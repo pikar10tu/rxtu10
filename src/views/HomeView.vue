@@ -1,7 +1,9 @@
 <template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:4px">🏠 Home</div>
-    <div style="font-size:0.72rem;color:rgba(255,255,255,.4);margin-bottom:14px">— กำลังพัฒนา —</div>
+    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px">🏠 Home</div>
+
+    <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
+    <ResidenceCard v-if="authStore.isLoggedIn" />
 
     <!-- ทางเข้า Shop / Rank (ย้ายมาจากเมนูล่าง) -->
     <div class="home-shortcuts">
@@ -21,7 +23,10 @@
 
 <script setup>
 import { RouterLink } from 'vue-router'
-// TODO: implement HomeView
+import { useAuthStore } from '../stores/auth.js'
+import ResidenceCard from '../components/residence/ResidenceCard.vue'
+
+const authStore = useAuthStore()
 </script>
 
 <style scoped>
