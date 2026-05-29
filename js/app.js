@@ -3,7 +3,7 @@
 // ════════════════════════════════════════
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY, PLE_CC_DATE,
          INSTANT_COST, MEGA_COST, IS_DEV, log } from './config.js';
-import { signInWithPopup, signOut, onAuthStateChanged }
+import { signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, setDoc, updateDoc, onSnapshot,
          collection, getDocs, increment, serverTimestamp, arrayUnion, addDoc,
@@ -284,18 +284,31 @@ function updateGuestBadge(){
 // ════════════════════════════════════════
 //  AUTH
 // ════════════════════════════════════════
+// มือถือ popup มักถูกบล็อก → ใช้ signInWithRedirect; เดสก์ท็อปใช้ popup (UX ดีกว่า) แล้ว fallback เป็น redirect ถ้า popup โดนบล็อก
+const _isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent);
 window.loginGoogle=async()=>{
     // หมายเหตุ: ไม่เรียก ensureDoc ที่นี่ — onAuthStateChanged จัดการสร้าง doc ให้แล้ว
     // (กันกรณี auth สำเร็จแต่ Firestore เชื่อมไม่ได้ จะได้ไม่ขึ้น "Login ไม่สำเร็จ" หลอกๆ)
+    provider.setCustomParameters({prompt:'select_account'});
+    if(_isMobile){
+        try{ await signInWithRedirect(auth,provider); }
+        catch(e){ console.error('[loginGoogle redirect]', e.code, e); toast("Login ไม่สำเร็จ: "+(e.code||e.message||e),"error",6000); }
+        return;
+    }
     try{
-        provider.setCustomParameters({prompt:'select_account'});
         await signInWithPopup(auth,provider);
     }catch(e){
-        console.error('[loginGoogle]', e.code, e.message, e);
+        console.error('[loginGoogle popup]', e.code, e.message, e);
         if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request') return;
+        if(e.code==='auth/popup-blocked'){ // popup โดนบล็อก → redirect แทน
+            try{ await signInWithRedirect(auth,provider); return; }
+            catch(e2){ console.error('[loginGoogle redirect fallback]', e2.code, e2); }
+        }
         toast("Login ไม่สำเร็จ: "+(e.code||e.message||e),"error",6000);
     }
 };
+// จบ flow ของ signInWithRedirect เมื่อกลับมาที่หน้าเว็บ (สำหรับ surface error; onAuthStateChanged จัดการ state เอง)
+getRedirectResult(auth).catch(e=>{ console.error('[getRedirectResult]', e.code, e); toast("Login ไม่สำเร็จ: "+(e.code||e.message||e),"error",6000); });
 // _confirm(msg) → Promise<boolean> — ใช้ custom modal แทน window.confirm
 function _confirm(msg){
     return new Promise(resolve=>{
