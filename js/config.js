@@ -3,7 +3,7 @@
 // ════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -17,7 +17,9 @@ const firebaseConfig = {
 
 export const app      = initializeApp(firebaseConfig);
 export const auth     = getAuth(app);
-export const db       = getFirestore(app);
+// long-polling auto-detect: กัน WebChannel ถูกบล็อก/รบกวนบนเครือข่ายมหาวิทยาลัย/proxy
+// (อาการเดิม: RPC 'Listen' 400 ซ้ำๆ + "client is offline")
+export const db       = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
 export const provider = new GoogleAuthProvider();
 
 // ── ADMIN ──
