@@ -305,7 +305,7 @@ window.openColorTilesModal = ()=>{
     clearInterval(__ct.tick);
     // Update hi badge
     const hiBadge = document.getElementById('ct-hi-badge');
-    if(hiBadge) hiBadge.innerHTML = `🏆 <b>${_ctTop1()}</b>`;
+    if(hiBadge) hiBadge.innerHTML = `🏆 <b>${window._ctTop1()}</b>`;
     // Render start screen
     document.getElementById('ct-modal-body').innerHTML = buildColorTilesBody();
     document.getElementById('ct-modal').classList.add('active');

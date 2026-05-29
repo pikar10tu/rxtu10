@@ -16,6 +16,7 @@ import { buildLeaderboard } from './tabs/leaderboard.js';
 import { buildAdmin } from './tabs/admin.js';
 import './systems/calc.js';       // attaches window.openCalc / calc functions
 import './systems/colortiles.js'; // attaches window.openColorTilesModal etc.
+import './systems/leaderboards.js'; // attaches window.buildQuizLb / toggleLb / _qTop1 etc.
 
 const DAILY_RESET_HR = 24;
 
@@ -691,6 +692,7 @@ function myPhoto(thumb=false){if(!userData)return null;if(thumb)return userData.
 //  NEWS FEED
 // ════════════════════════════════════════
 function sanitize(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+window.sanitize = sanitize; // exposed for extracted feature modules
 async function postNews(icon, msg) {
     try {
         await addDoc(collection(db,"news"), {icon, msg, ts: serverTimestamp()});
@@ -1550,7 +1552,7 @@ window.answerQ=async(btn,ans)=>{
             const earned=window.__qCoinsEarned||0;
             document.getElementById('q-msg').innerHTML=`ตอบผิด! ชื่อจริงคือ <b style="color:#fbbf24">${qAnswer}</b><br>คะแนน: ${finalScore} · ได้ <b style="color:#fbbf24">+${earned}🪙</b><br><span style="font-size:0.76rem;opacity:.7">สถิติ: ${Math.max(finalScore,qHigh)}</span>`;
             // refresh leaderboard
-            const qlb=document.getElementById('qlb');if(qlb&&qlb.style.display!=='none')qlb.innerHTML=buildQuizLb();
+            const qlb=document.getElementById('qlb');if(qlb&&qlb.style.display!=='none')qlb.innerHTML=window.buildQuizLb();
         },1000);
     }
 };
@@ -1594,7 +1596,7 @@ window.answerDQ=async(btn,ans)=>{
             document.getElementById('dquiz-play').style.display='none';
             const earned2=window.__dqCoinsEarned||0;
             document.getElementById('dq-msg').innerHTML=`ตอบผิด! Drug Class คือ <b style="color:#a5b4fc">${dqAnswer}</b><br>คะแนน: ${finalScore} · ได้ <b style="color:#fbbf24">+${earned2}🪙</b><br><span style="font-size:0.76rem;opacity:.7">สถิติ: ${Math.max(finalScore,dqHigh)}</span>`;
-            const dqlb=document.getElementById('dqlb');if(dqlb&&dqlb.style.display!=='none')dqlb.innerHTML=buildDrugLb();
+            const dqlb=document.getElementById('dqlb');if(dqlb&&dqlb.style.display!=='none')dqlb.innerHTML=window.buildDrugLb();
         },1000);
     }
 };
@@ -2271,52 +2273,6 @@ window.openGuestList=()=>{
 };
 
 // ════════════════════════════════════════
-//  LEADERBOARD (ใช้ cache __fbUsers — ไม่ต้อง read Firestore เพิ่ม)
-// ════════════════════════════════════════
-function _lbUsers(){
-    return[...Object.values(window.__fbUsers||{}),...(window.__guestUsers||[])];
-}
-function _renderLbRows(board,scoreKey,accentColor){
-    const myId=userData?.studentId;
-    if(!board.length)return`<div style="padding:10px;text-align:center;color:rgba(255,255,255,.3);font-size:0.76rem">ยังไม่มีข้อมูล</div>`;
-    const icons=['🥇','🥈','🥉'];
-    return board.map((u,i)=>{
-        const isMe=myId&&u.studentId===myId;
-        const _lb_slot0=(u.activePets||[])[0]||u.activePet||null;
-        const pet=_lb_slot0
-            ?(u.pets||[]).find(p=>p.instId&&String(p.instId)===String(_lb_slot0))
-             ||(u.pets||[]).find(p=>p.id===_lb_slot0):null;
-        const ph=u.customPhoto||u.googlePhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent((u.nickname||'?')[0])}&background=334155&color=fff&size=64`;
-        const fb=`https://ui-avatars.com/api/?name=${encodeURIComponent((u.nickname||'?')[0])}&background=334155&color=fff&size=64`;
-        const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
-        return`<div class="lb-row${isMe?' lb-me':''}">
-            <div class="lb-rank ${rc}">${i<3?icons[i]:i+1}</div>
-            <img loading="lazy" src="${ph}" class="lb-photo" onerror="this.onerror=null;this.src='${fb}'">
-            <div class="lb-name">${u.nickname||'?'}${pet?` ${pet.emoji}`:''}</div>
-            <div class="lb-score" style="color:${accentColor}">${u[scoreKey]}</div>
-        </div>`;
-    }).join('');
-}
-
-// ── Global Top 1 score helpers ──
-function _globalTop1(scoreKey){ const all=_lbUsers(); if(!all.length)return 0; return Math.max(...all.map(u=>u[scoreKey]||0)); }
-function _qTop1(){ return _globalTop1('quizHigh'); }
-function _dqTop1(){ return _globalTop1('drugHigh'); }
-function _ctTop1(){ return _globalTop1('ctHigh'); }
-function buildQuizLb(){
-    const board=[..._lbUsers()].filter(u=>u.quizHigh>0).sort((a,b)=>b.quizHigh-a.quizHigh).slice(0,7);
-    return _renderLbRows(board,'quizHigh','#6ee7b7');
-}
-function buildDrugLb(){
-    const board=[..._lbUsers()].filter(u=>u.drugHigh>0).sort((a,b)=>b.drugHigh-a.drugHigh).slice(0,7);
-    return _renderLbRows(board,'drugHigh','#a5b4fc');
-}
-function buildCtLb(){
-    const board=[..._lbUsers()].filter(u=>(u.ctHigh||0)>0).sort((a,b)=>(b.ctHigh||0)-(a.ctHigh||0)).slice(0,7);
-    return _renderLbRows(board,'ctHigh','#4ade80');
-}
-
-// ════════════════════════════════════════
 //  TAB: PLAY
 // ════════════════════════════════════════
 // ════════════════════════════════════════
@@ -2695,10 +2651,10 @@ function buildQuizBody(){
             <div style="font-size:0.8rem;color:rgba(255,255,255,.5)">เห็นชื่อเล่น → ทายชื่อจริง<br><span style="font-size:0.7rem;color:rgba(255,255,255,.35)">ตอบถูกต่อเนื่อง +5🪙/ข้อ</span></div>
             <div style="display:flex;align-items:center;gap:8px">
                 <button onclick="toggleLb('qlb')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:3px 9px;color:rgba(255,255,255,.6);font-size:0.68rem;cursor:pointer;font-family:inherit">🏆 กระดาน</button>
-                <div class="score-badge">🏆 <b id="q-score">${_qTop1()}</b></div>
+                <div class="score-badge">🏆 <b id="q-score">${window._qTop1()}</b></div>
             </div>
         </div>
-        <div id="qlb" style="display:none;margin-bottom:10px">${buildQuizLb()}</div>
+        <div id="qlb" style="display:none;margin-bottom:10px">${window.buildQuizLb()}</div>
         <div id="quiz-start">
             <div class="game-start">
                 <span class="game-start-icon">🕵️</span>
@@ -2724,10 +2680,10 @@ function buildDrugBody(){
             <div style="font-size:0.8rem;color:rgba(255,255,255,.5)">เห็นชื่อยา → ทาย Drug Class<br><span style="font-size:0.7rem;color:rgba(255,255,255,.35)">ตอบถูกต่อเนื่อง +5🪙/ข้อ</span></div>
             <div style="display:flex;align-items:center;gap:8px">
                 <button onclick="toggleLb('dqlb')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:3px 9px;color:rgba(255,255,255,.6);font-size:0.68rem;cursor:pointer;font-family:inherit">🏆 กระดาน</button>
-                <div class="score-badge">🏆 <b id="dq-score">${_dqTop1()}</b></div>
+                <div class="score-badge">🏆 <b id="dq-score">${window._dqTop1()}</b></div>
             </div>
         </div>
-        <div id="dqlb" style="display:none;margin-bottom:10px">${buildDrugLb()}</div>
+        <div id="dqlb" style="display:none;margin-bottom:10px">${window.buildDrugLb()}</div>
         <div id="dquiz-start">
             <div class="game-start">
                 <span class="game-start-icon">💊</span>
@@ -2995,36 +2951,6 @@ ${formatPetName(p)}
         setTimeout(()=>{ window.__blockSnapshot=false; }, 1500);
     }
 };
-
-// ════════════════════════════════════════
-// ▶ LEADERBOARD
-// ════════════════════════════════════════
-window.toggleLb=(id)=>{const el=document.getElementById(id);if(!el)return;const show=el.style.display==='none';el.style.display=show?'block':'none';if(show){el.innerHTML=id==='qlb'?buildQuizLb():id==='dqlb'?buildDrugLb():id==='twlb'?buildTowerLb():buildCtLb();}}
-
-function buildTowerLb(){
-    const all=window.__students||[];
-    const rows=all.map(s=>{
-        const live=window.__fbUsers?.[s.id];
-        const best=live?.towerBest||0;
-        return {nick:s.nickname,best,track:s.track,emoji:(()=>{const slot0=(live?.activePets||[])[0]||live?.activePet||null;if(!slot0)return '';const ep=(live?.pets||[]).find(p=>p.instId&&String(p.instId)===String(slot0)||(p.id===slot0));return ep?ep.emoji:'';})()};
-    }).filter(r=>r.best>0).sort((a,b)=>b.best-a.best).slice(0,10);
-    if(!rows.length) return `<div style="text-align:center;padding:16px;color:rgba(255,255,255,.3);font-size:0.8rem">ยังไม่มีข้อมูลชั้นสูงสุด</div>`;
-    const medals=['🥇','🥈','🥉'];
-    return `<div style="background:rgba(0,0,0,.2);border-radius:12px;overflow:hidden">
-        ${rows.map((r,i)=>`
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;${i<rows.length-1?'border-bottom:1px solid rgba(255,255,255,.06)':''}${i===0?';background:rgba(251,191,36,.08)':''}">
-            <div style="width:22px;text-align:center;font-size:${i<3?'1rem':'0.76rem'};font-weight:800;color:${i===0?'#fbbf24':i===1?'#e2e8f0':i===2?'#f87171':'rgba(255,255,255,.3)'}">${i<3?medals[i]:i+1}</div>
-            <div style="font-size:1rem">${r.emoji||'🐾'}</div>
-            <div style="flex:1;min-width:0">
-                <div style="font-size:0.78rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(r.nick)}</div>
-                <div style="font-size:0.58rem;color:${r.track==='sci'?'var(--sci)':'var(--care)'}">${r.track.toUpperCase()}</div>
-            </div>
-            <div style="text-align:right">
-                <div style="font-size:0.9rem;font-weight:800;color:#a78bfa">ชั้น ${r.best}</div>
-            </div>
-        </div>`).join('')}
-    </div>`;
-}
 
 // ════════════════════════════════════════
 //  TAB: SHOP
