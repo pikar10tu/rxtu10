@@ -9,46 +9,41 @@ rules_version = '2';
 //   2. วางเนื้อหาไฟล์นี้ทั้งหมด แล้วกด "Publish"
 //   (หรือถ้าใช้ Firebase CLI: `firebase deploy --only firestore:rules`)
 //
-//  ⚠️ ข้อจำกัดสำคัญ:
-//   logic เกมทั้งหมดรันฝั่ง client แล้วเขียนค่าตรงเข้า Firestore
-//   Rules ระดับนี้ "กันการแก้ข้อมูลคนอื่น" ได้ (กัน griefing leaderboard)
-//   แต่ "กันการโกงเหรียญ/คะแนนของตัวเอง" ไม่ได้ เพราะ client เป็นคนคำนวณ
-//   ถ้าต้องการ leaderboard ที่เชื่อถือได้จริง ต้องย้าย logic รางวัล
-//   ไปไว้ใน Cloud Functions (backend)
+//  สรุปสิทธิ์:
+//   - users: อ่านได้ทุกคนที่ login; แก้/สร้างได้เฉพาะ doc ตัวเอง
+//            admin แก้ + ลบ doc คนอื่นได้ (สำหรับ "ให้/ลดเหรียญ" และ "ลบ User")
+//   - news:  อ่าน + สร้างได้ทุกคนที่ login; ลบได้เฉพาะ admin; แก้ไม่ได้
+//
+//  ⚠️ ข้อจำกัด: logic เกม (เหรียญ/คะแนน) คำนวณฝั่ง client แล้วเขียนตรงเข้า
+//   Firestore — rules กัน "การแก้ข้อมูลคนอื่น" ได้ แต่กัน "การโกงคะแนน
+//   ของตัวเอง" ไม่ได้ ถ้าต้องการ leaderboard ที่เชื่อถือได้จริงต้องย้าย
+//   logic รางวัลไปไว้ใน Cloud Functions (backend)
 // ════════════════════════════════════════════════════════════
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
     function isAdmin() {
-      return isSignedIn()
+      return request.auth != null
         && request.auth.token.email == 'prawich.aum@dome.tu.ac.th';
     }
 
-    // ── users/{uid} ──
-    // อ่านได้ทุกคนที่ login (สำหรับ leaderboard / members / โปรไฟล์)
-    // เขียนได้เฉพาะ document ของตัวเอง — กันการแก้ข้อมูล/คะแนนคนอื่น
-    match /users/{uid} {
-      allow read:  if isSignedIn();
-      allow write: if isSignedIn() && request.auth.uid == uid;
+    // ── Users — แก้ได้เฉพาะ document ตัวเอง (admin แก้/ลบ ของคนอื่นได้) ──
+    match /users/{userId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null
+        && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
 
-    // ── news ──
-    // อ่าน + สร้างได้ทุกคนที่ login (megaphone, guest join, announcement)
-    // แก้ / ลบ ได้เฉพาะ admin
+    // ── News feed — อ่าน/สร้างได้ทุกคนที่ login, ลบได้เฉพาะ admin ──
     match /news/{newsId} {
-      allow read:   if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isAdmin();
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if false;
+      allow delete: if isAdmin();
     }
 
-    // ปฏิเสธทุกอย่างที่ไม่ได้ระบุไว้ข้างบน
-    match /{document=**} {
-      allow read, write: if false;
-    }
   }
 }
