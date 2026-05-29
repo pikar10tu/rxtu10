@@ -6,6 +6,7 @@
 <title>RxTU10</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -110,7 +111,7 @@
         <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">📣 ใช้โทรโข่ง</div>
         <div style="font-size:0.8rem;color:var(--muted);margin-bottom:2px">ส่งข้อความถึงทุกคน — ใช้ 25🪙</div>
         <textarea class="mega-inp" id="mega-text" rows="3" maxlength="80" placeholder="พิมพ์ข้อความที่อยากบอกทุกคน (ไม่เกิน 80 ตัวอักษร)..."></textarea>
-        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px">เหรียญของคุณ: <b id="mega-coins">0</b> 🪙</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px">เหรียญของคุณ: <b id="mega-coins" style="color:var(--text)">0</b> 🪙</div>
         <div style="display:flex;gap:7px">
             <button class="btn-gold" style="flex:1" onclick="sendMegaphone()">📣 ส่ง (25🪙)</button>
             <button class="btn-gray" style="flex:1" onclick="closeMega()">ยกเลิก</button>
@@ -123,7 +124,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div>
             <div style="font-weight:800;font-size:1rem">🔬 ห้องทดลอง</div>
-            <div style="font-size:0.62rem;color:rgba(255,255,255,.4);margin-top:1px">Gene Lab</div>
+            <div style="font-size:0.62rem;color:#94a3b8;margin-top:1px">Gene Lab</div>
         </div>
         <button class="mclose" style="position:static" onclick="closeTrade()">✕</button>
     </div>
@@ -139,7 +140,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div>
             <div style="font-weight:800;font-size:0.95rem">🧮 เครื่องมือที่น่าจะเป็นประโยชน์ <span style="font-size:0.6rem;background:rgba(99,102,241,.3);color:#a5b4fc;padding:1px 7px;border-radius:6px;font-weight:700;vertical-align:middle">beta</span></div>
-            <div style="font-size:0.6rem;color:rgba(255,255,255,.35);margin-top:1px">Pharmacy Calculators</div>
+            <div style="font-size:0.6rem;color:#94a3b8;margin-top:1px">Pharmacy Calculators</div>
         </div>
         <button class="mclose" style="position:static" onclick="closeCalc()">✕</button>
     </div>
@@ -151,39 +152,39 @@
     <div class="modal-box" style="text-align:center;max-width:360px">
         <div style="font-size:3rem;margin-bottom:4px">🎉</div>
         <div style="font-weight:800;font-size:1.2rem;margin-bottom:2px" id="wm-title">ยินดีต้อนรับ!</div>
-        <div style="font-size:0.75rem;color:rgba(255,255,255,.45);margin-bottom:16px">ผูกบัญชีเรียบร้อยแล้ว</div>
+        <div style="font-size:0.75rem;color:#64748b;margin-bottom:16px">ผูกบัญชีเรียบร้อยแล้ว</div>
 
         <!-- ของขวัญ -->
-        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;margin-bottom:14px;text-align:left">
-            <div style="font-size:0.65rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:10px">🎁 ของขวัญที่ได้รับ</div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:14px;text-align:left">
+            <div style="font-size:0.65rem;font-weight:700;color:#64748b;letter-spacing:1px;margin-bottom:10px">🎁 ของขวัญที่ได้รับ</div>
             <div style="display:flex;flex-direction:column;gap:7px">
                 <div style="display:flex;align-items:center;gap:10px">
                     <div style="font-size:1.4rem">🌠</div>
-                    <div><div style="font-size:0.82rem;font-weight:700">ไข่ตำนาน ×5</div><div style="font-size:0.62rem;color:rgba(255,255,255,.4)">Rare 35% · Epic 45% · Legendary 20%</div></div>
+                    <div><div style="font-size:0.82rem;font-weight:700">ไข่ตำนาน ×5</div><div style="font-size:0.62rem;color:#64748b">Rare 35% · Epic 45% · Legendary 20%</div></div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px">
                     <div style="font-size:1.4rem">🎁</div>
-                    <div><div style="font-size:0.82rem;font-weight:700">ไข่การันตีตำนาน ×1</div><div style="font-size:0.62rem;color:rgba(255,255,255,.4)">Legendary 100% รับประกัน</div></div>
+                    <div><div style="font-size:0.82rem;font-weight:700">ไข่การันตีตำนาน ×1</div><div style="font-size:0.62rem;color:#64748b">Legendary 100% รับประกัน</div></div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px">
                     <div style="font-size:1.4rem">🪙</div>
-                    <div><div style="font-size:0.82rem;font-weight:700">20,000 เหรียญ</div><div style="font-size:0.62rem;color:rgba(255,255,255,.4)">สำหรับเริ่มต้นการผจญภัย</div></div>
+                    <div><div style="font-size:0.82rem;font-weight:700">20,000 เหรียญ</div><div style="font-size:0.62rem;color:#64748b">สำหรับเริ่มต้นการผจญภัย</div></div>
                 </div>
             </div>
         </div>
 
         <!-- ขอให้ใส่ข้อมูล -->
-        <div style="background:linear-gradient(135deg,rgba(109,40,217,.2),rgba(124,58,237,.15));border:1.5px solid rgba(167,139,250,.3);border-radius:14px;padding:12px;margin-bottom:16px;text-align:left">
-            <div style="font-size:0.8rem;font-weight:700;color:#c4b5fd;margin-bottom:6px">📋 ขอความร่วมมือหน่อยนะ</div>
-            <div style="font-size:0.72rem;color:rgba(255,255,255,.65);line-height:1.7">
+        <div style="background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:14px;padding:12px;margin-bottom:16px;text-align:left">
+            <div style="font-size:0.8rem;font-weight:700;color:#4f46e5;margin-bottom:6px">📋 ขอความร่วมมือหน่อยนะ</div>
+            <div style="font-size:0.72rem;color:#475569;line-height:1.7">
                 📷 ใส่รูปโปรไฟล์ให้เพื่อนจำได้<br>
                 📱 ใส่ข้อมูลติดต่อ (IG / Line / เบอร์)<br>
-                <span style="font-size:0.62rem;color:rgba(255,255,255,.35)">กด ✏️ แก้ไขโปรไฟล์ได้ที่หน้าหลัก</span>
+                <span style="font-size:0.62rem;color:#94a3b8">กด ✏️ แก้ไขโปรไฟล์ได้ที่หน้าหลัก</span>
             </div>
         </div>
 
         <button onclick="document.getElementById('welcome-modal').classList.remove('active')"
-            style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;border-radius:12px;padding:12px;color:#fff;font-family:inherit;font-size:0.9rem;font-weight:800;cursor:pointer">
+            style="width:100%;background:linear-gradient(135deg,#4f46e5,#4338ca);border:none;border-radius:12px;padding:12px;color:#fff;font-family:inherit;font-size:0.9rem;font-weight:800;cursor:pointer">
             รับของขวัญแล้ว เริ่มเลย! 🚀
         </button>
     </div>
@@ -207,7 +208,7 @@
 
 <!-- BATTLE MODAL -->
 <div class="modal-ov" id="battle-modal" style="align-items:flex-end;padding:0" onclick="if(event.target===this)closeBattle()">
-    <div style="width:100%;max-width:480px;margin:0 auto;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 12px 28px;box-sizing:border-box;border-radius:20px 20px 0 0;background:#0c1445;" onclick="event.stopPropagation()">
+    <div style="width:100%;max-width:480px;margin:0 auto;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 12px 28px;box-sizing:border-box;border-radius:20px 20px 0 0;background:#fff;" onclick="event.stopPropagation()">
         <div id="battle-content"></div>
     </div>
 </div>
