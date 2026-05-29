@@ -18,7 +18,13 @@ export const useAuthStore = defineStore('auth', () => {
 
     // ── Getters ──
     const isLoggedIn = computed(() => !!currentUser.value)
-    const isAdmin    = computed(() => currentUser.value?.email === ADMIN_EMAIL)
+    // ADMIN_EMAIL is the bootstrap super-admin (can never be locked out);
+    // a 'admin' role on the user doc also grants admin.
+    const isAdmin    = computed(() =>
+        currentUser.value?.email === ADMIN_EMAIL || userData.value?.role === 'admin')
+    // Academic team (admin OR academic) — gates question editing.
+    const isAcademic = computed(() =>
+        isAdmin.value || userData.value?.role === 'academic')
     const isLinked   = computed(() => !!userData.value?.studentId)
 
     // ── Actions ──
@@ -71,6 +77,11 @@ export const useAuthStore = defineStore('auth', () => {
                 likedBy: {},
                 totalSpent: 0,
                 pityClaimedRounds: 0,
+                // ── v2 fields ──
+                role: 'student',                               // 'student' | 'academic' | 'admin'
+                residence: { level: 1, upgradedAt: null },     // ที่อยู่อาศัย (prestige/coin sink)
+                farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
+                petsVault: [],                                 // overflow pets (no income, not battle-eligible)
                 createdAt: serverTimestamp(),
             })
         }
@@ -114,7 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         currentUser, userData, loading,
-        isLoggedIn, isAdmin, isLinked,
+        isLoggedIn, isAdmin, isAcademic, isLinked,
         login, logout, ensureDoc,
         blockSnapshot, setUserDataOptimistic,
         init,

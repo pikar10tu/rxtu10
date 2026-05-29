@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// ════════════════════════════════════════════════════════════
+//  RxTU10 v2 — Firestore Security Rules
+// ════════════════════════════════════════════════════════════
+//
+//  Deploy:
+//   - Firebase Console → Firestore Database → "Rules" → paste → Publish
+//   - or CLI: `firebase deploy --only firestore:rules`
+//
+//  Model (DECIDED 2026-05-30): client-only, trust-based + LIGHT guards.
+//   Rules enforce ownership, role-change protection, and sane ranges.
+//   They CANNOT validate game logic (a determined cheater with DevTools can
+//   still alter their own coins/pets) — accepted for a class app.
+//
+//  Roles: 'student' | 'academic' | 'admin'
+//   - bootstrap super-admin = ADMIN_EMAIL (can never be locked out)
+//   - 'admin'    → full control; only an admin may change anyone's `role`
+//   - 'academic' → may add/edit questions (question bank)
+//   - users may edit their OWN doc but NOT their own `role` (no self-promotion)
+// ════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // role of the requesting user (defaults to 'student' if missing)
+    function myRole() {
+      return request.auth != null
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'student')
+        : 'student';
+    }
+    function isAdmin() {
+      return request.auth != null
+        && (request.auth.token.email == 'prawich.aum@dome.tu.ac.th' || myRole() == 'admin');
+    }
+    function isAcademic() {
+      return isAdmin() || (request.auth != null && myRole() == 'academic');
+    }
+
+    // ── Users ──
+    //  read: any logged-in user (members list)
+    //  create: only your own doc
+    //  update: admins anything; otherwise only your own doc, with the `role`
+    //          field unchanged and coins kept non-negative (light guards)
+    //  delete: admin only
+    match /users/{userId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (
+        isAdmin()
+        || (
+          request.auth.uid == userId
+          && request.resource.data.get('role', 'student') == resource.data.get('role', 'student')
+          && request.resource.data.get('coins', 0) >= 0
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── News feed ──
+    match /news/{newsId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // ── Question bank (Phase 2) — editable by the Academic Team ──
+    match /questions/{id} {
+      allow read:  if request.auth != null && (resource.data.get('isPublished', false) == true || isAcademic());
+      allow write: if isAcademic();
+    }
+
+    // ── Exam sessions (Phase 2) — owner-only ──
+    match /examSessions/{id} {
+      allow read:   if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // ── SRS cards (Phase 2) — owner-only subcollection ──
+    match /users/{userId}/srsCards/{cardId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+  }
+}

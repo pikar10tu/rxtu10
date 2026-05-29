@@ -35,6 +35,8 @@ export const useMembersStore = defineStore('members', () => {
                     studentId: x.studentId,
                     nickname: x.nickname || x.name?.split(' ')[0] || '?',
                     realName: x.realName,
+                    email: x.email,
+                    role: x.role || 'student',
                     track: x.track,
                     coins: x.coins || 0,
                     pets: x.pets || [],
