@@ -358,7 +358,7 @@ window.logoutUser=()=>{
  */
 async function ensureDoc(u){
     const ref=doc(db,"users",u.uid);const snap=await getDoc(ref);
-    if(!snap.exists())await setDoc(ref,{uid:u.uid,name:u.displayName,email:u.email,googlePhoto:u.photoURL,customPhoto:null,coins:2000,pets:[],eggs:[],activePet:null,activePets:[null,null,null],pvpVictories:0,studentId:null,nickname:null,realName:null,track:null,quizHigh:0,drugHigh:0,ctHigh:0,towerFloor:1,towerBest:0,towerLastReset:null,lastDaily:null,contact:{phone:'',ig:'',line:''},likes:0,likedBy:{},totalSpent:0,pityClaimedRounds:0,createdAt:serverTimestamp()});
+    if(!snap.exists())await setDoc(ref,{uid:u.uid,name:u.displayName,email:u.email,googlePhoto:u.photoURL,customPhoto:null,coins:2000,pets:[],eggs:[],activePet:null,activePets:[null,null,null],pvpVictories:0,studentId:null,nickname:null,realName:null,track:null,quizHigh:0,drugHigh:0,ctHigh:0,towerFloor:1,towerBest:0,towerLastReset:null,lastDaily:null,contact:{phone:'',ig:'',line:''},likes:0,likedBy:{},totalSpent:0,pityClaimedRounds:0,role:'student',createdAt:serverTimestamp()});
 }
 
 onAuthStateChanged(auth,async u=>{
