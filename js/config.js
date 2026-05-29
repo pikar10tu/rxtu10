@@ -17,9 +17,10 @@ const firebaseConfig = {
 
 export const app      = initializeApp(firebaseConfig);
 export const auth     = getAuth(app);
-// long-polling auto-detect: กัน WebChannel ถูกบล็อก/รบกวนบนเครือข่ายมหาวิทยาลัย/proxy
-// (อาการเดิม: RPC 'Listen' 400 ซ้ำๆ + "client is offline")
-export const db       = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+// force long-polling: เลี่ยง WebChannel streaming ทั้งหมด
+// (กัน Edge Tracking Prevention / proxy / firewall ที่บล็อก storage ของ
+//  firestore.googleapis.com แล้วทำให้เกิด RPC 'Listen' 400 + "client is offline")
+export const db       = initializeFirestore(app, { experimentalForceLongPolling: true });
 export const provider = new GoogleAuthProvider();
 
 // ── ADMIN ──
