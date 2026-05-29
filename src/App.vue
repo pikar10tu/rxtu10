@@ -12,8 +12,6 @@
       <RouterLink to="/members" class="bn-item"><span class="bn-icon">👥</span>Members</RouterLink>
       <RouterLink to="/play"    class="bn-item"><span class="bn-icon">🎮</span>Play</RouterLink>
       <RouterLink to="/study"   class="bn-item"><span class="bn-icon">📚</span>Study</RouterLink>
-      <RouterLink to="/shop"    class="bn-item"><span class="bn-icon">🛒</span>Shop</RouterLink>
-      <RouterLink to="/rank"    class="bn-item"><span class="bn-icon">🏆</span>Rank</RouterLink>
       <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
     </nav>
 
