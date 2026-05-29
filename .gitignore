@@ -36,3 +36,15 @@
 ehthumbs.db
 Thumbs.db
 
+# Editor / tooling #
+####################
+.claude/
+.vscode/
+.idea/
+*.code-workspace
+
+# GitHub Skills exercise leftovers #
+####################################
+_config.yml
+index.md
+

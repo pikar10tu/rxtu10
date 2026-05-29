@@ -760,9 +760,9 @@ window.closeMega=()=>document.getElementById('mega-modal').classList.remove('act
 window.sendMegaphone=async()=>{
     if(!currentUser||!userData){toast("Login ก่อน","error");return;}
     if((userData.coins||0)<MEGA_COST){toast(`เหรียญไม่พอ! ต้องการ ${MEGA_COST}🪙`,"error");return;}
-    const msg=document.getElementById('mega-text').value.trim();
+    const msg=sanitize(document.getElementById('mega-text').value.trim());
     if(!msg){toast("กรุณาพิมพ์ข้อความ","error");return;}
-    const name=userData.nickname?.split(' ')[0]||userData.name||'ไม่ระบุ';
+    const name=sanitize(userData.nickname?.split(' ')[0]||userData.name||'ไม่ระบุ');
     await updateDoc(doc(db,"users",currentUser.uid),{coins:increment(-MEGA_COST)});
     await postNews("📣",`${name}: ${msg}`);
     closeMega();
@@ -793,16 +793,18 @@ window.showStudentSection=()=>{
     document.getElementById('link-section-student').style.display='block';
 };
 window.confirmGuest=async()=>{
-    const name=document.getElementById('guest-name-input').value.trim();
+    const raw=document.getElementById('guest-name-input').value.trim();
     const err=document.getElementById('guest-error');
-    if(!name){err.textContent='กรุณาใส่ชื่อก่อน';return;}
-    if(name.length<2){err.textContent='ชื่อต้องมีอย่างน้อย 2 ตัวอักษร';return;}
+    if(!raw){err.textContent='กรุณาใส่ชื่อก่อน';return;}
+    if(raw.length<2){err.textContent='ชื่อต้องมีอย่างน้อย 2 ตัวอักษร';return;}
     if(!currentUser)return;
     // Guest: studentId='guest', track='guest', nickname=name ที่ตั้งเอง
+    // sanitize ก่อนเก็บ — ชื่อ guest ถูก render ทุกหน้า (ป้องกัน stored XSS)
+    const name=sanitize(raw);
     const welcomeEggs=[1,2].map(()=>{const p=rollPetFromEgg('pet');return{eggId:`welcome_${Date.now()}_${Math.random().toString(36).slice(2)}`,eggType:'normal',petId:p.id,petEmoji:p.emoji,petName:p.name,petRarity:p.rarity,petInstId:p.instId,hatchMins:p.hatchMins,startedAt:null};});
     await updateDoc(doc(db,"users",currentUser.uid),{studentId:'guest_'+currentUser.uid.slice(0,8),nickname:name,realName:name,track:'guest',eggs:arrayUnion(welcomeEggs[0],welcomeEggs[1])});
     closeLinkModal();
-    toast(`ยินดีต้อนรับ ${name}! 🎁 ได้รับไข่ 2 ฟอง!`,"success");
+    toast(`ยินดีต้อนรับ ${raw}! 🎁 ได้รับไข่ 2 ฟอง!`,"success");
     confetti({particleCount:120,spread:70,origin:{y:0.5}});
     await postNews("👋",`${name} เพิ่งเข้าร่วม RxTU10 Dashboard ในฐานะ Guest!`);
 };
@@ -2440,12 +2442,12 @@ window.openContactEdit = () => {
     const c = userData?.contact || {};
     let overlay = document.getElementById('contact-edit-overlay');
     if(!overlay){ overlay=document.createElement('div'); overlay.id='contact-edit-overlay'; document.body.appendChild(overlay); }
-    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9100;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:9100;display:flex;align-items:flex-end;justify-content:center;padding:16px;backdrop-filter:blur(4px);';
     overlay.innerHTML=`
-    <div onclick="event.stopPropagation()" style="background:linear-gradient(175deg,#0f172a,#1e293b);border-radius:20px 20px 16px 16px;padding:22px 18px 28px;width:100%;max-width:420px;border:1px solid rgba(255,255,255,.1)">
+    <div onclick="event.stopPropagation()" style="background:#fff;border-radius:20px 20px 16px 16px;padding:22px 18px 28px;width:100%;max-width:420px;border:1px solid var(--border);box-shadow:0 -8px 40px rgba(15,23,42,.15)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-            <div style="font-weight:800;font-size:1rem;color:#fff">📋 ช่องทางติดต่อ</div>
-            <button onclick="document.getElementById('contact-edit-overlay').remove()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem">✕</button>
+            <div style="font-weight:800;font-size:1rem;color:var(--text)">📋 ช่องทางติดต่อ</div>
+            <button onclick="document.getElementById('contact-edit-overlay').remove()" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem">✕</button>
         </div>
         ${[
             {key:'phone', icon:'📱', label:'เบอร์โทร', placeholder:'0XX-XXX-XXXX'},
@@ -2453,18 +2455,18 @@ window.openContactEdit = () => {
             {key:'line',  icon:'💬', label:'LINE ID', placeholder:'line_id'},
         ].map(f=>`
         <div style="margin-bottom:14px">
-            <div style="font-size:0.68rem;color:rgba(255,255,255,.4);font-weight:700;letter-spacing:1px;margin-bottom:5px">${f.icon} ${f.label}</div>
+            <div style="font-size:0.68rem;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:5px">${f.icon} ${f.label}</div>
             <input id="cedit-${f.key}" maxlength="20" value="${(c[f.key]||'').replace(/"/g,'&quot;')}" placeholder="${f.placeholder}"
-                style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 13px;color:#fff;font-family:'Kanit',sans-serif;font-size:0.85rem;outline:none;box-sizing:border-box">
+                style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'Kanit',sans-serif;font-size:0.85rem;outline:none;box-sizing:border-box">
         </div>`).join('')}
-        <div style="font-size:0.6rem;color:rgba(255,255,255,.25);margin-bottom:14px;text-align:right">จำกัด 20 ตัวอักษรต่อรายการ</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:14px;text-align:right">จำกัด 20 ตัวอักษรต่อรายการ</div>
         <button onclick="saveContact()" style="width:100%;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:12px;padding:12px;color:#fff;font-family:inherit;font-size:0.88rem;font-weight:800;cursor:pointer">💾 บันทึก</button>
     </div>`;
 };
 
 window.saveContact = async () => {
     if(!currentUser) return;
-    const trim20 = v => (v||'').trim().slice(0,20);
+    const trim20 = v => sanitize((v||'').trim().slice(0,20));
     const contact = {
         phone: trim20(document.getElementById('cedit-phone')?.value),
         ig:    trim20(document.getElementById('cedit-ig')?.value),

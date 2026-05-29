@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// ════════════════════════════════════════════════════════════
+//  RxTU10 Dashboard — Firestore Security Rules
+// ════════════════════════════════════════════════════════════
+//
+//  วิธี deploy:
+//   1. Firebase Console → Firestore Database → แท็บ "Rules"
+//   2. วางเนื้อหาไฟล์นี้ทั้งหมด แล้วกด "Publish"
+//   (หรือถ้าใช้ Firebase CLI: `firebase deploy --only firestore:rules`)
+//
+//  ⚠️ ข้อจำกัดสำคัญ:
+//   logic เกมทั้งหมดรันฝั่ง client แล้วเขียนค่าตรงเข้า Firestore
+//   Rules ระดับนี้ "กันการแก้ข้อมูลคนอื่น" ได้ (กัน griefing leaderboard)
+//   แต่ "กันการโกงเหรียญ/คะแนนของตัวเอง" ไม่ได้ เพราะ client เป็นคนคำนวณ
+//   ถ้าต้องการ leaderboard ที่เชื่อถือได้จริง ต้องย้าย logic รางวัล
+//   ไปไว้ใน Cloud Functions (backend)
+// ════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email == 'prawich.aum@dome.tu.ac.th';
+    }
+
+    // ── users/{uid} ──
+    // อ่านได้ทุกคนที่ login (สำหรับ leaderboard / members / โปรไฟล์)
+    // เขียนได้เฉพาะ document ของตัวเอง — กันการแก้ข้อมูล/คะแนนคนอื่น
+    match /users/{uid} {
+      allow read:  if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── news ──
+    // อ่าน + สร้างได้ทุกคนที่ login (megaphone, guest join, announcement)
+    // แก้ / ลบ ได้เฉพาะ admin
+    match /news/{newsId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // ปฏิเสธทุกอย่างที่ไม่ได้ระบุไว้ข้างบน
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

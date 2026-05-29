@@ -2,6 +2,8 @@
 // TAB: ADMIN PANEL (⚙️ Admin)
 // ════════════════════════════════════════
 import { db, ADMIN_EMAIL } from '../config.js';
+
+const _sanitize = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 import {
     collection, getDocs, doc, updateDoc, deleteDoc,
     addDoc, serverTimestamp, increment, query, orderBy, limit
@@ -172,8 +174,8 @@ window.adminFilterUsers = (q) => {
 
 window.adminPostAnn = async () => {
     if (!isAdmin()) return;
-    const emoji = document.getElementById('adm-ann-emoji')?.value.trim() || '📢';
-    const text  = document.getElementById('adm-ann-text')?.value.trim();
+    const emoji = _sanitize(document.getElementById('adm-ann-emoji')?.value.trim() || '📢');
+    const text  = _sanitize(document.getElementById('adm-ann-text')?.value.trim());
     if (!text) { window.toast('กรุณาใส่ข้อความ', 'error'); return; }
     try {
         await addDoc(collection(db, 'news'), {
