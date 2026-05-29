@@ -285,8 +285,16 @@ function updateGuestBadge(){
 //  AUTH
 // ════════════════════════════════════════
 window.loginGoogle=async()=>{
-    try{provider.setCustomParameters({prompt:'select_account'});const r=await signInWithPopup(auth,provider);await ensureDoc(r.user);}
-    catch(e){if(e.code!=='auth/popup-closed-by-user')toast("Login ไม่สำเร็จ","error");}
+    // หมายเหตุ: ไม่เรียก ensureDoc ที่นี่ — onAuthStateChanged จัดการสร้าง doc ให้แล้ว
+    // (กันกรณี auth สำเร็จแต่ Firestore เชื่อมไม่ได้ จะได้ไม่ขึ้น "Login ไม่สำเร็จ" หลอกๆ)
+    try{
+        provider.setCustomParameters({prompt:'select_account'});
+        await signInWithPopup(auth,provider);
+    }catch(e){
+        console.error('[loginGoogle]', e.code, e.message, e);
+        if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request') return;
+        toast("Login ไม่สำเร็จ: "+(e.code||e.message||e),"error",6000);
+    }
 };
 // _confirm(msg) → Promise<boolean> — ใช้ custom modal แทน window.confirm
 function _confirm(msg){
