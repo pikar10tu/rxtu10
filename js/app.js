@@ -441,14 +441,14 @@ window.openDailyDetail=()=>{
     const {base,passive,total}=calcTotalDaily(userData?.pets||[]);
     const pets=userData?.pets||[];
     const petRows=pets.length===0
-        ?'<div style="color:rgba(255,255,255,.35);font-size:0.76rem;text-align:center;padding:8px 0">ยังไม่มีสัตว์เลี้ยง</div>'
+        ?'<div style="color:var(--muted);font-size:0.76rem;text-align:center;padding:8px 0">ยังไม่มีสัตว์เลี้ยง</div>'
         :pets.sort((a,b)=>petDailyCoins(b)-petDailyCoins(a)).map(p=>{
             const cfg=RARITY[p.rarity];
             const coins=petDailyCoins(p);
-            return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
                 <span style="font-size:1.3rem">${p.emoji}</span>
                 <div style="flex:1;min-width:0">
-                    <div style="font-size:0.78rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${formatPetName(p)}</div>
+                    <div style="font-size:0.78rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${formatPetName(p)}</div>
                     <div style="font-size:0.62rem;color:${cfg.color}">${cfg.label}</div>
                 </div>
                 <div style="font-size:0.82rem;font-weight:800;color:#6ee7b7;white-space:nowrap">+${coins}🪙</div>
@@ -457,24 +457,24 @@ window.openDailyDetail=()=>{
     const content=document.getElementById('daily-content');
     if(content) content.innerHTML=`
         <div style="padding:4px 0">
-            <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;text-align:center">📊 รายละเอียดรายได้รายวัน</div>
-            <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;margin-bottom:12px">
+            <div style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:14px;text-align:center">📊 รายละเอียดรายได้รายวัน</div>
+            <div style="background:var(--bg);border-radius:12px;padding:10px 14px;margin-bottom:12px">
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0">
-                    <span style="font-size:0.78rem;color:rgba(255,255,255,.6)">🏅 รายได้ฐาน</span>
-                    <span style="font-size:0.88rem;font-weight:800;color:#fbbf24">+${base.toLocaleString()}🪙</span>
+                    <span style="font-size:0.78rem;color:var(--muted)">🏅 รายได้ฐาน</span>
+                    <span style="font-size:0.88rem;font-weight:800;color:#b45309">+${base.toLocaleString()}🪙</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid rgba(255,255,255,.06)">
-                    <span style="font-size:0.78rem;color:rgba(255,255,255,.6)">🐾 รายได้จากสัตว์เลี้ยง (${pets.length} ตัว)</span>
-                    <span style="font-size:0.88rem;font-weight:800;color:#6ee7b7">+${passive.toLocaleString()}🪙</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--border)">
+                    <span style="font-size:0.78rem;color:var(--muted)">🐾 รายได้จากสัตว์เลี้ยง (${pets.length} ตัว)</span>
+                    <span style="font-size:0.88rem;font-weight:800;color:#059669">+${passive.toLocaleString()}🪙</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;border-top:2px solid rgba(255,255,255,.12);margin-top:2px">
-                    <span style="font-size:0.82rem;font-weight:700;color:#fff">รวมทั้งหมด</span>
-                    <span style="font-size:1rem;font-weight:800;color:#fff">+${total.toLocaleString()}🪙</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;border-top:2px solid var(--border);margin-top:2px">
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--text)">รวมทั้งหมด</span>
+                    <span style="font-size:1rem;font-weight:800;color:var(--text)">+${total.toLocaleString()}🪙</span>
                 </div>
             </div>
-            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:8px">รายได้จากสัตว์เลี้ยง</div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--muted);margin-bottom:8px">รายได้จากสัตว์เลี้ยง</div>
             <div style="max-height:260px;overflow-y:auto">${petRows}</div>
-            <button onclick="closeDailyModal()" style="width:100%;margin-top:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:10px;border-radius:12px;font-family:inherit;font-size:0.84rem;cursor:pointer">ปิด</button>
+            <button onclick="closeDailyModal()" style="width:100%;margin-top:14px;background:var(--bg);border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:12px;font-family:inherit;font-size:0.84rem;cursor:pointer">ปิด</button>
         </div>`;
     document.getElementById('daily-modal').classList.add('active');
 };
@@ -1154,7 +1154,7 @@ window.showPetInfo=async(petInstId)=>{
         '<div style="text-align:center">'
         +'<div style="display:flex;justify-content:center;gap:6px;margin-bottom:6px">'
         +`<div class="gr-badge" style="background:${cfg.color}">${cfg.label}</div>`
-        +(elInfo?`<div class="gr-badge" style="background:#334155;font-size:1rem">${elInfo.emoji}</div>`:'')
+        +(elInfo?`<div class="gr-badge" style="background:#f1f5f9;color:#334155;font-size:1rem">${elInfo.emoji}</div>`:'')
         +'</div>'
         +`<div style="font-size:3rem;margin:4px 0;filter:drop-shadow(0 0 10px ${cfg.glow})">${p.emoji}</div>`
         +`<div style="font-size:1.2rem;font-weight:800;margin-bottom:2px">${formatPetName(p)}</div>`
@@ -1172,9 +1172,9 @@ window.showPetInfo=async(petInstId)=>{
         +`<div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Daily</div>`
         +`<div style="font-size:1.1rem;font-weight:800;color:${cfg.color}">+${daily}🪙</div></div>`
         +'</div>'
-        +(elInfo?`<div style="background:#0f172a;border-radius:10px;padding:8px 12px;font-size:0.78rem;color:rgba(255,255,255,.7);margin-bottom:8px;display:flex;align-items:center;gap:8px">`
+        +(elInfo?`<div style="background:var(--bg);border-radius:10px;padding:8px 12px;font-size:0.78rem;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px">`
         +`<span style="font-size:1.1rem">${elInfo.emoji}</span>`
-        +`<span>ชนะ <b style="color:#fbbf24">${ELEMENTS[elInfo.beats]?.emoji||''}</b> · แพ้ <b style="color:#f87171">${Object.values(ELEMENTS).find(e=>e.beats===el)?.emoji||''}</b></span></div>`:'')
+        +`<span>ชนะ <b style="color:#b45309">${ELEMENTS[elInfo.beats]?.emoji||''}</b> · แพ้ <b style="color:#ef4444">${Object.values(ELEMENTS).find(e=>e.beats===el)?.emoji||''}</b></span></div>`:'')
         +`<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">`
         +`<button class="btn-gold full" onclick="closePetInfo();openUpgradeModal('${p.instId||p.id}')" ${(isMax||isOnExp)?'disabled':''}>🧬 ${isOnExp?'⏳ กำลังผจญภัย':'วิวัฒนาการยีน '+(isMax?'(Max Grade XII)':'→ Grade '+GRADE_LABELS[nextGrade])}</button>`
         +`<button style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;padding:10px;color:#fff;font-family:inherit;font-size:0.85rem;font-weight:800;cursor:pointer" onclick="closePetInfo();openForgeModal('${p.instId||p.id}')">🔨 ตีบวก</button>`
@@ -1989,12 +1989,12 @@ const GOOGLE_SVG=`<svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.5
 // ════════════════════════════════════════
 function buildHome(){
     if(!currentUser)return`
-        <div style="background:linear-gradient(160deg,#0c1445,#1a237e,#0d47a1);border-radius:24px;padding:40px 20px 36px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(13,71,161,.4)">
-            <div style="font-size:4.5rem;margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))">💊</div>
+        <div style="background:linear-gradient(160deg,#4338ca,#4f46e5,#6366f1);border-radius:24px;padding:40px 20px 36px;text-align:center;color:#fff;box-shadow:0 8px 32px rgba(79,70,229,.3)">
+            <div style="font-size:4.5rem;margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.2))">💊</div>
             <div style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:2px">RxTU10</div>
-            <div style="color:rgba(255,255,255,.5);margin-bottom:28px;font-size:0.84rem;letter-spacing:.5px">CLASS DASHBOARD · Rx 2565 · THAMMASAT</div>
+            <div style="color:rgba(255,255,255,.75);margin-bottom:28px;font-size:0.84rem;letter-spacing:.5px">CLASS DASHBOARD · Rx 2565 · THAMMASAT</div>
             <button class="btn-google big" onclick="loginGoogle()" style="border-radius:14px;padding:13px 22px;font-size:0.95rem">${GOOGLE_SVG}Login ด้วย Google</button>
-            <p style="font-size:0.74rem;color:rgba(255,255,255,.3);margin-top:14px">Login แล้วผูกรหัสนักศึกษาเพื่อเข้าถึงทุกฟีเจอร์</p>
+            <p style="font-size:0.74rem;color:rgba(255,255,255,.6);margin-top:14px">Login แล้วผูกรหัสนักศึกษาเพื่อเข้าถึงทุกฟีเจอร์</p>
         </div>`;
     const pet=activePet();const tc=userData?.track==='sci'?'var(--sci)':'var(--care)';
 
@@ -2023,7 +2023,7 @@ function buildHome(){
                 </div>
             </div>
             <!-- Pet Team Slots -->
-            <div style="background:rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.06);padding:10px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">                ${[0,1,2].map(i=>{
+            <div style="background:rgba(0,0,0,.12);border-top:1px solid rgba(255,255,255,.15);padding:10px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">                ${[0,1,2].map(i=>{
                     const slotId=(userData?.activePets||[])[i]||null;
                     const p=slotId?(userData?.pets||[]).find(x=>x.instId&&String(x.instId)===String(slotId)||(x.id===slotId)):null;
                     const cfg=p?RARITY[p.rarity]:null;
@@ -2031,11 +2031,11 @@ function buildHome(){
                         ?`<div onclick="showPetInfo('${String(p.instId||p.id)}')" style="background:${cfg.bg};border:1.5px solid ${cfg.color}44;border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;transition:.15s;">
                             <div style="font-size:1.8rem;filter:drop-shadow(0 0 6px ${cfg.glow})">${p.emoji}</div>
                             <div style="font-size:0.58rem;font-weight:700;color:${cfg.color};margin-top:2px;line-height:1.2">${formatPetName(p)}</div>
-                            <div style="font-size:0.5rem;color:rgba(255,255,255,.3)">Slot ${i+1}</div>
+                            <div style="font-size:0.5rem;color:rgba(255,255,255,.65)">Slot ${i+1}</div>
                           </div>`
-                        :`<div onclick="switchTab('home')" style="background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.12);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;">
-                            <div style="font-size:1.4rem;opacity:.3">➕</div>
-                            <div style="font-size:0.55rem;color:rgba(255,255,255,.25);margin-top:2px">Slot ${i+1}</div>
+                        :`<div onclick="switchTab('home')" style="background:rgba(255,255,255,.12);border:1.5px dashed rgba(255,255,255,.4);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;">
+                            <div style="font-size:1.4rem;opacity:.5">➕</div>
+                            <div style="font-size:0.55rem;color:rgba(255,255,255,.6);margin-top:2px">Slot ${i+1}</div>
                           </div>`;
                 }).join('')}
             </div>
@@ -2045,40 +2045,40 @@ function buildHome(){
                 <div class="hs-cell"><b>${userData.towerBest||0}</b><small>🗼 Tower</small></div>
                 <div class="hs-cell"><b>${userData.pvpVictories||0}</b><small>⚔️ PvP</small></div>
             </div>
-            <div style="background:#060b1f;border-top:1px solid rgba(255,255,255,.07);padding:12px 14px">
+            <div style="background:#f8fafc;border-top:1px solid var(--border);padding:12px 14px">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                    <span style="font-size:0.62rem;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:1px;text-transform:uppercase">ช่องทางติดต่อ</span>
+                    <span style="font-size:0.62rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase">ช่องทางติดต่อ</span>
                     <div style="display:flex;align-items:center;gap:8px">
-                        <button onclick="openContactEdit()" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:8px;padding:5px 11px;font-size:0.68rem;font-weight:700;cursor:pointer;font-family:inherit">✏️ แก้ไขข้อมูลติดต่อ</button>
+                        <button onclick="openContactEdit()" style="background:var(--primary-light);border:1px solid #c7d2fe;color:var(--primary);border-radius:8px;padding:5px 11px;font-size:0.68rem;font-weight:700;cursor:pointer;font-family:inherit">✏️ แก้ไขข้อมูลติดต่อ</button>
                     </div>
                 </div>
                 ${(()=>{const c=userData?.contact||{};return[
                     {icon:'📱',label:'เบอร์',val:c.phone},
                     {icon:'📸',label:'IG',   val:c.ig},
                     {icon:'💬',label:'LINE', val:c.line}
-                ].map(x=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:rgba(255,255,255,.03);border-radius:9px;border:1px solid rgba(255,255,255,.06);margin-bottom:6px">
+                ].map(x=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surface);border-radius:9px;border:1px solid var(--border);margin-bottom:6px">
                     <span style="font-size:1rem;width:20px;text-align:center">${x.icon}</span>
-                    <span style="font-size:0.68rem;color:rgba(255,255,255,.3);width:32px;flex-shrink:0">${x.label}</span>
-                    <span style="font-size:0.82rem;color:${x.val?'rgba(255,255,255,.85)':'rgba(255,255,255,.18)'};font-family:'Space Mono',monospace;font-weight:${x.val?700:400}">${x.val||'—'}</span>
+                    <span style="font-size:0.68rem;color:var(--muted);width:32px;flex-shrink:0">${x.label}</span>
+                    <span style="font-size:0.82rem;color:${x.val?'var(--text)':'#cbd5e1'};font-family:'Space Mono',monospace;font-weight:${x.val?700:400}">${x.val||'—'}</span>
                 </div>`).join('');})()}
             </div>
         </div>
 `
-        :`<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:20px;padding:0;overflow:hidden;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.2)">
+        :`<div style="background:var(--surface);border-radius:20px;padding:0;overflow:hidden;margin-bottom:10px;border:1px solid var(--border);box-shadow:var(--shadow-md)">
             <div style="padding:20px 18px 16px;display:flex;align-items:center;gap:14px">
-                <img loading="lazy" src="${myPhoto()}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=?'">
+                <img loading="lazy" src="${myPhoto()}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=?'">
                 <div style="flex:1;min-width:0">
-                    <div style="font-weight:800;font-size:1rem;color:#fff">${userData?.name||'ยินดีต้อนรับ!'}</div>
-                    <div style="font-size:0.78rem;color:rgba(255,255,255,.45);margin-top:2px">Login แล้ว — ผูกรหัสเพื่อเข้าถึงทุกฟีเจอร์</div>
+                    <div style="font-weight:800;font-size:1rem;color:var(--text)">${userData?.name||'ยินดีต้อนรับ!'}</div>
+                    <div style="font-size:0.78rem;color:var(--muted);margin-top:2px">Login แล้ว — ผูกรหัสเพื่อเข้าถึงทุกฟีเจอร์</div>
                 </div>
-                <button class="btn-out-hero" onclick="logoutUser()" style="flex-shrink:0">ออก</button>
+                <button class="btn-gray" onclick="logoutUser()" style="flex-shrink:0">ออก</button>
             </div>
             <div style="padding:0 18px 18px">
-                <button onclick="openLinkModal()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:14px;padding:14px;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(37,99,235,.4);transition:.2s">
+                <button onclick="openLinkModal()" style="width:100%;background:linear-gradient(135deg,var(--primary),#4338ca);color:#fff;border:none;border-radius:14px;padding:14px;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(79,70,229,.3);transition:.2s">
                     🔗 ผูกรหัสนักศึกษา
                 </button>
-                <div style="text-align:center;margin-top:10px;font-size:0.74rem;color:rgba(255,255,255,.3)">
-                    ไม่มีรหัสนักศึกษา? <button onclick="openLinkModal()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:0.74rem;cursor:pointer;font-family:inherit;text-decoration:underline">เข้าแบบ Guest</button>
+                <div style="text-align:center;margin-top:10px;font-size:0.74rem;color:var(--muted)">
+                    ไม่มีรหัสนักศึกษา? <button onclick="openLinkModal()" style="background:none;border:none;color:var(--primary);font-size:0.74rem;cursor:pointer;font-family:inherit;text-decoration:underline">เข้าแบบ Guest</button>
                 </div>
             </div>
         </div>`;
@@ -2106,18 +2106,18 @@ function buildHome(){
     <div class="coll-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
             <div>
-                <div style="font-size:0.68rem;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">🏅 คอลเลกชัน</div>
-                <div style="font-weight:800;font-size:1.1rem;color:#fff">${uniqueIds.length} <span style="color:rgba(255,255,255,.3);font-size:0.8rem">/ ${total} สายพันธุ์</span></div>
+                <div style="font-size:0.68rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">🏅 คอลเลกชัน</div>
+                <div style="font-weight:800;font-size:1.1rem;color:var(--text)">${uniqueIds.length} <span style="color:var(--muted);font-size:0.8rem">/ ${total} สายพันธุ์</span></div>
                 ${achTitle?`<div style="font-size:0.74rem;color:#fbbf24;font-weight:600;margin-top:2px">${achTitle}</div>`:''}
             </div>
             <div style="text-align:right">
-                <div style="font-size:0.64rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px">daily income</div>
+                <div style="font-size:0.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">daily income</div>
                 <div style="display:flex;align-items:center;gap:6px">
-                    <div style="font-size:1.2rem;font-weight:800;color:#6ee7b7">+${todayTotal}🪙</div>
+                    <div style="font-size:1.2rem;font-weight:800;color:#059669">+${todayTotal}🪙</div>
                     <button id="daily-claim-btn" onclick="claimDaily()" style="background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:8px;padding:3px 9px;color:#fff;font-family:inherit;font-size:0.65rem;font-weight:800;cursor:pointer;white-space:nowrap;transition:.2s;line-height:1.4">💰 รับ</button>
                 </div>
-                <div style="font-size:0.62rem;color:rgba(255,255,255,.3)" id="daily-claim-status">ต่อวัน</div>
-                <div style="font-size:0.6rem;color:rgba(255,255,255,.25);margin-top:3px;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openDailyDetail()">ดูรายละเอียด</div>
+                <div style="font-size:0.62rem;color:var(--muted)" id="daily-claim-status">ต่อวัน</div>
+                <div style="font-size:0.6rem;color:var(--primary);margin-top:3px;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="openDailyDetail()">ดูรายละเอียด</div>
             </div>
         </div>
         <div class="coll-bar-bg"><div class="coll-bar-fill" style="width:${pct}%"></div></div>
@@ -2128,7 +2128,7 @@ function buildHome(){
             </span>`).join('')}
         </div>
         ${nextTier
-            ?`<div style="margin-top:9px;font-size:0.74rem;color:rgba(255,255,255,.4)">🎯 ถัดไป: <span style="color:#fbbf24;font-weight:700">${nextTier.label}</span> (สะสม ${nextTier.need} สายพันธุ์)</div>`
+            ?`<div style="margin-top:9px;font-size:0.74rem;color:var(--muted)">🎯 ถัดไป: <span style="color:#b45309;font-weight:700">${nextTier.label}</span> (สะสม ${nextTier.need} สายพันธุ์)</div>`
             :'<div style="margin-top:9px;font-size:0.78rem;color:#fbbf24;font-weight:700">🏆 Master Collector!</div>'}
     </div>`;
 
@@ -2253,20 +2253,20 @@ window._buildMembersTopBar=function _buildMembersTopBar(){
         + pleHtml
         + '<button onclick="openCalc()" style="flex:1;background:linear-gradient(135deg,rgba(109,40,217,.25),rgba(124,58,237,.2));border:1.5px solid rgba(167,139,250,.3);border-radius:14px;padding:10px 12px;cursor:pointer;font-family:inherit;text-align:left;display:flex;align-items:center;gap:8px">'
         + '<div style="font-size:1.6rem;line-height:1">🧮</div>'
-        + '<div><div style="font-size:0.68rem;font-weight:800;color:#c4b5fd;line-height:1.3">เครื่องมือที่น่าจะ<br>เป็นประโยชน์</div>'
-        + '<span style="font-size:0.5rem;background:rgba(99,102,241,.35);color:#a5b4fc;padding:1px 6px;border-radius:5px;font-weight:700">beta</span></div>'
-        + '<div style="margin-left:auto;color:rgba(255,255,255,.2);font-size:0.8rem">›</div>'
+        + '<div><div style="font-size:0.68rem;font-weight:800;color:var(--primary);line-height:1.3">เครื่องมือที่น่าจะ<br>เป็นประโยชน์</div>'
+        + '<span style="font-size:0.5rem;background:var(--primary-light);color:var(--primary);padding:1px 6px;border-radius:5px;font-weight:700">beta</span></div>'
+        + '<div style="margin-left:auto;color:var(--muted);font-size:0.8rem">›</div>'
         + '</button></div>';
 }
 function buildMembers(){
     const all=window.__students||[];const sci=all.filter(s=>s.track==='sci').length;const care=all.filter(s=>s.track==='care').length;const tot=all.length;
     const guestCount=(window.__guestUsers||[]).length;
     return`
-        <div class="card" style="margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);">
-            <div style="font-weight:700;font-size:0.95rem;text-align:center;margin-bottom:8px;color:#fff">💊 RxTU10 — ${tot} คน</div>
+        <div class="card" style="margin-bottom:8px;">
+            <div style="font-weight:700;font-size:0.95rem;text-align:center;margin-bottom:8px;color:var(--text)">💊 RxTU10 — ${tot} คน</div>
             <div><div class="prog-bar"><div class="pb-sci" style="width:${(sci/tot*100).toFixed(1)}%"></div><div class="pb-care" style="width:${(care/tot*100).toFixed(1)}%"></div></div>
             <div class="prog-lbls"><span style="color:var(--sci)">Sci ${sci}</span><span style="color:var(--care)">Care ${care}</span></div></div>
-            ${guestCount?`<div style="text-align:center;margin-top:8px"><button onclick="openGuestList()" id="guest-count-badge" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:16px;padding:4px 12px;font-size:0.75rem;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit">👋 Guest ${guestCount} คน</button></div>`:''}
+            ${guestCount?`<div style="text-align:center;margin-top:8px"><button onclick="openGuestList()" id="guest-count-badge" style="background:var(--bg);border:1.5px solid var(--border);border-radius:16px;padding:4px 12px;font-size:0.75rem;color:var(--muted);cursor:pointer;font-family:inherit">👋 Guest ${guestCount} คน</button></div>`:''}
         </div>
         ${_buildMembersTopBar()}
         <div class="filter-row">
@@ -2281,7 +2281,7 @@ function memberGrid(){
     let list=window.__students||[];
     if(mTrack!=='all')list=list.filter(s=>s.track===mTrack);
     if(mSearch){const q=mSearch.toLowerCase();list=list.filter(s=>s.nickname.toLowerCase().includes(q)||s.id.includes(q)||s.realName.toLowerCase().includes(q));}
-    if(!list.length)return `<div style="text-align:center;padding:32px 16px;color:rgba(255,255,255,.3);font-size:0.85rem">ไม่พบสมาชิก</div>`;
+    if(!list.length)return `<div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:0.85rem">ไม่พบสมาชิก</div>`;
     return`<div class="mgrid">${list.map(s=>{
         const tc=s.track==='sci'?'var(--sci)':'var(--care)';
         const live=window.__fbUsers?.[s.id];
@@ -2303,7 +2303,7 @@ function memberGrid(){
                     ${s.track==='sci'?'🔬':'💊'}
                 </div>
                 <div class="mc-nick" style="font-size:0.77rem">${s.nickname}</div>
-                <div style="font-size:0.58rem;color:rgba(255,255,255,.4);margin-top:1px;line-height:1.3;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.realName}</div>
+                <div style="font-size:0.58rem;color:var(--muted);margin-top:1px;line-height:1.3;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.realName}</div>
                 <span class="track-badge" style="background:${tc};font-size:0.5rem;padding:2px 6px;margin-top:4px">${s.track==='sci'?'SCI':'CARE'}</span>
             </div>`;
         }
@@ -2559,7 +2559,7 @@ window.openFriendPetInfo=(studentId,instOrId)=>{
     const overlay=document.createElement('div');
     // ใช้ fixed เพื่อครอบทับ modal เสมอแม้จะ scroll
     const modalRect = document.querySelector('#profile-modal .modal-box')?.getBoundingClientRect()||{top:0,left:0,width:400,height:window.innerHeight*0.88};
-    overlay.style.cssText=`position:fixed;top:${modalRect.top}px;left:${modalRect.left}px;width:${modalRect.width}px;height:${modalRect.height}px;background:#0f172a;border-radius:20px;padding:20px 16px;overflow-y:auto;z-index:9200;animation:popIn .25s ease`;
+    overlay.style.cssText=`position:fixed;top:${modalRect.top}px;left:${modalRect.left}px;width:${modalRect.width}px;height:${modalRect.height}px;background:#fff;border-radius:20px;padding:20px 16px;overflow-y:auto;z-index:9200;animation:popIn .25s ease;border:1px solid #e2e8f0;`;
     const stats=calculatePetStats(p);
     const el=def?.element;const elInfo=ELEMENTS[el]||null;
     overlay.innerHTML=`
@@ -2567,11 +2567,11 @@ window.openFriendPetInfo=(studentId,instOrId)=>{
         <div style="text-align:center">
             <div style="display:flex;justify-content:center;gap:6px;margin-bottom:8px">
                 <span style="background:${cfg.color};color:#fff;padding:3px 12px;border-radius:16px;font-size:0.72rem;font-weight:800">${cfg.label}</span>
-                ${grade>0?`<span style="background:#475569;color:#fff;padding:3px 12px;border-radius:16px;font-size:0.72rem;font-weight:800">Grade ${GRADE_LABELS[grade]}</span>`:''}
-                ${elInfo?`<span style="background:#334155;color:#fff;padding:3px 10px;border-radius:16px;font-size:1rem">${elInfo.emoji}</span>`:''}
+                ${grade>0?`<span style="background:#e2e8f0;color:#334155;padding:3px 12px;border-radius:16px;font-size:0.72rem;font-weight:800">Grade ${GRADE_LABELS[grade]}</span>`:''}
+                ${elInfo?`<span style="background:#f1f5f9;color:#334155;padding:3px 10px;border-radius:16px;font-size:1rem">${elInfo.emoji}</span>`:''}
             </div>
             <div style="font-size:3.5rem;margin:4px 0;filter:drop-shadow(0 0 14px ${cfg.glow})">${p.emoji}</div>
-            <div style="font-size:1.2rem;font-weight:800;margin-bottom:4px">${formatPetName(p)}</div>
+            <div style="font-size:1.2rem;font-weight:800;margin-bottom:4px;color:var(--text)">${formatPetName(p)}</div>
             ${def?.flavor?`<div style="font-size:0.74rem;color:${cfg.color};font-style:italic;padding:7px 12px;background:${cfg.bg};border-radius:9px;border-left:3px solid ${cfg.color}44;text-align:left;margin-bottom:10px">"${def.flavor}"</div>`:''}
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
                 <div style="background:${cfg.bg};border-radius:10px;padding:8px 4px">
@@ -2587,9 +2587,9 @@ window.openFriendPetInfo=(studentId,instOrId)=>{
                     <div style="font-size:1.15rem;font-weight:800;color:${cfg.color}">+${petDailyCoins(p)}🪙</div>
                 </div>
             </div>
-            ${elInfo?`<div style="background:#0f172a;border-radius:10px;padding:8px 12px;font-size:0.78rem;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            ${elInfo?`<div style="background:var(--bg);border-radius:10px;padding:8px 12px;font-size:0.78rem;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:8px">
                 <span style="font-size:1.1rem">${elInfo.emoji}</span>
-                <span>ชนะ <b style="color:#fbbf24">${ELEMENTS[elInfo.beats]?.emoji||''}</b> · แพ้ <b style="color:#f87171">${Object.values(ELEMENTS).find(e=>e.beats===el)?.emoji||''}</b></span>
+                <span>ชนะ <b style="color:#b45309">${ELEMENTS[elInfo.beats]?.emoji||''}</b> · แพ้ <b style="color:#ef4444">${Object.values(ELEMENTS).find(e=>e.beats===el)?.emoji||''}</b></span>
             </div>`:''}
         </div>`;
     document.body.appendChild(overlay);
@@ -2693,10 +2693,10 @@ function buildPlay(){
     </div>
 
     <!-- 🐾 Pet Games group -->
-    <div style="font-size:0.6rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">🐾 สัตว์เลี้ยง</div>
+    <div style="font-size:0.6rem;color:var(--muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">🐾 สัตว์เลี้ยง</div>
     <div class="hub-grid" style="margin-bottom:14px">
         <!-- Expedition -->
-        <div class="hub-card live" style="--hc-glow:rgba(124,58,237,.4);background:linear-gradient(145deg,#2d1057,#1a0533);border-color:rgba(168,85,247,.25);" onclick="openExpModal()">
+        <div class="hub-card live" style="--hc-glow:rgba(124,58,237,.2);background:linear-gradient(145deg,#f3e8ff,#ede9fe);border-color:#e9d5ff;" onclick="openExpModal()">
             ${expNotify?'<div class="hub-notify"></div>':''}
             ${expActive&&!expNotify?'<div class="hub-badge">⏳ กำลังไป</div>':''}
             <div class="hub-card-icon">🏕️</div>
@@ -2704,7 +2704,7 @@ function buildPlay(){
             <div class="hub-card-sub">${expNotify?'🎁 มีรางวัลรอรับ!':expActive?'กำลังออกเดินทาง...':'ส่งสัตว์หาของรางวัล'}</div>
         </div>
         <!-- Tower -->
-        <div class="hub-card live" style="--hc-glow:rgba(124,58,237,.4);background:linear-gradient(145deg,#2d1057,#1a0533);border-color:rgba(168,85,247,.25);" onclick="openTower()">
+        <div class="hub-card live" style="--hc-glow:rgba(124,58,237,.2);background:linear-gradient(145deg,#f3e8ff,#ede9fe);border-color:#e9d5ff;" onclick="openTower()">
             <div class="hub-card-icon">🗼</div>
             <div class="hub-card-title">หอคอยไร้สิ้นสุด</div>
             <div class="hub-card-sub">ชั้นสูงสุด: ${userData?.towerBest||0} ชั้น</div>
@@ -2712,31 +2712,31 @@ function buildPlay(){
     </div>
 
     <!-- 🎮 Mini Games group -->
-    <div style="font-size:0.6rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">🎮 มินิเกม</div>
+    <div style="font-size:0.6rem;color:var(--muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">🎮 มินิเกม</div>
     <div class="hub-grid">
         <!-- Quiz: ชื่อเพื่อน -->
-        <div class="hub-card live" style="--hc-glow:rgba(37,99,235,.4);background:linear-gradient(145deg,#1e3a5f,#0f172a);border-color:rgba(96,165,250,.25);" onclick="openQuizModal()">
+        <div class="hub-card live" style="--hc-glow:rgba(37,99,235,.2);background:linear-gradient(145deg,#dbeafe,#eff6ff);border-color:#bfdbfe;" onclick="openQuizModal()">
             <div class="hub-card-icon">🕵️</div>
             <div class="hub-card-title">ทายชื่อเพื่อน</div>
-            <div class="hub-card-sub">เห็นชื่อเล่น → ทายชื่อจริง</div><div style="font-size:0.72rem;font-weight:800;color:#fbbf24;margin-top:2px">🏆 ${qHigh} คะแนน</div>
+            <div class="hub-card-sub">เห็นชื่อเล่น → ทายชื่อจริง</div><div style="font-size:0.72rem;font-weight:800;color:#b45309;margin-top:2px">🏆 ${qHigh} คะแนน</div>
         </div>
         <!-- Quiz: ยา -->
-        <div class="hub-card live" style="--hc-glow:rgba(99,102,241,.4);background:linear-gradient(145deg,#312e81,#1e1b4b);border-color:rgba(165,180,252,.2);" onclick="openDrugModal()">
+        <div class="hub-card live" style="--hc-glow:rgba(99,102,241,.2);background:linear-gradient(145deg,#e0e7ff,#eef2ff);border-color:#c7d2fe;" onclick="openDrugModal()">
             <div class="hub-card-icon">💊</div>
             <div class="hub-card-title">ทายยา</div>
-            <div class="hub-card-sub">Drug Class Quiz</div><div style="font-size:0.72rem;font-weight:800;color:#fbbf24;margin-top:2px">🏆 ${dqHigh} คะแนน</div>
+            <div class="hub-card-sub">Drug Class Quiz</div><div style="font-size:0.72rem;font-weight:800;color:#b45309;margin-top:2px">🏆 ${dqHigh} คะแนน</div>
         </div>
         <!-- Color Tiles -->
-        <div class="hub-card live" style="--hc-glow:rgba(16,185,129,.4);background:linear-gradient(145deg,#052e16,#0a1a0a);border-color:rgba(34,197,94,.25);" onclick="openColorTilesModal()">
+        <div class="hub-card live" style="--hc-glow:rgba(16,185,129,.2);background:linear-gradient(145deg,#dcfce7,#f0fdf4);border-color:#bbf7d0;" onclick="openColorTilesModal()">
             <div class="hub-card-icon">🟩</div>
             <div class="hub-card-title">Color Tiles</div>
-            <div class="hub-card-sub">Piano Tiles สไตล์</div><div style="font-size:0.72rem;font-weight:800;color:#fbbf24;margin-top:2px">🏆 ${ctHigh} คะแนน</div>
+            <div class="hub-card-sub">Piano Tiles สไตล์</div><div style="font-size:0.72rem;font-weight:800;color:#b45309;margin-top:2px">🏆 ${ctHigh} คะแนน</div>
         </div>
         <!-- CC Exam (Easter Egg — Coming Soon facade) -->
-        <div class="hub-card soon" style="background:linear-gradient(145deg,#1a1000,#120d00);border-color:rgba(255,255,255,.06);" onclick="openCCExam()">
+        <div class="hub-card soon" style="background:linear-gradient(145deg,#fef3c7,#fffbeb);border-color:#fde68a;" onclick="openCCExam()">
             <div class="hub-badge">เร็วๆ นี้</div>
             <div class="hub-card-icon" style="filter:grayscale(.4)">📝</div>
-            <div class="hub-card-title" style="color:rgba(255,255,255,.5)">ข้อสอบ CC ย้อนหลัง</div>
+            <div class="hub-card-title">ข้อสอบ CC ย้อนหลัง</div>
             <div class="hub-card-sub">Pharm Board Exam<br>Coming Soon</div>
         </div>
     </div>`;

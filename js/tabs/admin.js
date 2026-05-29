@@ -12,7 +12,7 @@ export function isAdmin() {
 }
 
 function _photoFor(u) {
-    const def = `https://ui-avatars.com/api/?name=${encodeURIComponent((u.nickname || '?').split(' ')[0])}&background=1e293b&color=fff&size=64`;
+    const def = `https://ui-avatars.com/api/?name=${encodeURIComponent((u.nickname || '?').split(' ')[0])}&background=e2e8f0&color=334155&size=64`;
     return u.customPhoto || u.googlePhoto || def;
 }
 
@@ -20,8 +20,8 @@ export function buildAdmin() {
     if (!isAdmin()) {
         return `<div style="text-align:center;padding:60px 20px">
             <div style="font-size:3rem;margin-bottom:12px">🔒</div>
-            <div style="font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:6px">ไม่มีสิทธิ์เข้าถึง</div>
-            <div style="font-size:0.8rem;color:rgba(255,255,255,.4)">หน้านี้สำหรับ Admin เท่านั้น</div>
+            <div style="font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:6px">ไม่มีสิทธิ์เข้าถึง</div>
+            <div style="font-size:0.8rem;color:var(--muted)">หน้านี้สำหรับ Admin เท่านั้น</div>
         </div>`;
     }
 
@@ -35,8 +35,8 @@ export function buildAdmin() {
     return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
-            <div style="font-size:1.1rem;font-weight:800;color:#fff">⚙️ Admin Panel</div>
-            <div style="font-size:0.68rem;color:rgba(255,255,255,.4)">RxTU10 Dashboard · ${ADMIN_EMAIL}</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--text)">⚙️ Admin Panel</div>
+            <div style="font-size:0.68rem;color:var(--muted)">RxTU10 Dashboard · ${ADMIN_EMAIL}</div>
         </div>
         <span class="admin-badge">ADMIN</span>
     </div>
@@ -117,7 +117,7 @@ export function buildAdmin() {
             <span class="admin-section-title">จัดการเหรียญ</span>
         </div>
         <div class="admin-section-body">
-            <div style="font-size:0.72rem;color:rgba(255,255,255,.5);margin-bottom:8px">ให้/ลดเหรียญสมาชิกคนเดียวด้วย Student ID</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px">ให้/ลดเหรียญสมาชิกคนเดียวด้วย Student ID</div>
             <input class="admin-input" id="adm-coin-sid" placeholder="Student ID (เช่น 6518610016)">
             <input class="admin-input" id="adm-coin-amt" type="number" placeholder="จำนวนเหรียญ (+/-)">
             <button class="btn-admin-action" onclick="window.adminGiveCoins()">🪙 ให้/ลดเหรียญ</button>
@@ -131,7 +131,7 @@ export function buildAdmin() {
             <span class="admin-section-title" style="color:#fca5a5">Danger Zone</span>
         </div>
         <div class="admin-section-body">
-            <div style="font-size:0.72rem;color:rgba(255,255,255,.5);margin-bottom:8px">ลบ user ที่ใช้ email ผิด (เช่น test account)</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px">ลบ user ที่ใช้ email ผิด (เช่น test account)</div>
             <input class="admin-input" id="adm-del-uid" placeholder="UID ของ user ที่ต้องการลบ">
             <button class="btn-admin-danger" onclick="window.adminDeleteUser()">🗑️ ลบ User</button>
         </div>
@@ -139,20 +139,20 @@ export function buildAdmin() {
 }
 
 function _renderUserList(users) {
-    if (users.length === 0) return '<div style="color:rgba(255,255,255,.4);font-size:0.8rem">ไม่มีข้อมูล</div>';
+    if (users.length === 0) return '<div style="color:var(--muted);font-size:0.8rem">ไม่มีข้อมูล</div>';
     return users.sort((a, b) => (b.coins || 0) - (a.coins || 0)).map(u => {
         const tc = u.track === 'sci' ? 'var(--sci)' : 'var(--care)';
         const photo = _photoFor(u);
         return `<div class="admin-user-row">
             <img class="admin-user-photo" src="${photo}" loading="lazy"
-                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=?&background=1e293b&color=fff&size=64'">
+                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=?&background=e2e8f0&color=334155&size=64'">
             <div class="admin-user-info">
                 <div class="admin-user-nick">${u.nickname || '—'}</div>
                 <div class="admin-user-meta" style="color:${tc}">${u.id || u.studentId} · ${u.track?.toUpperCase()}</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
                 <div style="font-size:0.78rem;font-weight:700;color:#fbbf24">${(u.coins || 0).toLocaleString()}🪙</div>
-                <div style="font-size:0.58rem;color:rgba(255,255,255,.35)">${(u.pets || []).length} pets</div>
+                <div style="font-size:0.58rem;color:var(--muted)">${(u.pets || []).length} pets</div>
             </div>
         </div>`;
     }).join('');
@@ -192,19 +192,19 @@ window.adminLoadNews = async () => {
     if (!isAdmin()) return;
     const list = document.getElementById('adm-news-list');
     if (!list) return;
-    list.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:0.8rem">กำลังโหลด...</div>';
+    list.innerHTML = '<div style="color:var(--muted);font-size:0.8rem">กำลังโหลด...</div>';
     try {
         const q2 = query(collection(db, 'news'), orderBy('ts', 'desc'), limit(20));
         const snap = await getDocs(q2);
-        if (snap.empty) { list.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:0.8rem">ไม่มีข่าว</div>'; return; }
+        if (snap.empty) { list.innerHTML = '<div style="color:var(--muted);font-size:0.8rem">ไม่มีข่าว</div>'; return; }
         list.innerHTML = snap.docs.map(d => {
             const x = d.data();
             const ts = x.ts?.toDate?.()?.toLocaleString('th') || '—';
-            return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
                 <span style="font-size:1.1rem;flex-shrink:0">${x.emoji || '📰'}</span>
                 <div style="flex:1;min-width:0">
-                    <div style="font-size:0.8rem;color:rgba(255,255,255,.85)">${x.msg || ''}</div>
-                    <div style="font-size:0.62rem;color:rgba(255,255,255,.3);margin-top:2px">${ts}</div>
+                    <div style="font-size:0.8rem;color:var(--text)">${x.msg || ''}</div>
+                    <div style="font-size:0.62rem;color:var(--muted);margin-top:2px">${ts}</div>
                 </div>
                 <button onclick="window.adminDelNews('${d.id}')"
                     style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:3px 8px;font-size:0.65rem;cursor:pointer;flex-shrink:0">

@@ -101,7 +101,7 @@ function _renderBoard(board) {
     const myId = window.userData?.studentId;
 
     if (users.length === 0) {
-        return `<div style="text-align:center;padding:24px;color:rgba(255,255,255,.4);font-size:0.84rem">
+        return `<div style="text-align:center;padding:24px;color:var(--muted);font-size:0.84rem">
             ยังไม่มีข้อมูล
         </div>`;
     }
@@ -113,7 +113,7 @@ function _renderBoard(board) {
         return `<div class="rank-row${isMe ? ' me' : ''}">
             ${_rankEmoji(i)}
             <img class="rank-photo" src="${photo}" loading="lazy"
-                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=?&background=1e293b&color=fff&size=64'">
+                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=?&background=e2e8f0&color=334155&size=64'">
             <div class="rank-info">
                 <div class="rank-nick">${u.nickname || '—'}${isMe ? ' <span style="font-size:0.58rem;color:#fbbf24">(คุณ)</span>' : ''}</div>
                 <div class="rank-sub" style="color:${tc}">${u.track === 'sci' ? 'Sci-Pharm' : 'Care-Pharm'}</div>
@@ -131,8 +131,8 @@ export function buildLeaderboard() {
 
     return `
     <div style="padding-bottom:8px">
-        <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:4px">🏆 อันดับ</div>
-        <div style="font-size:0.72rem;color:rgba(255,255,255,.4)">Leaderboard — อัพเดทแบบเรียลไทม์</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:4px">🏆 อันดับ</div>
+        <div style="font-size:0.72rem;color:var(--muted)">Leaderboard — อัพเดทแบบเรียลไทม์</div>
     </div>
 
     <div class="rank-tab-row">
@@ -155,7 +155,7 @@ export function buildLeaderboard() {
         </div>
     </div>
 
-    <div style="text-align:center;font-size:0.65rem;color:rgba(255,255,255,.25);padding:4px 0 8px">
+    <div style="text-align:center;font-size:0.65rem;color:var(--muted);padding:4px 0 8px">
         แสดงเฉพาะผู้ใช้ที่ Login แล้ว · Top 50
     </div>`;
 }
