@@ -1,7 +1,6 @@
 <template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">🏆 Rank</div>
-    <div class="rk-note">จัดอันดับเพื่อความสนุก 🎉</div>
+    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px">🏆 Rank</div>
 
     <!-- board selector -->
     <div class="rk-tabs">
@@ -73,7 +72,6 @@ const avatarOf = (m) =>
 </script>
 
 <style scoped>
-.rk-note { font-size: .66rem; color: rgba(0,0,0,.45); margin-bottom: 12px; }
 .rk-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
 .rk-tab { flex: 1; white-space: nowrap; border: 1px solid rgba(0,0,0,.1); background: #fff; border-radius: 999px; padding: 7px 10px; font-family: inherit; font-size: .72rem; font-weight: 700; cursor: pointer; color: rgba(0,0,0,.55); }
 .rk-tab.on { background: #1e293b; color: #fff; border-color: #1e293b; }
