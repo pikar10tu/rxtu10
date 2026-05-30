@@ -51,6 +51,8 @@ service cloud.firestore {
         || (
           request.auth.uid == userId
           && request.resource.data.get('role', 'student') == resource.data.get('role', 'student')
+          && request.resource.data.get('tags', []) == resource.data.get('tags', [])
+          && request.resource.data.get('founder', false) == resource.data.get('founder', false)
           && request.resource.data.get('coins', 0) >= 0
         )
       );

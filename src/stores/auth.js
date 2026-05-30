@@ -8,6 +8,7 @@ import {
     serverTimestamp,
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/config.js'
+import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
 
 export const useAuthStore = defineStore('auth', () => {
     // ── State ──
@@ -26,6 +27,8 @@ export const useAuthStore = defineStore('auth', () => {
     const isAcademic = computed(() =>
         isAdmin.value || userData.value?.role === 'academic')
     const isLinked   = computed(() => !!userData.value?.studentId)
+    // daily-income bonus % from tags (e.g. supporter +20%)
+    const incomeBonusPct = computed(() => incomeBonusFromTags(effectiveTags(userData.value)))
 
     // ── Actions ──
     async function login() {
@@ -79,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
                 pityClaimedRounds: 0,
                 // ── v2 fields ──
                 role: 'student',                               // 'student' | 'academic' | 'admin'
+                tags: [],                                      // admin-assigned badges (founder/supporter/…)
                 residence: { level: 1, upgradedAt: null },     // ที่อยู่อาศัย (prestige/coin sink)
                 farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
                 petsVault: [],                                 // overflow pets (no income, not battle-eligible)
@@ -125,7 +129,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         currentUser, userData, loading,
-        isLoggedIn, isAdmin, isAcademic, isLinked,
+        isLoggedIn, isAdmin, isAcademic, isLinked, incomeBonusPct,
         login, logout, ensureDoc,
         blockSnapshot, setUserDataOptimistic,
         init,

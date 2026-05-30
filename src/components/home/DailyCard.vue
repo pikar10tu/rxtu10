@@ -8,6 +8,7 @@
     <div class="dc-breakdown">
       <div class="dc-row"><span>🏠 ที่อยู่อาศัย</span><b>+{{ baseIncome.toLocaleString() }}</b></div>
       <div class="dc-row"><span>🐾 สัตว์เลี้ยงในคลัง</span><b>+{{ petIncome.toLocaleString() }}</b></div>
+      <div v-if="bonusPct" class="dc-row dc-bonus"><span>💖 โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
       <div class="dc-row dc-total"><span>รวมต่อวัน</span><b>+{{ total.toLocaleString() }}🪙</b></div>
     </div>
 
@@ -24,7 +25,7 @@ import { useDaily } from '../../composables/useDaily.js'
 
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
-const { baseIncome, petIncome, total, claimable, claim } = useDaily()
+const { baseIncome, petIncome, bonusPct, total, claimable, claim } = useDaily()
 </script>
 
 <style scoped>
@@ -49,6 +50,7 @@ const { baseIncome, petIncome, total, claimable, claim } = useDaily()
   font-size: .76rem; color: rgba(0,0,0,.6); padding: 3px 0;
 }
 .dc-row b { color: #059669; }
+.dc-bonus b { color: #ec4899; }
 .dc-total {
   border-top: 1px dashed rgba(0,0,0,.12); margin-top: 4px; padding-top: 6px;
   font-weight: 800; color: rgba(0,0,0,.8);

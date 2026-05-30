@@ -32,27 +32,39 @@
 
         <ul v-else class="role-list">
           <li v-for="m in filtered" :key="m.uid" class="role-row">
-            <div class="role-info">
-              <div class="role-name">
-                {{ m.nickname }}
-                <span v-if="m.realName" class="role-real">· {{ m.realName }}</span>
+            <div class="role-top">
+              <div class="role-info">
+                <div class="role-name">
+                  {{ m.nickname }}
+                  <span v-if="m.realName" class="role-real">· {{ m.realName }}</span>
+                </div>
+                <div class="role-sub">{{ m.studentId || m.email || m.uid.slice(0, 8) }}</div>
               </div>
-              <div class="role-sub">{{ m.studentId || m.email || m.uid.slice(0, 8) }}</div>
+              <span class="role-badge" :class="'role-' + m.role">{{ roleLabel(m.role) }}</span>
+              <div class="role-actions">
+                <button
+                  v-if="m.role !== 'academic'"
+                  class="btn-mini btn-gold"
+                  :disabled="savingUid === m.uid || m.role === 'admin'"
+                  @click="setRole(m, 'academic')"
+                >+ วิชาการ</button>
+                <button
+                  v-else
+                  class="btn-mini btn-gray"
+                  :disabled="savingUid === m.uid"
+                  @click="setRole(m, 'student')"
+                >− เอาออก</button>
+                <button class="btn-mini btn-gray" @click="editTagsUid = editTagsUid === m.uid ? null : m.uid">🏷️</button>
+              </div>
             </div>
-            <span class="role-badge" :class="'role-' + m.role">{{ roleLabel(m.role) }}</span>
-            <div class="role-actions">
+            <!-- tag editor -->
+            <div v-if="editTagsUid === m.uid" class="tag-editor">
               <button
-                v-if="m.role !== 'academic'"
-                class="btn-mini btn-gold"
-                :disabled="savingUid === m.uid || m.role === 'admin'"
-                @click="setRole(m, 'academic')"
-              >+ วิชาการ</button>
-              <button
-                v-else
-                class="btn-mini btn-gray"
-                :disabled="savingUid === m.uid"
-                @click="setRole(m, 'student')"
-              >− เอาออก</button>
+                v-for="t in TAG_LIST" :key="t.id"
+                class="tag-toggle" :class="{ on: hasTag(m, t.id) }"
+                :style="hasTag(m, t.id) ? { background: t.color, borderColor: t.color } : {}"
+                @click="toggleTag(m, t.id)"
+              >{{ t.emoji }} {{ t.label }}</button>
             </div>
           </li>
         </ul>
@@ -68,13 +80,28 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useToast } from '../composables/useToast.js'
+import { TAG_LIST } from '../data/tags.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
 const { toast } = useToast()
 
-const search    = ref('')
-const savingUid = ref(null)
+const search     = ref('')
+const savingUid  = ref(null)
+const editTagsUid = ref(null)
+
+function hasTag(m, id) { return (m.tags || []).includes(id) }
+async function toggleTag(m, id) {
+  const next = hasTag(m, id) ? (m.tags || []).filter(t => t !== id) : [...(m.tags || []), id]
+  try {
+    await updateDoc(doc(db, 'users', m.uid), { tags: next })
+    m.tags = next
+    toast(`อัปเดตแท็ก ${m.nickname}`, 'success')
+  } catch (e) {
+    console.error('[admin toggleTag]', e)
+    toast('บันทึกแท็กไม่สำเร็จ', 'error')
+  }
+}
 
 onMounted(() => {
   if (authStore.isAdmin) reload()
@@ -171,12 +198,20 @@ async function setRole(m, role) {
 }
 .role-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
   padding: 8px 10px;
   border-radius: 10px;
   background: rgba(0, 0, 0, .03);
 }
+.role-top { display: flex; align-items: center; gap: 8px; }
+.tag-editor { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px; }
+.tag-toggle {
+  border: 1px solid rgba(0,0,0,.15); background: #fff; color: rgba(0,0,0,.55);
+  border-radius: 999px; padding: 4px 9px; font-family: inherit; font-size: .64rem;
+  font-weight: 700; cursor: pointer;
+}
+.tag-toggle.on { color: #fff; }
 .role-info { flex: 1; min-width: 0; }
 .role-name {
   font-size: .82rem;

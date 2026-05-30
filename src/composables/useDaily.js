@@ -18,7 +18,9 @@ export function useDaily() {
   const level    = computed(() => auth.userData?.residence?.level || 1)
   const baseIncome = computed(() => residenceDailyIncome(level.value))
   const petIncome  = computed(() => totalPetDaily(auth.userData?.pets))
-  const total      = computed(() => baseIncome.value + petIncome.value)
+  const bonusPct   = computed(() => auth.incomeBonusPct)            // supporter etc.
+  const subtotal   = computed(() => baseIncome.value + petIncome.value)
+  const total      = computed(() => Math.round(subtotal.value * (1 + bonusPct.value / 100)))
 
   // claimable if never claimed, or last claim was on a different calendar day
   const claimable = computed(() => {
@@ -47,5 +49,5 @@ export function useDaily() {
     }
   }
 
-  return { baseIncome, petIncome, total, claimable, claim }
+  return { baseIncome, petIncome, bonusPct, total, claimable, claim }
 }

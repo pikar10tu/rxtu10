@@ -11,9 +11,9 @@
         <div class="pm-chips">
           <span class="pm-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
           <ResidenceBadge :level="lvl" />
-          <span v-if="member.founder" class="pm-chip founder">🏅 ผู้บุกเบิก</span>
           <span class="pm-chip likes">❤️ {{ member.likes || 0 }}</span>
         </div>
+        <div class="pm-chips" style="margin-top:5px"><TagChips :member="member" /></div>
       </div>
 
       <!-- Tier 2: stat strip (max 3, no coins) -->
@@ -42,6 +42,7 @@
 import { computed } from 'vue'
 import { getTier } from '../../data/residence.js'
 import ResidenceBadge from '../residence/ResidenceBadge.vue'
+import TagChips from '../shared/TagChips.vue'
 
 const props = defineProps({ member: { type: Object, default: null } })
 defineEmits(['close'])
