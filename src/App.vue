@@ -15,16 +15,48 @@
       <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
     </nav>
 
+    <button
+      v-if="authStore.isLoggedIn"
+      class="help-fab"
+      title="วิธีเล่น"
+      @click="openHelp"
+    >❓</button>
+
     <ToastContainer />
     <ConfirmModal />
+    <HelpModal />
+    <MigrationWelcome />
   </div>
 </template>
 
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
-import ToastContainer from './components/layout/ToastContainer.vue'
-import ConfirmModal   from './components/layout/ConfirmModal.vue'
+import { useHelp } from './composables/useHelp.js'
+import ToastContainer   from './components/layout/ToastContainer.vue'
+import ConfirmModal     from './components/layout/ConfirmModal.vue'
+import HelpModal        from './components/help/HelpModal.vue'
+import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
 
 const authStore = useAuthStore()
+const { openHelp } = useHelp()
 </script>
+
+<style scoped>
+.help-fab {
+  position: fixed;
+  right: 14px;
+  bottom: 74px; /* sits above the bottom nav */
+  z-index: 150;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .25);
+}
+.help-fab:active { transform: scale(.92); }
+</style>

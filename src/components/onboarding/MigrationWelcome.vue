@@ -1,0 +1,108 @@
+<template>
+  <div v-if="show" class="mw-ov">
+    <div class="mw-box">
+      <div class="mw-confetti">🎉</div>
+      <div class="mw-title">อัปเดตใหม่!</div>
+      <div class="mw-sub">RxTU10 ปรับระบบครั้งใหญ่ — นี่คือสิ่งที่เปลี่ยนไปสำหรับคุณ</div>
+
+      <div class="mw-list">
+        <div class="mw-item">
+          <span class="mw-emoji">{{ tier.art }}</span>
+          <div>
+            <b>ที่อยู่อาศัยของคุณ: {{ tier.tierName }} (Lv.{{ level }})</b>
+            <div class="mw-note">ความมั่งคั่งเดิมของคุณถูกแปลงเป็นเลเวลที่อยู่อาศัย — ยิ่งสูงยิ่งเก๋า!</div>
+          </div>
+        </div>
+        <div v-if="isFounder" class="mw-item">
+          <span class="mw-emoji">🏅</span>
+          <div>
+            <b>ป้าย "ผู้บุกเบิก"</b>
+            <div class="mw-note">มอบให้เฉพาะคนที่อยู่กับเราตั้งแต่วันแรก — หาไม่ได้อีกแล้ว</div>
+          </div>
+        </div>
+        <div class="mw-item">
+          <span class="mw-emoji">🐾</span>
+          <div>
+            <b>สัตว์เลี้ยงปลอดภัยทุกตัว</b>
+            <div class="mw-note">ตัวเก่งอยู่ในคลังเก็บ ที่เหลืออยู่ใน "คลังพัก" — ไม่มีตัวไหนหาย</div>
+          </div>
+        </div>
+        <div class="mw-item">
+          <span class="mw-emoji">💰</span>
+          <div>
+            <b>ระบบรายได้ใหม่</b>
+            <div class="mw-note">รับรายได้รายวันจากบ้าน + สัตว์เลี้ยง · เหรียญเป็นข้อมูลส่วนตัวแล้ว</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="mw-btn primary" @click="dismiss(true)">เริ่มเล่นเลย!</button>
+      <button class="mw-btn ghost" @click="dismiss(false)">ดูวิธีเล่นทั้งหมด</button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '../../firebase/config.js'
+import { useAuthStore } from '../../stores/auth.js'
+import { useHelp } from '../../composables/useHelp.js'
+import { getTier } from '../../data/residence.js'
+
+const auth = useAuthStore()
+const { openHelp } = useHelp()
+
+const dismissed = ref(false)
+const show = computed(() =>
+  !dismissed.value &&
+  auth.userData?.migratedV2 === true &&
+  !auth.userData?.seenV2Notice
+)
+
+const level     = computed(() => auth.userData?.residence?.level || 1)
+const tier      = computed(() => getTier(level.value))
+const isFounder = computed(() => auth.userData?.founder === true)
+
+async function dismiss(startPlaying) {
+  dismissed.value = true
+  // persist the once-flag so it never shows again
+  if (auth.currentUser) {
+    auth.setUserDataOptimistic({ seenV2Notice: true })
+    try {
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), { seenV2Notice: true })
+    } catch (e) {
+      console.error('[migration welcome]', e)
+    }
+  }
+  if (!startPlaying) openHelp()
+}
+</script>
+
+<style scoped>
+.mw-ov {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0, 0, 0, .55);
+  display: flex; align-items: center; justify-content: center; padding: 18px;
+}
+.mw-box {
+  background: #fff; width: 100%; max-width: 380px;
+  border-radius: 20px; padding: 22px; text-align: center;
+  max-height: 88vh; overflow-y: auto;
+}
+.mw-confetti { font-size: 2.4rem; }
+.mw-title { font-size: 1.3rem; font-weight: 800; margin-top: 4px; }
+.mw-sub { font-size: .76rem; color: rgba(0,0,0,.5); margin: 4px 0 16px; }
+.mw-list { display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 18px; }
+.mw-item { display: flex; gap: 10px; align-items: flex-start; }
+.mw-emoji { font-size: 1.5rem; flex-shrink: 0; }
+.mw-item b { font-size: .84rem; }
+.mw-note { font-size: .68rem; color: rgba(0,0,0,.5); line-height: 1.45; margin-top: 2px; }
+.mw-btn {
+  width: 100%; border: none; border-radius: 12px; padding: 12px;
+  font-family: inherit; font-size: .88rem; font-weight: 800; cursor: pointer;
+}
+.mw-btn.primary { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; margin-bottom: 8px; }
+.mw-btn.ghost { background: rgba(0,0,0,.05); color: rgba(0,0,0,.6); }
+.mw-btn:active { transform: scale(.98); }
+</style>
