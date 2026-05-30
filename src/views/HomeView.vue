@@ -2,8 +2,12 @@
   <div class="tab-content">
     <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px">🏠 Home</div>
 
-    <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
-    <ResidenceCard v-if="authStore.isLoggedIn" />
+    <template v-if="authStore.isLoggedIn">
+      <!-- เหรียญ + รับรายได้รายวัน (ส่วนตัว เห็นเฉพาะเจ้าของ) -->
+      <DailyCard />
+      <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
+      <ResidenceCard />
+    </template>
 
     <!-- ทางเข้า Shop / Rank (ย้ายมาจากเมนูล่าง) -->
     <div class="home-shortcuts">
@@ -25,6 +29,7 @@
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
+import DailyCard from '../components/home/DailyCard.vue'
 
 const authStore = useAuthStore()
 </script>
