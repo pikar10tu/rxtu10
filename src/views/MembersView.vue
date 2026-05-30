@@ -48,11 +48,11 @@ const search = ref('')
 const track = ref('all')
 const selected = ref(null)
 
-onMounted(() => { if (!Object.keys(members.fbUsers.value || {}).length) members.loadFbUsers() })
+onMounted(() => { if (!Object.keys(members.fbUsers || {}).length) members.loadFbUsers() })
 
 // merge the full static roster (83) with logged-in user data (by studentId)
 const roster = computed(() => {
-  const fb = members.fbUsers.value || {}
+  const fb = members.fbUsers || {}
   const merged = (members.students || []).map(s => {
     const u = fb[s.id]
     if (u) return { ...u, registered: true }
@@ -62,7 +62,7 @@ const roster = computed(() => {
       residence: { level: 1 }, likes: 0, pets: [], registered: false,
     }
   })
-  const guests = (members.guestUsers.value || []).map(g => ({ ...g, registered: true }))
+  const guests = (members.guestUsers || []).map(g => ({ ...g, registered: true }))
   return [...merged, ...guests]
 })
 

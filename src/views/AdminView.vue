@@ -155,7 +155,7 @@ function roleLabel(role) {
 
 // flatten student fbUsers + guests into one sortable list
 const allUsers = computed(() => {
-  const list = [...Object.values(members.fbUsers.value || {}), ...(members.guestUsers.value || [])]
+  const list = [...Object.values(members.fbUsers || {}), ...(members.guestUsers || [])]
   return list.sort((a, b) => {
     const rank = r => (r === 'admin' ? 0 : r === 'academic' ? 1 : 2)
     return rank(a.role) - rank(b.role) || (a.studentId || '').localeCompare(b.studentId || '')

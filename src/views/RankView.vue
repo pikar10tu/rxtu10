@@ -52,11 +52,11 @@ const board = ref('residence')
 const current = computed(() => BOARDS.find(b => b.key === board.value))
 const valueOf = (m) => current.value.get(m)
 
-onMounted(() => { if (!Object.keys(members.fbUsers.value || {}).length) members.loadFbUsers() })
+onMounted(() => { if (!Object.keys(members.fbUsers || {}).length) members.loadFbUsers() })
 
 const all = computed(() => [
-  ...Object.values(members.fbUsers.value || {}),
-  ...(members.guestUsers.value || []),
+  ...Object.values(members.fbUsers || {}),
+  ...(members.guestUsers || []),
 ])
 
 const ranked = computed(() =>
