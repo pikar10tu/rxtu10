@@ -89,6 +89,17 @@ function onPick(seedId) { const i = pickIndex.value; pickIndex.value = null; if 
 // reactive plot status (re-evaluates as `now` ticks)
 function stat(plot) { return farm.status(plot, now.value) }
 
+// format remaining grow time (ms) → readable countdown
+function fmt(ms) {
+  const s = Math.max(0, Math.ceil(ms / 1000))
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  const sec = s % 60
+  if (h > 0) return `${h}ชม ${m}น`
+  if (m > 0) return `${m}น ${sec}ว`
+  return `${sec}ว`
+}
+
 const invList = computed(() =>
   Object.entries(farm.inventory.value)
     .filter(([, q]) => q > 0)
