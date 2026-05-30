@@ -41,6 +41,8 @@ export const useMembersStore = defineStore('members', () => {
                     coins: x.coins || 0,
                     pets: x.pets || [],
                     activePets: x.activePets || [],
+                    residence: x.residence || { level: 1 },
+                    founder: x.founder === true,
                     pvpVictories: x.pvpVictories || 0,
                     towerBest: x.towerBest || 0,
                     quizHigh: x.quizHigh || 0,
