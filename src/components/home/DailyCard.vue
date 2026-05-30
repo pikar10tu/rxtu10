@@ -30,11 +30,12 @@ const { baseIncome, petIncome, bonusPct, total, claimable, claim } = useDaily()
 
 <style scoped>
 .daily-card {
-  background: linear-gradient(135deg, #fffbeb, #fff);
-  border: 1px solid rgba(251, 191, 36, .35);
-  border-radius: 16px;
+  background: linear-gradient(135deg, #fff0f7, #f6f0ff);
+  border: 1px solid #f3d9ec;
+  border-radius: 18px;
   padding: 14px;
   margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(170,140,210,.12);
 }
 .dc-coins {
   display: flex; align-items: baseline; justify-content: space-between;
@@ -61,7 +62,7 @@ const { baseIncome, petIncome, bonusPct, total, claimable, claim } = useDaily()
   font-family: inherit; font-size: .86rem; font-weight: 800; color: #fff;
   background: rgba(0,0,0,.25); cursor: pointer; transition: transform .12s;
 }
-.dc-claim.ready { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.dc-claim.ready { background: linear-gradient(135deg, #c4a5f5, #f7a8c4); }
 .dc-claim.ready:active { transform: scale(.98); }
 .dc-claim:disabled { cursor: default; opacity: .6; }
 </style>

@@ -457,5 +457,54 @@ html, body {
 /* ── Vue Router active nav item ── */
 #bottom-nav a.router-link-active,
 #bottom-nav a.router-link-exact-active {
-    color: var(--accent);
+    color: var(--primary);
 }
+
+/* ═══════════════════════════════════════════════════════
+   🌸 PASTEL THEME (cute) — design-system override
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --sci: #6fcf97;
+  --care: #6aa9f4;
+  --gold: #f6b756;
+  --primary: #b58df1;        /* soft lavender */
+  --primary-light: #f4edff;
+  --accent: #f7a8c4;         /* soft pink */
+  --bg: #fbf7ff;
+  --surface: #ffffff;
+  --text: #4a3f5e;
+  --muted: #9b8fb0;
+  --border: #efe7fb;
+  --shadow-sm: 0 2px 10px rgba(170,140,210,.12);
+  --shadow-md: 0 8px 24px rgba(170,140,210,.18);
+}
+
+html, body {
+  font-family: 'Kanit', sans-serif;
+  color: var(--text);
+  background: linear-gradient(160deg, #fdeef7 0%, #f3edff 45%, #eafaf6 100%);
+  background-attachment: fixed;
+}
+
+#main-content { padding: 16px 14px 26px; }
+
+/* floating frosted pastel nav */
+#bottom-nav {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 24px rgba(170, 140, 210, 0.14);
+}
+.bn-item { color: var(--muted); }
+.bn-item.router-link-active,
+.bn-item.router-link-exact-active { color: var(--primary); }
+.bn-item.router-link-active .bn-icon { transform: translateY(-2px) scale(1.06); }
+
+/* soft cards + subtle page transition */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm); }
+.tab-content { animation: fadeup .25s ease; }
+@keyframes fadeup { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* help FAB → pastel gradient */
+.help-fab { background: linear-gradient(135deg, #c4a5f5, #f7a8c4) !important; }
