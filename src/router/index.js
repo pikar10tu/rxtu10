@@ -6,6 +6,7 @@ import StudyView    from '../views/StudyView.vue'
 import ShopView     from '../views/ShopView.vue'
 import RankView     from '../views/RankView.vue'
 import AdminView    from '../views/AdminView.vue'
+import MeView       from '../views/MeView.vue'
 
 const routes = [
     { path: '/',        name: 'home',    component: HomeView    },
@@ -15,6 +16,7 @@ const routes = [
     { path: '/shop',    name: 'shop',    component: ShopView    },
     { path: '/rank',    name: 'rank',    component: RankView    },
     { path: '/admin',   name: 'admin',   component: AdminView   },
+    { path: '/me',      name: 'me',      component: MeView      },
 ]
 
 export const router = createRouter({

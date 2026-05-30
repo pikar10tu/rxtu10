@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { residencePlots, getTier } from '../data/residence.js'
 import {
-  getCrop, cropsForSeedTier, effectiveGrowMs, fertilizerCost,
+  getCrop, cropsForSeedTier, growMs,
 } from '../data/crops.js'
 
 /**
@@ -36,7 +36,7 @@ export function useFarm() {
   function status(plot, now) {
     if (!plot) return { empty: true }
     const crop = getCrop(plot.seedId)
-    const total = effectiveGrowMs(plot)
+    const total = growMs(plot.seedId)
     const elapsed = now - (plot.plantedAt || now)
     const ready = elapsed >= total
     const progress = Math.max(0, Math.min(1, total ? elapsed / total : 1))
@@ -75,29 +75,9 @@ export function useFarm() {
       toast(`เหรียญไม่พอ! เมล็ด ${crop.name} ราคา ${crop.seedCost}🪙`, 'error'); return
     }
     const next = clonePlots()
-    next[i] = { seedId, plantedAt: Date.now(), watered: false, fertilized: false }
+    next[i] = { seedId, plantedAt: Date.now() }
     await commit(next, { coinDelta: -crop.seedCost })
     toast(`ปลูก ${crop.emoji} ${crop.name} แล้ว`, 'success')
-  }
-
-  async function water(i) {
-    const p = plots.value[i]
-    if (!p || p.watered) return
-    const next = clonePlots()
-    next[i] = { ...next[i], watered: true }
-    await commit(next)
-    toast('รดน้ำแล้ว 💧 (โตเร็วขึ้น)', 'success')
-  }
-
-  async function fertilize(i) {
-    const p = plots.value[i]
-    if (!p || p.fertilized) return
-    const cost = fertilizerCost(p.seedId)
-    if ((auth.userData?.coins || 0) < cost) { toast(`เหรียญไม่พอ! ปุ๋ย ${cost}🪙`, 'error'); return }
-    const next = clonePlots()
-    next[i] = { ...next[i], fertilized: true }
-    await commit(next, { coinDelta: -cost })
-    toast(`ใส่ปุ๋ยแล้ว 🌟 (−${cost}🪙)`, 'success')
   }
 
   async function harvest(i) {
@@ -139,7 +119,7 @@ export function useFarm() {
 
   return {
     level, plotCount, plots, inventory, seedChoices, maxTier,
-    status, fertilizerCost,
-    plant, water, fertilize, harvest, sell, sellAll,
+    status,
+    plant, harvest, sell, sellAll,
   }
 }

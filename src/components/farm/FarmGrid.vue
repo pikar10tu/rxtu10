@@ -25,12 +25,6 @@
           <template v-else>
             <div class="plot-bar"><div class="plot-fill" :style="{ width: (stat(plot).progress * 100) + '%' }"></div></div>
             <div class="plot-time">⏱ {{ fmt(stat(plot).remainingMs) }}</div>
-            <div class="plot-actions">
-              <button class="plot-mini" :disabled="plot.watered" @click="farm.water(i)">💧</button>
-              <button class="plot-mini" :disabled="plot.fertilized" @click="farm.fertilize(i)">
-                🌟<span class="plot-fertcost">{{ farm.fertilizerCost(plot.seedId) }}</span>
-              </button>
-            </div>
           </template>
         </template>
       </div>

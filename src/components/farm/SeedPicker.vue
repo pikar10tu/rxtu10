@@ -16,7 +16,7 @@
           <span class="sp-emoji">{{ c.emoji }}</span>
           <div class="sp-info">
             <div class="sp-name">{{ c.name }}</div>
-            <div class="sp-meta">⏱ {{ c.growMinutes }} นาที · ขายได้ {{ c.sellPrice.toLocaleString() }}🪙</div>
+            <div class="sp-meta">⏱ {{ growLabel(c) }} · ขายได้ {{ c.sellPrice.toLocaleString() }}🪙</div>
           </div>
           <span class="sp-cost" :class="{ no: coins < c.seedCost }">{{ c.seedCost.toLocaleString() }}🪙</span>
         </button>
@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+import { growLabel } from '../../data/crops.js'
 defineProps({
   open: Boolean,
   choices: { type: Array, default: () => [] },
