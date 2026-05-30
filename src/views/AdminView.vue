@@ -69,13 +69,32 @@
           </li>
         </ul>
       </section>
+
+      <!-- ───── รายงานการโกง (cheat logs) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span>🚨 รายงานการโกง</span>
+          <button class="btn-mini" :disabled="loadingLogs" @click="loadCheatLogs">
+            {{ loadingLogs ? '...' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">ค่าผิดปกติที่ระบบตรวจพบ (กันได้แค่หยาบๆ — ดูประกอบการพิจารณา)</div>
+        <div v-if="!cheatLogs.length" class="admin-empty">ยังไม่มีรายงาน 🎉</div>
+        <ul v-else class="log-list">
+          <li v-for="g in cheatLogs" :key="g.id" class="log-row">
+            <div class="log-main"><b>{{ g.name }}</b> · <span class="log-reason">{{ g.reason }}</span></div>
+            <div class="log-detail">{{ g.detail }}</div>
+            <div class="log-ts">{{ fmtTs(g.ts) }}</div>
+          </li>
+        </ul>
+      </section>
     </template>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc, updateDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
@@ -103,9 +122,28 @@ async function toggleTag(m, id) {
   }
 }
 
+const cheatLogs = ref([])
+const loadingLogs = ref(false)
+
 onMounted(() => {
-  if (authStore.isAdmin) reload()
+  if (authStore.isAdmin) { reload(); loadCheatLogs() }
 })
+
+async function loadCheatLogs() {
+  loadingLogs.value = true
+  try {
+    const snap = await getDocs(query(collection(db, 'cheatLogs'), orderBy('ts', 'desc'), limit(50)))
+    cheatLogs.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) {
+    console.error('[admin cheatLogs]', e)
+  } finally {
+    loadingLogs.value = false
+  }
+}
+function fmtTs(ts) {
+  const d = ts?.toDate ? ts.toDate() : null
+  return d ? d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'
+}
 
 function reload() {
   members.loadFbUsers()
@@ -245,4 +283,10 @@ async function setRole(m, role) {
 .btn-mini:disabled { opacity: .4; cursor: default; }
 .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
 .btn-gray { background: rgba(0, 0, 0, .08); color: rgba(0, 0, 0, .6); }
+.log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.log-row { padding: 8px 10px; border-radius: 10px; background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.18); }
+.log-main { font-size: .8rem; }
+.log-reason { color: #dc2626; font-weight: 700; font-size: .72rem; }
+.log-detail { font-size: .66rem; color: rgba(0,0,0,.5); }
+.log-ts { font-size: .58rem; color: rgba(0,0,0,.35); margin-top: 2px; }
 </style>

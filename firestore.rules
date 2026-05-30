@@ -53,10 +53,22 @@ service cloud.firestore {
           && request.resource.data.get('role', 'student') == resource.data.get('role', 'student')
           && request.resource.data.get('tags', []) == resource.data.get('tags', [])
           && request.resource.data.get('founder', false) == resource.data.get('founder', false)
+          // light anti-cheat: coins in sane range; residence level can't jump >1
           && request.resource.data.get('coins', 0) >= 0
+          && request.resource.data.get('coins', 0) <= 50000000
+          && request.resource.data.get('residence', {}).get('level', 1) >= 1
+          && request.resource.data.get('residence', {}).get('level', 1) <= 12
+          && request.resource.data.get('residence', {}).get('level', 1)
+             <= resource.data.get('residence', {}).get('level', 1) + 1
         )
       );
       allow delete: if isAdmin();
+    }
+
+    // ── Cheat logs — anyone may log themselves; only admin reads ──
+    match /cheatLogs/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read, update, delete: if isAdmin();
     }
 
     // ── News feed ──

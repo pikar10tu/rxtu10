@@ -30,9 +30,11 @@
 </template>
 
 <script setup>
+import { watch } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
 import { useHelp } from './composables/useHelp.js'
+import { runIntegrityCheck } from './composables/useGuard.js'
 import ToastContainer   from './components/layout/ToastContainer.vue'
 import ConfirmModal     from './components/layout/ConfirmModal.vue'
 import HelpModal        from './components/help/HelpModal.vue'
@@ -40,6 +42,9 @@ import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
 
 const authStore = useAuthStore()
 const { openHelp } = useHelp()
+
+// rough integrity trip-wire: scan user data when it loads/changes
+watch(() => authStore.userData, (d) => runIntegrityCheck(d), { immediate: true })
 </script>
 
 <style scoped>
