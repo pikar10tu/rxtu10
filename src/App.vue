@@ -2,30 +2,30 @@
   <div id="app-root">
     <div id="ticker-text" style="display:none"></div>
 
-    <main id="main-content">
-      <RouterView v-if="!authStore.loading" />
-      <div v-else class="loading-screen">กำลังโหลด...</div>
-    </main>
+    <div v-if="authStore.loading" class="loading-screen">กำลังโหลด...</div>
 
-    <nav id="bottom-nav">
-      <RouterLink to="/"        class="bn-item"><span class="bn-icon">🏠</span>Home</RouterLink>
-      <RouterLink to="/members" class="bn-item"><span class="bn-icon">👥</span>Members</RouterLink>
-      <RouterLink to="/play"    class="bn-item"><span class="bn-icon">🎮</span>Play</RouterLink>
-      <RouterLink to="/study"   class="bn-item"><span class="bn-icon">📚</span>Study</RouterLink>
-      <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
-    </nav>
+    <!-- Only admins see the live app while v2 is under construction;
+         everyone else gets the maintenance screen (and can't touch data). -->
+    <template v-else-if="authStore.isAdmin">
+      <main id="main-content"><RouterView /></main>
 
-    <button
-      v-if="authStore.isLoggedIn"
-      class="help-fab"
-      title="วิธีเล่น"
-      @click="openHelp"
-    >❓</button>
+      <nav id="bottom-nav">
+        <RouterLink to="/"        class="bn-item"><span class="bn-icon">🏠</span>Home</RouterLink>
+        <RouterLink to="/members" class="bn-item"><span class="bn-icon">👥</span>Members</RouterLink>
+        <RouterLink to="/play"    class="bn-item"><span class="bn-icon">🎮</span>Play</RouterLink>
+        <RouterLink to="/study"   class="bn-item"><span class="bn-icon">📚</span>Study</RouterLink>
+        <RouterLink to="/admin"   class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
+      </nav>
+
+      <button class="help-fab" title="วิธีเล่น" @click="openHelp">❓</button>
+      <HelpModal />
+      <MigrationWelcome />
+    </template>
+
+    <MaintenanceScreen v-else />
 
     <ToastContainer />
     <ConfirmModal />
-    <HelpModal />
-    <MigrationWelcome />
   </div>
 </template>
 
@@ -39,6 +39,7 @@ import ToastContainer   from './components/layout/ToastContainer.vue'
 import ConfirmModal     from './components/layout/ConfirmModal.vue'
 import HelpModal        from './components/help/HelpModal.vue'
 import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
+import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'
 
 const authStore = useAuthStore()
 const { openHelp } = useHelp()
