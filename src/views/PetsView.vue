@@ -22,6 +22,7 @@
           @click="sel = p.instId"
         >
           <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[p.grade] }}</span>
+          <span v-if="activeSet.has(p.instId)" class="pt-cell-star">⭐</span>
           <span v-if="(p.potential || []).length" class="pt-cell-pot">⚗️{{ p.potential.length }}</span>
           <span class="pt-cell-emoji">{{ p.emoji }}</span>
           <span class="pt-cell-name">{{ p.name }}</span>
@@ -50,6 +51,9 @@ const level = computed(() => authStore.userData?.residence?.level || 1)
 const storageCap = computed(() => residencePetStorage(level.value))
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
+const activeSet = computed(() => new Set(
+  (authStore.userData?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
+))
 
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
@@ -79,4 +83,5 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-name { font-size: .56rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pt-cell-grade { position: absolute; top: -5px; left: -5px; background: #1e293b; color: #fff; font-size: .54rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-pot { position: absolute; top: -5px; right: -5px; background: #7c3aed; color: #fff; font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 999px; border: 2px solid #fff; }
+.pt-cell-star { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
 </style>

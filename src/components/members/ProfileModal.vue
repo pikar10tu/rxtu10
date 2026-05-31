@@ -25,13 +25,15 @@
         <div class="pf-stat"><span>🐾</span><b>{{ (member.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
 
-      <!-- Tier 3: showcase pets (tap to see stats) -->
+      <!-- Tier 3: active team (tap to see stats) -->
+      <div class="pf-team-label">⭐ ทีม Active</div>
       <div v-if="showcase.length" class="pf-showcase">
         <button v-for="(p, i) in showcase" :key="p.instId || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
           {{ p.emoji }}
           <span v-if="p.grade > 0" class="pf-pet-g">{{ p.grade }}</span>
         </button>
       </div>
+      <div v-else class="pf-team-empty">ยังไม่ได้ตั้งทีม</div>
 
       <PetStatPopup :pet="petPopup" @close="petPopup = null" />
 
@@ -111,12 +113,12 @@ const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Gue
 const trackLabel = computed(() => (TRACK[props.member?.track]?.[0]) || 'สมาชิก')
 const trackColor = computed(() => (TRACK[props.member?.track]?.[1]) || '#6366f1')
 
-const SC_RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
-const showcase = computed(() =>
-  (props.member?.pets || []).slice().sort((a, b) =>
-    (SC_RANK[a.rarity] - SC_RANK[b.rarity]) || ((b.grade || 0) - (a.grade || 0))
-  ).slice(0, 24)
-)
+// active team only: resolve activePets (instId list) against their pets
+const showcase = computed(() => {
+  const pets = props.member?.pets || []
+  const ids = (props.member?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
+  return ids.map(id => pets.find(p => p.instId === id)).filter(Boolean)
+})
 const hasContact = computed(() => {
   const c = props.member?.contact || {}
   return !!(c.phone || c.ig || c.line)
@@ -156,7 +158,9 @@ const hasContact = computed(() => {
 .pf-stat span { font-size: 1rem; }
 .pf-stat b { display: block; font-size: 1.1rem; font-weight: 800; }
 .pf-stat small { font-size: .6rem; color: rgba(0,0,0,.45); }
-.pf-showcase { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 12px; border-top: 1px solid rgba(0,0,0,.06); max-height: 180px; overflow-y: auto; }
+.pf-team-label { font-size: .66rem; font-weight: 800; color: var(--muted, #9b8fb0); text-align: center; padding: 12px 0 0; border-top: 1px solid rgba(0,0,0,.06); }
+.pf-team-empty { text-align: center; font-size: .7rem; color: rgba(0,0,0,.35); padding: 8px 0 14px; }
+.pf-showcase { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px 12px 12px; max-height: 180px; overflow-y: auto; }
 .pf-pet { position: relative; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 12px; border: 2px solid #cbd5e1; background: rgba(0,0,0,.03); cursor: pointer; font-family: inherit; }
 .pf-pet:active { transform: scale(.92); }
 .pf-pet-g { position: absolute; top: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .5rem; font-weight: 800; padding: 0 4px; border-radius: 999px; border: 1.5px solid #fff; }

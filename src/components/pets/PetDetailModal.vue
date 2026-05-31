@@ -12,6 +12,11 @@
         </div>
       </div>
 
+      <!-- active team toggle -->
+      <button class="pd-active" :class="{ on: isActive }" :disabled="busy" @click="toggleActive">
+        {{ isActive ? '⭐ อยู่ในทีม Active (กดเพื่อเอาออก)' : `☆ ตั้งเป็นทีม Active (${activeList.length}/${battleSlots})` }}
+      </button>
+
       <!-- stats -->
       <div class="pd-stats">
         <div class="pd-stat"><span>⚔️</span><b>{{ atk }}</b><small>ATK</small></div>
@@ -66,6 +71,7 @@ import { useConfirm } from '../../composables/useConfirm.js'
 import { RARITY, GRADE_LABELS, GRADE_COPIES, petStats } from '../../data/index.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
 import { AFFIXES, slotsFor, rollCost, rollAffix, statBonusPct, affixMeta } from '../../data/potential.js'
+import { residenceBattleSlots } from '../../data/residence.js'
 
 const props = defineProps({ instId: { type: String, default: null } })
 defineEmits(['close'])
@@ -76,6 +82,29 @@ const { confirm } = useConfirm()
 const busy = ref(false)
 
 const pets = computed(() => auth.userData?.pets || [])
+
+// ── Active team ──
+const battleSlots = computed(() => residenceBattleSlots(auth.userData?.residence?.level || 1))
+const activeList = computed(() =>
+  (auth.userData?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
+)
+const isActive = computed(() => pet.value && activeList.value.includes(pet.value.instId))
+async function toggleActive() {
+  if (busy.value || !pet.value) return
+  const cur = activeList.value
+  let next
+  if (isActive.value) next = cur.filter(id => id !== pet.value.instId)
+  else {
+    if (cur.length >= battleSlots.value) { toast(`ทีม Active เต็ม (${battleSlots.value}) — เอาตัวอื่นออกก่อน`, 'info'); return }
+    next = [...cur, pet.value.instId]
+  }
+  busy.value = true
+  auth.blockSnapshot()
+  auth.setUserDataOptimistic({ activePets: next })
+  try { await updateDoc(doc(db, 'users', auth.currentUser.uid), { activePets: next }) }
+  catch (e) { console.error('[active]', e); toast('ตั้งทีมไม่สำเร็จ', 'error') }
+  finally { busy.value = false }
+}
 const pet = computed(() => pets.value.find(p => p.instId === props.instId) || null)
 
 const rc = computed(() => RARITY[pet.value?.rarity]?.color || '#94a3b8')
@@ -179,6 +208,9 @@ async function reroll(idx) {
 .pd-name { font-size: 1.2rem; font-weight: 800; margin-top: 2px; }
 .pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .pd-tag { background: rgba(255,255,255,.25); font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+.pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: none; border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: rgba(0,0,0,.06); color: rgba(0,0,0,.6); }
+.pd-active.on { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; }
+.pd-active:disabled { opacity: .6; }
 .pd-stats { display: flex; }
 .pd-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }
 .pd-stat:last-child { border-right: none; }
