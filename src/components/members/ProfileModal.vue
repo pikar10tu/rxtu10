@@ -110,23 +110,23 @@ const hasContact = computed(() => {
 
 <style scoped>
 .pm-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.pm-box { background: #fff; width: 100%; max-width: 360px; border-radius: 20px; overflow: hidden; max-height: 88vh; overflow-y: auto; }
+.pm-box { background: #fff; width: 100%; max-width: 400px; border-radius: 20px; overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pm-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }
 .pm-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pm-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; }
 .pm-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }
 .pm-real {
-  font-size: 1.25rem; font-weight: 800; margin-top: 8px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  font-size: 1.2rem; font-weight: 800; margin-top: 8px;
+  line-height: 1.25; padding: 0 6px; word-break: break-word;
 }
-.pm-name { font-size: .8rem; font-weight: 600; opacity: .85; }
+.pm-name { font-size: .82rem; font-weight: 600; opacity: .85; }
 .pm-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
 .pm-chip { font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; }
 .pm-chip.likes { background: rgba(255,255,255,.25); }
 .pm-chip.founder { background: rgba(0,0,0,.3); }
 .pm-residence {
-  font-size: .68rem; font-weight: 700; margin-top: 6px; opacity: .95;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95;
+  line-height: 1.3; padding: 0 6px;
 }
 .pm-chip.like {
   border: none; cursor: pointer; font-family: inherit; font-weight: 800;
