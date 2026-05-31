@@ -48,9 +48,9 @@
           </div>
         </div>
         <button v-if="(pet.potential || []).length < slots" class="pd-btn ok" :disabled="busy" @click="rollNew">
-          🎲 เปิดศักยภาพ · {{ cost.toLocaleString() }}🪙 + ตัวซ้ำเรท{{ rarityLabel }} 1
+          🎲 เปิดศักยภาพ · {{ cost.toLocaleString() }}🪙 + สังเวยเพ็ทเรท{{ rarityLabel }} 1 ตัว
         </button>
-        <div class="pd-note small">รีโรล/เปิด = สังเวยเพ็ทเรทเดียวกัน 1 ตัว + เหรียญ</div>
+        <div class="pd-note small">เปิด/รีโรล = สังเวยเพ็ท "เรทเดียวกัน" 1 ตัว (ไม่ต้องเป็นตัวซ้ำ) + เหรียญ</div>
       </div>
     </div>
   </div>

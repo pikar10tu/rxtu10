@@ -25,10 +25,15 @@
         <div class="pf-stat"><span>🐾</span><b>{{ (member.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
 
-      <!-- Tier 3: showcase pets -->
+      <!-- Tier 3: showcase pets (tap to see stats) -->
       <div v-if="showcase.length" class="pf-showcase">
-        <div v-for="(p, i) in showcase" :key="i" class="pf-pet" :class="'r-' + (p.rarity || 'common')">{{ p.emoji }}</div>
+        <button v-for="(p, i) in showcase" :key="p.instId || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
+          {{ p.emoji }}
+          <span v-if="p.grade > 0" class="pf-pet-g">{{ p.grade }}</span>
+        </button>
       </div>
+
+      <PetStatPopup :pet="petPopup" @close="petPopup = null" />
 
       <!-- Tier 4: contact (only filled rows) -->
       <div v-if="hasContact" class="pf-contact">
@@ -41,16 +46,19 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
 import { getTier } from '../../data/residence.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import TagChips from '../shared/TagChips.vue'
+import PetStatPopup from '../pets/PetStatPopup.vue'
 
 const props = defineProps({ member: { type: Object, default: null } })
 defineEmits(['close'])
+
+const petPopup = ref(null)
 
 const auth = useAuthStore()
 const { toast } = useToast()
@@ -103,7 +111,12 @@ const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Gue
 const trackLabel = computed(() => (TRACK[props.member?.track]?.[0]) || 'สมาชิก')
 const trackColor = computed(() => (TRACK[props.member?.track]?.[1]) || '#6366f1')
 
-const showcase = computed(() => (props.member?.pets || []).slice(0, 4))
+const SC_RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
+const showcase = computed(() =>
+  (props.member?.pets || []).slice().sort((a, b) =>
+    (SC_RANK[a.rarity] - SC_RANK[b.rarity]) || ((b.grade || 0) - (a.grade || 0))
+  ).slice(0, 24)
+)
 const hasContact = computed(() => {
   const c = props.member?.contact || {}
   return !!(c.phone || c.ig || c.line)
@@ -143,8 +156,10 @@ const hasContact = computed(() => {
 .pf-stat span { font-size: 1rem; }
 .pf-stat b { display: block; font-size: 1.1rem; font-weight: 800; }
 .pf-stat small { font-size: .6rem; color: rgba(0,0,0,.45); }
-.pf-showcase { display: flex; gap: 8px; justify-content: center; padding: 12px; border-top: 1px solid rgba(0,0,0,.06); }
-.pf-pet { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 12px; border: 2px solid #cbd5e1; background: rgba(0,0,0,.03); }
+.pf-showcase { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 12px; border-top: 1px solid rgba(0,0,0,.06); max-height: 180px; overflow-y: auto; }
+.pf-pet { position: relative; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 12px; border: 2px solid #cbd5e1; background: rgba(0,0,0,.03); cursor: pointer; font-family: inherit; }
+.pf-pet:active { transform: scale(.92); }
+.pf-pet-g { position: absolute; top: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .5rem; font-weight: 800; padding: 0 4px; border-radius: 999px; border: 1.5px solid #fff; }
 .pf-pet.r-rare { border-color: #60a5fa; }
 .pf-pet.r-epic { border-color: #c084fc; }
 .pf-pet.r-legendary { border-color: #fbbf24; }
