@@ -11,7 +11,7 @@
         <div class="pm-residence">{{ tier.art }} {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pm-chips">
           <span class="pm-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
-          <button class="pm-chip like" :class="{ on: likedToday }" :disabled="!canLike" @click="likeOnce">
+          <button class="pm-chip like" :class="{ on: likedToday }" @click="likeOnce">
             {{ likedToday ? '❤️' : '🤍' }} {{ member.likes || 0 }}
           </button>
         </div>
@@ -64,15 +64,16 @@ const today = () => new Date().toDateString()
 const likedToday = computed(() =>
   !!(props.member?.likedBy && myUid.value && props.member.likedBy[myUid.value] === today())
 )
-const canLike = computed(() =>
-  !!myUid.value && props.member?.registered !== false &&
-  props.member?.uid && props.member.uid !== myUid.value &&
-  !String(props.member.uid).startsWith('static_')
-)
 async function likeOnce() {
-  if (!canLike.value) return
-  if (likedToday.value) { toast('ไลก์เพื่อนคนนี้วันนี้แล้ว เดี๋ยวพรุ่งนี้มาใหม่!', 'info'); return }
   const m = props.member
+  if (!m) return
+  if (!myUid.value) { toast('ต้องเข้าสู่ระบบก่อน', 'info'); return }
+  if (m.registered === false || String(m.uid).startsWith('static_')) {
+    toast('เพื่อนคนนี้ยังไม่เข้าระบบ ไลก์ไม่ได้', 'info'); return
+  }
+  if (m.uid === myUid.value) { toast('ไลก์ตัวเองไม่ได้นะ 😅', 'info'); return }
+  if (likedToday.value) { toast('ไลก์เพื่อนคนนี้วันนี้แล้ว เดี๋ยวพรุ่งนี้มาใหม่!', 'info'); return }
+
   const d = today()
   // optimistic
   if (!m.likedBy) m.likedBy = {}
@@ -83,9 +84,10 @@ async function likeOnce() {
       likes: increment(1),
       [`likedBy.${myUid.value}`]: d,
     })
+    toast('ส่งหัวใจให้แล้ว ❤️', 'success')
   } catch (e) {
     console.error('[like]', e)
-    toast('กดไลก์ไม่สำเร็จ', 'error')
+    toast('กดไลก์ไม่สำเร็จ (สิทธิ์)', 'error')
   }
 }
 
@@ -116,8 +118,8 @@ const hasContact = computed(() => {
 .pm-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; }
 .pm-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }
 .pm-real {
-  font-size: 1.2rem; font-weight: 800; margin-top: 8px;
-  line-height: 1.25; padding: 0 6px; word-break: break-word;
+  font-size: 1.1rem; font-weight: 800; margin-top: 8px; padding: 0 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 .pm-name { font-size: .82rem; font-weight: 600; opacity: .85; }
 .pm-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
@@ -125,8 +127,8 @@ const hasContact = computed(() => {
 .pm-chip.likes { background: rgba(255,255,255,.25); }
 .pm-chip.founder { background: rgba(0,0,0,.3); }
 .pm-residence {
-  font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95;
-  line-height: 1.3; padding: 0 6px;
+  font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95; padding: 0 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 .pm-chip.like {
   border: none; cursor: pointer; font-family: inherit; font-weight: 800;
