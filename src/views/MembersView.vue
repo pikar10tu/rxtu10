@@ -70,8 +70,8 @@ const registeredCount = computed(() => roster.value.filter(m => m.registered).le
 
 const FILTERS = [
   { key: 'all', label: 'ทั้งหมด' },
-  { key: 'sci', label: 'วิทย์' },
-  { key: 'care', label: 'บริบาล' },
+  { key: 'sci', label: 'Sci' },
+  { key: 'care', label: 'Care' },
 ]
 
 const list = computed(() => {
@@ -87,7 +87,7 @@ const list = computed(() => {
   )
 })
 
-const TRACK = { sci: ['วิทย์', '#22c55e'], care: ['บริบาล', '#3b82f6'], guest: ['เกสต์', '#9ca3af'] }
+const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
 const trackLabel = (t) => TRACK[t]?.[0] || 'สมาชิก'
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor

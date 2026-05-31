@@ -13,6 +13,7 @@
           <ResidenceBadge :level="lvl" />
           <span class="pm-chip likes">❤️ {{ member.likes || 0 }}</span>
         </div>
+        <div class="pm-residence">{{ tier.art }} {{ tier.tierName }}</div>
         <div class="pm-chips" style="margin-top:5px"><TagChips :member="member" /></div>
       </div>
 
@@ -58,7 +59,7 @@ const heroStyle = computed(() => ({
   background: `linear-gradient(135deg, ${tier.value.frameColor}, ${tier.value.frameColor}99)`,
 }))
 
-const TRACK = { sci: ['สายวิทย์', '#22c55e'], care: ['บริบาล', '#3b82f6'], guest: ['เกสต์', '#9ca3af'] }
+const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
 const trackLabel = computed(() => (TRACK[props.member?.track]?.[0]) || 'สมาชิก')
 const trackColor = computed(() => (TRACK[props.member?.track]?.[1]) || '#6366f1')
 
@@ -82,6 +83,7 @@ const hasContact = computed(() => {
 .pm-chip { font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; }
 .pm-chip.likes { background: rgba(255,255,255,.25); }
 .pm-chip.founder { background: rgba(0,0,0,.3); }
+.pm-residence { font-size: .74rem; font-weight: 700; margin-top: 8px; opacity: .95; }
 .pm-stats { display: flex; }
 .pm-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }
 .pm-stat:last-child { border-right: none; }

@@ -12,15 +12,11 @@
       <div class="me-avatar-row">
         <img class="me-avatar" :src="previewPhoto" alt="me" />
         <div class="me-av-actions">
+          <div class="me-nick">{{ auth.userData?.nickname || 'ฉัน' }}</div>
           <button class="me-btn-sm" @click="fileEl?.click()">📷 เปลี่ยนรูป</button>
-          <button v-if="newPhoto || auth.userData?.customPhoto" class="me-btn-sm ghost" @click="useGoogle">ใช้รูป Google</button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
         </div>
       </div>
-
-      <!-- editable fields -->
-      <label class="me-label">ชื่อเล่น</label>
-      <input v-model="nickname" class="me-input" maxlength="24" placeholder="ชื่อเล่น" />
 
       <label class="me-label">ข้อมูลติดต่อ</label>
       <div class="me-contact">
@@ -57,14 +53,12 @@ const { toast } = useToast()
 
 const fileEl = ref(null)
 const newPhoto = ref(null)   // freshly picked (base64) before save
-const nickname = ref('')
 const phone = ref(''); const ig = ref(''); const line = ref('')
 const saving = ref(false)
 
-// populate form from userData (loads async)
+// populate contact form from userData (loads async)
 function fill(u) {
   if (!u) return
-  nickname.value = u.nickname || ''
   phone.value = u.contact?.phone || ''
   ig.value = u.contact?.ig || ''
   line.value = u.contact?.line || ''
@@ -73,7 +67,7 @@ watch(() => auth.userData, fill, { immediate: true })
 
 const previewPhoto = computed(() =>
   newPhoto.value || auth.userData?.customPhoto || auth.userData?.googlePhoto ||
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(nickname.value || '?')}&size=160&background=random`
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(auth.userData?.nickname || '?')}&size=160&background=random`
 )
 
 function onFile(e) {
@@ -96,17 +90,13 @@ function onFile(e) {
   reader.readAsDataURL(file)
 }
 
-function useGoogle() { newPhoto.value = '__GOOGLE__' }  // sentinel: clear custom photo on save
-
 async function save() {
   if (!auth.currentUser) return
   saving.value = true
   const patch = {
-    nickname: nickname.value.trim() || auth.userData?.nickname || '',
     contact: { phone: phone.value.trim(), ig: ig.value.trim(), line: line.value.trim() },
   }
-  if (newPhoto.value === '__GOOGLE__') patch.customPhoto = null
-  else if (newPhoto.value) patch.customPhoto = newPhoto.value
+  if (newPhoto.value) patch.customPhoto = newPhoto.value
 
   auth.blockSnapshot()
   auth.setUserDataOptimistic(patch)
@@ -130,6 +120,7 @@ async function save() {
 .me-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
 .me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary, #b58df1); background: #eee; }
 .me-av-actions { display: flex; flex-direction: column; gap: 6px; }
+.me-nick { font-size: 1rem; font-weight: 800; color: var(--text, #4a3f5e); }
 .me-btn-sm { border: none; background: var(--primary-light, #f4edff); color: var(--primary, #b58df1); border-radius: 9px; padding: 7px 12px; font-family: inherit; font-size: .76rem; font-weight: 700; cursor: pointer; }
 .me-btn-sm.ghost { background: rgba(0,0,0,.05); color: rgba(0,0,0,.5); }
 .me-label { display: block; font-size: .72rem; font-weight: 700; color: var(--muted, #9b8fb0); margin: 14px 0 6px; }
