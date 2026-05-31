@@ -61,6 +61,12 @@ service cloud.firestore {
           && request.resource.data.get('residence', {}).get('level', 1)
              <= resource.data.get('residence', {}).get('level', 1) + 1
         )
+        // anyone logged in may toggle likes on ANY profile (only these fields)
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy'])
+          && request.resource.data.likes is int
+          && request.resource.data.likes >= 0
+        )
       );
       allow delete: if isAdmin();
     }

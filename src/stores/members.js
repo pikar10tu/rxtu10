@@ -52,6 +52,7 @@ export const useMembersStore = defineStore('members', () => {
                     customPhoto: x.customPhoto,
                     contact: x.contact || {},
                     likes: x.likes || 0,
+                    likedBy: x.likedBy || {},
                 }
                 if (x.track === 'guest') guests.push(light)
                 else if (x.studentId) newFb[x.studentId] = light
