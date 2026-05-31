@@ -118,17 +118,17 @@ const hasContact = computed(() => {
 .pm-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; }
 .pm-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }
 .pm-real {
-  font-size: 1.1rem; font-weight: 800; margin-top: 8px; padding: 0 10px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  font-size: 1.15rem; font-weight: 800; margin-top: 8px; padding: 0 14px;
+  line-height: 1.25;
 }
-.pm-name { font-size: .82rem; font-weight: 600; opacity: .85; }
+.pm-name { font-size: .82rem; font-weight: 600; opacity: .85; margin-top: 1px; }
 .pm-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
 .pm-chip { font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; }
 .pm-chip.likes { background: rgba(255,255,255,.25); }
 .pm-chip.founder { background: rgba(0,0,0,.3); }
 .pm-residence {
-  font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95; padding: 0 10px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95; padding: 0 14px;
+  line-height: 1.3;
 }
 .pm-chip.like {
   border: none; cursor: pointer; font-family: inherit; font-weight: 800;
