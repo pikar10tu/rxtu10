@@ -13,22 +13,26 @@
 export const RESIDENCE_TIERS = [
   // lvl, name, art, upgradeCost, dailyIncome, plots, petStorage, battleSlots,
   //      market, maxSeedTier, shopDiscountPct, eggSlots, frameColor
-  { level: 1,  tierName: 'นอนกลางแจ้ง',  art: '📰', upgradeCost: 0,         dailyIncome: 150,    plots: 4,  petStorage: 20, battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',    shopDiscountPct: 0,  eggSlots: 2, frameColor: '#9ca3af' },
+  { level: 1,  tierName: 'นอนข้างถนน',  art: '📰', upgradeCost: 0,         dailyIncome: 150,    plots: 4,  petStorage: 20, battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',    shopDiscountPct: 0,  eggSlots: 2, frameColor: '#9ca3af' },
   { level: 2,  tierName: 'กล่องกระดาษ',   art: '📦', upgradeCost: 700,      dailyIncome: 250,    plots: 5,  petStorage: 25, battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',    shopDiscountPct: 0,  eggSlots: 2, frameColor: '#a8a29e' },
-  { level: 3,  tierName: 'เต็นท์ผ้าใบ',    art: '⛺', upgradeCost: 1800,      dailyIncome: 400,    plots: 6,  petStorage: 30, battleSlots: 1, marketUnlocked: false, maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 2, frameColor: '#84cc16' },
-  { level: 4,  tierName: 'กระท่อม',        art: '🛖', upgradeCost: 4000,      dailyIncome: 650,    plots: 6,  petStorage: 35, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 3, frameColor: '#22c55e' },
-  { level: 5,  tierName: 'บ้านไม้',        art: '🏠', upgradeCost: 8000,     dailyIncome: 1000,   plots: 7,  petStorage: 40, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 3, frameColor: '#14b8a6' },
-  { level: 6,  tierName: 'คฤหาสน์',        art: '🏛️', upgradeCost: 16000,     dailyIncome: 1500,   plots: 8,  petStorage: 45, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 3,  eggSlots: 3, frameColor: '#06b6d4' },
-  { level: 7,  tierName: 'ปราสาท',        art: '🏰', upgradeCost: 32000,     dailyIncome: 2200,   plots: 8,  petStorage: 50, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 3,  eggSlots: 4, frameColor: '#3b82f6' },
-  { level: 8,  tierName: 'วัง',    art: '🏯', upgradeCost: 58000,    dailyIncome: 3200,   plots: 9,  petStorage: 55, battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 5,  eggSlots: 4, frameColor: '#6366f1' },
-  { level: 9,  tierName: 'เกาะส่วนตัว',       art: '🏝️', upgradeCost: 105000,    dailyIncome: 4500,   plots: 10, petStorage: 60, battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 5,  eggSlots: 4, frameColor: '#8b5cf6' },
-  { level: 10, tierName: 'เมืองส่วนตัว',        art: '🏙️', upgradeCost: 190000,    dailyIncome: 6000,   plots: 10, petStorage: 65, battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 7,  eggSlots: 5, frameColor: '#a855f7' },
-  { level: 11, tierName: 'วังลอยฟ้า',       art: '🌇', upgradeCost: 350000,   dailyIncome: 8000,   plots: 11, petStorage: 70, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', shopDiscountPct: 8,  eggSlots: 5, frameColor: '#ec4899' },
-  { level: 12, tierName: 'อาณาจักรอวกาศ',         art: '🚀', upgradeCost: 650000,   dailyIncome: 12000,  plots: 12, petStorage: 75, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', shopDiscountPct: 10, eggSlots: 6, frameColor: '#f59e0b' },
+  { level: 3,  tierName: 'เต็นท์',    art: '⛺', upgradeCost: 1800,      dailyIncome: 400,    plots: 6,  petStorage: 30, battleSlots: 1, marketUnlocked: false, maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 2, frameColor: '#84cc16' },
+  { level: 4,  tierName: 'เพิงพัก',        art: '🛖', upgradeCost: 4000,      dailyIncome: 650,    plots: 6,  petStorage: 35, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 3, frameColor: '#22c55e' },
+  { level: 5,  tierName: 'กระท่อมไม้',        art: '🏚️', upgradeCost: 8000,     dailyIncome: 1000,   plots: 7,  petStorage: 40, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 3, frameColor: '#14b8a6' },
+  { level: 6,  tierName: 'บ้านหลังเล็ก',        art: '🏠', upgradeCost: 16000,     dailyIncome: 1500,   plots: 8,  petStorage: 45, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 3,  eggSlots: 3, frameColor: '#06b6d4' },
+  { level: 7,  tierName: 'บ้านพร้อมสวน',        art: '🏡', upgradeCost: 32000,     dailyIncome: 2200,   plots: 8,  petStorage: 50, battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 3,  eggSlots: 4, frameColor: '#3b82f6' },
+  { level: 8,  tierName: 'ทาวน์โฮมหรู',    art: '🏘️', upgradeCost: 58000,    dailyIncome: 3200,   plots: 9,  petStorage: 55, battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 5,  eggSlots: 4, frameColor: '#6366f1' },
+  { level: 9,  tierName: 'คฤหาสน์',       art: '🏛️', upgradeCost: 105000,    dailyIncome: 4500,   plots: 10, petStorage: 60, battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 5,  eggSlots: 4, frameColor: '#8b5cf6' },
+  { level: 10, tierName: 'วิลล่าหรู',        art: '🏨', upgradeCost: 190000,    dailyIncome: 6000,   plots: 10, petStorage: 65, battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 7,  eggSlots: 5, frameColor: '#a855f7' },
+  { level: 11, tierName: 'ปราสาท',       art: '🏰', upgradeCost: 350000,   dailyIncome: 8000,   plots: 11, petStorage: 70, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', shopDiscountPct: 8,  eggSlots: 5, frameColor: '#ec4899' },
+  { level: 12, tierName: 'พระราชวัง',         art: '🏯', upgradeCost: 650000,   dailyIncome: 12000,  plots: 12, petStorage: 75, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', shopDiscountPct: 10, eggSlots: 6, frameColor: '#f59e0b' },
+  // ── planned (not released; MAX_RESIDENCE_LEVEL caps play at 12) ──
+  { level: 13, tierName: 'ปราสาทคริสตัล',  art: '💎', upgradeCost: 1100000, dailyIncome: 16000, plots: 13, petStorage: 80, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', shopDiscountPct: 12, eggSlots: 7, frameColor: '#f43f5e' },
+  { level: 14, tierName: 'วิมานสวรรค์',    art: '🌌', upgradeCost: 1900000, dailyIncome: 21000, plots: 14, petStorage: 85, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', shopDiscountPct: 14, eggSlots: 7, frameColor: '#a21caf' },
+  { level: 15, tierName: 'มหานครเหนือเมฆ', art: '👑', upgradeCost: 3200000, dailyIncome: 28000, plots: 15, petStorage: 90, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', shopDiscountPct: 15, eggSlots: 8, frameColor: '#fbbf24' },
 ]
 
 export const MIN_RESIDENCE_LEVEL = 1
-export const MAX_RESIDENCE_LEVEL = RESIDENCE_TIERS.length // 12
+export const MAX_RESIDENCE_LEVEL = 12 // released cap (array defines 15 for future tiers)
 
 // ── Lookups (all clamp the level into range, accept missing/undefined) ──
 export function clampLevel(level) {
