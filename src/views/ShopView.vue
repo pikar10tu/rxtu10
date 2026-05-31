@@ -1,10 +1,130 @@
-﻿<template>
+<template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:4px">🛒 Shop</div>
-    <div style="font-size:0.72rem;color:rgba(255,255,255,.4)">— กำลังพัฒนา —</div>
+    <div class="shop-head">
+      <div style="font-size:1.1rem;font-weight:800">🛒 Shop</div>
+      <span class="shop-coins">{{ coins.toLocaleString() }} 🪙</span>
+    </div>
+
+    <template v-if="authStore.isLoggedIn">
+      <div class="shop-storage">
+        🐾 คลังเพ็ท {{ pets.length }}/{{ storageCap }}
+        <span v-if="discount" class="shop-disc">· ส่วนลดร้าน −{{ discount }}%</span>
+      </div>
+
+      <div class="egg-list">
+        <div v-for="egg in EGG_TYPES" :key="egg.id" class="egg-card">
+          <div class="egg-emoji">{{ egg.emoji }}</div>
+          <div class="egg-info">
+            <div class="egg-name">{{ egg.name }}</div>
+            <div class="egg-desc">{{ egg.desc }}</div>
+            <div class="egg-rates">
+              <span v-for="r in rarityList(egg)" :key="r.key" :style="{ color: r.color }">{{ r.label }} {{ r.pct }}%</span>
+            </div>
+          </div>
+          <button class="egg-buy" :class="{ ok: coins >= price(egg) }" @click="buy(egg)">
+            {{ price(egg).toLocaleString() }}🪙
+          </button>
+        </div>
+      </div>
+
+      <div class="shop-note">ซื้อแล้วได้เพ็ทเข้าคลังทันที · คลังเต็มต้องขาย/ย้ายก่อน</div>
+    </template>
+    <div v-else class="shop-login">เข้าสู่ระบบเพื่อช้อป</div>
+
+    <!-- reveal modal -->
+    <div v-if="reveal" class="rv-ov" @click.self="reveal = null">
+      <div class="rv-box">
+        <div class="rv-label">คุณได้รับ!</div>
+        <div class="rv-emoji" :style="{ filter: `drop-shadow(0 0 16px ${rarityColor(reveal.rarity)})` }">{{ reveal.emoji }}</div>
+        <div class="rv-name">{{ reveal.name }}</div>
+        <div class="rv-rarity" :style="{ background: rarityColor(reveal.rarity) }">{{ rarityLabel(reveal.rarity) }}</div>
+        <button class="rv-ok" @click="reveal = null">เยี่ยม!</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-// TODO: implement ShopView
+import { computed, ref } from 'vue'
+import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore'
+import { db } from '../firebase/config.js'
+import { useAuthStore } from '../stores/auth.js'
+import { useToast } from '../composables/useToast.js'
+import { EGG_TYPES, rollPetFromEgg } from '../data/shop.js'
+import { RARITY } from '../data/index.js'
+import { residencePetStorage, residenceShopDiscount } from '../data/residence.js'
+
+const authStore = useAuthStore()
+const { toast } = useToast()
+
+const coins = computed(() => authStore.userData?.coins || 0)
+const pets = computed(() => authStore.userData?.pets || [])
+const level = computed(() => authStore.userData?.residence?.level || 1)
+const storageCap = computed(() => residencePetStorage(level.value))
+const discount = computed(() => residenceShopDiscount(level.value))
+
+const reveal = ref(null)
+const buying = ref(false)
+
+const price = (egg) => Math.round(egg.cost * (1 - discount.value / 100))
+const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
+const rarityLabel = (r) => RARITY[r]?.label || r
+function rarityList(egg) {
+  return ['common', 'rare', 'epic', 'legendary']
+    .filter(k => (egg.rates[k] || 0) > 0)
+    .map(k => ({ key: k, pct: egg.rates[k], color: RARITY[k]?.color, label: RARITY[k]?.label }))
+}
+
+async function buy(egg) {
+  if (buying.value) return
+  const cost = price(egg)
+  if (coins.value < cost) { toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}🪙`, 'error'); return }
+  if (pets.value.length >= storageCap.value) {
+    toast(`คลังเพ็ทเต็ม (${storageCap.value}) — ขาย/ย้ายก่อน หรืออัปที่อยู่อาศัย`, 'info'); return
+  }
+  buying.value = true
+  const pet = rollPetFromEgg(egg.id)
+  authStore.blockSnapshot()
+  authStore.setUserDataOptimistic({ coins: coins.value - cost, pets: [...pets.value, pet] })
+  try {
+    await updateDoc(doc(db, 'users', authStore.currentUser.uid), {
+      coins: increment(-cost),
+      pets: arrayUnion(pet),
+    })
+    reveal.value = pet
+  } catch (e) {
+    console.error('[shop buy]', e)
+    toast('ซื้อไม่สำเร็จ', 'error')
+  } finally {
+    buying.value = false
+  }
+}
 </script>
+
+<style scoped>
+.shop-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.shop-coins { font-size: 1rem; font-weight: 800; color: #b45309; }
+.shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
+.shop-disc { color: #059669; font-weight: 700; }
+.egg-list { display: flex; flex-direction: column; gap: 10px; }
+.egg-card { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--border, #efe7fb); border-radius: 16px; padding: 12px; box-shadow: 0 2px 10px rgba(170,140,210,.1); }
+.egg-emoji { font-size: 2.2rem; flex-shrink: 0; }
+.egg-info { flex: 1; min-width: 0; }
+.egg-name { font-weight: 800; font-size: .92rem; }
+.egg-desc { font-size: .64rem; color: rgba(0,0,0,.5); margin: 1px 0 4px; }
+.egg-rates { display: flex; flex-wrap: wrap; gap: 6px; font-size: .6rem; font-weight: 700; }
+.egg-buy { flex-shrink: 0; border: none; border-radius: 11px; padding: 10px 12px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: rgba(0,0,0,.25); cursor: pointer; }
+.egg-buy.ok { background: linear-gradient(135deg, #c4a5f5, #f7a8c4); }
+.egg-buy.ok:active { transform: scale(.97); }
+.shop-note { font-size: .64rem; color: rgba(0,0,0,.4); text-align: center; margin-top: 14px; }
+.shop-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
+/* reveal */
+.rv-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.rv-box { background: #fff; border-radius: 22px; padding: 28px 24px; text-align: center; max-width: 300px; width: 100%; animation: rv-pop .25s ease; }
+@keyframes rv-pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.rv-label { font-size: .8rem; color: rgba(0,0,0,.5); }
+.rv-emoji { font-size: 4.5rem; margin: 8px 0; }
+.rv-name { font-size: 1.2rem; font-weight: 800; }
+.rv-rarity { display: inline-block; color: #fff; font-size: .64rem; font-weight: 800; padding: 3px 12px; border-radius: 999px; margin-top: 8px; }
+.rv-ok { display: block; width: 100%; margin-top: 18px; border: none; border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: linear-gradient(135deg, #c4a5f5, #f7a8c4); cursor: pointer; }
+</style>
