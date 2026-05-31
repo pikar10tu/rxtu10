@@ -11,8 +11,8 @@
         <div class="pm-residence">{{ tier.art }} {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pm-chips">
           <span class="pm-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
-          <button class="pm-chip like" :class="{ on: liked }" :disabled="!canLike" @click="toggleLike">
-            {{ liked ? '❤️' : '🤍' }} {{ member.likes || 0 }}
+          <button class="pm-chip like" :class="{ on: likedToday }" :disabled="!canLike" @click="likeOnce">
+            {{ likedToday ? '❤️' : '🤍' }} {{ member.likes || 0 }}
           </button>
         </div>
         <div class="pm-chips" style="margin-top:5px"><TagChips :member="member" /></div>
@@ -42,7 +42,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { doc, updateDoc, increment, deleteField } from 'firebase/firestore'
+import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
 import { getTier } from '../../data/residence.js'
 import { useAuthStore } from '../../stores/auth.js'
@@ -58,26 +58,30 @@ const { toast } = useToast()
 const lvl  = computed(() => props.member?.residence?.level || 1)
 const tier = computed(() => getTier(lvl.value))
 
-// ── Likes ──
+// ── Likes (daily: +1 per person per day, never decreases, no unlike) ──
 const myUid = computed(() => auth.currentUser?.uid)
-const liked = computed(() => !!(props.member?.likedBy && myUid.value && props.member.likedBy[myUid.value]))
+const today = () => new Date().toDateString()
+const likedToday = computed(() =>
+  !!(props.member?.likedBy && myUid.value && props.member.likedBy[myUid.value] === today())
+)
 const canLike = computed(() =>
   !!myUid.value && props.member?.registered !== false &&
   props.member?.uid && props.member.uid !== myUid.value &&
   !String(props.member.uid).startsWith('static_')
 )
-async function toggleLike() {
+async function likeOnce() {
   if (!canLike.value) return
+  if (likedToday.value) { toast('ไลก์เพื่อนคนนี้วันนี้แล้ว เดี๋ยวพรุ่งนี้มาใหม่!', 'info'); return }
   const m = props.member
-  const add = !liked.value
+  const d = today()
   // optimistic
   if (!m.likedBy) m.likedBy = {}
-  if (add) { m.likedBy[myUid.value] = true; m.likes = (m.likes || 0) + 1 }
-  else { delete m.likedBy[myUid.value]; m.likes = Math.max(0, (m.likes || 0) - 1) }
+  m.likedBy[myUid.value] = d
+  m.likes = (m.likes || 0) + 1
   try {
     await updateDoc(doc(db, 'users', m.uid), {
-      likes: increment(add ? 1 : -1),
-      [`likedBy.${myUid.value}`]: add ? true : deleteField(),
+      likes: increment(1),
+      [`likedBy.${myUid.value}`]: d,
     })
   } catch (e) {
     console.error('[like]', e)
