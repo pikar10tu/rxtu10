@@ -19,6 +19,9 @@
       <ResidenceCard />
     </template>
 
+    <!-- กระดานข่าว (เห็นได้ทุกคน) -->
+    <NewsBoard />
+
     <!-- ทางเข้า Shop / Rank (ย้ายมาจากเมนูล่าง) -->
     <div class="home-shortcuts">
       <RouterLink to="/shop" class="home-shortcut">
@@ -41,6 +44,7 @@ import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
+import NewsBoard from '../components/home/NewsBoard.vue'
 
 const authStore = useAuthStore()
 const myAvatar = computed(() =>

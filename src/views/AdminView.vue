@@ -70,6 +70,23 @@
         </ul>
       </section>
 
+      <!-- ───── กระดานข่าว ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span>📢 กระดานข่าว</span></div>
+        <div class="admin-hint">โพสต์ประกาศ — ทุกคนจะเห็นบนหน้า Home</div>
+        <div class="news-form">
+          <input v-model="newsIcon" class="news-icon-in" maxlength="2" />
+          <input v-model="newsMsg" class="admin-search" style="margin:0;flex:1" placeholder="ข้อความข่าว…" @keyup.enter="postNews" />
+          <button class="btn-mini btn-gold" :disabled="postingNews || !newsMsg.trim()" @click="postNews">โพสต์</button>
+        </div>
+        <ul v-if="newsList.length" class="news-admin-list">
+          <li v-for="n in newsList" :key="n.id" class="news-admin-row">
+            <span>{{ n.icon }} {{ n.msg }}</span>
+            <button class="news-del" @click="delNews(n.id)">🗑️</button>
+          </li>
+        </ul>
+      </section>
+
       <!-- ───── รายงานการโกง (cheat logs) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -94,7 +111,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { doc, updateDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
+import { doc, updateDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
@@ -126,7 +143,7 @@ const cheatLogs = ref([])
 const loadingLogs = ref(false)
 
 onMounted(() => {
-  if (authStore.isAdmin) { reload(); loadCheatLogs() }
+  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews() }
 })
 
 async function loadCheatLogs() {
@@ -143,6 +160,35 @@ async function loadCheatLogs() {
 function fmtTs(ts) {
   const d = ts?.toDate ? ts.toDate() : null
   return d ? d.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'
+}
+
+// ── News board ──
+const newsIcon = ref('📢')
+const newsMsg = ref('')
+const newsList = ref([])
+const postingNews = ref(false)
+
+async function loadNews() {
+  try {
+    const snap = await getDocs(query(collection(db, 'news'), orderBy('ts', 'desc'), limit(20)))
+    newsList.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[admin news]', e) }
+}
+async function postNews() {
+  const msg = newsMsg.value.trim()
+  if (!msg) return
+  postingNews.value = true
+  try {
+    await addDoc(collection(db, 'news'), { icon: newsIcon.value || '📢', msg, ts: serverTimestamp() })
+    newsMsg.value = ''
+    await loadNews()
+    toast('โพสต์ข่าวแล้ว', 'success')
+  } catch (e) { console.error('[post news]', e); toast('โพสต์ไม่สำเร็จ', 'error') }
+  finally { postingNews.value = false }
+}
+async function delNews(id) {
+  try { await deleteDoc(doc(db, 'news', id)); newsList.value = newsList.value.filter(n => n.id !== id) }
+  catch (e) { console.error('[del news]', e); toast('ลบไม่สำเร็จ', 'error') }
 }
 
 function reload() {
@@ -289,4 +335,10 @@ async function setRole(m, role) {
 .log-reason { color: #dc2626; font-weight: 700; font-size: .72rem; }
 .log-detail { font-size: .66rem; color: rgba(0,0,0,.5); }
 .log-ts { font-size: .58rem; color: rgba(0,0,0,.35); margin-top: 2px; }
+.news-form { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+.news-icon-in { width: 42px; text-align: center; padding: 8px 0; border: 1px solid rgba(0,0,0,.12); border-radius: 10px; font-family: inherit; font-size: 1rem; }
+.news-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.news-admin-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; background: rgba(0,0,0,.03); font-size: .76rem; }
+.news-admin-row span { flex: 1; word-break: break-word; }
+.news-del { border: none; background: none; cursor: pointer; font-size: .9rem; flex-shrink: 0; }
 </style>
