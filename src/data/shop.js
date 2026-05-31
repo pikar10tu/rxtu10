@@ -11,17 +11,17 @@ import { PETS } from './index.js'
 
 export const EGG_TYPES = [
   { id: 'common', name: 'ไข่ธรรมดา', emoji: '🥚', cost: 150,
-    rates: { common: 70, rare: 25, epic: 5,  legendary: 0  },
-    desc: 'ลุ้นเพ็ททั่วไป โอกาสได้ของดีบ้างเล็กน้อย' },
-  { id: 'silver', name: 'ไข่เงิน',   emoji: '🩵', cost: 1800,
-    rates: { common: 30, rare: 45, epic: 20, legendary: 5  },
-    desc: 'เน้นแรร์ขึ้นไป มีลุ้นตำนาน 5%' },
-  { id: 'gold',   name: 'ไข่ทอง',    emoji: '🌟', cost: 7000,
-    rates: { common: 0,  rare: 30, epic: 50, legendary: 20 },
+    rates: { common: 72, rare: 24, epic: 4,  legendary: 0  },
+    desc: 'ราคาถูก ซื้อรัวๆ เก็บตัวซ้ำไปวิวัฒน์ในห้องทดลอง' },
+  { id: 'silver', name: 'ไข่เงิน',   emoji: '🩵', cost: 2000,
+    rates: { common: 25, rare: 50, epic: 22, legendary: 3  },
+    desc: 'เน้นแรร์ มีลุ้นอิพิค/ตำนาน' },
+  { id: 'gold',   name: 'ไข่ทอง',    emoji: '🌟', cost: 8000,
+    rates: { common: 0,  rare: 28, epic: 52, legendary: 20 },
     desc: 'การันตีแรร์ขึ้นไป ลุ้นตำนาน 20%' },
-  { id: 'legend', name: 'ไข่ตำนาน',  emoji: '👑', cost: 35000,
+  { id: 'legend', name: 'ไข่ตำนาน',  emoji: '👑', cost: 40000,
     rates: { common: 0,  rare: 0,  epic: 0,  legendary: 100 },
-    desc: 'การันตีเพ็ทตำนาน 100%' },
+    desc: 'การันตีตำนาน — เก็บตัวซ้ำเพื่อวิวัฒน์สู่เกรดสูง' },
 ]
 
 export const getEgg = (id) => EGG_TYPES.find(e => e.id === id) || null

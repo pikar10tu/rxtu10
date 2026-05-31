@@ -7,6 +7,7 @@ import ShopView     from '../views/ShopView.vue'
 import RankView     from '../views/RankView.vue'
 import AdminView    from '../views/AdminView.vue'
 import MeView       from '../views/MeView.vue'
+import PetsView     from '../views/PetsView.vue'
 
 const routes = [
     { path: '/',        name: 'home',    component: HomeView    },
@@ -17,6 +18,7 @@ const routes = [
     { path: '/rank',    name: 'rank',    component: RankView    },
     { path: '/admin',   name: 'admin',   component: AdminView   },
     { path: '/me',      name: 'me',      component: MeView      },
+    { path: '/pets',    name: 'pets',    component: PetsView    },
 ]
 
 export const router = createRouter({

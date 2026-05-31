@@ -22,17 +22,22 @@
     <!-- กระดานข่าว (เห็นได้ทุกคน) -->
     <NewsBoard />
 
-    <!-- ทางเข้า Shop / Rank (ย้ายมาจากเมนูล่าง) -->
+    <!-- ทางเข้าลัด -->
     <div class="home-shortcuts">
       <RouterLink to="/shop" class="home-shortcut">
         <span class="hs-icon">🛒</span>
         <span class="hs-label">Shop</span>
-        <span class="hs-sub">ร้านค้า · กาชา · อัปเกรด</span>
+        <span class="hs-sub">กาชาไข่</span>
+      </RouterLink>
+      <RouterLink v-if="authStore.isLoggedIn" to="/pets" class="home-shortcut">
+        <span class="hs-icon">🧪</span>
+        <span class="hs-label">สัตว์เลี้ยง</span>
+        <span class="hs-sub">คลัง · ห้องทดลอง</span>
       </RouterLink>
       <RouterLink to="/rank" class="home-shortcut">
         <span class="hs-icon">🏆</span>
         <span class="hs-label">Rank</span>
-        <span class="hs-sub">อันดับ · ลีดเดอร์บอร์ด</span>
+        <span class="hs-sub">อันดับ</span>
       </RouterLink>
     </div>
   </div>
@@ -68,7 +73,7 @@ const myAvatar = computed(() =>
 .home-me-arrow { color: var(--muted, #9b8fb0); font-size: 1.4rem; }
 .home-shortcuts {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 10px;
 }
 .home-shortcut {
