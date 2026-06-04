@@ -9,4 +9,16 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   base: './',
   plugins: [vue()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split the Firebase SDK into its own vendor chunk — it rarely changes,
+        // so it stays cached across app-code deploys (only the small app chunk
+        // gets re-downloaded).
+        manualChunks(id) {
+          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) return 'firebase'
+        },
+      },
+    },
+  },
 })

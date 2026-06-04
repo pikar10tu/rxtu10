@@ -8,7 +8,7 @@
          live app (academics manage the question bank); everyone else gets the
          maintenance screen (and can't touch data). -->
     <template v-else-if="authStore.isAcademic">
-      <main id="main-content"><RouterView /></main>
+      <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">
         <RouterLink to="/"        class="bn-item"><span class="bn-icon">🏠</span>Home</RouterLink>
@@ -42,6 +42,7 @@ import ConfirmModal     from './components/layout/ConfirmModal.vue'
 import HelpModal        from './components/help/HelpModal.vue'
 import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
 import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'
+import ErrorBoundary     from './components/layout/ErrorBoundary.vue'
 
 const authStore = useAuthStore()
 const { openHelp } = useHelp()

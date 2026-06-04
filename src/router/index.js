@@ -1,26 +1,18 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView     from '../views/HomeView.vue'
-import MembersView  from '../views/MembersView.vue'
-import PlayView     from '../views/PlayView.vue'
-import StudyView    from '../views/StudyView.vue'
-import QuestionsView from '../views/QuestionsView.vue'
-import ShopView     from '../views/ShopView.vue'
-import RankView     from '../views/RankView.vue'
-import AdminView    from '../views/AdminView.vue'
-import MeView       from '../views/MeView.vue'
-import PetsView     from '../views/PetsView.vue'
 
+// Lazy-loaded views → each becomes its own chunk (smaller initial bundle,
+// faster first paint, and one failing route can't block the whole app).
 const routes = [
-    { path: '/',        name: 'home',    component: HomeView    },
-    { path: '/members', name: 'members', component: MembersView },
-    { path: '/play',    name: 'play',    component: PlayView    },
-    { path: '/study',   name: 'study',   component: StudyView   },
-    { path: '/questions', name: 'questions', component: QuestionsView },
-    { path: '/shop',    name: 'shop',    component: ShopView    },
-    { path: '/rank',    name: 'rank',    component: RankView    },
-    { path: '/admin',   name: 'admin',   component: AdminView   },
-    { path: '/me',      name: 'me',      component: MeView      },
-    { path: '/pets',    name: 'pets',    component: PetsView    },
+    { path: '/',          name: 'home',      component: () => import('../views/HomeView.vue')      },
+    { path: '/members',   name: 'members',   component: () => import('../views/MembersView.vue')   },
+    { path: '/play',      name: 'play',      component: () => import('../views/PlayView.vue')      },
+    { path: '/study',     name: 'study',     component: () => import('../views/StudyView.vue')     },
+    { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue') },
+    { path: '/shop',      name: 'shop',      component: () => import('../views/ShopView.vue')      },
+    { path: '/rank',      name: 'rank',      component: () => import('../views/RankView.vue')      },
+    { path: '/admin',     name: 'admin',     component: () => import('../views/AdminView.vue')     },
+    { path: '/me',        name: 'me',        component: () => import('../views/MeView.vue')        },
+    { path: '/pets',      name: 'pets',      component: () => import('../views/PetsView.vue')      },
 ]
 
 export const router = createRouter({
@@ -28,3 +20,18 @@ export const router = createRouter({
     routes,
     scrollBehavior: () => ({ top: 0 }),
 })
+
+// A failed dynamic import is usually a stale chunk after a new deploy — hard
+// reload once to fetch the fresh build (guard against a reload loop).
+router.onError((err) => {
+    const msg = err?.message || ''
+    if (/dynamically imported module|Importing a module script failed|Failed to fetch/i.test(msg)) {
+        if (!sessionStorage.getItem('chunkReloaded')) {
+            sessionStorage.setItem('chunkReloaded', '1')
+            window.location.reload()
+        }
+    }
+})
+
+// clear the reload-guard once we land somewhere successfully
+router.afterEach(() => { sessionStorage.removeItem('chunkReloaded') })

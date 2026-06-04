@@ -9,6 +9,17 @@ import './style.css'
 const app   = createApp(App)
 const pinia = createPinia()
 
+// ── global safety net: never swallow errors silently ──
+app.config.errorHandler = (err, _instance, info) => {
+  console.error('[vue:error]', info, err)
+}
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('[unhandledrejection]', e.reason)
+})
+window.addEventListener('error', (e) => {
+  console.error('[window:error]', e.error || e.message)
+})
+
 app.use(pinia)
 app.use(router)
 
