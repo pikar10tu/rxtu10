@@ -26,6 +26,8 @@ export const USER_DEFAULTS = {
   quizHigh: 0,
   drugHigh: 0,
   ctHigh: 0,
+  quizCoinDate: null,   // YYYY-MM-DD of last quiz-coin earning (daily cap)
+  quizCoinsToday: 0,    // quiz coins earned today (capped)
   towerFloor: 1,
   towerBest: 0,
   towerLastReset: null,

@@ -27,6 +27,15 @@
       </button>
       <div v-if="!queueSize" class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือกดด้านล่างเพื่อฝึกแบบสุ่ม</div>
       <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่นับ SRS) 🎲</button>
+
+      <RouterLink to="/quiz" class="sv-quizlink">
+        <span class="sv-quizlink-emoji">📝</span>
+        <span class="sv-quizlink-text">
+          <b>ทำข้อสอบ (MCQ)</b>
+          <small>ตอบคำถามจากคลังข้อสอบ ได้เหรียญ</small>
+        </span>
+        <span class="sv-quizlink-go">›</span>
+      </RouterLink>
     </template>
 
     <!-- ── REVIEW ── -->
@@ -295,6 +304,13 @@ async function sendReport() {
 .sv-start:disabled { background: #cbd5e1; cursor: default; color: #fff; }
 .sv-allclear { text-align: center; font-size: .68rem; color: rgba(0,0,0,.45); margin-top: 12px; }
 .sv-freebtn { width: 100%; margin-top: 8px; border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 12px; padding: 11px; font-family: inherit; font-size: .8rem; font-weight: 700; color: #475569; cursor: pointer; }
+.sv-quizlink { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 14px; border-radius: 14px; background: #eef2ff; border: 1px solid rgba(99,102,241,.2); text-decoration: none; }
+.sv-quizlink:active { transform: scale(.99); }
+.sv-quizlink-emoji { font-size: 1.6rem; }
+.sv-quizlink-text { flex: 1; display: flex; flex-direction: column; }
+.sv-quizlink-text b { font-size: .88rem; color: #3730a3; }
+.sv-quizlink-text small { font-size: .66rem; color: #6366f1; }
+.sv-quizlink-go { font-size: 1.4rem; color: #6366f1; }
 
 /* review */
 .sv-rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
