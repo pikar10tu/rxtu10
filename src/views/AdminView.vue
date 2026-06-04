@@ -76,7 +76,7 @@
         <div class="admin-hint">โพสต์ประกาศ — ทุกคนจะเห็นบนหน้า Home</div>
         <div class="news-form">
           <input v-model="newsIcon" class="news-icon-in" maxlength="2" />
-          <input v-model="newsMsg" class="admin-search" style="margin:0;flex:1" placeholder="ข้อความข่าว…" @keyup.enter="postNews" />
+          <input v-model="newsMsg" :maxlength="LIMITS.news" class="admin-search" style="margin:0;flex:1" placeholder="ข้อความข่าว…" @keyup.enter="postNews" />
           <button class="btn-mini btn-gold" :disabled="postingNews || !newsMsg.trim()" @click="postNews">โพสต์</button>
         </div>
         <ul v-if="newsList.length" class="news-admin-list">
@@ -155,6 +155,7 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useToast } from '../composables/useToast.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 import { TAG_LIST } from '../data/tags.js'
 
 const authStore = useAuthStore()
@@ -246,7 +247,7 @@ async function loadNews() {
   } catch (e) { console.error('[admin news]', e) }
 }
 async function postNews() {
-  const msg = newsMsg.value.trim()
+  const msg = cleanText(newsMsg.value, LIMITS.news)
   if (!msg) return
   postingNews.value = true
   try {

@@ -15,7 +15,7 @@
         <div class="qz-card-head">{{ draft.id ? '✏️ แก้ไขข้อสอบ' : '➕ เพิ่มข้อสอบใหม่' }}</div>
 
         <label class="qz-label">โจทย์</label>
-        <textarea v-model="draft.question" class="qz-input" rows="3" placeholder="พิมพ์คำถาม…"></textarea>
+        <textarea v-model="draft.question" :maxlength="LIMITS.question" class="qz-input" rows="3" placeholder="พิมพ์คำถาม…"></textarea>
 
         <label class="qz-label">ตัวเลือก (กดวงกลมเพื่อเลือกข้อที่ถูก)</label>
         <div v-for="(c, i) in draft.choices" :key="i" class="qz-choice">
@@ -24,16 +24,16 @@
             type="button" @click="draft.answer = i"
             :title="draft.answer === i ? 'ข้อที่ถูก' : 'ตั้งเป็นข้อที่ถูก'"
           >{{ draft.answer === i ? '✓' : LETTERS[i] }}</button>
-          <input v-model="draft.choices[i]" class="qz-input qz-choice-in" :placeholder="`ตัวเลือก ${LETTERS[i]}`" />
+          <input v-model="draft.choices[i]" :maxlength="LIMITS.choice" class="qz-input qz-choice-in" :placeholder="`ตัวเลือก ${LETTERS[i]}`" />
           <button class="qz-del-choice" type="button" :disabled="draft.choices.length <= 2" @click="removeChoice(i)">✕</button>
         </div>
         <button class="qz-add-choice" type="button" :disabled="draft.choices.length >= 6" @click="draft.choices.push('')">+ เพิ่มตัวเลือก</button>
 
         <label class="qz-label">หมวด / กลุ่มเนื้อหา</label>
-        <input v-model="draft.category" class="qz-input" placeholder="เช่น ยาปฏิชีวนะ, ระบบหัวใจ, เภสัชจลนศาสตร์…" />
+        <input v-model="draft.category" :maxlength="LIMITS.category" class="qz-input" placeholder="เช่น ยาปฏิชีวนะ, ระบบหัวใจ, เภสัชจลนศาสตร์…" />
 
         <label class="qz-label">คำอธิบายเฉลย (ไม่บังคับ)</label>
-        <textarea v-model="draft.explanation" class="qz-input" rows="2" placeholder="อธิบายว่าทำไมข้อนี้ถูก…"></textarea>
+        <textarea v-model="draft.explanation" :maxlength="LIMITS.explanation" class="qz-input" rows="2" placeholder="อธิบายว่าทำไมข้อนี้ถูก…"></textarea>
 
         <label class="qz-check">
           <input type="checkbox" v-model="draft.isPublished" />
@@ -85,6 +85,7 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -132,11 +133,11 @@ async function save() {
   saving.value = true
   const d = draft.value
   const payload = {
-    question: d.question.trim(),
-    choices: d.choices.map(c => c.trim()).filter(Boolean),
+    question: cleanText(d.question, LIMITS.question),
+    choices: d.choices.map(c => cleanText(c, LIMITS.choice)).filter(Boolean),
     answer: d.answer,
-    category: d.category.trim() || null,
-    explanation: d.explanation.trim() || null,
+    category: cleanText(d.category, LIMITS.category) || null,
+    explanation: cleanText(d.explanation, LIMITS.explanation) || null,
     isPublished: !!d.isPublished,
     updatedAt: serverTimestamp(),
   }

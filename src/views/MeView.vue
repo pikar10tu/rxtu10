@@ -20,9 +20,9 @@
 
       <label class="me-label">ข้อมูลติดต่อ</label>
       <div class="me-contact">
-        <div class="me-crow"><span>📞</span><input v-model="phone" class="me-input" placeholder="เบอร์โทร" /></div>
-        <div class="me-crow"><span>📷</span><input v-model="ig" class="me-input" placeholder="Instagram" /></div>
-        <div class="me-crow"><span>💬</span><input v-model="line" class="me-input" placeholder="LINE ID" /></div>
+        <div class="me-crow"><span>📞</span><input v-model="phone" :maxlength="LIMITS.contact" class="me-input" placeholder="เบอร์โทร" /></div>
+        <div class="me-crow"><span>📷</span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
+        <div class="me-crow"><span>💬</span><input v-model="line" :maxlength="LIMITS.contact" class="me-input" placeholder="LINE ID" /></div>
       </div>
 
       <button class="me-save" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึก' }}</button>
@@ -55,6 +55,7 @@
         </div>
         <textarea
           v-model="fbText"
+          :maxlength="LIMITS.feedback"
           class="fb-input"
           rows="4"
           placeholder="อยากให้เพิ่ม/แก้อะไร เล่าได้เลย เช่น ฟีเจอร์ใหม่ จุดที่ใช้งานยาก หรือบั๊กที่เจอ…"
@@ -74,6 +75,7 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
 
 const auth = useAuthStore()
@@ -110,7 +112,7 @@ const fbText = ref('')
 const fbBusy = ref(false)
 
 async function sendFeedback() {
-  const message = fbText.value.trim()
+  const message = cleanText(fbText.value, LIMITS.feedback)
   if (!message || fbBusy.value) return
   fbBusy.value = true
   try {
@@ -158,7 +160,11 @@ async function save() {
   if (!auth.currentUser) return
   saving.value = true
   const patch = {
-    contact: { phone: phone.value.trim(), ig: ig.value.trim(), line: line.value.trim() },
+    contact: {
+      phone: cleanText(phone.value, LIMITS.contact),
+      ig: cleanText(ig.value, LIMITS.contact),
+      line: cleanText(line.value, LIMITS.contact),
+    },
   }
   if (newPhoto.value) patch.customPhoto = newPhoto.value
 

@@ -82,6 +82,7 @@
         <div class="sv-rep-drug">{{ reportTarget?.n }} — {{ reportTarget?.a }}</div>
         <textarea
           v-model="reportText"
+          :maxlength="LIMITS.report"
           class="sv-rep-input"
           rows="4"
           placeholder="ระบุสิ่งที่ผิด/ควรแก้ เช่น ขนาดยา ข้อบ่งใช้ หรือกลุ่มยาไม่ตรง…"
@@ -102,6 +103,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { DRUGS } from '../data/index.js'
 import { sm2Update, newSrsCard } from '../utils/sm2.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -244,7 +246,7 @@ function openReport(drug) {
 }
 
 async function sendReport() {
-  const note = reportText.value.trim()
+  const note = cleanText(reportText.value, LIMITS.report)
   const d = reportTarget.value
   if (!note || !d || reportBusy.value) return
   reportBusy.value = true
