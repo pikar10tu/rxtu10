@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/config.js'
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
+import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
 
 export const useAuthStore = defineStore('auth', () => {
     // ── State ──
@@ -52,42 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
         const ref = doc(db, 'users', user.uid)
         const snap = await getDoc(ref)
         if (!snap.exists()) {
-            await setDoc(ref, {
-                uid: user.uid,
-                name: user.displayName,
-                email: user.email,
-                googlePhoto: user.photoURL,
-                customPhoto: null,
-                coins: 2000,
-                pets: [],
-                eggs: [],
-                activePet: null,
-                activePets: [null, null, null],
-                pvpVictories: 0,
-                studentId: null,
-                nickname: null,
-                realName: null,
-                track: null,
-                quizHigh: 0,
-                drugHigh: 0,
-                ctHigh: 0,
-                towerFloor: 1,
-                towerBest: 0,
-                towerLastReset: null,
-                lastDaily: null,
-                contact: { phone: '', ig: '', line: '' },
-                likes: 0,
-                likedBy: {},
-                totalSpent: 0,
-                pityClaimedRounds: 0,
-                // ── v2 fields ──
-                role: 'student',                               // 'student' | 'academic' | 'admin'
-                tags: [],                                      // admin-assigned badges (founder/supporter/…)
-                residence: { level: 1, upgradedAt: null },     // ที่อยู่อาศัย (prestige/coin sink)
-                farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
-                petsVault: [],                                 // overflow pets (no income, not battle-eligible)
-                createdAt: serverTimestamp(),
-            })
+            await setDoc(ref, newUserDoc(user, serverTimestamp()))
         }
     }
 
@@ -132,12 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
                 if (_unsub) _unsub()
                 _unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => {
                     if (_blockSnapshot) return
-                    const data = snap.data()
-                    // Migrate activePet → activePets[0] (one-time)
-                    if (data?.activePet && !(data?.activePets || []).some(Boolean)) {
-                        data.activePets = [data.activePet, null, null]
-                    }
-                    userData.value = data
+                    userData.value = normalizeUserData(snap.data())
                 })
             } else {
                 if (_unsub) { _unsub(); _unsub = null }
