@@ -1,10 +1,350 @@
-﻿<template>
+<template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:4px">📚 Study</div>
-    <div style="font-size:0.72rem;color:rgba(255,255,255,.4)">— กำลังพัฒนา —</div>
+    <div class="sv-head">
+      <div class="sv-title">📚 ทบทวนกลุ่มยา</div>
+      <div class="sv-sub">Flashcard แบบ spaced repetition · {{ DECK.length }} ตัวยา</div>
+    </div>
+
+    <template v-if="!authStore.isLoggedIn">
+      <div class="sv-empty">เข้าสู่ระบบเพื่อเริ่มทบทวน</div>
+    </template>
+
+    <!-- ── HOME ── -->
+    <template v-else-if="mode === 'home'">
+      <div class="sv-stats">
+        <div class="sv-stat due"><span class="sv-stat-n">{{ dueCount }}</span><span class="sv-stat-l">ครบกำหนด</span></div>
+        <div class="sv-stat new"><span class="sv-stat-n">{{ newCount }}</span><span class="sv-stat-l">ยังไม่เคยเรียน</span></div>
+        <div class="sv-stat mast"><span class="sv-stat-n">{{ masteredCount }}</span><span class="sv-stat-l">แม่นแล้ว</span></div>
+      </div>
+
+      <div class="sv-progress">
+        <div class="sv-progress-bar"><div class="sv-progress-fill" :style="{ width: seenPct + '%' }"></div></div>
+        <div class="sv-progress-txt">เรียนไปแล้ว {{ seenCount }}/{{ DECK.length }} ตัว</div>
+      </div>
+
+      <button class="sv-start" :disabled="!queueSize" @click="startSession">
+        {{ queueSize ? `เริ่มทบทวน ${queueSize} ใบ` : '🎉 วันนี้ทบทวนครบแล้ว!' }}
+      </button>
+      <div v-if="!queueSize" class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือกดด้านล่างเพื่อฝึกแบบสุ่ม</div>
+      <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่นับ SRS) 🎲</button>
+    </template>
+
+    <!-- ── REVIEW ── -->
+    <template v-else-if="mode === 'review'">
+      <div class="sv-rev-top">
+        <button class="sv-quit" @click="endSession">✕</button>
+        <div class="sv-rev-bar"><div class="sv-rev-fill" :style="{ width: revPct + '%' }"></div></div>
+        <span class="sv-rev-count">{{ doneInSession }}/{{ sessionTotal }}</span>
+      </div>
+
+      <div class="sv-card" :class="{ flipped }" @click="!flipped && (flipped = true)">
+        <div class="sv-card-tag">{{ flipped ? 'กลุ่ม / กลไก' : 'ตัวยา' }}</div>
+        <div class="sv-card-front">{{ current?.n }}</div>
+        <template v-if="flipped">
+          <div class="sv-card-divider"></div>
+          <div class="sv-card-back">{{ current?.a }}</div>
+          <div class="sv-card-detail">
+            <div class="sv-detail-row"><span class="sv-detail-k">💊 ข้อบ่งใช้</span><span class="sv-detail-v">{{ current?.ind }}</span></div>
+            <div class="sv-detail-row"><span class="sv-detail-k">📐 ขนาด (ผู้ใหญ่)</span><span class="sv-detail-v">{{ current?.dose }}</span></div>
+          </div>
+          <button class="sv-report" @click.stop="openReport(current)">🚩 แจ้งข้อมูลผิด</button>
+        </template>
+        <div v-else class="sv-card-hint">แตะเพื่อดูเฉลย</div>
+      </div>
+
+      <div v-if="flipped" class="sv-grades">
+        <button class="sv-grade again" @click="grade(1)"><b>ลืม</b><small>&lt; 1 วัน</small></button>
+        <button class="sv-grade hard"  @click="grade(3)"><b>ยาก</b><small>{{ preview(3) }}</small></button>
+        <button class="sv-grade good"  @click="grade(4)"><b>จำได้</b><small>{{ preview(4) }}</small></button>
+        <button class="sv-grade easy"  @click="grade(5)"><b>ง่าย</b><small>{{ preview(5) }}</small></button>
+      </div>
+      <div v-else class="sv-flip-spacer">เลือกระดับความจำหลังเปิดเฉลย</div>
+    </template>
+
+    <!-- ── DONE ── -->
+    <template v-else-if="mode === 'done'">
+      <div class="sv-done">
+        <div class="sv-done-emoji">🎓</div>
+        <div class="sv-done-title">จบรอบทบทวน!</div>
+        <div class="sv-done-line">ทบทวนไป <b>{{ sessionTotal }}</b> ใบ · จำได้ <b>{{ sessionCorrect }}</b> ใบ</div>
+        <div v-if="sessionCoins" class="sv-done-coins">+{{ sessionCoins.toLocaleString() }} 🪙</div>
+        <button class="sv-start" @click="mode = 'home'">กลับหน้าหลัก</button>
+      </div>
+    </template>
+
+    <!-- ── REPORT modal ── -->
+    <div v-if="reportOpen" class="sv-rep-ov" @click.self="reportOpen = false">
+      <div class="sv-rep-box">
+        <div class="sv-rep-head">
+          <span>🚩 แจ้งข้อมูลผิด</span>
+          <button class="sv-rep-x" @click="reportOpen = false">✕</button>
+        </div>
+        <div class="sv-rep-drug">{{ reportTarget?.n }} — {{ reportTarget?.a }}</div>
+        <textarea
+          v-model="reportText"
+          class="sv-rep-input"
+          rows="4"
+          placeholder="ระบุสิ่งที่ผิด/ควรแก้ เช่น ขนาดยา ข้อบ่งใช้ หรือกลุ่มยาไม่ตรง…"
+        ></textarea>
+        <button class="sv-rep-send" :disabled="!reportText.trim() || reportBusy" @click="sendReport">
+          {{ reportBusy ? 'กำลังส่ง…' : 'ส่งรายงาน' }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-// TODO: implement StudyView
+import { ref, computed } from 'vue'
+import { doc, updateDoc, increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase/config.js'
+import { useAuthStore } from '../stores/auth.js'
+import { useToast } from '../composables/useToast.js'
+import { DRUGS } from '../data/index.js'
+import { sm2Update, newSrsCard } from '../utils/sm2.js'
+
+const authStore = useAuthStore()
+const { toast } = useToast()
+
+const DECK = DRUGS
+const NEW_PER_SESSION = 15
+const MATURE_DAYS = 21
+const COIN_PER_CARD = 5
+
+// ── persistent SRS state: userData.study.cards keyed by drug name ──
+const study = computed(() => authStore.userData?.study || { cards: {} })
+const cards = computed(() => study.value.cards || {})
+
+const isDue = (c) => (c?.nextReviewDate || 0) <= Date.now()
+const dueList   = computed(() => DECK.filter(d => cards.value[d.n] && isDue(cards.value[d.n])))
+const newList   = computed(() => DECK.filter(d => !cards.value[d.n]))
+const dueCount  = computed(() => dueList.value.length)
+const newCount  = computed(() => newList.value.length)
+const seenCount = computed(() => DECK.filter(d => cards.value[d.n]).length)
+const seenPct   = computed(() => Math.round((seenCount.value / DECK.length) * 100))
+const masteredCount = computed(() =>
+  DECK.filter(d => (cards.value[d.n]?.interval || 0) >= MATURE_DAYS).length
+)
+const queueSize = computed(() => dueCount.value + Math.min(newCount.value, NEW_PER_SESSION))
+
+// ── session state ──
+const mode = ref('home')          // home | review | done
+const queue = ref([])             // array of drug names left to review
+const flipped = ref(false)
+const sessionTotal = ref(0)
+const sessionCorrect = ref(0)
+const sessionCoins = ref(0)
+const rewarded = ref(new Set())   // card ids already rewarded this session
+
+const current = computed(() => DECK.find(d => d.n === queue.value[0]) || null)
+const doneInSession = computed(() => sessionTotal.value - queue.value.length)
+const revPct = computed(() => sessionTotal.value ? Math.round((doneInSession.value / sessionTotal.value) * 100) : 0)
+
+function shuffle(arr) {
+  const a = arr.slice()
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] }
+  return a
+}
+
+function startSession(free = false) {
+  let ids
+  if (free) {
+    ids = shuffle(DECK.map(d => d.n)).slice(0, 20)
+  } else {
+    const due = shuffle(dueList.value.map(d => d.n))
+    const fresh = shuffle(newList.value.map(d => d.n)).slice(0, NEW_PER_SESSION)
+    ids = [...due, ...fresh]
+  }
+  if (!ids.length) return
+  queue.value = ids
+  sessionTotal.value = ids.length
+  sessionCorrect.value = 0
+  sessionCoins.value = 0
+  rewarded.value = new Set()
+  flipped.value = false
+  mode.value = 'review'
+}
+
+// human label for the next interval at a given quality (preview on buttons)
+function preview(q) {
+  const c = cards.value[current.value?.n] || newSrsCard(current.value?.n)
+  const { interval } = sm2Update(c, q)
+  if (interval <= 1) return '1 วัน'
+  if (interval < 30) return `${interval} วัน`
+  const m = Math.round(interval / 30)
+  return `${m} เดือน`
+}
+
+async function grade(q) {
+  const drug = current.value
+  if (!drug) return
+  const id = drug.n
+  const prev = cards.value[id] || newSrsCard(id)
+  const u = sm2Update(prev, q)
+  const updated = {
+    cardId: id,
+    easeFactor: u.easeFactor,
+    interval: u.interval,
+    repetitions: u.repetitions,
+    nextReviewDate: u.nextReviewDate.getTime(),   // store as epoch ms
+    lapses: (prev.lapses || 0) + (q < 3 ? 1 : 0),
+    totalReviews: (prev.totalReviews || 0) + 1,
+    lastReviewDate: Date.now(),
+  }
+
+  // first time this card is graded in the session → reward + count
+  let reward = 0
+  if (!rewarded.value.has(id)) {
+    rewarded.value.add(id)
+    reward = COIN_PER_CARD
+    sessionCoins.value += reward
+    if (q >= 3) sessionCorrect.value++
+  }
+
+  // advance queue: drop the card; if forgotten, requeue near the end to relearn
+  const rest = queue.value.slice(1)
+  queue.value = q < 3 ? [...rest, id] : rest
+  flipped.value = false
+
+  const newCards = { ...cards.value, [id]: updated }
+  await commit(newCards, reward)
+
+  if (!queue.value.length) finishSession()
+}
+
+function finishSession() {
+  mode.value = 'done'
+  if (sessionCoins.value) toast(`ทบทวนจบ +${sessionCoins.value}🪙`, 'success')
+}
+
+function endSession() {
+  if (queue.value.length && doneInSession.value > 0) finishSession()
+  else mode.value = 'home'
+}
+
+async function commit(newCards, reward) {
+  if (!authStore.currentUser) return
+  const newStudy = { ...study.value, cards: newCards, lastStudied: Date.now() }
+  authStore.blockSnapshot()
+  authStore.setUserDataOptimistic({
+    study: newStudy,
+    ...(reward ? { coins: (authStore.userData?.coins || 0) + reward } : {}),
+  })
+  const patch = { study: newStudy }
+  if (reward) patch.coins = increment(reward)
+  try { await updateDoc(doc(db, 'users', authStore.currentUser.uid), patch) }
+  catch (e) { console.error('[study]', e); toast('บันทึกการทบทวนไม่สำเร็จ', 'error') }
+}
+
+// ── report wrong drug data → Firestore `drugReports` (admin reviews later) ──
+const reportOpen = ref(false)
+const reportTarget = ref(null)
+const reportText = ref('')
+const reportBusy = ref(false)
+
+function openReport(drug) {
+  reportTarget.value = drug
+  reportText.value = ''
+  reportOpen.value = true
+}
+
+async function sendReport() {
+  const note = reportText.value.trim()
+  const d = reportTarget.value
+  if (!note || !d || reportBusy.value) return
+  reportBusy.value = true
+  try {
+    await addDoc(collection(db, 'drugReports'), {
+      drug: d.n,
+      currentClass: d.a,
+      currentInd: d.ind || null,
+      currentDose: d.dose || null,
+      note,
+      reporterUid: authStore.currentUser?.uid || null,
+      reporterName: authStore.userData?.nickname || authStore.userData?.name || null,
+      status: 'open',
+      ts: serverTimestamp(),
+    })
+    reportOpen.value = false
+    toast('ส่งรายงานแล้ว ขอบคุณที่ช่วยตรวจสอบ 🙏', 'success')
+  } catch (e) {
+    console.error('[drugReport]', e)
+    toast('ส่งรายงานไม่สำเร็จ', 'error')
+  } finally {
+    reportBusy.value = false
+  }
+}
 </script>
+
+<style scoped>
+.sv-head { margin-bottom: 14px; }
+.sv-title { font-size: 1.15rem; font-weight: 800; }
+.sv-sub { font-size: .68rem; color: rgba(0,0,0,.45); margin-top: 2px; }
+.sv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 36px 0; font-size: .85rem; }
+
+/* home */
+.sv-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.sv-stat { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 14px; padding: 14px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.sv-stat-n { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.sv-stat-l { font-size: .6rem; color: rgba(0,0,0,.5); font-weight: 600; }
+.sv-stat.due  .sv-stat-n { color: #d97706; }
+.sv-stat.new  .sv-stat-n { color: #2563eb; }
+.sv-stat.mast .sv-stat-n { color: #16a34a; }
+.sv-progress { margin-bottom: 18px; }
+.sv-progress-bar { height: 8px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
+.sv-progress-fill { height: 100%; background: linear-gradient(90deg,#84cc16,#16a34a); transition: width .4s; }
+.sv-progress-txt { font-size: .64rem; color: rgba(0,0,0,.5); margin-top: 5px; text-align: center; }
+.sv-start { width: 100%; border: none; border-radius: 14px; padding: 16px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#4f46e5,#6366f1); cursor: pointer; }
+.sv-start:disabled { background: #cbd5e1; cursor: default; color: #fff; }
+.sv-allclear { text-align: center; font-size: .68rem; color: rgba(0,0,0,.45); margin-top: 12px; }
+.sv-freebtn { width: 100%; margin-top: 8px; border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 12px; padding: 11px; font-family: inherit; font-size: .8rem; font-weight: 700; color: #475569; cursor: pointer; }
+
+/* review */
+.sv-rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.sv-quit { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; flex-shrink: 0; font-size: .85rem; }
+.sv-rev-bar { flex: 1; height: 7px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
+.sv-rev-fill { height: 100%; background: linear-gradient(90deg,#4f46e5,#6366f1); transition: width .3s; }
+.sv-rev-count { font-size: .68rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
+.sv-card { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 20px; box-shadow: 0 4px 16px rgba(15,23,42,.07); min-height: 240px; padding: 26px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; cursor: pointer; }
+.sv-card.flipped { cursor: default; }
+.sv-card-tag { font-size: .58rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6366f1; background: #eef2ff; padding: 3px 10px; border-radius: 999px; }
+.sv-card-front { font-size: 1.5rem; font-weight: 800; color: #1e293b; }
+.sv-card-divider { width: 40px; height: 2px; background: rgba(0,0,0,.1); border-radius: 2px; }
+.sv-card-back { font-size: 1.05rem; font-weight: 600; color: #4338ca; }
+.sv-card-detail { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.sv-detail-row { display: flex; flex-direction: column; gap: 2px; background: #f8fafc; border: 1px solid rgba(0,0,0,.05); border-radius: 10px; padding: 8px 11px; text-align: left; }
+.sv-detail-k { font-size: .58rem; font-weight: 700; color: #64748b; }
+.sv-detail-v { font-size: .78rem; color: #1e293b; line-height: 1.35; }
+.sv-report { margin-top: 4px; border: none; background: none; color: #ef4444; font-family: inherit; font-size: .64rem; font-weight: 600; cursor: pointer; padding: 4px; }
+.sv-report:active { opacity: .6; }
+.sv-card-hint { font-size: .68rem; color: rgba(0,0,0,.35); margin-top: 4px; }
+.sv-grades { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; margin-top: 16px; }
+.sv-grade { border: none; border-radius: 12px; padding: 12px 4px; font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; color: #fff; }
+.sv-grade b { font-size: .82rem; }
+.sv-grade small { font-size: .56rem; opacity: .9; }
+.sv-grade.again { background: #ef4444; }
+.sv-grade.hard  { background: #f59e0b; }
+.sv-grade.good  { background: #22c55e; }
+.sv-grade.easy  { background: #3b82f6; }
+.sv-grade:active { transform: scale(.96); }
+.sv-flip-spacer { margin-top: 18px; text-align: center; font-size: .7rem; color: rgba(0,0,0,.35); }
+
+/* done */
+.sv-done { text-align: center; padding: 30px 0; }
+.sv-done-emoji { font-size: 3rem; }
+.sv-done-title { font-size: 1.3rem; font-weight: 800; margin: 8px 0; }
+.sv-done-line { font-size: .85rem; color: rgba(0,0,0,.6); margin-bottom: 6px; }
+.sv-done-coins { font-size: 1.1rem; font-weight: 800; color: #d97706; margin-bottom: 20px; }
+.sv-done .sv-start { max-width: 260px; margin: 0 auto; }
+
+/* report modal */
+.sv-rep-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
+.sv-rep-box { background: #fff; width: 100%; max-width: 380px; border-radius: 18px; padding: 16px; }
+.sv-rep-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .92rem; margin-bottom: 10px; }
+.sv-rep-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
+.sv-rep-drug { font-size: .74rem; color: #475569; background: #f1f5f9; border-radius: 10px; padding: 8px 11px; margin-bottom: 10px; }
+.sv-rep-input { width: 100%; box-sizing: border-box; border: 1px solid rgba(0,0,0,.12); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.sv-rep-input:focus { outline: 2px solid #6366f1aa; border-color: transparent; }
+.sv-rep-send { width: 100%; margin-top: 10px; border: none; border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#ef4444,#dc2626); cursor: pointer; }
+.sv-rep-send:disabled { background: #cbd5e1; cursor: default; }
+</style>
