@@ -22,8 +22,13 @@
       <!-- Farm modal -->
       <div v-if="farmOpen" class="farm-ov" @click.self="farmOpen = false">
         <div class="farm-sheet">
-          <button class="farm-x" @click="farmOpen = false">✕</button>
-          <FarmGrid />
+          <div class="farm-sheet-head">
+            <span class="farm-sheet-grab"></span>
+            <button class="farm-x" @click="farmOpen = false">✕</button>
+          </div>
+          <div class="farm-scroll">
+            <FarmGrid />
+          </div>
         </div>
       </div>
     </template>
@@ -71,8 +76,13 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .soon-tag { font-size: .56rem; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; }
 
 .farm-ov { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
-.farm-sheet { position: relative; background: transparent; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 0 0 16px; }
-.farm-x { position: sticky; top: 0; float: right; z-index: 1; border: none; background: rgba(255,255,255,.95); box-shadow: 0 1px 4px rgba(0,0,0,.15); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: .9rem; margin: 0 4px 4px 0; }
+.farm-sheet { background: #fff; width: 100%; max-width: 480px; max-height: 88vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+.farm-sheet-head { flex: none; position: relative; display: flex; align-items: center; justify-content: center; padding: 8px 8px 4px; }
+.farm-sheet-grab { width: 38px; height: 4px; border-radius: 999px; background: rgba(0,0,0,.15); }
+.farm-x { position: absolute; right: 8px; top: 6px; border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: .9rem; }
+.farm-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 12px 24px; }
+/* farm card blends into the sheet (no card-in-card chrome) */
+.farm-scroll :deep(.farm) { border: none; border-radius: 0; box-shadow: none; padding: 0; background: transparent; }
 
 .play-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
 </style>
