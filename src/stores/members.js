@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { R_SCI, R_CARE, RN } from '../data/students.js'
+import { normalizeUserData } from '../data/userSchema.js'
 
 export const useMembersStore = defineStore('members', () => {
     const fbUsers    = ref({})   // { studentId: userObject }
@@ -30,32 +31,35 @@ export const useMembersStore = defineStore('members', () => {
             snap.forEach(d => {
                 const x = d.data()
                 if (!x.studentId && !x.nickname) return
+                // normalize first → canonical defaults + deep-defaulted nested
+                // objects, then keep only the light subset the member views need.
+                const n = normalizeUserData(x)
                 const light = {
                     uid: d.id,
-                    studentId: x.studentId,
-                    nickname: x.nickname || x.name?.split(' ')[0] || '?',
-                    realName: x.realName,
-                    email: x.email,
-                    role: x.role || 'student',
-                    track: x.track,
-                    coins: x.coins || 0,
-                    pets: x.pets || [],
-                    activePets: x.activePets || [],
-                    residence: x.residence || { level: 1 },
-                    founder: x.founder === true,
-                    tags: x.tags || [],
-                    pvpVictories: x.pvpVictories || 0,
-                    towerBest: x.towerBest || 0,
-                    quizHigh: x.quizHigh || 0,
-                    drugHigh: x.drugHigh || 0,
-                    googlePhoto: x.googlePhoto,
-                    customPhoto: x.customPhoto,
-                    contact: x.contact || {},
-                    likes: x.likes || 0,
-                    likedBy: x.likedBy || {},
+                    studentId: n.studentId,
+                    nickname: n.nickname || n.name?.split(' ')[0] || '?',
+                    realName: n.realName,
+                    email: n.email,
+                    role: n.role,
+                    track: n.track,
+                    coins: n.coins,
+                    pets: n.pets,
+                    activePets: n.activePets,
+                    residence: n.residence,
+                    founder: n.founder === true,
+                    tags: n.tags,
+                    pvpVictories: n.pvpVictories,
+                    towerBest: n.towerBest,
+                    quizHigh: n.quizHigh,
+                    drugHigh: n.drugHigh,
+                    googlePhoto: n.googlePhoto,
+                    customPhoto: n.customPhoto,
+                    contact: n.contact,
+                    likes: n.likes,
+                    likedBy: n.likedBy,
                 }
-                if (x.track === 'guest') guests.push(light)
-                else if (x.studentId) newFb[x.studentId] = light
+                if (n.track === 'guest') guests.push(light)
+                else if (n.studentId) newFb[n.studentId] = light
             })
             fbUsers.value    = newFb
             guestUsers.value = guests
