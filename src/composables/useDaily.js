@@ -1,6 +1,5 @@
 import { ref, computed, onScopeDispose } from 'vue'
-import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase/config.js'
+import { increment, serverTimestamp } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { residenceDailyIncome } from '../data/residence.js'
@@ -49,18 +48,11 @@ export function useDaily() {
     if (!auth.currentUser) return
     const amount = accrued.value
     if (amount < 1) { toast('ยังไม่มีรายได้สะสม รออีกหน่อยนะ', 'info'); return }
-    auth.blockSnapshot()
-    auth.setUserDataOptimistic({ coins: (auth.userData?.coins || 0) + amount, lastDaily: new Date() })
-    try {
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-        coins: increment(amount),
-        lastDaily: serverTimestamp(),
-      })
-      toast(`เก็บรายได้ +${amount.toLocaleString()}🪙`, 'success')
-    } catch (e) {
-      console.error('[daily claim]', e)
-      toast('เก็บรายได้ไม่สำเร็จ', 'error')
-    }
+    const ok = await auth.patchUser(
+      { coins: (auth.userData?.coins || 0) + amount, lastDaily: new Date() },
+      { coins: increment(amount), lastDaily: serverTimestamp() },
+    )
+    toast(ok ? `เก็บรายได้ +${amount.toLocaleString()}🪙` : 'เก็บรายได้ไม่สำเร็จ', ok ? 'success' : 'error')
   }
 
   return {

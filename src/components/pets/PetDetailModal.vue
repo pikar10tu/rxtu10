@@ -63,8 +63,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { doc, updateDoc, increment } from 'firebase/firestore'
-import { db } from '../../firebase/config.js'
+import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import { useConfirm } from '../../composables/useConfirm.js'
@@ -104,11 +103,9 @@ async function toggleActive() {
     next = [...cur, pet.value.instId]
   }
   busy.value = true
-  auth.blockSnapshot()
-  auth.setUserDataOptimistic({ activePets: next })
-  try { await updateDoc(doc(db, 'users', auth.currentUser.uid), { activePets: next }) }
-  catch (e) { console.error('[active]', e); toast('ตั้งทีมไม่สำเร็จ', 'error') }
-  finally { busy.value = false }
+  const ok = await auth.patchUser({ activePets: next })
+  if (!ok) toast('ตั้งทีมไม่สำเร็จ', 'error')
+  busy.value = false
 }
 const pet = computed(() => pets.value.find(p => p.instId === props.instId) || null)
 
@@ -138,16 +135,16 @@ async function commit(newPets, coinDelta = 0) {
   const nextActive = curActive.filter(id => owned.has(id))
   const activeChanged = nextActive.length !== curActive.length
 
-  auth.blockSnapshot()
-  auth.setUserDataOptimistic({
+  const optimistic = {
     pets: newPets,
     ...(activeChanged ? { activePets: nextActive } : {}),
     ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}),
-  })
+  }
   const patch = { pets: newPets }
   if (activeChanged) patch.activePets = nextActive
   if (coinDelta) patch.coins = increment(coinDelta)
-  await updateDoc(doc(db, 'users', auth.currentUser.uid), patch)
+  // throw on failure so the calling action's try/catch shows its error toast
+  if (!(await auth.patchUser(optimistic, patch))) throw new Error('user patch failed')
 }
 
 async function evolve() {

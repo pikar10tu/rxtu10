@@ -4,7 +4,7 @@ import {
     signInWithPopup, signOut, onAuthStateChanged,
 } from 'firebase/auth'
 import {
-    doc, getDoc, setDoc, onSnapshot,
+    doc, getDoc, setDoc, updateDoc, onSnapshot,
     serverTimestamp,
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/config.js'
@@ -103,6 +103,26 @@ export const useAuthStore = defineStore('auth', () => {
         userData.value = { ...userData.value, ...patch }
     }
 
+    /**
+     * Canonical user-doc write: block the snapshot, apply the optimistic local
+     * patch, then persist to Firestore. `optimistic` = plain local values;
+     * `server` = the Firestore patch (may use increment()/serverTimestamp()).
+     * If `server` is omitted, `optimistic` is written as-is.
+     * Returns true on success, false on failure (caller decides how to toast).
+     */
+    async function patchUser(optimistic, server) {
+        if (!currentUser.value) return false
+        blockSnapshot()
+        setUserDataOptimistic(optimistic)
+        try {
+            await updateDoc(doc(db, 'users', currentUser.value.uid), server ?? optimistic)
+            return true
+        } catch (e) {
+            console.error('[patchUser]', e)
+            return false
+        }
+    }
+
     // ── Auth listener (call once in main.js) ──
     function init() {
         onAuthStateChanged(auth, async (user) => {
@@ -131,7 +151,7 @@ export const useAuthStore = defineStore('auth', () => {
         currentUser, userData, loading,
         isLoggedIn, isAdmin, isAcademic, isLinked, incomeBonusPct,
         login, logout, ensureDoc,
-        blockSnapshot, setUserDataOptimistic,
+        blockSnapshot, setUserDataOptimistic, patchUser,
         init,
     }
 })

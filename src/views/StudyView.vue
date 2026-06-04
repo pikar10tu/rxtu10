@@ -96,7 +96,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { doc, updateDoc, increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
@@ -223,17 +223,12 @@ function endSession() {
 }
 
 async function commit(newCards, reward) {
-  if (!authStore.currentUser) return
   const newStudy = { ...study.value, cards: newCards, lastStudied: Date.now() }
-  authStore.blockSnapshot()
-  authStore.setUserDataOptimistic({
-    study: newStudy,
-    ...(reward ? { coins: (authStore.userData?.coins || 0) + reward } : {}),
-  })
+  const optimistic = { study: newStudy, ...(reward ? { coins: (authStore.userData?.coins || 0) + reward } : {}) }
   const patch = { study: newStudy }
   if (reward) patch.coins = increment(reward)
-  try { await updateDoc(doc(db, 'users', authStore.currentUser.uid), patch) }
-  catch (e) { console.error('[study]', e); toast('บันทึกการทบทวนไม่สำเร็จ', 'error') }
+  const ok = await authStore.patchUser(optimistic, patch)
+  if (!ok) toast('บันทึกการทบทวนไม่สำเร็จ', 'error')
 }
 
 // ── report wrong drug data → Firestore `drugReports` (admin reviews later) ──

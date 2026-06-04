@@ -1,6 +1,5 @@
 import { computed } from 'vue'
-import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase/config.js'
+import { increment, serverTimestamp } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { useConfirm } from './useConfirm.js'
@@ -44,24 +43,18 @@ export function useResidence() {
     if (!ok) return
 
     const newLevel = level.value + 1
-    // optimistic local update (guard the snapshot so it doesn't flicker back)
-    auth.blockSnapshot()
-    auth.setUserDataOptimistic({
-      coins: coins.value - cost,
-      residence: { ...(auth.userData?.residence || {}), level: newLevel, upgradedAt: new Date() },
-    })
-
-    try {
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+    const saved = await auth.patchUser(
+      {
+        coins: coins.value - cost,
+        residence: { ...(auth.userData?.residence || {}), level: newLevel, upgradedAt: new Date() },
+      },
+      {
         coins: increment(-cost),
         'residence.level': newLevel,
         'residence.upgradedAt': serverTimestamp(),
-      })
-      toast(`อัปเกรดเป็น ${target.art} ${target.tierName} แล้ว!`, 'success')
-    } catch (e) {
-      console.error('[residence upgrade]', e)
-      toast('อัปเกรดไม่สำเร็จ', 'error')
-    }
+      },
+    )
+    toast(saved ? `อัปเกรดเป็น ${target.art} ${target.tierName} แล้ว!` : 'อัปเกรดไม่สำเร็จ', saved ? 'success' : 'error')
   }
 
   return { level, currentTier, next, isMax, coins, canAfford, upgrade }

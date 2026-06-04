@@ -1,6 +1,5 @@
 import { computed } from 'vue'
-import { doc, updateDoc, increment } from 'firebase/firestore'
-import { db } from '../firebase/config.js'
+import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { residencePlots } from '../data/residence.js'
@@ -46,23 +45,14 @@ export function useFarm() {
 
   // ── persistence helper: optimistic + Firestore ──
   async function commit(newPlots, { coinDelta = 0, inventory: newInv } = {}) {
-    if (!auth.currentUser) return
     const farm = { ...(auth.userData?.farm || {}), plots: newPlots }
     if (newInv) farm.inventory = newInv
-    auth.blockSnapshot()
-    auth.setUserDataOptimistic({
-      farm,
-      ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}),
-    })
+    const optimistic = { farm, ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}) }
     const patch = { 'farm.plots': newPlots }
     if (newInv) patch['farm.inventory'] = newInv
     if (coinDelta) patch.coins = increment(coinDelta)
-    try {
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), patch)
-    } catch (e) {
-      console.error('[farm commit]', e)
-      toast('บันทึกฟาร์มไม่สำเร็จ', 'error')
-    }
+    const ok = await auth.patchUser(optimistic, patch)
+    if (!ok) toast('บันทึกฟาร์มไม่สำเร็จ', 'error')
   }
 
   function clonePlots() { return plots.value.map(p => (p ? { ...p } : null)) }
