@@ -2,7 +2,7 @@
   <div class="farm">
     <div class="farm-head">
       <span class="farm-title">🌾 ฟาร์ม</span>
-      <span class="farm-sub">{{ plotCount }} แปลง · เมล็ดถึงระดับ {{ tierLabel }}</span>
+      <span class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} {{ upcomingEmojis }}</template></span>
     </div>
 
     <!-- plots -->
@@ -71,10 +71,12 @@ let timer = null
 onMounted(() => { timer = setInterval(() => { now.value = Date.now() }, 1000) })
 onUnmounted(() => clearInterval(timer))
 
-const plots     = computed(() => farm.plots.value)
-const plotCount = computed(() => farm.plotCount.value)
-const coins     = computed(() => auth.userData?.coins || 0)
-const tierLabel = computed(() => ({ common: 'ธรรมดา', rare: 'แรร์', epic: 'อิพิค', legendary: 'ตำนาน' }[farm.maxTier.value] || farm.maxTier.value))
+const plots       = computed(() => farm.plots.value)
+const plotCount   = computed(() => farm.plotCount.value)
+const coins       = computed(() => auth.userData?.coins || 0)
+const seedChoices = computed(() => farm.seedChoices.value)
+const upcoming    = computed(() => farm.upcomingSeed.value)
+const upcomingEmojis = computed(() => (upcoming.value?.crops || []).map(c => c.emoji).join(''))
 
 const pickIndex = ref(null)
 function openPicker(i) { pickIndex.value = i }

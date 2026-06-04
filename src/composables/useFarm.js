@@ -3,9 +3,9 @@ import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
-import { residencePlots, getTier } from '../data/residence.js'
+import { residencePlots } from '../data/residence.js'
 import {
-  getCrop, cropsForSeedTier, growMs,
+  getCrop, cropsForLevel, nextUnlock, growMs,
 } from '../data/crops.js'
 
 /**
@@ -20,7 +20,6 @@ export function useFarm() {
 
   const level     = computed(() => auth.userData?.residence?.level || 1)
   const plotCount = computed(() => residencePlots(level.value))
-  const maxTier   = computed(() => getTier(level.value).maxSeedTier)
 
   const inventory = computed(() => auth.userData?.farm?.inventory || {})
 
@@ -30,7 +29,8 @@ export function useFarm() {
     return Array.from({ length: plotCount.value }, (_, i) => raw[i] || null)
   })
 
-  const seedChoices = computed(() => cropsForSeedTier(maxTier.value))
+  const seedChoices  = computed(() => cropsForLevel(level.value))
+  const upcomingSeed = computed(() => nextUnlock(level.value))
 
   // ── plot status (pass a live `now` ms for reactivity) ──
   function status(plot, now) {
@@ -118,7 +118,7 @@ export function useFarm() {
   }
 
   return {
-    level, plotCount, plots, inventory, seedChoices, maxTier,
+    level, plotCount, plots, inventory, seedChoices, upcomingSeed,
     status,
     plant, harvest, sell, sellAll,
   }
