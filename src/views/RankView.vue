@@ -20,7 +20,7 @@
         class="rk-row" :class="{ me: m.uid === myUid, top: i < 3 }"
       >
         <span class="rk-pos" :class="medal(i)">{{ i < 3 ? ['🥇','🥈','🥉'][i] : i + 1 }}</span>
-        <img class="rk-avatar" :src="avatarOf(m)" :alt="m.nickname" />
+        <img class="rk-avatar" :src="avatarOf(m)" :alt="m.nickname" @error="(e) => fallbackAvatar(e, m.nickname)" />
         <div class="rk-name">
           {{ m.nickname }}
           <ResidenceBadge v-if="board !== 'residence'" :level="m.residence?.level || 1" />
@@ -35,6 +35,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { useAuthStore } from '../stores/auth.js'
+import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import ResidenceBadge from '../components/residence/ResidenceBadge.vue'
 
 const members = useMembersStore()
@@ -67,8 +68,7 @@ const ranked = computed(() =>
 )
 
 const medal = (i) => (i === 0 ? 'g' : i === 1 ? 's' : i === 2 ? 'b' : '')
-const avatarOf = (m) =>
-  m.customPhoto || m.googlePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.nickname || '?')}&size=64`
+const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nickname)
 </script>
 
 <style scoped>

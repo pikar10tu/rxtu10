@@ -23,7 +23,7 @@
         @click="m.registered && (selected = m)"
       >
         <div class="mv-av-wrap" :style="{ '--ring': trackColor(m.track) }">
-          <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" />
+          <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" @error="(e) => fallbackAvatar(e, m.nickname)" />
           <span v-if="m.registered" class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
         </div>
         <div class="mv-nick">{{ m.nickname }}</div>
@@ -41,6 +41,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { getTier } from '../data/residence.js'
+import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import ProfileModal from '../components/members/ProfileModal.vue'
 
 const members = useMembersStore()
@@ -91,9 +92,7 @@ const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Gue
 const trackLabel = (t) => TRACK[t]?.[0] || 'สมาชิก'
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
-const avatarOf = (m) =>
-  m.customPhoto || m.googlePhoto ||
-  `https://ui-avatars.com/api/?name=${encodeURIComponent((m.nickname || '?').replace(/[^฀-๿a-zA-Z]/g, '') || '?')}&size=96&background=random`
+const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nickname)
 </script>
 
 <style scoped>

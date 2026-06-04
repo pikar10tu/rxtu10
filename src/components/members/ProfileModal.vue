@@ -5,7 +5,7 @@
       <div class="pf-hero" :style="heroStyle">
         <button class="pf-x" @click="$emit('close')">✕</button>
         <div class="pf-hero-art">{{ tier.art }}</div>
-        <img class="pf-avatar" :src="avatar" :alt="member.nickname" />
+        <img class="pf-avatar" :src="avatar" :alt="member.nickname" @error="(e) => fallbackAvatar(e, member?.nickname)" />
         <div v-if="member.realName" class="pf-real">{{ member.realName }}</div>
         <div class="pf-name">{{ member.nickname }}</div>
         <div class="pf-residence">{{ tier.art }} {{ tier.tierName }} · Lv.{{ lvl }}</div>
@@ -54,6 +54,7 @@ import { db } from '../../firebase/config.js'
 import { getTier } from '../../data/residence.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
+import { letterAvatar, fallbackAvatar } from '../../utils/avatar.js'
 import TagChips from '../shared/TagChips.vue'
 import PetStatPopup from '../pets/PetStatPopup.vue'
 
@@ -103,7 +104,7 @@ async function likeOnce() {
 
 const avatar = computed(() =>
   props.member?.customPhoto || props.member?.googlePhoto ||
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(props.member?.nickname || '?')}&size=128`
+  letterAvatar(props.member?.nickname)
 )
 const heroStyle = computed(() => ({
   background: `linear-gradient(135deg, ${tier.value.frameColor}, ${tier.value.frameColor}99)`,

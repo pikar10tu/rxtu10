@@ -5,7 +5,7 @@
     <template v-if="authStore.isLoggedIn">
       <!-- โปรไฟล์ของฉัน (แตะเพื่อแก้ไข) -->
       <RouterLink to="/me" class="home-me">
-        <img class="home-me-av" :src="myAvatar" alt="me" />
+        <img class="home-me-av" :src="myAvatar" alt="me" @error="(e) => fallbackAvatar(e, authStore.userData?.nickname)" />
         <div class="home-me-info">
           <div class="home-me-nick">{{ authStore.userData?.nickname || 'ฉัน' }}</div>
           <div class="home-me-sub">🏠 Lv.{{ authStore.userData?.residence?.level || 1 }} · แตะเพื่อแก้โปรไฟล์</div>
@@ -47,6 +47,7 @@
 import { RouterLink } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
+import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
 import NewsBoard from '../components/home/NewsBoard.vue'
@@ -54,7 +55,7 @@ import NewsBoard from '../components/home/NewsBoard.vue'
 const authStore = useAuthStore()
 const myAvatar = computed(() =>
   authStore.userData?.customPhoto || authStore.userData?.googlePhoto ||
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.userData?.nickname || '?')}&size=80&background=random`
+  letterAvatar(authStore.userData?.nickname)
 )
 </script>
 

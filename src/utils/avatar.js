@@ -1,0 +1,56 @@
+// ════════════════════════════════════════════════════════════
+//  Local avatar — initials on a deterministic colour, as an inline
+//  data-URI SVG. No network request → never shows a broken-image icon
+//  (replaces the old ui-avatars.com fallback, which fails offline / on
+//  flaky networks and rendered as "image not loaded").
+// ════════════════════════════════════════════════════════════
+
+const COLORS = [
+  '#6366f1', '#22c55e', '#3b82f6', '#f59e0b', '#ec4899',
+  '#14b8a6', '#a855f7', '#ef4444', '#0ea5e9', '#84cc16',
+]
+
+// Thai combining marks (vowels above/below + tone marks) — drop so an
+// initial never starts with a floating mark.
+const THAI_COMBINING = /[ัิ-ฺ็-๎]/
+
+function initials(name) {
+  const base = [...String(name || '').trim()].filter(
+    (c) => /[฀-๿a-zA-Z0-9]/.test(c) && !THAI_COMBINING.test(c)
+  )
+  if (!base.length) return '?'
+  // latin name reads better as 2 letters; Thai as a single character
+  const isLatin = /[a-zA-Z]/.test(base[0])
+  return base.slice(0, isLatin ? 2 : 1).join('').toUpperCase()
+}
+
+function colorFor(name) {
+  const s = String(name || '?')
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+  return COLORS[h % COLORS.length]
+}
+
+/** Inline data-URI SVG avatar (initials on colour). */
+export function letterAvatar(name, size = 96) {
+  const text = initials(name)
+  const bg = colorFor(name)
+  const fs = (text.length > 1 ? 0.4 : 0.5) * size
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">` +
+    `<rect width="100%" height="100%" fill="${bg}"/>` +
+    `<text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#fff" ` +
+    `font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-weight="700" font-size="${fs}">${text}</text>` +
+    `</svg>`
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
+/**
+ * <img @error> handler: swap a failed real photo (dead Google/custom URL)
+ * for the local letter avatar. Guards against an infinite error loop.
+ */
+export function fallbackAvatar(e, name, size = 96) {
+  const fb = letterAvatar(name, size)
+  const el = e?.target
+  if (el && el.getAttribute('src') !== fb) el.src = fb
+}

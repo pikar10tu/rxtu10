@@ -10,7 +10,7 @@
     <template v-else>
       <!-- avatar -->
       <div class="me-avatar-row">
-        <img class="me-avatar" :src="previewPhoto" alt="me" />
+        <img class="me-avatar" :src="previewPhoto" alt="me" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
         <div class="me-av-actions">
           <div class="me-nick">{{ auth.userData?.nickname || 'ฉัน' }}</div>
           <button class="me-btn-sm" @click="fileEl?.click()">📷 เปลี่ยนรูป</button>
@@ -46,6 +46,7 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
+import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import TagChips from '../components/shared/TagChips.vue'
 
 const auth = useAuthStore()
@@ -67,7 +68,7 @@ watch(() => auth.userData, fill, { immediate: true })
 
 const previewPhoto = computed(() =>
   newPhoto.value || auth.userData?.customPhoto || auth.userData?.googlePhoto ||
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(auth.userData?.nickname || '?')}&size=160&background=random`
+  letterAvatar(auth.userData?.nickname)
 )
 
 function onFile(e) {
