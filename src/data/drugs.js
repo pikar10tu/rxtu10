@@ -52,7 +52,7 @@ export const DRUGS = [
   { n: 'Loperamide', a: 'Peripheral Opioid Receptor Agonist (Antidiarrheal)', ind: 'ท้องเสียเฉียบพลัน (ไม่มีไข้/ถ่ายเป็นเลือด)', dose: 'เริ่ม 4 mg แล้ว 2 mg หลังถ่ายเหลวแต่ละครั้ง (สูงสุด 16 mg/วัน)' },
   { n: 'Glibenclamide', a: 'Sulfonylurea (closes K-ATP channel)', ind: 'เบาหวานชนิดที่ 2', dose: '2.5–5 mg วันละครั้ง พร้อมอาหารเช้า (สูงสุด 20 mg/วัน)' },
   { n: 'Allopurinol', a: 'Xanthine Oxidase Inhibitor (antigout)', ind: 'ลดกรดยูริก ป้องกันโรคเกาต์ (ไม่ใช้ตอนกำเริบ)', dose: '100–300 mg วันละครั้ง หลังอาหาร' },
-  { n: 'Colchicine', a: 'Microtubule Inhibitor (acute gout)', ind: 'โรคเกาต์กำเริบเฉียบพลัน', dose: 'เริ่ม 1 mg แล้ว 0.5 mg ใน 1 ชม.; ป้องกัน 0.5–1 mg/วัน' },
+  { n: 'Colchicine', a: 'Microtubule Inhibitor (acute gout)', ind: 'โรคเกาต์กำเริบเฉียบพลัน; ป้องกันช่วงเริ่มยาลดยูริก', dose: 'เริ่ม 1.2 mg แล้ว 0.6 mg ใน 1 ชม. (สูงสุด 1.8 mg วันแรก); ป้องกัน 0.6 mg วันละ 1–2 ครั้ง' },
   { n: 'Diclofenac', a: 'NSAIDs (acetic acid derivative)', ind: 'ปวด/อักเสบข้อ ปวดประจำเดือน', dose: '25–50 mg วันละ 2–3 ครั้ง พร้อมอาหาร' },
   { n: 'Naproxen', a: 'NSAIDs (propionic acid derivative)', ind: 'ปวด อักเสบข้อ เกาต์', dose: '250–500 mg วันละ 2 ครั้ง' },
   { n: 'Celecoxib', a: 'Selective COX-2 Inhibitor', ind: 'ข้อเสื่อม ข้ออักเสบรูมาตอยด์ (ระคายกระเพาะน้อย)', dose: '100–200 mg วันละ 1–2 ครั้ง' },
@@ -60,4 +60,44 @@ export const DRUGS = [
   { n: 'Ergotamine', a: 'Serotonin Agonist Antimigraine', ind: 'รักษาไมเกรนเฉียบพลัน', dose: '1–2 mg เมื่อเริ่มปวด ซ้ำได้ (สูงสุด 6 mg/วัน, 10 mg/สัปดาห์)' },
   { n: 'Norfloxacin', a: 'Fluoroquinolone (urinary/GI tract)', ind: 'ติดเชื้อทางเดินปัสสาวะ ท้องเสียจากแบคทีเรีย', dose: '400 mg ทุก 12 ชม.' },
   { n: 'ORS', a: 'Oral Rehydration Solution (WHO formula)', ind: 'ทดแทนน้ำและเกลือแร่จากท้องเสีย/อาเจียน', dose: 'จิบทีละน้อยหลังถ่ายเหลวแต่ละครั้ง (ผสม 1 ซองตามฉลาก)' },
+
+  // ── เพิ่มเติม: ยาต้านจุลชีพ (antibiotics / antifungal / antiviral) ──
+  { n: 'Amoxicillin/Clavulanate (Co-amoxiclav)', a: 'Penicillin + β-lactamase inhibitor', ind: 'ติดเชื้อที่ดื้อ amoxicillin: ไซนัส หู ปอด ผิวหนัง แผลสัตว์กัด', dose: '625 mg ทุก 8 ชม. หรือ 1 g ทุก 12 ชม. พร้อมอาหาร' },
+  { n: 'Cephalexin', a: '1st-gen Cephalosporin (oral)', ind: 'ติดเชื้อผิวหนัง ทางเดินปัสสาวะ คออักเสบ', dose: '250–500 mg ทุก 6 ชม.' },
+  { n: 'Dicloxacillin', a: 'Antistaphylococcal Penicillin', ind: 'ติดเชื้อ Staphylococcus ที่ผิวหนัง (ฝี หนอง)', dose: '250–500 mg ทุก 6 ชม. ตอนท้องว่าง (ก่อนอาหาร 1 ชม.)' },
+  { n: 'Clarithromycin', a: 'Macrolide Antibiotic', ind: 'ติดเชื้อทางเดินหายใจ; สูตรกำจัด H. pylori', dose: '250–500 mg ทุก 12 ชม.' },
+  { n: 'Clindamycin', a: 'Lincosamide Antibiotic', ind: 'ติดเชื้อ Staph/Strep ผิวหนัง-กระดูก ฟันอักเสบ (ทางเลือกเมื่อแพ้ penicillin)', dose: '150–450 mg ทุก 6 ชม.' },
+  { n: 'Metronidazole', a: 'Nitroimidazole (anaerobes/protozoa)', ind: 'ติดเชื้อแบคทีเรียไร้อากาศ บิดมีตัว ช่องคลอดอักเสบ', dose: '400 mg ทุก 8 ชม. (ห้ามดื่มแอลกอฮอล์)' },
+  { n: 'Co-trimoxazole (TMP-SMX)', a: 'Trimethoprim + Sulfamethoxazole', ind: 'ติดเชื้อทางเดินปัสสาวะ; ป้องกัน/รักษา PCP', dose: '1 DS (800/160) ทุก 12 ชม. ดื่มน้ำมากๆ' },
+  { n: 'Fluconazole', a: 'Azole Antifungal', ind: 'เชื้อราในช่องคลอด/ช่องปาก; เชื้อราระบบ', dose: 'ช่องคลอด 150 mg ครั้งเดียว; อื่นๆ 100–200 mg/วัน' },
+  { n: 'Acyclovir', a: 'Antiviral (guanosine analogue)', ind: 'เริม (HSV) และงูสวัด (VZV)', dose: 'เริม 400 mg วันละ 3 ครั้ง; งูสวัด 800 mg วันละ 5 ครั้ง' },
+
+  // ── เพิ่มเติม: หัวใจ-หลอดเลือด-ความดัน ──
+  { n: 'Hydrochlorothiazide (HCTZ)', a: 'Thiazide Diuretic', ind: 'ความดันโลหิตสูง บวมน้ำ', dose: '12.5–25 mg วันละครั้ง ตอนเช้า' },
+  { n: 'Spironolactone', a: 'K-sparing Diuretic / Aldosterone antagonist', ind: 'หัวใจล้มเหลว บวมจากตับแข็ง ความดันดื้อยา', dose: '25–50 mg วันละครั้ง' },
+  { n: 'Atenolol', a: 'Cardioselective Beta-blocker (β1)', ind: 'ความดันโลหิตสูง โรคหลอดเลือดหัวใจ', dose: '25–100 mg วันละครั้ง' },
+  { n: 'Isosorbide dinitrate (ISDN)', a: 'Nitrate Vasodilator', ind: 'ป้องกัน/บรรเทาอาการเจ็บหน้าอก (angina)', dose: 'อมใต้ลิ้น 5 mg เมื่อเจ็บ; ชนิดกิน 10–20 mg วันละ 2–3 ครั้ง' },
+
+  // ── เพิ่มเติม: เบาหวาน-ต่อมไร้ท่อ ──
+  { n: 'Sitagliptin', a: 'DPP-4 Inhibitor', ind: 'เบาหวานชนิดที่ 2', dose: '100 mg วันละครั้ง' },
+  { n: 'Pioglitazone', a: 'Thiazolidinedione (TZD)', ind: 'เบาหวานชนิดที่ 2 (เพิ่มความไวอินซูลิน)', dose: '15–30 mg วันละครั้ง (สูงสุด 45 mg)' },
+  { n: 'Levothyroxine', a: 'Thyroid Hormone (T4)', ind: 'ภาวะไทรอยด์ต่ำ (hypothyroidism)', dose: '50–100 mcg วันละครั้ง ตอนเช้าท้องว่าง' },
+  { n: 'Methimazole (Thiamazole)', a: 'Antithyroid (thionamide)', ind: 'ภาวะไทรอยด์เป็นพิษ (hyperthyroidism)', dose: 'เริ่ม 10–30 mg/วัน แล้วปรับตามผลเลือด' },
+
+  // ── เพิ่มเติม: ทางเดินหายใจ ──
+  { n: 'Montelukast', a: 'Leukotriene Receptor Antagonist', ind: 'ควบคุมหอบหืด; ภูมิแพ้จมูก', dose: '10 mg วันละครั้ง ตอนเย็น' },
+  { n: 'Theophylline', a: 'Methylxanthine Bronchodilator', ind: 'หอบหืด/ถุงลมโป่งพอง (COPD)', dose: 'ชนิดออกฤทธิ์นาน 200 mg ทุก 12 ชม. (ติดตามระดับยา)' },
+
+  // ── เพิ่มเติม: ทางเดินอาหาร ──
+  { n: 'Sucralfate', a: 'Mucosal Protectant', ind: 'แผลในกระเพาะ/ลำไส้เล็ก', dose: '1 g วันละ 4 ครั้ง ก่อนอาหารและก่อนนอน (ท้องว่าง)' },
+  { n: 'Metoclopramide', a: 'D2 Antagonist Prokinetic / Antiemetic', ind: 'คลื่นไส้ อาเจียน กระตุ้นการบีบตัวของกระเพาะ', dose: '10 mg วันละ 3 ครั้ง ก่อนอาหาร (ใช้ระยะสั้น)' },
+  { n: 'Ondansetron', a: '5-HT3 Receptor Antagonist Antiemetic', ind: 'คลื่นไส้/อาเจียนจากเคมีบำบัดหรือหลังผ่าตัด', dose: '4–8 mg ทุก 8–12 ชม.' },
+  { n: 'Dimenhydrinate', a: 'Antihistamine Antiemetic', ind: 'เมารถ-เรือ คลื่นไส้ เวียนศีรษะ', dose: '50 mg ทุก 4–6 ชม. (สูงสุด 400 mg/วัน)' },
+  { n: 'Bisacodyl', a: 'Stimulant Laxative', ind: 'ท้องผูก', dose: '5–10 mg ก่อนนอน (ออกฤทธิ์ ~6–12 ชม.)' },
+  { n: 'Lactulose', a: 'Osmotic Laxative', ind: 'ท้องผูก; ลดแอมโมเนียในภาวะตับวาย (hepatic encephalopathy)', dose: 'ท้องผูก 15–30 mL วันละ 1–2 ครั้ง' },
+  { n: 'Simethicone', a: 'Antiflatulent (defoaming agent)', ind: 'ท้องอืด แน่นท้องจากแก๊ส', dose: '40–125 mg หลังอาหารและก่อนนอน' },
+
+  // ── เพิ่มเติม: จิตเวช / อื่นๆ ──
+  { n: 'Sertraline', a: 'Selective Serotonin Reuptake Inhibitor (SSRI)', ind: 'ซึมเศร้า วิตกกังวล แพนิค PTSD', dose: '50 mg วันละครั้ง (ช่วง 25–200 mg/วัน)' },
+  { n: 'Ferrous sulfate', a: 'Iron Supplement', ind: 'ภาวะโลหิตจางจากขาดธาตุเหล็ก', dose: '200 mg (≈65 mg elemental Fe) วันละ 1–3 ครั้ง' },
 ]
