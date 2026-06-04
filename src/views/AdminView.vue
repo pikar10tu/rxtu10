@@ -105,6 +105,45 @@
           </li>
         </ul>
       </section>
+
+      <!-- ───── รายงานข้อมูลยา (drug reports) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span>📋 รายงานข้อมูลยา</span>
+          <button class="btn-mini" :disabled="loadingReports" @click="loadDrugReports">
+            {{ loadingReports ? '...' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">ผู้ใช้แจ้งว่าข้อมูลยาผิด/ไม่ตรง — ตรวจแก้แล้วกด ✓ เพื่อปิด</div>
+        <div v-if="!drugReports.length" class="admin-empty">ยังไม่มีรายงาน 🎉</div>
+        <ul v-else class="log-list">
+          <li v-for="r in drugReports" :key="r.id" class="rep-row">
+            <div class="rep-top"><b>{{ r.drug }}</b><button class="rep-done" @click="resolveDoc('drugReports', r.id)">✓ ปิด</button></div>
+            <div class="rep-cur">{{ r.currentClass }}<template v-if="r.currentDose"> · {{ r.currentDose }}</template></div>
+            <div class="rep-note">💬 {{ r.note }}</div>
+            <div class="log-ts">{{ r.reporterName || 'ไม่ระบุ' }} · {{ fmtTs(r.ts) }}</div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ───── ข้อเสนอแนะพัฒนา (feedback) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span>💡 ข้อเสนอแนะพัฒนา</span>
+          <button class="btn-mini" :disabled="loadingFeedback" @click="loadFeedback">
+            {{ loadingFeedback ? '...' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">ไอเดีย/ปัญหาที่ผู้ใช้ส่งมาเพื่อพัฒนาแอป</div>
+        <div v-if="!feedback.length" class="admin-empty">ยังไม่มีข้อเสนอแนะ</div>
+        <ul v-else class="log-list">
+          <li v-for="f in feedback" :key="f.id" class="rep-row">
+            <div class="rep-top"><span class="fb-cat">{{ fbCatLabel(f.category) }}</span><button class="rep-done" @click="resolveDoc('feedback', f.id)">✓ ปิด</button></div>
+            <div class="rep-note">{{ f.message }}</div>
+            <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ fmtTs(f.ts) }}</div>
+          </li>
+        </ul>
+      </section>
     </template>
   </div>
 </template>
@@ -143,8 +182,40 @@ const cheatLogs = ref([])
 const loadingLogs = ref(false)
 
 onMounted(() => {
-  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews() }
+  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews(); loadDrugReports(); loadFeedback() }
 })
+
+// ── Drug reports + dev feedback ──
+const drugReports = ref([])
+const loadingReports = ref(false)
+const feedback = ref([])
+const loadingFeedback = ref(false)
+
+async function loadDrugReports() {
+  loadingReports.value = true
+  try {
+    const snap = await getDocs(query(collection(db, 'drugReports'), orderBy('ts', 'desc'), limit(50)))
+    drugReports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[admin drugReports]', e) }
+  finally { loadingReports.value = false }
+}
+async function loadFeedback() {
+  loadingFeedback.value = true
+  try {
+    const snap = await getDocs(query(collection(db, 'feedback'), orderBy('ts', 'desc'), limit(50)))
+    feedback.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[admin feedback]', e) }
+  finally { loadingFeedback.value = false }
+}
+async function resolveDoc(coll, id) {
+  try {
+    await deleteDoc(doc(db, coll, id))
+    if (coll === 'drugReports') drugReports.value = drugReports.value.filter(x => x.id !== id)
+    else if (coll === 'feedback') feedback.value = feedback.value.filter(x => x.id !== id)
+    toast('ปิดรายการแล้ว', 'success')
+  } catch (e) { console.error('[admin resolve]', e); toast('ลบไม่สำเร็จ', 'error') }
+}
+const fbCatLabel = (c) => ({ idea: '💡 ไอเดีย', bug: '🐞 ปัญหา', other: '📝 อื่นๆ' }[c] || '📝 อื่นๆ')
 
 async function loadCheatLogs() {
   loadingLogs.value = true
@@ -335,6 +406,12 @@ async function setRole(m, role) {
 .log-reason { color: #dc2626; font-weight: 700; font-size: .72rem; }
 .log-detail { font-size: .66rem; color: rgba(0,0,0,.5); }
 .log-ts { font-size: .58rem; color: rgba(0,0,0,.35); margin-top: 2px; }
+.rep-row { padding: 9px 11px; border-radius: 10px; background: rgba(99,102,241,.05); border: 1px solid rgba(99,102,241,.15); }
+.rep-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .82rem; }
+.rep-done { border: none; background: rgba(34,197,94,.15); color: #15803d; border-radius: 8px; padding: 3px 9px; font-family: inherit; font-size: .64rem; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+.rep-cur { font-size: .66rem; color: rgba(0,0,0,.5); margin-top: 2px; }
+.rep-note { font-size: .76rem; color: #1e293b; margin-top: 4px; line-height: 1.4; word-break: break-word; }
+.fb-cat { font-size: .68rem; font-weight: 700; color: #4f46e5; }
 .news-form { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
 .news-icon-in { width: 42px; text-align: center; padding: 8px 0; border: 1px solid rgba(0,0,0,.12); border-radius: 10px; font-family: inherit; font-size: 1rem; }
 .news-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }

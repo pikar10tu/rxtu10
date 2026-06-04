@@ -78,6 +78,20 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // ── Drug-data error reports (Study tab) — any logged-in user may submit;
+    //    only admin reads/triages ──
+    match /drugReports/{id} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Dev feedback / suggestions — any logged-in user may submit;
+    //    only admin reads/triages ──
+    match /feedback/{id} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
     // ── News feed ──
     match /news/{newsId} {
       allow read:   if request.auth != null;
