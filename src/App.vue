@@ -4,9 +4,10 @@
 
     <div v-if="authStore.loading" class="loading-screen">กำลังโหลด...</div>
 
-    <!-- Only admins see the live app while v2 is under construction;
-         everyone else gets the maintenance screen (and can't touch data). -->
-    <template v-else-if="authStore.isAdmin">
+    <!-- While v2 is under construction, only the admin + academic team see the
+         live app (academics manage the question bank); everyone else gets the
+         maintenance screen (and can't touch data). -->
+    <template v-else-if="authStore.isAcademic">
       <main id="main-content"><RouterView /></main>
 
       <nav id="bottom-nav">
@@ -14,7 +15,8 @@
         <RouterLink to="/members" class="bn-item"><span class="bn-icon">👥</span>Members</RouterLink>
         <RouterLink to="/play"    class="bn-item"><span class="bn-icon">🎮</span>Play</RouterLink>
         <RouterLink to="/study"   class="bn-item"><span class="bn-icon">📚</span>Study</RouterLink>
-        <RouterLink to="/admin"   class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
+        <RouterLink to="/questions" class="bn-item"><span class="bn-icon">📝</span>ข้อสอบ</RouterLink>
+        <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
       </nav>
 
       <button class="help-fab" title="วิธีเล่น" @click="openHelp">❓</button>
