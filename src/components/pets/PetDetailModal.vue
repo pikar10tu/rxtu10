@@ -85,9 +85,14 @@ const pets = computed(() => auth.userData?.pets || [])
 
 // ── Active team ──
 const battleSlots = computed(() => residenceBattleSlots(auth.userData?.residence?.level || 1))
-const activeList = computed(() =>
-  (auth.userData?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
-)
+// only count active pets that still exist — a consumed pet (evolve/potential
+// fodder) can leave a ghost instId in activePets and inflate the count.
+const activeList = computed(() => {
+  const owned = new Set(pets.value.map(p => p.instId))
+  return (auth.userData?.activePets || [])
+    .map(x => (typeof x === 'string' ? x : x?.instId))
+    .filter(id => id && owned.has(id))
+})
 const isActive = computed(() => pet.value && activeList.value.includes(pet.value.instId))
 async function toggleActive() {
   if (busy.value || !pet.value) return
@@ -126,9 +131,21 @@ const lifesteal = computed(() => statBonusPct(pot.value, 'lifesteal'))
 const dodge = computed(() => statBonusPct(pot.value, 'dodge'))
 
 async function commit(newPets, coinDelta = 0) {
+  // reconcile the active team: drop any pet that no longer exists so a
+  // consumed-as-fodder pet can't linger as a ghost in activePets.
+  const owned = new Set(newPets.map(p => p.instId))
+  const curActive = (auth.userData?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
+  const nextActive = curActive.filter(id => owned.has(id))
+  const activeChanged = nextActive.length !== curActive.length
+
   auth.blockSnapshot()
-  auth.setUserDataOptimistic({ pets: newPets, ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}) })
+  auth.setUserDataOptimistic({
+    pets: newPets,
+    ...(activeChanged ? { activePets: nextActive } : {}),
+    ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}),
+  })
   const patch = { pets: newPets }
+  if (activeChanged) patch.activePets = nextActive
   if (coinDelta) patch.coins = increment(coinDelta)
   await updateDoc(doc(db, 'users', auth.currentUser.uid), patch)
 }

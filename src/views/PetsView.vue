@@ -51,9 +51,14 @@ const level = computed(() => authStore.userData?.residence?.level || 1)
 const storageCap = computed(() => residencePetStorage(level.value))
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
-const activeSet = computed(() => new Set(
-  (authStore.userData?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
-))
+const activeSet = computed(() => {
+  const owned = new Set(pets.value.map(p => p.instId))
+  return new Set(
+    (authStore.userData?.activePets || [])
+      .map(x => (typeof x === 'string' ? x : x?.instId))
+      .filter(id => id && owned.has(id))
+  )
+})
 
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
