@@ -92,10 +92,10 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    // ── News feed ──
+    // ── News feed — only admin posts (UI posts from AdminView only) ──
     match /news/{newsId} {
       allow read:   if request.auth != null;
-      allow create: if request.auth != null;
+      allow create: if isAdmin();
       allow update: if false;
       allow delete: if isAdmin();
     }
