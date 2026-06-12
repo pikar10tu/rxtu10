@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import {
-    signInWithPopup, signOut, onAuthStateChanged,
+    signInWithPopup, signInWithRedirect, getRedirectResult,
+    signOut, onAuthStateChanged,
 } from 'firebase/auth'
 import {
     doc, getDoc, setDoc, updateDoc, onSnapshot,
@@ -10,6 +11,7 @@ import {
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/config.js'
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
 import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
+import { useToast } from '../composables/useToast.js'
 
 export const useAuthStore = defineStore('auth', () => {
     // ── State ──
@@ -32,13 +34,33 @@ export const useAuthStore = defineStore('auth', () => {
     const incomeBonusPct = computed(() => incomeBonusFromTags(effectiveTags(userData.value)))
 
     // ── Actions ──
+    // มือถือ: popup มักโดนบล็อก → ใช้ signInWithRedirect;
+    // เดสก์ท็อป: popup (UX ดีกว่า) แล้ว fallback เป็น redirect ถ้าโดนบล็อก
+    // หมายเหตุ: ไม่เรียก ensureDoc ที่นี่ — onAuthStateChanged ใน init() สร้าง doc ให้
+    // (กันกรณี auth สำเร็จแต่ Firestore เชื่อมไม่ได้ จะได้ไม่ขึ้น error หลอก)
+    const _isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent)
     async function login() {
+        const { toast } = useToast()
+        provider.setCustomParameters({ prompt: 'select_account' })
+        if (_isMobile) {
+            try { await signInWithRedirect(auth, provider) }
+            catch (e) {
+                console.error('[login redirect]', e.code, e)
+                toast(`Login ไม่สำเร็จ: ${e.code || e.message || e}`, 'error', 6000)
+            }
+            return
+        }
         try {
-            provider.setCustomParameters({ prompt: 'select_account' })
-            const result = await signInWithPopup(auth, provider)
-            await ensureDoc(result.user)
+            await signInWithPopup(auth, provider)
         } catch (e) {
-            if (e.code !== 'auth/popup-closed-by-user') throw e
+            if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
+            if (e.code === 'auth/popup-blocked') {
+                // popup โดนบล็อก → redirect แทน
+                try { await signInWithRedirect(auth, provider); return }
+                catch (e2) { console.error('[login redirect fallback]', e2.code, e2) }
+            }
+            console.error('[login popup]', e.code, e)
+            toast(`Login ไม่สำเร็จ: ${e.code || e.message || e}`, 'error', 6000)
         }
     }
 
@@ -91,10 +113,19 @@ export const useAuthStore = defineStore('auth', () => {
 
     // ── Auth listener (call once in main.js) ──
     function init() {
+        // จบ flow ของ signInWithRedirect เมื่อกลับมาที่หน้าเว็บ
+        // (surface error เท่านั้น; onAuthStateChanged จัดการ state เอง)
+        getRedirectResult(auth).catch((e) => {
+            console.error('[getRedirectResult]', e.code, e)
+            const { toast } = useToast()
+            toast(`Login ไม่สำเร็จ: ${e.code || e.message || e}`, 'error', 6000)
+        })
         onAuthStateChanged(auth, async (user) => {
             currentUser.value = user
             if (user) {
-                await ensureDoc(user)
+                // อย่าให้ ensureDoc ที่ล้มเหลวค้างหน้า "กำลังโหลด..." ตลอดไป
+                try { await ensureDoc(user) }
+                catch (e) { console.error('[ensureDoc]', e) }
                 if (_unsub) _unsub()
                 _unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => {
                     if (_blockSnapshot) return
