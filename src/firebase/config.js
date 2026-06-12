@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore } from 'firebase/firestore'
 import { getDatabase } from 'firebase/database'
 
 const firebaseConfig = {
@@ -16,7 +16,9 @@ const firebaseConfig = {
 
 export const app      = initializeApp(firebaseConfig)
 export const auth     = getAuth(app)
-export const db       = getFirestore(app)
+// force long-polling — บางเครือข่าย (มือถือ/มหาลัย) บล็อก WebChannel ทำให้
+// Firestore เชื่อมไม่ติด; v1 เจอปัญหานี้แล้ว (autoDetect ไม่พอ ต้อง force)
+export const db       = initializeFirestore(app, { experimentalForceLongPolling: true })
 export const provider = new GoogleAuthProvider()
 // export const rtdb  = getDatabase(app)  // enable in Phase 3
 
