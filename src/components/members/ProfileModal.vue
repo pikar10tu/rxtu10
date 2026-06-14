@@ -128,13 +128,14 @@ const hasContact = computed(() => {
 
 <style scoped>
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.pf-box { background: #fff; width: 100%; max-width: 400px; border-radius: 20px; overflow: hidden; max-height: 88vh; overflow-y: auto; }
+.pf-box { background: #fff; width: 100%; max-width: 400px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }
 .pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; }
 .pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }
 .pf-real {
-  font-size: 1.15rem; font-weight: 800; margin-top: 8px; padding: 0 14px;
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 1.3rem; margin-top: 8px; padding: 0 14px;
   line-height: 1.25;
 }
 .pf-name { font-size: .82rem; font-weight: 600; opacity: .85; margin-top: 1px; }

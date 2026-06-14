@@ -215,16 +215,17 @@ async function reroll(idx) {
 
 <style scoped>
 .pd-ov { position: fixed; inset: 0; z-index: 230; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.pd-box { background: #fff; width: 100%; max-width: 380px; border-radius: 20px; overflow: hidden; max-height: 90vh; overflow-y: auto; }
+.pd-box { background: #fff; width: 100%; max-width: 380px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; }
 .pd-hero { position: relative; padding: 20px 16px 16px; text-align: center; color: #fff; }
 .pd-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; }
 .pd-emoji { font-size: 3.4rem; }
-.pd-name { font-size: 1.2rem; font-weight: 800; margin-top: 2px; }
+.pd-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
 .pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .pd-tag { background: rgba(255,255,255,.25); font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
-.pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: none; border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: rgba(0,0,0,.06); color: rgba(0,0,0,.6); }
-.pd-active.on { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; }
-.pd-active:disabled { opacity: .6; }
+.pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: #fff; color: var(--ink); box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.pd-active.on { background: var(--gold); color: #fff; }
+.pd-active:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.pd-active:disabled { opacity: .6; box-shadow: none; }
 .pd-stats { display: flex; }
 .pd-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }
 .pd-stat:last-child { border-right: none; }
@@ -236,14 +237,14 @@ async function reroll(idx) {
 .pd-sec-head { font-weight: 800; font-size: .82rem; margin-bottom: 8px; }
 .pd-note { font-size: .68rem; color: rgba(0,0,0,.5); margin-bottom: 8px; }
 .pd-note.small { font-size: .58rem; margin: 6px 0 0; }
-.pd-btn { width: 100%; border: none; border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: rgba(0,0,0,.2); cursor: pointer; }
-.pd-btn.ok { background: linear-gradient(135deg, #c4a5f5, #f7a8c4); }
-.pd-btn:disabled { opacity: .5; cursor: default; }
-.pd-btn.ok:active:not(:disabled) { transform: scale(.98); }
+.pd-btn { width: 100%; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.pd-btn.ok { background: var(--primary); box-shadow: var(--pop); }
+.pd-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+.pd-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pd-slots { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-.pd-slot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; border-radius: 10px; border: 1.5px dashed rgba(0,0,0,.15); }
-.pd-slot.filled { border-style: solid; border-color: #c4a5f5; background: #f4edff; }
-.pd-slot-aff { font-size: .78rem; font-weight: 800; color: #7c3aed; }
+.pd-slot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; border-radius: 10px; border: 2px dashed var(--ink); }
+.pd-slot.filled { border-style: solid; border-color: var(--ink); background: var(--primary-light); }
+.pd-slot-aff { font-size: .78rem; font-weight: 800; color: var(--primary); }
 .pd-slot-empty { font-size: .7rem; color: rgba(0,0,0,.35); }
 .pd-reroll { border: none; background: rgba(0,0,0,.06); border-radius: 7px; padding: 4px 8px; cursor: pointer; font-size: .8rem; }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px">⚙️ Admin</div>
+    <div class="page-title">⚙️ Admin</div>
 
     <!-- guard: admin only -->
     <div v-if="!authStore.isAdmin" class="admin-denied">
@@ -351,8 +351,9 @@ async function setRole(m, role) {
 }
 .admin-card {
   background: #fff;
-  border: 1px solid rgba(0, 0, 0, .08);
-  border-radius: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: var(--pop);
   padding: 14px;
   margin-bottom: 14px;
 }
@@ -377,12 +378,13 @@ async function setRole(m, role) {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
-  border: 1px solid rgba(0, 0, 0, .12);
+  border: 2px solid var(--ink);
   border-radius: 10px;
   font-family: inherit;
   font-size: .82rem;
   margin-bottom: 10px;
 }
+.admin-search:focus { outline: none; box-shadow: var(--pop); }
 .role-list {
   list-style: none;
   margin: 0;
@@ -431,17 +433,18 @@ async function setRole(m, role) {
 .role-admin    { background: rgba(251,191,36,.18); color: #b45309; }
 .role-actions { flex-shrink: 0; }
 .btn-mini {
-  border: none;
+  border: 2px solid var(--ink);
   border-radius: 8px;
   padding: 6px 10px;
   font-family: inherit;
   font-size: .72rem;
   font-weight: 700;
   cursor: pointer;
+  background: #fff;
 }
 .btn-mini:disabled { opacity: .4; cursor: default; }
-.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
-.btn-gray { background: rgba(0, 0, 0, .08); color: rgba(0, 0, 0, .6); }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gray { background: #fff; color: var(--ink); }
 .log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .log-row { padding: 8px 10px; border-radius: 10px; background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.18); }
 .log-main { font-size: .8rem; }

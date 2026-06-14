@@ -42,10 +42,12 @@ function toggle(i) { open.value = open.value === i ? -1 : i }
 }
 .help-box {
   background: #fff; width: 100%; max-width: 480px;
-  max-height: 85vh; border-radius: 18px 18px 0 0;
+  max-height: 85vh; border: 2px solid var(--ink); border-bottom: none;
+  border-radius: 18px 18px 0 0;
   display: flex; flex-direction: column;
   animation: help-up .2s ease;
 }
+.help-head span:first-child { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; color: var(--ink); }
 @keyframes help-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .help-head {
   display: flex; align-items: center; justify-content: space-between;
