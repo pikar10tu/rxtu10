@@ -51,12 +51,12 @@ const fmtRemain = computed(() => {
 
 <style scoped>
 .daily-card {
-  background: linear-gradient(135deg, #fff0f7, #f6f0ff);
-  border: 1px solid #f3d9ec;
+  background: #fff;
+  border: 2px solid var(--ink);
   border-radius: 18px;
   padding: 14px;
   margin-bottom: 14px;
-  box-shadow: 0 2px 10px rgba(170,140,210,.12);
+  box-shadow: var(--pop);
 }
 .dc-coins { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
 .dc-coins-label { font-size: .72rem; color: rgba(0,0,0,.5); }
@@ -65,17 +65,17 @@ const fmtRemain = computed(() => {
 .dc-pool-top { display: flex; justify-content: space-between; align-items: baseline; font-size: .78rem; color: rgba(0,0,0,.6); margin-bottom: 5px; }
 .dc-pool-top b { font-size: 1rem; color: #b45309; }
 .dc-bar { height: 8px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
-.dc-fill { height: 100%; background: linear-gradient(90deg, #c4a5f5, #f7a8c4); transition: width .8s linear; }
-.dc-fill.full { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+.dc-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width .8s linear; }
+.dc-fill.full { background: linear-gradient(90deg, var(--gold), var(--accent)); }
 .dc-pool-sub { display: flex; justify-content: space-between; font-size: .62rem; color: rgba(0,0,0,.45); margin-top: 4px; }
 .dc-claim {
-  width: 100%; border: none; border-radius: 12px; padding: 11px;
+  width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 11px;
   font-family: inherit; font-size: .86rem; font-weight: 800; color: #fff;
-  background: rgba(0,0,0,.25); cursor: pointer; transition: transform .12s; margin-bottom: 12px;
+  background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; margin-bottom: 12px;
 }
-.dc-claim.ready { background: linear-gradient(135deg, #c4a5f5, #f7a8c4); }
-.dc-claim.ready:active { transform: scale(.98); }
-.dc-claim:disabled { cursor: default; opacity: .55; }
+.dc-claim.ready { background: var(--mint); box-shadow: var(--pop); }
+.dc-claim.ready:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+.dc-claim:disabled { cursor: default; opacity: .6; box-shadow: none; }
 .dc-breakdown { background: rgba(0,0,0,.03); border-radius: 10px; padding: 8px 12px; }
 .dc-row { display: flex; justify-content: space-between; align-items: center; font-size: .74rem; color: rgba(0,0,0,.6); padding: 3px 0; }
 .dc-row b { color: #059669; }

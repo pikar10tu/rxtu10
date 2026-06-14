@@ -467,54 +467,73 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════
-   🌸 PASTEL THEME (cute) — design-system override
+   🧪 STICKER POP — Apothecary Arcade (bold redesign)
+   พื้นกระดาษครีม + สีจัด + การ์ดสติกเกอร์ขอบหมึก เงาแข็ง
    ═══════════════════════════════════════════════════════ */
 :root {
-  --sci: #6fcf97;
-  --care: #6aa9f4;
-  --gold: #f6b756;
-  --primary: #b58df1;        /* soft lavender */
-  --primary-light: #f4edff;
-  --accent: #f7a8c4;         /* soft pink */
-  --bg: #fbf7ff;
+  --ink: #241b33;            /* deep plum-ink: text, sticker borders + hard shadow */
+  --sci: #2da8ff;
+  --care: #17c39a;
+  --gold: #ffb020;
+  --primary: #6d3bf5;        /* electric violet */
+  --primary-light: #efe9ff;
+  --accent: #ff5d73;         /* hot coral */
+  --mint: #17c39a;
+  --bg: #fdf3e7;             /* warm cream paper */
   --surface: #ffffff;
-  --text: #4a3f5e;
-  --muted: #9b8fb0;
-  --border: #efe7fb;
-  --shadow-sm: 0 2px 10px rgba(170,140,210,.12);
-  --shadow-md: 0 8px 24px rgba(170,140,210,.18);
+  --text: #241b33;
+  --muted: #8a8197;
+  --border: #ece1d2;         /* soft warm divider (เก็บไว้อ่อน — ใช้เป็นเส้นคั่น/แทร็ก) */
+  --shadow-sm: 0 2px 8px rgba(36,27,51,.07);
+  --shadow-md: 0 8px 22px rgba(36,27,51,.12);
+  --shadow-lg: 0 16px 36px rgba(36,27,51,.16);
+  --pop: 3px 3px 0 var(--ink);     /* hard sticker shadow */
+  --pop-lg: 5px 6px 0 var(--ink);
+  --font-display: 'Chonburi', 'Kanit', serif;
 }
 
 html, body {
   font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol';
   color: var(--text);
-  background: linear-gradient(160deg, #fdeef7 0%, #f3edff 45%, #eafaf6 100%);
+  background:
+    radial-gradient(circle at 12% 6%, #ffe2c2 0, transparent 38%),
+    radial-gradient(circle at 90% 0%, #ffd3de 0, transparent 34%),
+    radial-gradient(circle at 50% 102%, #cdf3e6 0, transparent 46%),
+    #fdf3e7;
   background-attachment: fixed;
 }
 
-#main-content { padding: 16px 14px 26px; }
+#main-content { padding: 16px 14px 28px; }
 
-/* floating frosted pastel nav */
+/* floating sticker bottom nav */
 #bottom-nav {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -6px 24px rgba(170, 140, 210, 0.14);
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -3px 0 rgba(36,27,51,.10);
 }
-.bn-item { color: var(--muted); }
+.bn-item { color: var(--muted); font-weight: 700; }
+.bn-item .bn-icon { transition: transform .18s cubic-bezier(.34,1.56,.64,1); }
 .bn-item.router-link-active,
 .bn-item.router-link-exact-active { color: var(--primary); }
-.bn-item.router-link-active .bn-icon { transform: translateY(-2px) scale(1.06); }
+.bn-item.router-link-active .bn-icon,
+.bn-item.router-link-exact-active .bn-icon { transform: translateY(-3px) scale(1.2); }
 
-/* soft cards + subtle page transition */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm); }
-.tab-content { animation: fadeup .25s ease; }
-@keyframes fadeup { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+/* sticker cards + page transition */
+.card { background: var(--surface); border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop); }
+.tab-content { animation: fadeup .28s cubic-bezier(.34,1.4,.64,1); }
+@keyframes fadeup { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* help FAB → pastel gradient */
-.help-fab { background: linear-gradient(135deg, #c4a5f5, #f7a8c4) !important; }
+/* help FAB → coral sticker */
+.help-fab {
+  background: var(--accent) !important;
+  border: 2px solid var(--ink) !important;
+  color: #fff !important;
+  box-shadow: var(--pop) !important;
+}
+.help-fab:active { transform: translate(2px,2px) !important; box-shadow: 1px 1px 0 var(--ink) !important; }
 
 /* ── Tablet / iPad / desktop: center the app as a phone-width column ── */
 @media (min-width: 640px) {

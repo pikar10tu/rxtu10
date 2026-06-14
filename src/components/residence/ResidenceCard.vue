@@ -42,10 +42,11 @@ const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useReside
 <style scoped>
 .res-card {
   background: #fff;
-  border: 2px solid;
-  border-radius: 16px;
+  border: 2px solid var(--ink);
+  border-radius: 18px;
   padding: 14px;
   margin-bottom: 14px;
+  box-shadow: var(--pop);
 }
 .res-head { display: flex; align-items: center; gap: 12px; }
 .res-art {
@@ -62,12 +63,13 @@ const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useReside
 .res-next-income { color: #059669; font-weight: 700; }
 .res-upgrade {
   width: 100%;
-  border: none; border-radius: 12px;
+  border: 2px solid var(--ink); border-radius: 12px;
   padding: 11px; font-family: inherit; font-size: .86rem; font-weight: 800;
-  color: #fff; background: rgba(0,0,0,.25); cursor: pointer;
-  transition: transform .12s, opacity .12s;
+  color: #fff; background: #c9c2d4; cursor: pointer;
+  transition: transform .12s, box-shadow .12s, opacity .12s;
 }
-.res-upgrade.ok:active { transform: scale(.98); }
+.res-upgrade.ok { box-shadow: var(--pop); }
+.res-upgrade.ok:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 .res-upgrade:not(.ok) { opacity: .55; cursor: not-allowed; }
 .res-need { text-align: center; font-size: .66rem; color: #ef4444; margin-top: 6px; }
 .res-max { text-align: center; font-weight: 800; color: #f59e0b; padding: 12px 0 4px; }

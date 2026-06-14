@@ -41,8 +41,8 @@ function fmt(ts) {
 </script>
 
 <style scoped>
-.news { background: #fff; border: 1px solid var(--border, #efe7fb); border-radius: 16px; padding: 14px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(170,140,210,.1); }
-.news-head { font-weight: 800; font-size: .95rem; margin-bottom: 10px; }
+.news { background: #fff; border: 2px solid var(--ink); border-radius: 18px; padding: 14px; margin-bottom: 14px; box-shadow: var(--pop); }
+.news-head { font-weight: 800; font-size: .95rem; margin-bottom: 10px; color: var(--ink); }
 .news-empty { font-size: .74rem; color: rgba(0,0,0,.4); text-align: center; padding: 6px 0; }
 .news-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
 .news-item { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,.05); }
