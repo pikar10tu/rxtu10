@@ -2,7 +2,7 @@
   <div class="tab-content">
     <div class="qv-head">
       <button class="qv-back" @click="$router.back()">‹</button>
-      <span>📝 ทำข้อสอบ</span>
+      <span class="qv-head-title">📝 ทำข้อสอบ</span>
     </div>
 
     <div v-if="!authStore.isLoggedIn" class="qv-empty">เข้าสู่ระบบเพื่อทำข้อสอบ</div>
@@ -229,17 +229,20 @@ async function finish() {
 </script>
 
 <style scoped>
-.qv-head { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px; }
-.qv-back { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; font-size: 1.1rem; cursor: pointer; }
+.qv-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.qv-head-title { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); }
+.qv-back { border: 2px solid var(--ink); background: #fff; border-radius: 10px; width: 32px; height: 32px; font-size: 1.1rem; cursor: pointer; box-shadow: var(--pop); }
+.qv-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qv-empty { text-align: center; color: rgba(0,0,0,.45); padding: 40px 16px; font-size: .85rem; line-height: 1.6; }
 
 .qv-info { font-size: .9rem; color: #334155; margin-bottom: 14px; }
 .qv-label { font-size: .68rem; font-weight: 700; color: #64748b; margin: 12px 0 6px; }
 .qv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.qv-chip { border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: rgba(0,0,0,.55); cursor: pointer; }
-.qv-chip.on { background: #4f46e5; border-color: #4f46e5; color: #fff; }
-.qv-start { width: 100%; margin-top: 20px; border: none; border-radius: 14px; padding: 15px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#4f46e5,#6366f1); cursor: pointer; }
-.qv-start:disabled { background: #cbd5e1; cursor: default; }
+.qv-chip { border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.qv-chip.on { background: var(--primary); border-color: var(--ink); color: #fff; }
+.qv-start { width: 100%; margin-top: 20px; border: 2px solid var(--ink); border-radius: 14px; padding: 15px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.qv-start:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.qv-start:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .qv-hint { text-align: center; font-size: .64rem; color: rgba(0,0,0,.4); margin-top: 10px; }
 
 .qv-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -248,9 +251,10 @@ async function finish() {
 .qv-fill { height: 100%; background: linear-gradient(90deg,#4f46e5,#6366f1); transition: width .3s; }
 .qv-count { font-size: .68rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .qv-running { text-align: right; font-size: .68rem; font-weight: 700; color: #15803d; margin-bottom: 10px; }
-.qv-q { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; padding: 18px; font-size: .95rem; font-weight: 700; color: #1e293b; line-height: 1.5; margin-bottom: 12px; }
-.qv-choices { display: flex; flex-direction: column; gap: 8px; }
-.qv-choice { display: flex; align-items: center; gap: 10px; text-align: left; border: 1.5px solid rgba(0,0,0,.1); background: #fff; border-radius: 12px; padding: 13px 14px; font-family: inherit; font-size: .85rem; color: #334155; cursor: pointer; }
+.qv-q { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 18px; font-size: .95rem; font-weight: 700; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
+.qv-choices { display: flex; flex-direction: column; gap: 10px; }
+.qv-choice { display: flex; align-items: center; gap: 10px; text-align: left; border: 2px solid var(--ink); background: #fff; border-radius: 12px; padding: 13px 14px; font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; box-shadow: var(--pop); transition: transform .1s, box-shadow .1s; }
+.qv-choice:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qv-choice:disabled { cursor: default; }
 .qv-letter { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,.06); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .78rem; }
 .qv-ctext { flex: 1; }
@@ -269,7 +273,7 @@ async function finish() {
 .qv-result { text-align: center; padding: 24px 0; }
 .qv-result-emoji { font-size: 3.4rem; }
 .qv-result-title { font-size: 1.2rem; font-weight: 800; margin: 6px 0 14px; }
-.qv-result-score { font-size: 2.6rem; font-weight: 800; color: #4f46e5; line-height: 1; }
+.qv-result-score { font-family: var(--font-display); font-weight: 400; font-size: 2.8rem; color: var(--primary); line-height: 1; }
 .qv-result-score span { font-size: 1.3rem; color: rgba(0,0,0,.35); }
 .qv-result-pct { font-size: 1rem; font-weight: 700; color: #64748b; margin-top: 4px; }
 .qv-result-coins { font-size: 1.2rem; font-weight: 800; color: #d97706; margin: 14px 0; }

@@ -535,6 +535,9 @@ html, body {
 }
 .help-fab:active { transform: translate(2px,2px) !important; box-shadow: 1px 1px 0 var(--ink) !important; }
 
+/* shared page heading — display font (ใช้ทุกหน้า) */
+.page-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: var(--ink); margin-bottom: 14px; letter-spacing: .3px; }
+
 /* ── Tablet / iPad / desktop: center the app as a phone-width column ── */
 @media (min-width: 640px) {
   /* center as a 560px column WITHOUT transform (transform would break

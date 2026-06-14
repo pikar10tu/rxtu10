@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="shop-head">
-      <div style="font-size:1.1rem;font-weight:800">🛒 Shop</div>
+      <div class="page-title" style="margin-bottom:0">🛒 Shop</div>
       <span class="shop-coins">{{ coins.toLocaleString() }} 🪙</span>
     </div>
 
@@ -107,24 +107,26 @@ async function buy(egg) {
 .shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
 .shop-disc { color: #059669; font-weight: 700; }
 .egg-list { display: flex; flex-direction: column; gap: 10px; }
-.egg-card { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--border, #efe7fb); border-radius: 16px; padding: 12px; box-shadow: 0 2px 10px rgba(170,140,210,.1); }
+.egg-card { display: flex; align-items: center; gap: 12px; background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 12px; box-shadow: var(--pop); }
 .egg-emoji { font-size: 2.2rem; flex-shrink: 0; }
 .egg-info { flex: 1; min-width: 0; }
 .egg-name { font-weight: 800; font-size: .92rem; }
 .egg-desc { font-size: .64rem; color: rgba(0,0,0,.5); margin: 1px 0 4px; }
 .egg-rates { display: flex; flex-wrap: wrap; gap: 6px; font-size: .6rem; font-weight: 700; }
-.egg-buy { flex-shrink: 0; border: none; border-radius: 11px; padding: 10px 12px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: rgba(0,0,0,.25); cursor: pointer; }
-.egg-buy.ok { background: linear-gradient(135deg, #c4a5f5, #f7a8c4); }
-.egg-buy.ok:active { transform: scale(.97); }
+.egg-buy { flex-shrink: 0; border: 2px solid var(--ink); border-radius: 11px; padding: 10px 12px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.egg-buy.ok { background: var(--gold); box-shadow: var(--pop); }
+.egg-buy.ok:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .shop-note { font-size: .64rem; color: rgba(0,0,0,.4); text-align: center; margin-top: 14px; }
 .shop-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 /* reveal */
 .rv-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.rv-box { background: #fff; border-radius: 22px; padding: 28px 24px; text-align: center; max-width: 300px; width: 100%; animation: rv-pop .25s ease; }
+.rv-box { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 28px 24px; text-align: center; max-width: 300px; width: 100%; animation: rv-pop .25s ease; }
 @keyframes rv-pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); }
 .rv-emoji { font-size: 4.5rem; margin: 8px 0; }
 .rv-name { font-size: 1.2rem; font-weight: 800; }
 .rv-rarity { display: inline-block; color: #fff; font-size: .64rem; font-weight: 800; padding: 3px 12px; border-radius: 999px; margin-top: 8px; }
-.rv-ok { display: block; width: 100%; margin-top: 18px; border: none; border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: linear-gradient(135deg, #c4a5f5, #f7a8c4); cursor: pointer; }
+.rv-ok { display: block; width: 100%; margin-top: 18px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.rv-ok:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.rv-name { font-family: var(--font-display); font-weight: 400; }
 </style>

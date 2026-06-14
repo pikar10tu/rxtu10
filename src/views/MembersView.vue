@@ -97,33 +97,32 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
 
 <style scoped>
 .mv-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
-.mv-title { font-size: 1.15rem; font-weight: 800; }
+.mv-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
 .mv-count { font-size: .66rem; color: rgba(0,0,0,.45); font-weight: 600; }
 .mv-search {
   width: 100%; box-sizing: border-box; padding: 10px 14px;
-  border: 1px solid rgba(0,0,0,.1); border-radius: 12px;
+  border: 2px solid var(--ink); border-radius: 12px;
   font-family: inherit; font-size: .82rem; margin-bottom: 10px; background: #fff;
 }
-.mv-search:focus { outline: 2px solid #6366f1aa; border-color: transparent; }
+.mv-search:focus { outline: none; box-shadow: var(--pop); }
 .mv-filters { display: flex; gap: 6px; margin-bottom: 14px; }
 .mv-filter {
-  border: 1px solid rgba(0,0,0,.1); background: #fff; border-radius: 999px;
+  border: 2px solid var(--ink); background: #fff; border-radius: 999px;
   padding: 6px 14px; font-family: inherit; font-size: .74rem; font-weight: 700;
-  color: rgba(0,0,0,.5); cursor: pointer; transition: .12s;
+  color: var(--ink); cursor: pointer; transition: .12s;
 }
-.mv-filter.on { background: #1e293b; color: #fff; border-color: #1e293b; }
+.mv-filter.on { background: var(--primary); color: #fff; border-color: var(--ink); }
 .mv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 28px 0; font-size: .85rem; }
 .mv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .mv-card {
-  background: #fff; border: 1px solid rgba(0,0,0,.06); border-radius: 16px;
+  background: #fff; border: 2px solid var(--ink); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px;
-  cursor: pointer; font-family: inherit; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  cursor: pointer; font-family: inherit; box-shadow: var(--pop);
   transition: transform .12s, box-shadow .12s;
 }
-.mv-card:active { transform: scale(.96); }
-.mv-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
-.mv-card.off { opacity: .5; cursor: default; box-shadow: none; }
-.mv-card.off:active { transform: none; }
+.mv-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.mv-card.off { opacity: .5; cursor: default; box-shadow: none; border-style: dashed; }
+.mv-card.off:active { transform: none; box-shadow: none; }
 .mv-av-wrap { position: relative; }
 .mv-avatar {
   width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #eee;

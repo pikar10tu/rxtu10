@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px">🏆 Rank</div>
+    <div class="page-title">🏆 Rank</div>
 
     <!-- board selector -->
     <div class="rk-tabs">
@@ -73,13 +73,13 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
 
 <style scoped>
 .rk-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
-.rk-tab { flex: 1; white-space: nowrap; border: 1px solid rgba(0,0,0,.1); background: #fff; border-radius: 999px; padding: 7px 10px; font-family: inherit; font-size: .72rem; font-weight: 700; cursor: pointer; color: rgba(0,0,0,.55); }
-.rk-tab.on { background: #1e293b; color: #fff; border-color: #1e293b; }
+.rk-tab { flex: 1; white-space: nowrap; border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 7px 10px; font-family: inherit; font-size: .72rem; font-weight: 700; cursor: pointer; color: var(--ink); }
+.rk-tab.on { background: var(--primary); color: #fff; border-color: var(--ink); }
 .rk-empty { text-align: center; color: rgba(0,0,0,.4); padding: 24px 0; font-size: .85rem; }
 .rk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-.rk-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: #fff; border: 1px solid rgba(0,0,0,.06); }
-.rk-row.top { background: linear-gradient(135deg,#fffbeb,#fff); border-color: rgba(251,191,36,.4); }
-.rk-row.me { outline: 2px solid #6366f1; }
+.rk-row { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 12px; background: #fff; border: 2px solid var(--ink); box-shadow: var(--pop); }
+.rk-row.top { background: #fff7e6; }
+.rk-row.me { background: var(--primary-light); }
 .rk-pos { width: 26px; text-align: center; font-weight: 800; font-size: .82rem; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .rk-pos.g, .rk-pos.s, .rk-pos.b { font-size: 1.1rem; }
 .rk-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }

@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px">🎮 Play</div>
+    <div class="page-title">🎮 Play</div>
 
     <template v-if="authStore.isLoggedIn">
       <div class="play-grid">
@@ -61,8 +61,8 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 
 <style scoped>
 .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.game-card { all: unset; cursor: pointer; box-sizing: border-box; background: linear-gradient(135deg,#ecfdf5,#fff); border: 1px solid rgba(34,197,94,.3); border-radius: 12px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.game-card:active { transform: scale(.98); }
+.game-card { all: unset; cursor: pointer; box-sizing: border-box; background: #e2f7f0; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform .12s, box-shadow .12s; }
+.game-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .gc-emoji { font-size: 1.6rem; }
 .gc-name { font-size: .8rem; font-weight: 800; }
 .gc-badge { font-size: .58rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
@@ -70,7 +70,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .gc-badge.plant { color: #b45309; background: rgba(251,191,36,.18); }
 .gc-badge.grow  { color: rgba(0,0,0,.45); background: rgba(0,0,0,.05); }
 
-.soon-card { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 12px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: .75; }
+.soon-card { background: #fff; border: 2px dashed var(--ink); border-radius: 16px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: .6; }
 .soon-emoji { font-size: 1.6rem; }
 .soon-card span:nth-child(2) { font-size: .8rem; font-weight: 700; }
 .soon-tag { font-size: .56rem; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; }
