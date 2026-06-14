@@ -43,6 +43,7 @@ Bottom nav มีปุ่ม "📝 ข้อสอบ" ชี้ไป `/questi
 3. **Rank board "📝 ข้อสอบ"** (จาก `quizHigh` ที่เก็บอยู่แล้ว) + **ซ่อน board PvP/หอคอย**
    (ตอนนี้โชว์ 0 ทั้งกระดาน ดูเหมือนเว็บพัง เพราะฟีเจอร์ยังไม่มา)
 4. **นับถอยหลังสอบบน Home** — มี `PLE_CC_DATE` (11 ธ.ค. 2026) ใน config อยู่แล้วแต่ไม่ได้ใช้
+   → ดูรายละเอียด UI ใน **🏠 หน้าหลัก: ภาพรวมวันนี้** ด้านล่าง
 5. อัปเดต `guide.js` ให้มีหมวด Study/Quiz (ตอนนี้ copy บางจุดเก่า เช่น "ปราสาท 12 ขั้น"
    แต่ Lv12 จริงคือเกาะส่วนตัว)
 
@@ -56,15 +57,144 @@ Bottom nav มีปุ่ม "📝 ข้อสอบ" ชี้ไป `/questi
 3. **Daily quest ผูกเหรียญกับการเรียน** (ดู Economy ด้านล่าง) — เช่น
    "ทบทวนครบโควต้าวันนี้ → รายได้บ้าน +25% เป็นเวลา 24 ชม."
    ให้การเรียนเป็น "ตัวคูณ" ของเกม แทนที่จะแข่งแจกเหรียญตรงๆ (คุมเงินเฟ้อได้)
+   → UI แสดงผลอยู่ใน **🏠 หน้าหลัก: ภาพรวมวันนี้** ด้านล่าง
 4. **Streak การทบทวน** — แสดงไฟ 🔥 ติดต่อกันกี่วัน (กลไกเดียวที่พิสูจน์แล้วว่าคนกลับมาทุกวัน)
+   → UI แสดงผลอยู่ใน **🏠 หน้าหลัก: ภาพรวมวันนี้** ด้านล่าง
 
 ---
 
 ## 🟢 Phase 3 — เกมและสังคม
 
-1. Battle engine: PvP / หอคอย (stats, element, crit พร้อมหมดแล้วใน data — เหลือ engine)
+1. Battle engine: PvP / หอคอย → ดูรายละเอียดใน **⚔️ Battle System Rework** และ **🏯 Tower Rework** ด้านล่าง
 2. ตลาด (market) — `marketUnlocked` ปลดที่ Lv4 แต่ยังไม่มีระบบ → ซื้อขายเพ็ท/ผลผลิตระหว่างผู้เล่น
 3. เภสัช Crush / Co-op ตามการ์ด "เร็วๆ นี้" ใน Play
+4. Gacha ใหม่ Genshin-style → ดูรายละเอียดใน **🎰 Gacha ใหม่** ด้านล่าง
+
+---
+
+## 🏠 หน้าหลัก: ภาพรวมวันนี้
+
+> ปรับ mindset Home จาก "รวมทางลัด" → "ตอบคำถาม วันนี้ฉันควรทำอะไร?" ใน 5 วินาที
+
+**เลย์เอาต์ใหม่ (บนลงล่าง):**
+
+### ① นับถอยหลัง PLE CC — ✅ ทำได้ทันที
+- ใช้ `PLE_CC_DATE = '2026-12-11T00:00:00+07:00'` ใน `src/firebase/config.js` render "เหลืออีก X วัน" ตัวเลขใหญ่บนสุด
+- เป้าหมายร่วมของทั้งชั้นปี ทำให้ทุกคนรู้สึกว่าเวลาเหลือน้อย
+- *(รวม Phase 1 ข้อ 4 มาอยู่ที่นี่)*
+
+### ② งานวันนี้ของฉัน
+
+| Widget | พร้อม? | รายละเอียด |
+|---|---|---|
+| 📚 การ์ด SRS ครบกำหนด X ใบ | ✅ ทันที | ดึงจาก `userData.study.cards` — `nextReviewDate <= Date.now()` (pattern จาก `StudyView.vue:129`) |
+| 🔥 Streak กี่วันติด | ⏳ schema | เพิ่ม `study.lastStudied` ใน `src/data/userSchema.js` + update ใน StudyView ทุก grade |
+| ⚡ Daily quest buff | ⏳ Phase 2.3 | รอระบบ daily quest (Phase 2 ข้อ 3) |
+| 🎓 ปุ่มจัดการยา/ข้อสอบ | ✅ ทันที | เห็นเฉพาะ `auth.isAcademic` — link ไป `/questions` (ข้อสอบ) + deck management (ยา) |
+
+*(รวม Phase 2 ข้อ 3 และ 4 มาอ้างอิงที่นี่)*
+
+### ③ อีเวนต์/ความเคลื่อนไหวกลุ่ม (ยกระดับ NewsBoard)
+
+ปัจจุบัน `news` collection มี `{ id, msg, icon?, ts }` — เพียงพอสำหรับประกาศธรรมดา
+
+| การเปลี่ยนแปลง | พร้อม? | หมายเหตุ |
+|---|---|---|
+| เพิ่ม `type` field (`announce` / `event` / `achievement`) | ✅ ทันที | backward-compatible, `NewsBoard.vue:28` |
+| Admin โพสต์ event (เปิดชุดข้อสอบใหม่, เหรียญ x2 สุดสัปดาห์) | ✅ ทันที | เพิ่ม dropdown type ใน AdminView |
+| auto-post เมื่อคนขึ้นอันดับ | ⏳ รอหลังเปิด | ต้องการ client trigger |
+
+### ④ ทางลัด
+ของเดิม — จัดลำดับใหม่ให้ Study/Quiz ขึ้นก่อน (core loop ของแอพ)
+
+**ลำดับการพัฒนา:**
+```
+ทำได้เลย    : ① countdown + ② SRS due count + ② academic button + ③ event type + admin post
+รอ Phase 2  : ② streak (schema เล็กน้อย) + daily quest buff
+รอหลังเปิด  : ③ auto-post achievement
+```
+
+---
+
+## 🎰 Gacha ใหม่ (Genshin-style) — แทนระบบไข่
+
+**ทำไมเปลี่ยน:** ระบบไข่ปัจจุบัน = "เลือก tier จ่ายเงิน" ขาดความตื่นเต้นและการวางแผน
+Gacha + pity → ผู้เล่นรู้สึกว่าพยายามแล้วต้องได้ มีเป้าหมายที่ชัดเจน
+
+### สิ่งที่ต้องทำ
+
+1. **ลบระบบไข่เดิม** — `userSchema.js` ลบ `eggs: []`, ลบ egg UI ใน `ShopView.vue`
+   (ปัจจุบัน eggs array ไม่ได้ใช้งานจริง — `rollPetFromEgg` สร้าง pet โดยตรง)
+2. **Banner system** — featured pet หมุนเวียน ตั้งจาก admin หรือ config
+   - เพิ่ม `gachaFeaturedId` ใน `src/firebase/config.js`
+   - เพิ่ม `gachaPity: { standard: 0, featured: 0 }` ใน `src/data/userSchema.js`
+3. **Pity mechanic**
+   - Soft pity ~75 pulls: rate legendary เริ่มเพิ่มขึ้นแบบ step
+   - Hard pity 100 pulls: การันตี legendary (featured มี 50/50 → guaranteed ครั้งถัดไป)
+4. **Pull modes**
+   - Single pull ~8,000 🪙 (เทียบ gold egg เดิม)
+   - 10-pull ~72,000 🪙 (discount 10%) + การันตี rare ขึ้นไปอย่างน้อย 1 ใบ
+5. **Rate pools**
+   - Standard banner: rate เดิมจาก gold egg (common 0%, rare 28%, epic 52%, legendary 20%)
+   - Featured banner: legendary up-rate ตัวที่เลือก, pity counter แยกจาก standard
+6. **Animation**
+   - Reveal ทีละใบ (10-pull) พร้อม delay แบบ Genshin
+   - Star burst effect + shake เมื่อออก epic/legendary
+   - ใช้ CSS `@keyframes` + JS delay — ไม่จำเป็นต้องมี 3D library
+
+---
+
+## ⚔️ Battle System Rework (ทีมเพ็ทสู้พร้อมกัน — Auto-resolve)
+
+*(รวม/แทนที่ Phase 3 ข้อ 1)*
+
+**แนวทาง: async team-auto-battle** (client-only ทำได้ ไม่ใช่ real-time)
+- ผู้เล่นตั้งทีม 3–4 เพ็ท (ตามเลเวลบ้าน — `activePets` มีใน user doc แล้ว)
+- กด "สู้" → engine resolve battle ฝั่ง client → animate ผลการสู้ (fast-forward ได้)
+- เพ็ทในทีมโจมตีพร้อมกันตาม speed/cooldown (ไม่ใช่ turn-by-turn แบบเก่า)
+
+### Engine ที่ต้องสร้าง
+
+1. **`utils/battleEngine.js`**
+   - Damage calc: ATK × element multiplier × crit roll (crit rate/dmg มีใน potential แล้ว)
+   - Element: ✊✌️✋ มีใน `data/index.js` พร้อม advantage table
+   - Lifesteal, Dodge — ใช้ค่าจาก potential affixes
+2. **`data/towerFloors.js`** — bot team config ต่อชั้น (หรือ procedural gen จาก floor number)
+3. **PvP async** — snapshot ทีม user เก็บใน Firestore → ดึง opponent snapshot มา resolve client-side
+
+### Field ที่ต้องเพิ่มใน userSchema
+
+- `pvpRecord: { wins, losses }` (`pvpVictories` มีอยู่แล้ว แต่ขาด losses)
+- `lastPvpAt: null` (cooldown กัน spam)
+
+---
+
+## 🏯 Tower Rework (AFK Arena — ชั้นหอคอย = รายได้ประจำวัน)
+
+*(รวม/แทนที่ส่วน tower ใน Phase 3)*
+
+**แนวคิด:** `towerBest` → บวก flat coins ต่อวันแทนรางวัลครั้งเดียวต่อด่าน
+ยิ่งดันสูง ยิ่งรวยเร็วตลอดไป — tower เป็น "passive investment" ระยะยาว
+
+### Bonus ladder (tunable ใน `data/towerBonus.js`)
+
+| Tower Floor | Bonus รายวัน |
+|---|---|
+| 1–9 | +0 🪙 |
+| 10–19 | +500 🪙 |
+| 20–29 | +1,500 🪙 |
+| 30–49 | +4,000 🪙 |
+| 50–74 | +10,000 🪙 |
+| 75+ | +20,000 🪙 |
+
+*(floor 30 ≈ รายได้บ้าน Lv6 ตั้งใจให้สมดุล — ปรับตัวเลขที่ `data/towerBonus.js`)*
+
+### สิ่งที่ต้องสร้าง
+
+1. **`data/towerBonus.js`** — `export function getTowerBonus(floor)` คืน flat coins/วัน
+2. แก้ **`src/composables/useDaily.js`** — `baseIncome += getTowerBonus(userData.towerBest)`
+3. ลบ fixed coin reward ต่อ floor ออก (ถ้ามี) → ใช้ bonus ladder แทน
+4. **`data/towerFloors.js`** — bot team config ต่อชั้น (ใช้ร่วมกับ Battle Engine)
 
 ---
 
