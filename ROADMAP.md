@@ -7,31 +7,36 @@
 
 ## 🔴 Phase 0 — ก่อนเปิดตัว (บล็อกการ launch ทั้งหมด)
 
-### 1. Nav ของนักศึกษาผิด
+> ✅ **โค้ดเสร็จครบทั้ง 5 ข้อแล้ว (15 มิ.ย. 2026)** — build ผ่าน
+> ⚠️ **เหลือ deploy เท่านั้น:** `npm run build && firebase deploy --only hosting,firestore:rules`
+> (rules เปลี่ยน: เพิ่ม `config/{doc}`, examSessions create-only, ลบ srsCards — **ต้อง deploy ไม่งั้น launch toggle ใช้ไม่ได้**)
+> หลัง deploy → เปิดเว็บจริงด้วยปุ่ม 🚀 ในแท็บ Admin (ไม่ต้อง deploy ซ้ำ)
+
+### 1. Nav ของนักศึกษาผิด — ✅ เสร็จ (`App.vue`: `:to` แยกตาม `isAcademic`)
 Bottom nav มีปุ่ม "📝 ข้อสอบ" ชี้ไป `/questions` ซึ่งเป็นหน้าจัดการคลังข้อสอบ
 (นักศึกษาเข้าแล้วเจอ "เฉพาะแอดมินหรือทีมวิชาการเท่านั้น")
 → แยกเงื่อนไข: นักศึกษาเห็นปุ่มไป `/quiz`, ทีมวิชาการเห็น `/questions`
 
-### 2. บั๊ก UI: ปุ่มลัดหน้า Home มองไม่เห็น
+### 2. บั๊ก UI: ปุ่มลัดหน้า Home มองไม่เห็น — ✅ เสร็จ (`HomeView`: `.hs-label/.hs-sub` → var สีธีม, การ์ดพื้น #fff)
 `.hs-label` ใช้ `color:#fff` บนพื้นหลัง `rgba(255,255,255,.06)` — ธีมแอพเป็นพื้นสว่าง
 ตัวหนังสือขาวบนพื้นขาว มาจากธีมมืดเวอร์ชันเก่า → เปลี่ยนเป็น `var(--text)` + พื้น `#fff`
 
-### 3. ย้าย launch gate จาก hardcode ไป Firestore
+### 3. ย้าย launch gate จาก hardcode ไป Firestore — ✅ เสร็จ (`composables/useAppConfig.js` + toggle ใน Admin)
 ตอนนี้ gate อยู่ใน `App.vue` (`v-else-if="authStore.isAcademic"`) เปิดตัวต้อง deploy ใหม่
 → สร้าง doc `config/app { maintenance: true/false }` + onSnapshot → เปิด/ปิดได้ทันทีจาก Admin
 
-### 4. ปิดช่องโหว่เหรียญ: ฝึกอิสระ (Study) ฟาร์มเหรียญได้ไม่จำกัด
+### 4. ปิดช่องโหว่เหรียญ: ฝึกอิสระ (Study) ฟาร์มเหรียญได้ไม่จำกัด — ✅ เสร็จ (cap 150/วัน + ฟิลด์ studyCoinDate/studyCoinsToday)
 `grade()` ให้ 5🪙/ใบ ทุก session ใหม่ → กด "ฝึกอิสระ" วนได้เรื่อยๆ (100🪙/รอบ ไม่มีเพดาน)
 → ใส่ daily cap แบบเดียวกับ Quiz (เช่น studyCoinsToday ≤ 150/วัน)
 
-### 5. Quiz: สลับตำแหน่งตัวเลือก
+### 5. Quiz: สลับตำแหน่งตัวเลือก — ✅ เสร็จ (`shuffleChoices()` remap index เฉลย ตอน start())
 เฉลยอยู่ตัวอักษรเดิมเสมอ ทำซ้ำ = จำตัวอักษรไม่ใช่เนื้อหา → shuffle choices ตอน start()
 
 ### 6. งานที่ค้างจากรอบก่อน (ทำแล้ว รอ deploy)
 - [x] login มือถือ redirect / long-polling / hosting config / rules news — push แล้ว
-- [ ] `firebase deploy --only firestore:rules` (ถ้ายังไม่ได้รัน)
-- [ ] rules `examSessions` → เปลี่ยนเป็น create-only (ตัด update/delete)
-- [ ] ลบ rules `srsCards` subcollection ที่ไม่ได้ใช้ (SRS จริงอยู่ใน user doc)
+- [ ] `firebase deploy --only firestore:rules` (⚠️ ยังไม่ได้รัน — บล็อก launch toggle)
+- [x] rules `examSessions` → create-only (ตัด update/delete) — แก้แล้ว รอ deploy
+- [x] ลบ rules `srsCards` subcollection ที่ไม่ได้ใช้ — แก้แล้ว รอ deploy
 
 ---
 

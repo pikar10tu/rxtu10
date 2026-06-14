@@ -28,6 +28,8 @@
       <div v-if="!queueSize" class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือกดด้านล่างเพื่อฝึกแบบสุ่ม</div>
       <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่นับ SRS) 🎲</button>
 
+      <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}🪙/วัน)</div>
+
       <RouterLink to="/quiz" class="sv-quizlink">
         <span class="sv-quizlink-emoji">📝</span>
         <span class="sv-quizlink-text">
@@ -121,6 +123,7 @@ const DECK = DRUGS
 const NEW_PER_SESSION = 15
 const MATURE_DAYS = 21
 const COIN_PER_CARD = 5
+const STUDY_DAILY_CAP = 150   // เพดานเหรียญจากการทบทวน/วัน (กันฟาร์ม "ฝึกอิสระ" วนไม่จำกัด)
 
 // ── persistent SRS state: userData.study.cards keyed by drug name ──
 const study = computed(() => authStore.userData?.study || { cards: {} })
@@ -203,11 +206,15 @@ async function grade(q) {
     lastReviewDate: Date.now(),
   }
 
-  // first time this card is graded in the session → reward + count
+  // first time this card is graded in the session → reward (daily-capped) + count
   let reward = 0
+  let dailyTotal = null
+  const today = new Date().toISOString().slice(0, 10)
   if (!rewarded.value.has(id)) {
     rewarded.value.add(id)
-    reward = COIN_PER_CARD
+    const earnedToday = authStore.userData?.studyCoinDate === today ? (authStore.userData?.studyCoinsToday || 0) : 0
+    reward = Math.max(0, Math.min(COIN_PER_CARD, STUDY_DAILY_CAP - earnedToday))
+    dailyTotal = earnedToday + reward
     sessionCoins.value += reward
     if (q >= 3) sessionCorrect.value++
   }
@@ -218,7 +225,7 @@ async function grade(q) {
   flipped.value = false
 
   const newCards = { ...cards.value, [id]: updated }
-  await commit(newCards, reward)
+  await commit(newCards, reward, today, dailyTotal)
 
   if (!queue.value.length) finishSession()
 }
@@ -233,11 +240,18 @@ function endSession() {
   else mode.value = 'home'
 }
 
-async function commit(newCards, reward) {
+async function commit(newCards, reward, today, dailyTotal) {
   const newStudy = { ...study.value, cards: newCards, lastStudied: Date.now() }
-  const optimistic = { study: newStudy, ...(reward ? { coins: (authStore.userData?.coins || 0) + reward } : {}) }
+  const optimistic = { study: newStudy }
   const patch = { study: newStudy }
-  if (reward) patch.coins = increment(reward)
+  if (reward) {
+    optimistic.coins = (authStore.userData?.coins || 0) + reward
+    optimistic.studyCoinDate = today
+    optimistic.studyCoinsToday = dailyTotal
+    patch.coins = increment(reward)
+    patch.studyCoinDate = today
+    patch.studyCoinsToday = dailyTotal
+  }
   const ok = await authStore.patchUser(optimistic, patch)
   if (!ok) toast('บันทึกการทบทวนไม่สำเร็จ', 'error')
 }
@@ -304,6 +318,7 @@ async function sendReport() {
 .sv-start:disabled { background: #cbd5e1; cursor: default; color: #fff; }
 .sv-allclear { text-align: center; font-size: .68rem; color: rgba(0,0,0,.45); margin-top: 12px; }
 .sv-freebtn { width: 100%; margin-top: 8px; border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 12px; padding: 11px; font-family: inherit; font-size: .8rem; font-weight: 700; color: #475569; cursor: pointer; }
+.sv-caphint { text-align: center; font-size: .62rem; color: rgba(0,0,0,.4); margin-top: 10px; }
 .sv-quizlink { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 14px; border-radius: 14px; background: #eef2ff; border: 1px solid rgba(99,102,241,.2); text-decoration: none; }
 .sv-quizlink:active { transform: scale(.99); }
 .sv-quizlink-emoji { font-size: 1.6rem; }

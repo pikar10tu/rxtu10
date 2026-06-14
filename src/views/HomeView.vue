@@ -84,8 +84,9 @@ const myAvatar = computed(() =>
   gap: 2px;
   padding: 16px 10px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #fff;
+  border: 1px solid var(--border, #efe7fb);
+  box-shadow: 0 2px 10px rgba(170, 140, 210, .1);
   text-decoration: none;
   transition: transform 0.12s, background 0.12s;
 }
@@ -93,18 +94,18 @@ const myAvatar = computed(() =>
   transform: scale(0.97);
 }
 .home-shortcut:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #faf7ff;
 }
 .hs-icon {
   font-size: 1.6rem;
 }
 .hs-label {
   font-weight: 800;
-  color: #fff;
+  color: var(--text, #4a3f5e);
   font-size: 0.95rem;
 }
 .hs-sub {
   font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--muted, #9b8fb0);
 }
 </style>

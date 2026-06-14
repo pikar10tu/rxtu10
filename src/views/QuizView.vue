@@ -149,9 +149,19 @@ function shuffle(arr) {
   return a
 }
 
+// สลับตำแหน่งตัวเลือกในแต่ละข้อ + remap index เฉลยให้ตรงตำแหน่งใหม่
+// (กันคนจำว่า "เฉลยคือข้อ ก" จากการทำซ้ำ — ให้จำเนื้อหาแทน)
+function shuffleChoices(q) {
+  const order = shuffle(q.choices.map((_, i) => i))
+  return {
+    ...q,
+    choices: order.map(i => q.choices[i]),
+    answer: order.indexOf(q.answer),
+  }
+}
+
 function start() {
-  const f = shuffle(filtered.value)
-  quiz.value = f.slice(0, quizCount.value)
+  quiz.value = shuffle(filtered.value).slice(0, quizCount.value).map(shuffleChoices)
   idx.value = 0; picked.value = null; correct.value = 0; answered.value = 0; coinsEarned.value = 0
   if (quiz.value.length) mode.value = 'quiz'
 }

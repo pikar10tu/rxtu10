@@ -2,12 +2,14 @@
   <div id="app-root">
     <div id="ticker-text" style="display:none"></div>
 
-    <div v-if="authStore.loading" class="loading-screen">กำลังโหลด...</div>
+    <div v-if="authStore.loading || !configLoaded" class="loading-screen">กำลังโหลด...</div>
 
-    <!-- While v2 is under construction, only the admin + academic team see the
-         live app (academics manage the question bank); everyone else gets the
-         maintenance screen (and can't touch data). -->
-    <template v-else-if="authStore.isAcademic">
+    <!-- Launch gate (config/app.maintenance, live from Firestore — see
+         composables/useAppConfig.js). While maintenance is ON, only the admin +
+         academic team see the live app (academics manage the question bank);
+         everyone else gets the maintenance screen. Admin flips it from the
+         Admin tab — no redeploy needed. -->
+    <template v-else-if="authStore.isLoggedIn && (authStore.isAcademic || !maintenance)">
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">
@@ -15,7 +17,8 @@
         <RouterLink to="/members" class="bn-item"><span class="bn-icon">👥</span>Members</RouterLink>
         <RouterLink to="/play"    class="bn-item"><span class="bn-icon">🎮</span>Play</RouterLink>
         <RouterLink to="/study"   class="bn-item"><span class="bn-icon">📚</span>Study</RouterLink>
-        <RouterLink to="/questions" class="bn-item"><span class="bn-icon">📝</span>ข้อสอบ</RouterLink>
+        <!-- นักศึกษา → ทำข้อสอบ (/quiz) · ทีมวิชาการ → จัดการคลังข้อสอบ (/questions) -->
+        <RouterLink :to="authStore.isAcademic ? '/questions' : '/quiz'" class="bn-item"><span class="bn-icon">📝</span>ข้อสอบ</RouterLink>
         <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
       </nav>
 
@@ -35,6 +38,7 @@
 import { watch } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
+import { useAppConfig } from './composables/useAppConfig.js'
 import { useHelp } from './composables/useHelp.js'
 import { runIntegrityCheck } from './composables/useGuard.js'
 import ToastContainer   from './components/layout/ToastContainer.vue'
@@ -45,6 +49,7 @@ import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'
 import ErrorBoundary     from './components/layout/ErrorBoundary.vue'
 
 const authStore = useAuthStore()
+const { maintenance, configLoaded } = useAppConfig()
 const { openHelp } = useHelp()
 
 // rough integrity trip-wire: scan user data when it loads/changes

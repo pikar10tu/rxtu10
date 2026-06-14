@@ -8,6 +8,25 @@
     </div>
 
     <template v-else>
+      <!-- ───── เปิด/ปิดเว็บ (launch gate) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span>🚀 สถานะการเปิดเว็บ</span></div>
+        <div class="admin-hint">
+          เปิดให้ทั้งชั้นปีใช้ หรือปิดเข้าโหมดปรับปรุง (เห็นเฉพาะแอดมิน/ทีมวิชาการ) — มีผลทันที ไม่ต้อง deploy
+        </div>
+        <div class="maint-toggle">
+          <span class="maint-state" :class="maintenance ? 'off' : 'on'">
+            {{ maintenance ? '🔒 ปิดปรับปรุง (เฉพาะทีมงาน)' : '🟢 เปิดให้ทุกคนใช้' }}
+          </span>
+          <button
+            class="btn-mini" :class="maintenance ? 'btn-gold' : 'btn-gray'"
+            :disabled="savingMaint" @click="toggleMaintenance"
+          >
+            {{ savingMaint ? '...' : (maintenance ? 'เปิดเว็บ 🚀' : 'ปิดปรับปรุง') }}
+          </button>
+        </div>
+      </section>
+
       <!-- ───── ทีมวิชาการ (role management) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -150,17 +169,35 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { doc, updateDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, updateDoc, setDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
+import { useAppConfig } from '../composables/useAppConfig.js'
 import { useToast } from '../composables/useToast.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { TAG_LIST } from '../data/tags.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
+const { maintenance } = useAppConfig()
 const { toast } = useToast()
+
+// ── launch gate toggle (config/app.maintenance) ──
+const savingMaint = ref(false)
+async function toggleMaintenance() {
+  const next = !maintenance.value
+  savingMaint.value = true
+  try {
+    await setDoc(doc(db, 'config', 'app'), { maintenance: next }, { merge: true })
+    toast(next ? 'เข้าโหมดปรับปรุงแล้ว' : 'เปิดเว็บให้ทุกคนแล้ว 🚀', 'success')
+  } catch (e) {
+    console.error('[admin maintenance]', e)
+    toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
+  } finally {
+    savingMaint.value = false
+  }
+}
 
 const search     = ref('')
 const savingUid  = ref(null)
@@ -327,6 +364,10 @@ async function setRole(m, role) {
   font-size: .95rem;
   margin-bottom: 4px;
 }
+.maint-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.maint-state { font-size: .8rem; font-weight: 700; }
+.maint-state.on  { color: #15803d; }
+.maint-state.off { color: #b45309; }
 .admin-hint {
   font-size: .68rem;
   color: rgba(0, 0, 0, .45);

@@ -72,6 +72,15 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── App config (launch gate) — config/app { maintenance: bool } ──
+    //  PUBLIC read: it's just a boolean, and the gate listener must work
+    //  before login + survive a desktop popup login without a page reload.
+    //  Write: admin only (toggled from the Admin tab).
+    match /config/{doc} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
     // ── Cheat logs — anyone may log themselves; only admin reads ──
     match /cheatLogs/{id} {
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
@@ -106,17 +115,15 @@ service cloud.firestore {
       allow write: if isAcademic();
     }
 
-    // ── Exam sessions (Phase 2) — owner-only ──
+    // ── Exam sessions (Phase 2) — owner-only, CREATE-ONLY ──
+    //  results are an immutable record (read for the history view; never edited)
     match /examSessions/{id} {
       allow read:   if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
     }
 
-    // ── SRS cards (Phase 2) — owner-only subcollection ──
-    match /users/{userId}/srsCards/{cardId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
+    // (SRS cards live in the user doc at `study.cards` — no subcollection)
 
   }
 }

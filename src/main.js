@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { router } from './router/index.js'
 import { useAuthStore } from './stores/auth.js'
 import { useMembersStore } from './stores/members.js'
+import { initAppConfig } from './composables/useAppConfig.js'
 import App from './App.vue'
 import './style.css'
 
@@ -28,5 +29,6 @@ const authStore    = useAuthStore()
 const membersStore = useMembersStore()
 authStore.init()
 membersStore.initStudents()
+initAppConfig()   // launch gate: live-subscribe to config/app { maintenance }
 
 app.mount('#app')

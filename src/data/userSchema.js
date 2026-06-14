@@ -28,6 +28,8 @@ export const USER_DEFAULTS = {
   ctHigh: 0,
   quizCoinDate: null,   // YYYY-MM-DD of last quiz-coin earning (daily cap)
   quizCoinsToday: 0,    // quiz coins earned today (capped)
+  studyCoinDate: null,  // YYYY-MM-DD of last study (SRS) coin earning (daily cap)
+  studyCoinsToday: 0,   // study coins earned today (capped)
   towerFloor: 1,
   towerBest: 0,
   towerLastReset: null,
