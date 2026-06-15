@@ -4,11 +4,11 @@
       <!-- Tier 1: hero (residence art = the flex background) -->
       <div class="pf-hero" :style="heroStyle">
         <button class="pf-x" @click="$emit('close')">✕</button>
-        <div class="pf-hero-art">{{ tier.art }}</div>
+        <div class="pf-hero-art"><Emoji :char="tier.art" /></div>
         <img class="pf-avatar" :src="avatar" :alt="member.nickname" @error="(e) => fallbackAvatar(e, member?.nickname)" />
         <div v-if="member.realName" class="pf-real">{{ member.realName }}</div>
         <div class="pf-name">{{ member.nickname }}</div>
-        <div class="pf-residence">{{ tier.art }} {{ tier.tierName }} · Lv.{{ lvl }}</div>
+        <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pf-chips">
           <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
           <button class="pf-chip like" :class="{ on: likedToday }" @click="likeOnce">

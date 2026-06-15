@@ -1,7 +1,7 @@
 <template>
   <div class="res-card" :style="{ borderColor: currentTier.frameColor }">
     <div class="res-head">
-      <div class="res-art" :style="{ background: currentTier.frameColor + '22' }">{{ currentTier.art }}</div>
+      <div class="res-art" :style="{ background: currentTier.frameColor + '22' }"><Emoji :char="currentTier.art" /></div>
       <div class="res-meta">
         <div class="res-name">
           {{ currentTier.tierName }}
@@ -14,7 +14,7 @@
     <!-- progress to next tier -->
     <template v-if="!isMax">
       <div class="res-next">
-        เลเวลถัดไป: {{ next.art }} {{ next.tierName }}
+        เลเวลถัดไป: <Emoji :char="next.art" /> {{ next.tierName }}
         <span class="res-next-income">(+{{ (next.dailyIncome - currentTier.dailyIncome).toLocaleString() }}<Emoji char="🪙" />/วัน)</span>
       </div>
       <button

@@ -1,6 +1,6 @@
 <template>
   <span class="res-badge" :style="{ background: tier.frameColor + '22', color: tier.frameColor }">
-    {{ tier.art }} Lv.{{ lvl }}
+    Lv.{{ lvl }}
   </span>
 </template>
 

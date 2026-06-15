@@ -9,7 +9,7 @@
       <div class="help-scroll">
         <div v-for="(s, i) in sections" :key="i" class="help-sec">
           <button class="help-sec-head" @click="toggle(i)">
-            <span class="help-sec-title">{{ s.icon }} {{ s.title }}</span>
+            <span class="help-sec-title"><Emoji :char="s.icon" /> {{ s.title }}</span>
             <span v-if="s.soon" class="help-soon">เร็วๆ นี้</span>
             <span class="help-caret">{{ open === i ? '−' : '+' }}</span>
           </button>

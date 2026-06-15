@@ -11,7 +11,7 @@
         v-for="b in BOARDS" :key="b.key"
         class="rk-tab" :class="{ on: board === b.key }"
         @click="board = b.key"
-      >{{ b.icon }} {{ b.label }}</button>
+      ><Emoji :char="b.icon" /> {{ b.label }}</button>
     </div>
 
     <div v-if="members.loading" class="rk-empty">กำลังโหลด…</div>

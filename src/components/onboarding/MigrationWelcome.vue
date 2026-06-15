@@ -7,7 +7,7 @@
 
       <div class="mw-list">
         <div class="mw-item">
-          <span class="mw-emoji">{{ tier.art }}</span>
+          <span class="mw-emoji"><Emoji :char="tier.art" /></span>
           <div>
             <b>ที่อยู่อาศัยของคุณ: {{ tier.tierName }} (Lv.{{ level }})</b>
             <div class="mw-note">ความมั่งคั่งเดิมของคุณถูกแปลงเป็นเลเวลที่อยู่อาศัย — ยิ่งสูงยิ่งเก๋า!</div>

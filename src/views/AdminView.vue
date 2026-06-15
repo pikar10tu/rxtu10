@@ -130,7 +130,7 @@
         </div>
         <ul v-if="newsList.length" class="news-admin-list">
           <li v-for="n in newsList" :key="n.id" class="news-admin-row">
-            <span>{{ n.icon }} {{ n.msg }}</span>
+            <span><Emoji :char="n.icon" /> {{ n.msg }}</span>
             <button class="news-del" @click="delNews(n.id)"><Emoji char="🗑️" /></button>
           </li>
         </ul>

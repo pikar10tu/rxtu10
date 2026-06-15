@@ -5,7 +5,7 @@
     <div v-else-if="!items.length" class="news-empty">ยังไม่มีข่าว</div>
     <ul v-else class="news-list">
       <li v-for="n in items" :key="n.id" class="news-item">
-        <span class="news-icon">{{ n.icon || '📢' }}</span>
+        <span class="news-icon"><Emoji :char="n.icon || '📢'" /></span>
         <div class="news-body">
           <div class="news-msg">{{ n.msg }}</div>
           <div class="news-time">{{ fmt(n.ts) }}</div>
