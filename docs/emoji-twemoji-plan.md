@@ -84,7 +84,7 @@ import `<Emoji>` ในแต่ละไฟล์: `import Emoji from '@/compon
 |---|---|---|---|---|
 | **OpenMoji** ⭐ | เส้นวาด outline มีเอกลักษณ์ น่ารัก | CC-BY-SA 4.0 | **น้อย** — codepoint **UPPERCASE** (`.toUpperCase()`) | `cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@15.0.0/color/svg/1F431.svg` |
 | **Noto Emoji** (Google) | แบนสะอาด สีสด กลมๆ | OFL/CC-BY 4.0 | **น้อย** — prefix `emoji_u` + lowercase + `_` join | `cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f431.svg` |
-| **Fluent Emoji** (MS) | **3D/มีมิติ สวยสุด** (มี Flat/Color/3D) | MIT | **มาก** — ชื่อไฟล์อิง "ชื่อ emoji" ไม่ใช่ codepoint → ต้องทำ map emoji→ชื่อ (มี metadata.json ให้ gen) · path มีช่องว่าง | (403 ตอน guess path — ต้องอ่าน repo structure ก่อน) |
+| **Fluent Emoji** (MS) ✅เลือกแล้ว | **3D/มีมิติ สวยสุด** (มี Flat/Color/3D) | **MIT (ดีสุด)** | **มาก** — ดูบล็อกด้านล่าง | ⚠️ jsDelivr เสิร์ฟไม่ได้ (repo >50MB) |
 | **Twemoji** (ปัจจุบัน) | แบน เรียบ | CC-BY 4.0 | — | ใช้อยู่ |
 
 **ข้อเสนอ session หน้า:**
@@ -94,6 +94,28 @@ import `<Emoji>` ในแต่ละไฟล์: `import Emoji from '@/compon
 4. เก็บโครง `<Emoji>` + fallback ไว้ ไม่ว่าเลือกอันไหน (เปลี่ยนแค่แหล่งรูป)
 
 > หมายเหตุ license: OpenMoji = **SA** (ถ้าดัดแปลงรูปต้องเปิดเผยแบบเดียวกัน — ใช้ตรงๆ ไม่แก้ ไม่มีปัญหา) · Fluent = MIT (ยืดหยุ่นสุด) · เครดิตใน README ปรับตามตัวที่เลือก
+
+## ✅ DECISION (16 มิ.ย. 2026): user เลือก **Fluent Emoji ทั้งระบบ** — แผนลงมือ session หน้า
+
+**ข้อจำกัดที่ verify แล้ว (ground truth จาก repo จริง):**
+1. **jsDelivr/CDN gh เสิร์ฟไม่ได้** — `microsoft/fluentui-emoji` repo > 50MB (มี 3D PNG เป็นพัน) jsDelivr ปฏิเสธ → **สลับแบบแก้ `CDN` เฉยๆ ไม่ได้** (ต่างจาก OpenMoji/Noto)
+2. **ต้อง self-host subset** — โหลดเฉพาะ emoji ที่แอปใช้จริง (~60–80: pet/crop/tag/egg ใน `data/*.js`) ลง `public/emoji/fluent/` เสิร์ฟผ่าน GitHub Pages
+3. **ชื่อไฟล์อิงชื่อ ไม่ใช่ codepoint:**
+   - โฟลเดอร์ = **Sentence case** ของชื่อ CLDR เช่น `Cat face` (ไม่ใช่ `Cat Face`)
+   - path: `assets/<Sentence case>/<Style>/<snake_case>_<style>.<ext>` เช่น `Cat face/Color/cat_face_color.svg`
+   - แต่ละตัวมี `metadata.json` → fields `glyph`(🐱) `unicode`(1f431) `cldr`(cat face) = **แหล่ง gen map codepoint→ชื่อไฟล์**
+
+**สไตล์ (ขนาดจริงจาก cat face):** 3D = PNG **37KB** (สวยสุด raster) · **Color = SVG 27KB (vector คมทุกขนาด — แนะนำ)** · Flat = SVG 2.6KB (เรียบ)
+
+**ขั้นลงมือ session หน้า (TDD):**
+1. เขียน `scripts/fetch-fluent.mjs` (node): enumerate emoji ที่ใช้ (สแกน `data/pets|crops|tags|shop`.js + ตัว hardcode ถ้าจะเอา) → สำหรับแต่ละตัว map codepoint→ชื่อโฟลเดอร์ (ดึง list+metadata จาก GitHub API/raw ครั้งเดียว) → ดาวน์โหลด **Color SVG** ลง `public/emoji/fluent/<unicode>.svg` (rename เป็น codepoint จะได้ map ตรงกับ `<Emoji>` เดิม)
+2. แก้ `Emoji.vue`/`emoji.js`: `url = /emoji/fluent/<codepoint>.svg` (base `import.meta.env.BASE_URL`) — codepoint logic เดิมใช้ต่อได้, ตัด CDN ภายนอกออก
+3. fallback เดิมคงไว้ (โหลดไม่เจอ → emoji เครื่อง) เผื่อ Fluent ไม่มีบางตัว
+4. เครดิต README: เปลี่ยนเป็น Fluent Emoji (MIT) · ลบบรรทัด Twemoji CC-BY
+5. ขนาด subset ~80×27KB ≈ 2MB ใน `public/` (commit เข้า repo) — รับได้ · เช็ก build/deploy ไม่บวมเกิน
+6. ตัว emoji ที่ Fluent ไม่มี → ปล่อย fallback (อย่าลืม log ว่าตัวไหนหายตอน fetch)
+
+> ทำไม self-host (ไม่ใช้ raw.githubusercontent): raw ไม่ใช่ CDN จริง (rate-limit, GitHub ห้าม hotlink prod) · self-host = เร็ว/นิ่ง/ออฟไลน์ได้/ไม่พึ่งใคร
 
 ## Free resources อื่น (ถ้าจะไปต่อ)
 
