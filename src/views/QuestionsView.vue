@@ -2,7 +2,7 @@
   <div class="tab-content">
     <div class="qz-head">
       <div class="qz-title">📝 คลังข้อสอบ</div>
-      <span class="qz-count">{{ list.length }} ข้อ</span>
+      <span class="qz-count">{{ filtered.length }}/{{ list.length }} ข้อ</span>
     </div>
 
     <div v-if="!authStore.isAcademic" class="qz-denied">
@@ -96,11 +96,52 @@
         <span>รายการข้อสอบ</span>
         <button class="qz-mini" :disabled="loading" @click="load">{{ loading ? '...' : '↻ โหลด' }}</button>
       </div>
+
+      <!-- ── ค้นหา / กรอง ── -->
+      <div v-if="list.length" class="qz-filters">
+        <input v-model="search" class="qz-input qz-search" type="text" placeholder="🔍 ค้นหาโจทย์ / หมวด…" />
+        <div class="qz-filter-row">
+          <select v-model="statusFilter" class="qz-select">
+            <option value="all">ทุกสถานะ</option>
+            <option value="published">เผยแพร่</option>
+            <option value="draft">ร่าง</option>
+          </select>
+          <select v-model="catFilter" class="qz-select">
+            <option value="__all">ทุกหมวด</option>
+            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ── เลือกหลายข้อ + batch ── -->
+      <div v-if="filtered.length" class="qz-batch">
+        <label class="qz-selall">
+          <input type="checkbox" :checked="allFilteredSelected" @change="toggleSelectAllFiltered" />
+          เลือกทั้งหมดในผลกรอง ({{ filtered.length }})
+        </label>
+        <button v-if="selected.size" class="qz-mini" @click="clearSelection">ล้างที่เลือก</button>
+      </div>
+      <div v-if="selected.size" class="qz-batch-actions">
+        <span class="qz-selcount">เลือก {{ selected.size }} ข้อ →</span>
+        <button class="qz-mini" :disabled="batchBusy" @click="batchPublish(true)">เผยแพร่</button>
+        <button class="qz-mini" :disabled="batchBusy" @click="batchPublish(false)">ถอนเป็นร่าง</button>
+        <button class="qz-mini qz-danger" :disabled="batchBusy" @click="batchDelete">ลบ</button>
+      </div>
+      <button
+        v-if="filteredDraftIds.length"
+        class="qz-btn qz-primary qz-pubfiltered" :disabled="batchBusy"
+        @click="publishAllFilteredDrafts"
+      >
+        {{ batchBusy ? 'กำลังทำ…' : `🚀 เผยแพร่ร่างที่กรองอยู่ทั้งหมด (${filteredDraftIds.length})` }}
+      </button>
+
       <div v-if="loading" class="qz-empty">กำลังโหลด…</div>
       <div v-else-if="!list.length" class="qz-empty">ยังไม่มีข้อสอบ — เพิ่มข้อแรกได้เลย</div>
+      <div v-else-if="!filtered.length" class="qz-empty">ไม่พบข้อสอบตามเงื่อนไข</div>
       <ul v-else class="qz-list">
-        <li v-for="q in list" :key="q.id" class="qz-item">
+        <li v-for="q in visible" :key="q.id" class="qz-item" :class="{ sel: selected.has(q.id) }">
           <div class="qz-item-top">
+            <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @change="toggleSelect(q.id)" />
             <span class="qz-badge" :class="q.isPublished ? 'pub' : 'draft'">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }}</span>
             <span v-if="q.category" class="qz-cat">{{ q.category }}</span>
             <div class="qz-item-actions">
@@ -117,12 +158,15 @@
           <div v-if="q.explanation" class="qz-exp">💡 {{ q.explanation }}</div>
         </li>
       </ul>
+      <button v-if="filtered.length > visible.length" class="qz-btn qz-gray qz-more" @click="visibleCount += PAGE">
+        แสดงเพิ่ม ({{ filtered.length - visible.length }} เหลือ)
+      </button>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp, writeBatch, setDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -132,6 +176,7 @@ import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { parseImport } from '../utils/importQuestions.js'
 import { buildMeta } from '../utils/questionsMeta.js'
+import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -143,6 +188,91 @@ const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const list = ref([])
 const loading = ref(false)
 const saving = ref(false)
+
+// ── ค้นหา / กรอง / แบ่งหน้า / เลือกหลายข้อ (admin UX) ──
+const PAGE = 50
+const search = ref('')
+const statusFilter = ref('all')   // all | published | draft
+const catFilter = ref('__all')
+const visibleCount = ref(PAGE)
+const selected = ref(new Set())   // เก็บ id ที่เลือก (Vue 3 track Set ได้)
+const batchBusy = ref(false)
+
+const categories = computed(() => distinctCategories(list.value))
+const filtered = computed(() => filterQuestions(list.value, {
+  search: search.value, status: statusFilter.value, category: catFilter.value,
+}))
+const visible = computed(() => filtered.value.slice(0, visibleCount.value))
+const filteredDraftIds = computed(() => filtered.value.filter(q => !q.isPublished).map(q => q.id))
+const allFilteredSelected = computed(() =>
+  filtered.value.length > 0 && filtered.value.every(q => selected.value.has(q.id)))
+
+// กรองใหม่ → รีเซ็ตจำนวนที่โชว์ (กัน DOM ค้างเยอะ)
+watch([search, statusFilter, catFilter], () => { visibleCount.value = PAGE })
+
+function toggleSelect(id) {
+  if (selected.value.has(id)) selected.value.delete(id)
+  else selected.value.add(id)
+}
+function toggleSelectAllFiltered() {
+  if (allFilteredSelected.value) filtered.value.forEach(q => selected.value.delete(q.id))
+  else filtered.value.forEach(q => selected.value.add(q.id))
+}
+function clearSelection() { selected.value.clear() }
+
+// commit ids เป็น batch ละ 500 (ลิมิต Firestore) · fn(batch, ref) สั่งงานต่อ doc
+async function commitInChunks(ids, fn) {
+  for (let i = 0; i < ids.length; i += 500) {
+    const chunk = ids.slice(i, i + 500)
+    const batch = writeBatch(db)
+    for (const id of chunk) fn(batch, doc(db, 'questions', id))
+    await batch.commit()
+    usage.track(0, chunk.length)
+  }
+}
+
+async function afterBatch(msg) {
+  clearSelection()
+  await load()
+  await recomputeMeta() // สถานะเผยแพร่เปลี่ยน → meta (publishedTotal/หมวด) ต้องคำนวณใหม่
+  toast(msg, 'success')
+}
+
+async function batchPublish(value) {
+  const ids = [...selected.value]
+  if (!ids.length || batchBusy.value) return
+  batchBusy.value = true
+  try {
+    await commitInChunks(ids, (b, ref) => b.update(ref, { isPublished: value, updatedAt: serverTimestamp() }))
+    await afterBatch(`${value ? 'เผยแพร่' : 'ถอนเป็นร่าง'} ${ids.length} ข้อแล้ว`)
+  } catch (e) { console.error('[batch publish]', e); toast('ทำไม่สำเร็จ', 'error') }
+  finally { batchBusy.value = false }
+}
+
+async function batchDelete() {
+  const ids = [...selected.value]
+  if (!ids.length || batchBusy.value) return
+  if (!(await confirm(`ลบข้อสอบที่เลือก ${ids.length} ข้อ? (ลบถาวร)`))) return
+  batchBusy.value = true
+  try {
+    await commitInChunks(ids, (b, ref) => b.delete(ref))
+    await afterBatch(`ลบ ${ids.length} ข้อแล้ว`)
+  } catch (e) { console.error('[batch delete]', e); toast('ลบไม่สำเร็จ', 'error') }
+  finally { batchBusy.value = false }
+}
+
+// ปุ่มลัด: เผยแพร่ "ร่างที่กรองอยู่" ทั้งหมด — จบงานหลัง import คลิกเดียว
+async function publishAllFilteredDrafts() {
+  const ids = filteredDraftIds.value
+  if (!ids.length || batchBusy.value) return
+  if (!(await confirm(`เผยแพร่ร่างที่กรองอยู่ทั้งหมด ${ids.length} ข้อ?`))) return
+  batchBusy.value = true
+  try {
+    await commitInChunks(ids, (b, ref) => b.update(ref, { isPublished: true, updatedAt: serverTimestamp() }))
+    await afterBatch(`เผยแพร่ ${ids.length} ข้อแล้ว`)
+  } catch (e) { console.error('[publish drafts]', e); toast('เผยแพร่ไม่สำเร็จ', 'error') }
+  finally { batchBusy.value = false }
+}
 
 function blankDraft() {
   return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false }
@@ -337,6 +467,7 @@ async function remove(q) {
   try {
     await deleteDoc(doc(db, 'questions', q.id))
     list.value = list.value.filter(x => x.id !== q.id)
+    selected.value.delete(q.id)
     if (draft.value.id === q.id) resetDraft()
     toast('ลบแล้ว', 'success')
   } catch (e) { console.error('[questions remove]', e); toast('ลบไม่สำเร็จ', 'error') }
@@ -397,7 +528,22 @@ async function remove(q) {
 .qz-mini.qz-danger { background: rgba(239,68,68,.12); color: #dc2626; }
 .qz-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .qz-item { background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); padding: 12px; }
+.qz-item.sel { background: var(--primary-light, #eef2ff); }
+.qz-check-item { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--primary); }
 .qz-item-top { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+
+/* ── filters / batch ── */
+.qz-filters { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
+.qz-search { font-size: .8rem; }
+.qz-filter-row { display: flex; gap: 7px; }
+.qz-select { flex: 1; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .78rem; font-weight: 700; background: #fff; color: var(--ink); }
+.qz-batch { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.qz-selall { display: flex; align-items: center; gap: 7px; font-size: .74rem; font-weight: 700; color: rgba(0,0,0,.6); cursor: pointer; }
+.qz-selall input { width: 16px; height: 16px; accent-color: var(--primary); }
+.qz-batch-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; background: #f8fafc; border-radius: 10px; padding: 8px 10px; }
+.qz-selcount { font-size: .72rem; font-weight: 800; color: var(--ink); }
+.qz-pubfiltered { width: 100%; margin-bottom: 12px; }
+.qz-more { width: 100%; margin-top: 10px; }
 .qz-badge { font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
 .qz-badge.pub { background: rgba(34,197,94,.15); color: #15803d; }
 .qz-badge.draft { background: rgba(0,0,0,.07); color: rgba(0,0,0,.5); }
