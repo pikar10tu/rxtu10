@@ -75,6 +75,26 @@ import `<Emoji>` ในแต่ละไฟล์: `import Emoji from '@/compon
 
 ---
 
+## 🔜 ทางเลือก asset อื่น (Twemoji แบนไป ไม่สวย) — เลือกใน session หน้า
+
+> ปัญหา: Twemoji ดูแบน/เรียบไป user อยากได้ที่น่ารัก/มีมิติกว่า
+> ข่าวดี: ตัวที่เป็น **codepoint-based** สลับได้แทบจะแค่แก้ `CDN` + รูปแบบชื่อไฟล์ใน `emoji.js` (`<Emoji>` เดิมใช้ต่อได้) — verify CDN แล้ว ✅
+
+| ตัวเลือก | สไตล์ | License | งานที่ต้องทำ | CDN (verify 200 แล้ว) |
+|---|---|---|---|---|
+| **OpenMoji** ⭐ | เส้นวาด outline มีเอกลักษณ์ น่ารัก | CC-BY-SA 4.0 | **น้อย** — codepoint **UPPERCASE** (`.toUpperCase()`) | `cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@15.0.0/color/svg/1F431.svg` |
+| **Noto Emoji** (Google) | แบนสะอาด สีสด กลมๆ | OFL/CC-BY 4.0 | **น้อย** — prefix `emoji_u` + lowercase + `_` join | `cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f431.svg` |
+| **Fluent Emoji** (MS) | **3D/มีมิติ สวยสุด** (มี Flat/Color/3D) | MIT | **มาก** — ชื่อไฟล์อิง "ชื่อ emoji" ไม่ใช่ codepoint → ต้องทำ map emoji→ชื่อ (มี metadata.json ให้ gen) · path มีช่องว่าง | (403 ตอน guess path — ต้องอ่าน repo structure ก่อน) |
+| **Twemoji** (ปัจจุบัน) | แบน เรียบ | CC-BY 4.0 | — | ใช้อยู่ |
+
+**ข้อเสนอ session หน้า:**
+1. ลองสลับ **OpenMoji** ก่อน (5 นาที: แก้ `emojiCodepoint` → `.toUpperCase()` + เปลี่ยน `CDN`) เทียบของจริงในแอป — น่าจะถูกใจกว่า ได้ลุคน่ารักทันที
+2. ถ้าอยากสวยจริง (3D) → ลงทุนทำ **Fluent** (map ชื่อ) คุ้มถ้าอยากให้เกมดูพรีเมียม
+3. **ทางที่ดีที่สุดสำหรับเพ็ท/พืชโดยเฉพาะ** = ใช้ **sprite วาดจริง** (ไม่ใช่ emoji) เช่น Kenney CC0 — แต่ต้อง map ทีละตัว (~40 เพ็ท + พืช) งานเยอะสุด ลุคดีสุด · อาจผสม: emoji set สำหรับ UI/แท็ก + sprite สำหรับเพ็ท
+4. เก็บโครง `<Emoji>` + fallback ไว้ ไม่ว่าเลือกอันไหน (เปลี่ยนแค่แหล่งรูป)
+
+> หมายเหตุ license: OpenMoji = **SA** (ถ้าดัดแปลงรูปต้องเปิดเผยแบบเดียวกัน — ใช้ตรงๆ ไม่แก้ ไม่มีปัญหา) · Fluent = MIT (ยืดหยุ่นสุด) · เครดิตใน README ปรับตามตัวที่เลือก
+
 ## Free resources อื่น (ถ้าจะไปต่อ)
 
 - **Badge/ไอคอนธาตุแบบวาดจริง:** [game-icons.net](https://game-icons.net/) — SVG 4,000+ CC-BY 3.0 ปรับสีได้ (เหมาะกับ medal/✊✌️✋)
