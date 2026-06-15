@@ -15,8 +15,11 @@ export const useMembersStore = defineStore('members', () => {
 
     // Build student list from static data (runs once)
     function initStudents() {
-        const sci  = R_SCI.map(s  => { const [nick, rest] = s.split(' (');  return { nickname: nick, id: rest.replace(')', ''), track: 'sci'  } })
-        const care = R_CARE.map(s => { const [nick, rest] = s.split(' (');  return { nickname: nick, id: rest.replace(')', ''), track: 'care' } })
+        // roster format = "ชื่อเล่น <emoji> (รหัส)" — ตัด emoji ตกแต่งท้ายชื่อออก
+        const stripEmoji = (s) => s.replace(/\s*(\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)+\s*$/u, '').trim()
+        const parse = (s, track) => { const [nick, rest] = s.split(' ('); return { nickname: stripEmoji(nick), id: rest.replace(')', ''), track } }
+        const sci  = R_SCI.map(s  => parse(s, 'sci'))
+        const care = R_CARE.map(s => parse(s, 'care'))
         const names = RN.split(/(?=นาย|นางสาว)/).filter(n => n.trim()).map(n => n.replace(/^นาย|^นางสาว/, '').trim())
         const all = [...sci, ...care].sort((a, b) => a.id.localeCompare(b.id))
         all.forEach((s, i) => { s.realName = names[i] || 'ไม่ระบุ' })
