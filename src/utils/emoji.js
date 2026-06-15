@@ -1,12 +1,11 @@
 // ════════════════════════════════════════════════════════════
-//  Twemoji helper — แสดง emoji เป็น "รูปเดียวกันทุกเครื่อง"
+//  Emoji helper — แสดง emoji เป็น "รูปเดียวกันทุกเครื่อง"
 //  (iOS / Android / Windows render emoji ต่างกัน → ใช้ภาพชุดเดียว)
-//  ใช้ SVG จาก jdecked/twemoji ผ่าน jsDelivr CDN (ฟรี, CC-BY 4.0)
-//  *อย่าลืมใส่เครดิต Twemoji ใน README / หน้า credits*
+//  ใช้ Fluent Emoji (Microsoft, สไตล์ Color SVG) self-host ใน public/emoji/fluent/
+//  ดาวน์โหลด subset เฉพาะที่ใช้ด้วย scripts/fetch-fluent.mjs (jsDelivr เสิร์ฟ repo
+//  >50MB ไม่ได้) · ไฟล์ตั้งชื่อตาม codepoint ให้ตรงกับ emojiCodepoint()
+//  License: Fluent Emoji = MIT (เครดิตใน README)
 // ════════════════════════════════════════════════════════════
-
-// pin @15.1.0 (verify แล้วคืน 200) กันภาพเปลี่ยน/พังเองเวลา twemoji restructure
-const CDN = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/'
 
 const ZWJ = '‍'   // zero-width joiner
 const VS16 = /️/g // variation selector-16
@@ -29,15 +28,15 @@ function toCodePoint(str, sep = '-') {
   return r.join(sep)
 }
 
-/** emoji string → codepoint สำหรับชื่อไฟล์ twemoji (ตัด VS16 ออกถ้าไม่ใช่ ZWJ sequence) */
+/** emoji string → codepoint สำหรับชื่อไฟล์ (ตัด VS16 ออกถ้าไม่ใช่ ZWJ sequence) */
 export function emojiCodepoint(emoji) {
   if (!emoji) return ''
   const e = emoji.indexOf(ZWJ) < 0 ? emoji.replace(VS16, '') : emoji
   return toCodePoint(e)
 }
 
-/** emoji string → URL รูป SVG (คืน '' ถ้า input ว่าง) */
-export function twemojiUrl(emoji) {
+/** emoji string → path ไฟล์ Fluent (สัมพัทธ์ต่อ BASE_URL) · '' ถ้า input ว่าง */
+export function fluentFile(emoji) {
   const cp = emojiCodepoint(emoji)
-  return cp ? `${CDN}${cp}.svg` : ''
+  return cp ? `emoji/fluent/${cp}.svg` : ''
 }

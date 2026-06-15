@@ -14,4 +14,4 @@ npm run dev
 
 ## Credits
 
-Emoji graphics by [Twemoji](https://github.com/jdecked/twemoji), licensed under CC-BY 4.0.
+Emoji graphics by [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) (Microsoft), licensed under MIT.

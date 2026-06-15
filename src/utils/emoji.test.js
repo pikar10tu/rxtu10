@@ -3,7 +3,7 @@
 // รัน: node --test src/utils/emoji.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { emojiCodepoint, twemojiUrl } from './emoji.js'
+import { emojiCodepoint, fluentFile } from './emoji.js'
 
 test('emoji ธรรมดา (surrogate pair) → hex ตัวเดียว', () => {
   assert.equal(emojiCodepoint('🐱'), '1f431') // cat face U+1F431
@@ -27,7 +27,8 @@ test('ค่าว่าง → ""', () => {
   assert.equal(emojiCodepoint(undefined), '')
 })
 
-test('twemojiUrl: ต่อ CDN + codepoint + .svg, ว่าง → ""', () => {
-  assert.match(twemojiUrl('🐱'), /\/1f431\.svg$/)
-  assert.equal(twemojiUrl(''), '')
+test('fluentFile: path สัมพัทธ์ emoji/fluent/<cp>.svg, ว่าง → ""', () => {
+  assert.equal(fluentFile('🐱'), 'emoji/fluent/1f431.svg')
+  assert.equal(fluentFile('🛠️'), 'emoji/fluent/1f6e0.svg') // VS16 strip
+  assert.equal(fluentFile(''), '')
 })

@@ -95,7 +95,16 @@ import `<Emoji>` ในแต่ละไฟล์: `import Emoji from '@/compon
 
 > หมายเหตุ license: OpenMoji = **SA** (ถ้าดัดแปลงรูปต้องเปิดเผยแบบเดียวกัน — ใช้ตรงๆ ไม่แก้ ไม่มีปัญหา) · Fluent = MIT (ยืดหยุ่นสุด) · เครดิตใน README ปรับตามตัวที่เลือก
 
-## ✅ DECISION (16 มิ.ย. 2026): user เลือก **Fluent Emoji ทั้งระบบ** — แผนลงมือ session หน้า
+## ✅ เสร็จแล้ว (16 มิ.ย. 2026): เปลี่ยนเป็น **Fluent Emoji** (Color SVG) self-host
+
+ลงมือเสร็จ + build ผ่าน: `scripts/fetch-fluent.mjs` ดึง **65/65** ตัว → `public/emoji/fluent/<codepoint>.svg` (รวม 1.7MB) · `emoji.js` เปลี่ยน `twemojiUrl`→`fluentFile` (path สัมพัทธ์ local) · `Emoji.vue` ใช้ `BASE_URL + fluentFile` · README เครดิต Fluent (MIT) · เทส 5 เคสผ่าน
+- **กับดักที่เจอ**: ชื่อไฟล์ derive จาก**ชื่อโฟลเดอร์** (lowercase + space→`_`, hyphen คงไว้ เช่น `jack-o-lantern_color.svg`) ไม่ใช่ slug · emoji มี skin-tone (มือ ✊✌️✋) ซ้อนใน `Default/Color/<base>_color_default.svg`
+- เพิ่ม emoji ใหม่ในเกมภายหลัง → รัน `node scripts/fetch-fluent.mjs` ซ้ำ (idempotent)
+- **เหลือ (ออปชัน)**: กลุ่ม `.icon` (news/rank/admin/help) ยังเป็น emoji เครื่อง · emoji hardcode ใน template (nav/title) ยังไม่แปลง
+
+---
+
+## (เดิม) DECISION 16 มิ.ย.: เลือก Fluent — เก็บไว้อ้างอิงข้อจำกัด
 
 **ข้อจำกัดที่ verify แล้ว (ground truth จาก repo จริง):**
 1. **jsDelivr/CDN gh เสิร์ฟไม่ได้** — `microsoft/fluentui-emoji` repo > 50MB (มี 3D PNG เป็นพัน) jsDelivr ปฏิเสธ → **สลับแบบแก้ `CDN` เฉยๆ ไม่ได้** (ต่างจาก OpenMoji/Noto)
