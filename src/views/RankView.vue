@@ -1,6 +1,9 @@
 <template>
   <div class="tab-content">
-    <div class="page-title">🏆 Rank</div>
+    <div class="rk-head">
+      <div class="page-title">🏆 Rank</div>
+      <button class="rk-refresh" :disabled="members.loading" title="โหลดข้อมูลล่าสุด" @click="refresh">↻</button>
+    </div>
 
     <!-- board selector -->
     <div class="rk-tabs">
@@ -53,7 +56,9 @@ const board = ref('residence')
 const current = computed(() => BOARDS.find(b => b.key === board.value))
 const valueOf = (m) => current.value.get(m)
 
-onMounted(() => { if (!Object.keys(members.fbUsers || {}).length) members.loadFbUsers() })
+onMounted(() => members.loadFbUsers())
+// ↻ บังคับโหลดสด (ข้าม cache) — coins/อันดับอาจ stale ได้ถึง 8 ชม.
+const refresh = () => members.loadFbUsers({ force: true })
 
 const all = computed(() => [
   ...Object.values(members.fbUsers || {}),
@@ -72,6 +77,14 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
 </script>
 
 <style scoped>
+.rk-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rk-refresh {
+  border: 2px solid var(--ink); background: #fff; border-radius: 999px;
+  width: 30px; height: 30px; font-size: .95rem; line-height: 1; color: var(--ink);
+  cursor: pointer; flex-shrink: 0; padding: 0;
+}
+.rk-refresh:active { transform: translate(1px,1px); }
+.rk-refresh:disabled { opacity: .4; cursor: default; }
 .rk-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
 .rk-tab { flex: 1; white-space: nowrap; border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 7px 10px; font-family: inherit; font-size: .72rem; font-weight: 700; cursor: pointer; color: var(--ink); }
 .rk-tab.on { background: var(--primary); color: #fff; border-color: var(--ink); }

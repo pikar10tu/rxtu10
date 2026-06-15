@@ -154,8 +154,8 @@ Collection ใหม่:
 
 แนะนำทำ **cost track ก่อน** (เป็นความเสี่ยงจริงตอนเปิดตัว) แล้วค่อย management track:
 
-1. **Phase 1** Quiz cost ⭐ (เร่งด่วน + backfill `rand` ก่อนคลังโต)
-2. **Phase 2** Members cache ⭐ (ตัวถ่วง read หลัก)
+1. **Phase 1** Quiz cost ⭐ (เร่งด่วน + backfill `rand` ก่อนคลังโต) — ✅ เสร็จ + deploy แล้ว
+2. **Phase 2** Members cache ⭐ (ตัวถ่วง read หลัก) — ✅ เสร็จ (`utils/membersCache.js` + test, `stores/members.js`, ↻ Members/Rank, Admin force) รอ deploy
 3. **Phase 3** แจ้งเตือนลิมิต (มองเห็นความเสี่ยง)
 4. **Phase 4** Admin UX (ได้ใช้ทุกวัน)
 5. **Phase 5** แจ้งข้อสอบผิด (ค่อนข้างอิสระ เลื่อนขึ้นได้ถ้าวิชาการอยากได้ก่อน)

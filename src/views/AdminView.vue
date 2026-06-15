@@ -301,7 +301,7 @@ async function delNews(id) {
 }
 
 function reload() {
-  members.loadFbUsers()
+  members.loadFbUsers({ force: true }) // triage ต้องเห็นข้อมูลสด ข้าม cache เสมอ
 }
 
 function roleLabel(role) {

@@ -4,6 +4,7 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { R_SCI, R_CARE, RN } from '../data/students.js'
 import { normalizeUserData } from '../data/userSchema.js'
+import { readCache, slimForCache, MEMBERS_CACHE_KEY, MEMBERS_CACHE_TTL } from '../utils/membersCache.js'
 
 export const useMembersStore = defineStore('members', () => {
     const fbUsers    = ref({})   // { studentId: userObject }
@@ -21,8 +22,31 @@ export const useMembersStore = defineStore('members', () => {
         students.value = all
     }
 
-    async function loadFbUsers() {
+    // อ่าน cache localStorage → hydrate in-memory ถ้าสด + shape ถูก (คืน true = ใช้ได้)
+    function hydrateFromCache() {
+        try {
+            const hit = readCache(localStorage.getItem(MEMBERS_CACHE_KEY), Date.now(), MEMBERS_CACHE_TTL)
+            if (!hit) return false
+            fbUsers.value    = hit.fbUsers
+            guestUsers.value = hit.guestUsers
+            return true
+        } catch { return false }
+    }
+
+    function writeCache() {
+        try {
+            const slim = slimForCache(fbUsers.value, guestUsers.value)
+            localStorage.setItem(MEMBERS_CACHE_KEY, JSON.stringify({ ts: Date.now(), ...slim }))
+        } catch { /* localStorage เต็ม/ปิด — ไม่เป็นไร รอบหน้าค่อยยิง Firestore */ }
+    }
+
+    // { force } = true → ข้าม cache ยิง Firestore สดเสมอ (ปุ่ม ↻ / Admin triage)
+    async function loadFbUsers({ force = false } = {}) {
         if (loading.value) return
+        // in-memory มีแล้ว + ไม่ force → ข้าม (กันยิงซ้ำในเซสชันเดียว)
+        if (!force && Object.keys(fbUsers.value).length) return
+        // cache ข้ามเซสชันสด + ไม่ force → hydrate ไม่ยิง Firestore
+        if (!force && hydrateFromCache()) return
         loading.value = true
         try {
             const snap = await getDocs(collection(db, 'users'))
@@ -63,6 +87,7 @@ export const useMembersStore = defineStore('members', () => {
             })
             fbUsers.value    = newFb
             guestUsers.value = guests
+            writeCache() // เก็บ light subset ไว้ใช้ข้ามเซสชัน
         } catch (e) {
             console.error('[members]', e)
         } finally {

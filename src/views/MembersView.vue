@@ -2,7 +2,10 @@
   <div class="tab-content">
     <div class="mv-head">
       <div class="mv-title">👥 สมาชิก</div>
-      <span class="mv-count">{{ registeredCount }}/{{ roster.length }} เข้าระบบแล้ว</span>
+      <div class="mv-head-r">
+        <span class="mv-count">{{ registeredCount }}/{{ roster.length }} เข้าระบบแล้ว</span>
+        <button class="mv-refresh" :disabled="members.loading" title="โหลดข้อมูลล่าสุด" @click="refresh">↻</button>
+      </div>
     </div>
 
     <input v-model="search" class="mv-search" type="text" placeholder="🔍 ค้นหาชื่อเล่น / ชื่อจริง / รหัส…" />
@@ -49,7 +52,9 @@ const search = ref('')
 const track = ref('all')
 const selected = ref(null)
 
-onMounted(() => { if (!Object.keys(members.fbUsers || {}).length) members.loadFbUsers() })
+onMounted(() => members.loadFbUsers())
+// ↻ บังคับโหลดสด (ข้าม cache) — coins/อันดับอาจ stale ได้ถึง 8 ชม.
+const refresh = () => members.loadFbUsers({ force: true })
 
 // merge the full static roster (83) with logged-in user data (by studentId)
 const roster = computed(() => {
@@ -98,7 +103,15 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
 <style scoped>
 .mv-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
 .mv-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
+.mv-head-r { display: flex; align-items: center; gap: 8px; }
 .mv-count { font-size: .66rem; color: rgba(0,0,0,.45); font-weight: 600; }
+.mv-refresh {
+  border: 2px solid var(--ink); background: #fff; border-radius: 999px;
+  width: 28px; height: 28px; font-size: .9rem; line-height: 1; color: var(--ink);
+  cursor: pointer; flex-shrink: 0; padding: 0;
+}
+.mv-refresh:active { transform: translate(1px,1px); }
+.mv-refresh:disabled { opacity: .4; cursor: default; }
 .mv-search {
   width: 100%; box-sizing: border-box; padding: 10px 14px;
   border: 2px solid var(--ink); border-radius: 12px;
