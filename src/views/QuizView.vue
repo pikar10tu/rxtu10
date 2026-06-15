@@ -10,9 +10,9 @@
     <!-- ── HOME ── -->
     <template v-else-if="mode === 'home'">
       <div v-if="loading" class="qv-empty">กำลังโหลดข้อสอบ…</div>
-      <div v-else-if="!pool.length" class="qv-empty">ยังไม่มีข้อสอบที่เผยแพร่ — รอทีมวิชาการเพิ่มก่อนนะ 📚</div>
+      <div v-else-if="!publishedTotal" class="qv-empty">ยังไม่มีข้อสอบที่เผยแพร่ — รอทีมวิชาการเพิ่มก่อนนะ 📚</div>
       <template v-else>
-        <div class="qv-info">มีข้อสอบให้ทำ <b>{{ pool.length }}</b> ข้อ</div>
+        <div class="qv-info">มีข้อสอบให้ทำ <b>{{ publishedTotal }}</b> ข้อ</div>
 
         <template v-if="categories.length > 1">
           <div class="qv-label">หมวด</div>
@@ -26,12 +26,12 @@
         <div class="qv-label">จำนวนข้อ</div>
         <div class="qv-chips">
           <button v-for="n in lenChoices" :key="n" class="qv-chip" :class="{ on: len === n }" @click="len = n">
-            {{ n === 0 ? `ทั้งหมด (${filtered.length})` : `${n} ข้อ` }}
+            {{ n }} ข้อ
           </button>
         </div>
 
-        <button class="qv-start" :disabled="!filtered.length" @click="start">
-          เริ่มทำข้อสอบ ({{ quizCount }} ข้อ)
+        <button class="qv-start" :disabled="!publishedTotal || starting" @click="start">
+          {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำข้อสอบ (${quizCount} ข้อ)` }}
         </button>
         <div class="qv-hint">ทำข้อสอบได้เหรียญ +10/ข้อที่ถูก (สูงสุด {{ DAILY_CAP }}🪙/วัน)</div>
       </template>
@@ -82,11 +82,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { collection, getDocs, query, where, addDoc, increment, serverTimestamp } from 'firebase/firestore'
+import { ref, computed, onMounted } from 'vue'
+import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, increment, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
+import { quizSample } from '../utils/quizSample.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -94,40 +95,36 @@ const { toast } = useToast()
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const DAILY_CAP = 300
 const COIN_PER_CORRECT = 10
+const LEN_CHOICES = [5, 10, 15, 20]
+const DEFAULT_LEN = 15
 
-// ── pool of published questions ──
-const pool = ref([])
+// ── home: อ่านแค่ config/questionsMeta (1 read) แทนการโหลดข้อทั้งคลัง ──
+const publishedTotal = ref(0)
+const metaCategories = ref([])
 const loading = ref(true)
 
 async function load() {
   loading.value = true
   try {
-    const snap = await getDocs(query(collection(db, 'questions'), where('isPublished', '==', true)))
-    pool.value = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(q => Array.isArray(q.choices) && q.choices.length >= 2)
+    const snap = await getDoc(doc(db, 'config', 'questionsMeta'))
+    const m = snap.exists() ? snap.data() : { publishedTotal: 0, categories: [] }
+    publishedTotal.value = m.publishedTotal || 0
+    metaCategories.value = Array.isArray(m.categories) ? m.categories : []
   } catch (e) {
-    console.error('[quiz load]', e)
-    toast('โหลดข้อสอบไม่สำเร็จ', 'error')
+    console.error('[quiz meta]', e)
+    toast('โหลดข้อมูลข้อสอบไม่สำเร็จ', 'error')
   } finally {
     loading.value = false
   }
 }
 onMounted(() => { if (authStore.isLoggedIn) load() })
 
-const categories = computed(() => ['__all', ...new Set(pool.value.map(q => q.category).filter(Boolean))])
+const categories = computed(() => ['__all', ...metaCategories.value])
 const cat = ref('__all')
-const filtered = computed(() => cat.value === '__all' ? pool.value : pool.value.filter(q => q.category === cat.value))
 
-const len = ref(10)
-const lenChoices = computed(() => {
-  const opts = [5, 10, 20].filter(n => n < filtered.value.length)
-  opts.push(0) // 0 = all
-  return opts
-})
-// keep `len` valid as the filtered pool changes
-watch(lenChoices, (opts) => { if (!opts.includes(len.value)) len.value = opts.includes(10) ? 10 : opts[opts.length - 1] }, { immediate: true })
-const quizCount = computed(() => len.value === 0 ? filtered.value.length : Math.min(len.value, filtered.value.length))
+const len = ref(DEFAULT_LEN)
+const lenChoices = computed(() => LEN_CHOICES)
+const quizCount = computed(() => len.value) // ขอ N; ได้จริงอาจน้อยกว่าถ้าคลัง/หมวดมีไม่พอ
 
 // ── session state ──
 const mode = ref('home')          // home | quiz | result
@@ -160,10 +157,35 @@ function shuffleChoices(q) {
   }
 }
 
-function start() {
-  quiz.value = shuffle(filtered.value).slice(0, quizCount.value).map(shuffleChoices)
-  idx.value = 0; picked.value = null; correct.value = 0; answered.value = 0; coinsEarned.value = 0
-  if (quiz.value.length) mode.value = 'quiz'
+const starting = ref(false)
+async function start() {
+  if (starting.value) return
+  starting.value = true
+  try {
+    const R = Math.random()
+    const base = [where('isPublished', '==', true)]
+    if (cat.value !== '__all') base.push(where('category', '==', cat.value))
+    const col = collection(db, 'questions')
+    const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(len.value)))
+    const first = firstSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    let wrap = []
+    if (first.length < len.value) {
+      const wrapSnap = await getDocs(query(col, ...base, orderBy('rand'), limit(len.value)))
+      wrap = wrapSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    }
+    const picks = quizSample(first, wrap, len.value)
+      .filter(q => Array.isArray(q.choices) && q.choices.length >= 2)
+    quiz.value = shuffle(picks).map(shuffleChoices)
+    idx.value = 0; resetRound()
+    if (quiz.value.length) mode.value = 'quiz'
+    else toast('ยังไม่มีข้อสอบในหมวดนี้', 'error')
+  } catch (e) {
+    console.error('[quiz start]', e); toast('เริ่มข้อสอบไม่สำเร็จ', 'error')
+  } finally { starting.value = false }
+}
+// รีเซ็ต state รอบใหม่
+function resetRound() {
+  picked.value = null; correct.value = 0; answered.value = 0; coinsEarned.value = 0
 }
 
 function pick(i) {
