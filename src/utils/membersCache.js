@@ -2,7 +2,7 @@
 // ตัวถ่วง read หลักคือ members (อ่านทั้ง collection ~150 docs/เซสชัน) — cache TTL 8 ชม./เครื่อง
 // bump key v1→v2 ถ้า shape ของ light subset เปลี่ยน
 
-export const MEMBERS_CACHE_KEY = 'rxtu10:members:v1'
+export const MEMBERS_CACHE_KEY = 'rxtu10:members:v2' // v2: strip emoji ท้ายชื่อ (invalidate cache เก่า)
 export const MEMBERS_CACHE_TTL = 8 * 60 * 60 * 1000 // 8 ชม.
 
 // ตัดฟิลด์หนัก (base64 customPhoto) ออกก่อนเขียน cache — กัน localStorage quota (~5MB) ระเบิด

@@ -7,6 +7,9 @@ import { normalizeUserData } from '../data/userSchema.js'
 import { readCache, slimForCache, MEMBERS_CACHE_KEY, MEMBERS_CACHE_TTL } from '../utils/membersCache.js'
 import { useUsageStore } from './usage.js'
 
+// ตัด emoji ตกแต่งท้ายชื่อเล่นออก (roster format "ชื่อ <emoji> (รหัส)" + เผื่อ user ที่ตั้ง emoji เอง)
+const stripTrailingEmoji = (s) => (s || '').replace(/\s*(\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)+\s*$/u, '').trim()
+
 export const useMembersStore = defineStore('members', () => {
     const fbUsers    = ref({})   // { studentId: userObject }
     const students   = ref([])   // all students from static data
@@ -15,9 +18,7 @@ export const useMembersStore = defineStore('members', () => {
 
     // Build student list from static data (runs once)
     function initStudents() {
-        // roster format = "ชื่อเล่น <emoji> (รหัส)" — ตัด emoji ตกแต่งท้ายชื่อออก
-        const stripEmoji = (s) => s.replace(/\s*(\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)+\s*$/u, '').trim()
-        const parse = (s, track) => { const [nick, rest] = s.split(' ('); return { nickname: stripEmoji(nick), id: rest.replace(')', ''), track } }
+        const parse = (s, track) => { const [nick, rest] = s.split(' ('); return { nickname: stripTrailingEmoji(nick), id: rest.replace(')', ''), track } }
         const sci  = R_SCI.map(s  => parse(s, 'sci'))
         const care = R_CARE.map(s => parse(s, 'care'))
         const names = RN.split(/(?=นาย|นางสาว)/).filter(n => n.trim()).map(n => n.replace(/^นาย|^นางสาว/, '').trim())
@@ -66,7 +67,7 @@ export const useMembersStore = defineStore('members', () => {
                 const light = {
                     uid: d.id,
                     studentId: n.studentId,
-                    nickname: n.nickname || n.name?.split(' ')[0] || '?',
+                    nickname: stripTrailingEmoji(n.nickname || n.name?.split(' ')[0]) || '?',
                     realName: n.realName,
                     email: n.email,
                     role: n.role,
