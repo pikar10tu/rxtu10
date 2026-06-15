@@ -47,21 +47,38 @@ Collection ใหม่:
 
 ---
 
-## Phase 1 — Quiz cost: สุ่ม 15 ข้อแบบ cost คงที่ ⭐ (cost, ทำก่อน)
+## Phase 1 — Quiz cost: windowed sampling + meta-doc ⭐ (cost, ทำก่อน)
 
-**N = 15 ข้อต่อ quiz** (const ที่เดียว tunable)
+> **แก้จากดีไซน์แรก:** `QuizView` ของจริงมี **เลือกหมวด + เลือกจำนวน** ที่ต้องเห็น pool ทั้งก้อน
+> การ "สุ่ม 15 ตรง ๆ" จะทำฟีเจอร์พัง → ใช้ **meta-doc** (โชว์หมวด/จำนวนโดยไม่โหลดทั้งคลัง) + **windowed query** (อ่านเฉพาะที่จะทำ)
 
+### meta-doc — `config/questionsMeta`
+`{ publishedTotal: number, categories: string[] }`
+- อ่าน **1 doc** ตอนเข้า QuizView home → เรนเดอร์ "มีข้อสอบ X ข้อ" + chips หมวด (แทนการ `getDocs` ทั้งคลัง)
+- **ดูแลโดย admin actions** ใน `QuestionsView` (เพิ่ม hook ใน save/remove/import เดิม):
+  - publish ข้อ (เดี่ยว/bulk): `publishedTotal += n` · เพิ่ม category ใหม่เข้า `categories`
+  - unpublish/ลบข้อที่เผยแพร่: `publishedTotal -= n`
+  - หมวดที่ไม่มีข้อเหลือ (ลบไม่ออกจาก array แบบ incremental): ยอม stale ได้ → ปุ่ม admin **"🔄 คำนวณ meta ใหม่"** อ่านทั้งคลังครั้งเดียว (admin น้อยคน = ถูก) เขียน meta ใหม่
+- Rules: `config/{id}` เดิม public-read/admin-write ใช้ได้ (questionsMeta อ่านโดย authed, เขียนโดย academic)
+
+### windowed query ตอนเริ่ม quiz
+**N เลือกได้ 5/10/15/20** (เอา "ทั้งหมด" ออก — มันคืออ่านทั้งคลัง = แพง · ค่าเริ่ม 15)
 1. สุ่ม `R = Math.random()`
-2. รอบแรก: `where isPublished==true · orderBy rand · startAt(R) · limit(15)`
-3. ถ้าได้ < 15 (ชนปลาย): รอบสอง `where isPublished==true · orderBy rand · limit(15-got)` แล้ว **dedup ด้วย doc id**
-4. สับไพ่ผลลัพธ์
-5. **เคสข้อไม่ถึง 15** (สถานะตอนนี้): คืน**เท่าที่มีจริง** quiz เริ่มได้เลย **ไม่ error/ไม่ค้าง** — ความยาวชุด = `Math.min(15, ได้จริง)` · คลังว่าง (0) → ข้อความ "ยังไม่มีข้อสอบ"
-6. วิชาการเพิ่มข้อเกิน 15 → สุ่ม 15 เองอัตโนมัติ ไม่ต้องแก้โค้ด
+2. รอบแรก: `where isPublished==true [· where category==X] · orderBy rand · startAt(R) · limit(N)`
+3. ถ้าได้ < N (ชนปลาย): รอบสอง `where isPublished==true [· where category==X] · orderBy rand · limit(N-got)` → **dedup ด้วย doc id**
+4. สับไพ่ + `shuffleChoices` (ของเดิม)
+5. **ข้อไม่ถึง N / คลังว่าง**: คืนเท่าที่มี (`Math.min(N, ได้จริง)`) ไม่ error · ว่าง → "ยังไม่มีข้อสอบ"
 
-- Index: composite `questions (isPublished ASC, rand ASC)` ใน `firestore.indexes.json` → `firebase deploy --only firestore:indexes`
-- Rules: **ไม่ต้องแก้** (query กรอง isPublished==true ตรง `allow read` ทุก doc)
-- เทส: pure `quizSample(docs, R, N)` + `.test.js` — เคส >N, <N, wrap, dedup, ว่าง
-- ผล: ~900k → ~7k reads/วัน
+### Index (`firestore.indexes.json` — สร้างใหม่ + ผูกใน `firebase.json`)
+- `questions (isPublished ASC, rand ASC)` — ควิซรวมทุกหมวด
+- `questions (isPublished ASC, category ASC, rand ASC)` — ควิซแยกหมวด
+- deploy: `firebase deploy --only firestore:indexes`
+
+### อื่น ๆ
+- ใส่ `rand = Math.random()` ตอน **สร้าง/import** ทุกข้อ · **backfill** ของเก่าด้วยปุ่ม admin (writeBatch chunk 500)
+- Rules questions: **ไม่ต้องแก้** (query กรอง isPublished==true ตรง `allow read`)
+- เทส pure: `quizSample(firstDocs, wrapDocs, N)` → dedup+ตัด N + `.test.js` (>N, <N ต้อง wrap, dedup ซ้ำ, ว่าง)
+- ผล: quiz read จาก ~ทั้งคลัง/เปิด → **1 (meta) + N (เริ่ม)** ต่อครั้ง
 
 ---
 
