@@ -12,10 +12,11 @@ git push origin master                   # deploy เว็บหลัก: GitH
 firebase deploy --only firestore:rules   # ⚠️ แก้ firestore.rules แล้วต้อง deploy เสมอ ไม่งั้นไม่มีผล (CLI: firebase-tools)
 firebase deploy --only hosting           # deploy host สำรอง (Firebase) — build ก่อน
 ```
-ไม่มี test/lint — ตรวจด้วย `npm run build` + ทดลองใน dev
+ไม่มี test runner กลาง/lint — ตรวจด้วย `npm run build` + ทดลองใน dev
+มีเทสเฉพาะจุด (pure utils) รันตรงด้วย `node --test src/utils/<x>.test.js` เช่น `importQuestions.test.js`
 
 **Deploy:** host หลัก = **GitHub Pages ผ่าน GitHub Actions** (`.github/workflows/deploy-pages.yml`) —
-push `master` = auto build+publish ไป `pikar10tu.github.io/RxTU10-Selection-Tracking/` (ลิงก์ที่ทั้งชั้นปีใช้)
+push `master` = auto build+publish ไป `pikar10tu.github.io/rxtu10/` (ลิงก์ที่ทั้งชั้นปีใช้)
 host สำรอง = Firebase Hosting (`rxtu10dashboard.web.app`) · Firestore เดียวกันทั้งสองที่ ·
 firestore rules ใช้ `firebase deploy` เสมอ (Pages เสิร์ฟแค่ frontend ไม่แตะ rules)
 
@@ -35,6 +36,7 @@ src/
                        useAppConfig (launch gate: live config/app.maintenance, default locked, public-read)
   data/                ค่าคงที่เกมทั้งหมด ปรับตัวเลขที่นี่ (ดู "เศรษฐกิจ")
   utils/               sm2.js (SRS) petUtils.js (รายได้เพ็ท v2) text.js (cleanText+LIMITS) avatar.js
+                       importQuestions.js (parseImport: bulk JSON → rows/skipped, pure + มี .test.js)
 firestore.rules        trust-based + light guards (ownership, role, coin range)
 .github/workflows/     deploy-pages.yml — CI build+publish ไป GitHub Pages เมื่อ push master
 ROADMAP.md             แผนพัฒนาปัจจุบัน + บั๊กที่รู้แล้ว + ข้อเสนอปรับ economy — อ่านก่อนเริ่มงานใหม่

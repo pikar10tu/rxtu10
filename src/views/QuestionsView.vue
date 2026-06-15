@@ -10,6 +10,42 @@
     </div>
 
     <template v-else>
+      <!-- ── นำเข้าหลายข้อ (bulk JSON import) ── -->
+      <details class="qz-import">
+        <summary class="qz-import-sum">📥 นำเข้าข้อสอบหลายข้อ (JSON)</summary>
+        <div class="qz-import-body">
+          <div class="qz-import-file">
+            <input ref="fileEl" type="file" accept=".json,application/json" hidden @change="onFile" />
+            <button type="button" class="qz-pick" @click="fileEl?.click()">📂 เลือกไฟล์ .json จากเครื่อง</button>
+            <span class="qz-pick-hint">หรือวาง JSON ด้านล่าง</span>
+          </div>
+
+          <textarea
+            v-model="importText" class="qz-input qz-import-ta" rows="6" spellcheck="false"
+            placeholder='วาง JSON ที่นี่ — array ของข้อสอบ เช่น [ { "question": "...", "choices": ["ก","ข"], "answer": 0 } ]'
+          ></textarea>
+
+          <details class="qz-fmt">
+            <summary>ดูรูปแบบ JSON</summary>
+            <pre class="qz-fmt-pre">{{ FORMAT_EXAMPLE }}</pre>
+            <p class="qz-fmt-note">
+              <code>answer</code> = ลำดับตัวเลือกที่ถูก เริ่มที่ 0 · <code>choices</code> 2–6 ตัว ·
+              <code>category</code>/<code>explanation</code> ไม่บังคับ ·
+              ทุกข้อนำเข้าเป็น <b>“ร่าง”</b> ต้องไปกดเผยแพร่ทีหลัง
+            </p>
+          </details>
+
+          <div v-if="importError" class="qz-import-err">⚠️ {{ importError }}</div>
+          <div v-else-if="importText.trim()" class="qz-import-hint">
+            พร้อมนำเข้า <b>{{ importCount }}</b> ข้อ<span v-if="importSkipped"> · ข้าม {{ importSkipped }} ข้อ (ผิดรูปแบบ)</span>
+          </div>
+
+          <button class="qz-btn qz-primary qz-import-btn" :disabled="importing || !importCount" @click="runImport">
+            {{ importing ? 'กำลังนำเข้า…' : (importCount ? `📥 นำเข้า ${importCount} ข้อ` : '📥 นำเข้า') }}
+          </button>
+        </div>
+      </details>
+
       <!-- ── editor ── -->
       <section class="qz-card">
         <div class="qz-card-head">{{ draft.id ? '✏️ แก้ไขข้อสอบ' : '➕ เพิ่มข้อสอบใหม่' }}</div>
@@ -80,12 +116,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
+import { parseImport } from '../utils/importQuestions.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -118,6 +155,74 @@ function removeChoice(i) {
 }
 
 onMounted(() => { if (authStore.isAcademic) load() })
+
+// ── bulk JSON import ──
+const FORMAT_EXAMPLE = `[
+  {
+    "question": "ยาใดเป็น first-line ของ ...",
+    "choices": ["ก", "ข", "ค", "ง"],
+    "answer": 2,
+    "category": "ยาปฏิชีวนะ",
+    "explanation": "เพราะ ..."
+  }
+]`
+const importText = ref('')
+const importing = ref(false)
+const fileEl = ref(null)
+
+// เลือกไฟล์ .json จากเครื่อง → เทเนื้อหาลง textarea (parse/preview เหมือนวางเอง)
+async function onFile(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  try {
+    importText.value = await file.text()
+    const { rows, error } = parseImport(importText.value)
+    if (error) toast(error, 'error')
+    else toast(`อ่านไฟล์แล้ว · พบ ${rows.length} ข้อ`, 'success')
+  } catch (err) {
+    console.error('[questions import file]', err)
+    toast('อ่านไฟล์ไม่สำเร็จ', 'error')
+  } finally {
+    e.target.value = '' // reset ให้เลือกไฟล์เดิมซ้ำได้
+  }
+}
+const importParsed = computed(() => parseImport(importText.value))
+const importCount = computed(() => importParsed.value.rows.length)
+const importSkipped = computed(() => importParsed.value.skipped.length)
+const importError = computed(() => (importText.value.trim() ? importParsed.value.error : null))
+
+async function runImport() {
+  if (importing.value) return
+  const { rows, skipped, error } = parseImport(importText.value)
+  if (error) { toast(error, 'error'); return }
+  if (!rows.length) { toast('ไม่มีข้อที่นำเข้าได้', 'error'); return }
+  importing.value = true
+  try {
+    const meta = {
+      createdBy: authStore.currentUser?.uid || null,
+      createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
+      source: 'import',
+    }
+    const col = collection(db, 'questions')
+    // chunk ละ 500 — Firestore batch จำกัด 500 ops/commit
+    for (let i = 0; i < rows.length; i += 500) {
+      const batch = writeBatch(db)
+      for (const row of rows.slice(i, i + 500)) {
+        batch.set(doc(col), { ...row, ...meta, createdAt: serverTimestamp() })
+      }
+      await batch.commit()
+    }
+    if (skipped.length) console.warn('[questions import] ข้ามข้อ (index, เหตุผล):', skipped)
+    toast(`นำเข้า ${rows.length} ข้อ${skipped.length ? ` · ข้าม ${skipped.length} ข้อ` : ''}`, 'success')
+    importText.value = ''
+    await load()
+  } catch (e) {
+    console.error('[questions import]', e)
+    toast('นำเข้าไม่สำเร็จ', 'error')
+  } finally {
+    importing.value = false
+  }
+}
 
 async function load() {
   loading.value = true
@@ -191,6 +296,27 @@ async function remove(q) {
 .qz-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
 .qz-count { font-size: .66rem; color: rgba(0,0,0,.45); font-weight: 600; }
 .qz-denied, .qz-empty { text-align: center; color: rgba(0,0,0,.4); padding: 26px 0; font-size: .85rem; }
+
+.qz-import { background: #fff; border: 2px dashed var(--ink); border-radius: 16px; padding: 4px 14px; margin-bottom: 16px; }
+.qz-import[open] { padding-bottom: 14px; }
+.qz-import-sum { cursor: pointer; font-weight: 800; font-size: .9rem; padding: 11px 0; list-style: none; user-select: none; }
+.qz-import-sum::-webkit-details-marker { display: none; }
+.qz-import-sum::before { content: '▸ '; color: #94a3b8; }
+.qz-import[open] .qz-import-sum::before { content: '▾ '; }
+.qz-import-body { display: flex; flex-direction: column; gap: 9px; }
+.qz-import-file { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.qz-pick { border: 1px dashed rgba(0,0,0,.25); background: none; border-radius: 9px; padding: 8px 13px; font-family: inherit; font-size: .76rem; font-weight: 700; color: #4f46e5; cursor: pointer; }
+.qz-pick:active { transform: translate(1px,1px); }
+.qz-pick-hint { font-size: .7rem; color: rgba(0,0,0,.4); }
+.qz-import-ta { font-family: 'Space Mono', ui-monospace, monospace; font-size: .74rem; line-height: 1.5; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+.qz-fmt { font-size: .72rem; }
+.qz-fmt > summary { cursor: pointer; color: #4f46e5; font-weight: 700; }
+.qz-fmt-pre { margin: 8px 0 6px; padding: 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 9px; font-family: 'Space Mono', ui-monospace, monospace; font-size: .68rem; line-height: 1.5; overflow-x: auto; }
+.qz-fmt-note { color: rgba(0,0,0,.55); line-height: 1.6; }
+.qz-fmt-note code { background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 5px; font-size: .92em; }
+.qz-import-hint { font-size: .74rem; color: #15803d; font-weight: 600; }
+.qz-import-err { font-size: .74rem; color: #dc2626; font-weight: 600; background: #fef2f2; border-radius: 8px; padding: 7px 10px; line-height: 1.4; }
+.qz-import-btn { width: 100%; }
 
 .qz-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
 .qz-card-head { font-weight: 800; font-size: .92rem; margin-bottom: 10px; }
