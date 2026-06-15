@@ -12,6 +12,7 @@ import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/con
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
 import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
 import { useToast } from '../composables/useToast.js'
+import { useUsageStore } from './usage.js'
 
 export const useAuthStore = defineStore('auth', () => {
     // ── State ──
@@ -104,6 +105,7 @@ export const useAuthStore = defineStore('auth', () => {
         setUserDataOptimistic(optimistic)
         try {
             await updateDoc(doc(db, 'users', currentUser.value.uid), server ?? optimistic)
+            useUsageStore().track(0, 1) // เส้นทางเขียนหลักของแอป — นับเข้าตัวประมาณการ
             return true
         } catch (e) {
             console.error('[patchUser]', e)

@@ -86,10 +86,12 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, increment, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { quizSample } from '../utils/quizSample.js'
 
 const authStore = useAuthStore()
+const usage = useUsageStore()
 const { toast } = useToast()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
@@ -107,6 +109,7 @@ async function load() {
   loading.value = true
   try {
     const snap = await getDoc(doc(db, 'config', 'questionsMeta'))
+    usage.track(1)
     const m = snap.exists() ? snap.data() : { publishedTotal: 0, categories: [] }
     publishedTotal.value = m.publishedTotal || 0
     metaCategories.value = Array.isArray(m.categories) ? m.categories : []
@@ -167,10 +170,12 @@ async function start() {
     if (cat.value !== '__all') base.push(where('category', '==', cat.value))
     const col = collection(db, 'questions')
     const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(len.value)))
+    usage.track(firstSnap.size)
     const first = firstSnap.docs.map(d => ({ id: d.id, ...d.data() }))
     let wrap = []
     if (first.length < len.value) {
       const wrapSnap = await getDocs(query(col, ...base, orderBy('rand'), limit(len.value)))
+      usage.track(wrapSnap.size)
       wrap = wrapSnap.docs.map(d => ({ id: d.id, ...d.data() }))
     }
     const picks = quizSample(first, wrap, len.value)
@@ -223,6 +228,7 @@ async function finish() {
 
   // 1) record the attempt (examSessions — owner-only)
   try {
+    usage.track(0, 1)
     await addDoc(collection(db, 'examSessions'), {
       userId: authStore.currentUser.uid,
       nickname: authStore.userData?.nickname || null,

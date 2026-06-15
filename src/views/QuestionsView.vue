@@ -126,6 +126,7 @@ import { ref, computed, onMounted } from 'vue'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp, writeBatch, setDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
@@ -133,6 +134,7 @@ import { parseImport } from '../utils/importQuestions.js'
 import { buildMeta } from '../utils/questionsMeta.js'
 
 const authStore = useAuthStore()
+const usage = useUsageStore()
 const { toast } = useToast()
 const { confirm } = useConfirm()
 
@@ -242,6 +244,7 @@ async function backfillRand() {
   backfilling.value = true
   try {
     const snap = await getDocs(query(collection(db, 'questions'), orderBy('createdAt', 'desc')))
+    usage.track(snap.size)
     const missing = snap.docs.filter(d => typeof d.data().rand !== 'number')
     for (let i = 0; i < missing.length; i += 500) {
       const batch = writeBatch(db)
@@ -262,6 +265,7 @@ async function recomputeMeta() {
   recomputingMeta.value = true
   try {
     const snap = await getDocs(collection(db, 'questions'))
+    usage.track(snap.size)
     const meta = buildMeta(snap.docs.map(d => d.data()))
     await setDoc(doc(db, 'config', 'questionsMeta'), { ...meta, updatedAt: serverTimestamp() })
     toast(`อัปเดต meta: เผยแพร่ ${meta.publishedTotal} ข้อ, ${meta.categories.length} หมวด`, 'success')
@@ -274,6 +278,7 @@ async function load() {
   loading.value = true
   try {
     const snap = await getDocs(query(collection(db, 'questions'), orderBy('createdAt', 'desc')))
+    usage.track(snap.size)
     list.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
   } catch (e) { console.error('[questions load]', e); toast('โหลดข้อสอบไม่สำเร็จ', 'error') }
   finally { loading.value = false }

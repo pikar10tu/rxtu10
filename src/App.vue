@@ -35,9 +35,10 @@
 </template>
 
 <script setup>
-import { watch } from 'vue'
+import { watch, onMounted } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
+import { useUsageStore } from './stores/usage.js'
 import { useAppConfig } from './composables/useAppConfig.js'
 import { useHelp } from './composables/useHelp.js'
 import { runIntegrityCheck } from './composables/useGuard.js'
@@ -49,11 +50,20 @@ import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'
 import ErrorBoundary     from './components/layout/ErrorBoundary.vue'
 
 const authStore = useAuthStore()
+const usage = useUsageStore()
 const { maintenance, configLoaded } = useAppConfig()
 const { openHelp } = useHelp()
 
 // rough integrity trip-wire: scan user data when it loads/changes
 watch(() => authStore.userData, (d) => runIntegrityCheck(d), { immediate: true })
+
+// flush ตัวนับ usage ครั้งเดียวตอนแอปถูกซ่อน/ปิด (มือถือ: visibilitychange เชื่อถือสุด)
+onMounted(() => {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') usage.flush()
+  })
+  window.addEventListener('pagehide', () => usage.flush())
+})
 </script>
 
 <style scoped>

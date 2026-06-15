@@ -19,13 +19,16 @@
 import { ref, onMounted } from 'vue'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
+import { useUsageStore } from '../../stores/usage.js'
 
+const usage = useUsageStore()
 const items = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
   try {
     const snap = await getDocs(query(collection(db, 'news'), orderBy('ts', 'desc'), limit(10)))
+    usage.track(snap.size)
     items.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
   } catch (e) {
     console.error('[news]', e)

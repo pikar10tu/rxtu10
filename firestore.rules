@@ -123,6 +123,22 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ── Usage stats (Phase 3) — ตัวนับประมาณการการใช้ Firestore รายวัน ──
+    //  read: admin (โชว์เกจ/banner) · write: ผู้ใช้ที่ล็อกอิน แต่แตะได้แค่
+    //  field reads/writes และต้องไม่ลดลง (increment เท่านั้น) กันการรีเซ็ต/ปลอม
+    match /stats/{id} {
+      allow read:   if isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['reads', 'writes'])
+        && request.resource.data.reads  is int && request.resource.data.reads  >= 0
+        && request.resource.data.writes is int && request.resource.data.writes >= 0;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reads', 'writes'])
+        && request.resource.data.reads  is int && request.resource.data.reads  >= resource.data.get('reads', 0)
+        && request.resource.data.writes is int && request.resource.data.writes >= resource.data.get('writes', 0);
+      allow delete: if isAdmin();
+    }
+
     // (SRS cards live in the user doc at `study.cards` — no subcollection)
 
   }

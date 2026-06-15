@@ -5,6 +5,7 @@ import { db } from '../firebase/config.js'
 import { R_SCI, R_CARE, RN } from '../data/students.js'
 import { normalizeUserData } from '../data/userSchema.js'
 import { readCache, slimForCache, MEMBERS_CACHE_KEY, MEMBERS_CACHE_TTL } from '../utils/membersCache.js'
+import { useUsageStore } from './usage.js'
 
 export const useMembersStore = defineStore('members', () => {
     const fbUsers    = ref({})   // { studentId: userObject }
@@ -50,6 +51,7 @@ export const useMembersStore = defineStore('members', () => {
         loading.value = true
         try {
             const snap = await getDocs(collection(db, 'users'))
+            useUsageStore().track(snap.size) // ตัวถ่วง read หลัก — นับเข้าตัวประมาณการ
             const newFb = {}
             const guests = []
             snap.forEach(d => {

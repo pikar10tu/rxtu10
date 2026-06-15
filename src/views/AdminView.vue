@@ -27,6 +27,36 @@
         </div>
       </section>
 
+      <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span>📊 การใช้ Firestore วันนี้</span>
+          <button class="btn-mini" @click="usage.loadToday()">↻ โหลด</button>
+        </div>
+        <div class="admin-hint">
+          ค่า<strong>ประมาณการ</strong>ในแอป (นับเฉพาะ getDocs ใหญ่ + การเขียนหลัก ไม่นับ listener echo)
+          — ตัวจริงดูที่ Cloud Monitoring เตือนทางอีเมล
+        </div>
+
+        <div v-if="usageBanner" class="usage-banner" :class="usageLevel">
+          {{ usageBanner }}
+        </div>
+
+        <div v-if="usage.today" class="usage-gauges">
+          <div class="usage-row">
+            <span class="usage-lbl">อ่าน (reads)</span>
+            <span class="usage-num">{{ usage.today.reads.toLocaleString() }} / {{ READ_LIMIT.toLocaleString() }}</span>
+          </div>
+          <div class="usage-bar"><i :style="{ width: pct(usage.today.reads, READ_LIMIT), background: barColor(usage.today.reads, READ_LIMIT) }"></i></div>
+          <div class="usage-row">
+            <span class="usage-lbl">เขียน (writes)</span>
+            <span class="usage-num">{{ usage.today.writes.toLocaleString() }} / {{ WRITE_LIMIT.toLocaleString() }}</span>
+          </div>
+          <div class="usage-bar"><i :style="{ width: pct(usage.today.writes, WRITE_LIMIT), background: barColor(usage.today.writes, WRITE_LIMIT) }"></i></div>
+        </div>
+        <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูค่า</div>
+      </section>
+
       <!-- ───── ทีมวิชาการ (role management) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -173,15 +203,34 @@ import { doc, updateDoc, setDoc, collection, getDocs, query, orderBy, limit, add
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
+import { useUsageStore } from '../stores/usage.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { useToast } from '../composables/useToast.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { TAG_LIST } from '../data/tags.js'
+import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
+const usage     = useUsageStore()
 const { maintenance } = useAppConfig()
 const { toast } = useToast()
+
+// ── usage gauge (ประมาณการในแอป) ──
+const READ_LIMIT = DAILY_READ_LIMIT
+const WRITE_LIMIT = DAILY_WRITE_LIMIT
+const usageLevel = computed(() => usageStatus(usage.today?.reads || 0, usage.today?.writes || 0))
+const usageBanner = computed(() => {
+  if (!usage.today) return ''
+  if (usageLevel.value === 'danger') return '🔴 ใกล้ชนลิมิตฟรีมาก! พิจารณาลดการอ่าน หรือเปิด Blaze (ยังมี quota ฟรีเดิม)'
+  if (usageLevel.value === 'warn')   return '🟡 การใช้งานสูงกว่าปกติ — จับตาดูไว้ (ค่านี้ undercount จริง)'
+  return ''
+})
+const pct = (v, max) => `${Math.min(100, Math.round((v / max) * 100))}%`
+const barColor = (v, max) => {
+  const s = usageStatus(max === READ_LIMIT ? v : 0, max === WRITE_LIMIT ? v : 0)
+  return s === 'danger' ? '#ef4444' : s === 'warn' ? '#f59e0b' : '#22c55e'
+}
 
 // ── launch gate toggle (config/app.maintenance) ──
 const savingMaint = ref(false)
@@ -220,7 +269,7 @@ const cheatLogs = ref([])
 const loadingLogs = ref(false)
 
 onMounted(() => {
-  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews(); loadDrugReports(); loadFeedback() }
+  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews(); loadDrugReports(); loadFeedback(); usage.loadToday() }
 })
 
 // ── Drug reports + dev feedback ──
@@ -374,6 +423,21 @@ async function setRole(m, role) {
   color: rgba(0, 0, 0, .45);
   margin-bottom: 10px;
 }
+.usage-banner {
+  border: 2px solid var(--ink); border-radius: 10px; padding: 8px 12px;
+  font-size: .74rem; font-weight: 700; margin-bottom: 10px;
+}
+.usage-banner.warn   { background: #fff7e6; }
+.usage-banner.danger { background: #fee2e2; }
+.usage-gauges { display: flex; flex-direction: column; gap: 4px; }
+.usage-row { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 700; }
+.usage-lbl { color: rgba(0,0,0,.6); }
+.usage-num { color: var(--ink); }
+.usage-bar {
+  height: 8px; border: 2px solid var(--ink); border-radius: 999px;
+  background: #fff; overflow: hidden; margin-bottom: 6px;
+}
+.usage-bar i { display: block; height: 100%; transition: width .3s; }
 .admin-search {
   width: 100%;
   box-sizing: border-box;
