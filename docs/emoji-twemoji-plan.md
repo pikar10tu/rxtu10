@@ -100,7 +100,8 @@ import `<Emoji>` ในแต่ละไฟล์: `import Emoji from '@/compon
 ลงมือเสร็จ + build ผ่าน: `scripts/fetch-fluent.mjs` ดึง **65/65** ตัว → `public/emoji/fluent/<codepoint>.svg` (รวม 1.7MB) · `emoji.js` เปลี่ยน `twemojiUrl`→`fluentFile` (path สัมพัทธ์ local) · `Emoji.vue` ใช้ `BASE_URL + fluentFile` · README เครดิต Fluent (MIT) · เทส 5 เคสผ่าน
 - **กับดักที่เจอ**: ชื่อไฟล์ derive จาก**ชื่อโฟลเดอร์** (lowercase + space→`_`, hyphen คงไว้ เช่น `jack-o-lantern_color.svg`) ไม่ใช่ slug · emoji มี skin-tone (มือ ✊✌️✋) ซ้อนใน `Default/Color/<base>_color_default.svg`
 - เพิ่ม emoji ใหม่ในเกมภายหลัง → รัน `node scripts/fetch-fluent.mjs` ซ้ำ (idempotent)
-- **เหลือ (ออปชัน)**: กลุ่ม `.icon` (news/rank/admin/help) ยังเป็น emoji เครื่อง · emoji hardcode ใน template (nav/title) ยังไม่แปลง
+- ✅ **แปลง hardcoded emoji ทั้งแอปแล้ว (16 มิ.ย. commit 67a96f5)**: `scripts/emojify.mjs` codemod แทน emoji ใน text node ของ `<template>` → `<Emoji>` (137 จุด/25 ไฟล์) แก้ tofu ทุก icon ที่เป็นข้อความ (nav/title/ปุ่ม/ป้าย) + RankView medal podium 🥇🥈🥉
+- **เหลือ (ปล่อยตั้งใจ)**: emoji ใน JS expression (`{{ ternary/template-literal }}` เช่นปุ่ม dynamic 💾📥, toast) — component แทนตรงๆ ไม่ได้ + เป็น emoji ทั่วไป tofu น้อยมาก · ถ้าจำเป็นค่อยแก้ทีละจุด
 
 ---
 

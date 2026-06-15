@@ -22,7 +22,7 @@
         v-for="(m, i) in ranked" :key="m.uid"
         class="rk-row" :class="{ me: m.uid === myUid, top: i < 3 }"
       >
-        <span class="rk-pos" :class="medal(i)">{{ i < 3 ? ['🥇','🥈','🥉'][i] : i + 1 }}</span>
+        <span class="rk-pos" :class="medal(i)"><Emoji v-if="i < 3" :char="['🥇','🥈','🥉'][i]" /><template v-else>{{ i + 1 }}</template></span>
         <img class="rk-avatar" :src="avatarOf(m)" :alt="m.nickname" @error="(e) => fallbackAvatar(e, m.nickname)" />
         <div class="rk-name">
           {{ m.nickname }}
