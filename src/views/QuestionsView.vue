@@ -43,6 +43,13 @@
           <button class="qz-btn qz-primary qz-import-btn" :disabled="importing || !importCount" @click="runImport">
             {{ importing ? 'กำลังนำเข้า…' : (importCount ? `📥 นำเข้า ${importCount} ข้อ` : '📥 นำเข้า') }}
           </button>
+
+          <button class="qz-btn qz-maint qz-import-btn" :disabled="backfilling" @click="backfillRand">
+            {{ backfilling ? 'กำลังเติม rand…' : '🔧 เติม rand ให้ข้อเก่า' }}
+          </button>
+          <button class="qz-btn qz-maint qz-import-btn" :disabled="recomputingMeta" @click="recomputeMeta">
+            {{ recomputingMeta ? 'กำลังคำนวณ…' : '🔄 คำนวณ meta ใหม่' }}
+          </button>
         </div>
       </details>
 
@@ -116,13 +123,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp, writeBatch } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp, writeBatch, setDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { parseImport } from '../utils/importQuestions.js'
+import { buildMeta } from '../utils/questionsMeta.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -208,7 +216,7 @@ async function runImport() {
     for (let i = 0; i < rows.length; i += 500) {
       const batch = writeBatch(db)
       for (const row of rows.slice(i, i + 500)) {
-        batch.set(doc(col), { ...row, ...meta, createdAt: serverTimestamp() })
+        batch.set(doc(col), { ...row, ...meta, rand: Math.random(), createdAt: serverTimestamp() })
       }
       await batch.commit()
     }
@@ -216,12 +224,50 @@ async function runImport() {
     toast(`นำเข้า ${rows.length} ข้อ${skipped.length ? ` · ข้าม ${skipped.length} ข้อ` : ''}`, 'success')
     importText.value = ''
     await load()
+    await recomputeMeta()
   } catch (e) {
     console.error('[questions import]', e)
     toast('นำเข้าไม่สำเร็จ', 'error')
   } finally {
     importing.value = false
   }
+}
+
+const backfilling = ref(false)
+// เติม rand ให้ข้อเก่าที่ยังไม่มี field (จำเป็นก่อนสลับ quiz ไป windowed query —
+// orderBy('rand') จะไม่คืน doc ที่ไม่มี rand)
+async function backfillRand() {
+  if (backfilling.value) return
+  if (!(await confirm('เติมค่า rand ให้ข้อสอบเก่าที่ยังไม่มี? (ทำครั้งเดียวก่อนเปิดควิซแบบใหม่)'))) return
+  backfilling.value = true
+  try {
+    const snap = await getDocs(query(collection(db, 'questions'), orderBy('createdAt', 'desc')))
+    const missing = snap.docs.filter(d => typeof d.data().rand !== 'number')
+    for (let i = 0; i < missing.length; i += 500) {
+      const batch = writeBatch(db)
+      for (const d of missing.slice(i, i + 500)) batch.update(d.ref, { rand: Math.random() })
+      await batch.commit()
+    }
+    toast(`เติม rand แล้ว ${missing.length} ข้อ`, 'success')
+  } catch (e) {
+    console.error('[backfill rand]', e); toast('เติม rand ไม่สำเร็จ', 'error')
+  } finally { backfilling.value = false }
+}
+
+const recomputingMeta = ref(false)
+// อ่านทั้งคลังครั้งเดียว (admin เท่านั้น = ถูก) → เขียน config/questionsMeta
+// ให้หน้า quiz home ใช้แทนการ getDocs ทั้งคลัง
+async function recomputeMeta() {
+  if (recomputingMeta.value) return
+  recomputingMeta.value = true
+  try {
+    const snap = await getDocs(collection(db, 'questions'))
+    const meta = buildMeta(snap.docs.map(d => d.data()))
+    await setDoc(doc(db, 'config', 'questionsMeta'), { ...meta, updatedAt: serverTimestamp() })
+    toast(`อัปเดต meta: เผยแพร่ ${meta.publishedTotal} ข้อ, ${meta.categories.length} หมวด`, 'success')
+  } catch (e) {
+    console.error('[recompute meta]', e); toast('อัปเดต meta ไม่สำเร็จ', 'error')
+  } finally { recomputingMeta.value = false }
 }
 
 async function load() {
@@ -255,6 +301,7 @@ async function save() {
     } else {
       await addDoc(collection(db, 'questions'), {
         ...payload,
+        rand: Math.random(),
         createdBy: authStore.currentUser?.uid || null,
         createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
         createdAt: serverTimestamp(),
@@ -317,6 +364,7 @@ async function remove(q) {
 .qz-import-hint { font-size: .74rem; color: #15803d; font-weight: 600; }
 .qz-import-err { font-size: .74rem; color: #dc2626; font-weight: 600; background: #fef2f2; border-radius: 8px; padding: 7px 10px; line-height: 1.4; }
 .qz-import-btn { width: 100%; }
+.qz-maint { background: #fff; color: var(--ink); }
 
 .qz-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
 .qz-card-head { font-weight: 800; font-size: .92rem; margin-bottom: 10px; }
