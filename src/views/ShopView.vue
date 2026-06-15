@@ -1,13 +1,13 @@
 <template>
   <div class="tab-content">
     <div class="shop-head">
-      <div class="page-title" style="margin-bottom:0">🛒 Shop</div>
-      <span class="shop-coins">{{ coins.toLocaleString() }} 🪙</span>
+      <div class="page-title" style="margin-bottom:0"><Emoji char="🛒" /> Shop</div>
+      <span class="shop-coins">{{ coins.toLocaleString() }} <Emoji char="🪙" /></span>
     </div>
 
     <template v-if="authStore.isLoggedIn">
       <div class="shop-storage">
-        🐾 คลังเพ็ท {{ pets.length }}/{{ storageCap }}
+        <Emoji char="🐾" /> คลังเพ็ท {{ pets.length }}/{{ storageCap }}
         <span v-if="discount" class="shop-disc">· ส่วนลดร้าน −{{ discount }}%</span>
       </div>
 
@@ -22,7 +22,7 @@
             </div>
           </div>
           <button class="egg-buy" :class="{ ok: coins >= price(egg) }" @click="buy(egg)">
-            {{ price(egg).toLocaleString() }}🪙
+            {{ price(egg).toLocaleString() }}<Emoji char="🪙" />
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <slot v-if="!err" />
   <div v-else class="eb">
-    <div class="eb-emoji">😵‍💫</div>
+    <div class="eb-emoji"><Emoji char="😵‍💫" /></div>
     <div class="eb-title">อุ๊ปส์ หน้านี้มีปัญหา</div>
     <div class="eb-msg">เกิดข้อผิดพลาดบางอย่าง — ข้อมูลของคุณยังปลอดภัย ลองใหม่หรือโหลดหน้าใหม่ได้เลย</div>
     <div class="eb-actions">
@@ -12,6 +12,7 @@
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { ref, onErrorCaptured, watch } from 'vue'
 import { useRoute } from 'vue-router'
 

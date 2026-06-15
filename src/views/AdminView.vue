@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div class="page-title">⚙️ Admin</div>
+    <div class="page-title"><Emoji char="⚙️" /> Admin</div>
 
     <!-- guard: admin only -->
     <div v-if="!authStore.isAdmin" class="admin-denied">
@@ -10,7 +10,7 @@
     <template v-else>
       <!-- ───── เปิด/ปิดเว็บ (launch gate) ───── -->
       <section class="admin-card">
-        <div class="admin-card-head"><span>🚀 สถานะการเปิดเว็บ</span></div>
+        <div class="admin-card-head"><span><Emoji char="🚀" /> สถานะการเปิดเว็บ</span></div>
         <div class="admin-hint">
           เปิดให้ทั้งชั้นปีใช้ หรือปิดเข้าโหมดปรับปรุง (เห็นเฉพาะแอดมิน/ทีมวิชาการ) — มีผลทันที ไม่ต้อง deploy
         </div>
@@ -30,7 +30,7 @@
       <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span>📊 การใช้ Firestore วันนี้</span>
+          <span><Emoji char="📊" /> การใช้ Firestore วันนี้</span>
           <button class="btn-mini" @click="usage.loadToday()">↻ โหลด</button>
         </div>
         <div class="admin-hint">
@@ -60,7 +60,7 @@
       <!-- ───── ทีมวิชาการ (role management) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span>🎓 ทีมวิชาการ</span>
+          <span><Emoji char="🎓" /> ทีมวิชาการ</span>
           <button class="btn-mini" :disabled="members.loading" @click="reload">
             {{ members.loading ? '...' : '↻ โหลด' }}
           </button>
@@ -103,7 +103,7 @@
                   :disabled="savingUid === m.uid"
                   @click="setRole(m, 'student')"
                 >− เอาออก</button>
-                <button class="btn-mini btn-gray" @click="editTagsUid = editTagsUid === m.uid ? null : m.uid">🏷️</button>
+                <button class="btn-mini btn-gray" @click="editTagsUid = editTagsUid === m.uid ? null : m.uid"><Emoji char="🏷️" /></button>
               </div>
             </div>
             <!-- tag editor -->
@@ -121,7 +121,7 @@
 
       <!-- ───── กระดานข่าว ───── -->
       <section class="admin-card">
-        <div class="admin-card-head"><span>📢 กระดานข่าว</span></div>
+        <div class="admin-card-head"><span><Emoji char="📢" /> กระดานข่าว</span></div>
         <div class="admin-hint">โพสต์ประกาศ — ทุกคนจะเห็นบนหน้า Home</div>
         <div class="news-form">
           <input v-model="newsIcon" class="news-icon-in" maxlength="2" />
@@ -131,7 +131,7 @@
         <ul v-if="newsList.length" class="news-admin-list">
           <li v-for="n in newsList" :key="n.id" class="news-admin-row">
             <span>{{ n.icon }} {{ n.msg }}</span>
-            <button class="news-del" @click="delNews(n.id)">🗑️</button>
+            <button class="news-del" @click="delNews(n.id)"><Emoji char="🗑️" /></button>
           </li>
         </ul>
       </section>
@@ -139,13 +139,13 @@
       <!-- ───── รายงานการโกง (cheat logs) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span>🚨 รายงานการโกง</span>
+          <span><Emoji char="🚨" /> รายงานการโกง</span>
           <button class="btn-mini" :disabled="loadingLogs" @click="loadCheatLogs">
             {{ loadingLogs ? '...' : '↻ โหลด' }}
           </button>
         </div>
         <div class="admin-hint">ค่าผิดปกติที่ระบบตรวจพบ (กันได้แค่หยาบๆ — ดูประกอบการพิจารณา)</div>
-        <div v-if="!cheatLogs.length" class="admin-empty">ยังไม่มีรายงาน 🎉</div>
+        <div v-if="!cheatLogs.length" class="admin-empty">ยังไม่มีรายงาน <Emoji char="🎉" /></div>
         <ul v-else class="log-list">
           <li v-for="g in cheatLogs" :key="g.id" class="log-row">
             <div class="log-main"><b>{{ g.name }}</b> · <span class="log-reason">{{ g.reason }}</span></div>
@@ -158,18 +158,18 @@
       <!-- ───── รายงานข้อมูลยา (drug reports) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span>📋 รายงานข้อมูลยา</span>
+          <span><Emoji char="📋" /> รายงานข้อมูลยา</span>
           <button class="btn-mini" :disabled="loadingReports" @click="loadDrugReports">
             {{ loadingReports ? '...' : '↻ โหลด' }}
           </button>
         </div>
         <div class="admin-hint">ผู้ใช้แจ้งว่าข้อมูลยาผิด/ไม่ตรง — ตรวจแก้แล้วกด ✓ เพื่อปิด</div>
-        <div v-if="!drugReports.length" class="admin-empty">ยังไม่มีรายงาน 🎉</div>
+        <div v-if="!drugReports.length" class="admin-empty">ยังไม่มีรายงาน <Emoji char="🎉" /></div>
         <ul v-else class="log-list">
           <li v-for="r in drugReports" :key="r.id" class="rep-row">
             <div class="rep-top"><b>{{ r.drug }}</b><button class="rep-done" @click="resolveDoc('drugReports', r.id)">✓ ปิด</button></div>
             <div class="rep-cur">{{ r.currentClass }}<template v-if="r.currentDose"> · {{ r.currentDose }}</template></div>
-            <div class="rep-note">💬 {{ r.note }}</div>
+            <div class="rep-note"><Emoji char="💬" /> {{ r.note }}</div>
             <div class="log-ts">{{ r.reporterName || 'ไม่ระบุ' }} · {{ fmtTs(r.ts) }}</div>
           </li>
         </ul>
@@ -178,7 +178,7 @@
       <!-- ───── ข้อเสนอแนะพัฒนา (feedback) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span>💡 ข้อเสนอแนะพัฒนา</span>
+          <span><Emoji char="💡" /> ข้อเสนอแนะพัฒนา</span>
           <button class="btn-mini" :disabled="loadingFeedback" @click="loadFeedback">
             {{ loadingFeedback ? '...' : '↻ โหลด' }}
           </button>

@@ -1,22 +1,22 @@
 <template>
   <div class="tab-content">
-    <div class="page-title">🎮 Play</div>
+    <div class="page-title"><Emoji char="🎮" /> Play</div>
 
     <template v-if="authStore.isLoggedIn">
       <div class="play-grid">
         <!-- Farm: live entry card → opens modal -->
         <button class="game-card" @click="farmOpen = true">
-          <span class="gc-emoji">🌾</span>
+          <span class="gc-emoji"><Emoji char="🌾" /></span>
           <span class="gc-name">ฟาร์ม</span>
-          <span v-if="readyCount" class="gc-badge ready">🧺 เก็บได้ {{ readyCount }}</span>
+          <span v-if="readyCount" class="gc-badge ready"><Emoji char="🧺" /> เก็บได้ {{ readyCount }}</span>
           <span v-else-if="emptyCount" class="gc-badge plant">＋ ว่าง {{ emptyCount }} แปลง</span>
-          <span v-else class="gc-badge grow">🌱 กำลังโต</span>
+          <span v-else class="gc-badge grow"><Emoji char="🌱" /> กำลังโต</span>
         </button>
 
-        <div class="soon-card"><span class="soon-emoji">⚔️</span><span>PvP สู้กัน</span><span class="soon-tag">เร็วๆ นี้</span></div>
-        <div class="soon-card"><span class="soon-emoji">🏯</span><span>ปีนหอคอย</span><span class="soon-tag">เร็วๆ นี้</span></div>
-        <div class="soon-card"><span class="soon-emoji">🗺️</span><span>ผจญภัย Co-op</span><span class="soon-tag">เร็วๆ นี้</span></div>
-        <div class="soon-card"><span class="soon-emoji">🍬</span><span>เภสัช Crush</span><span class="soon-tag">เร็วๆ นี้</span></div>
+        <div class="soon-card"><span class="soon-emoji"><Emoji char="⚔️" /></span><span>PvP สู้กัน</span><span class="soon-tag">เร็วๆ นี้</span></div>
+        <div class="soon-card"><span class="soon-emoji"><Emoji char="🏯" /></span><span>ปีนหอคอย</span><span class="soon-tag">เร็วๆ นี้</span></div>
+        <div class="soon-card"><span class="soon-emoji"><Emoji char="🗺️" /></span><span>ผจญภัย Co-op</span><span class="soon-tag">เร็วๆ นี้</span></div>
+        <div class="soon-card"><span class="soon-emoji"><Emoji char="🍬" /></span><span>เภสัช Crush</span><span class="soon-tag">เร็วๆ นี้</span></div>
       </div>
 
       <!-- Farm modal -->
@@ -37,6 +37,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useFarm } from '../composables/useFarm.js'

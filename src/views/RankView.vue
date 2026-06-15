@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="rk-head">
-      <div class="page-title">🏆 Rank</div>
+      <div class="page-title"><Emoji char="🏆" /> Rank</div>
       <button class="rk-refresh" :disabled="members.loading" title="โหลดข้อมูลล่าสุด" @click="refresh">↻</button>
     </div>
 
@@ -35,6 +35,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { useAuthStore } from '../stores/auth.js'

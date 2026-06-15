@@ -12,19 +12,19 @@
       </div>
 
       <div class="ps-stats">
-        <div class="ps-stat"><span>⚔️</span><b>{{ atk }}</b><small>ATK</small></div>
-        <div class="ps-stat"><span>❤️</span><b>{{ hp }}</b><small>HP</small></div>
-        <div class="ps-stat"><span>💰</span><b>{{ income }}</b><small>/วัน</small></div>
+        <div class="ps-stat"><span><Emoji char="⚔️" /></span><b>{{ atk }}</b><small>ATK</small></div>
+        <div class="ps-stat"><span><Emoji char="❤️" /></span><b>{{ hp }}</b><small>HP</small></div>
+        <div class="ps-stat"><span><Emoji char="💰" /></span><b>{{ income }}</b><small>/วัน</small></div>
       </div>
       <div class="ps-substats">
-        <span>🎯 Crit {{ crit }}%</span>
-        <span>💥 CritDMG {{ critDmg }}%</span>
-        <span v-if="lifesteal">🩸 {{ lifesteal }}%</span>
-        <span v-if="dodge">💨 {{ dodge }}%</span>
+        <span><Emoji char="🎯" /> Crit {{ crit }}%</span>
+        <span><Emoji char="💥" /> CritDMG {{ critDmg }}%</span>
+        <span v-if="lifesteal"><Emoji char="🩸" /> {{ lifesteal }}%</span>
+        <span v-if="dodge"><Emoji char="💨" /> {{ dodge }}%</span>
       </div>
 
       <div v-if="pot.length" class="ps-pot">
-        <div class="ps-pot-head">⚗️ ศักยภาพ</div>
+        <div class="ps-pot-head"><Emoji char="⚗️" /> ศักยภาพ</div>
         <div class="ps-pot-list">
           <span v-for="(a, i) in pot" :key="i" class="ps-aff">{{ affixMeta(a.stat).label }} +{{ a.value }}%</span>
         </div>

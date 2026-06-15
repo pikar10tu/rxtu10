@@ -1,7 +1,7 @@
 <template>
   <div class="farm">
     <div class="farm-head">
-      <span class="farm-title">🌾 ฟาร์ม</span>
+      <span class="farm-title"><Emoji char="🌾" /> ฟาร์ม</span>
       <span class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} {{ upcomingEmojis }}</template></span>
     </div>
 
@@ -20,11 +20,11 @@
           <div class="plot-name">{{ stat(plot).crop.name }}</div>
 
           <template v-if="stat(plot).ready">
-            <button class="plot-btn harvest" @click="farm.harvest(i)">✅ เก็บเกี่ยว</button>
+            <button class="plot-btn harvest" @click="farm.harvest(i)"><Emoji char="✅" /> เก็บเกี่ยว</button>
           </template>
           <template v-else>
             <div class="plot-bar"><div class="plot-fill" :style="{ width: (stat(plot).progress * 100) + '%' }"></div></div>
-            <div class="plot-time">⏱ {{ fmt(stat(plot).remainingMs) }}</div>
+            <div class="plot-time"><Emoji char="⏱" /> {{ fmt(stat(plot).remainingMs) }}</div>
           </template>
         </template>
       </div>
@@ -33,7 +33,7 @@
     <!-- inventory / sell -->
     <div class="inv">
       <div class="inv-head">
-        <span>🧺 ผลผลิต</span>
+        <span><Emoji char="🧺" /> ผลผลิต</span>
         <button v-if="invList.length" class="inv-sellall" @click="farm.sellAll()">ขายทั้งหมด</button>
       </div>
       <div v-if="!invList.length" class="inv-empty">ยังไม่มีผลผลิต — ปลูกแล้วเก็บเกี่ยวมาขายได้เลย</div>
@@ -41,7 +41,7 @@
         <button v-for="it in invList" :key="it.id" class="inv-item" @click="farm.sell(it.id)">
           <span class="inv-emoji"><Emoji :char="it.emoji" /></span>
           <span class="inv-qty">×{{ it.qty }}</span>
-          <span class="inv-sell">ขาย {{ (it.sellPrice * it.qty).toLocaleString() }}🪙</span>
+          <span class="inv-sell">ขาย {{ (it.sellPrice * it.qty).toLocaleString() }}<Emoji char="🪙" /></span>
         </button>
       </div>
     </div>

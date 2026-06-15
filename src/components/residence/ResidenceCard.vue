@@ -7,7 +7,7 @@
           {{ currentTier.tierName }}
           <span class="res-lv" :style="{ background: currentTier.frameColor }">Lv.{{ level }}</span>
         </div>
-        <div class="res-income">💰 รายได้/วัน <b>{{ currentTier.dailyIncome.toLocaleString() }}</b>🪙</div>
+        <div class="res-income"><Emoji char="💰" /> รายได้/วัน <b>{{ currentTier.dailyIncome.toLocaleString() }}</b><Emoji char="🪙" /></div>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
     <template v-if="!isMax">
       <div class="res-next">
         เลเวลถัดไป: {{ next.art }} {{ next.tierName }}
-        <span class="res-next-income">(+{{ (next.dailyIncome - currentTier.dailyIncome).toLocaleString() }}🪙/วัน)</span>
+        <span class="res-next-income">(+{{ (next.dailyIncome - currentTier.dailyIncome).toLocaleString() }}<Emoji char="🪙" />/วัน)</span>
       </div>
       <button
         class="res-upgrade"
@@ -23,17 +23,18 @@
         :style="canAfford ? { background: currentTier.frameColor } : {}"
         @click="upgrade"
       >
-        ⬆️ อัปเกรด · {{ next.upgradeCost.toLocaleString() }}🪙
+        <Emoji char="⬆️" /> อัปเกรด · {{ next.upgradeCost.toLocaleString() }}<Emoji char="🪙" />
       </button>
       <div v-if="!canAfford" class="res-need">
-        ขาดอีก {{ (next.upgradeCost - coins).toLocaleString() }}🪙
+        ขาดอีก {{ (next.upgradeCost - coins).toLocaleString() }}<Emoji char="🪙" />
       </div>
     </template>
-    <div v-else class="res-max">🏰 ระดับสูงสุดแล้ว!</div>
+    <div v-else class="res-max"><Emoji char="🏰" /> ระดับสูงสุดแล้ว!</div>
   </div>
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { useResidence } from '../../composables/useResidence.js'
 
 const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useResidence()

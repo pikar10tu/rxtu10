@@ -20,13 +20,13 @@
 
       <!-- Tier 2: stat strip (max 3, no coins) -->
       <div class="pf-stats">
-        <div class="pf-stat"><span>⚔️</span><b>{{ member.pvpVictories || 0 }}</b><small>PvP ชนะ</small></div>
-        <div class="pf-stat"><span>🏯</span><b>{{ member.towerBest || 0 }}</b><small>หอคอย</small></div>
-        <div class="pf-stat"><span>🐾</span><b>{{ (member.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+        <div class="pf-stat"><span><Emoji char="⚔️" /></span><b>{{ member.pvpVictories || 0 }}</b><small>PvP ชนะ</small></div>
+        <div class="pf-stat"><span><Emoji char="🏯" /></span><b>{{ member.towerBest || 0 }}</b><small>หอคอย</small></div>
+        <div class="pf-stat"><span><Emoji char="🐾" /></span><b>{{ (member.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
 
       <!-- Tier 3: active team (tap to see stats) -->
-      <div class="pf-team-label">⭐ ทีม Active</div>
+      <div class="pf-team-label"><Emoji char="⭐" /> ทีม Active</div>
       <div v-if="showcase.length" class="pf-showcase">
         <button v-for="(p, i) in showcase" :key="p.instId || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
           <Emoji :char="p.emoji" />
@@ -39,9 +39,9 @@
 
       <!-- Tier 4: contact (only filled rows) -->
       <div v-if="hasContact" class="pf-contact">
-        <div v-if="member.contact?.phone"><span>📞</span>{{ member.contact.phone }}</div>
-        <div v-if="member.contact?.ig"><span>📷</span>{{ member.contact.ig }}</div>
-        <div v-if="member.contact?.line"><span>💬</span>{{ member.contact.line }}</div>
+        <div v-if="member.contact?.phone"><span><Emoji char="📞" /></span>{{ member.contact.phone }}</div>
+        <div v-if="member.contact?.ig"><span><Emoji char="📷" /></span>{{ member.contact.ig }}</div>
+        <div v-if="member.contact?.line"><span><Emoji char="💬" /></span>{{ member.contact.line }}</div>
       </div>
     </div>
   </div>

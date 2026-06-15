@@ -2,7 +2,7 @@
   <div v-if="helpOpen" class="help-ov" @click.self="closeHelp">
     <div class="help-box">
       <div class="help-head">
-        <span>📖 วิธีเล่น</span>
+        <span><Emoji char="📖" /> วิธีเล่น</span>
         <button class="help-x" @click="closeHelp">✕</button>
       </div>
 
@@ -23,6 +23,7 @@
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { ref } from 'vue'
 import { GUIDE_SECTIONS } from '../../data/guide.js'
 import { useHelp } from '../../composables/useHelp.js'

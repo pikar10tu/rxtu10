@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="qz-head">
-      <div class="qz-title">📝 คลังข้อสอบ</div>
+      <div class="qz-title"><Emoji char="📝" /> คลังข้อสอบ</div>
       <span class="qz-count">{{ filtered.length }}/{{ list.length }} ข้อ</span>
     </div>
 
@@ -12,11 +12,11 @@
     <template v-else>
       <!-- ── นำเข้าหลายข้อ (bulk JSON import) ── -->
       <details class="qz-import">
-        <summary class="qz-import-sum">📥 นำเข้าข้อสอบหลายข้อ (JSON)</summary>
+        <summary class="qz-import-sum"><Emoji char="📥" /> นำเข้าข้อสอบหลายข้อ (JSON)</summary>
         <div class="qz-import-body">
           <div class="qz-import-file">
             <input ref="fileEl" type="file" accept=".json,application/json" hidden @change="onFile" />
-            <button type="button" class="qz-pick" @click="fileEl?.click()">📂 เลือกไฟล์ .json จากเครื่อง</button>
+            <button type="button" class="qz-pick" @click="fileEl?.click()"><Emoji char="📂" /> เลือกไฟล์ .json จากเครื่อง</button>
             <span class="qz-pick-hint">หรือวาง JSON ด้านล่าง</span>
           </div>
 
@@ -35,7 +35,7 @@
             </p>
           </details>
 
-          <div v-if="importError" class="qz-import-err">⚠️ {{ importError }}</div>
+          <div v-if="importError" class="qz-import-err"><Emoji char="⚠️" /> {{ importError }}</div>
           <div v-else-if="importText.trim()" class="qz-import-hint">
             พร้อมนำเข้า <b>{{ importCount }}</b> ข้อ<span v-if="importSkipped"> · ข้าม {{ importSkipped }} ข้อ (ผิดรูปแบบ)</span>
           </div>
@@ -155,7 +155,7 @@
               <span class="qz-c-letter">{{ LETTERS[i] }}</span>{{ c }}
             </li>
           </ul>
-          <div v-if="q.explanation" class="qz-exp">💡 {{ q.explanation }}</div>
+          <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
         </li>
       </ul>
       <button v-if="filtered.length > visible.length" class="qz-btn qz-gray qz-more" @click="visibleCount += PAGE">
@@ -166,6 +166,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp, writeBatch, setDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'

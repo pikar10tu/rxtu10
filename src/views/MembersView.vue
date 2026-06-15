@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="mv-head">
-      <div class="mv-title">👥 สมาชิก</div>
+      <div class="mv-title"><Emoji char="👥" /> สมาชิก</div>
       <div class="mv-head-r">
         <span class="mv-count">{{ registeredCount }}/{{ roster.length }} เข้าระบบแล้ว</span>
         <button class="mv-refresh" :disabled="members.loading" title="โหลดข้อมูลล่าสุด" @click="refresh">↻</button>
@@ -31,7 +31,7 @@
         </div>
         <div class="mv-nick">{{ m.nickname }}</div>
         <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
-        <div v-if="m.registered" class="mv-likes">❤️ {{ m.likes || 0 }}</div>
+        <div v-if="m.registered" class="mv-likes"><Emoji char="❤️" /> {{ m.likes || 0 }}</div>
         <div v-else class="mv-off-tag">ยังไม่เข้าระบบ</div>
       </button>
     </div>
@@ -41,6 +41,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { getTier } from '../data/residence.js'

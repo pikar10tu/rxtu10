@@ -2,7 +2,7 @@
   <div class="tab-content">
     <div class="qv-head">
       <button class="qv-back" @click="$router.back()">‹</button>
-      <span class="qv-head-title">📝 ทำข้อสอบ</span>
+      <span class="qv-head-title"><Emoji char="📝" /> ทำข้อสอบ</span>
     </div>
 
     <div v-if="!authStore.isLoggedIn" class="qv-empty">เข้าสู่ระบบเพื่อทำข้อสอบ</div>
@@ -10,7 +10,7 @@
     <!-- ── HOME ── -->
     <template v-else-if="mode === 'home'">
       <div v-if="loading" class="qv-empty">กำลังโหลดข้อสอบ…</div>
-      <div v-else-if="!publishedTotal" class="qv-empty">ยังไม่มีข้อสอบที่เผยแพร่ — รอทีมวิชาการเพิ่มก่อนนะ 📚</div>
+      <div v-else-if="!publishedTotal" class="qv-empty">ยังไม่มีข้อสอบที่เผยแพร่ — รอทีมวิชาการเพิ่มก่อนนะ <Emoji char="📚" /></div>
       <template v-else>
         <div class="qv-info">มีข้อสอบให้ทำ <b>{{ publishedTotal }}</b> ข้อ</div>
 
@@ -33,7 +33,7 @@
         <button class="qv-start" :disabled="!publishedTotal || starting" @click="start">
           {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำข้อสอบ (${quizCount} ข้อ)` }}
         </button>
-        <div class="qv-hint">ทำข้อสอบได้เหรียญ +10/ข้อที่ถูก (สูงสุด {{ DAILY_CAP }}🪙/วัน)</div>
+        <div class="qv-hint">ทำข้อสอบได้เหรียญ +10/ข้อที่ถูก (สูงสุด {{ DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
       </template>
     </template>
 
@@ -61,7 +61,7 @@
         <div :class="picked === current.answer ? 'qv-fb ok' : 'qv-fb no'">
           {{ picked === current.answer ? '✓ ถูกต้อง!' : `✗ ยังไม่ถูก — เฉลยคือข้อ ${LETTERS[current.answer]}` }}
         </div>
-        <div v-if="current.explanation" class="qv-exp">💡 {{ current.explanation }}</div>
+        <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
         <button class="qv-next" @click="next">{{ idx + 1 < quiz.length ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
       </div>
     </template>
@@ -73,7 +73,7 @@
         <div class="qv-result-title">ทำข้อสอบจบแล้ว!</div>
         <div class="qv-result-score">{{ correct }}<span>/{{ quiz.length }}</span></div>
         <div class="qv-result-pct">{{ pct }}%</div>
-        <div v-if="coinsEarned" class="qv-result-coins">+{{ coinsEarned.toLocaleString() }} 🪙</div>
+        <div v-if="coinsEarned" class="qv-result-coins">+{{ coinsEarned.toLocaleString() }} <Emoji char="🪙" /></div>
         <div v-else class="qv-result-nocoins">วันนี้รับเหรียญครบเพดานแล้ว</div>
         <button class="qv-start" @click="mode = 'home'">ทำชุดใหม่</button>
       </div>
@@ -82,6 +82,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, increment, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'

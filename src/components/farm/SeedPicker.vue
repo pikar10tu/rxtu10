@@ -2,7 +2,7 @@
   <div v-if="open" class="sp-ov" @click.self="$emit('close')">
     <div class="sp-box">
       <div class="sp-head">
-        <span>🌱 เลือกเมล็ดพันธุ์</span>
+        <span><Emoji char="🌱" /> เลือกเมล็ดพันธุ์</span>
         <button class="sp-x" @click="$emit('close')">✕</button>
       </div>
       <div class="sp-list">
@@ -16,9 +16,9 @@
           <span class="sp-emoji"><Emoji :char="c.emoji" /></span>
           <div class="sp-info">
             <div class="sp-name">{{ c.name }}</div>
-            <div class="sp-meta">⏱ {{ growLabel(c) }} · ขายได้ {{ c.sellPrice.toLocaleString() }}🪙</div>
+            <div class="sp-meta"><Emoji char="⏱" /> {{ growLabel(c) }} · ขายได้ {{ c.sellPrice.toLocaleString() }}<Emoji char="🪙" /></div>
           </div>
-          <span class="sp-cost" :class="{ no: coins < c.seedCost }">{{ c.seedCost.toLocaleString() }}🪙</span>
+          <span class="sp-cost" :class="{ no: coins < c.seedCost }">{{ c.seedCost.toLocaleString() }}<Emoji char="🪙" /></span>
         </button>
       </div>
     </div>

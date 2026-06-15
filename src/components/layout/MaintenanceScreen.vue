@@ -1,6 +1,6 @@
 <template>
   <div class="maint">
-    <div class="maint-emoji">🧝‍♂️🔧</div>
+    <div class="maint-emoji"><Emoji char="🧝‍♂️" /><Emoji char="🔧" /></div>
     <div class="maint-title">เว็บกำลังปรับปรุง</div>
     <div class="maint-msg">{{ line }}</div>
 
@@ -15,6 +15,7 @@
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { ref } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 

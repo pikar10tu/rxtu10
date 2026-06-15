@@ -13,16 +13,16 @@
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">
-        <RouterLink to="/"        class="bn-item"><span class="bn-icon">🏠</span>Home</RouterLink>
-        <RouterLink to="/members" class="bn-item"><span class="bn-icon">👥</span>Members</RouterLink>
-        <RouterLink to="/play"    class="bn-item"><span class="bn-icon">🎮</span>Play</RouterLink>
-        <RouterLink to="/study"   class="bn-item"><span class="bn-icon">📚</span>Study</RouterLink>
+        <RouterLink to="/"        class="bn-item"><span class="bn-icon"><Emoji char="🏠" /></span>Home</RouterLink>
+        <RouterLink to="/members" class="bn-item"><span class="bn-icon"><Emoji char="👥" /></span>Members</RouterLink>
+        <RouterLink to="/play"    class="bn-item"><span class="bn-icon"><Emoji char="🎮" /></span>Play</RouterLink>
+        <RouterLink to="/study"   class="bn-item"><span class="bn-icon"><Emoji char="📚" /></span>Study</RouterLink>
         <!-- นักศึกษา → ทำข้อสอบ (/quiz) · ทีมวิชาการ → จัดการคลังข้อสอบ (/questions) -->
-        <RouterLink :to="authStore.isAcademic ? '/questions' : '/quiz'" class="bn-item"><span class="bn-icon">📝</span>ข้อสอบ</RouterLink>
-        <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon">⚙️</span>Admin</RouterLink>
+        <RouterLink :to="authStore.isAcademic ? '/questions' : '/quiz'" class="bn-item"><span class="bn-icon"><Emoji char="📝" /></span>ข้อสอบ</RouterLink>
+        <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon"><Emoji char="⚙️" /></span>Admin</RouterLink>
       </nav>
 
-      <button class="help-fab" title="วิธีเล่น" @click="openHelp">❓</button>
+      <button class="help-fab" title="วิธีเล่น" @click="openHelp"><Emoji char="❓" /></button>
       <HelpModal />
       <MigrationWelcome />
     </template>
@@ -35,6 +35,7 @@
 </template>
 
 <script setup>
+import Emoji from './components/shared/Emoji.vue'
 import { watch, onMounted } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'

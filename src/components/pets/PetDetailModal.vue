@@ -19,21 +19,21 @@
 
       <!-- stats -->
       <div class="pd-stats">
-        <div class="pd-stat"><span>⚔️</span><b>{{ atk }}</b><small>ATK</small></div>
-        <div class="pd-stat"><span>❤️</span><b>{{ hp }}</b><small>HP</small></div>
-        <div class="pd-stat"><span>💰</span><b>{{ income }}</b><small>/วัน</small></div>
+        <div class="pd-stat"><span><Emoji char="⚔️" /></span><b>{{ atk }}</b><small>ATK</small></div>
+        <div class="pd-stat"><span><Emoji char="❤️" /></span><b>{{ hp }}</b><small>HP</small></div>
+        <div class="pd-stat"><span><Emoji char="💰" /></span><b>{{ income }}</b><small>/วัน</small></div>
       </div>
       <div class="pd-substats">
-        <span>🎯 Crit {{ crit }}%</span>
-        <span>💥 CritDMG {{ critDmg }}%</span>
-        <span v-if="lifesteal">🩸 Lifesteal {{ lifesteal }}%</span>
-        <span v-if="dodge">💨 Dodge {{ dodge }}%</span>
+        <span><Emoji char="🎯" /> Crit {{ crit }}%</span>
+        <span><Emoji char="💥" /> CritDMG {{ critDmg }}%</span>
+        <span v-if="lifesteal"><Emoji char="🩸" /> Lifesteal {{ lifesteal }}%</span>
+        <span v-if="dodge"><Emoji char="💨" /> Dodge {{ dodge }}%</span>
       </div>
 
       <!-- evolve -->
       <div class="pd-section">
-        <div class="pd-sec-head">🧬 วิวัฒน์ (เพิ่มเกรด)</div>
-        <template v-if="pet.grade >= 12"><div class="pd-note">เกรดสูงสุดแล้ว 👑</div></template>
+        <div class="pd-sec-head"><Emoji char="🧬" /> วิวัฒน์ (เพิ่มเกรด)</div>
+        <template v-if="pet.grade >= 12"><div class="pd-note">เกรดสูงสุดแล้ว <Emoji char="👑" /></div></template>
         <template v-else>
           <div class="pd-note">เกรด {{ GRADE_LABELS[pet.grade] || '0' }} → {{ GRADE_LABELS[pet.grade + 1] }} · ใช้ตัวซ้ำ {{ evoNeed }} ({{ dupes }}/{{ evoNeed }})</div>
           <button class="pd-btn" :class="{ ok: dupes >= evoNeed }" :disabled="dupes < evoNeed || busy" @click="evolve">วิวัฒน์</button>
@@ -42,18 +42,18 @@
 
       <!-- potential -->
       <div class="pd-section">
-        <div class="pd-sec-head">⚗️ ศักยภาพ ({{ (pet.potential || []).length }}/{{ slots }})</div>
+        <div class="pd-sec-head"><Emoji char="⚗️" /> ศักยภาพ ({{ (pet.potential || []).length }}/{{ slots }})</div>
         <div class="pd-slots">
           <div v-for="i in slots" :key="i" class="pd-slot" :class="{ filled: pet.potential && pet.potential[i-1] }">
             <template v-if="pet.potential && pet.potential[i - 1]">
               <span class="pd-slot-aff">{{ affixMeta(pet.potential[i-1].stat).label }} +{{ pet.potential[i-1].value }}%</span>
-              <button class="pd-reroll" :disabled="busy" @click="reroll(i - 1)">🎲</button>
+              <button class="pd-reroll" :disabled="busy" @click="reroll(i - 1)"><Emoji char="🎲" /></button>
             </template>
             <span v-else class="pd-slot-empty">ว่าง</span>
           </div>
         </div>
         <button v-if="(pet.potential || []).length < slots" class="pd-btn ok" :disabled="busy" @click="rollNew">
-          🎲 เปิดศักยภาพ · {{ cost.toLocaleString() }}🪙 + สังเวยเพ็ทเรท{{ rarityLabel }} 1 ตัว
+          <Emoji char="🎲" /> เปิดศักยภาพ · {{ cost.toLocaleString() }}<Emoji char="🪙" /> + สังเวยเพ็ทเรท{{ rarityLabel }} 1 ตัว
         </button>
         <div class="pd-note small">เปิด/รีโรล = สังเวยเพ็ท "เรทเดียวกัน" 1 ตัว (ไม่ต้องเป็นตัวซ้ำ) + เหรียญ</div>
       </div>

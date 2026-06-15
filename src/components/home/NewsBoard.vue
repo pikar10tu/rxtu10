@@ -1,6 +1,6 @@
 <template>
   <div class="news">
-    <div class="news-head">📢 กระดานข่าว</div>
+    <div class="news-head"><Emoji char="📢" /> กระดานข่าว</div>
     <div v-if="loading" class="news-empty">กำลังโหลด…</div>
     <div v-else-if="!items.length" class="news-empty">ยังไม่มีข่าว</div>
     <ul v-else class="news-list">
@@ -16,6 +16,7 @@
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { ref, onMounted } from 'vue'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'

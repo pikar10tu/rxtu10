@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="sv-head">
-      <div class="sv-title">📚 ทบทวนกลุ่มยา</div>
+      <div class="sv-title"><Emoji char="📚" /> ทบทวนกลุ่มยา</div>
       <div class="sv-sub">Flashcard แบบ spaced repetition · {{ DECK.length }} ตัวยา</div>
     </div>
 
@@ -26,12 +26,12 @@
         {{ queueSize ? `เริ่มทบทวน ${queueSize} ใบ` : '🎉 วันนี้ทบทวนครบแล้ว!' }}
       </button>
       <div v-if="!queueSize" class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือกดด้านล่างเพื่อฝึกแบบสุ่ม</div>
-      <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่นับ SRS) 🎲</button>
+      <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่นับ SRS) <Emoji char="🎲" /></button>
 
-      <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}🪙/วัน)</div>
+      <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
 
       <RouterLink to="/quiz" class="sv-quizlink">
-        <span class="sv-quizlink-emoji">📝</span>
+        <span class="sv-quizlink-emoji"><Emoji char="📝" /></span>
         <span class="sv-quizlink-text">
           <b>ทำข้อสอบ (MCQ)</b>
           <small>ตอบคำถามจากคลังข้อสอบ ได้เหรียญ</small>
@@ -55,10 +55,10 @@
           <div class="sv-card-divider"></div>
           <div class="sv-card-back">{{ current?.a }}</div>
           <div class="sv-card-detail">
-            <div class="sv-detail-row"><span class="sv-detail-k">💊 ข้อบ่งใช้</span><span class="sv-detail-v">{{ current?.ind }}</span></div>
-            <div class="sv-detail-row"><span class="sv-detail-k">📐 ขนาด (ผู้ใหญ่)</span><span class="sv-detail-v">{{ current?.dose }}</span></div>
+            <div class="sv-detail-row"><span class="sv-detail-k"><Emoji char="💊" /> ข้อบ่งใช้</span><span class="sv-detail-v">{{ current?.ind }}</span></div>
+            <div class="sv-detail-row"><span class="sv-detail-k"><Emoji char="📐" /> ขนาด (ผู้ใหญ่)</span><span class="sv-detail-v">{{ current?.dose }}</span></div>
           </div>
-          <button class="sv-report" @click.stop="openReport(current)">🚩 แจ้งข้อมูลผิด</button>
+          <button class="sv-report" @click.stop="openReport(current)"><Emoji char="🚩" /> แจ้งข้อมูลผิด</button>
         </template>
         <div v-else class="sv-card-hint">แตะเพื่อดูเฉลย</div>
       </div>
@@ -75,10 +75,10 @@
     <!-- ── DONE ── -->
     <template v-else-if="mode === 'done'">
       <div class="sv-done">
-        <div class="sv-done-emoji">🎓</div>
+        <div class="sv-done-emoji"><Emoji char="🎓" /></div>
         <div class="sv-done-title">จบรอบทบทวน!</div>
         <div class="sv-done-line">ทบทวนไป <b>{{ sessionTotal }}</b> ใบ · จำได้ <b>{{ sessionCorrect }}</b> ใบ</div>
-        <div v-if="sessionCoins" class="sv-done-coins">+{{ sessionCoins.toLocaleString() }} 🪙</div>
+        <div v-if="sessionCoins" class="sv-done-coins">+{{ sessionCoins.toLocaleString() }} <Emoji char="🪙" /></div>
         <button class="sv-start" @click="mode = 'home'">กลับหน้าหลัก</button>
       </div>
     </template>
@@ -87,7 +87,7 @@
     <div v-if="reportOpen" class="sv-rep-ov" @click.self="reportOpen = false">
       <div class="sv-rep-box">
         <div class="sv-rep-head">
-          <span>🚩 แจ้งข้อมูลผิด</span>
+          <span><Emoji char="🚩" /> แจ้งข้อมูลผิด</span>
           <button class="sv-rep-x" @click="reportOpen = false">✕</button>
         </div>
         <div class="sv-rep-drug">{{ reportTarget?.n }} — {{ reportTarget?.a }}</div>
@@ -107,6 +107,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'

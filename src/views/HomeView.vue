@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <header class="home-head">
-      <div class="home-head-badge">🧪</div>
+      <div class="home-head-badge"><Emoji char="🧪" /></div>
       <div class="home-head-txt">
         <h1 class="home-head-title">RxTU10</h1>
         <p class="home-head-sub">เภสัช มธ. รุ่น 10 · หน้าหลัก</p>
@@ -14,7 +14,7 @@
         <img class="home-me-av" :src="myAvatar" alt="me" @error="(e) => fallbackAvatar(e, authStore.userData?.nickname)" />
         <div class="home-me-info">
           <div class="home-me-nick">{{ authStore.userData?.nickname || 'ฉัน' }}</div>
-          <div class="home-me-sub">🏠 Lv.{{ authStore.userData?.residence?.level || 1 }} · แตะเพื่อแก้โปรไฟล์</div>
+          <div class="home-me-sub"><Emoji char="🏠" /> Lv.{{ authStore.userData?.residence?.level || 1 }} · แตะเพื่อแก้โปรไฟล์</div>
         </div>
         <span class="home-me-arrow">›</span>
       </RouterLink>
@@ -31,17 +31,17 @@
     <!-- ทางเข้าลัด -->
     <div class="home-shortcuts">
       <RouterLink to="/shop" class="home-shortcut sc-shop">
-        <span class="hs-icon">🛒</span>
+        <span class="hs-icon"><Emoji char="🛒" /></span>
         <span class="hs-label">Shop</span>
         <span class="hs-sub">กาชาไข่</span>
       </RouterLink>
       <RouterLink v-if="authStore.isLoggedIn" to="/pets" class="home-shortcut sc-pets">
-        <span class="hs-icon">🧪</span>
+        <span class="hs-icon"><Emoji char="🧪" /></span>
         <span class="hs-label">สัตว์เลี้ยง</span>
         <span class="hs-sub">คลัง · ห้องทดลอง</span>
       </RouterLink>
       <RouterLink to="/rank" class="home-shortcut sc-rank">
-        <span class="hs-icon">🏆</span>
+        <span class="hs-icon"><Emoji char="🏆" /></span>
         <span class="hs-label">Rank</span>
         <span class="hs-sub">อันดับ</span>
       </RouterLink>
@@ -50,6 +50,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth.js'

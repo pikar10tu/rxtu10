@@ -2,18 +2,18 @@
   <div class="tab-content">
     <div class="pt-head">
       <button class="pt-back" @click="$router.back()">‹</button>
-      <span>🐾 สัตว์เลี้ยง</span>
+      <span><Emoji char="🐾" /> สัตว์เลี้ยง</span>
     </div>
 
     <template v-if="authStore.isLoggedIn">
       <div class="pt-summary">
         <div><b>{{ pets.length }}</b>/{{ storageCap }} <small>คลัง</small></div>
-        <div><b>{{ totalIncome.toLocaleString() }}</b><small>🪙/วัน</small></div>
+        <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
-      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูสเตตัส · วิวัฒน์ · ใส่ศักยภาพ ⚗️</div>
+      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูสเตตัส · วิวัฒน์ · ใส่ศักยภาพ <Emoji char="⚗️" /></div>
 
-      <div v-if="!sorted.length" class="pt-empty">ยังไม่มีสัตว์เลี้ยง — ไปสุ่มไข่ที่ Shop ก่อนนะ 🥚</div>
+      <div v-if="!sorted.length" class="pt-empty">ยังไม่มีสัตว์เลี้ยง — ไปสุ่มไข่ที่ Shop ก่อนนะ <Emoji char="🥚" /></div>
 
       <div v-else class="pt-grid">
         <button
@@ -22,8 +22,8 @@
           @click="sel = p.instId"
         >
           <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[p.grade] }}</span>
-          <span v-if="activeSet.has(p.instId)" class="pt-cell-star">⭐</span>
-          <span v-if="(p.potential || []).length" class="pt-cell-pot">⚗️{{ p.potential.length }}</span>
+          <span v-if="activeSet.has(p.instId)" class="pt-cell-star"><Emoji char="⭐" /></span>
+          <span v-if="(p.potential || []).length" class="pt-cell-pot"><Emoji char="⚗️" />{{ p.potential.length }}</span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
         </button>

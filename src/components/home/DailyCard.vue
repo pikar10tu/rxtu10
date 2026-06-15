@@ -2,18 +2,18 @@
   <div class="daily-card">
     <div class="dc-coins">
       <span class="dc-coins-label">เหรียญของคุณ</span>
-      <span class="dc-coins-val">{{ coins.toLocaleString() }} 🪙</span>
+      <span class="dc-coins-val">{{ coins.toLocaleString() }} <Emoji char="🪙" /></span>
     </div>
 
     <!-- accruing pool -->
     <div class="dc-pool">
       <div class="dc-pool-top">
-        <span>💰 รายได้สะสม</span>
-        <b>{{ accrued.toLocaleString() }}🪙</b>
+        <span><Emoji char="💰" /> รายได้สะสม</span>
+        <b>{{ accrued.toLocaleString() }}<Emoji char="🪙" /></b>
       </div>
       <div class="dc-bar"><div class="dc-fill" :class="{ full: isFull }" :style="{ width: fillPct + '%' }"></div></div>
       <div class="dc-pool-sub">
-        <span>{{ ratePerHour.toLocaleString() }}🪙/ชม.</span>
+        <span>{{ ratePerHour.toLocaleString() }}<Emoji char="🪙" />/ชม.</span>
         <span>{{ isFull ? '⚠️ เต็มแล้ว! รีบเก็บ' : 'เต็มใน ' + fmtRemain }}</span>
       </div>
     </div>
@@ -24,15 +24,16 @@
 
     <!-- breakdown -->
     <div class="dc-breakdown">
-      <div class="dc-row"><span>🏠 ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
-      <div class="dc-row"><span>🐾 สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
-      <div v-if="bonusPct" class="dc-row dc-bonus"><span>💖 โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
-      <div class="dc-row dc-total"><span>รวมเต็ม (24 ชม.)</span><b>{{ ratePerDay.toLocaleString() }}🪙</b></div>
+      <div class="dc-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
+      <div class="dc-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
+      <div v-if="bonusPct" class="dc-row dc-bonus"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
+      <div class="dc-row dc-total"><span>รวมเต็ม (24 ชม.)</span><b>{{ ratePerDay.toLocaleString() }}<Emoji char="🪙" /></b></div>
     </div>
   </div>
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { computed } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useDaily } from '../../composables/useDaily.js'

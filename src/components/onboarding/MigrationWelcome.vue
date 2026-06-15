@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="mw-ov">
     <div class="mw-box">
-      <div class="mw-confetti">🎉</div>
+      <div class="mw-confetti"><Emoji char="🎉" /></div>
       <div class="mw-title">อัปเดตใหม่!</div>
       <div class="mw-sub">RxTU10 ปรับระบบครั้งใหญ่ — นี่คือสิ่งที่เปลี่ยนไปสำหรับคุณ</div>
 
@@ -14,21 +14,21 @@
           </div>
         </div>
         <div v-if="isFounder" class="mw-item">
-          <span class="mw-emoji">🏅</span>
+          <span class="mw-emoji"><Emoji char="🏅" /></span>
           <div>
             <b>ป้าย "ผู้บุกเบิก"</b>
             <div class="mw-note">มอบให้เฉพาะคนที่อยู่กับเราตั้งแต่วันแรก — หาไม่ได้อีกแล้ว</div>
           </div>
         </div>
         <div class="mw-item">
-          <span class="mw-emoji">🐾</span>
+          <span class="mw-emoji"><Emoji char="🐾" /></span>
           <div>
             <b>สัตว์เลี้ยงปลอดภัยทุกตัว</b>
             <div class="mw-note">ตัวเก่งอยู่ในคลังเก็บ ที่เหลืออยู่ใน "คลังพัก" — ไม่มีตัวไหนหาย</div>
           </div>
         </div>
         <div class="mw-item">
-          <span class="mw-emoji">💰</span>
+          <span class="mw-emoji"><Emoji char="💰" /></span>
           <div>
             <b>ระบบรายได้ใหม่</b>
             <div class="mw-note">รับรายได้รายวันจากบ้าน + สัตว์เลี้ยง · เหรียญเป็นข้อมูลส่วนตัวแล้ว</div>
@@ -43,6 +43,7 @@
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { ref, computed } from 'vue'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'

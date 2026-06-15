@@ -13,29 +13,29 @@
         <img class="me-avatar" :src="previewPhoto" alt="me" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
         <div class="me-av-actions">
           <div class="me-nick">{{ auth.userData?.nickname || 'ฉัน' }}</div>
-          <button class="me-btn-sm" @click="fileEl?.click()">📷 เปลี่ยนรูป</button>
+          <button class="me-btn-sm" @click="fileEl?.click()"><Emoji char="📷" /> เปลี่ยนรูป</button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
         </div>
       </div>
 
       <label class="me-label">ข้อมูลติดต่อ</label>
       <div class="me-contact">
-        <div class="me-crow"><span>📞</span><input v-model="phone" :maxlength="LIMITS.contact" class="me-input" placeholder="เบอร์โทร" /></div>
-        <div class="me-crow"><span>📷</span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
-        <div class="me-crow"><span>💬</span><input v-model="line" :maxlength="LIMITS.contact" class="me-input" placeholder="LINE ID" /></div>
+        <div class="me-crow"><span><Emoji char="📞" /></span><input v-model="phone" :maxlength="LIMITS.contact" class="me-input" placeholder="เบอร์โทร" /></div>
+        <div class="me-crow"><span><Emoji char="📷" /></span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
+        <div class="me-crow"><span><Emoji char="💬" /></span><input v-model="line" :maxlength="LIMITS.contact" class="me-input" placeholder="LINE ID" /></div>
       </div>
 
       <button class="me-save" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึก' }}</button>
 
       <!-- read-only stats -->
       <div class="me-stats">
-        <div class="me-stat"><span>🪙</span><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
-        <div class="me-stat"><span>🏠</span><b>Lv.{{ auth.userData?.residence?.level || 1 }}</b><small>ที่อยู่อาศัย</small></div>
-        <div class="me-stat"><span>🐾</span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+        <div class="me-stat"><span><Emoji char="🪙" /></span><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
+        <div class="me-stat"><span><Emoji char="🏠" /></span><b>Lv.{{ auth.userData?.residence?.level || 1 }}</b><small>ที่อยู่อาศัย</small></div>
+        <div class="me-stat"><span><Emoji char="🐾" /></span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
       <TagChips :member="auth.userData" class="me-tags" />
 
-      <button class="me-feedback" @click="fbOpen = true">💡 ส่งข้อเสนอแนะ / รายงานปัญหา</button>
+      <button class="me-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>
       <button class="me-logout" @click="auth.logout()">ออกจากระบบ</button>
     </template>
 
@@ -43,7 +43,7 @@
     <div v-if="fbOpen" class="fb-ov" @click.self="fbOpen = false">
       <div class="fb-box">
         <div class="fb-head">
-          <span>💡 ข้อเสนอแนะเพื่อพัฒนา</span>
+          <span><Emoji char="💡" /> ข้อเสนอแนะเพื่อพัฒนา</span>
           <button class="fb-x" @click="fbOpen = false">✕</button>
         </div>
         <div class="fb-cats">
@@ -69,6 +69,7 @@
 </template>
 
 <script setup>
+import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch } from 'vue'
 import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
