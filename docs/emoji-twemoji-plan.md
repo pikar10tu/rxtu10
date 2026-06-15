@@ -101,7 +101,12 @@ import `<Emoji>` ในแต่ละไฟล์: `import Emoji from '@/compon
 - **กับดักที่เจอ**: ชื่อไฟล์ derive จาก**ชื่อโฟลเดอร์** (lowercase + space→`_`, hyphen คงไว้ เช่น `jack-o-lantern_color.svg`) ไม่ใช่ slug · emoji มี skin-tone (มือ ✊✌️✋) ซ้อนใน `Default/Color/<base>_color_default.svg`
 - เพิ่ม emoji ใหม่ในเกมภายหลัง → รัน `node scripts/fetch-fluent.mjs` ซ้ำ (idempotent)
 - ✅ **แปลง hardcoded emoji ทั้งแอปแล้ว (16 มิ.ย. commit 67a96f5)**: `scripts/emojify.mjs` codemod แทน emoji ใน text node ของ `<template>` → `<Emoji>` (137 จุด/25 ไฟล์) แก้ tofu ทุก icon ที่เป็นข้อความ (nav/title/ปุ่ม/ป้าย) + RankView medal podium 🥇🥈🥉
-- **เหลือ (ปล่อยตั้งใจ)**: emoji ใน JS expression (`{{ ternary/template-literal }}` เช่นปุ่ม dynamic 💾📥, toast) — component แทนตรงๆ ไม่ได้ + เป็น emoji ทั่วไป tofu น้อยมาก · ถ้าจำเป็นค่อยแก้ทีละจุด
+- ✅ **แปลง data emoji ใน mustache เพิ่ม (commit 9ca0e29)**: ระบบบ้าน field `art` (📰📦🚪🏯) + `icon` (guide/news/rank board) ที่ render ผ่าน `{{ }}` → `<Emoji :char>` (ResidenceCard/ProfileModal/MigrationWelcome/HelpModal/NewsBoard/AdminView/RankView). แก้ tofu ระบบบ้าน
+- ✅ **ตัด emoji หลังชื่อเล่น**: `ResidenceBadge` เอา `{{ tier.art }}` ออก เหลือ `Lv.X` (ตามที่ user ขอ)
+- **เหลือ (ปล่อยตั้งใจ — budget)**:
+  - emoji ฝังใน **label ข้อมูล** + ข้อความ: `potential.js` stat icons (⚔️❤️🎯💥🩸💨💰), `index.js` egg `🥚 ไข่...` — ต้อง restructure (แยก `icon` ออกจาก `label`) แล้วแก้ render `{{ affixMeta(x).label }}` (PetDetailModal/PetStatPopup) · emoji ทั่วไป tofu ต่ำ
+  - emoji ใน JS expression (`{{ ternary }}`/toast เช่นปุ่ม 💾📥) — component แทนตรงๆ ไม่ได้
+  - ทั้งคู่เป็น emoji ทั่วไป (render ได้เกือบทุกเครื่อง) — ทำเมื่อต้องการความ consistent 100%
 
 ---
 
