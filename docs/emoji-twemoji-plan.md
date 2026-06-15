@@ -14,6 +14,15 @@
 
 ---
 
+## ▶ สถานะ (16 มิ.ย. 2026) — เสร็จรอบแรก + deploy แล้ว (commit 78ad3b2)
+
+- ✅ **verify helper**: `emoji.test.js` (5 เคส: VS16 strip + ZWJ + surrogate) + curl CDN @15.1.0/@latest คืน 200 · pin เป็น `@15.1.0`
+- ✅ **แทน dynamic `.emoji` ครบ**: PetStatPopup, PetDetailModal, ProfileModal, PetsView, ShopView (egg+reveal), SeedPicker, FarmGrid (plot+inv), TagChips, AdminView (tag)
+- ✅ **เครดิต** Twemoji CC-BY 4.0 ใน `README.md`
+- ⏳ **ยังไม่ตรวจด้วยตาในแอปจริง** (build ผ่าน + CDN 200 = มั่นใจระดับหนึ่ง) — ควร eyeball ขนาด/ภาพหน้า Pets/Shop
+- ⬜ **กลุ่ม `.icon` (news/rank/admin/help) ยังไม่ทำ** — ออปชัน (ดูตารางด้านล่าง)
+- ⬜ **emoji hardcode ใน template (nav 🏠, title ฯลฯ) อยู่นอก scope** — แปลงเฉพาะ emoji ข้อมูลที่ความเหมือนข้ามเครื่องสำคัญ
+
 ## งานที่ให้ Claude Code ทำ
 
 ### 1. Verify helper ก่อน
