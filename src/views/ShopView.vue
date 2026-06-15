@@ -13,7 +13,7 @@
 
       <div class="egg-list">
         <div v-for="egg in EGG_TYPES" :key="egg.id" class="egg-card">
-          <div class="egg-emoji">{{ egg.emoji }}</div>
+          <div class="egg-emoji"><Emoji :char="egg.emoji" /></div>
           <div class="egg-info">
             <div class="egg-name">{{ egg.name }}</div>
             <div class="egg-desc">{{ egg.desc }}</div>
@@ -35,7 +35,7 @@
     <div v-if="reveal" class="rv-ov" @click.self="reveal = null">
       <div class="rv-box">
         <div class="rv-label">คุณได้รับ!</div>
-        <div class="rv-emoji" :style="{ filter: `drop-shadow(0 0 16px ${rarityColor(reveal.rarity)})` }">{{ reveal.emoji }}</div>
+        <div class="rv-emoji" :style="{ filter: `drop-shadow(0 0 16px ${rarityColor(reveal.rarity)})` }"><Emoji :char="reveal.emoji" /></div>
         <div class="rv-name">{{ reveal.name }}</div>
         <div class="rv-rarity" :style="{ background: rarityColor(reveal.rarity) }">{{ rarityLabel(reveal.rarity) }}</div>
         <button class="rv-ok" @click="reveal = null">เยี่ยม!</button>
@@ -46,6 +46,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import Emoji from '../components/shared/Emoji.vue'
 import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'

@@ -5,8 +5,8 @@
 //  *อย่าลืมใส่เครดิต Twemoji ใน README / หน้า credits*
 // ════════════════════════════════════════════════════════════
 
-// pin เวอร์ชันได้เพื่อความนิ่ง เช่น @15.1.0 — @latest = ตามล่าสุดเสมอ
-const CDN = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/'
+// pin @15.1.0 (verify แล้วคืน 200) กันภาพเปลี่ยน/พังเองเวลา twemoji restructure
+const CDN = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/'
 
 const ZWJ = '‍'   // zero-width joiner
 const VS16 = /️/g // variation selector-16

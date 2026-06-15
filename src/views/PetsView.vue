@@ -24,7 +24,7 @@
           <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[p.grade] }}</span>
           <span v-if="activeSet.has(p.instId)" class="pt-cell-star">⭐</span>
           <span v-if="(p.potential || []).length" class="pt-cell-pot">⚗️{{ p.potential.length }}</span>
-          <span class="pt-cell-emoji">{{ p.emoji }}</span>
+          <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
         </button>
       </div>
@@ -37,6 +37,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import Emoji from '../components/shared/Emoji.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, GRADE_LABELS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'

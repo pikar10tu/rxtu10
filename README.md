@@ -11,3 +11,7 @@ Vue 3 + Vite + Pinia + Firebase · deploy บน Firebase Hosting
 npm install
 npm run dev
 ```
+
+## Credits
+
+Emoji graphics by [Twemoji](https://github.com/jdecked/twemoji), licensed under CC-BY 4.0.

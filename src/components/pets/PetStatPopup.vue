@@ -3,7 +3,7 @@
     <div class="ps-box">
       <div class="ps-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
         <button class="ps-x" @click="$emit('close')">✕</button>
-        <div class="ps-emoji">{{ pet.emoji }}</div>
+        <div class="ps-emoji"><Emoji :char="pet.emoji" /></div>
         <div class="ps-name">{{ pet.name }}</div>
         <div class="ps-tags">
           <span class="ps-tag">{{ rarityLabel }}</span>
@@ -35,6 +35,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import Emoji from '../shared/Emoji.vue'
 import { RARITY, GRADE_LABELS, petStats } from '../../data/index.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
 import { statBonusPct, affixMeta } from '../../data/potential.js'

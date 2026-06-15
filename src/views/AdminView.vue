@@ -113,7 +113,7 @@
                 class="tag-toggle" :class="{ on: hasTag(m, t.id) }"
                 :style="hasTag(m, t.id) ? { background: t.color, borderColor: t.color } : {}"
                 @click="toggleTag(m, t.id)"
-              >{{ t.emoji }} {{ t.label }}</button>
+              ><Emoji :char="t.emoji" /> {{ t.label }}</button>
             </div>
           </li>
         </ul>
@@ -206,6 +206,7 @@ import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { useToast } from '../composables/useToast.js'
+import Emoji from '../components/shared/Emoji.vue'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { TAG_LIST } from '../data/tags.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'

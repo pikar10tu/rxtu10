@@ -16,7 +16,7 @@
 
         <!-- planted -->
         <template v-else>
-          <div class="plot-emoji">{{ stat(plot).crop.emoji }}</div>
+          <div class="plot-emoji"><Emoji :char="stat(plot).crop.emoji" /></div>
           <div class="plot-name">{{ stat(plot).crop.name }}</div>
 
           <template v-if="stat(plot).ready">
@@ -39,7 +39,7 @@
       <div v-if="!invList.length" class="inv-empty">ยังไม่มีผลผลิต — ปลูกแล้วเก็บเกี่ยวมาขายได้เลย</div>
       <div v-else class="inv-list">
         <button v-for="it in invList" :key="it.id" class="inv-item" @click="farm.sell(it.id)">
-          <span class="inv-emoji">{{ it.emoji }}</span>
+          <span class="inv-emoji"><Emoji :char="it.emoji" /></span>
           <span class="inv-qty">×{{ it.qty }}</span>
           <span class="inv-sell">ขาย {{ (it.sellPrice * it.qty).toLocaleString() }}🪙</span>
         </button>
@@ -58,6 +58,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import Emoji from '../shared/Emoji.vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useFarm } from '../../composables/useFarm.js'
 import { getCrop } from '../../data/crops.js'

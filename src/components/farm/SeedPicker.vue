@@ -13,7 +13,7 @@
           :disabled="coins < c.seedCost"
           @click="$emit('pick', c.id)"
         >
-          <span class="sp-emoji">{{ c.emoji }}</span>
+          <span class="sp-emoji"><Emoji :char="c.emoji" /></span>
           <div class="sp-info">
             <div class="sp-name">{{ c.name }}</div>
             <div class="sp-meta">⏱ {{ growLabel(c) }} · ขายได้ {{ c.sellPrice.toLocaleString() }}🪙</div>
@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { growLabel } from '../../data/crops.js'
 defineProps({
   open: Boolean,

@@ -3,7 +3,7 @@
     <div class="pd-box">
       <div class="pd-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
         <button class="pd-x" @click="$emit('close')">✕</button>
-        <div class="pd-emoji">{{ pet.emoji }}</div>
+        <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
         <div class="pd-name">{{ pet.name }}</div>
         <div class="pd-tags">
           <span class="pd-tag">{{ rarityLabel }}</span>
@@ -63,6 +63,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import Emoji from '../shared/Emoji.vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'

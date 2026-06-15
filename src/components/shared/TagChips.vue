@@ -3,12 +3,13 @@
     <span
       v-for="id in tags" :key="id"
       class="tag" :style="{ background: getTag(id)?.color || '#888' }"
-    >{{ getTag(id)?.emoji }} {{ getTag(id)?.label }}</span>
+    ><Emoji :char="getTag(id)?.emoji" /> {{ getTag(id)?.label }}</span>
   </span>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import Emoji from './Emoji.vue'
 import { getTag, effectiveTags } from '../../data/tags.js'
 
 // pass either a member-like object (uses founder+tags) or an explicit list

@@ -29,7 +29,7 @@
       <div class="pf-team-label">⭐ ทีม Active</div>
       <div v-if="showcase.length" class="pf-showcase">
         <button v-for="(p, i) in showcase" :key="p.instId || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
-          {{ p.emoji }}
+          <Emoji :char="p.emoji" />
           <span v-if="p.grade > 0" class="pf-pet-g">{{ p.grade }}</span>
         </button>
       </div>
@@ -49,6 +49,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import Emoji from '../shared/Emoji.vue'
 import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
 import { getTier } from '../../data/residence.js'
