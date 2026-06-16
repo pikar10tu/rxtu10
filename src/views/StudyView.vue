@@ -11,6 +11,9 @@
 
     <!-- ── HOME ── -->
     <template v-else-if="mode === 'home'">
+      <!-- นับถอยหลังสู่วันสอบ (data-driven: data/exams.js) -->
+      <ExamCountdown />
+
       <div class="sv-stats">
         <div class="sv-stat due"><span class="sv-stat-n">{{ dueCount }}</span><span class="sv-stat-l">ครบกำหนด</span></div>
         <div class="sv-stat new"><span class="sv-stat-n">{{ newCount }}</span><span class="sv-stat-l">ยังไม่เคยเรียน</span></div>
@@ -108,6 +111,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import ExamCountdown from '../components/study/ExamCountdown.vue'
 import { ref, computed } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
