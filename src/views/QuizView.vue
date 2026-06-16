@@ -63,6 +63,26 @@
         </div>
         <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
         <button class="qv-next" @click="next">{{ idx + 1 < quiz.length ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
+
+        <!-- 🚩 แจ้งข้อผิด -->
+        <div class="qv-report">
+          <button v-if="reportedIds.has(current.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
+          <button v-else-if="!reportOpen" class="qv-report-btn" @click="reportOpen = true"><Emoji char="🚩" /> แจ้งข้อผิด</button>
+          <div v-else class="qv-report-panel">
+            <div class="qv-report-chips">
+              <button
+                v-for="r in REPORT_REASONS" :key="r"
+                class="qv-report-chip" :class="{ on: reportReason === r }"
+                @click="reportReason = r"
+              >{{ r }}</button>
+            </div>
+            <textarea v-model="reportNote" :maxlength="LIMITS.report" class="qv-report-note" rows="2" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"></textarea>
+            <div class="qv-report-actions">
+              <button class="qv-report-cancel" @click="resetReport">ยกเลิก</button>
+              <button class="qv-report-send" :disabled="!reportReason || reportSending" @click="sendReport">{{ reportSending ? 'กำลังส่ง…' : 'ส่ง' }}</button>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -84,12 +104,14 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
-import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, increment, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { quizSample } from '../utils/quizSample.js'
+import { cleanText, LIMITS } from '../utils/text.js'
+import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -138,6 +160,44 @@ const picked = ref(null)
 const correct = ref(0)
 const answered = ref(0)
 const coinsEarned = ref(0)
+
+// ── แจ้งข้อสอบผิด (Phase 5) ──
+const REPORT_REASONS = ['เฉลยผิด', 'โจทย์/ตัวเลือกพิมพ์ผิด', 'โจทย์ไม่ชัด', 'ข้อมูลล้าสมัย', 'อื่นๆ']
+const reportOpen = ref(false)
+const reportReason = ref('')
+const reportNote = ref('')
+const reportSending = ref(false)
+const reportedIds = ref(new Set())   // กันสแปมในเซสชันเดียว (ข้ามเซสชัน deterministic id ทับเอง)
+
+function resetReport() { reportOpen.value = false; reportReason.value = ''; reportNote.value = '' }
+
+async function sendReport() {
+  const q = current.value
+  if (reportSending.value || !reportReason.value || !q || !authStore.currentUser) return
+  reportSending.value = true
+  try {
+    usage.track(0, 1)
+    await setDoc(doc(db, 'questionReports', reportDocId(q.id, authStore.currentUser.uid)), {
+      questionId: q.id,
+      reason: reportReason.value,
+      note: cleanText(reportNote.value, LIMITS.report),
+      reportedBy: authStore.currentUser.uid,
+      reportedByName: authStore.userData?.nickname || authStore.userData?.name || null,
+      status: 'open',
+      verdict: null,
+      rewardAmount: 0,
+      rewardDelivered: false,
+      questionSnapshot: buildSnapshot(q),
+      createdAt: serverTimestamp(),
+      resolvedAt: null,
+    }, { merge: true })
+    reportedIds.value.add(q.id)
+    resetReport()
+    toast('ขอบคุณที่ช่วยแจ้ง! ทีมวิชาการจะตรวจสอบให้', 'success')
+  } catch (e) {
+    console.error('[question report]', e); toast('ส่งรายงานไม่สำเร็จ', 'error')
+  } finally { reportSending.value = false }
+}
 
 const current = computed(() => quiz.value[idx.value] || null)
 const progress = computed(() => quiz.value.length ? Math.round((idx.value / quiz.value.length) * 100) : 0)
@@ -207,6 +267,7 @@ function choiceClass(i) {
   return 'dim'
 }
 function next() {
+  resetReport()
   if (idx.value + 1 < quiz.value.length) { idx.value++; picked.value = null }
   else finish()
 }
@@ -298,6 +359,19 @@ async function finish() {
 .qv-fb.no { color: #dc2626; background: rgba(239,68,68,.1); }
 .qv-exp { margin-top: 10px; font-size: .76rem; color: #b45309; background: #fffbeb; border-radius: 10px; padding: 10px 12px; line-height: 1.5; }
 .qv-next { width: 100%; margin-top: 14px; border: none; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .88rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#4f46e5,#6366f1); cursor: pointer; }
+
+.qv-report { margin-top: 12px; }
+.qv-report-btn { width: 100%; border: 1px dashed rgba(0,0,0,.2); background: none; border-radius: 10px; padding: 9px; font-family: inherit; font-size: .76rem; font-weight: 700; color: #64748b; cursor: pointer; }
+.qv-report-btn.done { color: #15803d; border-color: rgba(34,197,94,.4); cursor: default; }
+.qv-report-panel { border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+.qv-report-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.qv-report-chip { border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 5px 11px; font-family: inherit; font-size: .7rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.qv-report-chip.on { background: var(--primary); border-color: var(--ink); color: #fff; }
+.qv-report-note { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .78rem; resize: vertical; }
+.qv-report-actions { display: flex; gap: 8px; margin-top: 8px; }
+.qv-report-cancel { flex: 0 0 80px; border: 2px solid var(--ink); background: #fff; border-radius: 10px; padding: 8px; font-family: inherit; font-size: .76rem; font-weight: 700; cursor: pointer; }
+.qv-report-send { flex: 1; border: none; border-radius: 10px; padding: 8px; font-family: inherit; font-size: .78rem; font-weight: 800; color: #fff; background: var(--primary); cursor: pointer; }
+.qv-report-send:disabled { background: #cbd5e1; cursor: default; }
 
 .qv-result { text-align: center; padding: 24px 0; }
 .qv-result-emoji { font-size: 3.4rem; }
