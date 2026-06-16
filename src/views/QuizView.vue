@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="qv-head">
-      <button class="qv-back" @click="$router.back()">‹</button>
+      <button class="qv-back" aria-label="ย้อนกลับ" @click="$router.back()">‹</button>
       <span class="qv-head-title"><Emoji char="📝" /> ทำข้อสอบ</span>
     </div>
 
@@ -40,7 +40,7 @@
     <!-- ── QUIZ ── -->
     <template v-else-if="mode === 'quiz'">
       <div class="qv-bar-row">
-        <button class="qv-quit" @click="quit">✕</button>
+        <button class="qv-quit" aria-label="ออกจากการทำข้อสอบ" @click="quit">✕</button>
         <div class="qv-bar"><div class="qv-fill" :style="{ width: progress + '%' }"></div></div>
         <span class="qv-count">{{ idx + 1 }}/{{ quiz.length }}</span>
       </div>
@@ -73,10 +73,11 @@
               <button
                 v-for="r in REPORT_REASONS" :key="r"
                 class="qv-report-chip" :class="{ on: reportReason === r }"
+                :aria-pressed="reportReason === r"
                 @click="reportReason = r"
               >{{ r }}</button>
             </div>
-            <textarea v-model="reportNote" :maxlength="LIMITS.report" class="qv-report-note" rows="2" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"></textarea>
+            <textarea v-model="reportNote" :maxlength="LIMITS.report" class="qv-report-note" rows="2" aria-label="รายละเอียดเพิ่มเติมเกี่ยวกับข้อผิด" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)…"></textarea>
             <div class="qv-report-actions">
               <button class="qv-report-cancel" @click="resetReport">ยกเลิก</button>
               <button class="qv-report-send" :disabled="!reportReason || reportSending" @click="sendReport">{{ reportSending ? 'กำลังส่ง…' : 'ส่ง' }}</button>

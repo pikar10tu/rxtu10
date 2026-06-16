@@ -3,7 +3,7 @@
     <div class="mb-head">
       <span class="mb-title"><Emoji char="📬" /> กล่องจดหมาย</span>
       <span v-if="mailbox.attention" class="mb-badge">{{ mailbox.attention }}</span>
-      <button class="mb-refresh" :disabled="mailbox.loading" @click="mailbox.load({ force: true })">↻</button>
+      <button class="mb-refresh" aria-label="รีเฟรชจดหมาย" :disabled="mailbox.loading" @click="mailbox.load({ force: true })">↻</button>
     </div>
 
     <div v-if="mailbox.loading && !mailbox.mails.length" class="mb-empty">กำลังโหลด…</div>
@@ -12,7 +12,11 @@
       <li
         v-for="m in mailbox.mails" :key="m.id"
         class="mb-item" :class="{ unread: !m.read }"
+        role="button" tabindex="0"
+        :aria-label="`จดหมาย: ${m.title}${m.read ? '' : ' (ยังไม่อ่าน)'}`"
         @click="mailbox.markRead(m.id)"
+        @keydown.enter.prevent="mailbox.markRead(m.id)"
+        @keydown.space.prevent="mailbox.markRead(m.id)"
       >
         <span class="mb-ico"><Emoji :char="typeIcon(m)" /></span>
         <div class="mb-body">
@@ -77,7 +81,7 @@ async function onClaim(m) {
 .mb-refresh { margin-left: auto; border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 28px; height: 28px; font-size: .8rem; cursor: pointer; color: rgba(0,0,0,.55); }
 .mb-refresh:disabled { opacity: .5; }
 .mb-empty { font-size: .76rem; color: rgba(0,0,0,.4); text-align: center; padding: 12px 0; }
-.mb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+.mb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; }
 .mb-item { display: flex; align-items: flex-start; gap: 10px; border: 1px solid rgba(0,0,0,.1); border-radius: 12px; padding: 10px; background: #fff; cursor: pointer; }
 .mb-item.unread { background: #eef2ff; border-color: rgba(79,70,229,.3); }
 .mb-ico { font-size: 1.3rem; flex-shrink: 0; }

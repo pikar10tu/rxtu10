@@ -128,14 +128,14 @@
 
       <!-- ── ค้นหา / กรอง ── -->
       <div v-if="list.length" class="qz-filters">
-        <input v-model="search" class="qz-input qz-search" type="text" placeholder="🔍 ค้นหาโจทย์ / หมวด…" />
+        <input v-model="search" class="qz-input qz-search" type="text" aria-label="ค้นหาข้อสอบ" spellcheck="false" placeholder="🔍 ค้นหาโจทย์ / หมวด…" />
         <div class="qz-filter-row">
-          <select v-model="statusFilter" class="qz-select">
+          <select v-model="statusFilter" class="qz-select" aria-label="กรองตามสถานะ">
             <option value="all">ทุกสถานะ</option>
             <option value="published">เผยแพร่</option>
             <option value="draft">ร่าง</option>
           </select>
-          <select v-model="catFilter" class="qz-select">
+          <select v-model="catFilter" class="qz-select" aria-label="กรองตามหมวด">
             <option value="__all">ทุกหมวด</option>
             <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
           </select>

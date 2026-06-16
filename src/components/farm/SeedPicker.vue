@@ -3,7 +3,7 @@
     <div class="sp-box">
       <div class="sp-head">
         <span><Emoji char="🌱" /> เลือกเมล็ดพันธุ์</span>
-        <button class="sp-x" @click="$emit('close')">✕</button>
+        <button class="sp-x" aria-label="ปิด" @click="$emit('close')">✕</button>
       </div>
       <div class="sp-list">
         <button
@@ -42,7 +42,7 @@ defineEmits(['pick', 'close'])
 .sp-box { background: #fff; width: 100%; max-width: 480px; max-height: 80vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; }
 .sp-head { display: flex; justify-content: space-between; align-items: center; padding: 16px; font-weight: 800; border-bottom: 1px solid rgba(0,0,0,.07); }
 .sp-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
-.sp-list { overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.sp-list { overflow-y: auto; overscroll-behavior: contain; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 .sp-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid rgba(0,0,0,.08); border-radius: 12px; background: #fff; cursor: pointer; font-family: inherit; text-align: left; }
 .sp-item:disabled { opacity: .45; cursor: not-allowed; }
 .sp-item:active:not(:disabled) { transform: scale(.99); }

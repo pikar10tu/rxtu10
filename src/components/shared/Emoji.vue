@@ -8,13 +8,14 @@
   <img
     v-if="!failed && url"
     :src="url"
-    :alt="char"
+    alt=""
+    aria-hidden="true"
     class="twemoji"
     draggable="false"
     loading="lazy"
     @error="failed = true"
   />
-  <span v-else class="twemoji-fallback">{{ char }}</span>
+  <span v-else class="twemoji-fallback" aria-hidden="true">{{ char }}</span>
 </template>
 
 <script setup>

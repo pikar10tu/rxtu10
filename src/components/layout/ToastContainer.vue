@@ -1,5 +1,5 @@
 <template>
-  <div id="toast" :class="['toast', type, { show: visible }]">{{ message }}</div>
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true" :class="['toast', type, { show: visible }]">{{ message }}</div>
 </template>
 
 <script setup>
