@@ -14,12 +14,14 @@
       <div class="dc-bar"><div class="dc-fill" :class="{ full: isFull }" :style="{ width: fillPct + '%' }"></div></div>
       <div class="dc-pool-sub">
         <span>{{ ratePerHour.toLocaleString() }}<Emoji char="🪙" />/ชม.</span>
-        <span>{{ isFull ? '⚠️ เต็มแล้ว! รีบเก็บ' : 'เต็มใน ' + fmtRemain }}</span>
+        <span v-if="isFull"><Emoji char="⚠️" /> เต็มแล้ว! รีบเก็บ</span>
+        <span v-else>เต็มใน {{ fmtRemain }}</span>
       </div>
     </div>
 
     <button class="dc-claim" :class="{ ready: accrued > 0 }" :disabled="accrued < 1" @click="claim">
-      {{ accrued > 0 ? `เก็บ +${accrued.toLocaleString()}🪙` : 'ยังไม่มีรายได้สะสม' }}
+      <template v-if="accrued > 0">เก็บ +{{ accrued.toLocaleString() }}<Emoji char="🪙" /></template>
+      <template v-else>ยังไม่มีรายได้สะสม</template>
     </button>
 
     <!-- breakdown -->

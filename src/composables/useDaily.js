@@ -52,7 +52,7 @@ export function useDaily() {
       { coins: (auth.userData?.coins || 0) + amount, lastDaily: new Date() },
       { coins: increment(amount), lastDaily: serverTimestamp() },
     )
-    toast(ok ? `เก็บรายได้ +${amount.toLocaleString()}🪙` : 'เก็บรายได้ไม่สำเร็จ', ok ? 'success' : 'error')
+    toast(ok ? `เก็บรายได้ +${amount.toLocaleString()} เหรียญ` : 'เก็บรายได้ไม่สำเร็จ', ok ? 'success' : 'error')
   }
 
   return {

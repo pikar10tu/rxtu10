@@ -37,7 +37,8 @@ defineEmits(['pick', 'close'])
 </script>
 
 <style scoped>
-.sp-ov { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
+/* z-index ต้อง > #bottom-nav (200) — เปิดทับ FarmGrid (farm-ov z-index 400) ด้วย */
+.sp-ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
 .sp-box { background: #fff; width: 100%; max-width: 480px; max-height: 80vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; }
 .sp-head { display: flex; justify-content: space-between; align-items: center; padding: 16px; font-weight: 800; border-bottom: 1px solid rgba(0,0,0,.07); }
 .sp-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
