@@ -27,9 +27,6 @@
       <ResidenceCard />
     </template>
 
-    <!-- กระดานข่าว (เห็นได้ทุกคน) -->
-    <NewsBoard />
-
     <!-- ทางเข้าลัด -->
     <div class="home-shortcuts">
       <RouterLink to="/shop" class="home-shortcut sc-shop">
@@ -60,7 +57,6 @@ import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
-import NewsBoard from '../components/home/NewsBoard.vue'
 
 const authStore = useAuthStore()
 const myAvatar = computed(() =>

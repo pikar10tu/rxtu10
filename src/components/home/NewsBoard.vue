@@ -1,9 +1,19 @@
 <template>
-  <div class="news">
-    <div class="news-head"><Emoji char="📢" /> กระดานข่าว</div>
-    <div v-if="loading" class="news-empty">กำลังโหลด…</div>
-    <div v-else-if="!items.length" class="news-empty">ยังไม่มีข่าว</div>
-    <ul v-else class="news-list">
+  <!-- ซ่อนทั้งแถบถ้าไม่มีข่าว (และโหลดเสร็จแล้ว) -->
+  <div v-if="loading || items.length" class="news">
+    <!-- collapsed: บรรทัดล่าสุด · กดเพื่อกาง log -->
+    <button class="news-latest" :aria-expanded="open" @click="open = !open">
+      <span class="news-icon"><Emoji char="📢" /></span>
+      <span class="news-latest-msg">
+        <template v-if="loading">กำลังโหลดข่าว…</template>
+        <template v-else-if="open">กระดานข่าว</template>
+        <template v-else>{{ items[0].msg }}</template>
+      </span>
+      <span class="news-chevron" :class="{ open }" aria-hidden="true">▾</span>
+    </button>
+
+    <!-- expanded: log เต็มพร้อมเวลา (accordion กางในหน้า) -->
+    <ul v-if="open && items.length" class="news-list">
       <li v-for="n in items" :key="n.id" class="news-item">
         <span class="news-icon"><Emoji :char="n.icon || '📢'" /></span>
         <div class="news-body">
@@ -25,6 +35,7 @@ import { useUsageStore } from '../../stores/usage.js'
 const usage = useUsageStore()
 const items = ref([])
 const loading = ref(true)
+const open = ref(false)   // collapsed by default — กดบรรทัดล่าสุดเพื่อกาง log
 
 onMounted(async () => {
   try {
@@ -45,10 +56,13 @@ function fmt(ts) {
 </script>
 
 <style scoped>
-.news { background: #fff; border: 2px solid var(--ink); border-radius: 18px; padding: 14px; margin-bottom: 14px; box-shadow: var(--pop); }
-.news-head { font-weight: 800; font-size: .95rem; margin-bottom: 10px; color: var(--ink); }
-.news-empty { font-size: .74rem; color: rgba(0,0,0,.4); text-align: center; padding: 6px 0; }
-.news-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
+.news { background: #fff; border: 2px solid var(--ink); border-radius: 18px; padding: 10px 14px; margin-bottom: 14px; box-shadow: var(--pop); }
+/* collapsed: บรรทัดล่าสุด (กดเพื่อกาง) */
+.news-latest { all: unset; cursor: pointer; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; }
+.news-latest-msg { flex: 1; min-width: 0; text-align: left; font-size: .8rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.news-chevron { flex-shrink: 0; color: rgba(0,0,0,.4); font-size: .9rem; transition: transform .2s; }
+.news-chevron.open { transform: rotate(180deg); }
+.news-list { list-style: none; margin: 10px 0 0; padding: 8px 0 0; border-top: 1px solid rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; overscroll-behavior: contain; }
 .news-item { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,.05); }
 .news-item:last-child { border-bottom: none; padding-bottom: 0; }
 .news-icon { font-size: 1.2rem; flex-shrink: 0; }

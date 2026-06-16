@@ -2,6 +2,9 @@
   <div class="tab-content">
     <div class="page-title"><Emoji char="🎮" /> Play</div>
 
+    <!-- กระดานข่าว (เห็นได้ทุกคน · collapsed แสดงบรรทัดล่าสุด กดกาง log) -->
+    <NewsBoard />
+
     <template v-if="authStore.isLoggedIn">
       <div class="play-grid">
         <!-- Farm: live entry card → opens modal -->
@@ -42,6 +45,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useFarm } from '../composables/useFarm.js'
 import FarmGrid from '../components/farm/FarmGrid.vue'
+import NewsBoard from '../components/home/NewsBoard.vue'
 
 const authStore = useAuthStore()
 const farm = useFarm()
@@ -76,9 +80,12 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .soon-card span:nth-child(2) { font-size: .8rem; font-weight: 700; }
 .soon-tag { font-size: .56rem; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; }
 
-/* z-index ต้อง > #bottom-nav (200) ไม่งั้น nav ทับก้น sheet (66px) บัง "ผลผลิต" → scroll ลงไม่สุด */
+/* z-index ต้อง > #bottom-nav (200) ไม่งั้น nav ทับก้น sheet (66px) บัง "ผลผลิต" */
 .farm-ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
-.farm-sheet { background: #fff; width: 100%; max-width: 480px; max-height: 88vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+/* max-height ต้องเป็น dvh (dynamic viewport) ไม่ใช่ vh — บนมือถือตอน toolbar โผล่ vh = large viewport
+   ทำให้ sheet ยึดก้นจอสูงเกินพื้นที่เห็นจริง → ก้น sheet ("ผลผลิต") หล่นใต้ fold เลื่อนไม่ถึง
+   (sheet อื่น exp/forge/tower/pvp ใช้ dvh หมดแล้ว) */
+.farm-sheet { background: #fff; width: 100%; max-width: 480px; max-height: 88dvh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden; }
 .farm-sheet-head { flex: none; position: relative; display: flex; align-items: center; justify-content: center; padding: 8px 8px 4px; }
 .farm-sheet-grab { width: 38px; height: 4px; border-radius: 999px; background: rgba(0,0,0,.15); }
 .farm-x { position: absolute; right: 8px; top: 6px; border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: .9rem; }
