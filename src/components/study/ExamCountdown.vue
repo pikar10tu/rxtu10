@@ -29,7 +29,8 @@ onUnmounted(() => clearInterval(timer))
 const items = computed(() => upcomingExams(EXAMS, now.value))
 
 function fmtDate(iso) {
-  return new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })
+  // th-TH-u-ca-gregory = เดือนภาษาไทย แต่ปีเป็น ค.ศ. (ไม่ใช่ พ.ศ.)
+  return new Date(iso).toLocaleDateString('th-TH-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 </script>
 
