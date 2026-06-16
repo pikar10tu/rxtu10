@@ -136,6 +136,33 @@
         </ul>
       </section>
 
+      <!-- ───── ส่งจดหมายถึงสมาชิก (Mailbox broadcast) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="📬" /> ส่งจดหมายถึงสมาชิก</span></div>
+        <div class="admin-hint">ส่งประกาศ/ของขวัญเข้ากล่องจดหมาย — ใส่เหรียญ &gt; 0 ผู้รับจะกดรับเองที่หน้า Home (ไม่ใส่ = ประกาศเฉยๆ)</div>
+        <div class="bc-form">
+          <input v-model="bcTitle" :maxlength="LIMITS.news" class="admin-search" style="margin:0" placeholder="หัวข้อจดหมาย…" />
+          <textarea v-model="bcBody" :maxlength="LIMITS.feedback" class="bc-body" rows="2" placeholder="เนื้อหา (ไม่บังคับ)…"></textarea>
+          <div class="bc-row">
+            <label class="bc-field">
+              <span>เหรียญแนบ</span>
+              <input v-model.number="bcCoins" type="number" inputmode="numeric" min="0" max="100000" class="bc-coins" />
+            </label>
+            <label class="bc-field">
+              <span>ส่งถึง</span>
+              <select v-model="bcTarget" class="bc-target" aria-label="เลือกผู้รับ">
+                <option value="all">ทั้งรุ่น</option>
+                <option value="sci">เฉพาะสาย Sci</option>
+                <option value="care">เฉพาะสาย Care</option>
+              </select>
+            </label>
+          </div>
+          <button class="btn-mini btn-gold bc-send" :disabled="bcSending || !bcTitle.trim()" @click="sendBroadcast">
+            {{ bcSending ? 'กำลังส่ง…' : 'ส่งจดหมาย' }}
+          </button>
+        </div>
+      </section>
+
       <!-- ───── รายงานการโกง (cheat logs) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -199,15 +226,17 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { doc, updateDoc, setDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, updateDoc, setDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { useToast } from '../composables/useToast.js'
+import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
 import { cleanText, LIMITS } from '../utils/text.js'
+import { buildBroadcastMail } from '../utils/mailbox.js'
 import { TAG_LIST } from '../data/tags.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 
@@ -216,6 +245,48 @@ const members   = useMembersStore()
 const usage     = useUsageStore()
 const { maintenance } = useAppConfig()
 const { toast } = useToast()
+const { confirm } = useConfirm()
+
+// ── ส่งจดหมายถึงสมาชิก (Mailbox broadcast) ──
+const bcTitle = ref('')
+const bcBody = ref('')
+const bcCoins = ref(0)
+const bcTarget = ref('all')   // all | sci | care
+const bcSending = ref(false)
+
+async function sendBroadcast() {
+  const title = cleanText(bcTitle.value, LIMITS.news)
+  if (!title || bcSending.value) return
+  const coins = Math.max(0, Math.min(Number(bcCoins.value) || 0, 100000))
+  bcSending.value = true
+  try {
+    // โหลดสมาชิกสด (force) เพื่อให้ได้ uid ครบ ไม่อิง cache
+    await members.loadFbUsers({ force: true })
+    const all = [...Object.values(members.fbUsers), ...members.guestUsers]
+    const targets = bcTarget.value === 'all' ? all : all.filter(u => u.track === bcTarget.value)
+    const uids = [...new Set(targets.map(u => u.uid).filter(Boolean))]
+    if (!uids.length) { toast('ไม่พบผู้รับ', 'error'); return }
+    const label = bcTarget.value === 'sci' ? 'สาย Sci' : bcTarget.value === 'care' ? 'สาย Care' : 'ทั้งรุ่น'
+    const ok = await confirm(`ส่งจดหมาย "${title}" ถึง ${label} (${uids.length} คน)${coins ? ` พร้อมเหรียญ ${coins.toLocaleString()}` : ''}?`)
+    if (!ok) return
+    const body = cleanText(bcBody.value, LIMITS.feedback)
+    // chunk ละ 450 (< 500 ops/batch ของ Firestore)
+    for (let i = 0; i < uids.length; i += 450) {
+      const chunk = uids.slice(i, i + 450)
+      const batch = writeBatch(db)
+      for (const uid of chunk) {
+        batch.set(doc(collection(db, 'users', uid, 'mail')),
+          buildBroadcastMail({ title, body, coins }, serverTimestamp()))
+      }
+      await batch.commit()
+      usage.track(0, chunk.length)
+    }
+    toast(`ส่งจดหมายถึง ${uids.length} คนแล้ว`, 'success')
+    bcTitle.value = ''; bcBody.value = ''; bcCoins.value = 0
+  } catch (e) {
+    console.error('[broadcast]', e); toast('ส่งจดหมายไม่สำเร็จ', 'error')
+  } finally { bcSending.value = false }
+}
 
 // ── usage gauge (ประมาณการในแอป) ──
 const READ_LIMIT = DAILY_READ_LIMIT
@@ -399,6 +470,13 @@ async function setRole(m, role) {
   padding: 24px 0;
   font-size: .85rem;
 }
+/* ── broadcast (ส่งจดหมาย) ── */
+.bc-form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.bc-body { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.bc-row { display: flex; gap: 8px; }
+.bc-field { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: .68rem; font-weight: 700; color: #64748b; }
+.bc-coins, .bc-target { box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); width: 100%; }
+.bc-send { width: 100%; }
 .admin-card {
   background: #fff;
   border: 2px solid var(--ink);

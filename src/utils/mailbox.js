@@ -49,3 +49,20 @@ export function buildReportRewardMail(report, coins, createdAt) {
     claimed: false,
   }
 }
+
+// สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ)
+//   coins > 0 → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
+//   caller เติม createdAt = serverTimestamp()
+export function buildBroadcastMail({ title, body, coins, from } = {}, createdAt) {
+  const c = (typeof coins === 'number' && coins > 0) ? coins : 0
+  return {
+    type: c > 0 ? 'reward' : 'notice',
+    title: title || '',
+    body: body || '',
+    ...(c > 0 ? { reward: { coins: c } } : {}),
+    from: from || 'admin',
+    createdAt,
+    read: false,
+    claimed: false,
+  }
+}
