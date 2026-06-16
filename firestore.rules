@@ -70,6 +70,20 @@ service cloud.firestore {
         )
       );
       allow delete: if isAdmin();
+
+      // ── Mailbox (Mailbox track) — จดหมาย/ของรางวัลรายผู้ใช้ ──
+      //  read:   เจ้าของเท่านั้น
+      //  create: isAcademic (admin+academic = ทีมงานที่เชื่อใจ) — owner สร้างเองไม่ได้
+      //          กันนักศึกษาเสกเหรียญใส่ตัวเอง (auto-mint รางวัล report ตอน academic กด valid)
+      //  update: เจ้าของ แก้ได้เฉพาะ read/claimed (ห้ามแตะ reward)
+      //  delete: เจ้าของ หรือ admin
+      match /mail/{mailId} {
+        allow read:   if request.auth != null && request.auth.uid == userId;
+        allow create: if isAcademic();
+        allow update: if request.auth != null && request.auth.uid == userId
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'claimed']);
+        allow delete: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      }
     }
 
     // ── App config (launch gate) — config/app { maintenance: bool } ──
