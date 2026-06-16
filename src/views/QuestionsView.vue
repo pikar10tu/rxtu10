@@ -208,6 +208,7 @@ import { parseImport } from '../utils/importQuestions.js'
 import { buildMeta } from '../utils/questionsMeta.js'
 import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js'
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
+import { buildReportRewardMail } from '../utils/mailbox.js'
 import { REPORT_REWARD } from '../data/index.js'
 
 const authStore = useAuthStore()
@@ -553,14 +554,31 @@ async function resolveReports(g, verdict) {
   if (resolvingId.value) return
   resolvingId.value = g.questionId
   try {
-    const patch = resolvePayload(verdict, REPORT_REWARD)
     const batch = writeBatch(db)
-    for (const r of g.reports) batch.update(doc(db, 'questionReports', r.id), { ...patch, resolvedAt: serverTimestamp() })
+    if (verdict === 'valid') {
+      // ผิดจริง → mint mail รางวัลให้ผู้แจ้งแต่ละคน (auto-deliver) + ปิด report เป็น delivered
+      for (const r of g.reports) {
+        const mailRef = doc(collection(db, 'users', r.reportedBy, 'mail'))
+        batch.set(mailRef, buildReportRewardMail(r, REPORT_REWARD, serverTimestamp()))
+        batch.update(doc(db, 'questionReports', r.id), {
+          ...resolvePayload('valid', REPORT_REWARD),
+          rewardDelivered: true,                 // ส่งทันที (auto-mint)
+          resolvedAt: serverTimestamp(),
+        })
+      }
+    } else {
+      for (const r of g.reports) {
+        batch.update(doc(db, 'questionReports', r.id), {
+          ...resolvePayload('invalid', REPORT_REWARD),
+          resolvedAt: serverTimestamp(),
+        })
+      }
+    }
     await batch.commit()
-    usage.track(0, g.reports.length)
+    usage.track(0, verdict === 'valid' ? g.reports.length * 2 : g.reports.length)
     reports.value = reports.value.filter(r => r.questionId !== g.questionId) // ตัดกลุ่มที่ปิดออก
     toast(verdict === 'valid'
-      ? `บันทึกว่าผิดจริง · รางวัล ${REPORT_REWARD} เหรียญ (รอส่งผ่าน Mailbox)`
+      ? `ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${g.reports.length} คนแล้ว`
       : 'ปิดรายการแล้ว (ไม่ผิด)', 'success')
   } catch (e) { console.error('[resolve report]', e); toast('ปิดรายการไม่สำเร็จ', 'error') }
   finally { resolvingId.value = null }
