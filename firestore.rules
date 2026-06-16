@@ -139,6 +139,20 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── Question reports (Phase 5) — นักศึกษาแจ้งข้อสอบผิด ──
+    //  read:   academic เท่านั้น (คนน้อย → ไม่กระทบเพดาน reads รายวันของนักศึกษา)
+    //  create: ผู้ล็อกอิน สร้าง report ของตัวเอง (reportedBy ต้องเป็น uid ตัวเอง)
+    //  update: academic (ปิด/ตัดสิน) หรือ เจ้าของ report (re-report = setDoc merge → update)
+    //  delete: academic
+    match /questionReports/{id} {
+      allow read:   if isAcademic();
+      allow create: if request.auth != null
+                    && request.resource.data.reportedBy == request.auth.uid;
+      allow update: if isAcademic()
+                    || (request.auth != null && resource.data.reportedBy == request.auth.uid);
+      allow delete: if isAcademic();
+    }
+
     // (SRS cards live in the user doc at `study.cards` — no subcollection)
 
   }

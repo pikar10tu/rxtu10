@@ -16,6 +16,14 @@
         { "fieldPath": "category", "order": "ASCENDING" },
         { "fieldPath": "rand", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "questionReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
