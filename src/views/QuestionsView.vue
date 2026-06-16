@@ -45,7 +45,7 @@
           </button>
 
           <button class="qz-btn qz-maint qz-import-btn" :disabled="backfilling" @click="backfillRand">
-            {{ backfilling ? 'กำลังเติม rand…' : '🔧 เติม rand ให้ข้อเก่า' }}
+            {{ backfilling ? 'กำลังเติม…' : '🔧 เติม rand/qhash ให้ข้อเก่า' }}
           </button>
           <button class="qz-btn qz-maint qz-import-btn" :disabled="recomputingMeta" @click="recomputeMeta">
             {{ recomputingMeta ? 'กำลังคำนวณ…' : '🔄 คำนวณ meta ใหม่' }}
@@ -77,6 +77,31 @@
                 <button class="qz-mini" :disabled="resolvingId === g.questionId" @click="resolveReports(g, 'valid')">✓ ผิดจริง (ให้รางวัล)</button>
                 <button class="qz-mini qz-danger" :disabled="resolvingId === g.questionId" @click="resolveReports(g, 'invalid')">✕ ไม่ผิด</button>
               </div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ── ตรวจข้อซ้ำในคลัง (Phase 6) ── -->
+      <details class="qz-reports" @toggle="dupOpen = $event.target.open">
+        <summary class="qz-reports-sum"><Emoji char="🔁" /> ตรวจข้อซ้ำในคลัง<span v-if="dupOpen"> ({{ duplicateGroups.length }} กลุ่ม)</span></summary>
+        <div class="qz-reports-body">
+          <p class="qz-dup-note">เทียบโจทย์ที่เหมือนกัน (ตัดช่องว่าง/ตัวพิมพ์) จากรายการที่โหลดอยู่ — ลบข้อที่ซ้ำซ้อนทิ้งได้</p>
+          <div v-if="!list.length" class="qz-empty">ยังไม่ได้โหลดข้อสอบ — กด ↻ โหลด ก่อน</div>
+          <div v-else-if="!duplicateGroups.length" class="qz-empty">ไม่พบข้อซ้ำ <Emoji char="🎉" /></div>
+          <div v-else class="qz-report-list">
+            <div v-for="(g, gi) in duplicateGroups" :key="gi" class="qz-report-card">
+              <div class="qz-report-top"><span class="qz-report-badge">ซ้ำ {{ g.length }} ข้อ</span></div>
+              <div class="qz-dup-q">{{ g[0].question }}</div>
+              <ul class="qz-dup-items">
+                <li v-for="q in g" :key="q.id">
+                  <span class="qz-report-meta">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }} · {{ q.createdByName || 'ไม่ระบุ' }} · {{ fmtTime(q.createdAt) }}</span>
+                  <span class="qz-dup-acts">
+                    <button class="qz-mini" @click="edit(q)">แก้</button>
+                    <button class="qz-mini qz-danger" @click="remove(q)">ลบ</button>
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -205,6 +230,7 @@ import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { parseImport } from '../utils/importQuestions.js'
+import { qhash, splitDuplicateRows, groupDuplicates } from '../utils/qhash.js'
 import { buildMeta } from '../utils/questionsMeta.js'
 import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js'
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
@@ -371,6 +397,10 @@ async function runImport() {
   if (!rows.length) { toast('ไม่มีข้อที่นำเข้าได้', 'error'); return }
   importing.value = true
   try {
+    // กันซ้ำ: เทียบ qhash กับคลังที่โหลดอยู่ (list) + ซ้ำกันเองในก้อน → เขียนเฉพาะ fresh
+    const existingHashes = list.value.map(q => (typeof q.qhash === 'string' ? q.qhash : qhash(q.question)))
+    const { fresh, duplicates } = splitDuplicateRows(rows, existingHashes)
+    if (!fresh.length) { toast(`ทุกข้อซ้ำกับคลัง (${duplicates.length} ข้อ) — ไม่ได้นำเข้า`, 'error'); return }
     const meta = {
       createdBy: authStore.currentUser?.uid || null,
       createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
@@ -378,15 +408,18 @@ async function runImport() {
     }
     const col = collection(db, 'questions')
     // chunk ละ 500 — Firestore batch จำกัด 500 ops/commit
-    for (let i = 0; i < rows.length; i += 500) {
+    for (let i = 0; i < fresh.length; i += 500) {
       const batch = writeBatch(db)
-      for (const row of rows.slice(i, i + 500)) {
-        batch.set(doc(col), { ...row, ...meta, rand: Math.random(), createdAt: serverTimestamp() })
+      for (const row of fresh.slice(i, i + 500)) {
+        batch.set(doc(col), { ...row, ...meta, qhash: qhash(row.question), rand: Math.random(), createdAt: serverTimestamp() })
       }
       await batch.commit()
     }
     if (skipped.length) console.warn('[questions import] ข้ามข้อ (index, เหตุผล):', skipped)
-    toast(`นำเข้า ${rows.length} ข้อ${skipped.length ? ` · ข้าม ${skipped.length} ข้อ` : ''}`, 'success')
+    const parts = [`นำเข้า ${fresh.length} ข้อ`]
+    if (duplicates.length) parts.push(`ข้ามซ้ำ ${duplicates.length} ข้อ`)
+    if (skipped.length) parts.push(`ผิดรูปแบบ ${skipped.length} ข้อ`)
+    toast(parts.join(' · '), 'success')
     importText.value = ''
     await load()
     await recomputeMeta()
@@ -399,26 +432,41 @@ async function runImport() {
 }
 
 const backfilling = ref(false)
-// เติม rand ให้ข้อเก่าที่ยังไม่มี field (จำเป็นก่อนสลับ quiz ไป windowed query —
-// orderBy('rand') จะไม่คืน doc ที่ไม่มี rand)
+// เติม rand + qhash ให้ข้อเก่าที่ยังไม่มี field
+//  - rand จำเป็นก่อน quiz windowed query (orderBy('rand') ไม่คืน doc ที่ไม่มี rand)
+//  - qhash จำเป็นก่อนใช้ตรวจซ้ำ/กันซ้ำ import (ข้อเก่าก่อน Phase 6 ยังไม่มี)
 async function backfillRand() {
   if (backfilling.value) return
-  if (!(await confirm('เติมค่า rand ให้ข้อสอบเก่าที่ยังไม่มี? (ทำครั้งเดียวก่อนเปิดควิซแบบใหม่)'))) return
+  if (!(await confirm('เติมค่า rand + qhash ให้ข้อสอบเก่าที่ยังไม่มี? (ทำครั้งเดียวก่อนใช้ควิซแบบใหม่/ตรวจซ้ำ)'))) return
   backfilling.value = true
   try {
     const snap = await getDocs(query(collection(db, 'questions'), orderBy('createdAt', 'desc')))
     usage.track(snap.size)
-    const missing = snap.docs.filter(d => typeof d.data().rand !== 'number')
+    // เติมเฉพาะ field ที่ขาด — ไม่ re-roll rand ของข้อที่มีอยู่แล้ว
+    const missing = snap.docs.filter(d => {
+      const data = d.data()
+      return typeof data.rand !== 'number' || typeof data.qhash !== 'string'
+    })
     for (let i = 0; i < missing.length; i += 500) {
       const batch = writeBatch(db)
-      for (const d of missing.slice(i, i + 500)) batch.update(d.ref, { rand: Math.random() })
+      for (const d of missing.slice(i, i + 500)) {
+        const data = d.data()
+        const patch = {}
+        if (typeof data.rand !== 'number') patch.rand = Math.random()
+        if (typeof data.qhash !== 'string') patch.qhash = qhash(data.question || '')
+        batch.update(d.ref, patch)
+      }
       await batch.commit()
     }
-    toast(`เติม rand แล้ว ${missing.length} ข้อ`, 'success')
+    toast(`เติม rand/qhash แล้ว ${missing.length} ข้อ`, 'success')
   } catch (e) {
-    console.error('[backfill rand]', e); toast('เติม rand ไม่สำเร็จ', 'error')
+    console.error('[backfill rand/qhash]', e); toast('เติมไม่สำเร็จ', 'error')
   } finally { backfilling.value = false }
 }
+
+// ── ตรวจซ้ำในคลัง (Phase 6): จัดกลุ่มข้อที่ qhash ชนกัน โชว์ให้ลบ ──
+const dupOpen = ref(false)
+const duplicateGroups = computed(() => groupDuplicates(list.value))
 
 const recomputingMeta = ref(false)
 // อ่านทั้งคลังครั้งเดียว (admin เท่านั้น = ถูก) → เขียน config/questionsMeta
@@ -458,6 +506,7 @@ async function save() {
     category: cleanText(d.category, LIMITS.category) || null,
     explanation: cleanText(d.explanation, LIMITS.explanation) || null,
     isPublished: !!d.isPublished,
+    qhash: qhash(cleanText(d.question, LIMITS.question)), // กันซ้ำ + อัปเดตเมื่อแก้โจทย์
     updatedAt: serverTimestamp(),
   }
   // clamp answer in case trailing empty choices were dropped
@@ -685,4 +734,9 @@ async function resolveReports(g, verdict) {
 .qz-report-reasons li { font-size: .74rem; color: rgba(0,0,0,.7); line-height: 1.4; }
 .qz-report-meta { color: rgba(0,0,0,.4); font-size: .68rem; }
 .qz-report-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.qz-dup-note { font-size: .72rem; color: rgba(0,0,0,.5); line-height: 1.4; margin: 0 0 10px; }
+.qz-dup-q { font-size: .82rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; line-height: 1.4; }
+.qz-dup-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.qz-dup-items li { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.qz-dup-acts { display: flex; gap: 6px; }
 </style>
