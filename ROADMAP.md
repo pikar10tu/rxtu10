@@ -12,9 +12,28 @@
 1. **อีโมจิยังเป็นสี่เหลี่ยม (tofu) บางจุด** — พบที่ **"เก็บเหรียญรายวัน"** (Home / `useDaily`) — ✅ เสร็จ (16 มิ.ย.)
    root cause: emoji ฝังใน **JS expression** (mustache ternary / toast string) จึงถูก codemod `<Emoji>` ข้าม → ฟอนต์ระบบ → tofu
    แก้: `DailyCard.vue` ปุ่ม `เก็บ +X🪙` + `⚠️ เต็มแล้ว` ย้ายเป็น `v-if/v-else` + `<Emoji>` · `useDaily.js` toast เปลี่ยน 🪙 → คำว่า "เหรียญ" (toast เป็น plain text ฝัง `<Emoji>` ไม่ได้)
-2. **ฟาร์ม: ปลูกพืชแล้วเลื่อนลงมาดูผลผลิตไม่ได้** — โมดัลฟาร์ม scroll ลงไม่สุด เห็นผลผลิตไม่ครบ — ✅ เสร็จ (16 มิ.ย.)
-   root cause: `.farm-ov`/`.sp-ov` ใช้ `z-index:200` **เท่ากับ** `#bottom-nav` (200) แต่ nav อยู่หลังใน DOM → nav ทับก้น sheet (`--btm` 66px) บังส่วน "ผลผลิต" ที่อยู่ล่างสุด
-   แก้: ยก `.farm-ov`→400, `.sp-ov`→410 (เหนือ nav, ตาม convention modal อื่น 400-900)
+2. **ฟาร์ม: ปลูกพืชแล้วเลื่อนลงมาดูผลผลิตไม่ได้** — โมดัลฟาร์ม scroll ลงไม่สุด เห็นผลผลิตไม่ครบ — ✅ **เสร็จจริง 17 มิ.ย.** (Teleport, commit 389540e · user ยืนยันหาย)
+   ⚠️ **root cause จริง = stacking context trap:** `#main-content` เป็น `position:fixed` → สร้าง stacking context → `.farm-ov` (modal ใน PlayView) ถูกขังในนั้น z-index:400 สู้ `#bottom-nav` (z200) ที่ root **ไม่ได้** → nav ทับก้น sheet (เป็นทั้งคอม+มือถือ ไม่ใช่ mobile-only)
+   **fix จริง:** `<Teleport to="body">` ครอบ `.farm-ov` → ย้ายไประดับ root เหมือน ConfirmModal → z-index มีผล nav ไม่ทับ (แถม fix `SeedPicker` `.sp-ov` ที่ติดกับดักเดียวกันด้วย)
+   ❌ ความพยายามที่ไม่ได้ผล (เก็บไว้กันทำซ้ำ): z-index 200→400/410 (16 มิ.ย.) + `vh`→`dvh` (17 มิ.ย.) — แก้ไม่ตรงต้นเหตุทั้งคู่ (z-index ใช้ไม่ได้เพราะถูกขังใน stacking context · dvh = red herring จากการเทียบกับ sheet exp/forge/tower/pvp ที่จริงๆ ยังไม่มีใครใช้)
+   📌 **บทเรียน: modal/sheet ที่ render ใน view (ใต้ `#main-content` position:fixed) ต้อง `<Teleport to="body">` เสมอ — โปรเจกต์นี้เดิมไม่มี Teleport เลย, modal ที่ work (Confirm/Help) อยู่ใน `App.vue` ระดับ root ทั้งหมด** · follow-up: `.slide-panel` (z400 ใน view) + modal อื่นในอนาคต น่าจะติดกับดักเดียวกัน
+
+3. **อีโมจิ tofu ในฟาร์ม toast** — เห็นตอน**ขายพืชผล** (และปลูก/เก็บเกี่ยว) — 🔲 **ยังไม่แก้** (พบ 17 มิ.ย.)
+   root cause: `composables/useFarm.js` toast ฝัง `🪙` + `crop.emoji` ใน **JS string** (บรรทัด 65/70/83/96/107) → toast เป็น plain text ฝัง `<Emoji>` ไม่ได้ → ฟอนต์ระบบ → tofu (คลาสเดียวกับข้อ 1)
+   fix: `🪙`→คำว่า "เหรียญ" + เอา `crop.emoji` ออก (เหลือชื่อพืช) ในทุก toast ของ useFarm
+4. **อีโมจิ tofu ในกระดานข่าว** — ข้อความข่าว (`n.msg` ที่ admin พิมพ์) ที่มี emoji — 🔲 **ยังไม่แก้** (พบ 17 มิ.ย.)
+   root cause: `NewsBoard.vue` render `{{ n.msg }}` เป็น text ตรงๆ (ไอคอน `n.icon` ผ่าน `<Emoji>` แล้ว แต่ตัวข้อความไม่ได้) → emoji ในข้อความ dynamic = ฟอนต์ระบบ = tofu
+   fix: (a) ง่ายสุด — ล้างข่าวเก่า/เลี่ยงใส่ emoji ในเนื้อข่าว · (b) ใหญ่กว่า — render ข้อความ dynamic ผ่าน emoji-aware parser (แตก text → `<Emoji>` ราย codepoint)
+
+---
+
+## 📝 อัปเดต session 17 มิ.ย. 2026
+
+- **Economy Step 1 — spec + plan พร้อมแล้ว** (commit e9cfa6c): `docs/superpowers/specs/2026-06-17-economy-step1-design.md` + `docs/superpowers/plans/2026-06-17-economy-step1.md` (8 tasks TDD, โค้ดจริงครบ)
+  → chunk แรกของ `docs/economy-battle-master-plan.md`: **cut margin ฟาร์ม** (margin-scale + sim, ไม่ใช่ cut sellPrice ตรงๆ) + **daily quest** (แต้มเรียน SRS+quiz ≥15/วัน → ปลด **×1.25 idle** บ้าน+เพ็ท จนถึง reset) · ไม่แตะ rules
+  → ⏳ **build = post-launch (defer)** ตาม Phase 3 · 3 หมุด cross-cutting (หอคอย/เกรด 12-8/battle numbers) parked ไป spec Step 2-3
+- **กระดานข่าวย้าย Home → Play** (commit 9652c7f): collapsed บรรทัดล่าสุด → กด accordion กาง log พร้อมเวลา · ซ่อนถ้าไม่มีข่าว · ลบจาก Home
+- **บั๊กฟาร์มเลื่อนไม่สุด** → ✅ (ดู 🐞 ข้อ 2 ด้านบน)
 
 ---
 
