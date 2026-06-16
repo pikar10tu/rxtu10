@@ -22,7 +22,10 @@
         <div class="soon-card"><span class="soon-emoji"><Emoji char="🍬" /></span><span>เภสัช Crush</span><span class="soon-tag">เร็วๆ นี้</span></div>
       </div>
 
-      <!-- Farm modal -->
+      <!-- Farm modal — Teleport ไป body: #main-content เป็น position:fixed = สร้าง stacking context
+           ทำให้ .farm-ov ติดกับดัก z-index:400 สู้ #bottom-nav (z200) ที่ root ไม่ได้ → nav ทับก้น sheet.
+           ย้ายไป body ให้อยู่ระดับ root (เหมือน ConfirmModal) z-index จึงมีผลจริง -->
+      <Teleport to="body">
       <div v-if="farmOpen" class="farm-ov" @click.self="farmOpen = false">
         <div class="farm-sheet">
           <div class="farm-sheet-head">
@@ -34,6 +37,7 @@
           </div>
         </div>
       </div>
+      </Teleport>
     </template>
     <div v-else class="play-login">เข้าสู่ระบบเพื่อเล่น</div>
   </div>
