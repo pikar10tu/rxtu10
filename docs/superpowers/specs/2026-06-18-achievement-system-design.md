@@ -71,10 +71,11 @@ export const ACHIEVEMENTS = {
 - เทส pure ครบ (ดู §7)
 
 **granting (centralized):** composable `useAchievements()` init ใน `App.vue` (แนว `initAppConfig`)
-- ตอน login: โหลด earnedIds จาก subcollection ครั้งเดียว → เก็บ in-memory Set
-- `watch(auth.userData)` (+ run ครั้งแรก): `computeProgress` → `checkMilestones(progress, earnedIds, ctx)` → ถ้ามี id ใหม่: เขียน subcollection ตัวเอง (`setDoc users/{uid}/achievements/{id}` { achId, earnedAt:serverTimestamp() }) + `patchUser({}, { achievementCount: increment(n) })` + เพิ่มเข้า earnedIds Set + toast "ปลดล็อก: <title> <Emoji icon>"
-  - **กัน loop:** อัปเดต Set ทันทีก่อน write → การที่ achievementCount เปลี่ยน (userData refire) จะไม่เจอ id ใหม่
-  - usage.track สำหรับ read subcollection ตอน login
+- ตอน login: โหลด earnedIds จาก subcollection ครั้งเดียว → เก็บ in-memory Set (usage.track)
+- **รอบแรกหลังโหลด earnedIds = backfill เงียบ:** run `checkMilestones` หนึ่งครั้ง → grant ทุก id ที่เข้าเกณฑ์อยู่แล้ว **แบบไม่ประกาศ** (เขียน subcollection + นับ แต่ไม่เด้ง balloon/news) แล้วตั้ง flag `announceOn=true`
+  - **เหตุผล:** กัน flood ตอน feature เปิดครั้งแรก — ผู้เล่นเก่าเข้าเกณฑ์ย้อนหลังหลายใบพร้อมกัน
+- `watch(auth.userData)` หลังจากนั้น: `computeProgress` → `checkMilestones(progress, earnedIds, ctx)` → ถ้ามี id ใหม่ → เรียก `grantAchievement(achId)` (ดู §7)
+  - **กัน loop:** อัปเดต Set ทันทีก่อน write → achievementCount เปลี่ยน (userData refire) จะไม่เจอ id ใหม่
 
 ## 4. counters — เพิ่ม increment 1 บรรทัด/จุด (ผ่าน patchUser server `increment()`)
 - `QuizView.vue finish()` → `quizDoneTotal: increment(answered.value)` (จำนวนข้อที่ตอบในชุด)
@@ -94,12 +95,42 @@ export const ACHIEVEMENTS = {
 - empty state: "ยังไม่มีความสำเร็จ — เริ่มเล่นเพื่อปลดล็อก!"
 - หน้า catalog เต็ม+locked = **out of scope v1**
 
-## 7. Rules + เทส
+## 7. ปลดล็อก UX: balloon + กระดานข่าว + ปุ่มเคลียร์ (admin)
+**shared announce helper** `grantAchievement(achId, date?)` (ใน `useAchievements`) — เรียกทั้งจาก self-grant watcher และหลัง mail `claim()` สำเร็จ:
+1. เขียน subcollection (ถ้ายังไม่เขียน — claim เขียนใน transaction แล้ว ก็ข้าม) + `achievementCount: increment(1)` + เพิ่มเข้า earnedIds Set
+2. **ถ้า `announceOn`** → (a) เด้ง balloon (b) โพสต์ news · backfill รอบแรก = ข้ามทั้งสอง
+
+**(a) Balloon ด้านบน** — `components/shared/AchievementBalloon.vue` mount ที่ `App.vue` root (singleton, แยกจาก Toast):
+- composable `useAchievementBalloon()` singleton: `queue: ref([])`, `celebrate({title, icon})` push เข้า queue
+- component แสดงทีละใบจาก queue (banner ลอยบนสุด, animation เด้งเข้า/ออก, auto-dismiss ~4s, แตะปิดได้) — โชว์ "🎉 ปลดล็อก: <Emoji icon> <title>"
+- emoji ผ่าน `<Emoji char>` เสมอ (กัน tofu)
+
+**(b) กระดานข่าว** — โพสต์ลง `news` collection:
+- `addDoc(news, { msg: '<nickname> ปลดล็อก "<title>"', icon: <achievement icon>, type:'achievement', uid, ts: serverTimestamp() })`
+- NewsBoard เดิม render ได้เลย (มี `icon`/`msg`/`ts`) — ไม่ต้องแก้ NewsBoard
+- title ของ news เป็น text ฝัง emoji ไม่ได้ (NewsBoard render `{{ n.msg }}`) → **msg ไม่ใส่ emoji**, ไอคอนไปที่ field `icon` (render ผ่าน `<Emoji>` แล้วใน NewsBoard line 18)
+
+**(c) ปุ่มเคลียร์กระดานข่าว (admin)** — AdminView (มี post + ลบทีละอันอยู่แล้ว):
+- เพิ่มปุ่ม "🧹 เคลียร์ข่าวทั้งหมด" → ConfirmModal → `getDocs(news)` → `writeBatch` ลบ (chunk 500) → reload newsList
+- reuse `useConfirm` + pattern `commitInChunks` ที่มีในโปรเจกต์
+
+**Cost/abuse note:** เปิด news ให้ user สร้าง (เฉพาะ type 'achievement') = ทุกปลดล็อก +1 write, ทุกคนอ่าน news 10 docs/เปิด Play · volume รับได้สำหรับ 1 รุ่น · backfill เงียบกัน flood ตอนเปิด · ปุ่มเคลียร์จัดการสะสม · abuse = vanity spam เท่านั้น (สร้างได้แค่ type achievement, trust-based ตามทั้งแอป)
+
+## 8. Rules + เทส
 - rules `users/{userId}/achievements/{id}`: `read: request.auth != null` (ดูโปรไฟล์คนอื่นได้) · `create: request.auth.uid == userId` (เจ้าของเท่านั้น — ครอบทั้ง self-grant และ claim) · `update, delete: false` (immutable)
+- rules `news/{newsId}` แก้ `create` ให้ user โพสต์ achievement-news ได้ (เดิม admin เท่านั้น):
+  ```
+  allow create: if isAdmin()
+    || (request.auth != null
+        && request.resource.data.type == 'achievement'
+        && request.resource.data.msg is string && request.resource.data.msg.size() <= 140
+        && request.resource.data.keys().hasOnly(['msg','icon','type','uid','ts']));
+  ```
+  delete คง `isAdmin()` (ปุ่มเคลียร์), update คง false
   - ⚠️ ต้อง `firebase deploy --only firestore:rules`
-- ไม่ต้องมี composite index (query subcollection orderBy earnedAt อย่างเดียว = single-field auto index)
+- ไม่ต้องมี composite index (subcollection orderBy earnedAt = single-field auto index · news orderBy ts มี index เดิม)
 - เทส pure (`node --test`):
-  - `utils/achievements.test.js`: `computeProgress` (petCount/species/derive), `resolveGte` (sentinel), `checkMilestones` (ถึงเกณฑ์/ยังไม่ถึง/กัน earned ซ้ำ/tier หลายใบพร้อมกัน), `achievementTitle` (dated ต่อวันที่)
+  - `utils/achievements.test.js`: `computeProgress` (petCount/species/derive), `resolveGte` (sentinel), `checkMilestones` (ถึงเกณฑ์/ยังไม่ถึง/กัน earned ซ้ำ/tier หลายใบพร้อมกัน), `achievementTitle` (dated ต่อวันที่), `buildAchievementNews(nickname, def, date)` (msg ไม่มี emoji, icon แยก field)
   - `utils/mailbox.test.js`: เพิ่มเคส `reward.achievement` ใน builder/claim helper (pure ส่วนที่แยกได้)
 
 ---
