@@ -17,7 +17,7 @@ test('นำเข้าข้อที่ถูกต้อง 1 ข้อ → 
   assert.equal(r.rows.length, 1)
   assert.deepEqual(r.rows[0], {
     question: 'ยาใดเป็น first-line', choices: ['A', 'B', 'C', 'D'], answer: 2,
-    category: 'ยาปฏิชีวนะ', explanation: 'เพราะ X', isPublished: false,
+    category: 'ยาปฏิชีวนะ', explanation: 'เพราะ X', domain: null, isPublished: false,
   })
 })
 
@@ -113,4 +113,19 @@ test('item ไม่ใช่ object (เช่น string/null) → ข้าม
   const r = parseImport(JSON.stringify(['hello', null, 42]))
   assert.equal(r.rows.length, 0)
   assert.equal(r.skipped.length, 3)
+})
+
+test('domain ที่ถูกต้อง → เก็บค่า', () => {
+  const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0, domain: 'care' }))
+  assert.equal(r.rows[0].domain, 'care')
+})
+
+test('domain มั่ว (ไม่อยู่ใน Care/Sci/Law) → null', () => {
+  const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0, domain: 'xyz' }))
+  assert.equal(r.rows[0].domain, null)
+})
+
+test('domain ไม่ส่งมา → null', () => {
+  const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0 }))
+  assert.equal(r.rows[0].domain, null)
 })

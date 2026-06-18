@@ -8,6 +8,7 @@
 //  ความปลอดภัยวิชาการ: บังคับ isPublished:false ทุกข้อ — ไม่รับ true จาก JSON
 // ════════════════════════════════════════════════════════════
 import { cleanText, LIMITS } from './text.js'
+import { isDomainKey } from '../data/domains.js'
 
 function isPlainObject(v) {
   return v !== null && typeof v === 'object' && !Array.isArray(v)
@@ -34,6 +35,7 @@ function rowFromItem(item) {
     answer,
     category: cleanText(item.category, LIMITS.category) || null,
     explanation: cleanText(item.explanation, LIMITS.explanation) || null,
+    domain: isDomainKey(item.domain) ? item.domain : null,
     isPublished: false, // บังคับร่างเสมอ — ทีมวิชาการตรวจก่อน publish ทีละข้อ
   }
 }
