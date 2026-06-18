@@ -129,6 +129,12 @@
         <label class="qz-label">หมวด / กลุ่มเนื้อหา</label>
         <input v-model="draft.category" :maxlength="LIMITS.category" class="qz-input" placeholder="เช่น ยาปฏิชีวนะ, ระบบหัวใจ, เภสัชจลนศาสตร์…" />
 
+        <label class="qz-label">หมวดใหญ่ (domain)</label>
+        <select v-model="draft.domain" class="qz-input">
+          <option :value="null">— ไม่ระบุ —</option>
+          <option v-for="d in DOMAINS" :key="d.key" :value="d.key">{{ d.label }}</option>
+        </select>
+
         <label class="qz-label">คำอธิบายเฉลย (ไม่บังคับ)</label>
         <textarea v-model="draft.explanation" :maxlength="LIMITS.explanation" class="qz-input" rows="2" placeholder="อธิบายว่าทำไมข้อนี้ถูก…"></textarea>
 
@@ -164,6 +170,11 @@
             <option value="__all">ทุกหมวด</option>
             <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
           </select>
+          <select v-model="domainFilter" class="qz-select" aria-label="กรองตาม domain">
+            <option value="__all">ทุก domain</option>
+            <option v-for="d in DOMAINS" :key="d.key" :value="d.key">{{ d.label }}</option>
+            <option value="__none">ไม่ระบุหมวด</option>
+          </select>
         </div>
       </div>
 
@@ -198,6 +209,7 @@
             <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @change="toggleSelect(q.id)" />
             <span class="qz-badge" :class="q.isPublished ? 'pub' : 'draft'">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }}</span>
             <span v-if="q.category" class="qz-cat">{{ q.category }}</span>
+            <span v-if="q.domain" class="qz-cat">{{ q.domain }}</span>
             <div class="qz-item-actions">
               <button class="qz-mini" @click="edit(q)">แก้ไข</button>
               <button class="qz-mini qz-danger" @click="remove(q)">ลบ</button>
@@ -236,6 +248,7 @@ import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail } from '../utils/mailbox.js'
 import { REPORT_REWARD } from '../data/index.js'
+import { DOMAINS } from '../data/domains.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -253,21 +266,27 @@ const PAGE = 50
 const search = ref('')
 const statusFilter = ref('all')   // all | published | draft
 const catFilter = ref('__all')
+const domainFilter = ref('__all')
 const visibleCount = ref(PAGE)
 const selected = ref(new Set())   // เก็บ id ที่เลือก (Vue 3 track Set ได้)
 const batchBusy = ref(false)
 
 const categories = computed(() => distinctCategories(list.value))
-const filtered = computed(() => filterQuestions(list.value, {
-  search: search.value, status: statusFilter.value, category: catFilter.value,
-}))
+const filtered = computed(() => {
+  let r = filterQuestions(list.value, {
+    search: search.value, status: statusFilter.value, category: catFilter.value,
+  })
+  if (domainFilter.value === '__none') r = r.filter(q => !q.domain)
+  else if (domainFilter.value !== '__all') r = r.filter(q => q.domain === domainFilter.value)
+  return r
+})
 const visible = computed(() => filtered.value.slice(0, visibleCount.value))
 const filteredDraftIds = computed(() => filtered.value.filter(q => !q.isPublished).map(q => q.id))
 const allFilteredSelected = computed(() =>
   filtered.value.length > 0 && filtered.value.every(q => selected.value.has(q.id)))
 
 // กรองใหม่ → รีเซ็ตจำนวนที่โชว์ (กัน DOM ค้างเยอะ)
-watch([search, statusFilter, catFilter], () => { visibleCount.value = PAGE })
+watch([search, statusFilter, catFilter, domainFilter], () => { visibleCount.value = PAGE })
 
 function toggleSelect(id) {
   if (selected.value.has(id)) selected.value.delete(id)
@@ -334,7 +353,7 @@ async function publishAllFilteredDrafts() {
 }
 
 function blankDraft() {
-  return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false }
+  return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false, domain: null }
 }
 const draft = ref(blankDraft())
 function resetDraft() { draft.value = blankDraft() }
@@ -506,6 +525,7 @@ async function save() {
     category: cleanText(d.category, LIMITS.category) || null,
     explanation: cleanText(d.explanation, LIMITS.explanation) || null,
     isPublished: !!d.isPublished,
+    domain: d.domain || null,
     qhash: qhash(cleanText(d.question, LIMITS.question)), // กันซ้ำ + อัปเดตเมื่อแก้โจทย์
     updatedAt: serverTimestamp(),
   }
@@ -540,6 +560,7 @@ function edit(q) {
     category: q.category || '',
     explanation: q.explanation || '',
     isPublished: !!q.isPublished,
+    domain: q.domain || null,
   }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
