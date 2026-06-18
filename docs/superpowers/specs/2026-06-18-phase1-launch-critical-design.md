@@ -15,10 +15,12 @@
 | D | Privacy: ลบ Rank + Member sort | #3, #6, #7 | — |
 
 **ลำดับ build:** D → C → A → B (B ต้องรอ A) — แต่ละก้อนเป็น task/PR อิสระ
+- **D, C = เสี่ยงต่ำ shippable ทันที** (UX win, แทบไม่มี dep) → ทำก่อนเพื่อ momentum + ตรวจทิศทาง contextual help กับ user จริง
+- **A = เสี่ยงสุด** (แตะ read path ที่ optimize cost ไว้ + งานกรอกของ cowork) → ทำหลังได้ feedback จาก C
 
 **Decisions ที่ตกลงแล้ว (brainstorming 2026-06-18):**
-- domain เป็น **filter ใน quiz ด้วย** (ฝึกเฉพาะหมวด) ไม่ใช่แค่ stats
-- หน้าประวัติ = **mode ใน QuizView** ไม่ใช่ route แยก
+- quiz filter = **domain อย่างเดียว** (Care/Sci/Law) — **ซ่อน category จาก quiz UI นักศึกษา** (เก็บ field ไว้) → UX สะอาด + query ติด where ตัวเดียว ไม่ต้อง index 4 ฟิลด์
+- หน้าประวัติ = **mode ใน QuizView** ไม่ใช่ route แยก · เข้าได้จาก quiz home + MeView
 - contextual help = **แทนที่ทั้งหมด ตัด FAB + modal รวมทิ้ง**
 - privacy = **ลบ Rank ทั้งหน้า** (สถิติเกมค่อยให้แต่ละเกมมีปุ่มดูเองภายหลัง — out of scope)
 
@@ -48,16 +50,16 @@
 - **list filter**: เพิ่ม `<select>` domainFilter ข้าง catFilter (ราว line 163) ตัวเลือก = ทั้งหมด / Care / Sci / Law / **"ไม่ระบุหมวด"** (กรอง `domain == null`) → ใช้หาข้อเก่ามาเติม domain = ทาง migrate ข้อเดิม (ไม่มี migration script; academic ทยอยเติมเอง)
 - **recompute meta**: ฟังก์ชัน recompute เดิม (ปุ่ม 🔄) ต้องคำนวณ `domains` เพิ่ม — แยก logic เป็น pure helper เพื่อเทสได้ (ดู "เทส")
 
-### QuizView (filter ฝึกเฉพาะหมวดใหญ่)
-- home: เพิ่มแถว chips "หมวดใหญ่" (Care / Sci / Law / ทั้งหมด) เหนือหรือใต้แถว "หมวด" (category) เดิม — มิเรอร์ pattern category ที่ `QuizView.vue:17-24`
-- state: `dom = ref('__all')` คู่กับ `cat` เดิม
-- `start()` (ราว line 226-234): เติม `where('domain','==',dom)` เข้า `base` เมื่อ `dom !== '__all'` (เหมือน category) — ทั้ง firstSnap และ wrap query
-- แสดง chips หมวดใหญ่เฉพาะเมื่อ `metaDomains` มี > 0 ค่า (อ่านจาก `config/questionsMeta.domains`)
-- กรณีเลือกทั้ง domain + category พร้อมกัน = AND (composite filter) — ยอมรับได้ถ้ามี index
+### QuizView (filter = domain อย่างเดียว)
+**ตัดสินใจ:** quiz home มี selector เดียว "ฝึกหมวดไหน?" = ทั้งหมด / Care / Sci / Law — **ซ่อน category ออกจาก quiz UI นักศึกษา** (เก็บ field category ไว้ใช้ฝั่ง academic จัดระเบียบ + filter ใน QuestionsView; เปิดให้นักศึกษากรองภายหลังได้ถ้าจำเป็น)
+- home: แทนแถว chips category เดิม (`QuizView.vue:17-24`) ด้วย chips domain (Care/Sci/Law/ทั้งหมด) — เลิกใช้ `categories`/`cat` ใน quiz UI
+- state: `dom = ref('__all')` (แทน `cat`)
+- `start()` (ราว line 226-234): `base = [where('isPublished','==',true)]` + เติม `where('domain','==',dom)` เมื่อ `dom !== '__all'` — **ไม่มี where category** → query ติด where ตัวเดียวเสมอ (ทั้ง firstSnap + wrap)
+- แสดง chips เฉพาะเมื่อ `config/questionsMeta.domains` มี > 0 ค่า
 
 ### Deploy / index
-- composite index ใหม่ `questions: (isPublished ASC, domain ASC, rand ASC)` ใน `firestore.indexes.json` → `firebase deploy --only firestore:indexes`
-  - หมายเหตุ: ถ้าเลือก domain+category พร้อมกัน อาจต้อง index `(isPublished, domain, category, rand)` เพิ่ม — ตัดสินตอน build ถ้า Firestore ฟ้อง (เริ่มจาก index domain ก่อน)
+- composite index เดียว `questions: (isPublished ASC, domain ASC, rand ASC)` ใน `firestore.indexes.json` → `firebase deploy --only firestore:indexes`
+  - **ไม่ต้องมี index domain+category รวม** เพราะ quiz ไม่ filter 2 ตัวพร้อมกัน (decision 2026-06-18)
 - **rules ไม่ต้องแก้** — `questions` write=`isAcademic()` ครอบ field ใหม่อยู่แล้ว
 - หลัง deploy: กดปุ่ม 🔄 recompute meta หนึ่งครั้งเพื่อ populate `domains`
 
@@ -72,20 +74,17 @@
 **ขึ้นกับก้อน A** (ต้องมี domain บนข้อสอบก่อน)
 
 ### examSessions write (QuizView `finish()`, ราว line 295)
-- เพิ่ม field `domainStats` คำนวณจาก domain ของข้อในชุดที่เพิ่งทำ:
-  ```
-  domainStats: { care: {c, t}, sci: {c, t}, law: {c, t}, none: {c, t} }
-  ```
-  - `t` = จำนวนข้อใน domain นั้นในชุด, `c` = จำนวนที่ตอบถูก
-  - ข้อที่ `domain == null` → bucket `none`
-  - คำนวณตอน finish จาก `quiz.value` + ประวัติคำตอบ → **ต้องเก็บ per-question ว่าตอบถูกไหม** (ปัจจุบัน track แค่ `correct.value` รวม) → เพิ่ม array `answers` (เก็บ `{ domain, correct }` ต่อข้อ) อัปเดตใน `pick()`
-- field เดิมคงไว้ครบ (`userId, nickname, total, correct, pct, category, ts`)
-- (ทางเลือก) เพิ่ม `domain: dom === '__all' ? null : dom` ไว้ระบุว่าชุดนี้ฝึก domain เดียวหรือรวม
+- เพิ่ม array `answers` (เก็บ `{ domain, correct }` ต่อข้อ) อัปเดตใน `pick()` — ปัจจุบัน track แค่ `correct.value` รวม
+- เพิ่ม field `domainStats` = แมป `{ <domainKey>: {c, t} }` สร้างจาก `answers` โดย **วนจาก `DOMAIN_KEYS`** (ไม่ hardcode `care/sci/law`) + bucket `none` สำหรับข้อ `domain == null`
+  - `t` = จำนวนข้อใน domain นั้น, `c` = จำนวนตอบถูก
+- เพิ่ม field `domain` = `dom === '__all' ? null : dom` (ชุดนี้ฝึก domain เดียวหรือรวม)
+- field เดิมคงไว้ (`userId, nickname, total, correct, pct, ts`) · **`category` เลิก set จาก quiz UI** (ไม่มี category selector แล้ว) → เขียน `null` (คง schema เดิม backward-compat)
 
 ### หน้าประวัติ = mode `'history'` ใน QuizView
 - เพิ่ม mode ใหม่ `'history'` (ปัจจุบันมี home | quiz | result)
-- ปุ่มเข้า: ที่ quiz home เพิ่มปุ่ม "📊 ประวัติของฉัน" → `mode = 'history'` + เรียก loadHistory()
-- ลิงก์เสริมจาก MeView → `RouterLink to="/quiz"` พร้อม hint (หรือ query param เปิด history — keep simple: แค่ปุ่มใน quiz home ก่อน, MeView ลิงก์ไป /quiz)
+- ปุ่มเข้า 2 จุด (discoverability):
+  - quiz home: ปุ่ม "📊 ประวัติของฉัน" → `mode = 'history'` + loadHistory()
+  - **MeView**: การ์ด/ปุ่ม "ประวัติการทำข้อสอบ" → `RouterLink to="/quiz?view=history"` (QuizView อ่าน query param ตอน mount → เปิด mode history) — Me คือที่ผู้ใช้มองหาข้อมูลส่วนตัว
 - โหลด: `getDocs(query(collection(db,'examSessions'), where('userId','==',uid), orderBy('ts','desc'), limit(30)))` · `usage.track(snap.size)` · rules `read: owner-only` มีแล้ว (`firestore.rules:135`) ไม่ต้องแก้
 - composite index `examSessions: (userId ASC, ts DESC)` — เพิ่มใน `firestore.indexes.json` ถ้ายังไม่มี
 
@@ -97,7 +96,7 @@
 - empty state: ยังไม่เคยทำข้อสอบ → ข้อความชวนไปทำ
 
 ### เทส (pure)
-- `src/utils/examStats.js` `aggregateExamStats(sessions)` → `{ latest, trend: [pct…], byDomain: { care:{c,t,pct}, … } }` + `.test.js` (เคส: ว่าง, session เดียว, หลาย session, domainStats ขาด/มี none)
+- `src/utils/examStats.js` `aggregateExamStats(sessions)` → `{ latest, trend: [pct…], byDomain }` — byDomain **วนจาก `DOMAIN_KEYS`** (data-driven; เพิ่ม domain ใหม่ไม่ต้องแก้ logic) + **ทนกับ session เก่าที่ domainStats ขาด/มี key แปลกปลอม** (ไม่ throw) · `.test.js` (เคส: ว่าง, session เดียว, หลาย session, domainStats ขาด, legacy key)
 
 ---
 
@@ -127,6 +126,7 @@
 - HelpModal ยังอยู่ที่ App.vue ระดับ root (singleton) — แค่เปลี่ยนเนื้อหาเป็น topic เดียว
 
 ### วางปุ่ม `?`
+- convention: `?` วงกลมเล็ก มุมขวาบนของหัวการ์ด/หัวหน้า — ตำแหน่ง + ขนาดเดียวกันทุกที่ (ไม่ ad-hoc)
 - ResidenceCard (residence) · ฟาร์ม (farm — ใน PlayView/FarmGrid) · StudyView (study) · QuizView home (quiz) · ShopView (shop) · PetsView (pets)
 
 ### ตัดของเดิม
@@ -154,7 +154,7 @@
   - **ปักหมุดการ์ดตัวเอง (uid === myUid) ช่องแรกเสมอ** ไม่ว่าเลือก key ไหน
   - registered ก่อน, unregistered ท้ายสุดเสมอ
   - เทส: default sort, pin self, แต่ละ key, unregistered ไปท้าย
-- MembersView: เพิ่ม `<select>` เลือกการเรียง (รหัส / ชื่อ / เลเวล) · default = รหัส · แทน sort hardcode ที่ `MembersView.vue:90-94` ด้วย `sortMembers()`
+- MembersView: เพิ่ม `<select>` เลือกการเรียง (รหัส / ชื่อ / เลเวล) · default = รหัส · แทน sort hardcode ที่ `MembersView.vue:90-94` ด้วย `sortMembers()` · การ์ดตัวเองที่ปักหมุดติดป้าย "คุณ"
 
 ---
 
