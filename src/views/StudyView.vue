@@ -218,9 +218,11 @@ async function grade(q) {
   // first time this card is graded in the session → reward (daily-capped) + count
   let reward = 0
   let dailyTotal = null
+  let reviewedInc = 0
   const today = new Date().toISOString().slice(0, 10)
   if (!rewarded.value.has(id)) {
     rewarded.value.add(id)
+    reviewedInc = 1
     const earnedToday = authStore.userData?.studyCoinDate === today ? (authStore.userData?.studyCoinsToday || 0) : 0
     reward = Math.max(0, Math.min(COIN_PER_CARD, STUDY_DAILY_CAP - earnedToday))
     dailyTotal = earnedToday + reward
@@ -234,7 +236,7 @@ async function grade(q) {
   flipped.value = false
 
   const newCards = { ...cards.value, [id]: updated }
-  await commit(newCards, reward, today, dailyTotal)
+  await commit(newCards, reward, today, dailyTotal, reviewedInc)
 
   if (!queue.value.length) finishSession()
 }
@@ -249,7 +251,7 @@ function endSession() {
   else mode.value = 'home'
 }
 
-async function commit(newCards, reward, today, dailyTotal) {
+async function commit(newCards, reward, today, dailyTotal, reviewedInc = 0) {
   const newStudy = { ...study.value, cards: newCards, lastStudied: Date.now() }
   const optimistic = { study: newStudy }
   const patch = { study: newStudy }
@@ -260,6 +262,10 @@ async function commit(newCards, reward, today, dailyTotal) {
     patch.coins = increment(reward)
     patch.studyCoinDate = today
     patch.studyCoinsToday = dailyTotal
+  }
+  if (reviewedInc > 0) {
+    optimistic.studyReviewedTotal = (authStore.userData?.studyReviewedTotal || 0) + reviewedInc
+    patch.studyReviewedTotal = increment(reviewedInc)
   }
   const ok = await authStore.patchUser(optimistic, patch)
   if (!ok) toast('บันทึกการทบทวนไม่สำเร็จ', 'error')

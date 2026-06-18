@@ -386,10 +386,12 @@ async function finish() {
     {
       coins: (authStore.userData?.coins || 0) + grant,
       quizHigh: newHigh, quizCoinDate: today, quizCoinsToday: earnedToday + grant,
+      quizDoneTotal: (authStore.userData?.quizDoneTotal || 0) + answered.value,
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
       quizHigh: newHigh, quizCoinDate: today, quizCoinsToday: earnedToday + grant,
+      quizDoneTotal: increment(answered.value),
     },
   )
   if (grant) toast(`ได้ ${grant}🪙 จากการทำข้อสอบ`, 'success')

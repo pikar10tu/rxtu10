@@ -39,6 +39,10 @@ export const USER_DEFAULTS = {
   likedBy: {},
   totalSpent: 0,
   pityClaimedRounds: 0,
+  quizDoneTotal: 0,        // lifetime: ข้อสอบที่ทำ (achievement)
+  studyReviewedTotal: 0,   // lifetime: แฟลชการ์ดที่ทบทวน (achievement)
+  farmSalesTotal: 0,       // lifetime: เหรียญจากการขายฟาร์ม (achievement)
+  achievementCount: 0,     // denormalized count ของ achievements subcollection
   // ── v2 fields ──
   role: 'student',                            // 'student' | 'academic' | 'admin'
   tags: [],                                   // admin-assigned badges

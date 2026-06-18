@@ -44,13 +44,15 @@ export function useFarm() {
   }
 
   // ── persistence helper: optimistic + Firestore ──
-  async function commit(newPlots, { coinDelta = 0, inventory: newInv } = {}) {
+  async function commit(newPlots, { coinDelta = 0, inventory: newInv, salesGain = 0 } = {}) {
     const farm = { ...(auth.userData?.farm || {}), plots: newPlots }
     if (newInv) farm.inventory = newInv
     const optimistic = { farm, ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}) }
+    if (salesGain) optimistic.farmSalesTotal = (auth.userData?.farmSalesTotal || 0) + salesGain
     const patch = { 'farm.plots': newPlots }
     if (newInv) patch['farm.inventory'] = newInv
     if (coinDelta) patch.coins = increment(coinDelta)
+    if (salesGain) patch.farmSalesTotal = increment(salesGain)
     const ok = await auth.patchUser(optimistic, patch)
     if (!ok) toast('บันทึกฟาร์มไม่สำเร็จ', 'error')
   }
@@ -92,7 +94,7 @@ export function useFarm() {
     const inv = { ...inventory.value }
     inv[cropId] = have - n
     if (inv[cropId] <= 0) delete inv[cropId]
-    await commit(clonePlots(), { coinDelta: gain, inventory: inv })
+    await commit(clonePlots(), { coinDelta: gain, inventory: inv, salesGain: gain })
     toast(`ขาย ${crop.emoji} ×${n} = +${gain.toLocaleString()}🪙`, 'success')
   }
 
@@ -103,7 +105,7 @@ export function useFarm() {
       const c = getCrop(id); if (c) gain += c.sellPrice * qty
     }
     if (gain <= 0) { toast('ไม่มีผลผลิตให้ขาย', 'info'); return }
-    await commit(clonePlots(), { coinDelta: gain, inventory: {} })
+    await commit(clonePlots(), { coinDelta: gain, inventory: {}, salesGain: gain })
     toast(`ขายทั้งหมด +${gain.toLocaleString()}🪙`, 'success')
   }
 
