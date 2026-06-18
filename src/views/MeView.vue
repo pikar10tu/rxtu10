@@ -34,6 +34,7 @@
         <div class="me-stat"><span><Emoji char="🐾" /></span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
       <TagChips :member="auth.userData" class="me-tags" />
+      <AchievementGrid :uid="auth.currentUser?.uid" />
 
       <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
 
@@ -81,6 +82,7 @@ import { useToast } from '../composables/useToast.js'
 import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
+import AchievementGrid from '../components/shared/AchievementGrid.vue'
 
 const auth = useAuthStore()
 const { toast } = useToast()

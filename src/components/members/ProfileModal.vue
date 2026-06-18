@@ -18,6 +18,8 @@
         <div class="pf-chips" style="margin-top:5px"><TagChips :member="member" /></div>
       </div>
 
+      <AchievementGrid :uid="member?.uid" />
+
       <!-- Tier 2: stat strip (max 3, no coins) -->
       <div class="pf-stats">
         <div class="pf-stat"><span><Emoji char="⚔️" /></span><b>{{ member.pvpVictories || 0 }}</b><small>PvP ชนะ</small></div>
@@ -57,6 +59,7 @@ import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import { letterAvatar, fallbackAvatar } from '../../utils/avatar.js'
 import TagChips from '../shared/TagChips.vue'
+import AchievementGrid from '../shared/AchievementGrid.vue'
 import PetStatPopup from '../pets/PetStatPopup.vue'
 
 const props = defineProps({ member: { type: Object, default: null } })
