@@ -134,6 +134,9 @@
             <button class="news-del" @click="delNews(n.id)"><Emoji char="🗑️" /></button>
           </li>
         </ul>
+        <button class="btn-mini btn-gray" :disabled="clearingNews || !newsList.length" @click="clearAllNews">
+          <Emoji char="🧹" /> เคลียร์ข่าวทั้งหมด
+        </button>
       </section>
 
       <!-- ───── ส่งจดหมายถึงสมาชิก (Mailbox broadcast) ───── -->
@@ -425,6 +428,25 @@ async function postNews() {
 async function delNews(id) {
   try { await deleteDoc(doc(db, 'news', id)); newsList.value = newsList.value.filter(n => n.id !== id) }
   catch (e) { console.error('[del news]', e); toast('ลบไม่สำเร็จ', 'error') }
+}
+
+const clearingNews = ref(false)
+async function clearAllNews() {
+  if (!(await confirm('ลบข่าวทั้งหมดในกระดานข่าว?'))) return
+  clearingNews.value = true
+  try {
+    const snap = await getDocs(collection(db, 'news'))
+    let batch = writeBatch(db); let n = 0
+    for (const d of snap.docs) {
+      batch.delete(d.ref); n++
+      if (n % 450 === 0) { await batch.commit(); batch = writeBatch(db) }
+    }
+    if (n % 450 !== 0) await batch.commit()
+    usage.track(snap.size, n)
+    await loadNews()
+    toast(`ลบข่าวแล้ว ${n} รายการ`, 'success')
+  } catch (e) { console.error('[clear news]', e); toast('ลบข่าวไม่สำเร็จ', 'error') }
+  finally { clearingNews.value = false }
 }
 
 function reload() {
