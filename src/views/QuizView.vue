@@ -164,6 +164,7 @@ const picked = ref(null)
 const correct = ref(0)
 const answered = ref(0)
 const coinsEarned = ref(0)
+const answers = ref([])
 
 // ── แจ้งข้อสอบผิด (Phase 5) ──
 const REPORT_REASONS = ['เฉลยผิด', 'โจทย์/ตัวเลือกพิมพ์ผิด', 'โจทย์ไม่ชัด', 'ข้อมูลล้าสมัย', 'อื่นๆ']
@@ -256,13 +257,16 @@ async function start() {
 // รีเซ็ต state รอบใหม่
 function resetRound() {
   picked.value = null; correct.value = 0; answered.value = 0; coinsEarned.value = 0
+  answers.value = []
 }
 
 function pick(i) {
   if (picked.value !== null) return
   picked.value = i
   answered.value++
-  if (i === current.value.answer) correct.value++
+  const isCorrect = i === current.value.answer
+  if (isCorrect) correct.value++
+  answers.value.push({ domain: current.value.domain || null, correct: isCorrect })
 }
 function choiceClass(i) {
   if (picked.value === null) return ''
@@ -295,6 +299,14 @@ async function finish() {
   // 1) record the attempt (examSessions — owner-only)
   try {
     usage.track(0, 1)
+    // สรุปถูก/ทั้งหมดต่อ domain จาก answers (วนจาก DOMAIN_KEYS + bucket none สำหรับข้อไม่มี domain)
+    const domainStats = Object.fromEntries(DOMAIN_KEYS.map(k => [k, { c: 0, t: 0 }]))
+    domainStats.none = { c: 0, t: 0 }
+    for (const a of answers.value) {
+      const bucket = (a.domain && domainStats[a.domain]) ? a.domain : 'none'
+      domainStats[bucket].t++
+      if (a.correct) domainStats[bucket].c++
+    }
     await addDoc(collection(db, 'examSessions'), {
       userId: authStore.currentUser.uid,
       nickname: authStore.userData?.nickname || null,
@@ -303,6 +315,7 @@ async function finish() {
       pct: pct.value,
       domain: dom.value === '__all' ? null : dom.value,
       category: null,
+      domainStats,
       ts: serverTimestamp(),
     })
   } catch (e) { console.error('[exam save]', e) }
