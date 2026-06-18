@@ -16,6 +16,15 @@
       </button>
     </div>
 
+    <div class="mv-sort">
+      <label class="mv-sort-label" for="mv-sort-sel">เรียงตาม</label>
+      <select id="mv-sort-sel" v-model="sortKey" class="mv-sort-sel">
+        <option value="studentId">รหัสนักศึกษา</option>
+        <option value="nickname">ชื่อเล่น</option>
+        <option value="level">เลเวลบ้าน</option>
+      </select>
+    </div>
+
     <div v-if="members.loading" class="mv-empty">กำลังโหลด…</div>
     <div v-else-if="!list.length" class="mv-empty">ไม่พบสมาชิก</div>
 
@@ -30,6 +39,7 @@
           <span v-if="m.registered" class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
         </div>
         <div class="mv-nick">{{ m.nickname }}</div>
+        <div v-if="m.uid === myUid" class="mv-you">คุณ</div>
         <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
         <div v-if="m.registered" class="mv-likes"><Emoji char="❤️" /> {{ m.likes || 0 }}</div>
         <div v-else class="mv-off-tag">ยังไม่เข้าระบบ</div>
@@ -44,14 +54,19 @@
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
+import { useAuthStore } from '../stores/auth.js'
 import { getTier } from '../data/residence.js'
 import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
+import { sortMembers } from '../utils/sortMembers.js'
 import ProfileModal from '../components/members/ProfileModal.vue'
 
 const members = useMembersStore()
+const auth = useAuthStore()
+const myUid = computed(() => auth.currentUser?.uid)
 const search = ref('')
 const track = ref('all')
 const selected = ref(null)
+const sortKey = ref('studentId')
 
 onMounted(() => members.loadFbUsers())
 // ↻ บังคับโหลดสด (ข้าม cache) — coins/อันดับอาจ stale ได้ถึง 8 ชม.
@@ -86,12 +101,7 @@ const list = computed(() => {
   let r = roster.value
   if (track.value !== 'all') r = r.filter(m => m.track === track.value)
   if (q) r = r.filter(m => [m.nickname, m.realName, m.studentId].some(v => (v || '').toLowerCase().includes(q)))
-  // registered first, then by residence level desc, then by id
-  return r.slice().sort((a, b) =>
-    (b.registered - a.registered) ||
-    ((b.residence?.level || 1) - (a.residence?.level || 1)) ||
-    String(a.studentId).localeCompare(String(b.studentId))
-  )
+  return sortMembers(r, sortKey.value, myUid.value)
 })
 
 const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
@@ -126,6 +136,9 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
   color: var(--ink); cursor: pointer; transition: .12s;
 }
 .mv-filter.on { background: var(--primary); color: #fff; border-color: var(--ink); }
+.mv-sort { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.mv-sort-label { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); }
+.mv-sort-sel { border: 2px solid var(--ink); border-radius: 10px; padding: 5px 10px; font-family: inherit; font-size: .74rem; font-weight: 700; background: #fff; color: var(--ink); }
 .mv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 28px 0; font-size: .85rem; }
 .mv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .mv-card {
@@ -153,6 +166,7 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
   font-size: .8rem; font-weight: 700; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
+.mv-you { font-size: .55rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 1px 7px; }
 .mv-track { font-size: .62rem; font-weight: 700; }
 .mv-likes { font-size: .62rem; color: rgba(0,0,0,.5); }
 .mv-off-tag { font-size: .56rem; color: rgba(0,0,0,.35); }
