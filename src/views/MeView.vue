@@ -35,6 +35,8 @@
       </div>
       <TagChips :member="auth.userData" class="me-tags" />
 
+      <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
+
       <button class="me-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>
       <button class="me-logout" @click="auth.logout()">ออกจากระบบ</button>
     </template>
@@ -71,6 +73,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -211,6 +214,8 @@ async function save() {
 .me-stat b { display: block; font-size: 1rem; font-weight: 800; }
 .me-stat small { font-size: .6rem; color: var(--muted, #9b8fb0); }
 .me-tags { display: flex; justify-content: center; margin-top: 12px; }
+.me-link { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-weight: 700; font-size: .85rem; color: var(--ink); text-decoration: none; margin-top: 12px; }
+.me-link:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .me-feedback { width: 100%; margin-top: 22px; border: 2px solid var(--ink); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .me-feedback:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .me-logout { width: 100%; margin-top: 10px; border: 2px solid var(--ink); background: #fff; color: var(--accent); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
