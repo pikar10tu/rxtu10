@@ -33,6 +33,7 @@
         <button class="qv-start" :disabled="!publishedTotal || starting" @click="start">
           {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำข้อสอบ (${quizCount} ข้อ)` }}
         </button>
+        <button class="qv-history-btn" @click="openHistory"><Emoji char="📊" /> ประวัติของฉัน</button>
         <div class="qv-hint">ทำข้อสอบได้เหรียญ +10/ข้อที่ถูก (สูงสุด {{ DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
       </template>
     </template>
@@ -99,6 +100,36 @@
         <button class="qv-start" @click="mode = 'home'">ทำชุดใหม่</button>
       </div>
     </template>
+
+    <!-- ── HISTORY ── -->
+    <template v-else-if="mode === 'history'">
+      <div class="qv-head">
+        <button class="qv-back" aria-label="ย้อนกลับ" @click="mode = 'home'">‹</button>
+        <span class="qv-head-title"><Emoji char="📊" /> ประวัติของฉัน</span>
+      </div>
+
+      <div v-if="historyLoading" class="qv-empty">กำลังโหลด…</div>
+      <div v-else-if="!stats.count" class="qv-empty">ยังไม่เคยทำข้อสอบ — ลองทำชุดแรกดูสิ! <Emoji char="📚" /></div>
+      <template v-else>
+        <div class="qv-hist-latest">
+          ล่าสุด <b>{{ stats.latest.correct }}/{{ stats.latest.total }}</b> ({{ stats.latest.pct }}%)
+        </div>
+
+        <div class="qv-label">พัฒนาการ ({{ stats.count }} ครั้งล่าสุด)</div>
+        <div class="qv-trend">
+          <div v-for="(p, i) in stats.trend" :key="i" class="qv-trend-bar" :style="{ height: Math.max(4, p) + '%' }" :title="p + '%'"></div>
+        </div>
+
+        <div class="qv-label">สถิติรายหมวด</div>
+        <div class="qv-dom-stats">
+          <div v-for="d in DOMAINS" :key="d.key" class="qv-dom-row">
+            <span class="qv-dom-name">{{ d.label }}</span>
+            <span class="qv-dom-bar"><span class="qv-dom-fill" :style="{ width: stats.byDomain[d.key].pct + '%' }"></span></span>
+            <span class="qv-dom-val">{{ stats.byDomain[d.key].c }}/{{ stats.byDomain[d.key].t }}</span>
+          </div>
+        </div>
+      </template>
+    </template>
   </div>
 </template>
 
@@ -106,6 +137,7 @@
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -114,11 +146,13 @@ import { useToast } from '../composables/useToast.js'
 import { quizSample } from '../utils/quizSample.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
-import { DOMAINS, DOMAIN_KEYS } from '../data/domains.js'
+import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
+import { aggregateExamStats } from '../utils/examStats.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
 const { toast } = useToast()
+const route = useRoute()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const DAILY_CAP = 300
@@ -146,7 +180,11 @@ async function load() {
     loading.value = false
   }
 }
-onMounted(() => { if (authStore.isLoggedIn) load() })
+onMounted(() => {
+  if (!authStore.isLoggedIn) return
+  load()
+  if (route.query.view === 'history') openHistory()
+})
 
 const dom = ref('__all')
 // chips เฉพาะ domain ที่มีข้ออย่างน้อย 1 ข้อ
@@ -157,7 +195,7 @@ const lenChoices = computed(() => LEN_CHOICES)
 const quizCount = computed(() => len.value) // ขอ N; ได้จริงอาจน้อยกว่าถ้าคลัง/หมวดมีไม่พอ
 
 // ── session state ──
-const mode = ref('home')          // home | quiz | result
+const mode = ref('home')          // home | quiz | result | history
 const quiz = ref([])
 const idx = ref(0)
 const picked = ref(null)
@@ -165,6 +203,28 @@ const correct = ref(0)
 const answered = ref(0)
 const coinsEarned = ref(0)
 const answers = ref([])
+
+// ── ประวัติของฉัน (Phase 1 — private, ไม่มี leaderboard) ──
+const history = ref([])
+const historyLoading = ref(false)
+const stats = computed(() => aggregateExamStats(history.value))
+
+async function loadHistory() {
+  if (!authStore.currentUser) return
+  historyLoading.value = true
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'examSessions'),
+      where('userId', '==', authStore.currentUser.uid),
+      orderBy('ts', 'desc'), limit(30),
+    ))
+    usage.track(snap.size)
+    history.value = snap.docs.map(d => d.data())
+  } catch (e) {
+    console.error('[exam history]', e); toast('โหลดประวัติไม่สำเร็จ', 'error')
+  } finally { historyLoading.value = false }
+}
+function openHistory() { mode.value = 'history'; loadHistory() }
 
 // ── แจ้งข้อสอบผิด (Phase 5) ──
 const REPORT_REASONS = ['เฉลยผิด', 'โจทย์/ตัวเลือกพิมพ์ผิด', 'โจทย์ไม่ชัด', 'ข้อมูลล้าสมัย', 'อื่นๆ']
@@ -400,4 +460,16 @@ async function finish() {
 .qv-result-coins { font-size: 1.2rem; font-weight: 800; color: #d97706; margin: 14px 0; }
 .qv-result-nocoins { font-size: .72rem; color: rgba(0,0,0,.4); margin: 14px 0; }
 .qv-result .qv-start { max-width: 260px; margin: 6px auto 0; }
+
+.qv-history-btn { width: 100%; margin-top: 10px; border: 2px solid var(--ink); background: #fff; border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 700; font-size: .85rem; color: var(--ink); cursor: pointer; box-shadow: var(--pop); }
+.qv-history-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.qv-hist-latest { font-size: .95rem; margin-bottom: 14px; }
+.qv-trend { display: flex; align-items: flex-end; gap: 4px; height: 80px; padding: 8px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; margin-bottom: 8px; }
+.qv-trend-bar { flex: 1; min-width: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
+.qv-dom-stats { display: flex; flex-direction: column; gap: 8px; }
+.qv-dom-row { display: flex; align-items: center; gap: 8px; }
+.qv-dom-name { width: 44px; font-size: .78rem; font-weight: 700; }
+.qv-dom-bar { flex: 1; height: 14px; background: rgba(0,0,0,.07); border-radius: 999px; overflow: hidden; }
+.qv-dom-fill { display: block; height: 100%; background: var(--primary); }
+.qv-dom-val { font-size: .72rem; font-variant-numeric: tabular-nums; color: rgba(0,0,0,.6); }
 </style>
