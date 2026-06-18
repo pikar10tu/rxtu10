@@ -39,11 +39,6 @@
         <span class="hs-label">สัตว์เลี้ยง</span>
         <span class="hs-sub">คลัง · ห้องทดลอง</span>
       </RouterLink>
-      <RouterLink to="/rank" class="home-shortcut sc-rank">
-        <span class="hs-icon"><Emoji char="🏆" /></span>
-        <span class="hs-label">Rank</span>
-        <span class="hs-sub">อันดับ</span>
-      </RouterLink>
     </div>
   </div>
 </template>
@@ -128,7 +123,6 @@ const myAvatar = computed(() =>
 }
 .sc-shop .hs-icon { background: #ffe1ea; }
 .sc-pets .hs-icon { background: #e2f7f0; }
-.sc-rank .hs-icon { background: #fff0cf; }
 .hs-label {
   font-weight: 800;
   color: var(--ink);
