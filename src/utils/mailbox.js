@@ -11,9 +11,9 @@ export function rewardCoins(mail) {
   return (typeof c === 'number' && c > 0) ? c : 0
 }
 
-// กดรับได้ไหม = มีรางวัล > 0 และยังไม่เคยรับ
+// กดรับได้ไหม = มีรางวัล (เหรียญ > 0 หรือ achievement) และยังไม่เคยรับ
 export function canClaim(mail) {
-  return !!mail && !mail.claimed && rewardCoins(mail) > 0
+  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || !!mail?.reward?.achievement)
 }
 
 // ต้องสนใจไหม = ยังไม่อ่าน หรือ ยังกดรับได้ (ใช้คิด badge)
@@ -50,16 +50,21 @@ export function buildReportRewardMail(report, coins, createdAt) {
   }
 }
 
-// สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ)
-//   coins > 0 → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
+// สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ/achievement)
+//   coins > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
 //   caller เติม createdAt = serverTimestamp()
-export function buildBroadcastMail({ title, body, coins, from } = {}, createdAt) {
+export function buildBroadcastMail({ title, body, coins, from, achievement } = {}, createdAt) {
   const c = (typeof coins === 'number' && coins > 0) ? coins : 0
+  const hasAch = achievement && achievement.id
+  const reward = {}
+  if (c > 0) reward.coins = c
+  if (hasAch) reward.achievement = { id: achievement.id, ...(achievement.date ? { date: achievement.date } : {}) }
+  const hasReward = c > 0 || hasAch
   return {
-    type: c > 0 ? 'reward' : 'notice',
+    type: hasReward ? 'reward' : 'notice',
     title: title || '',
     body: body || '',
-    ...(c > 0 ? { reward: { coins: c } } : {}),
+    ...(hasReward ? { reward } : {}),
     from: from || 'admin',
     createdAt,
     read: false,

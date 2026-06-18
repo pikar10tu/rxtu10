@@ -157,6 +157,10 @@
               </select>
             </label>
           </div>
+          <select v-model="bcAchievement" class="admin-search" style="margin:0">
+            <option value="">— ไม่แนบ achievement —</option>
+            <option v-for="(a, id) in ACHIEVEMENTS" :key="id" :value="id">{{ a.icon }} {{ a.title }}</option>
+          </select>
           <button class="btn-mini btn-gold bc-send" :disabled="bcSending || !bcTitle.trim()" @click="sendBroadcast">
             {{ bcSending ? 'กำลังส่ง…' : 'ส่งจดหมาย' }}
           </button>
@@ -238,6 +242,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { TAG_LIST } from '../data/tags.js'
+import { ACHIEVEMENTS } from '../data/achievements.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 
 const authStore = useAuthStore()
@@ -252,6 +257,7 @@ const bcTitle = ref('')
 const bcBody = ref('')
 const bcCoins = ref(0)
 const bcTarget = ref('all')   // all | sci | care
+const bcAchievement = ref('') // achievement id ที่เลือกแนบ, '' = ไม่แนบ
 const bcSending = ref(false)
 
 async function sendBroadcast() {
@@ -276,13 +282,13 @@ async function sendBroadcast() {
       const batch = writeBatch(db)
       for (const uid of chunk) {
         batch.set(doc(collection(db, 'users', uid, 'mail')),
-          buildBroadcastMail({ title, body, coins }, serverTimestamp()))
+          buildBroadcastMail({ title, body, coins, achievement: bcAchievement.value ? { id: bcAchievement.value } : undefined }, serverTimestamp()))
       }
       await batch.commit()
       usage.track(0, chunk.length)
     }
     toast(`ส่งจดหมายถึง ${uids.length} คนแล้ว`, 'success')
-    bcTitle.value = ''; bcBody.value = ''; bcCoins.value = 0
+    bcTitle.value = ''; bcBody.value = ''; bcCoins.value = 0; bcAchievement.value = ''
   } catch (e) {
     console.error('[broadcast]', e); toast('ส่งจดหมายไม่สำเร็จ', 'error')
   } finally { bcSending.value = false }

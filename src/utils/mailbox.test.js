@@ -80,3 +80,19 @@ test('buildBroadcastMail: ระบุ from เองได้ (เช่น uid
   const mail = buildBroadcastMail({ title: 'ของขวัญ', coins: 10, from: 'uid123' }, 1)
   assert.equal(mail.from, 'uid123')
 })
+
+test('buildBroadcastMail: แนบ achievement → reward.achievement', () => {
+  const m = buildBroadcastMail({ title: 'ยินดีด้วย', body: 'เก่งมาก', achievement: { id: 'daily_king', date: '2026-06-18' } }, 'TS')
+  assert.deepEqual(m.reward.achievement, { id: 'daily_king', date: '2026-06-18' })
+  assert.equal(m.type, 'reward')
+})
+
+test('buildBroadcastMail: ไม่มี coins/achievement → notice', () => {
+  const m = buildBroadcastMail({ title: 'ประกาศ', body: 'ข่าว' }, 'TS')
+  assert.equal(m.type, 'notice')
+  assert.equal(m.reward, undefined)
+})
+
+test('canClaim: achievement อย่างเดียว (coins 0) ก็รับได้', () => {
+  assert.equal(canClaim({ claimed: false, reward: { achievement: { id: 'x' } } }), true)
+})
