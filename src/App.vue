@@ -42,6 +42,7 @@ import { useAuthStore } from './stores/auth.js'
 import { useUsageStore } from './stores/usage.js'
 import { useAppConfig } from './composables/useAppConfig.js'
 import { runIntegrityCheck } from './composables/useGuard.js'
+import { initAchievements } from './composables/useAchievements.js'
 import ToastContainer   from './components/layout/ToastContainer.vue'
 import ConfirmModal     from './components/layout/ConfirmModal.vue'
 import HelpModal        from './components/help/HelpModal.vue'
@@ -53,6 +54,7 @@ import AchievementBalloon from './components/shared/AchievementBalloon.vue'
 const authStore = useAuthStore()
 const usage = useUsageStore()
 const { maintenance, configLoaded } = useAppConfig()
+initAchievements()
 
 // rough integrity trip-wire: scan user data when it loads/changes
 watch(() => authStore.userData, (d) => runIntegrityCheck(d), { immediate: true })
