@@ -22,7 +22,6 @@
         <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon"><Emoji char="⚙️" /></span>Admin</RouterLink>
       </nav>
 
-      <button class="help-fab" title="วิธีเล่น" @click="openHelp"><Emoji char="❓" /></button>
       <HelpModal />
       <MigrationWelcome />
     </template>
@@ -41,7 +40,6 @@ import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
 import { useUsageStore } from './stores/usage.js'
 import { useAppConfig } from './composables/useAppConfig.js'
-import { useHelp } from './composables/useHelp.js'
 import { runIntegrityCheck } from './composables/useGuard.js'
 import ToastContainer   from './components/layout/ToastContainer.vue'
 import ConfirmModal     from './components/layout/ConfirmModal.vue'
@@ -53,7 +51,6 @@ import ErrorBoundary     from './components/layout/ErrorBoundary.vue'
 const authStore = useAuthStore()
 const usage = useUsageStore()
 const { maintenance, configLoaded } = useAppConfig()
-const { openHelp } = useHelp()
 
 // rough integrity trip-wire: scan user data when it loads/changes
 watch(() => authStore.userData, (d) => runIntegrityCheck(d), { immediate: true })
@@ -67,21 +64,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.help-fab {
-  position: fixed;
-  right: 14px;
-  bottom: 74px; /* sits above the bottom nav */
-  z-index: 150;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, .55);
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, .25);
-}
-.help-fab:active { transform: scale(.92); }
-</style>

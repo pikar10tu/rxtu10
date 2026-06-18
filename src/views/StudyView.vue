@@ -1,7 +1,10 @@
 <template>
   <div class="tab-content">
     <div class="sv-head">
-      <div class="sv-title"><Emoji char="📚" /> ทบทวนกลุ่มยา</div>
+      <div class="sv-head-row">
+        <div class="sv-title"><Emoji char="📚" /> ทบทวนกลุ่มยา</div>
+        <HelpButton topic="study" />
+      </div>
       <div class="sv-sub">Flashcard แบบ spaced repetition · {{ DECK.length }} ตัวยา</div>
     </div>
 
@@ -111,6 +114,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import HelpButton from '../components/help/HelpButton.vue'
 import ExamCountdown from '../components/study/ExamCountdown.vue'
 import { ref, computed } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
@@ -303,6 +307,7 @@ async function sendReport() {
 
 <style scoped>
 .sv-head { margin-bottom: 14px; }
+.sv-head-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .sv-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
 .sv-sub { font-size: .68rem; color: rgba(0,0,0,.45); margin-top: 2px; }
 .sv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 36px 0; font-size: .85rem; }

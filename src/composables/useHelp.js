@@ -1,10 +1,10 @@
 import { ref } from 'vue'
 
-// shared singleton open-state for the Help / วิธีเล่น modal
-const helpOpen = ref(false)
+// shared singleton: topic ที่กำลังเปิดอยู่ (null = ปิด)
+const helpTopic = ref(null)
 
 export function useHelp() {
-  function openHelp()  { helpOpen.value = true }
-  function closeHelp() { helpOpen.value = false }
-  return { helpOpen, openHelp, closeHelp }
+  function openHelp(topic) { helpTopic.value = topic }
+  function closeHelp() { helpTopic.value = null }
+  return { helpTopic, openHelp, closeHelp }
 }

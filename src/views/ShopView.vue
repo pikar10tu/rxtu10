@@ -3,6 +3,7 @@
     <div class="shop-head">
       <div class="page-title" style="margin-bottom:0"><Emoji char="🛒" /> Shop</div>
       <span class="shop-coins">{{ coins.toLocaleString() }} <Emoji char="🪙" /></span>
+      <HelpButton topic="shop" />
     </div>
 
     <template v-if="authStore.isLoggedIn">
@@ -47,6 +48,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
+import HelpButton from '../components/help/HelpButton.vue'
 import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -103,7 +105,7 @@ async function buy(egg) {
 </script>
 
 <style scoped>
-.shop-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.shop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .shop-coins { font-size: 1rem; font-weight: 800; color: #b45309; }
 .shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
 .shop-disc { color: #059669; font-weight: 700; }

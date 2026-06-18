@@ -3,6 +3,7 @@
     <div class="qv-head">
       <button class="qv-back" aria-label="ย้อนกลับ" @click="$router.back()">‹</button>
       <span class="qv-head-title"><Emoji char="📝" /> ทำข้อสอบ</span>
+      <HelpButton topic="quiz" style="margin-left:auto" />
     </div>
 
     <div v-if="!authStore.isLoggedIn" class="qv-empty">เข้าสู่ระบบเพื่อทำข้อสอบ</div>
@@ -104,6 +105,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'

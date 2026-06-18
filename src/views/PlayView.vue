@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div class="page-title"><Emoji char="🎮" /> Play</div>
+    <div class="page-title pv-head"><span><Emoji char="🎮" /> Play</span><HelpButton topic="farm" /></div>
 
     <!-- กระดานข่าว (เห็นได้ทุกคน · collapsed แสดงบรรทัดล่าสุด กดกาง log) -->
     <NewsBoard />
@@ -45,6 +45,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useFarm } from '../composables/useFarm.js'
@@ -69,6 +70,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 </script>
 
 <style scoped>
+.pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .game-card { all: unset; cursor: pointer; box-sizing: border-box; background: #e2f7f0; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform .12s, box-shadow .12s; }
 .game-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }

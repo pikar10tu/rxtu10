@@ -9,6 +9,7 @@
         </div>
         <div class="res-income"><Emoji char="💰" /> รายได้/วัน <b>{{ currentTier.dailyIncome.toLocaleString() }}</b><Emoji char="🪙" /></div>
       </div>
+      <HelpButton topic="residence" />
     </div>
 
     <!-- progress to next tier -->
@@ -35,6 +36,7 @@
 
 <script setup>
 import Emoji from '../shared/Emoji.vue'
+import HelpButton from '../help/HelpButton.vue'
 import { useResidence } from '../../composables/useResidence.js'
 
 const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useResidence()
@@ -50,6 +52,7 @@ const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useReside
   box-shadow: var(--pop);
 }
 .res-head { display: flex; align-items: center; gap: 12px; }
+.res-head :deep(.help-btn) { margin-left: auto; align-self: flex-start; }
 .res-art {
   width: 56px; height: 56px;
   display: flex; align-items: center; justify-content: center;

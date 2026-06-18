@@ -3,6 +3,7 @@
     <div class="pt-head">
       <button class="pt-back" @click="$router.back()">‹</button>
       <span><Emoji char="🐾" /> สัตว์เลี้ยง</span>
+      <HelpButton topic="pets" style="margin-left:auto" />
     </div>
 
     <template v-if="authStore.isLoggedIn">
@@ -38,6 +39,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
+import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, GRADE_LABELS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'

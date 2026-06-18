@@ -36,8 +36,7 @@
         </div>
       </div>
 
-      <button class="mw-btn primary" @click="dismiss(true)">เริ่มเล่นเลย!</button>
-      <button class="mw-btn ghost" @click="dismiss(false)">ดูวิธีเล่นทั้งหมด</button>
+      <button class="mw-btn primary" @click="dismiss()">เริ่มเล่นเลย!</button>
     </div>
   </div>
 </template>
@@ -48,11 +47,9 @@ import { ref, computed } from 'vue'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
 import { useAuthStore } from '../../stores/auth.js'
-import { useHelp } from '../../composables/useHelp.js'
 import { getTier } from '../../data/residence.js'
 
 const auth = useAuthStore()
-const { openHelp } = useHelp()
 
 const dismissed = ref(false)
 const show = computed(() =>
@@ -65,7 +62,7 @@ const level     = computed(() => auth.userData?.residence?.level || 1)
 const tier      = computed(() => getTier(level.value))
 const isFounder = computed(() => auth.userData?.founder === true)
 
-async function dismiss(startPlaying) {
+async function dismiss() {
   dismissed.value = true
   // persist the once-flag so it never shows again
   if (auth.currentUser) {
@@ -76,7 +73,6 @@ async function dismiss(startPlaying) {
       console.error('[migration welcome]', e)
     }
   }
-  if (!startPlaying) openHelp()
 }
 </script>
 
@@ -105,7 +101,6 @@ async function dismiss(startPlaying) {
   font-family: inherit; font-size: .88rem; font-weight: 800; cursor: pointer;
   box-shadow: var(--pop); transition: transform .12s, box-shadow .12s;
 }
-.mw-btn.primary { background: var(--gold); color: #fff; margin-bottom: 8px; }
-.mw-btn.ghost { background: #fff; color: var(--ink); }
+.mw-btn.primary { background: var(--gold); color: #fff; }
 .mw-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 </style>
