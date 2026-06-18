@@ -18,6 +18,15 @@
       ]
     },
     {
+      "collectionGroup": "questions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "domain", "order": "ASCENDING" },
+        { "fieldPath": "rand", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "questionReports",
       "queryScope": "COLLECTION",
       "fields": [

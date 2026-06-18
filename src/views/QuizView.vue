@@ -15,12 +15,11 @@
       <template v-else>
         <div class="qv-info">มีข้อสอบให้ทำ <b>{{ publishedTotal }}</b> ข้อ</div>
 
-        <template v-if="categories.length > 1">
+        <template v-if="domainChips.length">
           <div class="qv-label">หมวด</div>
           <div class="qv-chips">
-            <button v-for="c in categories" :key="c" class="qv-chip" :class="{ on: cat === c }" @click="cat = c">
-              {{ c === '__all' ? 'ทั้งหมด' : c }}
-            </button>
+            <button class="qv-chip" :class="{ on: dom === '__all' }" @click="dom = '__all'">ทั้งหมด</button>
+            <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="dom = d.key">{{ d.label }}</button>
           </div>
         </template>
 
@@ -115,6 +114,7 @@ import { useToast } from '../composables/useToast.js'
 import { quizSample } from '../utils/quizSample.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
+import { DOMAINS, DOMAIN_KEYS } from '../data/domains.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -128,7 +128,7 @@ const DEFAULT_LEN = 15
 
 // ── home: อ่านแค่ config/questionsMeta (1 read) แทนการโหลดข้อทั้งคลัง ──
 const publishedTotal = ref(0)
-const metaCategories = ref([])
+const metaDomains = ref({})
 const loading = ref(true)
 
 async function load() {
@@ -136,9 +136,9 @@ async function load() {
   try {
     const snap = await getDoc(doc(db, 'config', 'questionsMeta'))
     usage.track(1)
-    const m = snap.exists() ? snap.data() : { publishedTotal: 0, categories: [] }
+    const m = snap.exists() ? snap.data() : { publishedTotal: 0, categories: [], domains: {} }
     publishedTotal.value = m.publishedTotal || 0
-    metaCategories.value = Array.isArray(m.categories) ? m.categories : []
+    metaDomains.value = m.domains || {}
   } catch (e) {
     console.error('[quiz meta]', e)
     toast('โหลดข้อมูลข้อสอบไม่สำเร็จ', 'error')
@@ -148,8 +148,9 @@ async function load() {
 }
 onMounted(() => { if (authStore.isLoggedIn) load() })
 
-const categories = computed(() => ['__all', ...metaCategories.value])
-const cat = ref('__all')
+const dom = ref('__all')
+// chips เฉพาะ domain ที่มีข้ออย่างน้อย 1 ข้อ
+const domainChips = computed(() => DOMAINS.filter(d => (metaDomains.value[d.key] || 0) > 0))
 
 const len = ref(DEFAULT_LEN)
 const lenChoices = computed(() => LEN_CHOICES)
@@ -231,7 +232,7 @@ async function start() {
   try {
     const R = Math.random()
     const base = [where('isPublished', '==', true)]
-    if (cat.value !== '__all') base.push(where('category', '==', cat.value))
+    if (dom.value !== '__all') base.push(where('domain', '==', dom.value))
     const col = collection(db, 'questions')
     const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(len.value)))
     usage.track(firstSnap.size)
@@ -300,7 +301,8 @@ async function finish() {
       total: quiz.value.length,
       correct: correct.value,
       pct: pct.value,
-      category: cat.value === '__all' ? null : cat.value,
+      domain: dom.value === '__all' ? null : dom.value,
+      category: null,
       ts: serverTimestamp(),
     })
   } catch (e) { console.error('[exam save]', e) }
