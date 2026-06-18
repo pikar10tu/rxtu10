@@ -30,6 +30,7 @@
 
     <ToastContainer />
     <ConfirmModal />
+    <AchievementBalloon />
   </div>
 </template>
 
@@ -47,6 +48,7 @@ import HelpModal        from './components/help/HelpModal.vue'
 import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
 import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'
 import ErrorBoundary     from './components/layout/ErrorBoundary.vue'
+import AchievementBalloon from './components/shared/AchievementBalloon.vue'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
