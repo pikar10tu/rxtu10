@@ -84,6 +84,16 @@ service cloud.firestore {
                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'claimed']);
         allow delete: if (request.auth != null && request.auth.uid == userId) || isAdmin();
       }
+
+      // ── Achievements subcollection — ปลดล็อกความสำเร็จรายผู้ใช้ ──
+      //  read:   ผู้ล็อกอินใดก็ได้ (โชว์บนโปรไฟล์)
+      //  create: เจ้าของเท่านั้น (self-grant ตอนปลดล็อก)
+      //  update/delete: ห้ามเสมอ — เป็น record ที่ไม่เปลี่ยนแปลง
+      match /achievements/{achId} {
+        allow read:   if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update, delete: if false;
+      }
     }
 
     // ── App config (launch gate) — config/app { maintenance: bool } ──
@@ -115,10 +125,15 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    // ── News feed — only admin posts (UI posts from AdminView only) ──
+    // ── News feed — admin posts anything; logged-in users may post
+    //    achievement-unlock announcements only (field+length guarded) ──
     match /news/{newsId} {
       allow read:   if request.auth != null;
-      allow create: if isAdmin();
+      allow create: if isAdmin()
+        || (request.auth != null
+            && request.resource.data.type == 'achievement'
+            && request.resource.data.msg is string && request.resource.data.msg.size() <= 140
+            && request.resource.data.keys().hasOnly(['msg','icon','type','uid','ts']));
       allow update: if false;
       allow delete: if isAdmin();
     }
