@@ -7,7 +7,7 @@
         <div class="pd-name">{{ pet.name }}</div>
         <div class="pd-tags">
           <span class="pd-tag">{{ rarityLabel }}</span>
-          <span class="pd-tag" v-if="pet.grade > 0">เกรด {{ GRADE_LABELS[pet.grade] }}</span>
+          <span class="pd-tag" v-if="pet.grade > 0">เกรด {{ GRADE_LABELS[Math.min(pet.grade, GRADE_LABELS.length - 1)] }}</span>
           <span class="pd-tag">copies {{ pet.copies || 0 }}</span>
         </div>
       </div>

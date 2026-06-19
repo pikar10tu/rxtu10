@@ -124,10 +124,12 @@ export const useAuthStore = defineStore('auth', () => {
         _petMigrating = true
         try {
             const ids = new Set(PETS.map(p => p.id))
-            const { pets, activePets, refundCoins } = migratePets(u.pets, u.activePets, ids, getPetDef)
+            const { pets, activePets, refundCoins } = migratePets(
+                [...(u.pets || []), ...(u.petsVault || [])], u.activePets, ids, getPetDef,
+            )
             await patchUser(
-                { pets, activePets, petsMigratedV2: true, coins: (u.coins || 0) + refundCoins },
-                { pets, activePets, petsMigratedV2: true, ...(refundCoins ? { coins: increment(refundCoins) } : {}) },
+                { pets, activePets, petsVault: [], petsMigratedV2: true, coins: (u.coins || 0) + refundCoins },
+                { pets, activePets, petsVault: [], petsMigratedV2: true, ...(refundCoins ? { coins: increment(refundCoins) } : {}) },
             )
             if (refundCoins) {
                 const { toast } = useToast()

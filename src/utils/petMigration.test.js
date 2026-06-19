@@ -52,3 +52,13 @@ test('activePets instId → species id, ตัด id ที่ถูก cut', ()
   const r = migratePets(old, ['a', 'x'], ids, defOf)
   assert.deepEqual(r.activePets, ['cat'])  // a→cat, x(frog ถูกตัด)→หาย
 })
+
+test('instance ที่มี copies เดิมอยู่แล้ว → รวมกับตัวเกินใหม่', () => {
+  const old = [
+    { id:'cat', grade:0, rarity:'common', instId:'a', copies:3 },
+    { id:'cat', grade:0, rarity:'common', instId:'b' },
+  ]
+  const r = migratePets(old, [], ids, defOf)
+  const cat = r.pets.find(p => p.id === 'cat')
+  assert.equal(cat.copies, 4)  // 3 เดิม + 1 ตัวเกินจาก instance ที่สอง
+})

@@ -22,7 +22,7 @@
           class="pt-cell" :style="{ borderColor: rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
-          <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[p.grade] }}</span>
+          <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[Math.min(p.grade, GRADE_LABELS.length - 1)] }}</span>
           <span v-if="activeSet.has(p.id)" class="pt-cell-star"><Emoji char="⭐" /></span>
           <span v-if="(p.potential || []).length" class="pt-cell-pot"><Emoji char="⚗️" />{{ p.potential.length }}</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
