@@ -24,7 +24,7 @@
           <span class="mw-emoji"><Emoji char="🐾" /></span>
           <div>
             <b>สัตว์เลี้ยงปลอดภัยทุกตัว</b>
-            <div class="mw-note">ตัวเก่งอยู่ในคลังเก็บ ที่เหลืออยู่ใน "คลังพัก" — ไม่มีตัวไหนหาย</div>
+            <div class="mw-note">สัตว์เลี้ยงทุกตัวเก็บได้หมด ตัวซ้ำใช้อัปเกรด</div>
           </div>
         </div>
         <div class="mw-item">

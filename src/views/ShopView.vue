@@ -8,7 +8,7 @@
 
     <template v-if="authStore.isLoggedIn">
       <div class="shop-storage">
-        <Emoji char="🐾" /> คลังเพ็ท {{ pets.length }}/{{ storageCap }}
+        <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ PETS.length }} ชนิด
         <span v-if="discount" class="shop-disc">· ส่วนลดร้าน −{{ discount }}%</span>
       </div>
 
@@ -32,7 +32,7 @@
         </div>
       </div>
 
-      <div class="shop-note">ซื้อแล้วได้เพ็ทเข้าคลังทันที · คลังเต็มต้องขาย/ย้ายก่อน</div>
+      <div class="shop-note">ซื้อแล้วได้เพ็ทเข้าคลังทันที</div>
     </template>
     <div v-else class="shop-login">เข้าสู่ระบบเพื่อช้อป</div>
 
@@ -58,8 +58,8 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { EGG_TYPES, rollPetFromEgg, DAILY_QUEST_TICKET_EGG } from '../data/shop.js'
-import { RARITY } from '../data/index.js'
-import { residencePetStorage, residenceShopDiscount } from '../data/residence.js'
+import { RARITY, PETS } from '../data/index.js'
+import { residenceShopDiscount } from '../data/residence.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 const authStore = useAuthStore()
@@ -68,7 +68,6 @@ const { toast } = useToast()
 const coins = computed(() => authStore.userData?.coins || 0)
 const pets = computed(() => authStore.userData?.pets || [])
 const level = computed(() => authStore.userData?.residence?.level || 1)
-const storageCap = computed(() => residencePetStorage(level.value))
 const discount = computed(() => residenceShopDiscount(level.value))
 const tickets = computed(() => authStore.userData?.freeGachaTickets || 0)
 
@@ -90,9 +89,6 @@ async function buy(egg) {
   if (coins.value < cost) { toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}🪙`, 'error'); return }
   const pet = rollPetFromEgg(egg.id)
   const existing = pets.value.find(p => p.id === pet.id)
-  if (!existing && pets.value.length >= storageCap.value) {
-    toast(`คลังเพ็ทเต็ม (${storageCap.value}) — ขาย/ย้ายก่อน หรืออัปที่อยู่อาศัย`, 'info'); return
-  }
   buying.value = true
   const newPets = existing
     ? pets.value.map(p => p.id === pet.id ? { ...p, copies: (p.copies || 0) + 1 } : p)
@@ -121,9 +117,6 @@ async function useTicket() {
   if (buying.value || tickets.value < 1) return
   const pet = rollPetFromEgg(DAILY_QUEST_TICKET_EGG)
   const existing = pets.value.find(p => p.id === pet.id)
-  if (!existing && pets.value.length >= storageCap.value) {
-    toast(`คลังเพ็ทเต็ม (${storageCap.value}) — ขาย/ย้ายก่อน หรืออัปที่อยู่อาศัย`, 'info'); return
-  }
   buying.value = true
   const newPets = existing
     ? pets.value.map(p => p.id === pet.id ? { ...p, copies: (p.copies || 0) + 1 } : p)

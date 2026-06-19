@@ -48,7 +48,6 @@ export const USER_DEFAULTS = {
   tags: [],                                   // admin-assigned badges
   residence: { level: 1, upgradedAt: null },  // ที่อยู่อาศัย (prestige/coin sink)
   farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
-  petsVault: [],                              // overflow pets (no income / not battle-eligible)
   study: { cards: {} },                       // SRS flashcard progress
   dailyQuest: { date: null, quiz: 0, study: 0, gacha: 0, claimed: false },
   freeGachaTickets: 0,
@@ -91,7 +90,6 @@ export function normalizeUserData(data) {
   d.pets       = Array.isArray(d.pets) ? d.pets : []
   d.eggs       = Array.isArray(d.eggs) ? d.eggs : []
   d.tags       = Array.isArray(d.tags) ? d.tags : []
-  d.petsVault  = Array.isArray(d.petsVault) ? d.petsVault : []
   d.activePets = Array.isArray(d.activePets) ? d.activePets : [null, null, null]
 
   // deep-default nested objects so a missing sub-field can't crash a view

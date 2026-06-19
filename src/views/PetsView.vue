@@ -8,7 +8,7 @@
 
     <template v-if="authStore.isLoggedIn">
       <div class="pt-summary">
-        <div><b>{{ pets.length }}</b>/{{ storageCap }} <small>คลัง</small></div>
+        <div><b>{{ pets.length }}</b>/{{ PETS.length }} <small>ชนิด</small></div>
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
@@ -42,17 +42,14 @@ import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
-import { RARITY, GRADE_LABELS } from '../data/index.js'
+import { RARITY, GRADE_LABELS, PETS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'
-import { residencePetStorage } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 
 const authStore = useAuthStore()
 const sel = ref(null)
 
 const pets = computed(() => authStore.userData?.pets || [])
-const level = computed(() => authStore.userData?.residence?.level || 1)
-const storageCap = computed(() => residencePetStorage(level.value))
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
 const activeSet = computed(() => {
