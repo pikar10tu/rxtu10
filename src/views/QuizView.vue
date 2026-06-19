@@ -158,7 +158,7 @@ const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const DAILY_CAP = 300
 const COIN_PER_CORRECT = 10
 const LEN_CHOICES = [5, 10, 15, 20]
-const DEFAULT_LEN = 15
+const DEFAULT_LEN = 5
 
 // ── home: อ่านแค่ config/questionsMeta (1 read) แทนการโหลดข้อทั้งคลัง ──
 const publishedTotal = ref(0)

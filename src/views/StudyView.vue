@@ -129,7 +129,7 @@ const authStore = useAuthStore()
 const { toast } = useToast()
 
 const DECK = DRUGS
-const NEW_PER_SESSION = 15
+const NEW_PER_SESSION = 5
 const MATURE_DAYS = 21
 const COIN_PER_CARD = 5
 const STUDY_DAILY_CAP = 150   // เพดานเหรียญจากการทบทวน/วัน (กันฟาร์ม "ฝึกอิสระ" วนไม่จำกัด)

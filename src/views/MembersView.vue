@@ -140,10 +140,10 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
 .mv-sort-label { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); }
 .mv-sort-sel { border: 2px solid var(--ink); border-radius: 10px; padding: 5px 10px; font-family: inherit; font-size: .74rem; font-weight: 700; background: #fff; color: var(--ink); }
 .mv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 28px 0; font-size: .85rem; }
-.mv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mv-card {
   background: #fff; border: 2px solid var(--ink); border-radius: 16px;
-  padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
   cursor: pointer; font-family: inherit; box-shadow: var(--pop);
   transition: transform .12s, box-shadow .12s;
 }
