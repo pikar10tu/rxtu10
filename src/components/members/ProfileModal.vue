@@ -30,7 +30,7 @@
       <!-- Tier 3: active team (tap to see stats) -->
       <div class="pf-team-label"><Emoji char="⭐" /> ทีม Active</div>
       <div v-if="showcase.length" class="pf-showcase">
-        <button v-for="(p, i) in showcase" :key="p.instId || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
+        <button v-for="(p, i) in showcase" :key="p.id || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
           <Emoji :char="p.emoji" />
           <span v-if="p.grade > 0" class="pf-pet-g">{{ p.grade }}</span>
         </button>
@@ -118,11 +118,11 @@ const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Gue
 const trackLabel = computed(() => (TRACK[props.member?.track]?.[0]) || 'สมาชิก')
 const trackColor = computed(() => (TRACK[props.member?.track]?.[1]) || '#6366f1')
 
-// active team only: resolve activePets (instId list) against their pets
+// active team only: resolve activePets (species id, with instId fallback for not-yet-migrated members)
 const showcase = computed(() => {
   const pets = props.member?.pets || []
   const ids = (props.member?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
-  return ids.map(id => pets.find(p => p.instId === id)).filter(Boolean)
+  return ids.map(id => pets.find(p => p.id === id || p.instId === id)).filter(Boolean)
 })
 const hasContact = computed(() => {
   const c = props.member?.contact || {}

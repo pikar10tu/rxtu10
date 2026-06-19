@@ -18,13 +18,14 @@
 
       <div v-else class="pt-grid">
         <button
-          v-for="p in sorted" :key="p.instId"
+          v-for="p in sorted" :key="p.id"
           class="pt-cell" :style="{ borderColor: rarityColor(p.rarity) }"
-          @click="sel = p.instId"
+          @click="sel = p.id"
         >
           <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[p.grade] }}</span>
-          <span v-if="activeSet.has(p.instId)" class="pt-cell-star"><Emoji char="⭐" /></span>
+          <span v-if="activeSet.has(p.id)" class="pt-cell-star"><Emoji char="⭐" /></span>
           <span v-if="(p.potential || []).length" class="pt-cell-pot"><Emoji char="⚗️" />{{ p.potential.length }}</span>
+          <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
         </button>
@@ -32,7 +33,7 @@
     </template>
     <div v-else class="pt-empty">เข้าสู่ระบบก่อนนะ</div>
 
-    <PetDetailModal :inst-id="sel" @close="sel = null" />
+    <PetDetailModal :pet-id="sel" @close="sel = null" />
   </div>
 </template>
 
@@ -55,12 +56,8 @@ const storageCap = computed(() => residencePetStorage(level.value))
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
 const activeSet = computed(() => {
-  const owned = new Set(pets.value.map(p => p.instId))
-  return new Set(
-    (authStore.userData?.activePets || [])
-      .map(x => (typeof x === 'string' ? x : x?.instId))
-      .filter(id => id && owned.has(id))
-  )
+  const owned = new Set(pets.value.map(p => p.id))
+  return new Set((authStore.userData?.activePets || []).filter(id => owned.has(id)))
 })
 
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
@@ -94,4 +91,5 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-grade { position: absolute; top: -5px; left: -5px; background: #1e293b; color: #fff; font-size: .54rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-pot { position: absolute; top: -5px; right: -5px; background: #7c3aed; color: #fff; font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-star { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
+.pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .54rem; font-weight: 800; color: rgba(0,0,0,.4); }
 </style>
