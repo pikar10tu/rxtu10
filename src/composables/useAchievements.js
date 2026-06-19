@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { collection, getDocs, doc, setDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
