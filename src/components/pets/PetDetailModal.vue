@@ -8,7 +8,7 @@
         <div class="pd-tags">
           <span class="pd-tag">{{ rarityLabel }}</span>
           <span class="pd-tag" v-if="pet.grade > 0">เกรด {{ GRADE_LABELS[pet.grade] }}</span>
-          <span class="pd-tag">×{{ count }} ในคลัง</span>
+          <span class="pd-tag">copies {{ pet.copies || 0 }}</span>
         </div>
       </div>
 
@@ -33,10 +33,10 @@
       <!-- evolve -->
       <div class="pd-section">
         <div class="pd-sec-head"><Emoji char="🧬" /> วิวัฒน์ (เพิ่มเกรด)</div>
-        <template v-if="pet.grade >= 12"><div class="pd-note">เกรดสูงสุดแล้ว <Emoji char="👑" /></div></template>
+        <template v-if="pet.grade >= MAX_GRADE"><div class="pd-note">เกรดสูงสุดแล้ว <Emoji char="👑" /></div></template>
         <template v-else>
-          <div class="pd-note">เกรด {{ GRADE_LABELS[pet.grade] || '0' }} → {{ GRADE_LABELS[pet.grade + 1] }} · ใช้ตัวซ้ำ {{ evoNeed }} ({{ dupes }}/{{ evoNeed }})</div>
-          <button class="pd-btn" :class="{ ok: dupes >= evoNeed }" :disabled="dupes < evoNeed || busy" @click="evolve">วิวัฒน์</button>
+          <div class="pd-note">เกรด {{ GRADE_LABELS[pet.grade] || '0' }} → {{ GRADE_LABELS[pet.grade + 1] }} · ใช้ {{ upCost.copies }} copies + {{ upCost.coins.toLocaleString() }} เหรียญ (มี copies {{ pet.copies || 0 }})</div>
+          <button class="pd-btn" :class="{ ok: canUp }" :disabled="!canUp || busy" @click="evolve">วิวัฒน์</button>
         </template>
       </div>
 
@@ -47,15 +47,11 @@
           <div v-for="i in slots" :key="i" class="pd-slot" :class="{ filled: pet.potential && pet.potential[i-1] }">
             <template v-if="pet.potential && pet.potential[i - 1]">
               <span class="pd-slot-aff">{{ affixMeta(pet.potential[i-1].stat).label }} +{{ pet.potential[i-1].value }}%</span>
-              <button class="pd-reroll" :disabled="busy" @click="reroll(i - 1)"><Emoji char="🎲" /></button>
             </template>
             <span v-else class="pd-slot-empty">ว่าง</span>
           </div>
         </div>
-        <button v-if="(pet.potential || []).length < slots" class="pd-btn ok" :disabled="busy" @click="rollNew">
-          <Emoji char="🎲" /> เปิดศักยภาพ · {{ cost.toLocaleString() }}<Emoji char="🪙" /> + สังเวยเพ็ทเรท{{ rarityLabel }} 1 ตัว
-        </button>
-        <div class="pd-note small">เปิด/รีโรล = สังเวยเพ็ท "เรทเดียวกัน" 1 ตัว (ไม่ต้องเป็นตัวซ้ำ) + เหรียญ</div>
+        <div class="pd-note small">ศักยภาพปรับได้เมื่อเปิดระบบสู้ (เร็วๆ นี้)</div>
       </div>
     </div>
   </div>
@@ -67,56 +63,52 @@ import Emoji from '../shared/Emoji.vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
-import { useConfirm } from '../../composables/useConfirm.js'
-import { RARITY, GRADE_LABELS, GRADE_COPIES, petStats } from '../../data/index.js'
+import { RARITY, GRADE_LABELS, petStats } from '../../data/index.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
-import { AFFIXES, slotsFor, rollCost, rollAffix, statBonusPct, affixMeta } from '../../data/potential.js'
+import { slotsFor, statBonusPct, affixMeta } from '../../data/potential.js'
 import { residenceBattleSlots } from '../../data/residence.js'
+import { gradeUpCost, canUpgrade, MAX_GRADE } from '../../utils/petGrade.js'
 
-const props = defineProps({ instId: { type: String, default: null } })
+const props = defineProps({ petId: { type: String, default: null } })
 defineEmits(['close'])
 
 const auth = useAuthStore()
 const { toast } = useToast()
-const { confirm } = useConfirm()
 const busy = ref(false)
 
 const pets = computed(() => auth.userData?.pets || [])
 
 // ── Active team ──
 const battleSlots = computed(() => residenceBattleSlots(auth.userData?.residence?.level || 1))
-// only count active pets that still exist — a consumed pet (evolve/potential
-// fodder) can leave a ghost instId in activePets and inflate the count.
+// only count active pets that are still owned — a species removed from the
+// collection can leave a ghost id in activePets and inflate the count.
 const activeList = computed(() => {
-  const owned = new Set(pets.value.map(p => p.instId))
-  return (auth.userData?.activePets || [])
-    .map(x => (typeof x === 'string' ? x : x?.instId))
-    .filter(id => id && owned.has(id))
+  const owned = new Set(pets.value.map(p => p.id))
+  return (auth.userData?.activePets || []).filter(id => id && owned.has(id))
 })
-const isActive = computed(() => pet.value && activeList.value.includes(pet.value.instId))
+const isActive = computed(() => pet.value && activeList.value.includes(pet.value.id))
 async function toggleActive() {
   if (busy.value || !pet.value) return
   const cur = activeList.value
   let next
-  if (isActive.value) next = cur.filter(id => id !== pet.value.instId)
+  if (isActive.value) next = cur.filter(id => id !== pet.value.id)
   else {
     if (cur.length >= battleSlots.value) { toast(`ทีม Active เต็ม (${battleSlots.value}) — เอาตัวอื่นออกก่อน`, 'info'); return }
-    next = [...cur, pet.value.instId]
+    next = [...cur, pet.value.id]
   }
   busy.value = true
   const ok = await auth.patchUser({ activePets: next })
   if (!ok) toast('ตั้งทีมไม่สำเร็จ', 'error')
   busy.value = false
 }
-const pet = computed(() => pets.value.find(p => p.instId === props.instId) || null)
+const pet = computed(() => pets.value.find(p => p.id === props.petId) || null)
 
 const rc = computed(() => RARITY[pet.value?.rarity]?.color || '#94a3b8')
 const rarityLabel = computed(() => RARITY[pet.value?.rarity]?.label || pet.value?.rarity)
-const count = computed(() => pet.value ? pets.value.filter(p => p.id === pet.value.id).length : 0)
-const dupes = computed(() => pet.value ? pets.value.filter(p => p.id === pet.value.id && p.instId !== pet.value.instId).length : 0)
-const evoNeed = computed(() => (pet.value && pet.value.grade < 12) ? GRADE_COPIES[(pet.value.grade || 0) + 1] : 0)
 const slots = computed(() => slotsFor(pet.value?.rarity))
-const cost = computed(() => rollCost(pet.value?.rarity))
+
+const upCost = computed(() => pet.value ? gradeUpCost(pet.value) : null)
+const canUp = computed(() => pet.value && canUpgrade(pet.value, auth.userData?.coins || 0))
 
 const base = computed(() => (pet.value ? petStats(pet.value) : { atk: 0, hp: 0 }))
 const pot = computed(() => pet.value?.potential || [])
@@ -129,10 +121,10 @@ const lifesteal = computed(() => statBonusPct(pot.value, 'lifesteal'))
 const dodge = computed(() => statBonusPct(pot.value, 'dodge'))
 
 async function commit(newPets, coinDelta = 0) {
-  // reconcile the active team: drop any pet that no longer exists so a
-  // consumed-as-fodder pet can't linger as a ghost in activePets.
-  const owned = new Set(newPets.map(p => p.instId))
-  const curActive = (auth.userData?.activePets || []).map(x => (typeof x === 'string' ? x : x?.instId)).filter(Boolean)
+  // reconcile the active team: drop any species no longer owned so a
+  // consumed pet can't linger as a ghost in activePets.
+  const owned = new Set(newPets.map(p => p.id))
+  const curActive = (auth.userData?.activePets || []).filter(Boolean)
   const nextActive = curActive.filter(id => owned.has(id))
   const activeChanged = nextActive.length !== curActive.length
 
@@ -149,67 +141,14 @@ async function commit(newPets, coinDelta = 0) {
 }
 
 async function evolve() {
-  if (busy.value || !pet.value) return
+  if (busy.value || !pet.value || !upCost.value) return
   const p = pet.value
-  const next = (p.grade || 0) + 1
-  if (next > 12) return
-  const need = GRADE_COPIES[next]
-  const fodder = pets.value.filter(x => x.id === p.id && x.instId !== p.instId)
-    .sort((a, b) => (a.grade || 0) - (b.grade || 0)).slice(0, need)
-  if (fodder.length < need) { toast(`ต้องการตัวซ้ำอีก ${need - fodder.length}`, 'info'); return }
-  const drop = new Set(fodder.map(x => x.instId))
-  const newPets = pets.value.filter(x => !drop.has(x.instId)).map(x => x.instId === p.instId ? { ...x, grade: next } : x)
+  if (!canUp.value) { toast('copies หรือเหรียญไม่พอ', 'info'); return }
+  const newPets = pets.value.map(x => x.id === p.id
+    ? { ...x, grade: (x.grade || 0) + 1, copies: (x.copies || 0) - upCost.value.copies } : x)
   busy.value = true
-  try { await commit(newPets); toast(`วิวัฒน์ → เกรด ${GRADE_LABELS[next]}!`, 'success') }
+  try { await commit(newPets, -upCost.value.coins); toast(`วิวัฒน์ → เกรด ${GRADE_LABELS[(p.grade || 0) + 1]}!`, 'success') }
   catch (e) { console.error('[evolve]', e); toast('วิวัฒน์ไม่สำเร็จ', 'error') }
-  finally { busy.value = false }
-}
-
-// pick the lowest-value same-rarity fodder (not this pet)
-function pickFodder() {
-  return pets.value.filter(x => x.rarity === pet.value.rarity && x.instId !== pet.value.instId)
-    .sort((a, b) => (a.grade || 0) - (b.grade || 0) || ((a.potential?.length || 0) - (b.potential?.length || 0)))[0]
-}
-
-async function rollNew() {
-  if (busy.value || !pet.value) return
-  const p = pet.value
-  if ((p.potential || []).length >= slots.value) return
-  if ((auth.userData?.coins || 0) < cost.value) { toast(`เหรียญไม่พอ (${cost.value.toLocaleString()})`, 'error'); return }
-  const fodder = pickFodder()
-  if (!fodder) { toast(`ต้องมีเพ็ทเรท${rarityLabel.value}อีกตัวไว้สังเวย`, 'info'); return }
-  const affix = rollAffix((p.potential || []).map(a => a.stat))
-  if (!affix) return
-  const newPot = [...(p.potential || []), affix]
-  const newPets = pets.value.filter(x => x.instId !== fodder.instId)
-    .map(x => x.instId === p.instId ? { ...x, potential: newPot } : x)
-  busy.value = true
-  try { await commit(newPets, -cost.value); toast(`ได้ ${affixMeta(affix.stat).label} +${affix.value}%`, 'success') }
-  catch (e) { console.error('[roll]', e); toast('สุ่มไม่สำเร็จ', 'error') }
-  finally { busy.value = false }
-}
-
-async function reroll(idx) {
-  if (busy.value || !pet.value) return
-  const p = pet.value
-  if ((auth.userData?.coins || 0) < cost.value) { toast(`เหรียญไม่พอ (${cost.value.toLocaleString()})`, 'error'); return }
-  const fodder = pickFodder()
-  if (!fodder) { toast(`ต้องมีเพ็ทเรท${rarityLabel.value}อีกตัวไว้สังเวย`, 'info'); return }
-  const others = (p.potential || []).filter((_, i) => i !== idx).map(a => a.stat)
-  const cand = rollAffix(others)
-  if (!cand) return
-  const cur = p.potential[idx]
-  const ok = await confirm(
-    `ของเดิม: ${affixMeta(cur.stat).label} +${cur.value}%\n` +
-    `สุ่มได้: ${affixMeta(cand.stat).label} +${cand.value}%\n\nใช้ตัวใหม่?`
-  )
-  // fodder + coins are spent on the roll regardless; keep or replace the slot
-  const newPot = (p.potential || []).map((a, i) => (i === idx && ok) ? cand : a)
-  const newPets = pets.value.filter(x => x.instId !== fodder.instId)
-    .map(x => x.instId === p.instId ? { ...x, potential: newPot } : x)
-  busy.value = true
-  try { await commit(newPets, -cost.value); toast(ok ? 'เปลี่ยนศักยภาพแล้ว' : 'เก็บของเดิมไว้', 'info') }
-  catch (e) { console.error('[reroll]', e); toast('รีโรลไม่สำเร็จ', 'error') }
   finally { busy.value = false }
 }
 </script>
@@ -247,5 +186,4 @@ async function reroll(idx) {
 .pd-slot.filled { border-style: solid; border-color: var(--ink); background: var(--primary-light); }
 .pd-slot-aff { font-size: .78rem; font-weight: 800; color: var(--primary); }
 .pd-slot-empty { font-size: .7rem; color: rgba(0,0,0,.35); }
-.pd-reroll { border: none; background: rgba(0,0,0,.06); border-radius: 7px; padding: 4px 8px; cursor: pointer; font-size: .8rem; }
 </style>
