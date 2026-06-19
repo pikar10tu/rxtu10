@@ -12,6 +12,10 @@
         <span v-if="discount" class="shop-disc">· ส่วนลดร้าน −{{ discount }}%</span>
       </div>
 
+      <button v-if="tickets > 0" class="ticket-btn" :disabled="buying" @click="useTicket">
+        <Emoji char="🎟️" /> ใช้ตั๋วกาชาฟรี (×{{ tickets }})
+      </button>
+
       <div class="egg-list">
         <div v-for="egg in EGG_TYPES" :key="egg.id" class="egg-card">
           <div class="egg-emoji"><Emoji :char="egg.emoji" /></div>
@@ -53,7 +57,7 @@ import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
-import { EGG_TYPES, rollPetFromEgg } from '../data/shop.js'
+import { EGG_TYPES, rollPetFromEgg, DAILY_QUEST_TICKET_EGG } from '../data/shop.js'
 import { RARITY } from '../data/index.js'
 import { residencePetStorage, residenceShopDiscount } from '../data/residence.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
@@ -66,6 +70,7 @@ const pets = computed(() => authStore.userData?.pets || [])
 const level = computed(() => authStore.userData?.residence?.level || 1)
 const storageCap = computed(() => residencePetStorage(level.value))
 const discount = computed(() => residenceShopDiscount(level.value))
+const tickets = computed(() => authStore.userData?.freeGachaTickets || 0)
 
 const reveal = ref(null)
 const buying = ref(false)
@@ -106,6 +111,33 @@ async function buy(egg) {
     buying.value = false
   }
 }
+
+async function useTicket() {
+  if (buying.value || tickets.value < 1) return
+  if (pets.value.length >= storageCap.value) {
+    toast(`คลังเพ็ทเต็ม (${storageCap.value}) — ขาย/ย้ายก่อน หรืออัปที่อยู่อาศัย`, 'info'); return
+  }
+  buying.value = true
+  const pet = rollPetFromEgg(DAILY_QUEST_TICKET_EGG)
+  const today = new Date().toISOString().slice(0, 10)
+  const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
+  authStore.blockSnapshot()
+  authStore.setUserDataOptimistic({
+    pets: [...pets.value, pet],
+    freeGachaTickets: tickets.value - 1,
+    dailyQuest: dq,
+  })
+  try {
+    await updateDoc(doc(db, 'users', authStore.currentUser.uid), {
+      pets: arrayUnion(pet),
+      freeGachaTickets: increment(-1),
+      dailyQuest: dq,
+    })
+    reveal.value = pet
+  } catch (e) {
+    console.error('[ticket roll]', e); toast('ใช้ตั๋วไม่สำเร็จ', 'error')
+  } finally { buying.value = false }
+}
 </script>
 
 <style scoped>
@@ -113,6 +145,9 @@ async function buy(egg) {
 .shop-coins { font-size: 1rem; font-weight: 800; color: #b45309; }
 .shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
 .shop-disc { color: #059669; font-weight: 700; }
+.ticket-btn { width: 100%; margin-bottom: 12px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; color: var(--ink); background: var(--gold); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.ticket-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.ticket-btn:disabled { opacity: .5; cursor: default; }
 .egg-list { display: flex; flex-direction: column; gap: 10px; }
 .egg-card { display: flex; align-items: center; gap: 12px; background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 12px; box-shadow: var(--pop); }
 .egg-emoji { font-size: 2.2rem; flex-shrink: 0; }

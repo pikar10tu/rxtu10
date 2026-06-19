@@ -58,3 +58,6 @@ export function rollPetFromEgg(eggId) {
     bornAt: Date.now(),
   }
 }
+
+// tier ที่ตั๋วกาชาฟรี (จาก daily quest) สุ่ม — ปรับได้ตอน rework กาชา
+export const DAILY_QUEST_TICKET_EGG = 'common'
