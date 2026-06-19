@@ -12,9 +12,9 @@ export const RARITY = {
 };
 
 // ── GRADE SYSTEM ──
-export const GRADE_LABELS = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-export const GRADE_COPIES = [0,1,1,1,1,2,2,2,2,3,3,3,3];
-export const GRADE_MULTI  = [1.0,2.5,4.0,5.5,7.0,10.0,13.0,16.0,19.0,23.5,28.0,32.5,37.0];
+export const GRADE_LABELS = ['','I','II','III','IV','V'];
+export const GRADE_COPIES = [0,1,2,3,4,5];        // copies ต่อการอัพไปเกรด index (อัพไป N = N copies)
+export const GRADE_MULTI  = [1.0, 1.5, 2.1, 2.8, 3.6, 4.5];   // legacy stat mult (draft pin)
 
 // ── ELEMENT SYSTEM ──
 export const ELEMENTS = {
@@ -32,64 +32,51 @@ export const BASE_STATS = {
     epic:      { atk:20, hp:100 },
     legendary: { atk:25, hp:125 },
 };
-export const STAT_MULTI = [1.0, 1.3, 1.7, 2.2, 2.8, 3.5, 4.3, 5.2, 6.2, 7.3, 8.5, 9.8, 11.2];
+export const STAT_MULTI = [1.0, 1.5, 2.1, 2.8, 3.6, 4.5];   // (draft pin)
 
 export function petStats(p){
     const base = BASE_STATS[p.rarity] || BASE_STATS.common;
-    const g = p.grade || 0;
+    const g = Math.min(STAT_MULTI.length - 1, Math.max(0, p.grade || 0));
     const m = STAT_MULTI[g];
     return { atk: Math.round(base.atk * m), hp: Math.round(base.hp * m) };
 }
 
 // ── PETS POOL ──
 export const PETS = [
-    // COMMON
-    { id:"cat",       emoji:"🐱", name:"แมวเหมียว",     rarity:"common",    element:"paper",    flavor:"นอนทับ lab sheet ที่พรุ่งนี้ต้องส่ง แต่ไม่มีใครกล้าปลุก",        rate:{normal:0.148,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"rabbit",    emoji:"🐰", name:"กระต่าย",    rarity:"common",    element:"scissors", flavor:"ออกฤทธิ์เร็วกว่า IV push ซะอีก",              rate:{normal:0.111,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"hamster",   emoji:"🐹", name:"แฮมสเตอร์",  rarity:"common",    element:"fist",     flavor:"ตุนแคปซูลเต็มแก้มเหมือนตุนชีตก่อนสอบ แต่ไม่เคยเปิดอ่าน",                        rate:{normal:0.089,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"frog",      emoji:"🐸", name:"กบน้อย",     rarity:"common",    element:"paper",    flavor:"นั่งหลังห้องแลป เปิดกล้องเรียนออนไลน์ไว้แต่หลับ",                  rate:{normal:0.074,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"penguin",   emoji:"🐧", name:"เพนกวิน",    rarity:"common",    element:"scissors", flavor:"เฝ้าตู้เย็นวัคซีน 2-8°C อุณหภูมิเดียวที่มันรู้สึกอบอุ่น",                        rate:{normal:0.052,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"hedgehog",  emoji:"🦔", name:"เม่นจิ๋ว",        rarity:"common",    element:"fist",     flavor:"หนามแหลมเหมือนเข็ม 18G แต่ใจอ่อนยิ่งกว่าวุ้น",              rate:{normal:0.03,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"mouse",     emoji:"🐭", name:"หนูน้อย",    rarity:"common",    element:"scissors", flavor:"อาสาเป็นหนูทดลอง ขอแค่ได้ใส่ชื่อเป็นผู้ร่วมวิจัย",                    rate:{normal:0.011,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"chick",     emoji:"🐣", name:"ลูกไก่",     rarity:"common",    element:"fist",     flavor:"ปี 1 ที่เพิ่งรู้ว่าเภสัชเรียน 6 ปี",                    rate:{normal:0.018,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"axolotl",   emoji:"🦎", name:"แอกโซลอเติล",rarity:"common",    element:"paper",    flavor:"regenerate อวัยวะได้ แต่ regenerate เกรดที่ตกไม่ได้",        rate:{normal:0.03,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"seal",      emoji:"🦭", name:"แมวน้ำ",      rarity:"common",    element:"fist",     flavor:"ตบมือให้ตัวเองทุกครั้งที่ตอบ ทั้งที่ตอบผิด",            rate:{normal:0.025,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"snail",     emoji:"🐌", name:"หอยทาก",      rarity:"common",    element:"paper",    flavor:"ออกฤทธิ์ช้าแบบ sustained release ส่งงานก็ช้าแบบ sustained release",    rate:{normal:0.02,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"ladybug",   emoji:"🐞", name:"เต่าทอง",     rarity:"common",    element:"scissors", flavor:"จุดแดงบนหลัง = ADR ที่อาจารย์ชอบออกสอบ",        rate:{normal:0.018,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"duck",      emoji:"🦆", name:"เป็ดน้อย",    rarity:"common",    element:"scissors", flavor:"ว่ายใน D5W ทุกเช้า กันตัวเอง dehydrate ตอนอ่านหนังสือ",           rate:{normal:0.015,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"koala",     emoji:"🐨", name:"โคอาล่า",     rarity:"common",    element:"fist",     flavor:"ดมยูคาลิปตัสแล้วหลับ 22 ชม./วัน สายเดียวกับเราตอนปิดเทอม",     rate:{normal:0.012,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    { id:"capybara",  emoji:"🦫", name:"คาปิบาร่า",   rarity:"common",    element:"paper",    flavor:"ใจเย็นที่สุดในรุ่น เพราะปลงแล้วว่าเกรดออกมายังไงก็รับได้",  rate:{normal:0.01,gold:0.0,rainbow:0.0}, hatchMins:1 },
-    // RARE
-    { id:"fox",       emoji:"🦊", name:"จิ้งจอก",    rarity:"rare",      element:"scissors", flavor:"ได้กลิ่น drug interaction ก่อน Micromedex โหลดเสร็จ",                      rate:{normal:0.059,gold:0.0746,rainbow:0.0}, hatchMins:1 },
-    { id:"owl",       emoji:"🦉", name:"นกฮูก",      rarity:"rare",      element:"paper",    flavor:"อ่านหนังสือทั้งคืน ตื่นมาจำได้แค่หน้าปก",                    rate:{normal:0.044,gold:0.0689,rainbow:0.0}, hatchMins:1 },
-    { id:"panda",     emoji:"🐼", name:"แพนด้า",     rarity:"rare",      element:"paper",    flavor:"ตาดำคล้ำเพราะอดนอนติว ไม่ใช่ลายประจำสายพันธุ์",                              rate:{normal:0.037,gold:0.0631,rainbow:0.0}, hatchMins:1 },
-    { id:"butterfly", emoji:"🦋", name:"ผีเสื้อ",    rarity:"rare",      element:"scissors", flavor:"เก็บเกสรสมุนไพรเก่ง สอบ Pharmacognosy ได้ A คนเดียวในรุ่น",                     rate:{normal:0.03,gold:0.056,rainbow:0.0}, hatchMins:1 },
-    { id:"wolf",      emoji:"🐺", name:"หมาป่า",     rarity:"rare",      element:"fist",     flavor:"หอนเรียกก๊วนมาติว สุดท้ายนั่งเล่นเกมกันหมด",               rate:{normal:0.022,gold:0.0502,rainbow:0.0}, hatchMins:1 },
-    { id:"peacock",   emoji:"🦚", name:"นกยูง",      rarity:"rare",      element:"fist",     flavor:"รำแพนหางโชว์ Counselling คนไข้ ปึ้ง ปึ้ง ปึ้ง!",                 rate:{normal:0.015,gold:0.0316,rainbow:0.0}, hatchMins:1 },
-    { id:"octopus",   emoji:"🐙", name:"ปลาหมึก",    rarity:"rare",      element:"paper",    flavor:"ใช้ 8 หนวดหยิบยา จัดยา พิมพ์ฉลาก รับโทรศัพท์ห้องยาพร้อมกัน",   rate:{normal:0.035,gold:0.043,rainbow:0.0}, hatchMins:1 },
-    { id:"flamingo",  emoji:"🦩", name:"ฟลามิงโก้",  rarity:"rare",      element:"scissors", flavor:"ยืนขาเดียวรอคิวรับยานานจนกลายเป็นท่าโยคะ มิงโก้ มิงโก้",              rate:{normal:0.028,gold:0.0373,rainbow:0.0}, hatchMins:1 },
-    { id:"deer",      emoji:"🦌", name:"กวาง",        rarity:"rare",      element:"scissors", flavor:"เขาซับซ้อนเหมือนโครงสร้าง steroid ที่ต้องท่องตอนสอบ",   rate:{normal:0.022,gold:0.0344,rainbow:0.0}, hatchMins:1 },
-    { id:"shark",     emoji:"🦈", name:"ฉลาม",        rarity:"rare",      element:"fist",     flavor:"ว่ายไม่หยุดเหมือน deadline ที่ไม่เคยหยุดวิ่งเข้ามา",    rate:{normal:0.018,gold:0.0316,rainbow:0.0}, hatchMins:1 },
-    { id:"parrot",    emoji:"🦜", name:"นกแก้ว",      rarity:"rare",      element:"paper",    flavor:"แบรนด์สบู่ในตำนาน ท่องสูตรยาได้เป๊ะ แต่ไม่เข้าใจสักคำ", rate:{normal:0.015,gold:0.0258,rainbow:0.0}, hatchMins:1 },
-    { id:"turtle",    emoji:"🐢", name:"เต่าทะเล",   rarity:"rare",      element:"fist",     flavor:"อายุยืนเพราะ compliance 100% กินยาตรงเวลายิ่งกว่ากินข้าว",             rate:{normal:0.012,gold:0.0215,rainbow:0.0}, hatchMins:1 },
-    // EPIC
-    { id:"dragon",    emoji:"🐲", name:"มังกรน้อย",  rarity:"epic",      element:"fist",     flavor:"พ่นไฟ purify impurity ใน API แต่เผา reactor ไปด้วย สะดวกแต่แพง",                    rate:{normal:0.0,gold:0.0861,rainbow:0.1091}, hatchMins:1 },
-    { id:"unicorn",   emoji:"🦄", name:"ยูนิคอร์น",  rarity:"epic",      element:"paper",    flavor:"เขาเป็น magic wand บดยาในโกร่งเนียนกริ๊บ ไม่ต้องเสี่ยงเอ็นข้อมืออักเสบ",                 rate:{normal:0.0,gold:0.0732,rainbow:0.0955}, hatchMins:1 },
-    { id:"phoenix",   emoji:"🦅", name:"ฟีนิกซ์",   rarity:"epic",      element:"scissors", flavor:"น้ำตารักษาได้ทุกโรค ยกเว้นใจที่สลายตอนเห็นเกรด",              rate:{normal:0.0,gold:0.0603,rainbow:0.0894}, hatchMins:1 },
-    { id:"spirit",    emoji:"🧿", name:"สปิริต",     rarity:"epic",      element:"paper",    flavor:"มองไม่เห็นเหมือน first-pass metabolism แต่ส่งผลกับทุกอย่าง",   rate:{normal:0.0,gold:0.0473,rainbow:0.0818}, hatchMins:1 },
-    { id:"kitsune",   emoji:"🦊", name:"คิทสึเนะ",   rarity:"epic",      element:"scissors", flavor:"จิ้งจอก 9 หาง ซ่อนสูตรยาไว้หางละหมวด หางที่ 9 คือ 'จำไม่ได้แล้ว'",       rate:{normal:0.0,gold:0.043,rainbow:0.0682}, hatchMins:1 },
-    { id:"thunderbird",emoji:"🌩️",name:"ธันเดอร์เบิร์ด",rarity:"epic",  element:"fist",     flavor:"นกจากแดนอีสาน เพราะ ธัน-เด้อ-เบิร์ด อะไร๊",   rate:{normal:0.0,gold:0.0359,rainbow:0.0621}, hatchMins:1 },
-    { id:"leviathan", emoji:"🌊", name:"เลวีอาธาน",  rarity:"epic",      element:"paper",    flavor:"พายุระดับ cat-5 แต่ใจอ่อนเวลาน้องปี 1 มาถามทางห้องแลป",     rate:{normal:0.0,gold:0.0301,rainbow:0.0545}, hatchMins:1 },
-    { id:"cerberus",  emoji:"🐕", name:"เซอร์เบอรัส", rarity:"epic",     element:"fist",     flavor:"หมา 3 หัวเฝ้า drug interaction ยา-อาหาร-สมุนไพร เห่าทุกครั้งที่เจอ grapefruit juice",    rate:{normal:0.0,gold:0.023,rainbow:0.0485}, hatchMins:1 },
-    { id:"tanuki",    emoji:"🦝", name:"ทานูกิ",      rarity:"epic",      element:"paper",    flavor:"พกโกร่งใบจิ๋ว แอบผสมสูตรลับ ขายดีในตลาดนัดเภสัช",       rate:{normal:0.0,gold:0.0172,rainbow:0.0424}, hatchMins:1 },
-    // LEGENDARY
-    { id:"celestial", emoji:"🌟", name:"ดาวเหนือ", rarity:"legendary", element:"paper",    flavor:"ในคืนมืดมิดก่อนสอบ comp จะเป็นแสงนำทาง (ไปร้านกาแฟ 24 ชม.)",   rate:{normal:0.0,gold:0.0129,rainbow:0.0894}, hatchMins:60 },
-    { id:"bahamut",   emoji:"🐉", name:"บาฮามุท",    rarity:"legendary", element:"scissors", flavor:"ราชันมังกรบรรพกาล กางปีกปัดเป่าโรคร้าย และปัดเป่าราคายาที่ requote ไม่จบ",    rate:{normal:0.0,gold:0.0129,rainbow:0.0758}, hatchMins:60 },
-    { id:"kirin",     emoji:"🦁", name:"คิริน",       rarity:"legendary", element:"fist",     flavor:"สัตว์เทวะผู้นำสันติ รอยเท้าที่ก้าวผ่านชะล้างความเจ็บปวด (และคราบยาหก)", rate:{normal:0.0,gold:0.0072,rainbow:0.0606}, hatchMins:60 },
-    { id:"ouroboros", emoji:"🐍", name:"อูโรโบรอส",  rarity:"legendary", element:"scissors", flavor:"งูกลืนหางตัวเอง = วัฏจักรการเรียนที่ไม่จบสิ้น เรียน–สอบ–ลืม–เรียนใหม่", rate:{normal:0.0,gold:0.0057,rainbow:0.05}, hatchMins:60 },
-    { id:"simurgh",   emoji:"🦅", name:"ซีมูร์ก",    rarity:"legendary", element:"paper",    flavor:"ภูมิปัญญาโบราณ รากฐานของยาแผนปัจจุบัน และคำตอบข้อที่เราเดามั่ว", rate:{normal:0.0,gold:0.0043,rainbow:0.0409}, hatchMins:60 },
-    { id:"qilin",     emoji:"🐘", name:"บากุ",     rarity:"legendary", element:"fist",     flavor:"ปีศาจกินฝันร้าย รวมถึงฝันว่าสอบตก (กินเก่งจนอ้วน)",  rate:{normal:0.0,gold:0.0029,rainbow:0.0318}, hatchMins:60 },
+  // ── LEGENDARY ──
+  { id:"bahamut",   emoji:"🐉", name:"บาฮามุท",  rarity:"legendary", element:"fist",     flavor:"ราชันมังกรบรรพกาล กางปีกปัดเป่าโรคร้าย", hatchMins:60 },
+  { id:"kirin",     emoji:"👹", name:"โอนิ",      rarity:"legendary", element:"fist",     flavor:"อสูรเขาเดียวจากตำนาน พลังทำลายล้างมหาศาล", hatchMins:60 },
+  { id:"trex",      emoji:"🦖", name:"ทีเร็กซ์",  rarity:"legendary", element:"fist",     flavor:"ราชานักล่าแห่งยุคดึกดำบรรพ์ กัดทีเดียวจบ", hatchMins:60 },
+  { id:"ouroboros", emoji:"🐍", name:"อูโรโบรอส", rarity:"legendary", element:"scissors", flavor:"งูกลืนหางตัวเอง วัฏจักรไม่มีวันสิ้นสุด", hatchMins:60 },
+  { id:"simurgh",   emoji:"🦅", name:"กริฟฟิน",   rarity:"legendary", element:"scissors", flavor:"ราชาแห่งเวหา ปีกครึ่งอินทรีครึ่งสิงห์", hatchMins:60 },
+  { id:"phoenix",   emoji:"🐦‍🔥", name:"ฟีนิกซ์", rarity:"legendary", element:"scissors", flavor:"เกิดใหม่จากเถ้าถ่าน ไม่มีวันดับสูญ", hatchMins:60 },
+  { id:"whale",     emoji:"🐳", name:"คุณวาฬ",    rarity:"legendary", element:"paper",    flavor:"เจ้าสมุทรผู้ใจดี โอบอุ้มทั้งทีมไว้ในอ้อมอก", hatchMins:60 },
+  { id:"qilin",     emoji:"🐘", name:"บากุ",      rarity:"legendary", element:"paper",    flavor:"ปีศาจกินฝันร้าย รวมถึงฝันว่าสอบตก", hatchMins:60 },
+  { id:"mammoth",   emoji:"🦣", name:"แมมมอธ",    rarity:"legendary", element:"paper",    flavor:"ยักษ์ขนยาวแห่งยุคน้ำแข็ง เกราะหนาปราการ", hatchMins:60 },
+  // ── EPIC ──
+  { id:"dragon",    emoji:"🐲", name:"มังกร",     rarity:"epic", element:"fist",     flavor:"พ่นไฟ purify impurity แต่เผา reactor ไปด้วย", hatchMins:1 },
+  { id:"cerberus",  emoji:"🐕", name:"เซอร์เบอรัส", rarity:"epic", element:"fist",   flavor:"หมา 3 หัวเฝ้า drug interaction เห่าทุกครั้งที่เจอ grapefruit", hatchMins:1 },
+  { id:"unicorn",   emoji:"🦄", name:"ยูนิคอร์น", rarity:"epic", element:"scissors", flavor:"เขาเป็น magic wand บดยาในโกร่งเนียนกริ๊บ", hatchMins:1 },
+  { id:"fairy",     emoji:"🧚", name:"ภูต",       rarity:"epic", element:"scissors", flavor:"ภูตน้อยเจ้าเวทมนตร์ โปรยละอองเสริมพลังทั้งทีม", hatchMins:1 },
+  { id:"panda",     emoji:"🐼", name:"แพนด้า",    rarity:"epic", element:"paper",    flavor:"ตาดำคล้ำเพราะอดนอนติว ไม่ใช่ลายประจำสายพันธุ์", hatchMins:1 },
+  { id:"genie",     emoji:"🧞", name:"จินนี่",    rarity:"epic", element:"paper",    flavor:"จินนี่จากตะเกียง ขอพรได้ แต่ใช้ไปกับการบ้านหมดแล้ว", hatchMins:1 },
+  // ── RARE ──
+  { id:"wolf",      emoji:"🐺", name:"หมาป่า",    rarity:"rare", element:"fist",     flavor:"หอนเรียกก๊วนมาติว สุดท้ายนั่งเล่นเกมกันหมด", hatchMins:1 },
+  { id:"shark",     emoji:"🦈", name:"ฉลาม",      rarity:"rare", element:"fist",     flavor:"ว่ายไม่หยุดเหมือน deadline ที่ไม่เคยหยุดวิ่งเข้ามา", hatchMins:1 },
+  { id:"fox",       emoji:"🦊", name:"จิ้งจอก",   rarity:"rare", element:"scissors", flavor:"ได้กลิ่น drug interaction ก่อน Micromedex โหลดเสร็จ", hatchMins:1 },
+  { id:"rabbit",    emoji:"🐰", name:"กระต่าย",   rarity:"rare", element:"scissors", flavor:"ออกฤทธิ์เร็วกว่า IV push ซะอีก", hatchMins:1 },
+  { id:"owl",       emoji:"🦉", name:"นกฮูก",     rarity:"rare", element:"paper",    flavor:"อ่านหนังสือทั้งคืน ตื่นมาจำได้แค่หน้าปก", hatchMins:1 },
+  { id:"seal",      emoji:"🦭", name:"แมวน้ำ",    rarity:"rare", element:"paper",    flavor:"ตบมือให้ตัวเองทุกครั้งที่ตอบ ทั้งที่ตอบผิด", hatchMins:1 },
+  // ── COMMON ──
+  { id:"hedgehog",  emoji:"🦔", name:"เม่น",      rarity:"common", element:"fist",     flavor:"หนามแหลมเหมือนเข็ม 18G แต่ใจอ่อนยิ่งกว่าวุ้น", hatchMins:1 },
+  { id:"hamster",   emoji:"🐹", name:"แฮมสเตอร์", rarity:"common", element:"fist",     flavor:"ตุนแคปซูลเต็มแก้มเหมือนตุนชีตก่อนสอบ", hatchMins:1 },
+  { id:"mouse",     emoji:"🐭", name:"หนู",       rarity:"common", element:"scissors", flavor:"อาสาเป็นหนูทดลอง ขอแค่ได้ใส่ชื่อเป็นผู้ร่วมวิจัย", hatchMins:1 },
+  { id:"cat",       emoji:"🐱", name:"แมว",       rarity:"common", element:"scissors", flavor:"นอนทับ lab sheet ที่พรุ่งนี้ต้องส่ง แต่ไม่มีใครกล้าปลุก", hatchMins:1 },
+  { id:"butterfly", emoji:"🦋", name:"ผีเสื้อ",   rarity:"common", element:"paper",    flavor:"เก็บเกสรสมุนไพรเก่ง สอบ Pharmacognosy ได้ A", hatchMins:1 },
+  { id:"turtle",    emoji:"🐢", name:"เต่า",      rarity:"common", element:"paper",    flavor:"อายุยืนเพราะ compliance 100% กินยาตรงเวลา", hatchMins:1 },
 ];
+
+export const getPetDef = (id) => PETS.find(p => p.id === id) || null;
 
 export const HATCH_LABELS = { common:"1 นาที", rare:"1 นาที", epic:"1 นาที", legendary:"1 นาที", glow:"1 นาที" };
 export const EGG_TYPES = {

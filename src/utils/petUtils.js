@@ -18,8 +18,8 @@ export const RARITY_DAILY_BASE = {
   legendary: 45,
 }
 
-// grade multiplier, flattened so max grade ≈ 12× (was 37×). Index = grade 0..12.
-export const GRADE_MULTI_V2 = [1.0, 1.6, 2.3, 3.0, 3.8, 4.7, 5.6, 6.6, 7.7, 8.9, 10.1, 11.0, 12.0]
+// grade multiplier, flattened so max grade ≈ 12× (was 37×). Index = grade 0..5.
+export const GRADE_MULTI_V2 = [1.0, 1.7, 2.5, 3.4, 4.4, 5.5]   // income mult by grade 0-5 (draft pin)
 
 /** Daily coins a single stored pet produces. Deterministic from rarity+grade. */
 export function petDailyCoins(pet) {
