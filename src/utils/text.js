@@ -27,6 +27,8 @@ export function cleanText(str, max = 500) {
 // Length caps — single source of truth; mirror these in input maxlength attrs.
 export const LIMITS = {
   contact: 40,
+  nickname: 30,
+  guestReason: 200,
   news: 280,
   feedback: 1000,
   report: 1000,

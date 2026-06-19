@@ -25,6 +25,10 @@ export const provider = new GoogleAuthProvider()
 // ── ADMIN ──
 export const ADMIN_EMAIL = 'prawich.aum@dome.tu.ac.th'
 
+// ── CONSENT ──
+// bump เมื่อแก้ข้อความ consent → บังคับผู้ใช้ยินยอมใหม่อัตโนมัติ
+export const CONSENT_VERSION = '2026-06-20'
+
 // ── SYSTEM CONSTANTS ──
 export const SNAPSHOT_DELAY   = 1500
 export const PLE_CC_DATE      = '2026-12-11T00:00:00+07:00'

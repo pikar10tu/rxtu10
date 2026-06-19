@@ -53,6 +53,12 @@ export const USER_DEFAULTS = {
   freeGachaTickets: 0,
   incomeBuffUntil: null,
   petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
+  // ── onboarding / identity (first-run) ──
+  consent: { accepted: false, version: null, at: null },  // PDPA
+  onboarded: false,        // ผ่าน wizard ผูกตัวตนแล้ว
+  accountType: null,       // 'student' | 'guest'
+  guestReason: null,       // เหตุผลเข้าชม (เฉพาะ guest)
+  guestStatus: null,       // null | 'pending' | 'approved' | 'rejected'
 }
 
 export const STARTER_COINS = 2000
