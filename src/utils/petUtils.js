@@ -10,16 +10,16 @@
 //  These constants SUPERSEDE the legacy RARITY.dailyBase / GRADE_MULTI.
 // ════════════════════════════════════════════════════════════
 
-// daily coins per rarity at grade 0 (was 5 / 15 / 35 / 80)
+// daily coins per rarity at grade 0 (was 4 / 10 / 22 / 45)
 export const RARITY_DAILY_BASE = {
-  common: 4,
-  rare: 10,
-  epic: 22,
-  legendary: 45,
+  common: 6,
+  rare: 15,
+  epic: 35,
+  legendary: 70,
 }
 
-// grade multiplier, flattened so max grade ≈ 12× (was 37×). Index = grade 0..5.
-export const GRADE_MULTI_V2 = [1.0, 1.7, 2.5, 3.4, 4.4, 5.5]   // income mult by grade 0-5 (draft pin)
+// grade multiplier, max grade = 12× (was 5.5×). Index = grade 0..5.
+export const GRADE_MULTI_V2 = [1.0, 2.0, 3.5, 5.5, 8.0, 12.0]   // income mult by grade 0-5 (draft pin)
 
 /** Daily coins a single stored pet produces. Deterministic from rarity+grade. */
 export function petDailyCoins(pet) {
