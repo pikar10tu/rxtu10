@@ -53,6 +53,7 @@ export const USER_DEFAULTS = {
   dailyQuest: { date: null, quiz: 0, study: 0, gacha: 0, claimed: false },
   freeGachaTickets: 0,
   incomeBuffUntil: null,
+  petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
 }
 
 export const STARTER_COINS = 2000

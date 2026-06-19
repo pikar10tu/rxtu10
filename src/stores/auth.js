@@ -6,13 +6,15 @@ import {
 } from 'firebase/auth'
 import {
     doc, getDoc, setDoc, updateDoc, onSnapshot,
-    serverTimestamp,
+    serverTimestamp, increment,
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/config.js'
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
 import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
 import { useToast } from '../composables/useToast.js'
 import { useUsageStore } from './usage.js'
+import { migratePets } from '../utils/petMigration.js'
+import { PETS, getPetDef } from '../data/index.js'
 
 export const useAuthStore = defineStore('auth', () => {
     // ── State ──
@@ -113,6 +115,31 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // One-time migration: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
+    // guard ด้วยตัวแปร module-scope กันยิงซ้ำระหว่าง snapshot (รอ patchUser อยู่)
+    let _petMigrating = false
+    async function runPetMigrationIfNeeded() {
+        const u = userData.value
+        if (!u || u.petsMigratedV2 === true || _petMigrating) return
+        _petMigrating = true
+        try {
+            const ids = new Set(PETS.map(p => p.id))
+            const { pets, activePets, refundCoins } = migratePets(u.pets, u.activePets, ids, getPetDef)
+            await patchUser(
+                { pets, activePets, petsMigratedV2: true, coins: (u.coins || 0) + refundCoins },
+                { pets, activePets, petsMigratedV2: true, ...(refundCoins ? { coins: increment(refundCoins) } : {}) },
+            )
+            if (refundCoins) {
+                const { toast } = useToast()
+                toast(`อัปเดตคลังเพ็ทรุ่นใหม่ — คืนเหรียญ ${refundCoins.toLocaleString()}`, 'success')
+            }
+        } catch (e) {
+            console.error('[pet migration]', e)
+        } finally {
+            _petMigrating = false
+        }
+    }
+
     // ── Auth listener (call once in main.js) ──
     function init() {
         // จบ flow ของ signInWithRedirect เมื่อกลับมาที่หน้าเว็บ
@@ -132,6 +159,7 @@ export const useAuthStore = defineStore('auth', () => {
                 _unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => {
                     if (_blockSnapshot) return
                     userData.value = normalizeUserData(snap.data())
+                    runPetMigrationIfNeeded()
                 })
             } else {
                 if (_unsub) { _unsub(); _unsub = null }
