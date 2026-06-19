@@ -88,22 +88,27 @@ async function buy(egg) {
   if (buying.value) return
   const cost = price(egg)
   if (coins.value < cost) { toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}🪙`, 'error'); return }
-  if (pets.value.length >= storageCap.value) {
+  const pet = rollPetFromEgg(egg.id)
+  const existing = pets.value.find(p => p.id === pet.id)
+  if (!existing && pets.value.length >= storageCap.value) {
     toast(`คลังเพ็ทเต็ม (${storageCap.value}) — ขาย/ย้ายก่อน หรืออัปที่อยู่อาศัย`, 'info'); return
   }
   buying.value = true
-  const pet = rollPetFromEgg(egg.id)
+  const newPets = existing
+    ? pets.value.map(p => p.id === pet.id ? { ...p, copies: (p.copies || 0) + 1 } : p)
+    : [...pets.value, pet]
   const today = new Date().toISOString().slice(0, 10)
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
   authStore.blockSnapshot()
-  authStore.setUserDataOptimistic({ coins: coins.value - cost, pets: [...pets.value, pet], dailyQuest: dq })
+  authStore.setUserDataOptimistic({ coins: coins.value - cost, pets: newPets, dailyQuest: dq })
   try {
     await updateDoc(doc(db, 'users', authStore.currentUser.uid), {
       coins: increment(-cost),
-      pets: arrayUnion(pet),
+      pets: newPets,
       dailyQuest: dq,
     })
     reveal.value = pet
+    if (existing) toast(`ได้ตัวซ้ำ! ${pet.name} +1 copy`, 'info')
   } catch (e) {
     console.error('[shop buy]', e)
     toast('ซื้อไม่สำเร็จ', 'error')

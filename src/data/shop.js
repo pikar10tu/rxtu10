@@ -54,6 +54,7 @@ export function rollPetFromEgg(eggId) {
     grade: 0,
     refine: 0,
     potential: [],
+    copies: 0,
     instId: `${base.id}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     bornAt: Date.now(),
   }
