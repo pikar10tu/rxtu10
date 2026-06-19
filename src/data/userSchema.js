@@ -50,6 +50,9 @@ export const USER_DEFAULTS = {
   farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
   petsVault: [],                              // overflow pets (no income / not battle-eligible)
   study: { cards: {} },                       // SRS flashcard progress
+  dailyQuest: { date: null, quiz: 0, study: 0, gacha: 0, claimed: false },
+  freeGachaTickets: 0,
+  incomeBuffUntil: null,
 }
 
 export const STARTER_COINS = 2000
@@ -95,6 +98,7 @@ export function normalizeUserData(data) {
   d.residence = { ...USER_DEFAULTS.residence, ...(isObj(data.residence) ? data.residence : {}) }
   d.farm      = { ...USER_DEFAULTS.farm,      ...(isObj(data.farm)      ? data.farm      : {}) }
   d.study     = { ...USER_DEFAULTS.study,     ...(isObj(data.study)     ? data.study     : {}) }
+  d.dailyQuest = { ...USER_DEFAULTS.dailyQuest, ...(isObj(data.dailyQuest) ? data.dailyQuest : {}) }
   d.likedBy   = isObj(data.likedBy) ? data.likedBy : {}
 
   return d
