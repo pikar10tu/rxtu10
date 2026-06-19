@@ -53,7 +53,7 @@
 import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
-import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore'
+import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
@@ -119,26 +119,31 @@ async function buy(egg) {
 
 async function useTicket() {
   if (buying.value || tickets.value < 1) return
-  if (pets.value.length >= storageCap.value) {
+  const pet = rollPetFromEgg(DAILY_QUEST_TICKET_EGG)
+  const existing = pets.value.find(p => p.id === pet.id)
+  if (!existing && pets.value.length >= storageCap.value) {
     toast(`คลังเพ็ทเต็ม (${storageCap.value}) — ขาย/ย้ายก่อน หรืออัปที่อยู่อาศัย`, 'info'); return
   }
   buying.value = true
-  const pet = rollPetFromEgg(DAILY_QUEST_TICKET_EGG)
+  const newPets = existing
+    ? pets.value.map(p => p.id === pet.id ? { ...p, copies: (p.copies || 0) + 1 } : p)
+    : [...pets.value, pet]
   const today = new Date().toISOString().slice(0, 10)
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
   authStore.blockSnapshot()
   authStore.setUserDataOptimistic({
-    pets: [...pets.value, pet],
+    pets: newPets,
     freeGachaTickets: tickets.value - 1,
     dailyQuest: dq,
   })
   try {
     await updateDoc(doc(db, 'users', authStore.currentUser.uid), {
-      pets: arrayUnion(pet),
+      pets: newPets,
       freeGachaTickets: increment(-1),
       dailyQuest: dq,
     })
     reveal.value = pet
+    if (existing) toast(`ได้ตัวซ้ำ! ${pet.name} +1 copy`, 'info')
   } catch (e) {
     console.error('[ticket roll]', e); toast('ใช้ตั๋วไม่สำเร็จ', 'error')
   } finally { buying.value = false }
