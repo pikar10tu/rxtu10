@@ -148,6 +148,7 @@ import { cleanText, LIMITS } from '../utils/text.js'
 import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 import { aggregateExamStats } from '../utils/examStats.js'
+import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -382,16 +383,19 @@ async function finish() {
 
   // 2) update the user doc: coins + best score + daily cap
   const newHigh = Math.max(authStore.userData?.quizHigh || 0, correct.value)
+  const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'quiz', today, answered.value)
   await authStore.patchUser(
     {
       coins: (authStore.userData?.coins || 0) + grant,
       quizHigh: newHigh, quizCoinDate: today, quizCoinsToday: earnedToday + grant,
       quizDoneTotal: (authStore.userData?.quizDoneTotal || 0) + answered.value,
+      dailyQuest: dq,
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
       quizHigh: newHigh, quizCoinDate: today, quizCoinsToday: earnedToday + grant,
       quizDoneTotal: increment(answered.value),
+      dailyQuest: dq,
     },
   )
   if (grant) toast(`ได้ ${grant}🪙 จากการทำข้อสอบ`, 'success')

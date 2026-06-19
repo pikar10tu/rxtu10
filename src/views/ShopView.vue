@@ -56,6 +56,7 @@ import { useToast } from '../composables/useToast.js'
 import { EGG_TYPES, rollPetFromEgg } from '../data/shop.js'
 import { RARITY } from '../data/index.js'
 import { residencePetStorage, residenceShopDiscount } from '../data/residence.js'
+import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -87,12 +88,15 @@ async function buy(egg) {
   }
   buying.value = true
   const pet = rollPetFromEgg(egg.id)
+  const today = new Date().toISOString().slice(0, 10)
+  const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
   authStore.blockSnapshot()
-  authStore.setUserDataOptimistic({ coins: coins.value - cost, pets: [...pets.value, pet] })
+  authStore.setUserDataOptimistic({ coins: coins.value - cost, pets: [...pets.value, pet], dailyQuest: dq })
   try {
     await updateDoc(doc(db, 'users', authStore.currentUser.uid), {
       coins: increment(-cost),
       pets: arrayUnion(pet),
+      dailyQuest: dq,
     })
     reveal.value = pet
   } catch (e) {

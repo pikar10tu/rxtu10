@@ -124,6 +124,7 @@ import { useToast } from '../composables/useToast.js'
 import { DRUGS } from '../data/index.js'
 import { sm2Update, newSrsCard } from '../utils/sm2.js'
 import { cleanText, LIMITS } from '../utils/text.js'
+import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -266,6 +267,9 @@ async function commit(newCards, reward, today, dailyTotal, reviewedInc = 0) {
   if (reviewedInc > 0) {
     optimistic.studyReviewedTotal = (authStore.userData?.studyReviewedTotal || 0) + reviewedInc
     patch.studyReviewedTotal = increment(reviewedInc)
+    const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'study', today, reviewedInc)
+    optimistic.dailyQuest = dq
+    patch.dailyQuest = dq
   }
   const ok = await authStore.patchUser(optimistic, patch)
   if (!ok) toast('บันทึกการทบทวนไม่สำเร็จ', 'error')
