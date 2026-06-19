@@ -18,7 +18,7 @@
         <div class="pf-chips" style="margin-top:5px"><TagChips :member="member" /></div>
       </div>
 
-      <AchievementGrid :uid="member?.uid" />
+      <div class="pf-ach"><AchievementGrid :uid="member?.uid" /></div>
 
       <!-- Tier 2: stat strip (max 3, no coins) -->
       <div class="pf-stats">
@@ -158,6 +158,7 @@ const hasContact = computed(() => {
 .pf-chip.like:disabled { opacity: .7; cursor: default; }
 .pf-chip.like.on { background: rgba(255,255,255,.4); }
 .pf-chip.like:active:not(:disabled) { transform: scale(1.12); }
+.pf-ach { padding: 12px 16px 0; }
 .pf-stats { display: flex; }
 .pf-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }
 .pf-stat:last-child { border-right: none; }
