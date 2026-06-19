@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { residenceDailyIncome } from '../data/residence.js'
 import { totalPetDaily } from '../utils/petUtils.js'
+import { questIncomeMult } from '../utils/dailyQuest.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -22,13 +23,16 @@ export function useDaily() {
   const baseIncome = computed(() => residenceDailyIncome(level.value))
   const petIncome  = computed(() => totalPetDaily(auth.userData?.pets))
   const bonusPct   = computed(() => auth.incomeBonusPct)
-  const ratePerDay = computed(() => Math.round((baseIncome.value + petIncome.value) * (1 + bonusPct.value / 100)))
-  const ratePerHour = computed(() => Math.round(ratePerDay.value / 24))
 
   // live clock (ticks for the accrual bar/amount)
   const now = ref(Date.now())
   const timer = setInterval(() => { now.value = Date.now() }, 1000)
   onScopeDispose(() => clearInterval(timer))
+
+  const buffMult   = computed(() => questIncomeMult(auth.userData, now.value))
+  const buffActive = computed(() => buffMult.value > 1)
+  const ratePerDay = computed(() => Math.round((baseIncome.value + petIncome.value) * (1 + bonusPct.value / 100) * buffMult.value))
+  const ratePerHour = computed(() => Math.round(ratePerDay.value / 24))
 
   function lastMs() {
     const l = auth.userData?.lastDaily
@@ -56,7 +60,7 @@ export function useDaily() {
   }
 
   return {
-    baseIncome, petIncome, bonusPct, ratePerDay, ratePerHour,
+    baseIncome, petIncome, bonusPct, buffActive, buffMult, ratePerDay, ratePerHour,
     accrued, fillPct, isFull, remainingMs, claim,
   }
 }
