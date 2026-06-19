@@ -8,13 +8,16 @@ import {
     doc, getDoc, setDoc, updateDoc, onSnapshot,
     serverTimestamp, increment,
 } from 'firebase/firestore'
-import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY } from '../firebase/config.js'
+import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY, CONSENT_VERSION } from '../firebase/config.js'
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
 import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
 import { useToast } from '../composables/useToast.js'
 import { useUsageStore } from './usage.js'
 import { migratePets } from '../utils/petMigration.js'
 import { PETS, getPetDef } from '../data/index.js'
+import { matchRoster } from '../utils/onboarding.js'
+import { useMembersStore } from './members.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 
 export const useAuthStore = defineStore('auth', () => {
     // ── State ──
@@ -142,6 +145,55 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // ── Onboarding actions ──
+    // ยอมรับ consent → persist consent block (ค่าเดียวที่ต้องเขียนจริงสำหรับคนเก่า)
+    async function acceptConsent() {
+        return patchUser(
+            { consent: { accepted: true, version: CONSENT_VERSION, at: Date.now() } },
+            { consent: { accepted: true, version: CONSENT_VERSION, at: serverTimestamp() } },
+        )
+    }
+
+    // ผูกตัวตนนักศึกษา: match roster (client) → จอง claims/{id} (atomic) → เขียน identity
+    //  คืน reason 'notfound' (ไม่อยู่ roster) / 'taken' (รหัสถูกจองแล้ว)
+    async function linkStudent(studentId) {
+        if (!currentUser.value) return { ok: false, reason: 'taken' }
+        const members = useMembersStore()
+        if (!members.students.length) members.initStudents()
+        const m = matchRoster(studentId, members.students)
+        if (!m) return { ok: false, reason: 'notfound' }
+
+        const claimRef = doc(db, 'claims', m.id)
+        try {
+            const existing = await getDoc(claimRef)
+            if (existing.exists()) return { ok: false, reason: 'taken' }
+            // create-only (rules ปฏิเสธถ้ามีอยู่แล้ว = ตัวกันซ้ำจริง)
+            await setDoc(claimRef, { uid: currentUser.value.uid, at: serverTimestamp() })
+        } catch (e) {
+            console.error('[linkStudent claim]', e)
+            return { ok: false, reason: 'taken' }
+        }
+
+        const identity = {
+            studentId: m.id, nickname: m.nickname, realName: m.realName,
+            track: m.track, accountType: 'student', onboarded: true,
+        }
+        const ok = await patchUser(identity, identity)
+        return { ok }
+    }
+
+    // สมัคร guest → pending (รอ admin อนุมัติ)
+    async function registerGuest(nickname, reason) {
+        const nick = cleanText(nickname, LIMITS.nickname)
+        const why  = cleanText(reason, LIMITS.guestReason)
+        if (!nick || !why) return false
+        const patch = {
+            nickname: nick, guestReason: why,
+            accountType: 'guest', guestStatus: 'pending', onboarded: true,
+        }
+        return patchUser(patch, patch)
+    }
+
     // ── Auth listener (call once in main.js) ──
     function init() {
         // จบ flow ของ signInWithRedirect เมื่อกลับมาที่หน้าเว็บ
@@ -176,6 +228,7 @@ export const useAuthStore = defineStore('auth', () => {
         isLoggedIn, isAdmin, isAcademic, isLinked, incomeBonusPct,
         login, logout, ensureDoc,
         blockSnapshot, setUserDataOptimistic, patchUser,
+        acceptConsent, linkStudent, registerGuest,
         init,
     }
 })
