@@ -133,7 +133,6 @@ const buying = ref(false)
 
 const price = (base) => Math.round(base * (1 - discount.value / 100))
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
-const rarityLabel = (r) => RARITY[r]?.label || r
 const ownedLegendaryIds = () => pets.value.filter((p) => p.rarity === 'legendary').map((p) => p.id)
 
 const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, pct: GACHA_RATES[k], color: RARITY[k]?.color, label: RARITY[k]?.label }))
@@ -152,6 +151,7 @@ async function pull(n, useFreeTicket = false) {
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
 
   buying.value = true
+  // NOTE: gachaTarget ไม่เขียนที่นี่ — เป็นของ chooseTarget() (กัน stale-target write)
   const optimistic = {
     pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed,
     ...(useFreeTicket ? { freeGachaTickets: tickets.value - 1 } : { coins: coins.value - cost, totalSpent: (authStore.userData?.totalSpent || 0) + cost }),
