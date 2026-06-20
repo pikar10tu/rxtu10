@@ -28,7 +28,6 @@
     <div class="dc-breakdown">
       <div class="dc-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
       <div class="dc-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
-      <div v-if="petBonusPct" class="dc-row dc-bonus"><span><Emoji char="🏠" /> โบนัสบ้าน (เพ็ท)</span><b>+{{ petBonusPct }}%</b></div>
       <div v-if="bonusPct" class="dc-row dc-bonus"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
       <div v-if="buffActive" class="dc-row dc-bonus"><span><Emoji char="⚡" /> โบนัสเควสต์รายวัน</span><b>+50%</b></div>
       <div class="dc-row dc-total"><span>รวมเต็ม (24 ชม.)</span><b>{{ ratePerDay.toLocaleString() }}<Emoji char="🪙" /></b></div>
@@ -44,7 +43,7 @@ import { useDaily } from '../../composables/useDaily.js'
 
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
-const { baseIncome, petIncome, petBonusPct, bonusPct, buffActive, ratePerDay, ratePerHour, accrued, fillPct, isFull, remainingMs, claim } = useDaily()
+const { baseIncome, petIncome, bonusPct, buffActive, ratePerDay, ratePerHour, accrued, fillPct, isFull, remainingMs, claim } = useDaily()
 
 const fmtRemain = computed(() => {
   const s = Math.ceil(remainingMs.value / 1000)

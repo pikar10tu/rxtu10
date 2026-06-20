@@ -2,7 +2,7 @@ import { ref, computed, onScopeDispose } from 'vue'
 import { increment, serverTimestamp } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
-import { residenceDailyIncome, residencePetIncomeBonus } from '../data/residence.js'
+import { residenceDailyIncome } from '../data/residence.js'
 import { totalPetDaily } from '../utils/petUtils.js'
 import { questIncomeMult } from '../utils/dailyQuest.js'
 
@@ -23,8 +23,6 @@ export function useDaily() {
   const baseIncome = computed(() => residenceDailyIncome(level.value))
   const petIncome  = computed(() => totalPetDaily(auth.userData?.pets))
   const bonusPct   = computed(() => auth.incomeBonusPct)
-  const petBonusPct      = computed(() => residencePetIncomeBonus(level.value))
-  const petIncomeBoosted = computed(() => Math.round(petIncome.value * (1 + petBonusPct.value / 100)))
 
   // live clock (ticks for the accrual bar/amount)
   const now = ref(Date.now())
@@ -33,7 +31,7 @@ export function useDaily() {
 
   const buffMult   = computed(() => questIncomeMult(auth.userData, now.value))
   const buffActive = computed(() => buffMult.value > 1)
-  const ratePerDay = computed(() => Math.round((baseIncome.value + petIncomeBoosted.value) * (1 + bonusPct.value / 100) * buffMult.value))
+  const ratePerDay = computed(() => Math.round((baseIncome.value + petIncome.value) * (1 + bonusPct.value / 100) * buffMult.value))
   const ratePerHour = computed(() => Math.round(ratePerDay.value / 24))
 
   function lastMs() {
@@ -62,7 +60,7 @@ export function useDaily() {
   }
 
   return {
-    baseIncome, petIncome, petBonusPct, bonusPct, buffActive, buffMult, ratePerDay, ratePerHour,
+    baseIncome, petIncome, bonusPct, buffActive, buffMult, ratePerDay, ratePerHour,
     accrued, fillPct, isFull, remainingMs, claim,
   }
 }

@@ -9,24 +9,24 @@
 
 export const RESIDENCE_TIERS = [
   // ── 🪙 สู้ชีวิต (เริ่มต้น–ดิ้นรน) ──
-  { level: 1,  tierName: 'ปูหนังสือพิมพ์ริมทาง',     art: '📰', upgradeCost: 0,       dailyIncome: 300,    plots: 4,  petIncomeBonusPct: 0,   battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',    shopDiscountPct: 0,  eggSlots: 2, frameColor: '#9ca3af' },
-  { level: 2,  tierName: 'เพิงกล่องกระดาษใต้สะพานลอย', art: '📦', upgradeCost: 700,    dailyIncome: 600,    plots: 5,  petIncomeBonusPct: 5,   battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',    shopDiscountPct: 0,  eggSlots: 2, frameColor: '#a8a29e' },
-  { level: 3,  tierName: 'ห้องเช่ารูหนู',            art: '🚪', upgradeCost: 1800,   dailyIncome: 1000,   plots: 6,  petIncomeBonusPct: 10,  battleSlots: 1, marketUnlocked: false, maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 2, frameColor: '#84cc16' },
-  { level: 4,  tierName: 'ห้องแถวไม้เก่าท้ายซอย',    art: '🏚️', upgradeCost: 4000,   dailyIncome: 1800,   plots: 6,  petIncomeBonusPct: 15,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 3, frameColor: '#22c55e' },
+  { level: 1,  tierName: 'ปูหนังสือพิมพ์ริมทาง',     art: '📰', upgradeCost: 0,       dailyIncome: 300,    plots: 4,   battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',  eggSlots: 2, frameColor: '#9ca3af' },
+  { level: 2,  tierName: 'เพิงกล่องกระดาษใต้สะพานลอย', art: '📦', upgradeCost: 700,    dailyIncome: 600,    plots: 5,   battleSlots: 1, marketUnlocked: false, maxSeedTier: 'common',  eggSlots: 2, frameColor: '#a8a29e' },
+  { level: 3,  tierName: 'ห้องเช่ารูหนู',            art: '🚪', upgradeCost: 1800,   dailyIncome: 1000,   plots: 6,  battleSlots: 1, marketUnlocked: false, maxSeedTier: 'rare',  eggSlots: 2, frameColor: '#84cc16' },
+  { level: 4,  tierName: 'ห้องแถวไม้เก่าท้ายซอย',    art: '🏚️', upgradeCost: 4000,   dailyIncome: 1800,   plots: 6,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',  eggSlots: 3, frameColor: '#22c55e' },
   // ── 🏢 สร้างตัว (เริ่มลืมตาอ้าปากได้) ──
-  { level: 5,  tierName: 'ห้องแบ่งเช่าใต้หลังคา',    art: '🏠', upgradeCost: 8000,   dailyIncome: 3000,   plots: 7,  petIncomeBonusPct: 20,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 0,  eggSlots: 3, frameColor: '#14b8a6' },
-  { level: 6,  tierName: 'เซฟเฮาส์ตึกแถวรีโนเวท',    art: '🏢', upgradeCost: 16000,  dailyIncome: 5000,   plots: 8,  petIncomeBonusPct: 25,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',      shopDiscountPct: 3,  eggSlots: 3, frameColor: '#06b6d4' },
-  { level: 7,  tierName: 'คอนโด High-Rise ชั้นสูง',  art: '🏙️', upgradeCost: 32000,  dailyIncome: 8000,   plots: 8,  petIncomeBonusPct: 35,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 3,  eggSlots: 4, frameColor: '#3b82f6' },
-  { level: 8,  tierName: 'ทาวน์โฮม 3 ชั้นในเมือง',   art: '🏘️', upgradeCost: 58000,  dailyIncome: 12000,  plots: 9,  petIncomeBonusPct: 45,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 5,  eggSlots: 4, frameColor: '#6366f1' },
+  { level: 5,  tierName: 'ห้องแบ่งเช่าใต้หลังคา',    art: '🏠', upgradeCost: 8000,   dailyIncome: 3000,   plots: 7,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',  eggSlots: 3, frameColor: '#14b8a6' },
+  { level: 6,  tierName: 'เซฟเฮาส์ตึกแถวรีโนเวท',    art: '🏢', upgradeCost: 16000,  dailyIncome: 5000,   plots: 8,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'rare',  eggSlots: 3, frameColor: '#06b6d4' },
+  { level: 7,  tierName: 'คอนโด High-Rise ชั้นสูง',  art: '🏙️', upgradeCost: 32000,  dailyIncome: 8000,   plots: 8,  battleSlots: 2, marketUnlocked: true,  maxSeedTier: 'epic',  eggSlots: 4, frameColor: '#3b82f6' },
+  { level: 8,  tierName: 'ทาวน์โฮม 3 ชั้นในเมือง',   art: '🏘️', upgradeCost: 58000,  dailyIncome: 12000,  plots: 9,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',  eggSlots: 4, frameColor: '#6366f1' },
   // ── 🏰 ประสบความสำเร็จ (ร่ำรวย–มหาเศรษฐี) ──
-  { level: 9,  tierName: 'บ้านพักตากอากาศริมทะเล',   art: '🏖️', upgradeCost: 105000, dailyIncome: 18000,  plots: 10, petIncomeBonusPct: 60,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 5,  eggSlots: 4, frameColor: '#8b5cf6' },
-  { level: 10, tierName: 'คฤหาสน์หรูพร้อมสระว่ายน้ำ', art: '🏛️', upgradeCost: 190000, dailyIncome: 26000,  plots: 10, petIncomeBonusPct: 80,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',      shopDiscountPct: 7,  eggSlots: 5, frameColor: '#a855f7' },
-  { level: 11, tierName: 'เพนต์เฮาส์ลอยฟ้า',         art: '🌆', upgradeCost: 350000, dailyIncome: 38000,  plots: 11, petIncomeBonusPct: 100, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', shopDiscountPct: 8,  eggSlots: 5, frameColor: '#ec4899' },
-  { level: 12, tierName: 'คฤหาสน์บนเกาะส่วนตัว',     art: '🏝️', upgradeCost: 650000, dailyIncome: 55000,  plots: 12, petIncomeBonusPct: 120, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', shopDiscountPct: 10, eggSlots: 6, frameColor: '#f59e0b' },
+  { level: 9,  tierName: 'บ้านพักตากอากาศริมทะเล',   art: '🏖️', upgradeCost: 105000, dailyIncome: 18000,  plots: 10,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',  eggSlots: 4, frameColor: '#8b5cf6' },
+  { level: 10, tierName: 'คฤหาสน์หรูพร้อมสระว่ายน้ำ', art: '🏛️', upgradeCost: 190000, dailyIncome: 26000,  plots: 10,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',  eggSlots: 5, frameColor: '#a855f7' },
+  { level: 11, tierName: 'เพนต์เฮาส์ลอยฟ้า',         art: '🌆', upgradeCost: 350000, dailyIncome: 38000,  plots: 11, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary',  eggSlots: 5, frameColor: '#ec4899' },
+  { level: 12, tierName: 'คฤหาสน์บนเกาะส่วนตัว',     art: '🏝️', upgradeCost: 650000, dailyIncome: 55000,  plots: 12, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', eggSlots: 6, frameColor: '#f59e0b' },
   // ── 🚀 อนาคต (เหนือระดับ–หลุดโลก) — ยังไม่เปิด (cap = 12) ──
-  { level: 13, tierName: 'ปราสาทโบราณในยุโรป',       art: '🏰', upgradeCost: 1100000, dailyIncome: 75000,  plots: 13, petIncomeBonusPct: 140, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', shopDiscountPct: 12, eggSlots: 7, frameColor: '#f43f5e' },
-  { level: 14, tierName: 'สถานีอวกาศส่วนตัว',        art: '🛰️', upgradeCost: 1900000, dailyIncome: 100000, plots: 14, petIncomeBonusPct: 160, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', shopDiscountPct: 14, eggSlots: 7, frameColor: '#a21caf' },
-  { level: 15, tierName: 'มิติส่วนตัวเหนือกาลเวลา',   art: '🌌', upgradeCost: 3200000, dailyIncome: 140000, plots: 15, petIncomeBonusPct: 180, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', shopDiscountPct: 15, eggSlots: 8, frameColor: '#fbbf24' },
+  { level: 13, tierName: 'ปราสาทโบราณในยุโรป',       art: '🏰', upgradeCost: 1100000, dailyIncome: 75000,  plots: 13, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#f43f5e' },
+  { level: 14, tierName: 'สถานีอวกาศส่วนตัว',        art: '🛰️', upgradeCost: 1900000, dailyIncome: 100000, plots: 14, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#a21caf' },
+  { level: 15, tierName: 'มิติส่วนตัวเหนือกาลเวลา',   art: '🌌', upgradeCost: 3200000, dailyIncome: 140000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#fbbf24' },
 ]
 
 export const MIN_RESIDENCE_LEVEL = 1
@@ -54,11 +54,9 @@ export const isMaxResidence = (level) => clampLevel(level) >= MAX_RESIDENCE_LEVE
 // ── Per-level accessors ──
 export const residenceDailyIncome  = (level) => getTier(level).dailyIncome
 export const residencePlots        = (level) => getTier(level).plots
-export const residencePetIncomeBonus = (level) => getTier(level).petIncomeBonusPct
 export const residenceBattleSlots  = (level) => getTier(level).battleSlots
 export const residenceEggSlots     = (level) => getTier(level).eggSlots
 export const residenceMarketOpen   = (level) => getTier(level).marketUnlocked
-export const residenceShopDiscount = (level) => getTier(level).shopDiscountPct
 
 /** Cost to upgrade FROM `level` to `level+1` (null if maxed). */
 export function upgradeCostFrom(level) {

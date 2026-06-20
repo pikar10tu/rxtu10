@@ -18,7 +18,6 @@
     <template v-else-if="authStore.isLoggedIn">
       <div class="shop-storage">
         <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ PETS.length }} ชนิด
-        <span v-if="discount" class="shop-disc">· ส่วนลดร้าน −{{ discount }}%</span>
       </div>
 
       <!-- banner -->
@@ -46,11 +45,11 @@
           <Emoji char="🎟️" /> ใช้ตั๋วฟรี สุ่ม 1 (×{{ tickets }})
         </button>
         <div class="pull-row">
-          <button class="pull-btn" :class="{ ok: coins >= price(PULL_COST) }" :disabled="buying" @click="pull(1)">
-            สุ่ม 1<br><small>{{ price(PULL_COST).toLocaleString() }}<Emoji char="🪙" /></small>
+          <button class="pull-btn" :class="{ ok: coins >= PULL_COST }" :disabled="buying" @click="pull(1)">
+            สุ่ม 1<br><small>{{ PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
           </button>
-          <button class="pull-btn" :class="{ ok: coins >= price(TEN_PULL_COST) }" :disabled="buying" @click="pull(10)">
-            สุ่ม 10<br><small>{{ price(TEN_PULL_COST).toLocaleString() }}<Emoji char="🪙" /></small>
+          <button class="pull-btn" :class="{ ok: coins >= TEN_PULL_COST }" :disabled="buying" @click="pull(10)">
+            สุ่ม 10<br><small>{{ TEN_PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
           </button>
         </div>
       </div>
@@ -63,14 +62,31 @@
       <div v-if="pickerOpen" class="ov" @click.self="pickerOpen = false">
         <div class="picker">
           <div class="picker-head">เลือกเป้าหมาย legendary</div>
+          <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด ℹ️ = ดูรายละเอียด</div>
           <div class="picker-grid">
-            <button v-for="p in legendaries" :key="p.id" class="picker-cell" :class="{ on: p.id === target }" @click="chooseTarget(p.id)">
+            <div v-for="p in legendaries" :key="p.id" class="picker-cell" :class="{ on: p.id === target }" @click="chooseTarget(p.id)">
+              <button class="picker-info" @click.stop="infoPet = p" aria-label="ดูรายละเอียด"><Emoji char="ℹ️" /></button>
               <span class="picker-emoji"><Emoji :char="p.emoji" /></span>
               <span class="picker-name">{{ p.name }}</span>
               <span v-if="pets.find((x) => x.id === p.id)" class="picker-have">มีแล้ว</span>
-            </button>
+            </div>
           </div>
           <button class="picker-clear" @click="chooseTarget(target)">{{ target ? 'ล้างเป้าหมาย' : 'ปิด' }}</button>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- legendary info (flavor) -->
+    <Teleport to="body">
+      <div v-if="infoPet" class="ov" @click.self="infoPet = null">
+        <div class="info-box">
+          <button class="info-x" @click="infoPet = null">✕</button>
+          <div class="info-emoji"><Emoji :char="infoPet.emoji" /></div>
+          <div class="info-name">{{ infoPet.name }}</div>
+          <div class="info-rarity" :style="{ background: rarityColor(infoPet.rarity) }">{{ RARITY[infoPet.rarity]?.label }}</div>
+          <div class="info-flavor">“{{ infoPet.flavor }}”</div>
+          <div class="info-passive"><Emoji char="🔒" /> พาสซีฟ — รอระบบต่อสู้ (เร็วๆ นี้)</div>
+          <button class="info-target" @click="chooseTarget(infoPet.id); infoPet = null">ตั้งเป็นเป้าหมาย</button>
         </div>
       </div>
     </Teleport>
@@ -102,7 +118,6 @@ import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { PETS, RARITY } from '../data/index.js'
-import { residenceShopDiscount } from '../data/residence.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { rollMany, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
@@ -116,8 +131,6 @@ const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 
 const coins   = computed(() => authStore.userData?.coins || 0)
 const pets    = computed(() => authStore.userData?.pets || [])
-const level   = computed(() => authStore.userData?.residence?.level || 1)
-const discount = computed(() => residenceShopDiscount(level.value))
 const tickets = computed(() => authStore.userData?.freeGachaTickets || 0)
 const pity    = computed(() => authStore.userData?.gachaPity || 0)
 const target  = computed(() => authStore.userData?.gachaTarget || null)
@@ -129,9 +142,9 @@ const pityLeft  = computed(() => Math.max(0, HARD_PITY - pity.value))
 
 const reveal = ref(null)       // { summary, multi }
 const pickerOpen = ref(false)
+const infoPet = ref(null)      // legendary ที่กดดู flavor ใน picker
 const buying = ref(false)
 
-const price = (base) => Math.round(base * (1 - discount.value / 100))
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const ownedLegendaryIds = () => pets.value.filter((p) => p.rarity === 'legendary').map((p) => p.id)
 
@@ -140,7 +153,7 @@ const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, p
 async function pull(n, useFreeTicket = false) {
   if (buying.value) return
   const rolls = useFreeTicket ? 1 : (n === 1 ? 1 : TEN_PULL_N) // สุ่ม 10 → ปั่น 11 ครั้ง ("เปิด 10 แถม 1")
-  const cost = useFreeTicket ? 0 : price(n === 1 ? PULL_COST : TEN_PULL_COST)
+  const cost = useFreeTicket ? 0 : (n === 1 ? PULL_COST : TEN_PULL_COST)
   if (useFreeTicket) { if (tickets.value < 1) return }
   else if (coins.value < cost) { toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}`, 'error'); return }
 
@@ -177,7 +190,6 @@ async function chooseTarget(id) {
 .shop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .shop-coins { font-size: 1rem; font-weight: 800; color: #b45309; }
 .shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
-.shop-disc { color: #059669; font-weight: 700; }
 .shop-note { font-size: .64rem; color: rgba(0,0,0,.4); text-align: center; margin-top: 14px; }
 .shop-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 .shop-maint { text-align: center; padding: 48px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -207,12 +219,23 @@ async function chooseTarget(id) {
 .picker { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 80vh; overflow-y: auto; }
 .picker-head { font-weight: 800; margin-bottom: 12px; text-align: center; }
 .picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.picker-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid var(--ink); border-radius: 11px; padding: 8px 4px; background: #fff; cursor: pointer; font-family: inherit; }
+.picker-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid var(--ink); border-radius: 11px; padding: 8px 4px; background: #fff; cursor: pointer; font-family: inherit; }
 .picker-cell.on { background: var(--gold); }
+.picker-info { position: absolute; top: 2px; right: 2px; border: none; background: transparent; padding: 2px; font-size: .7rem; line-height: 1; cursor: pointer; opacity: .65; }
+.picker-info:active { opacity: 1; }
+.picker-hint { font-size: .58rem; color: rgba(0,0,0,.45); text-align: center; margin-bottom: 8px; }
 .picker-emoji { font-size: 1.6rem; }
 .picker-name { font-size: .58rem; font-weight: 700; }
 .picker-have { font-size: .5rem; color: #059669; font-weight: 800; }
 .picker-clear { width: 100%; margin-top: 12px; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; background: #fff; cursor: pointer; }
+.info-box { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 20px 20px; text-align: center; max-width: 320px; width: 100%; }
+.info-x { position: absolute; right: 12px; top: 12px; border: none; background: rgba(0,0,0,.08); border-radius: 8px; width: 26px; height: 26px; cursor: pointer; }
+.info-emoji { font-size: 3.4rem; }
+.info-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
+.info-rarity { display: inline-block; color: #fff; font-size: .58rem; font-weight: 800; padding: 2px 10px; border-radius: 999px; margin-top: 6px; }
+.info-flavor { font-size: .8rem; color: rgba(0,0,0,.65); line-height: 1.6; margin: 12px 4px; font-style: italic; }
+.info-passive { font-size: .66rem; color: rgba(0,0,0,.45); background: rgba(0,0,0,.04); border-radius: 9px; padding: 7px; }
+.info-target { width: 100%; margin-top: 14px; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 .rv-box { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; }
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); margin-bottom: 10px; }
 .rv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
