@@ -37,6 +37,7 @@ export function fuseRoll(sourceRarity, catalog, rng = Math.random) {
   const target = nextRarity(sourceRarity)
   if (!target) return null
   const pool = rarityPool(catalog, target)
+  if (!pool.length) return null
   return pool[Math.floor(rng() * pool.length)]
 }
 

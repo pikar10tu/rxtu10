@@ -63,6 +63,14 @@ test('fuseRoll สุ่มในระดับถัดไป (uniform), legen
   assert.equal(fuseRoll('legendary', CAT, seq([0.0])), null)  // หลอมต่อไม่ได้
 })
 
+test('fuseRoll pool ว่าง (ระดับถัดไปไม่มีตัวในแคตตาล็อก) → null ไม่ throw', () => {
+  const catalogNoLegendary = [
+    { id: 'cat', rarity: 'common' }, { id: 'mouse', rarity: 'common' },
+    { id: 'wolf', rarity: 'rare' }, { id: 'dragon', rarity: 'epic' },
+  ]
+  assert.equal(fuseRoll('epic', catalogNoLegendary, () => 0), null)
+})
+
 test('redeemValue = Σn × rate', () => {
   assert.equal(redeemValue([{ id: 'bahamut', n: 2 }], 'legendary'), 6000) // 2 × 3000
   assert.equal(redeemValue([{ id: 'cat', n: 3 }], 'common'), 150)         // 3 × 50

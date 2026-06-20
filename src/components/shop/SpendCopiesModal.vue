@@ -55,7 +55,7 @@ const available = computed(() => candidates.value.reduce((s, p) => s + (p.copies
 const rarityLabel = computed(() => RARITY[props.rarity]?.label || props.rarity)
 
 const alloc = ref({}) // id -> n
-const total = computed(() => Object.values(alloc.value).reduce((s, n) => s + n, 0))
+const total = computed(() => candidates.value.reduce((s, p) => s + (alloc.value[p.id] || 0), 0))
 const coinValue = computed(() => total.value * (REDEEM_COIN[props.rarity] || 0))
 
 function setN(p, n) {
@@ -75,7 +75,9 @@ function auto() {
 }
 const canConfirm = computed(() => props.mode === 'fusion' ? total.value === props.required : total.value >= 1)
 function confirm() {
-  const allocation = Object.entries(alloc.value).filter(([, n]) => n > 0).map(([id, n]) => ({ id, n }))
+  const allocation = candidates.value
+    .map((p) => ({ id: p.id, n: alloc.value[p.id] || 0 }))
+    .filter((a) => a.n > 0)
   emit('confirm', allocation)
 }
 </script>

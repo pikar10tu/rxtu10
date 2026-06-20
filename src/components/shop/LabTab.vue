@@ -87,6 +87,7 @@ async function onConfirm(allocation) {
     const petsAfter = applyCopySpend(pets.value, allocation)
     if (mode === 'fusion') {
       const id = fuseRoll(rarity, PETS)
+      if (!id) { toast('หลอมไม่สำเร็จ', 'error'); return }
       const { pets: finalPets, summary } = mergeRolls(petsAfter, [{ id }], PETS)
       const ok = await auth.patchUser({ pets: finalPets }, { pets: finalPets })
       if (ok) reveal.value = summary[0]
