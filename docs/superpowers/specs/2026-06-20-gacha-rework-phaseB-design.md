@@ -136,11 +136,11 @@ TEN_PULL_N    = 11    // ได้ 11 ตัวจากการสุ่ม 10
 - **แลกของ:** token → ตั๋วกาชา (+ ของอื่นต่อยอด) · ต่อยอดแนวคิด "ห้องทดลอง/วิวัฒนาการยีน" ของ v1
 - ⚠️ ต้องสร้างก่อนเปิด Shop จริง (ไม่งั้น copies ระดับล่างล้นไม่มีทางระบายตั้งแต่ Phase B)
 
-### Phase B follow-ups (จาก smoke test 20 มิ.ย. 2026 — ทำรอบหน้า)
+### Phase B follow-ups (จาก smoke test 20 มิ.ย. 2026)
 - ✅ **แก้แล้ว (commit 1382419):** สุ่ม 10 ได้ 11 ตัว (เดิม ShopView `pull()` ใช้ `rolls=n=10` ไม่ใช่ `TEN_PULL_N`)
-- **Target picker → ดู flavor + passive:** กด legendary ใน picker ให้เปิด detail (flavor มีใน `PETS.flavor` แล้ว · **passive ยังไม่มีระบบ** — ผูกกับ Phase C combat หรือออกแบบ passive ใหม่)
-- **เอาออก: โบนัสรายได้เพ็ท %ของบ้าน** (`residencePetIncomeBonus`/`petIncomeBonusPct` ใน `useDaily.petIncomeBoosted` + แถวใน DailyCard) — user ขอตัดให้เศรษฐกิจง่ายขึ้น
-- **เอาออก: ส่วนลดร้านค้า** (`residenceShopDiscount`/`shopDiscountPct` ใน `ShopView.price()`) — user ขอตัด
+- ✅ **เสร็จ (commit 0aac5db):** Target picker → ℹ️ ต่อตัว เปิด popup **flavor** + passive placeholder "🔒 รอระบบต่อสู้ (Phase C)" (กดการ์ด=ตั้งเป้าเหมือนเดิม) · **passive จริงรอ Phase C**
+- ✅ **เสร็จ (commit 0aac5db):** ตัดโบนัสรายได้เพ็ท %บ้าน (`petIncomeBonusPct`/accessor/useDaily/DailyCard ลบหมด — รายได้เพ็ท = ผลรวมตรงๆ)
+- ✅ **เสร็จ (commit 0aac5db):** ตัดส่วนลดร้าน (`shopDiscountPct`/accessor/ShopView ลบหมด — ราคาเต็มเสมอ)
 
 ## หลักการที่ยึด
 - pure util + `node --test` (ฉีด rng) · เพิ่ม field → userSchema ที่เดียว · เขียน user doc ผ่าน `patchUser`
