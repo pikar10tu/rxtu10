@@ -53,6 +53,7 @@ TEN_PULL_N    = 11    // ได้ 11 ตัวจากการสุ่ม 10
     - `guaranteed` → คืน `target`, `won:true`, `newGuaranteed:false`
     - ไม่งั้น 50/50: win → `target`, `newGuaranteed:false` · lose → สุ่มจาก legendary **ที่ไม่ใช่ target**, `won:false`, `newGuaranteed:true`
   - ไม่มี `target` (new-first): unowned = `legendaryIds \ ownedLegendaryIds`; ถ้ามี → สุ่มจาก unowned; ครบแล้ว → สุ่มทั้งหมด · `newGuaranteed:false`
+  - **กฎการันตี (ยืนยัน 2026-06-20):** pity รีเซ็ต 0 ทุกครั้งที่ออก legendary · lose → `newGuaranteed:true` → legendary **ตัวถัดไป** (จะออกเองตอน pity เท่าไรก็ตาม หรือชน hard pity) = ตัวเป้าแน่นอน → ล้างธง · ซวยสุด = lose ที่ pull 100 → ได้เป้าช้าสุด pull 200 · **ระหว่างนั้นถ้าโชคดีออก legendary เองที่ pull 130 ตัวนั้น = ตัวเป้าทันที** (ไม่ใช่ 50/50 ซ้ำ)
 - `pickNonLegendary(rarity, rarityPoolIds, rng)` → สุ่ม species id จาก pool ของ rarity นั้น (ทุก rarity ใช้สุ่มเต็ม pool — ตั้งใจให้ rare/epic/common ได้ตัวซ้ำเป็น copies)
 - `rollOne(state, catalog, rng)` → `{ rarity, id, won, nextPity, nextTarget, nextGuaranteed }` (รวม logic ข้างบน 1 ครั้ง · legendary → pity reset 0 + อัปเดต guaranteed; ไม่ใช่ → pity+1)
 - `rollMany(n, state, catalog, rng)` → `{ results[], nextState }`: วน `rollOne` n ครั้ง (carry state) + **การันตี ≥1 epic ต่อ 10**: ถ้าใน 10 ตัวแรก (หรือทั้งชุดถ้า n<10) ไม่มี ≥ epic → upgrade ตัวสุดท้ายเป็น epic (สุ่ม id epic pool)
