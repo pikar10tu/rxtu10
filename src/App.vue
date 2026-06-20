@@ -4,12 +4,20 @@
 
     <div v-if="authStore.loading || !configLoaded" class="loading-screen">กำลังโหลด...</div>
 
-    <!-- Launch gate (config/app.maintenance, live from Firestore — see
-         composables/useAppConfig.js). While maintenance is ON, only the admin +
-         academic team see the live app (academics manage the question bank);
-         everyone else gets the maintenance screen. Admin flips it from the
+    <!-- ยังไม่ login → จอ login (ไม่ใช่จอปรับปรุง) -->
+    <LoginLanding v-else-if="!authStore.isLoggedIn" />
+
+    <!-- ด่าน onboarding ตามลำดับ -->
+    <ConsentGate        v-else-if="gate === 'consent'" />
+    <OnboardingWizard   v-else-if="gate === 'wizard'" />
+    <GuestPendingScreen v-else-if="gate === 'guest-pending'" />
+
+    <!-- ผ่าน onboarding แล้ว → launch gate เดิม (config/app.maintenance, live from
+         Firestore — see composables/useAppConfig.js). While maintenance is ON, only
+         the admin + academic team see the live app (academics manage the question
+         bank); everyone else gets the maintenance screen. Admin flips it from the
          Admin tab — no redeploy needed. -->
-    <template v-else-if="authStore.isLoggedIn && (authStore.isAcademic || !maintenance)">
+    <template v-else-if="authStore.isAcademic || !maintenance">
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">
@@ -36,7 +44,7 @@
 
 <script setup>
 import Emoji from './components/shared/Emoji.vue'
-import { watch, onMounted } from 'vue'
+import { watch, onMounted, computed } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
 import { useUsageStore } from './stores/usage.js'
@@ -50,11 +58,20 @@ import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
 import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'
 import ErrorBoundary     from './components/layout/ErrorBoundary.vue'
 import AchievementBalloon from './components/shared/AchievementBalloon.vue'
+import ConsentGate        from './components/onboarding/ConsentGate.vue'
+import OnboardingWizard   from './components/onboarding/OnboardingWizard.vue'
+import GuestPendingScreen from './components/onboarding/GuestPendingScreen.vue'
+import LoginLanding       from './components/onboarding/LoginLanding.vue'
+import { onboardingGate } from './utils/onboarding.js'
+import { CONSENT_VERSION } from './firebase/config.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
 const { maintenance, configLoaded } = useAppConfig()
 initAchievements()
+
+const gate = computed(() =>
+  authStore.isLoggedIn ? onboardingGate(authStore.userData, CONSENT_VERSION) : 'login')
 
 // rough integrity trip-wire: scan user data when it loads/changes
 watch(() => authStore.userData, (d) => runIntegrityCheck(d), { immediate: true })
