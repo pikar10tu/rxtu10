@@ -10,12 +10,12 @@
 //  These constants SUPERSEDE the legacy RARITY.dailyBase / GRADE_MULTI.
 // ════════════════════════════════════════════════════════════
 
-// daily coins per rarity at grade 0 (was 4 / 10 / 22 / 45)
+// daily coins per rarity at grade 0 (Phase B ×2.5 จาก 6/15/35/70)
 export const RARITY_DAILY_BASE = {
-  common: 6,
-  rare: 15,
-  epic: 35,
-  legendary: 70,
+  common: 15,
+  rare: 38,
+  epic: 85,
+  legendary: 175,
 }
 
 // grade multiplier, max grade = 12× (was 5.5×). Index = grade 0..5.
