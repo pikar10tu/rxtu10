@@ -104,7 +104,7 @@ import { useToast } from '../composables/useToast.js'
 import { PETS, RARITY } from '../data/index.js'
 import { residenceShopDiscount } from '../data/residence.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
-import { rollMany, GACHA_RATES, PULL_COST, TEN_PULL_COST, HARD_PITY } from '../utils/gacha.js'
+import { rollMany, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
 
 const authStore = useAuthStore()
@@ -139,7 +139,7 @@ const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, p
 
 async function pull(n, useFreeTicket = false) {
   if (buying.value) return
-  const rolls = useFreeTicket ? 1 : n
+  const rolls = useFreeTicket ? 1 : (n === 1 ? 1 : TEN_PULL_N) // สุ่ม 10 → ปั่น 11 ครั้ง ("เปิด 10 แถม 1")
   const cost = useFreeTicket ? 0 : price(n === 1 ? PULL_COST : TEN_PULL_COST)
   if (useFreeTicket) { if (tickets.value < 1) return }
   else if (coins.value < cost) { toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}`, 'error'); return }
