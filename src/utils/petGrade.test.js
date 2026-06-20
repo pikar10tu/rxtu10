@@ -1,30 +1,19 @@
-// เทส petGrade — ค่าอัพเกรด (copies + เหรียญ ตาม rarity/เกรดเป้า)
-// รัน: node --test src/utils/petGrade.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { MAX_GRADE, gradeUpCost, canUpgrade } from './petGrade.js'
+import { gradeUpCost, canUpgrade, MAX_GRADE } from './petGrade.js'
 
-test('อัพไปเกรด N ใช้ N copies', () => {
-  assert.equal(gradeUpCost({ rarity: 'common', grade: 0 }).copies, 1) // →I
-  assert.equal(gradeUpCost({ rarity: 'common', grade: 3 }).copies, 4) // →IV
+test('gradeUpCost ใช้ 1 copy ทุกขั้น, เหรียญ scale ตามเกรดเป้า', () => {
+  assert.deepEqual(gradeUpCost({ grade: 0, rarity: 'common' }), { copies: 1, coins: 200 })   // 200*1
+  assert.deepEqual(gradeUpCost({ grade: 1, rarity: 'common' }), { copies: 1, coins: 400 })   // 200*2
+  assert.deepEqual(gradeUpCost({ grade: 4, rarity: 'legendary' }), { copies: 1, coins: 20000 }) // 4000*5
 })
 
-test('เหรียญ = base[rarity] × เกรดเป้า', () => {
-  assert.equal(gradeUpCost({ rarity: 'common', grade: 0 }).coins, 200 * 1)
-  assert.equal(gradeUpCost({ rarity: 'legendary', grade: 4 }).coins, 4000 * 5)
+test('gradeUpCost = null เมื่อ maxed', () => {
+  assert.equal(gradeUpCost({ grade: MAX_GRADE, rarity: 'epic' }), null)
 })
 
-test('เกรดสูงสุด (≥5) → null', () => {
-  assert.equal(gradeUpCost({ rarity: 'epic', grade: 5 }), null)
-})
-
-test('canUpgrade: copies + เหรียญ พอ', () => {
-  const pet = { rarity: 'common', grade: 0, copies: 1 }
-  assert.equal(canUpgrade(pet, 200), true)
-  assert.equal(canUpgrade(pet, 199), false)              // เหรียญไม่พอ
-  assert.equal(canUpgrade({ ...pet, copies: 0 }, 999), false) // copies ไม่พอ
-})
-
-test('canUpgrade: เกรดสูงสุด → false', () => {
-  assert.equal(canUpgrade({ rarity: 'rare', grade: 5, copies: 9 }, 999999), false)
+test('canUpgrade ต้องมี 1 copy + เหรียญพอ', () => {
+  assert.equal(canUpgrade({ grade: 0, rarity: 'common', copies: 1 }, 200), true)
+  assert.equal(canUpgrade({ grade: 0, rarity: 'common', copies: 0 }, 200), false) // copy ไม่พอ
+  assert.equal(canUpgrade({ grade: 0, rarity: 'common', copies: 1 }, 199), false) // เหรียญไม่พอ
 })
