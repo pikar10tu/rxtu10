@@ -18,7 +18,8 @@
 - **แลก copies ส่วนเกิน → ตั๋ว** เฉพาะเพ็ท **เกรด V** · rate ตาม rarity
 - **ตั๋วรวมระบบเดียว** — 1 ตั๋ว = สุ่ม 1 ครั้งบน banner (รวมตั๋วฟรี daily quest) · เลิกใช้ `DAILY_QUEST_TICKET_EGG`
 - **ดันรายได้เพ็ท base ×2.5** (income คิดต่อชนิดแล้ว ไม่ใช่ต่อ instance → ต้องชดเชย)
-- **Out of scope:** featured banner หมุนตามเวลา/แอดมินจัด, แลก copies เป็นของอื่นนอกจากตั๋ว (เปิดโครงต่อยอด), battle stat/passive, potential affix rework
+- **เก็บกวาด `refine` (ตีบวก) — field ตาย** เฟส A แทนด้วยระบบเกรดแล้ว ไม่มี logic อ่าน · ลบออกตอนสร้างเพ็ทใหม่ + แก้ guide.js
+- **Out of scope:** featured banner หมุนตามเวลา/แอดมินจัด, แลก copies เป็นของอื่นนอกจากตั๋ว (เปิดโครงต่อยอด), battle stat/passive, **potential rework (→ Phase C, spec แยก)**
 
 ---
 
@@ -125,7 +126,15 @@ COPIES_PER_TICKET = { common: 10, rare: 6, epic: 3, legendary: 1 }  // draft pin
 6. ShopView รื้อ banner + target picker + pity + เขียน doc
 7. Reveal single + grid 10-pull (Teleport)
 8. PetsView/PetDetailModal: อัพเกรด + ปุ่มแลกตั๋ว
-9. ลบ legacy `data/shop.js` egg API + ตรวจ caller (`DAILY_QUEST_TICKET_EGG` ใน Shop/daily) + build + ลองมือ
+9. ลบ legacy `data/shop.js` egg API + `refine` field + ตรวจ caller (`DAILY_QUEST_TICKET_EGG` ใน Shop/daily, guide.js ข้อความ "ตีบวก") + build + ลองมือ
+
+## 9. Phase C ถัดไป (จดไว้กัน decision หาย — เขียน spec แยกทีหลัง)
+**Potential rework = ระบบเตรียมพลังต่อสู้ (combat-only)** — brainstorm ทิศทางแล้ว 2026-06-20:
+- affix เหลือ **6 ตัวต่อสู้** (ตัด `dailyCoins` ออก + ตัด code path income ใน `petUtils.petDailyCoins`): atk/hp/crit/critDmg/lifesteal/dodge
+- roll cost รื้อจาก "สังเวยเพ็ท fodder" (ใช้ไม่ได้กับ species model) → **copies ของตัวนั้น + เหรียญ** (เป็น copies sink + coin sink ตัวจริง ทำให้ลด grade เหลือ 1 copy/ขั้นแล้ว copies ไม่ไร้ค่า)
+- slot ตาม rarity (1-4) · 1 slot 1 affix ห้ามสแตทซ้ำ · re-roll → preview → เก็บ/ทับ
+- pre-battle: เลขสู้ขยับเห็นใน PetDetailModal (min-max + สะสม) แต่ยังไม่มีผลกลไกจน battle เปิด — frame "เตรียมทีม"
+- มีอยู่แล้ว: `data/potential.js` (AFFIXES/SLOTS_BY_RARITY/POTENTIAL_COST/rollAffix/statBonusPct), PetDetailModal โชว์ slot read-only
 
 ## หลักการที่ยึด
 - pure util + `node --test` (ฉีด rng) · เพิ่ม field → userSchema ที่เดียว · เขียน user doc ผ่าน `patchUser`
