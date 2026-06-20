@@ -40,3 +40,41 @@ export function pickLegendary({ target, guaranteed, ownedLegendaryIds, legendary
   const pool = unowned.length ? unowned : legendaryIds
   return { id: pool[Math.floor(rng() * pool.length)], won: null, newGuaranteed: false }
 }
+
+export const rarityPool = (catalog, rarity) => catalog.filter((p) => p.rarity === rarity).map((p) => p.id)
+
+const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
+
+/** สุ่ม 1 ครั้งพร้อม carry state (pity/guaranteed/owned) */
+export function rollOne(state, catalog, rng = Math.random) {
+  const legendaryIds = rarityPool(catalog, 'legendary')
+  const rarity = rollRarity(state.pity, rng)
+  if (rarity === 'legendary') {
+    const pick = pickLegendary({
+      target: state.target, guaranteed: state.guaranteed,
+      ownedLegendaryIds: state.ownedLegendaryIds, legendaryIds, rng,
+    })
+    const nextOwned = state.ownedLegendaryIds.includes(pick.id)
+      ? state.ownedLegendaryIds : [...state.ownedLegendaryIds, pick.id]
+    return { rarity, id: pick.id, won: pick.won, nextPity: 0, nextGuaranteed: pick.newGuaranteed, nextOwned }
+  }
+  const pool = rarityPool(catalog, rarity)
+  const id = pool[Math.floor(rng() * pool.length)]
+  return { rarity, id, won: null, nextPity: state.pity + 1, nextGuaranteed: state.guaranteed, nextOwned: state.ownedLegendaryIds }
+}
+
+/** สุ่ม n ครั้ง (carry state) + การันตี ≥1 epic ต่อ 10-pull */
+export function rollMany(n, state, catalog, rng = Math.random) {
+  let cur = { pity: state.pity, target: state.target, guaranteed: state.guaranteed, ownedLegendaryIds: [...(state.ownedLegendaryIds || [])] }
+  const results = []
+  for (let i = 0; i < n; i++) {
+    const r = rollOne(cur, catalog, rng)
+    results.push({ rarity: r.rarity, id: r.id, won: r.won })
+    cur = { pity: r.nextPity, target: cur.target, guaranteed: r.nextGuaranteed, ownedLegendaryIds: r.nextOwned }
+  }
+  if (n >= 10 && !results.some((r) => RANK[r.rarity] >= RANK.epic)) {
+    const pool = rarityPool(catalog, 'epic')
+    results[results.length - 1] = { rarity: 'epic', id: pool[Math.floor(rng() * pool.length)], won: null }
+  }
+  return { results, nextState: { pity: cur.pity, target: cur.target, guaranteed: cur.guaranteed } }
+}
