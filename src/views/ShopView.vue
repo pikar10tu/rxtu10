@@ -134,8 +134,8 @@ import { mergeRolls } from '../utils/gachaMerge.js'
 const authStore = useAuthStore()
 const { toast } = useToast()
 
-// ร้านค้ายังไม่เปิดให้นักศึกษา — flip เป็น true เมื่อพร้อม (admin เห็นร้านปกติเสมอเพื่อทดสอบ)
-const SHOP_OPEN = false
+// ร้านค้าเปิดให้นักศึกษาแล้ว (21 มิ.ย. 2026) — flip false เพื่อปิดปรับปรุง (admin เห็นร้านปกติเสมอ)
+const SHOP_OPEN = true
 const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 const tab = ref('gacha') // 'gacha' | 'lab'
 
