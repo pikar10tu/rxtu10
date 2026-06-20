@@ -51,6 +51,10 @@ export const USER_DEFAULTS = {
   study: { cards: {} },                       // SRS flashcard progress
   dailyQuest: { date: null, quiz: 0, study: 0, gacha: 0, claimed: false },
   freeGachaTickets: 0,
+  // ── gacha (Phase B) ──
+  gachaPity: 0,            // จำนวน pull ตั้งแต่ legendary ล่าสุด (soft 76 / hard 100)
+  gachaTarget: null,       // species id ของ legendary ที่เลือกเป็นเป้า (null = ไม่เลือก → new-first)
+  gachaGuaranteed: false,  // true = legendary ครั้งหน้าการันตีตัวเป้า (จาก lose 50/50)
   incomeBuffUntil: null,
   petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
   // ── onboarding / identity (first-run) ──
