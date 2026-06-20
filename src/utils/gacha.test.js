@@ -7,16 +7,16 @@ const seq = (vals) => { let i = 0; return () => vals[Math.min(i++, vals.length -
 
 test('legendaryChance base ก่อน soft pity', () => {
   assert.equal(legendaryChance(0), 4)
-  assert.equal(legendaryChance(58), 4) // pull 59 (ก่อน soft 60)
+  assert.equal(legendaryChance(38), 4) // pull 39 (ก่อน soft 40)
 })
 
 test('legendaryChance ไต่ขึ้นที่ soft pity', () => {
-  assert.equal(legendaryChance(59), 10)        // pull 60 = 4 + 6
-  assert.ok(legendaryChance(70) > legendaryChance(62))
+  assert.equal(legendaryChance(39), 10)        // pull 40 = 4 + 6
+  assert.ok(legendaryChance(44) > legendaryChance(41))
 })
 
 test('legendaryChance hard pity = 100', () => {
-  assert.equal(legendaryChance(79), 100)  // pull 80
+  assert.equal(legendaryChance(49), 100)  // pull 50
 })
 
 test('rollRarity = legendary เมื่อ rng ต่ำกว่า chance', () => {
