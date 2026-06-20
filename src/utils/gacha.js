@@ -24,3 +24,19 @@ export function rollRarity(pity, rng = Math.random) {
   if (r < GACHA_RATES.epic + GACHA_RATES.rare) return 'rare'
   return 'common'
 }
+
+/** เลือกตัว legendary ที่จะออก ตามระบบเป้า 50/50 หรือ new-first */
+export function pickLegendary({ target, guaranteed, ownedLegendaryIds, legendaryIds, rng = Math.random }) {
+  if (target) {
+    if (guaranteed) return { id: target, won: true, newGuaranteed: false }
+    if (rng() < 0.5) return { id: target, won: true, newGuaranteed: false }
+    const others = legendaryIds.filter((id) => id !== target)
+    const id = others.length ? others[Math.floor(rng() * others.length)] : target
+    return { id, won: false, newGuaranteed: true }
+  }
+  // new-first: สุ่มตัวที่ยังไม่มีก่อน, ครบแล้วสุ่มทั้งหมด
+  const owned = new Set(ownedLegendaryIds || [])
+  const unowned = legendaryIds.filter((id) => !owned.has(id))
+  const pool = unowned.length ? unowned : legendaryIds
+  return { id: pool[Math.floor(rng() * pool.length)], won: null, newGuaranteed: false }
+}
