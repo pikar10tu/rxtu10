@@ -16,6 +16,13 @@
     </template>
 
     <template v-else-if="authStore.isLoggedIn">
+      <div class="shop-tabs">
+        <button class="shop-tab" :class="{ on: tab === 'gacha' }" @click="tab = 'gacha'"><Emoji char="🎰" /> อัญเชิญ</button>
+        <button class="shop-tab" :class="{ on: tab === 'lab' }" @click="tab = 'lab'"><Emoji char="🧪" /> ห้องทดลอง</button>
+      </div>
+
+      <LabTab v-if="tab === 'lab'" />
+      <template v-else>
       <div class="shop-storage">
         <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ PETS.length }} ชนิด
       </div>
@@ -54,6 +61,7 @@
         </div>
       </div>
       <div class="shop-note">สุ่ม 10 ได้ 11 ตัว · ตัวซ้ำ → +1 copy (ใช้อัพเกรด)</div>
+      </template>
     </template>
     <div v-else class="shop-login">เข้าสู่ระบบเพื่อช้อป</div>
 
@@ -114,6 +122,7 @@
 import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
+import LabTab from '../components/shop/LabTab.vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
@@ -128,6 +137,7 @@ const { toast } = useToast()
 // ร้านค้ายังไม่เปิดให้นักศึกษา — flip เป็น true เมื่อพร้อม (admin เห็นร้านปกติเสมอเพื่อทดสอบ)
 const SHOP_OPEN = false
 const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
+const tab = ref('gacha') // 'gacha' | 'lab'
 
 const coins   = computed(() => authStore.userData?.coins || 0)
 const pets    = computed(() => authStore.userData?.pets || [])
@@ -247,4 +257,8 @@ async function chooseTarget(id) {
 .rv-grid.single .rv-nm { font-size: .9rem; }
 .rv-badge { color: #fff; font-size: .48rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; }
 .rv-ok { display: block; width: 100%; margin-top: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+
+.shop-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.shop-tab { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; font-size: .82rem; background: #fff; color: var(--ink); cursor: pointer; }
+.shop-tab.on { background: var(--gold); }
 </style>
