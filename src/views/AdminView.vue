@@ -57,6 +57,26 @@
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูค่า</div>
       </section>
 
+      <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
+      <section v-if="pendingGuests.length" class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="📨" /> คำขอเข้าชม (รออนุมัติ)</span></div>
+        <ul class="role-list">
+          <li v-for="g in pendingGuests" :key="g.uid" class="role-row">
+            <div class="role-top">
+              <div class="role-info">
+                <div class="role-name">{{ g.nickname }}</div>
+                <div class="role-sub">{{ g.email }}</div>
+                <div class="gq-reason">{{ g.guestReason }}</div>
+              </div>
+              <div class="role-actions">
+                <button class="btn-mini btn-gold" @click="setGuestStatus(g, 'approved')">✓ อนุมัติ</button>
+                <button class="btn-mini btn-gray" @click="setGuestStatus(g, 'rejected')">✗ ปฏิเสธ</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
       <!-- ───── ทีมวิชาการ (role management) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -87,10 +107,11 @@
                   {{ m.nickname }}
                   <span v-if="m.realName" class="role-real">· {{ m.realName }}</span>
                 </div>
-                <div class="role-sub">{{ m.studentId || m.email || m.uid.slice(0, 8) }}</div>
+                <div class="role-sub">{{ m.studentId || '—' }} · {{ m.email || m.uid.slice(0, 8) }}</div>
               </div>
               <span class="role-badge" :class="'role-' + m.role">{{ roleLabel(m.role) }}</span>
               <div class="role-actions">
+                <button v-if="m.studentId" class="btn-mini btn-gray" title="แก้การผูกตัวตน" @click="resetLink(m)"><Emoji char="🔧" /></button>
                 <button
                   v-if="m.role !== 'academic'"
                   class="btn-mini btn-gold"
@@ -474,6 +495,31 @@ const filtered = computed(() => {
   )
 })
 
+const pendingGuests = computed(() =>
+  (members.guestUsers || []).filter(g => g.guestStatus === 'pending'))
+
+async function setGuestStatus(g, status) {
+  try {
+    await updateDoc(doc(db, 'users', g.uid), { guestStatus: status })
+    g.guestStatus = status
+    toast(status === 'approved' ? `อนุมัติ ${g.nickname} แล้ว` : `ปฏิเสธ ${g.nickname} แล้ว`, 'success')
+  } catch (e) { console.error('[guest status]', e); toast('อัปเดตไม่สำเร็จ', 'error') }
+}
+
+// แก้การผูกผิด: ลบ claim + ล้าง identity → ผู้ใช้ผูกใหม่ตอน login ครั้งหน้า
+async function resetLink(m) {
+  if (!(await confirm(`ล้างการผูกตัวตนของ ${m.nickname}? เขาจะต้องผูกรหัสใหม่ตอนเข้าครั้งหน้า`))) return
+  try {
+    if (m.studentId) await deleteDoc(doc(db, 'claims', m.studentId))
+    await updateDoc(doc(db, 'users', m.uid), {
+      studentId: null, nickname: null, realName: null, track: null,
+      accountType: null, onboarded: false,
+    })
+    toast(`ล้างการผูกของ ${m.nickname || m.email} แล้ว`, 'success')
+    reload()
+  } catch (e) { console.error('[resetLink]', e); toast('ล้างไม่สำเร็จ', 'error') }
+}
+
 async function setRole(m, role) {
   if (m.role === 'admin') return // never demote/alter an admin from here
   savingUid.value = m.uid
@@ -592,6 +638,7 @@ async function setRole(m, role) {
 }
 .role-real { font-weight: 400; color: rgba(0, 0, 0, .45); }
 .role-sub { font-size: .64rem; color: rgba(0, 0, 0, .4); }
+.gq-reason { font-size: .72rem; color: rgba(0, 0, 0, .55); margin-top: 4px; }
 .role-badge {
   font-size: .6rem;
   font-weight: 700;
