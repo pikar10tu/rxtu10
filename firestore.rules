@@ -60,6 +60,11 @@ service cloud.firestore {
           && request.resource.data.get('residence', {}).get('level', 1) <= 12
           && request.resource.data.get('residence', {}).get('level', 1)
              <= resource.data.get('residence', {}).get('level', 1) + 1
+          // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร) — approve/reject = admin เท่านั้น
+          && (
+            request.resource.data.get('guestStatus', null) == resource.data.get('guestStatus', null)
+            || request.resource.data.get('guestStatus', null) == 'pending'
+          )
         )
         // anyone logged in may toggle likes on ANY profile (only these fields)
         || (
@@ -183,6 +188,18 @@ service cloud.firestore {
     }
 
     // (SRS cards live in the user doc at `study.cards` — no subcollection)
+
+    // ── Identity claims — กันจองรหัสนักศึกษาซ้ำ (atomic) ──
+    //  doc id = รหัสนักศึกษา · create-only: มีแล้วสร้างทับไม่ได้
+    //  delete: admin (ตอนแก้การผูกผิด)
+    match /claims/{studentId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && !exists(/databases/$(database)/documents/claims/$(studentId));
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
 
   }
 }
