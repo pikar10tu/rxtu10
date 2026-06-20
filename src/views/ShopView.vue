@@ -6,7 +6,16 @@
       <HelpButton topic="shop" />
     </div>
 
-    <template v-if="authStore.isLoggedIn">
+    <!-- ร้านค้าปิดปรับปรุง (ยังไม่เปิดให้นักศึกษา) — flip SHOP_OPEN=true เมื่อพร้อม; admin เห็นร้านปกติไว้ทดสอบ -->
+    <template v-if="!shopOpen">
+      <div class="shop-maint">
+        <div class="shop-maint-emoji"><Emoji char="🚧" /></div>
+        <div class="shop-maint-title">ร้านค้ากำลังปรับปรุง</div>
+        <div class="shop-maint-msg">กำลังจัดของให้พร้อม เดี๋ยวเปิดให้ช้อปเร็วๆ นี้!</div>
+      </div>
+    </template>
+
+    <template v-else-if="authStore.isLoggedIn">
       <div class="shop-storage">
         <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ PETS.length }} ชนิด
         <span v-if="discount" class="shop-disc">· ส่วนลดร้าน −{{ discount }}%</span>
@@ -64,6 +73,10 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
+
+// ร้านค้ายังไม่เปิดให้นักศึกษา — เปลี่ยนเป็น true เมื่อพร้อมเปิด (admin bypass เห็นร้านปกติเสมอเพื่อทดสอบ)
+const SHOP_OPEN = false
+const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 
 const coins = computed(() => authStore.userData?.coins || 0)
 const pets = computed(() => authStore.userData?.pets || [])
@@ -163,6 +176,10 @@ async function useTicket() {
 .egg-buy.ok:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .shop-note { font-size: .64rem; color: rgba(0,0,0,.4); text-align: center; margin-top: 14px; }
 .shop-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
+.shop-maint { text-align: center; padding: 48px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.shop-maint-emoji { font-size: 3rem; }
+.shop-maint-title { font-size: 1.2rem; font-weight: 800; color: var(--ink); }
+.shop-maint-msg { font-size: .82rem; color: rgba(0,0,0,.55); max-width: 280px; line-height: 1.6; }
 /* reveal */
 .rv-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
 .rv-box { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 28px 24px; text-align: center; max-width: 300px; width: 100%; animation: rv-pop .25s ease; }
