@@ -166,9 +166,13 @@ export const useAuthStore = defineStore('auth', () => {
         const claimRef = doc(db, 'claims', m.id)
         try {
             const existing = await getDoc(claimRef)
-            if (existing.exists()) return { ok: false, reason: 'taken' }
-            // create-only (rules ปฏิเสธถ้ามีอยู่แล้ว = ตัวกันซ้ำจริง)
-            await setDoc(claimRef, { uid: currentUser.value.uid, at: serverTimestamp() })
+            if (existing.exists()) {
+                if (existing.data().uid !== currentUser.value.uid) return { ok: false, reason: 'taken' }
+                // claim เป็นของเราอยู่แล้ว (retry หลัง patchUser รอบก่อนล้มเหลว) → ข้ามไปเขียน identity ต่อ
+            } else {
+                // create-only (rules ปฏิเสธถ้ามีอยู่แล้ว = ตัวกันซ้ำจริง)
+                await setDoc(claimRef, { uid: currentUser.value.uid, at: serverTimestamp() })
+            }
         } catch (e) {
             console.error('[linkStudent claim]', e)
             return { ok: false, reason: 'taken' }
