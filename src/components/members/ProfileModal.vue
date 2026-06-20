@@ -115,8 +115,9 @@ const heroStyle = computed(() => ({
 }))
 
 const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
-const trackLabel = computed(() => (TRACK[props.member?.track]?.[0]) || 'สมาชิก')
-const trackColor = computed(() => (TRACK[props.member?.track]?.[1]) || '#6366f1')
+const isGuest = computed(() => props.member?.accountType === 'guest' || props.member?.track === 'guest')
+const trackLabel = computed(() => (isGuest.value ? 'ผู้เยี่ยมชม' : (TRACK[props.member?.track]?.[0]) || 'สมาชิก'))
+const trackColor = computed(() => (isGuest.value ? (TRACK.guest[1]) : (TRACK[props.member?.track]?.[1]) || '#6366f1'))
 
 // active team only: resolve activePets (species id, with instId fallback for not-yet-migrated members)
 const showcase = computed(() => {

@@ -16,6 +16,14 @@
       </button>
     </div>
 
+    <button
+      v-if="approvedGuests.length"
+      class="mv-guest-toggle" :class="{ on: showGuests }"
+      @click="showGuests = !showGuests"
+    >
+      <Emoji char="👤" /> {{ showGuests ? '← กลับไปดูนักศึกษา' : `ผู้เยี่ยมชม (${approvedGuests.length})` }}
+    </button>
+
     <div class="mv-sort">
       <label class="mv-sort-label" for="mv-sort-sel">เรียงตาม</label>
       <select id="mv-sort-sel" v-model="sortKey" class="mv-sort-sel">
@@ -75,7 +83,7 @@ const refresh = () => members.loadFbUsers({ force: true })
 // merge the full static roster (83) with logged-in user data (by studentId)
 const roster = computed(() => {
   const fb = members.fbUsers || {}
-  const merged = (members.students || []).map(s => {
+  return (members.students || []).map(s => {
     const u = fb[s.id]
     if (u) return { ...u, registered: true }
     return {
@@ -84,9 +92,13 @@ const roster = computed(() => {
       residence: { level: 1 }, likes: 0, pets: [], registered: false,
     }
   })
-  const guests = (members.guestUsers || []).map(g => ({ ...g, registered: true }))
-  return [...merged, ...guests]
 })
+
+// guest ที่อนุมัติแล้วเท่านั้น (pending/rejected ไม่โชว์ให้สมาชิก)
+const approvedGuests = computed(() =>
+  (members.guestUsers || []).filter(g => g.guestStatus === 'approved').map(g => ({ ...g, registered: true })))
+
+const showGuests = ref(false)
 
 const registeredCount = computed(() => roster.value.filter(m => m.registered).length)
 
@@ -98,8 +110,8 @@ const FILTERS = [
 
 const list = computed(() => {
   const q = search.value.trim().toLowerCase()
-  let r = roster.value
-  if (track.value !== 'all') r = r.filter(m => m.track === track.value)
+  let r = showGuests.value ? approvedGuests.value : roster.value
+  if (!showGuests.value && track.value !== 'all') r = r.filter(m => m.track === track.value)
   if (q) r = r.filter(m => [m.nickname, m.realName, m.studentId].some(v => (v || '').toLowerCase().includes(q)))
   return sortMembers(r, sortKey.value, myUid.value)
 })
@@ -136,6 +148,9 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
   color: var(--ink); cursor: pointer; transition: .12s;
 }
 .mv-filter.on { background: var(--primary); color: #fff; border-color: var(--ink); }
+.mv-guest-toggle { width:100%; margin:0 0 12px; border:2px solid var(--ink); border-radius:12px; padding:9px; background:#fff; font-family:inherit; font-size:.82rem; font-weight:700; color:var(--ink); box-shadow:var(--pop); cursor:pointer; }
+.mv-guest-toggle.on { background:#eef2ff; }
+.mv-guest-toggle:active { transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 .mv-sort { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .mv-sort-label { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); }
 .mv-sort-sel { border: 2px solid var(--ink); border-radius: 10px; padding: 5px 10px; font-family: inherit; font-size: .74rem; font-weight: 700; background: #fff; color: var(--ink); }
