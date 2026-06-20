@@ -72,6 +72,9 @@ export const useMembersStore = defineStore('members', () => {
                     email: n.email,
                     role: n.role,
                     track: n.track,
+                    accountType: n.accountType,
+                    guestStatus: n.guestStatus,
+                    guestReason: n.guestReason,
                     coins: n.coins,
                     pets: n.pets,
                     activePets: n.activePets,
@@ -88,7 +91,7 @@ export const useMembersStore = defineStore('members', () => {
                     likes: n.likes,
                     likedBy: n.likedBy,
                 }
-                if (n.track === 'guest') guests.push(light)
+                if (n.accountType === 'guest' || n.track === 'guest') guests.push(light)
                 else if (n.studentId) newFb[n.studentId] = light
             })
             fbUsers.value    = newFb
