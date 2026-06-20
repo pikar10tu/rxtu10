@@ -39,12 +39,25 @@
     <!-- fusion reveal -->
     <Teleport to="body">
       <div v-if="reveal" class="ov" @click.self="reveal = null">
-        <div class="rv-box">
-          <div class="rv-label">หลอมได้!</div>
-          <div class="rv-emoji" :style="{ filter: `drop-shadow(0 0 14px ${rarityColor(reveal.rarity)})` }"><Emoji :char="reveal.emoji" /></div>
+        <div class="rv-box" :class="{ legend: reveal.rarity === 'legendary' }" :style="{ '--rc': rarityColor(reveal.rarity) }">
+          <div class="rv-label">หลอมสำเร็จ!</div>
+          <div class="rv-emoji-wrap">
+            <span class="fuse-aura" aria-hidden="true"></span>
+            <div class="rv-emoji"><Emoji :char="reveal.emoji" /></div>
+          </div>
           <div class="rv-nm">{{ reveal.name }}</div>
           <div class="rv-badge" :style="{ background: rarityColor(reveal.rarity) }">{{ reveal.isNew ? 'ใหม่!' : '+1 copy' }}</div>
           <button class="rv-ok" @click="reveal = null">เยี่ยม!</button>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- redeem coin-burst -->
+    <Teleport to="body">
+      <div v-if="coinBurst" class="cb-ov" aria-hidden="true">
+        <div class="cb">
+          <span v-for="i in 6" :key="i" class="cb-coin" :style="{ '--i': i }"><Emoji char="🪙" /></span>
+          <div class="cb-amt">+{{ coinBurst.toLocaleString() }}</div>
         </div>
       </div>
     </Teleport>
@@ -73,7 +86,9 @@ const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 
 const pending = ref(null) // { mode, rarity, required }
 const reveal = ref(null)  // summary entry
+const coinBurst = ref(null) // จำนวนเหรียญที่เพิ่งแลก (trigger animation)
 const busy = ref(false)
+let cbTimer = null
 
 function openFusion(src) { pending.value = { mode: 'fusion', rarity: src, required: FUSION_COST[src] } }
 function openRedeem(r) { pending.value = { mode: 'redeem', rarity: r, required: 0 } }
@@ -98,7 +113,12 @@ async function onConfirm(allocation) {
         { pets: petsAfter, coins: (auth.userData?.coins || 0) + gain },
         { pets: petsAfter, coins: increment(gain) },
       )
-      toast(ok ? `ได้ ${gain.toLocaleString()} เหรียญ` : 'แลกไม่สำเร็จ', ok ? 'success' : 'error')
+      if (ok) {
+        toast(`ได้ ${gain.toLocaleString()} เหรียญ`, 'success')
+        coinBurst.value = gain
+        clearTimeout(cbTimer)
+        cbTimer = setTimeout(() => { coinBurst.value = null }, 1100)
+      } else toast('แลกไม่สำเร็จ', 'error')
     }
   } catch (e) {
     console.error('[lab]', e); toast('ทำรายการไม่สำเร็จ', 'error')
@@ -124,10 +144,33 @@ async function onConfirm(allocation) {
 .lab-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .lab-btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
 .ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.rv-box { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; }
+.rv-box { position: relative; overflow: hidden; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
+.rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 38px 4px rgba(245,158,11,.5), var(--pop-lg); }
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); }
-.rv-emoji { font-size: 4rem; margin: 8px 0; }
+.rv-emoji-wrap { position: relative; display: grid; place-items: center; width: 110px; height: 110px; margin: 10px auto; }
+.fuse-aura { position: absolute; width: 108px; height: 108px; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0 18%, var(--rc) 28%, transparent 38% 68%, var(--rc) 78%, transparent 88%);
+  opacity: .5; filter: blur(1px); animation: fa-spin 1.1s linear infinite, fa-fade 1.6s ease-out both; }
+.rv-emoji { position: relative; z-index: 1; font-size: 4rem; filter: drop-shadow(0 0 12px var(--rc)); animation: emoji-pop .5s cubic-bezier(.2,1.45,.4,1) both; }
 .rv-nm { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
 .rv-badge { display: inline-block; color: #fff; font-size: .6rem; font-weight: 800; padding: 3px 12px; border-radius: 999px; margin-top: 8px; }
 .rv-ok { display: block; width: 100%; margin-top: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+
+/* redeem coin-burst */
+.cb-ov { position: fixed; inset: 0; z-index: 420; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.cb { position: relative; width: 0; height: 0; }
+.cb-coin { position: absolute; font-size: 1.4rem; left: calc((var(--i) - 3.5) * 16px); top: 0; animation: cb-fly .95s ease-out forwards; animation-delay: calc(var(--i) * 40ms); }
+.cb-amt { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; font-weight: 800; color: #b45309; font-size: 1.5rem; text-shadow: 0 1px 0 #fff, 0 0 10px rgba(245,158,11,.5); animation: cb-amt 1s ease-out forwards; }
+
+@keyframes rv-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes emoji-pop { 0% { transform: scale(.3) rotate(-12deg); opacity: 0; } 60% { transform: scale(1.18) rotate(4deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes fa-spin { to { transform: rotate(360deg); } }
+@keyframes fa-fade { from { opacity: .6; } to { opacity: .28; } }
+@keyframes cb-fly { 0% { opacity: 0; transform: translateY(12px) scale(.4); } 22% { opacity: 1; } 100% { opacity: 0; transform: translateY(-74px) scale(1.1); } }
+@keyframes cb-amt { 0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.7); } 28% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-22px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-box, .rv-emoji, .fuse-aura, .cb-coin, .cb-amt { animation: none !important; }
+  .cb-ov { display: none; }
+}
 </style>

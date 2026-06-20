@@ -99,19 +99,30 @@
       </div>
     </Teleport>
 
-    <!-- reveal -->
+    <!-- reveal: anticipate (ลุ้น) → show (เผย) -->
     <Teleport to="body">
-      <div v-if="reveal" class="ov" @click.self="reveal = null">
-        <div class="rv-box">
-          <div class="rv-label">คุณได้รับ!</div>
-          <div class="rv-grid" :class="{ single: !reveal.multi }">
-            <div v-for="(s, i) in reveal.summary" :key="i" class="rv-cell" :style="{ borderColor: rarityColor(s.rarity) }">
-              <span class="rv-emoji"><Emoji :char="s.emoji" /></span>
-              <span class="rv-nm">{{ s.name }}</span>
-              <span class="rv-badge" :style="{ background: rarityColor(s.rarity) }">{{ s.isNew ? 'ใหม่!' : '+1' }}</span>
+      <div v-if="reveal" class="rv-ov" :class="[`r-${reveal.best}`, reveal.phase]" @click.self="closeReveal">
+        <!-- จังหวะลุ้น: ลูกแก้วเรืองแสงสี rarity สูงสุด -->
+        <div v-if="reveal.phase === 'anticipate'" class="anti" :style="{ '--glow': rarityColor(reveal.best) }" @click="skipReveal">
+          <div class="orb"><span class="orb-core"></span></div>
+          <div class="anti-txt">กำลังอัญเชิญ…</div>
+          <div class="anti-skip">แตะเพื่อข้าม</div>
+        </div>
+        <!-- จังหวะเผย -->
+        <div v-else class="rv-box" :class="{ legend: reveal.best === 'legendary' }" @click.stop>
+          <div v-if="reveal.best === 'legendary'" class="legend-rays" aria-hidden="true"></div>
+          <div class="rv-inner">
+            <div class="rv-label">คุณได้รับ!</div>
+            <div class="rv-grid" :class="{ single: !reveal.multi }">
+              <div v-for="(s, i) in reveal.summary" :key="i" class="rv-cell"
+                :style="{ borderColor: rarityColor(s.rarity), '--rc': rarityColor(s.rarity), animationDelay: (reveal.multi ? i * 65 : 0) + 'ms' }">
+                <span class="rv-emoji"><Emoji :char="s.emoji" /></span>
+                <span class="rv-nm">{{ s.name }}</span>
+                <span class="rv-badge" :style="{ background: rarityColor(s.rarity) }">{{ s.isNew ? 'ใหม่!' : '+1' }}</span>
+              </div>
             </div>
+            <button class="rv-ok" @click="closeReveal">เยี่ยม!</button>
           </div>
-          <button class="rv-ok" @click="reveal = null">เยี่ยม!</button>
         </div>
       </div>
     </Teleport>
@@ -158,6 +169,21 @@ const buying = ref(false)
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const ownedLegendaryIds = () => pets.value.filter((p) => p.rarity === 'legendary').map((p) => p.id)
 
+// reveal animation: จังหวะ "ลุ้น" (anticipate, สีลูกแก้ว = rarity สูงสุด) → "เผย" (show)
+const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
+const reduceMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+let revealTimer = null
+function showReveal(summary, multi) {
+  const best = summary.reduce((b, s) => (RANK[s.rarity] > RANK[b] ? s.rarity : b), 'common')
+  clearTimeout(revealTimer)
+  reveal.value = { summary, multi, best, phase: reduceMotion() ? 'show' : 'anticipate' }
+  if (reveal.value.phase === 'anticipate') {
+    revealTimer = setTimeout(() => { if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }, 1300)
+  }
+}
+function skipReveal() { clearTimeout(revealTimer); if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }
+function closeReveal() { clearTimeout(revealTimer); reveal.value = null }
+
 const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, pct: GACHA_RATES[k], color: RARITY[k]?.color, label: RARITY[k]?.label }))
 
 async function pull(n, useFreeTicket = false) {
@@ -185,7 +211,7 @@ async function pull(n, useFreeTicket = false) {
   }
   const ok = await authStore.patchUser(optimistic, server)
   buying.value = false
-  if (ok) reveal.value = { summary, multi: rolls > 1 }
+  if (ok) showReveal(summary, rolls > 1)
   else toast('สุ่มไม่สำเร็จ', 'error')
 }
 
@@ -246,17 +272,52 @@ async function chooseTarget(id) {
 .info-flavor { font-size: .8rem; color: rgba(0,0,0,.65); line-height: 1.6; margin: 12px 4px; font-style: italic; }
 .info-passive { font-size: .66rem; color: rgba(0,0,0,.45); background: rgba(0,0,0,.04); border-radius: 9px; padding: 7px; }
 .info-target { width: 100%; margin-top: 14px; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
-.rv-box { background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; }
+/* ── reveal: ลุ้น (anticipate) → เผย (show) ── */
+.rv-ov { position: fixed; inset: 0; z-index: 410; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(10,8,20,.74); }
+.rv-ov.anticipate { cursor: pointer; }
+
+.anti { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.orb { position: relative; width: 128px; height: 128px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 42%, #fff 0%, var(--glow) 52%, rgba(0,0,0,.42) 108%);
+  box-shadow: 0 0 58px 8px var(--glow), inset 0 0 22px rgba(255,255,255,.55);
+  animation: orb-pulse .62s ease-in-out infinite alternate; }
+.orb::before { content: ''; position: absolute; inset: -32px; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0 16%, var(--glow) 24%, transparent 33% 66%, var(--glow) 76%, transparent 84%);
+  opacity: .5; filter: blur(2px); animation: orb-spin 2.4s linear infinite; }
+.orb-core { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 0 20px #fff; animation: orb-core .62s ease-in-out infinite alternate; }
+.anti-txt { color: #fff; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; letter-spacing: .03em; text-shadow: 0 0 16px var(--glow); }
+.anti-skip { color: rgba(255,255,255,.5); font-size: .62rem; }
+
+.rv-box { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; overflow: hidden; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
+.rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 40px 4px rgba(245,158,11,.5), var(--pop-lg); }
+.rv-inner { position: relative; z-index: 1; }
+.legend-rays { position: absolute; left: 50%; top: 42%; width: 220%; height: 220%; transform: translate(-50%,-50%); z-index: 0; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(245,158,11,.5) 0deg 7deg, transparent 7deg 22deg);
+  animation: ray-spin 9s linear infinite, ray-fade 2.4s ease-out both; }
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); margin-bottom: 10px; }
 .rv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .rv-grid.single { grid-template-columns: 1fr; }
-.rv-cell { position: relative; border: 2px solid var(--ink); border-radius: 11px; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.rv-cell { position: relative; border: 2px solid var(--ink); border-radius: 11px; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: #fff; animation: cell-in .42s cubic-bezier(.2,1.3,.45,1) both; }
+.rv-grid.single .rv-cell { animation: cell-pop .52s cubic-bezier(.2,1.45,.4,1) both; box-shadow: 0 0 22px -2px var(--rc); }
 .rv-grid.single .rv-emoji { font-size: 3.4rem; }
 .rv-emoji { font-size: 1.7rem; }
 .rv-nm { font-size: .52rem; font-weight: 700; }
 .rv-grid.single .rv-nm { font-size: .9rem; }
 .rv-badge { color: #fff; font-size: .48rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; }
-.rv-ok { display: block; width: 100%; margin-top: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+.rv-ok { position: relative; z-index: 1; display: block; width: 100%; margin-top: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+
+@keyframes orb-pulse { from { transform: scale(.92); } to { transform: scale(1.08); box-shadow: 0 0 80px 14px var(--glow), inset 0 0 22px rgba(255,255,255,.6); } }
+@keyframes orb-core { from { transform: scale(.78); opacity: .78; } to { transform: scale(1.16); opacity: 1; } }
+@keyframes orb-spin { to { transform: rotate(360deg); } }
+@keyframes rv-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes cell-in { from { transform: translateY(14px) scale(.82); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes cell-pop { 0% { transform: scale(.4); opacity: 0; } 62% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes ray-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+@keyframes ray-fade { from { opacity: .85; } to { opacity: .4; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb::before, .orb-core, .rv-box, .rv-cell, .legend-rays { animation: none !important; }
+}
 
 .shop-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
 .shop-tab { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; font-size: .82rem; background: #fff; color: var(--ink); cursor: pointer; }
