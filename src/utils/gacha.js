@@ -1,7 +1,7 @@
 // gacha (Phase B) — pure, ฉีด rng ได้ทุกฟังก์ชัน · ค่าทั้งหมด draft pin
-export const GACHA_RATES = { common: 60.5, rare: 30, epic: 8, legendary: 1.5 } // % รวม 100
-export const SOFT_PITY = 76      // pull ที่เริ่มไต่ rate legendary
-export const HARD_PITY = 100     // pull ที่การันตี legendary
+export const GACHA_RATES = { common: 45, rare: 35, epic: 16, legendary: 4 } // % รวม 100 (ใจป้ำ 21 มิ.ย.)
+export const SOFT_PITY = 60      // pull ที่เริ่มไต่ rate legendary
+export const HARD_PITY = 80      // pull ที่การันตี legendary
 export const SOFT_PITY_STEP = 6  // +%/pull หลัง soft pity
 export const PULL_COST = 1000
 export const TEN_PULL_COST = 10000

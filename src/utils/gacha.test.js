@@ -6,21 +6,21 @@ import { legendaryChance, rollRarity, GACHA_RATES, SOFT_PITY, HARD_PITY } from '
 const seq = (vals) => { let i = 0; return () => vals[Math.min(i++, vals.length - 1)] }
 
 test('legendaryChance base ก่อน soft pity', () => {
-  assert.equal(legendaryChance(0), 1.5)
-  assert.equal(legendaryChance(74), 1.5) // pull 75
+  assert.equal(legendaryChance(0), 4)
+  assert.equal(legendaryChance(58), 4) // pull 59 (ก่อน soft 60)
 })
 
 test('legendaryChance ไต่ขึ้นที่ soft pity', () => {
-  assert.equal(legendaryChance(75), 7.5)         // pull 76 = 1.5 + 6
-  assert.ok(legendaryChance(90) > legendaryChance(80))
+  assert.equal(legendaryChance(59), 10)        // pull 60 = 4 + 6
+  assert.ok(legendaryChance(70) > legendaryChance(62))
 })
 
 test('legendaryChance hard pity = 100', () => {
-  assert.equal(legendaryChance(99), 100)  // pull 100
+  assert.equal(legendaryChance(79), 100)  // pull 80
 })
 
 test('rollRarity = legendary เมื่อ rng ต่ำกว่า chance', () => {
-  assert.equal(rollRarity(0, seq([0.0])), 'legendary')   // 0 < 1.5%
+  assert.equal(rollRarity(0, seq([0.0])), 'legendary')   // 0 < 4%
 })
 
 test('rollRarity hard pity บังคับ legendary', () => {
