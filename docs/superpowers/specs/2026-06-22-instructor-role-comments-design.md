@@ -81,7 +81,7 @@
 - props: `questionId`
 - โหลด comments **เมื่อ mount** (component นี้ render เฉพาะตอนกาง panel) จาก `questions/{qid}/comments` orderBy createdAt
 - แสดง thread (ชื่อ+role badge+ข้อความ+เวลา) + ช่องพิมพ์ + ปุ่มส่ง → `addDoc` ผ่าน `buildComment` + `serverTimestamp()`
-- ปุ่มลบของคอมเมนต์ตัวเอง (own) — optional v1, ทำได้เพราะ rules อนุญาต
+- ปุ่มลบของคอมเมนต์ตัวเอง (own) — **มีใน v1** (deleteDoc, rules อนุญาตเจ้าของ/admin) · ยืนยันก่อนลบด้วย useConfirm
 - เขียนผ่าน Firestore SDK ตรง (ไม่ใช่ patchUser — ไม่ใช่ user doc) · cleanText ก่อนเขียนเสมอ
 - scoped style · emoji ผ่าน `<Emoji>`
 
@@ -106,7 +106,8 @@
 - [ ] admin ตั้ง guest (approved) เป็น `role:'instructor'` ได้จาก AdminView + เห็น badge 🩺 อาจารย์
 - [ ] บัญชี instructor: เห็นลิงก์ "จัดการคลังข้อสอบ" ใน Study → เข้า QuestionsView ได้ (ไม่โดน qz-denied) → เพิ่ม/แก้/เผยแพร่ข้อสอบได้จริง
 - [ ] บัญชี instructor: **broadcast mail / ตัดสิน report ไม่ได้** (rules ปฏิเสธ — เป็น isAcademic)
-- [ ] คอมเมนต์: วิชาการ+อาจารย์ เปิด panel 💬 ต่อข้อ → เห็น+โพสต์ thread ได้ · นักศึกษาเข้าไม่ถึง (rules ปฏิเสธ read/create)
+- [ ] คอมเมนต์: วิชาการ+อาจารย์ เปิด panel 💬 ต่อข้อ → เห็น+โพสต์ thread ได้ · ลบคอมเมนต์ตัวเองได้ (ยืนยันก่อนลบ) · นักศึกษาเข้าไม่ถึง (rules ปฏิเสธ read/create)
+- [ ] บัญชี instructor: **ไม่เห็น panel report** (🚩) ในหน้าจัดการข้อสอบ (ซ่อนด้วย isAcademic)
 - [ ] คอมเมนต์โหลด **เฉพาะตอนกาง panel** (ไม่ยิง read ตอนเปิดหน้า/ตอนไม่กาง)
 - [ ] นักศึกษาทั่วไป: ไม่เห็นลิงก์คลังข้อสอบ, ไม่เห็นปุ่มคอมเมนต์, พฤติกรรมเดิมทุกอย่าง
 - [ ] `npm run build` ผ่าน + `node --test src/utils/questionComments.test.js` เขียว
