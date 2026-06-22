@@ -5,7 +5,7 @@
       <span class="qz-count">{{ filtered.length }}/{{ list.length }} ข้อ</span>
     </div>
 
-    <div v-if="!authStore.isAcademic" class="qz-denied">
+    <div v-if="!authStore.isQuestionEditor" class="qz-denied">
       เฉพาะแอดมินหรือทีมวิชาการเท่านั้น
     </div>
 
@@ -54,7 +54,7 @@
       </details>
 
       <!-- ── ข้อที่ถูกแจ้งว่าผิด (questionReports) ── -->
-      <details class="qz-reports" @toggle="onReportsToggle">
+      <details v-if="authStore.isAcademic" class="qz-reports" @toggle="onReportsToggle">
         <summary class="qz-reports-sum"><Emoji char="🚩" /> ข้อที่ถูกแจ้งว่าผิด<span v-if="reportsOpen"> ({{ reports.length }})</span></summary>
         <div class="qz-reports-body">
           <div v-if="reportsLoading" class="qz-empty">กำลังโหลด…</div>
@@ -211,6 +211,7 @@
             <span v-if="q.category" class="qz-cat">{{ q.category }}</span>
             <span v-if="q.domain" class="qz-cat">{{ q.domain }}</span>
             <div class="qz-item-actions">
+              <button class="qz-mini" @click="commentOpenId = commentOpenId === q.id ? null : q.id">💬</button>
               <button class="qz-mini" @click="edit(q)">แก้ไข</button>
               <button class="qz-mini qz-danger" @click="remove(q)">ลบ</button>
             </div>
@@ -222,6 +223,7 @@
             </li>
           </ul>
           <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
+          <QuestionComments v-if="commentOpenId === q.id" :questionId="q.id" />
         </li>
       </ul>
       <button v-if="filtered.length > visible.length" class="qz-btn qz-gray qz-more" @click="visibleCount += PAGE">
@@ -233,6 +235,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import QuestionComments from '../components/questions/QuestionComments.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, setDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -270,6 +273,7 @@ const domainFilter = ref('__all')
 const visibleCount = ref(PAGE)
 const selected = ref(new Set())   // เก็บ id ที่เลือก (Vue 3 track Set ได้)
 const batchBusy = ref(false)
+const commentOpenId = ref(null)
 
 const categories = computed(() => distinctCategories(list.value))
 const filtered = computed(() => {
@@ -372,7 +376,7 @@ function removeChoice(i) {
   else if (draft.value.answer > i) draft.value.answer--
 }
 
-onMounted(() => { if (authStore.isAcademic) load() })
+onMounted(() => { if (authStore.isQuestionEditor) load() })
 
 // ── bulk JSON import ──
 const FORMAT_EXAMPLE = `[
