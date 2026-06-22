@@ -158,6 +158,16 @@
       </div>
 
       <!-- ── ค้นหา / กรอง ── -->
+      <div v-if="list.length" class="qz-overview">
+        <Emoji char="📊" /> ทั้งหมด <b>{{ bank.total }}</b> ข้อ · เผยแพร่ <b>{{ bank.published }}</b> · ร่าง <b>{{ bank.draft }}</b>
+        <span class="qz-ov-dom">
+          <template v-for="k in DOMAIN_KEYS" :key="k">
+            <span v-if="bank.byDomain[k]"> · {{ domainLabel(k) || k }} {{ bank.byDomain[k] }}</span>
+          </template>
+          <span v-if="bank.byDomain.none"> · ไม่ระบุ {{ bank.byDomain.none }}</span>
+        </span>
+      </div>
+
       <div v-if="list.length" class="qz-filters">
         <input v-model="search" class="qz-input qz-search" type="text" aria-label="ค้นหาข้อสอบ" spellcheck="false" placeholder="🔍 ค้นหาโจทย์ / หมวด…" />
         <div class="qz-filter-row">
@@ -246,6 +256,7 @@ import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
+import { bankStats } from '../utils/questionBankStats.js'
 import { parseImport } from '../utils/importQuestions.js'
 import { qhash, splitDuplicateRows, groupDuplicates } from '../utils/qhash.js'
 import { buildMeta } from '../utils/questionsMeta.js'
@@ -288,6 +299,7 @@ const filtered = computed(() => {
   return r
 })
 const visible = computed(() => filtered.value.slice(0, visibleCount.value))
+const bank = computed(() => bankStats(list.value))
 const filteredDraftIds = computed(() => filtered.value.filter(q => !q.isPublished).map(q => q.id))
 const allFilteredSelected = computed(() =>
   filtered.value.length > 0 && filtered.value.every(q => selected.value.has(q.id)))
@@ -725,6 +737,11 @@ async function resolveReports(g, verdict) {
 .qz-detail { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
 .qz-cat-sm { display: inline-block; margin-bottom: 6px; }
 .qz-detail-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+/* ── header ภาพรวมคลัง ── */
+.qz-overview { font-size: .72rem; color: var(--ink); background: var(--primary-light, #eef2ff); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.5; }
+.qz-overview b { font-weight: 800; }
+.qz-ov-dom { color: var(--muted); }
 
 /* ── filters / batch ── */
 .qz-filters { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
