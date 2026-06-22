@@ -46,7 +46,7 @@
       </RouterLink>
 
       <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ (admin ⊃ academic) -->
-      <RouterLink v-if="authStore.isAcademic" to="/questions" class="sv-quizlink sv-acadlink">
+      <RouterLink v-if="authStore.isQuestionEditor" to="/questions" class="sv-quizlink sv-acadlink">
         <span class="sv-quizlink-emoji"><Emoji char="🛠️" /></span>
         <span class="sv-quizlink-text">
           <b>จัดการคลังข้อสอบ</b>
