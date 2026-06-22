@@ -215,7 +215,7 @@
       <div v-else-if="!filtered.length" class="qz-empty">ไม่พบข้อสอบตามเงื่อนไข</div>
       <ul v-else class="qz-list">
         <li v-for="q in visible" :key="q.id" class="qz-item" :class="{ sel: selected.has(q.id), open: expandedId === q.id }">
-          <div class="qz-row" @click="toggleExpand(q.id)">
+          <div class="qz-row" role="button" tabindex="0" :aria-expanded="expandedId === q.id" @click="toggleExpand(q.id)" @keydown.enter.space.prevent="toggleExpand(q.id)">
             <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @click.stop @change="toggleSelect(q.id)" />
             <span class="qz-badge" :class="q.isPublished ? 'pub' : 'draft'">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }}</span>
             <span v-if="q.domain" class="qz-cat">{{ domainLabel(q.domain) || q.domain }}</span>
