@@ -36,6 +36,9 @@ service cloud.firestore {
     function isAcademic() {
       return isAdmin() || (request.auth != null && myRole() == 'academic');
     }
+    function canEditQuestions() {
+      return isAcademic() || (request.auth != null && myRole() == 'instructor');
+    }
 
     // ── Users ──
     //  read: any logged-in user (members list)
@@ -143,10 +146,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ── Question bank (Phase 2) — editable by the Academic Team ──
+    // ── Question bank — editable by Academic Team + Instructors (อาจารย์) ──
     match /questions/{id} {
-      allow read:  if request.auth != null && (resource.data.get('isPublished', false) == true || isAcademic());
-      allow write: if isAcademic();
+      allow read:  if request.auth != null && (resource.data.get('isPublished', false) == true || canEditQuestions());
+      allow write: if canEditQuestions();
+
+      // ── Comments (SP1) — thread วิชาการ↔อาจารย์ ต่อข้อ (นักศึกษาเข้าไม่ถึง) ──
+      match /comments/{commentId} {
+        allow read, create: if canEditQuestions();
+        allow update, delete: if isAdmin()
+          || (request.auth != null && request.auth.uid == resource.data.get('authorUid', ''));
+      }
     }
 
     // ── Exam sessions (Phase 2) — owner-only, CREATE-ONLY ──
