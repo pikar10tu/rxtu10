@@ -36,4 +36,5 @@ export const LIMITS = {
   choice: 200,
   category: 60,
   explanation: 1000,
+  comment: 1000,
 }
