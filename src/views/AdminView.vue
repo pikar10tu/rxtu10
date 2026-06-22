@@ -124,6 +124,18 @@
                   :disabled="savingUid === m.uid"
                   @click="setRole(m, 'student')"
                 >− เอาออก</button>
+                <button
+                  v-if="m.accountType === 'guest' && m.guestStatus === 'approved' && m.role !== 'instructor'"
+                  class="btn-mini btn-gold"
+                  :disabled="savingUid === m.uid || m.role === 'admin'"
+                  @click="setRole(m, 'instructor')"
+                ><Emoji char="🩺" /> อาจารย์</button>
+                <button
+                  v-else-if="m.role === 'instructor'"
+                  class="btn-mini btn-gray"
+                  :disabled="savingUid === m.uid"
+                  @click="setRole(m, 'student')"
+                >− ถอนอาจารย์</button>
                 <button class="btn-mini btn-gray" @click="editTagsUid = editTagsUid === m.uid ? null : m.uid"><Emoji char="🏷️" /></button>
               </div>
             </div>
@@ -475,7 +487,7 @@ function reload() {
 }
 
 function roleLabel(role) {
-  return role === 'admin' ? '👑 แอดมิน' : role === 'academic' ? '🎓 วิชาการ' : 'สมาชิก'
+  return role === 'admin' ? '👑 แอดมิน' : role === 'academic' ? '🎓 วิชาการ' : role === 'instructor' ? '🩺 อาจารย์' : 'สมาชิก'
 }
 
 // flatten student fbUsers + guests into one sortable list
@@ -649,6 +661,7 @@ async function setRole(m, role) {
 .role-student  { background: rgba(0,0,0,.06);  color: rgba(0,0,0,.5); }
 .role-academic { background: rgba(59,130,246,.15); color: #2563eb; }
 .role-admin    { background: rgba(251,191,36,.18); color: #b45309; }
+.role-instructor { background: #fff7ed; color: #9a3412; }
 .role-actions { flex-shrink: 0; }
 .btn-mini {
   border: 2px solid var(--ink);
