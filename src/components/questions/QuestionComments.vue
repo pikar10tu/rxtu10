@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { collection, addDoc, deleteDoc, doc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
 import { useAuthStore } from '../../stores/auth.js'
@@ -41,7 +41,7 @@ const comments = ref([])
 const loading = ref(true)
 const sending = ref(false)
 const draft = ref('')
-const uid = authStore.currentUser?.uid
+const uid = computed(() => authStore.currentUser?.uid)
 
 const colRef = () => collection(db, 'questions', props.questionId, 'comments')
 
@@ -57,7 +57,7 @@ async function load() {
 
 async function send() {
   const payload = buildComment({
-    text: draft.value, uid,
+    text: draft.value, uid: uid.value,
     name: authStore.userData?.nickname,
     role: authStore.userData?.role || 'student',
   })
