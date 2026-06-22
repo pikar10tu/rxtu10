@@ -35,6 +35,11 @@ export const useAuthStore = defineStore('auth', () => {
     // Academic team (admin OR academic) — gates question editing.
     const isAcademic = computed(() =>
         isAdmin.value || userData.value?.role === 'academic')
+    // Instructor — อาจารย์ (เข้ามาเป็น guest) ที่แก้คลังข้อสอบได้ แต่ไม่ใช่ isAcademic
+    // (จึงเสกจดหมาย/แจกเหรียญ/broadcast/ตัดสิน report ไม่ได้)
+    const isInstructor = computed(() => userData.value?.role === 'instructor')
+    // Gate แก้คลังข้อสอบ + คอมเมนต์ (ทีมวิชาการ OR อาจารย์)
+    const isQuestionEditor = computed(() => isAcademic.value || isInstructor.value)
     const isLinked   = computed(() => !!userData.value?.studentId)
     // daily-income bonus % from tags (e.g. supporter +20%)
     const incomeBonusPct = computed(() => incomeBonusFromTags(effectiveTags(userData.value)))
@@ -229,7 +234,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         currentUser, userData, loading,
-        isLoggedIn, isAdmin, isAcademic, isLinked, incomeBonusPct,
+        isLoggedIn, isAdmin, isAcademic, isInstructor, isQuestionEditor, isLinked, incomeBonusPct,
         login, logout, ensureDoc,
         blockSnapshot, setUserDataOptimistic, patchUser,
         acceptConsent, linkStudent, registerGuest,

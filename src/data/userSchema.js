@@ -44,7 +44,7 @@ export const USER_DEFAULTS = {
   farmSalesTotal: 0,       // lifetime: เหรียญจากการขายฟาร์ม (achievement)
   achievementCount: 0,     // denormalized count ของ achievements subcollection
   // ── v2 fields ──
-  role: 'student',                            // 'student' | 'academic' | 'admin'
+  role: 'student',                            // 'student' | 'academic' | 'instructor' | 'admin'
   tags: [],                                   // admin-assigned badges
   residence: { level: 1, upgradedAt: null },  // ที่อยู่อาศัย (prestige/coin sink)
   farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
