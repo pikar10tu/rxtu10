@@ -204,26 +204,28 @@
       <div v-else-if="!list.length" class="qz-empty">ยังไม่มีข้อสอบ — เพิ่มข้อแรกได้เลย</div>
       <div v-else-if="!filtered.length" class="qz-empty">ไม่พบข้อสอบตามเงื่อนไข</div>
       <ul v-else class="qz-list">
-        <li v-for="q in visible" :key="q.id" class="qz-item" :class="{ sel: selected.has(q.id) }">
-          <div class="qz-item-top">
-            <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @change="toggleSelect(q.id)" />
+        <li v-for="q in visible" :key="q.id" class="qz-item" :class="{ sel: selected.has(q.id), open: expandedId === q.id }">
+          <div class="qz-row" @click="toggleExpand(q.id)">
+            <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @click.stop @change="toggleSelect(q.id)" />
             <span class="qz-badge" :class="q.isPublished ? 'pub' : 'draft'">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }}</span>
-            <span v-if="q.category" class="qz-cat">{{ q.category }}</span>
-            <span v-if="q.domain" class="qz-cat">{{ q.domain }}</span>
-            <div class="qz-item-actions">
-              <button class="qz-mini" @click="commentOpenId = commentOpenId === q.id ? null : q.id">💬</button>
+            <span v-if="q.domain" class="qz-cat">{{ domainLabel(q.domain) || q.domain }}</span>
+            <span class="qz-row-q">{{ q.question }}</span>
+            <span class="qz-chev" :class="{ open: expandedId === q.id }">▸</span>
+          </div>
+          <div v-if="expandedId === q.id" class="qz-detail">
+            <span v-if="q.category" class="qz-cat qz-cat-sm">{{ q.category }}</span>
+            <ul class="qz-choices">
+              <li v-for="(c, i) in q.choices" :key="i" :class="{ correct: i === q.answer }">
+                <span class="qz-c-letter">{{ LETTERS[i] }}</span>{{ c }}
+              </li>
+            </ul>
+            <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
+            <QuestionComments :questionId="q.id" />
+            <div class="qz-detail-actions">
               <button class="qz-mini" @click="edit(q)">แก้ไข</button>
               <button class="qz-mini qz-danger" @click="remove(q)">ลบ</button>
             </div>
           </div>
-          <div class="qz-q">{{ q.question }}</div>
-          <ul class="qz-choices">
-            <li v-for="(c, i) in q.choices" :key="i" :class="{ correct: i === q.answer }">
-              <span class="qz-c-letter">{{ LETTERS[i] }}</span>{{ c }}
-            </li>
-          </ul>
-          <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
-          <QuestionComments v-if="commentOpenId === q.id" :questionId="q.id" />
         </li>
       </ul>
       <button v-if="filtered.length > visible.length" class="qz-btn qz-gray qz-more" @click="visibleCount += PAGE">
@@ -251,7 +253,7 @@ import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail } from '../utils/mailbox.js'
 import { REPORT_REWARD } from '../data/index.js'
-import { DOMAINS } from '../data/domains.js'
+import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -273,7 +275,8 @@ const domainFilter = ref('__all')
 const visibleCount = ref(PAGE)
 const selected = ref(new Set())   // เก็บ id ที่เลือก (Vue 3 track Set ได้)
 const batchBusy = ref(false)
-const commentOpenId = ref(null)
+const expandedId = ref(null)
+function toggleExpand(id) { expandedId.value = expandedId.value === id ? null : id }
 
 const categories = computed(() => distinctCategories(list.value))
 const filtered = computed(() => {
@@ -715,7 +718,13 @@ async function resolveReports(g, verdict) {
 .qz-item { background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); padding: 12px; }
 .qz-item.sel { background: var(--primary-light, #eef2ff); }
 .qz-check-item { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--primary); }
-.qz-item-top { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.qz-row { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.qz-row-q { flex: 1; min-width: 0; font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qz-chev { flex-shrink: 0; color: var(--muted); font-size: 1rem; transition: transform .15s; }
+.qz-chev.open { transform: rotate(90deg); }
+.qz-detail { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.qz-cat-sm { display: inline-block; margin-bottom: 6px; }
+.qz-detail-actions { display: flex; gap: 6px; margin-top: 8px; }
 
 /* ── filters / batch ── */
 .qz-filters { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
@@ -733,8 +742,6 @@ async function resolveReports(g, verdict) {
 .qz-badge.pub { background: rgba(34,197,94,.15); color: #15803d; }
 .qz-badge.draft { background: rgba(0,0,0,.07); color: rgba(0,0,0,.5); }
 .qz-cat { font-size: .62rem; color: #4f46e5; font-weight: 700; }
-.qz-item-actions { margin-left: auto; display: flex; gap: 5px; }
-.qz-q { font-size: .85rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; line-height: 1.4; }
 .qz-choices { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .qz-choices li { font-size: .76rem; color: rgba(0,0,0,.6); display: flex; gap: 7px; align-items: baseline; padding: 4px 8px; border-radius: 7px; }
 .qz-choices li.correct { background: rgba(34,197,94,.1); color: #15803d; font-weight: 700; }
