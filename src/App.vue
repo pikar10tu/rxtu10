@@ -25,9 +25,7 @@
         <RouterLink to="/members" class="bn-item"><span class="bn-icon"><Emoji char="👥" /></span>Members</RouterLink>
         <RouterLink to="/play"    class="bn-item"><span class="bn-icon"><Emoji char="🎮" /></span>Play</RouterLink>
         <RouterLink to="/study"   class="bn-item"><span class="bn-icon"><Emoji char="📚" /></span>Study</RouterLink>
-        <!-- นักศึกษา → ทำข้อสอบ (/quiz) · ทีมวิชาการ → จัดการคลังข้อสอบ (/questions) -->
-        <RouterLink :to="authStore.isAcademic ? '/questions' : '/quiz'" class="bn-item"><span class="bn-icon"><Emoji char="📝" /></span>ข้อสอบ</RouterLink>
-        <RouterLink v-if="authStore.isAdmin" to="/admin" class="bn-item"><span class="bn-icon"><Emoji char="⚙️" /></span>Admin</RouterLink>
+        <RouterLink to="/shop"    class="bn-item"><span class="bn-icon"><Emoji char="🛒" /></span>Shop</RouterLink>
       </nav>
 
       <HelpModal />

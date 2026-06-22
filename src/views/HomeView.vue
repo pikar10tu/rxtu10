@@ -27,21 +27,12 @@
       <MailboxCard />
       <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
       <ResidenceCard />
-    </template>
 
-    <!-- ทางเข้าลัด -->
-    <div class="home-shortcuts">
-      <RouterLink to="/shop" class="home-shortcut sc-shop">
-        <span class="hs-icon"><Emoji char="🛒" /></span>
-        <span class="hs-label">Shop</span>
-        <span class="hs-sub">กาชาไข่</span>
+      <!-- เครื่องมือผู้ดูแล — เฉพาะแอดมิน (Shop ไป nav, Pets ไป Play แล้ว) -->
+      <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-admin-btn">
+        <Emoji char="⚙️" /> แผงผู้ดูแลระบบ
       </RouterLink>
-      <RouterLink v-if="authStore.isLoggedIn" to="/pets" class="home-shortcut sc-pets">
-        <span class="hs-icon"><Emoji char="🧪" /></span>
-        <span class="hs-label">สัตว์เลี้ยง</span>
-        <span class="hs-sub">คลัง · ห้องทดลอง</span>
-      </RouterLink>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -95,46 +86,22 @@ const myAvatar = computed(() =>
 .home-me-sub { font-size: .66rem; color: var(--muted); }
 .home-me-arrow { color: var(--ink); font-size: 1.4rem; font-weight: 800; }
 
-/* ── colourful sticker shortcuts ── */
-.home-shortcuts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 12px;
-  margin-top: 4px;
-}
-.home-shortcut {
+/* ── ปุ่มเครื่องมือผู้ดูแล (แอดมินเท่านั้น) — โทนเทา ไม่แย่งความสนใจ ── */
+.home-admin-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 16px 10px 13px;
-  border-radius: 18px;
-  background: #fff;
-  border: 2px solid var(--ink);
-  box-shadow: var(--pop);
-  transition: transform .12s, box-shadow .12s;
-}
-.home-shortcut:active {
-  transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--ink);
-}
-.hs-icon {
-  font-size: 1.5rem;
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 14px; border: 2px solid var(--ink);
-}
-.sc-shop .hs-icon { background: #ffe1ea; }
-.sc-pets .hs-icon { background: #e2f7f0; }
-.hs-label {
-  font-weight: 800;
-  color: var(--ink);
-  font-size: 0.92rem;
-  margin-top: 2px;
-}
-.hs-sub {
-  font-size: 0.6rem;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 11px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  border: 1.5px solid #d1d5db;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: background .12s;
 }
+.home-admin-btn:active { background: #e5e7eb; }
 </style>

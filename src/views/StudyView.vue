@@ -44,6 +44,16 @@
         </span>
         <span class="sv-quizlink-go">›</span>
       </RouterLink>
+
+      <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ (admin ⊃ academic) -->
+      <RouterLink v-if="authStore.isAcademic" to="/questions" class="sv-quizlink sv-acadlink">
+        <span class="sv-quizlink-emoji"><Emoji char="🛠️" /></span>
+        <span class="sv-quizlink-text">
+          <b>จัดการคลังข้อสอบ</b>
+          <small>เพิ่ม/แก้/เผยแพร่ข้อสอบ · เฉพาะทีมวิชาการ</small>
+        </span>
+        <span class="sv-quizlink-go">›</span>
+      </RouterLink>
     </template>
 
     <!-- ── REVIEW ── -->
@@ -347,6 +357,11 @@ async function sendReport() {
 .sv-quizlink-text b { font-size: .88rem; color: #3730a3; }
 .sv-quizlink-text small { font-size: .66rem; color: #6366f1; }
 .sv-quizlink-go { font-size: 1.4rem; color: #6366f1; }
+/* ทางเข้าทีมวิชาการ — โทนอำพัน แยกจากปุ่มทำข้อสอบของนักศึกษา */
+.sv-acadlink { background: #fff7ed; border-color: #b45309; margin-top: 10px; }
+.sv-acadlink .sv-quizlink-text b { color: #9a3412; }
+.sv-acadlink .sv-quizlink-text small,
+.sv-acadlink .sv-quizlink-go { color: #c2680c; }
 
 /* review */
 .sv-rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }

@@ -16,6 +16,13 @@
           <span v-else class="gc-badge grow"><Emoji char="🌱" /> กำลังโต</span>
         </button>
 
+        <!-- สัตว์เลี้ยง: คลัง + ห้องทดลอง (Pets ย้ายมาจาก shortcut โฮม) -->
+        <RouterLink to="/pets" class="game-card">
+          <span class="gc-emoji"><Emoji char="🐾" /></span>
+          <span class="gc-name">สัตว์เลี้ยง</span>
+          <span class="gc-badge grow">คลัง · ห้องทดลอง</span>
+        </RouterLink>
+
         <div class="soon-card"><span class="soon-emoji"><Emoji char="⚔️" /></span><span>PvP สู้กัน</span><span class="soon-tag">เร็วๆ นี้</span></div>
         <div class="soon-card"><span class="soon-emoji"><Emoji char="🏯" /></span><span>ปีนหอคอย</span><span class="soon-tag">เร็วๆ นี้</span></div>
         <div class="soon-card"><span class="soon-emoji"><Emoji char="🗺️" /></span><span>ผจญภัย Co-op</span><span class="soon-tag">เร็วๆ นี้</span></div>
