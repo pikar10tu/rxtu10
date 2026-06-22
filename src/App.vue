@@ -17,7 +17,7 @@
          the admin + academic team see the live app (academics manage the question
          bank); everyone else gets the maintenance screen. Admin flips it from the
          Admin tab — no redeploy needed. -->
-    <template v-else-if="authStore.isAcademic || !maintenance">
+    <template v-else-if="authStore.isQuestionEditor || !maintenance">
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">

@@ -153,7 +153,10 @@ service cloud.firestore {
 
       // ── Comments (SP1) — thread วิชาการ↔อาจารย์ ต่อข้อ (นักศึกษาเข้าไม่ถึง) ──
       match /comments/{commentId} {
-        allow read, create: if canEditQuestions();
+        allow read:   if canEditQuestions();
+        // create: ต้องเป็นคนเขียนจริง (กันปลอม authorUid เป็นคนอื่นผ่าน DevTools)
+        allow create: if canEditQuestions()
+          && request.resource.data.get('authorUid', '') == request.auth.uid;
         allow update, delete: if isAdmin()
           || (request.auth != null && request.auth.uid == resource.data.get('authorUid', ''));
       }
