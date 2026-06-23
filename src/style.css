@@ -80,6 +80,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 .bn-icon { font-size: 1.3rem; transition: .15s; }
 .bn-item.active { color: var(--primary); }
 .bn-item.active .bn-icon { transform: translateY(-2px); }
+.bn-item.router-link-exact-active { color: var(--primary); }
+.bn-item.router-link-exact-active .bn-icon { transform: translateY(-1px) scale(1.08); }
 
 /* CARDS */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm); margin-bottom: 10px; }
