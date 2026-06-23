@@ -7,8 +7,8 @@ import { quizDailyCap, quizGrant } from './quizReward.js'
 test('quizDailyCap: บ้านเล็ก (Lv1 income 300) < พื้น → ใช้พื้น', () => {
   assert.equal(quizDailyCap(1, 1000), 1000)
 })
-test('quizDailyCap: บ้านใหญ่ (Lv15 income 140000) → ใช้รายได้บ้าน', () => {
-  assert.equal(quizDailyCap(15, 1000), 140000)
+test('quizDailyCap: บ้านใหญ่ (Lv12 income 55000) → ใช้รายได้บ้าน', () => {
+  assert.equal(quizDailyCap(12, 1000), 55000)
 })
 test('quizDailyCap: level หาย/undefined → clamp Lv1 → ใช้พื้น', () => {
   assert.equal(quizDailyCap(undefined, 1000), 1000)
