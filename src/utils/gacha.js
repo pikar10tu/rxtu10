@@ -78,3 +78,13 @@ export function rollMany(n, state, catalog, rng = Math.random) {
   }
   return { results, nextState: { pity: cur.pity, target: cur.target, guaranteed: cur.guaranteed } }
 }
+
+/** ตั๋ว payment-first: คืนวิธีจ่ายของปุ่มสุ่ม (n=1 หรือ 10) ตามจำนวนตั๋วที่มี
+ *  ×1 ใช้ 1 ตั๋ว / ×10 ใช้ 10 ตั๋ว (ได้ 11 ตัว) — มีตั๋วพอใช้ตั๋วก่อน ไม่พอจ่ายเหรียญ */
+export function resolvePullPayment(n, tickets) {
+  const single = n === 1
+  const rolls = single ? 1 : TEN_PULL_N
+  const ticketsNeeded = single ? 1 : 10
+  if ((tickets || 0) >= ticketsNeeded) return { rolls, pay: 'ticket', amount: ticketsNeeded }
+  return { rolls, pay: 'coin', amount: single ? PULL_COST : TEN_PULL_COST }
+}
