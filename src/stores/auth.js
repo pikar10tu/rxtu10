@@ -5,7 +5,7 @@ import {
     signOut, onAuthStateChanged,
 } from 'firebase/auth'
 import {
-    doc, getDoc, setDoc, updateDoc, onSnapshot, collection, writeBatch,
+    doc, getDoc, setDoc, updateDoc, onSnapshot, writeBatch,
     serverTimestamp, increment,
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY, CONSENT_VERSION } from '../firebase/config.js'
