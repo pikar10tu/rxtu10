@@ -51,6 +51,8 @@ export const USER_DEFAULTS = {
   study: { cards: {} },                       // SRS flashcard progress
   dailyQuest: { date: null, quiz: 0, study: 0, gacha: 0, claimed: false },
   freeGachaTickets: 0,
+  welcomeGiftV1: false,   // one-time: ส่งจดหมายของขวัญต้อนรับแล้ว (กัน client ส่งซ้ำ)
+  welcomeBoxSeen: false,  // เห็น Welcome box ต้อนรับแล้ว (กัน popup เด้งซ้ำ)
   // ── gacha (Phase B) ──
   gachaPity: 0,            // จำนวน pull ตั้งแต่ legendary ล่าสุด (soft 76 / hard 100)
   gachaTarget: null,       // species id ของ legendary ที่เลือกเป็นเป้า (null = ไม่เลือก → new-first)
@@ -66,6 +68,8 @@ export const USER_DEFAULTS = {
 }
 
 export const STARTER_COINS = 2000
+export const WELCOME_GIFT_COINS = 15000
+export const WELCOME_GIFT_TICKETS = 50
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v)
 
