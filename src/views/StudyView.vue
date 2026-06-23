@@ -2,10 +2,10 @@
   <div class="tab-content">
     <div class="sv-head">
       <div class="sv-head-row">
-        <div class="sv-title"><Emoji char="📚" /> ทบทวนกลุ่มยา</div>
+        <div class="sv-title"><Emoji char="📚" /> เตรียมสอบ</div>
         <HelpButton topic="study" />
       </div>
-      <div class="sv-sub">Flashcard แบบ spaced repetition · {{ DECK.length }} ตัวยา</div>
+      <div class="sv-sub">ทำข้อสอบ + ทบทวนกลุ่มยา ({{ DECK.length }} ตัวยา)</div>
     </div>
 
     <template v-if="!authStore.isLoggedIn">
@@ -17,6 +17,17 @@
       <!-- นับถอยหลังสู่วันสอบ (data-driven: data/exams.js) -->
       <ExamCountdown />
 
+      <!-- ── ส่วนทำข้อสอบ (ฮับโหมด) ── -->
+      <div class="sv-section-title"><Emoji char="📝" /> ทำข้อสอบ</div>
+      <div class="sv-modes">
+        <QuizModeCard emoji="🗓️" title="ข้อสอบประจำวัน" subtitle="ชุดเดียวกันทั้งรุ่น 3 ข้อ แข่งเก็บคะแนน" coming-soon />
+        <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
+        <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
+        <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที" coming-soon />
+      </div>
+
+      <!-- ── ส่วนทบทวน flashcard ── -->
+      <div class="sv-section-title sv-section-flash"><Emoji char="📚" /> ทบทวน flashcard</div>
       <div class="sv-stats">
         <div class="sv-stat due"><span class="sv-stat-n">{{ dueCount }}</span><span class="sv-stat-l">ครบกำหนด</span></div>
         <div class="sv-stat new"><span class="sv-stat-n">{{ newCount }}</span><span class="sv-stat-l">ยังไม่เคยเรียน</span></div>
@@ -36,16 +47,7 @@
 
       <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
 
-      <RouterLink to="/quiz" class="sv-quizlink">
-        <span class="sv-quizlink-emoji"><Emoji char="📝" /></span>
-        <span class="sv-quizlink-text">
-          <b>ทำข้อสอบ (MCQ)</b>
-          <small>ตอบคำถามจากคลังข้อสอบ ได้เหรียญ</small>
-        </span>
-        <span class="sv-quizlink-go">›</span>
-      </RouterLink>
-
-      <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ (admin ⊃ academic) -->
+      <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ -->
       <RouterLink v-if="authStore.isQuestionEditor" to="/questions" class="sv-quizlink sv-acadlink">
         <span class="sv-quizlink-emoji"><Emoji char="🛠️" /></span>
         <span class="sv-quizlink-text">
@@ -126,6 +128,7 @@
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import ExamCountdown from '../components/study/ExamCountdown.vue'
+import QuizModeCard from '../components/study/QuizModeCard.vue'
 import { ref, computed } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -333,6 +336,9 @@ async function sendReport() {
 .sv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 36px 0; font-size: .85rem; }
 
 /* home */
+.sv-section-title { font-weight: 800; font-size: .82rem; color: var(--ink); margin: 4px 0 10px; display: flex; align-items: center; gap: 6px; }
+.sv-section-flash { margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--border); }
+.sv-modes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
 .sv-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
 .sv-stat { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .sv-stat-n { font-size: 1.5rem; font-weight: 800; line-height: 1; }
