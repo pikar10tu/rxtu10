@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/mailbox.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rewardCoins, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildBroadcastMail } from './mailbox.js'
+import { rewardCoins, rewardTickets, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildBroadcastMail, buildWelcomeGiftMail } from './mailbox.js'
 
 test('rewardCoins: คืนจำนวนเหรียญถ้า reward.coins เป็นบวก, ไม่งั้น 0', () => {
   assert.equal(rewardCoins({ reward: { coins: 50 } }), 50)
@@ -95,4 +95,38 @@ test('buildBroadcastMail: ไม่มี coins/achievement → notice', () => {
 
 test('canClaim: achievement อย่างเดียว (coins 0) ก็รับได้', () => {
   assert.equal(canClaim({ claimed: false, reward: { achievement: { id: 'x' } } }), true)
+})
+
+test('rewardTickets: คืนจำนวนตั๋วถ้า reward.tickets เป็นบวก, ไม่งั้น 0', () => {
+  assert.equal(rewardTickets({ reward: { tickets: 50 } }), 50)
+  assert.equal(rewardTickets({ reward: { tickets: 0 } }), 0)
+  assert.equal(rewardTickets({ reward: { coins: 50 } }), 0)
+  assert.equal(rewardTickets(undefined), 0)
+})
+
+test('canClaim: true เมื่อมีตั๋วอย่างเดียวและยังไม่ claim', () => {
+  assert.equal(canClaim({ reward: { tickets: 50 }, claimed: false }), true)
+  assert.equal(canClaim({ reward: { tickets: 50 }, claimed: true }), false)
+})
+
+test('buildBroadcastMail: ใส่ reward.tickets เมื่อ tickets > 0', () => {
+  const m = buildBroadcastMail({ title: 'x', tickets: 10 }, 123)
+  assert.equal(m.type, 'reward')
+  assert.equal(m.reward.tickets, 10)
+  const n = buildBroadcastMail({ title: 'x' }, 123)
+  assert.equal(n.type, 'notice')
+  assert.equal(n.reward, undefined)
+})
+
+test('buildWelcomeGiftMail: แม่แบบเป๊ะ from welcome, reward 15000/50, claimable', () => {
+  const m = buildWelcomeGiftMail(123)
+  assert.equal(m.type, 'reward')
+  assert.equal(m.from, 'welcome')
+  assert.equal(m.claimed, false)
+  assert.equal(m.read, false)
+  assert.deepEqual(Object.keys(m.reward).sort(), ['coins', 'tickets'])
+  assert.equal(m.reward.coins, 15000)
+  assert.equal(m.reward.tickets, 50)
+  assert.equal(m.createdAt, 123)
+  assert.equal(canClaim(m), true)
 })

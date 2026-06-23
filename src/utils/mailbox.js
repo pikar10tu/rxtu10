@@ -5,15 +5,23 @@
 //          from:'system'|'daily'|'admin'|<uid>, createdAt, read:bool, claimed:bool }
 // ════════════════════════════════════════════════════════════
 
+import { WELCOME_GIFT_COINS, WELCOME_GIFT_TICKETS } from '../data/userSchema.js'
+
 // เหรียญในจดหมาย (>0 เท่านั้น ไม่งั้น 0)
 export function rewardCoins(mail) {
   const c = mail?.reward?.coins
   return (typeof c === 'number' && c > 0) ? c : 0
 }
 
-// กดรับได้ไหม = มีรางวัล (เหรียญ > 0 หรือ achievement) และยังไม่เคยรับ
+// ตั๋วกาชาในจดหมาย (>0 เท่านั้น ไม่งั้น 0)
+export function rewardTickets(mail) {
+  const t = mail?.reward?.tickets
+  return (typeof t === 'number' && t > 0) ? t : 0
+}
+
+// กดรับได้ไหม = มีรางวัล (เหรียญ/ตั๋ว > 0 หรือ achievement) และยังไม่เคยรับ
 export function canClaim(mail) {
-  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || !!mail?.reward?.achievement)
+  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || rewardTickets(mail) > 0 || !!mail?.reward?.achievement)
 }
 
 // ต้องสนใจไหม = ยังไม่อ่าน หรือ ยังกดรับได้ (ใช้คิด badge)
@@ -51,21 +59,38 @@ export function buildReportRewardMail(report, coins, createdAt) {
 }
 
 // สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ/achievement)
-//   coins > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
+//   coins > 0 หรือ tickets > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
 //   caller เติม createdAt = serverTimestamp()
-export function buildBroadcastMail({ title, body, coins, from, achievement } = {}, createdAt) {
+export function buildBroadcastMail({ title, body, coins, tickets, from, achievement } = {}, createdAt) {
   const c = (typeof coins === 'number' && coins > 0) ? coins : 0
+  const t = (typeof tickets === 'number' && tickets > 0) ? tickets : 0
   const hasAch = achievement && achievement.id
   const reward = {}
   if (c > 0) reward.coins = c
+  if (t > 0) reward.tickets = t
   if (hasAch) reward.achievement = { id: achievement.id, ...(achievement.date ? { date: achievement.date } : {}) }
-  const hasReward = c > 0 || hasAch
+  const hasReward = c > 0 || t > 0 || hasAch
   return {
     type: hasReward ? 'reward' : 'notice',
     title: title || '',
     body: body || '',
     ...(hasReward ? { reward } : {}),
     from: from || 'admin',
+    createdAt,
+    read: false,
+    claimed: false,
+  }
+}
+
+// จดหมายของขวัญต้อนรับ — แม่แบบเป๊ะ (rules ตรวจ from/reward เป๊ะ → ห้ามเปลี่ยนรูปร่าง)
+// caller (auth self-deliver) เติม createdAt = serverTimestamp()
+export function buildWelcomeGiftMail(createdAt) {
+  return {
+    type: 'reward',
+    title: 'ของขวัญต้อนรับ',
+    body: `ยินดีต้อนรับสู่ RxTU10! รับของขวัญต้อนรับ ${WELCOME_GIFT_COINS.toLocaleString()} เหรียญ + ตั๋วกาชา ${WELCOME_GIFT_TICKETS} ใบ`,
+    reward: { coins: WELCOME_GIFT_COINS, tickets: WELCOME_GIFT_TICKETS },
+    from: 'welcome',
     createdAt,
     read: false,
     claimed: false,
