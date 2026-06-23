@@ -30,7 +30,14 @@
             class="mb-claim" :class="{ done: m.claimed }"
             :disabled="m.claimed || claimingId === m.id"
             @click.stop="onClaim(m)"
-          >{{ m.claimed ? 'รับแล้ว ✓' : `รับ ${m.reward.coins}` }}<Emoji v-if="!m.claimed" char="🪙" /></button>
+          >
+            <template v-if="m.claimed">รับแล้ว ✓</template>
+            <template v-else>
+              รับ
+              <template v-if="rewardCoins(m) > 0">{{ rewardCoins(m).toLocaleString() }}<Emoji char="🪙" /></template>
+              <template v-if="rewardTickets(m) > 0"> +{{ rewardTickets(m) }}<Emoji char="🎟️" /></template>
+            </template>
+          </button>
         </div>
       </li>
     </ul>
@@ -42,7 +49,7 @@ import Emoji from '../shared/Emoji.vue'
 import { ref, onMounted } from 'vue'
 import { useMailbox } from '../../stores/mailbox.js'
 import { useToast } from '../../composables/useToast.js'
-import { canClaim, rewardCoins } from '../../utils/mailbox.js'
+import { canClaim, rewardCoins, rewardTickets } from '../../utils/mailbox.js'
 
 const mailbox = useMailbox()
 const { toast } = useToast()
@@ -50,7 +57,7 @@ const claimingId = ref(null)
 
 onMounted(() => mailbox.load())
 
-function hasReward(m) { return rewardCoins(m) > 0 }
+function hasReward(m) { return rewardCoins(m) > 0 || rewardTickets(m) > 0 }
 function typeIcon(m) { return m.type === 'reward' ? '🎁' : m.type === 'gift' ? '🎁' : '📢' }
 function fromLabel(from) {
   return from === 'system' ? 'ระบบ' : from === 'daily' ? 'เดลี่' : from === 'admin' ? 'แอดมิน' : 'เพื่อน'
@@ -65,10 +72,13 @@ async function onClaim(m) {
   if (claimingId.value || !canClaim(m)) return
   claimingId.value = m.id
   try {
-    const coins = await mailbox.claim(m.id)
-    if (coins > 0) toast(`รับ ${coins.toLocaleString()} เหรียญแล้ว`, 'success')
-    else if (coins === 0) toast('จดหมายนี้รับไปแล้ว', 'info')
-    else toast('รับรางวัลไม่สำเร็จ', 'error')
+    const res = await mailbox.claim(m.id)
+    if (res === false) { toast('รับรางวัลไม่สำเร็จ', 'error'); return }
+    const parts = []
+    if (res.coins > 0) parts.push(`${res.coins.toLocaleString()} เหรียญ`)
+    if (res.tickets > 0) parts.push(`${res.tickets} ตั๋ว`)
+    if (parts.length) toast(`รับ ${parts.join(' + ')} แล้ว`, 'success')
+    else toast('จดหมายนี้รับไปแล้ว', 'info')
   } finally { claimingId.value = null }
 }
 </script>
