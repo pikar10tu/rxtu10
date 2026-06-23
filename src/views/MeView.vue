@@ -1,14 +1,11 @@
 <template>
   <div class="tab-content">
-    <div class="me-head">
-      <button class="me-back" @click="$router.back()">‹</button>
-      <span>โปรไฟล์ของฉัน</span>
-    </div>
+    <div class="page-title me-pagetitle"><Emoji char="👤" /> ฉัน</div>
 
     <div v-if="!auth.isLoggedIn" class="me-empty">กรุณาเข้าสู่ระบบ</div>
 
     <template v-else>
-      <!-- avatar -->
+      <!-- identity (ดันขึ้นบนสุด) -->
       <div class="me-avatar-row">
         <img class="me-avatar" :src="previewPhoto" alt="me" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
         <div class="me-av-actions">
@@ -18,25 +15,27 @@
         </div>
       </div>
 
-      <label class="me-label">ข้อมูลติดต่อ</label>
-      <div class="me-contact">
-        <div class="me-crow"><span><Emoji char="📞" /></span><input v-model="phone" :maxlength="LIMITS.contact" class="me-input" placeholder="เบอร์โทร" /></div>
-        <div class="me-crow"><span><Emoji char="📷" /></span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
-        <div class="me-crow"><span><Emoji char="💬" /></span><input v-model="line" :maxlength="LIMITS.contact" class="me-input" placeholder="LINE ID" /></div>
-      </div>
-
-      <button class="me-save" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึก' }}</button>
-
-      <!-- read-only stats -->
       <div class="me-stats">
         <div class="me-stat"><span><Emoji char="🪙" /></span><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
         <div class="me-stat"><span><Emoji char="🏠" /></span><b>Lv.{{ auth.userData?.residence?.level || 1 }}</b><small>ที่อยู่อาศัย</small></div>
         <div class="me-stat"><span><Emoji char="🐾" /></span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
-      <TagChips :member="auth.userData" class="me-tags" />
+
       <AchievementGrid :uid="auth.currentUser?.uid" />
+      <TagChips :member="auth.userData" class="me-tags" />
 
       <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
+
+      <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
+      <details class="me-contact-fold">
+        <summary><Emoji char="📞" /> ข้อมูลติดต่อ</summary>
+        <div class="me-contact">
+          <div class="me-crow"><span><Emoji char="📞" /></span><input v-model="phone" :maxlength="LIMITS.contact" class="me-input" placeholder="เบอร์โทร" /></div>
+          <div class="me-crow"><span><Emoji char="📷" /></span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
+          <div class="me-crow"><span><Emoji char="💬" /></span><input v-model="line" :maxlength="LIMITS.contact" class="me-input" placeholder="LINE ID" /></div>
+        </div>
+        <button class="me-save" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึก' }}</button>
+      </details>
 
       <button class="me-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>
       <button class="me-logout" @click="auth.logout()">ออกจากระบบ</button>
@@ -190,9 +189,7 @@ async function save() {
 </script>
 
 <style scoped>
-.me-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-bottom: 16px; }
-.me-back { border: 2px solid var(--ink); background: #fff; width: 32px; height: 32px; border-radius: 10px; font-size: 1.2rem; cursor: pointer; line-height: 1; box-shadow: var(--pop); }
-.me-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.me-pagetitle { margin-bottom: 16px; }
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 .me-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
 .me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--ink); background: #eee; box-shadow: var(--pop); }
@@ -200,7 +197,6 @@ async function save() {
 .me-nick { font-size: 1rem; font-weight: 800; color: var(--text, #4a3f5e); }
 .me-btn-sm { border: none; background: var(--primary-light, #f4edff); color: var(--primary, #b58df1); border-radius: 9px; padding: 7px 12px; font-family: inherit; font-size: .76rem; font-weight: 700; cursor: pointer; }
 .me-btn-sm.ghost { background: rgba(0,0,0,.05); color: rgba(0,0,0,.5); }
-.me-label { display: block; font-size: .72rem; font-weight: 700; color: var(--muted, #9b8fb0); margin: 14px 0 6px; }
 .me-input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 11px; font-family: inherit; font-size: .85rem; background: #fff; }
 .me-input:focus { outline: none; box-shadow: var(--pop); }
 .me-contact { display: flex; flex-direction: column; gap: 8px; }
@@ -209,6 +205,10 @@ async function save() {
 .me-save { width: 100%; margin-top: 18px; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .9rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .me-save:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .me-save:disabled { opacity: .6; box-shadow: none; }
+.me-contact-fold { margin: 14px 0; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); background: #fff; padding: 10px 12px; }
+.me-contact-fold summary { font-weight: 800; font-size: .85rem; color: var(--ink); cursor: pointer; list-style: none; }
+.me-contact-fold summary::-webkit-details-marker { display: none; }
+.me-contact-fold[open] summary { margin-bottom: 10px; }
 .me-stats { display: flex; margin-top: 22px; background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; }
 .me-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid var(--border, #efe7fb); }
 .me-stat:last-child { border-right: none; }
