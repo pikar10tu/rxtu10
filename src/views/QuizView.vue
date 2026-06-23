@@ -138,7 +138,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs, getDoc, query, where, orderBy, startAt, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -149,6 +149,7 @@ import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
+import { tallyAnswers } from '../utils/questionStats.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -327,7 +328,7 @@ function pick(i) {
   answered.value++
   const isCorrect = i === current.value.answer
   if (isCorrect) correct.value++
-  answers.value.push({ domain: current.value.domain || null, correct: isCorrect })
+  answers.value.push({ id: current.value.id, domain: current.value.domain || null, correct: isCorrect })
 }
 function choiceClass(i) {
   if (picked.value === null) return ''
@@ -380,6 +381,21 @@ async function finish() {
       ts: serverTimestamp(),
     })
   } catch (e) { console.error('[exam save]', e) }
+
+  // 1.5) สถิติรายข้อ — increment questionStats/{qid} ต่อข้อที่ตอบ (SP2b, non-fatal)
+  try {
+    const tally = tallyAnswers(answers.value)
+    const qids = Object.keys(tally)
+    if (qids.length) {
+      const batch = writeBatch(db)
+      for (const qid of qids) {
+        batch.set(doc(db, 'questionStats', qid),
+          { a: increment(tally[qid].a), c: increment(tally[qid].c) }, { merge: true })
+      }
+      await batch.commit()
+      usage.track(0, qids.length)
+    }
+  } catch (e) { console.error('[questionStats]', e) }
 
   // 2) update the user doc: coins + best score + daily cap
   const newHigh = Math.max(authStore.userData?.quizHigh || 0, correct.value)
