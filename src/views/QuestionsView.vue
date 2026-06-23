@@ -229,6 +229,7 @@
             <span class="qz-chev" :class="{ open: expandedId === q.id }">▸</span>
           </div>
           <div v-if="expandedId === q.id" class="qz-detail">
+            <div class="qz-detail-q">{{ q.question }}</div>
             <span v-if="q.category" class="qz-cat qz-cat-sm">{{ q.category }}</span>
             <ul class="qz-choices">
               <li v-for="(c, i) in q.choices" :key="i" :class="{ correct: i === q.answer }">
@@ -772,6 +773,7 @@ async function resolveReports(g, verdict) {
 .qz-chev { flex-shrink: 0; color: var(--muted); font-size: 1rem; transition: transform .15s; }
 .qz-chev.open { transform: rotate(90deg); }
 .qz-detail { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.qz-detail-q { font-size: .86rem; font-weight: 700; color: var(--ink); line-height: 1.45; margin-bottom: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .qz-cat-sm { display: inline-block; margin-bottom: 6px; }
 .qz-detail-actions { display: flex; gap: 6px; margin-top: 8px; }
 

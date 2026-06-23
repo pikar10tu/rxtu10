@@ -11,9 +11,6 @@
         <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pf-chips">
           <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
-          <button class="pf-chip like" :class="{ on: likedToday }" @click="likeOnce">
-            {{ likedToday ? '❤️' : '🤍' }} {{ member.likes || 0 }}
-          </button>
         </div>
         <div class="pf-chips" style="margin-top:5px"><TagChips :member="member" /></div>
       </div>
@@ -52,11 +49,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import Emoji from '../shared/Emoji.vue'
-import { doc, updateDoc, increment } from 'firebase/firestore'
-import { db } from '../../firebase/config.js'
 import { getTier } from '../../data/residence.js'
-import { useAuthStore } from '../../stores/auth.js'
-import { useToast } from '../../composables/useToast.js'
 import { letterAvatar, fallbackAvatar } from '../../utils/avatar.js'
 import TagChips from '../shared/TagChips.vue'
 import AchievementGrid from '../shared/AchievementGrid.vue'
@@ -67,44 +60,8 @@ defineEmits(['close'])
 
 const petPopup = ref(null)
 
-const auth = useAuthStore()
-const { toast } = useToast()
-
 const lvl  = computed(() => props.member?.residence?.level || 1)
 const tier = computed(() => getTier(lvl.value))
-
-// ── Likes (daily: +1 per person per day, never decreases, no unlike) ──
-const myUid = computed(() => auth.currentUser?.uid)
-const today = () => new Date().toDateString()
-const likedToday = computed(() =>
-  !!(props.member?.likedBy && myUid.value && props.member.likedBy[myUid.value] === today())
-)
-async function likeOnce() {
-  const m = props.member
-  if (!m) return
-  if (!myUid.value) { toast('ต้องเข้าสู่ระบบก่อน', 'info'); return }
-  if (m.registered === false || String(m.uid).startsWith('static_')) {
-    toast('เพื่อนคนนี้ยังไม่เข้าระบบ ไลก์ไม่ได้', 'info'); return
-  }
-  if (m.uid === myUid.value) { toast('ไลก์ตัวเองไม่ได้นะ 😅', 'info'); return }
-  if (likedToday.value) { toast('ไลก์เพื่อนคนนี้วันนี้แล้ว เดี๋ยวพรุ่งนี้มาใหม่!', 'info'); return }
-
-  const d = today()
-  // optimistic
-  if (!m.likedBy) m.likedBy = {}
-  m.likedBy[myUid.value] = d
-  m.likes = (m.likes || 0) + 1
-  try {
-    await updateDoc(doc(db, 'users', m.uid), {
-      likes: increment(1),
-      [`likedBy.${myUid.value}`]: d,
-    })
-    toast('ส่งหัวใจให้แล้ว ❤️', 'success')
-  } catch (e) {
-    console.error('[like]', e)
-    toast('กดไลก์ไม่สำเร็จ (สิทธิ์)', 'error')
-  }
-}
 
 const avatar = computed(() =>
   props.member?.customPhoto || props.member?.googlePhoto ||
@@ -146,19 +103,11 @@ const hasContact = computed(() => {
 .pf-name { font-size: .82rem; font-weight: 600; opacity: .85; margin-top: 1px; }
 .pf-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
 .pf-chip { font-size: .58rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; }
-.pf-chip.likes { background: rgba(255,255,255,.25); }
 .pf-chip.founder { background: rgba(0,0,0,.3); }
 .pf-residence {
   font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95; padding: 0 14px;
   line-height: 1.3;
 }
-.pf-chip.like {
-  border: none; cursor: pointer; font-family: inherit; font-weight: 800;
-  background: rgba(255,255,255,.25); color: #fff; transition: transform .12s;
-}
-.pf-chip.like:disabled { opacity: .7; cursor: default; }
-.pf-chip.like.on { background: rgba(255,255,255,.4); }
-.pf-chip.like:active:not(:disabled) { transform: scale(1.12); }
 .pf-ach { padding: 12px 16px 0; }
 .pf-stats { display: flex; }
 .pf-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }

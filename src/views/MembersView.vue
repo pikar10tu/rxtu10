@@ -49,8 +49,8 @@
         <div class="mv-nick">{{ m.nickname }}</div>
         <div v-if="m.uid === myUid" class="mv-you">คุณ</div>
         <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
-        <div v-if="m.registered" class="mv-likes"><Emoji char="❤️" /> {{ m.likes || 0 }}</div>
-        <div v-else class="mv-off-tag">ยังไม่เข้าระบบ</div>
+        <div v-if="m.studentId" class="mv-sid">{{ m.studentId }}</div>
+        <div v-if="!m.registered" class="mv-off-tag">ยังไม่เข้าระบบ</div>
       </button>
     </div>
 
@@ -89,7 +89,7 @@ const roster = computed(() => {
     return {
       uid: 'static_' + s.id, studentId: s.id,
       nickname: s.nickname, realName: s.realName, track: s.track,
-      residence: { level: 1 }, likes: 0, pets: [], registered: false,
+      residence: { level: 1 }, pets: [], registered: false,
     }
   })
 })
@@ -183,6 +183,6 @@ const avatarOf = (m) => m.customPhoto || m.googlePhoto || letterAvatar(m.nicknam
 }
 .mv-you { font-size: .55rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 1px 7px; }
 .mv-track { font-size: .62rem; font-weight: 700; }
-.mv-likes { font-size: .62rem; color: rgba(0,0,0,.5); }
+.mv-sid { font-size: .62rem; color: rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
 .mv-off-tag { font-size: .56rem; color: rgba(0,0,0,.35); }
 </style>
