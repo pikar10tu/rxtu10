@@ -15,7 +15,7 @@
     <!-- ── HOME ── -->
     <template v-else-if="mode === 'home'">
       <!-- ── ส่วนทำข้อสอบ (ฮับโหมด) ── -->
-      <div class="sv-section-title"><Emoji char="📝" /> ทำข้อสอบ</div>
+      <SectionTitle><Emoji char="📝" /> ทำข้อสอบ</SectionTitle>
       <div class="sv-modes">
         <QuizModeCard emoji="🗓️" title="ข้อสอบประจำวัน" subtitle="ชุดเดียวกันทั้งรุ่น 3 ข้อ แข่งเก็บคะแนน" coming-soon />
         <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
@@ -24,7 +24,7 @@
       </div>
 
       <!-- ── ส่วนทบทวน flashcard ── -->
-      <div class="sv-section-title sv-section-flash"><Emoji char="📚" /> ทบทวน flashcard</div>
+      <div class="sv-section-flash"><SectionTitle><Emoji char="📚" /> ทบทวน flashcard</SectionTitle></div>
       <div class="sv-stats">
         <div class="sv-stat due"><span class="sv-stat-n">{{ dueCount }}</span><span class="sv-stat-l">ครบกำหนด</span></div>
         <div class="sv-stat new"><span class="sv-stat-n">{{ newCount }}</span><span class="sv-stat-l">ยังไม่เคยเรียน</span></div>
@@ -123,6 +123,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import SectionTitle from '../components/shared/SectionTitle.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import { ref, computed } from 'vue'
@@ -332,7 +333,6 @@ async function sendReport() {
 .sv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 36px 0; font-size: .85rem; }
 
 /* home */
-.sv-section-title { font-weight: 800; font-size: .82rem; color: var(--ink); margin: 4px 0 10px; display: flex; align-items: center; gap: 6px; }
 .sv-section-flash { margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--border); }
 .sv-modes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
 .sv-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
