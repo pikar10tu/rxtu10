@@ -6,6 +6,8 @@
     <NewsBoard />
 
     <template v-if="authStore.isLoggedIn">
+      <!-- ── สวน & สัตว์ ── -->
+      <SectionTitle><Emoji char="🌾" /> สวน &amp; สัตว์</SectionTitle>
       <div class="play-grid">
         <!-- Farm: live entry card → opens modal -->
         <button class="game-card" @click="farmOpen = true">
@@ -16,17 +18,28 @@
           <span v-else class="gc-badge grow"><Emoji char="🌱" /> กำลังโต</span>
         </button>
 
-        <!-- สัตว์เลี้ยง: คลัง + ห้องทดลอง (Pets ย้ายมาจาก shortcut โฮม) -->
         <RouterLink to="/pets" class="game-card">
           <span class="gc-emoji"><Emoji char="🐾" /></span>
           <span class="gc-name">สัตว์เลี้ยง</span>
           <span class="gc-badge grow">คลัง · ห้องทดลอง</span>
         </RouterLink>
+      </div>
 
-        <div class="soon-card"><span class="soon-emoji"><Emoji char="⚔️" /></span><span>PvP สู้กัน</span><span class="soon-tag">เร็วๆ นี้</span></div>
-        <div class="soon-card"><span class="soon-emoji"><Emoji char="🏯" /></span><span>ปีนหอคอย</span><span class="soon-tag">เร็วๆ นี้</span></div>
-        <div class="soon-card"><span class="soon-emoji"><Emoji char="🗺️" /></span><span>ผจญภัย Co-op</span><span class="soon-tag">เร็วๆ นี้</span></div>
-        <div class="soon-card"><span class="soon-emoji"><Emoji char="🍬" /></span><span>เภสัช Crush</span><span class="soon-tag">เร็วๆ นี้</span></div>
+      <!-- ── ร้านค้า ── (การ์ดเดียวเต็มแถว → /shop เจอ 2 แท็บเดิม) -->
+      <SectionTitle><Emoji char="🛒" /> ร้านค้า</SectionTitle>
+      <RouterLink to="/shop" class="game-card">
+        <span class="gc-emoji"><Emoji char="🛒" /></span>
+        <span class="gc-name">ร้านค้า</span>
+        <span class="gc-badge grow">อัญเชิญ · ห้องทดลอง</span>
+      </RouterLink>
+
+      <!-- ── สนามประลอง (เร็วๆ นี้) ── -->
+      <SectionTitle><Emoji char="⚔️" /> สนามประลอง</SectionTitle>
+      <div class="play-grid">
+        <SoonCard emoji="⚔️" label="PvP สู้กัน" />
+        <SoonCard emoji="🏯" label="ปีนหอคอย" />
+        <SoonCard emoji="🗺️" label="ผจญภัย Co-op" />
+        <SoonCard emoji="🍬" label="เภสัช Crush" />
       </div>
 
       <!-- Farm modal — Teleport ไป body: #main-content เป็น position:fixed = สร้าง stacking context
@@ -58,6 +71,8 @@ import { useAuthStore } from '../stores/auth.js'
 import { useFarm } from '../composables/useFarm.js'
 import FarmGrid from '../components/farm/FarmGrid.vue'
 import NewsBoard from '../components/home/NewsBoard.vue'
+import SectionTitle from '../components/shared/SectionTitle.vue'
+import SoonCard from '../components/shared/SoonCard.vue'
 
 const authStore = useAuthStore()
 const farm = useFarm()
@@ -87,11 +102,6 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .gc-badge.ready { color: #15803d; background: rgba(34,197,94,.16); }
 .gc-badge.plant { color: #b45309; background: rgba(251,191,36,.18); }
 .gc-badge.grow  { color: rgba(0,0,0,.45); background: rgba(0,0,0,.05); }
-
-.soon-card { background: #fff; border: 2px dashed var(--ink); border-radius: 16px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: .6; }
-.soon-emoji { font-size: 1.6rem; }
-.soon-card span:nth-child(2) { font-size: .8rem; font-weight: 700; }
-.soon-tag { font-size: .56rem; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; }
 
 /* z-index ต้อง > #bottom-nav (200) ไม่งั้น nav ทับก้น sheet (66px) บัง "ผลผลิต" */
 .farm-ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
