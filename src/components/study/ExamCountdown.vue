@@ -4,7 +4,7 @@
       <span class="ec-emoji"><Emoji :char="e.emoji || '🎯'" /></span>
       <div class="ec-body">
         <div class="ec-label">{{ e.label }}</div>
-        <div class="ec-date">{{ fmtDate(e.date) }}</div>
+        <div class="ec-date">{{ fmtRange(e) }}</div>
       </div>
       <div class="ec-count">
         <template v-if="e.days > 0"><b>{{ e.days }}</b><small>เหลือ (วัน)</small></template>
@@ -31,6 +31,16 @@ const items = computed(() => upcomingExams(EXAMS, now.value))
 function fmtDate(iso) {
   // th-TH-u-ca-gregory = เดือนภาษาไทย แต่ปีเป็น ค.ศ. (ไม่ใช่ พ.ศ.)
   return new Date(iso).toLocaleDateString('th-TH-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+// สอบหลายวัน (มี dateEnd) → "12–13 ธันวาคม 2026" (ยุบเดือน/ปีถ้าเดือนเดียวกัน) · ไม่มี dateEnd → วันเดียว
+function fmtRange(e) {
+  if (!e.dateEnd) return fmtDate(e.date)
+  const s = new Date(e.date), en = new Date(e.dateEnd)
+  if (s.getMonth() === en.getMonth() && s.getFullYear() === en.getFullYear()) {
+    return `${s.toLocaleDateString('th-TH-u-ca-gregory', { day: 'numeric' })}–${fmtDate(e.dateEnd)}`
+  }
+  return `${fmtDate(e.date)} – ${fmtDate(e.dateEnd)}`
 }
 </script>
 

@@ -32,6 +32,16 @@ test('upcomingExams: เฉพาะที่ยังไม่ผ่าน (day
   assert.ok(r[0].days > 0)
 })
 
+test('upcomingExams: สอบหลายวัน (dateEnd) ยังโชว์จนจบวันสุดท้าย + days นับถึงวันแรก', () => {
+  const exams = [{ id: 'cc1', label: 'CC1', date: '2026-12-12T00:00:00+07:00', dateEnd: '2026-12-13T00:00:00+07:00' }]
+  // วันที่ 13 (วันสุดท้าย): วันแรกผ่านไปแล้ว (days = -1) แต่ยังต้องโชว์อยู่
+  const day2 = upcomingExams(exams, new Date('2026-12-13T08:00:00+07:00').getTime())
+  assert.equal(day2.length, 1)
+  assert.equal(day2[0].days, -1)
+  // วันที่ 14 (หลังจบ): ตัดออก
+  assert.deepEqual(upcomingExams(exams, new Date('2026-12-14T08:00:00+07:00').getTime()), [])
+})
+
 test('upcomingExams: ตัดวันที่พัง + รับ undefined ไม่ throw', () => {
   assert.deepEqual(upcomingExams(undefined), [])
   assert.deepEqual(upcomingExams([{ id: 'x', date: 'พัง' }], Date.now()), [])

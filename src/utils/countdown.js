@@ -14,10 +14,15 @@ export function daysUntil(dateISO, now = Date.now()) {
   return dayIndex(t) - dayIndex(now)
 }
 
-// วันสอบที่ยังไม่ผ่าน (days >= 0) เรียงใกล้สุดก่อน + แนบ days
+// วันสอบที่ยังไม่ผ่าน เรียงใกล้สุดก่อน + แนบ days (นับถอยหลังถึงวันแรก = date)
+// สอบหลายวัน (มี dateEnd): ยังโชว์จนจบวันสุดท้าย — กรองด้วย dateEnd ถ้ามี ไม่งั้นใช้ date
 export function upcomingExams(exams, now = Date.now()) {
   return (exams || [])
     .map(e => ({ ...e, days: daysUntil(e.date, now) }))
-    .filter(e => e.days !== null && e.days >= 0)
+    .filter(e => {
+      if (e.days === null) return false
+      const endDays = daysUntil(e.dateEnd || e.date, now)
+      return endDays !== null && endDays >= 0
+    })
     .sort((a, b) => a.days - b.days)
 }
