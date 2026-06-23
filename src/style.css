@@ -78,10 +78,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 #bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--btm); background: #fff; border-top: 1px solid var(--border); display: flex; z-index: 200; box-shadow: 0 -2px 12px rgba(15,23,42,.06); padding-bottom: env(safe-area-inset-bottom,0px); }
 .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; border: none; background: none; font-family: inherit; color: var(--muted); font-size: .67rem; font-weight: 600; transition: .15s; padding: 5px 2px; }
 .bn-icon { font-size: 1.3rem; transition: .15s; }
-.bn-item.active { color: var(--primary); }
-.bn-item.active .bn-icon { transform: translateY(-2px); }
-.bn-item.router-link-exact-active { color: var(--primary); }
-.bn-item.router-link-exact-active .bn-icon { transform: translateY(-1px) scale(1.08); }
 
 /* CARDS */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm); margin-bottom: 10px; }
@@ -487,7 +483,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 .score-badge { background:#fffbeb;border:1px solid #fde68a;color:#b45309;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700; }
 
 /* ── Vue Router active nav item ── */
-#bottom-nav a.router-link-active,
 #bottom-nav a.router-link-exact-active {
     color: var(--primary);
 }
@@ -542,9 +537,7 @@ html, body {
 }
 .bn-item { color: var(--muted); font-weight: 700; }
 .bn-item .bn-icon { transition: transform .18s cubic-bezier(.34,1.56,.64,1); }
-.bn-item.router-link-active,
 .bn-item.router-link-exact-active { color: var(--primary); }
-.bn-item.router-link-active .bn-icon,
 .bn-item.router-link-exact-active .bn-icon { transform: translateY(-3px) scale(1.2); }
 
 /* sticker cards + page transition */
