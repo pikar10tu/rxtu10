@@ -30,6 +30,7 @@
 
       <HelpModal />
       <MigrationWelcome />
+      <WelcomeBox />
     </template>
 
     <MaintenanceScreen v-else />
@@ -60,6 +61,7 @@ import ConsentGate        from './components/onboarding/ConsentGate.vue'
 import OnboardingWizard   from './components/onboarding/OnboardingWizard.vue'
 import GuestPendingScreen from './components/onboarding/GuestPendingScreen.vue'
 import LoginLanding       from './components/onboarding/LoginLanding.vue'
+import WelcomeBox         from './components/WelcomeBox.vue'
 import { onboardingGate } from './utils/onboarding.js'
 import { CONSENT_VERSION } from './firebase/config.js'
 
