@@ -186,6 +186,22 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── Question stats (SP2b) — ตัวนับ %ถูกรายข้อ (increment-only) ──
+    //  read:   ผู้แก้คลัง (academic+instructor) เพื่อโชว์ badge 🔴 · นักศึกษาเขียนได้อย่างเดียว
+    //  write:  ผู้ล็อกอิน แตะได้แค่ field a/c และต้องไม่ลดลง (increment เท่านั้น) เหมือน stats/{date}
+    match /questionStats/{qid} {
+      allow read:   if canEditQuestions();
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['a', 'c'])
+        && request.resource.data.a is int && request.resource.data.a >= 0
+        && request.resource.data.c is int && request.resource.data.c >= 0;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['a', 'c'])
+        && request.resource.data.a is int && request.resource.data.a >= resource.data.get('a', 0)
+        && request.resource.data.c is int && request.resource.data.c >= resource.data.get('c', 0);
+      allow delete: if isAdmin();
+    }
+
     // ── Question reports (Phase 5) — นักศึกษาแจ้งข้อสอบผิด ──
     //  read:   academic เท่านั้น (คนน้อย → ไม่กระทบเพดาน reads รายวันของนักศึกษา)
     //  create: ผู้ล็อกอิน สร้าง report ของตัวเอง (reportedBy ต้องเป็น uid ตัวเอง)
