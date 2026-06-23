@@ -14,9 +14,6 @@
 
     <!-- ── HOME ── -->
     <template v-else-if="mode === 'home'">
-      <!-- นับถอยหลังสู่วันสอบ (data-driven: data/exams.js) -->
-      <ExamCountdown />
-
       <!-- ── ส่วนทำข้อสอบ (ฮับโหมด) ── -->
       <div class="sv-section-title"><Emoji char="📝" /> ทำข้อสอบ</div>
       <div class="sv-modes">
@@ -127,7 +124,6 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
-import ExamCountdown from '../components/study/ExamCountdown.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import { ref, computed } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'

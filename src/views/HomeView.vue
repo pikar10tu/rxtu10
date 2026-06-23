@@ -9,15 +9,8 @@
     </header>
 
     <template v-if="authStore.isLoggedIn">
-      <!-- โปรไฟล์ของฉัน (แตะเพื่อแก้ไข) -->
-      <RouterLink to="/me" class="home-me">
-        <img class="home-me-av" :src="myAvatar" alt="me" @error="(e) => fallbackAvatar(e, authStore.userData?.nickname)" />
-        <div class="home-me-info">
-          <div class="home-me-nick">{{ authStore.userData?.nickname || 'ฉัน' }}</div>
-          <div class="home-me-sub"><Emoji char="🏠" /> Lv.{{ authStore.userData?.residence?.level || 1 }} · แตะเพื่อแก้โปรไฟล์</div>
-        </div>
-        <span class="home-me-arrow">›</span>
-      </RouterLink>
+      <!-- นับถอยหลังสู่วันสอบ (ย้ายมาจาก Study — ข้อมูลสรุปรายวัน เห็นทันทีเปิดแอป) -->
+      <ExamCountdown />
 
       <!-- เหรียญ + รับรายได้รายวัน (ส่วนตัว เห็นเฉพาะเจ้าของ) -->
       <DailyCard />
@@ -39,19 +32,14 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink } from 'vue-router'
-import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
-import { letterAvatar, fallbackAvatar } from '../utils/avatar.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
+import ExamCountdown from '../components/study/ExamCountdown.vue'
 
 const authStore = useAuthStore()
-const myAvatar = computed(() =>
-  authStore.userData?.customPhoto || authStore.userData?.googlePhoto ||
-  letterAvatar(authStore.userData?.nickname)
-)
 </script>
 
 <style scoped>
@@ -71,20 +59,6 @@ const myAvatar = computed(() =>
   letter-spacing: .5px;
 }
 .home-head-sub { font-size: .68rem; color: var(--muted); margin: 4px 0 0; font-weight: 600; }
-
-/* ── "ฉัน" sticker card ── */
-.home-me {
-  display: flex; align-items: center; gap: 12px;
-  background: #fff; border: 2px solid var(--ink);
-  border-radius: 18px; padding: 12px 14px; margin-bottom: 14px;
-  box-shadow: var(--pop); transition: transform .12s, box-shadow .12s;
-}
-.home-me:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
-.home-me-av { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--ink); background: #eee; }
-.home-me-info { flex: 1; min-width: 0; }
-.home-me-nick { font-size: .95rem; font-weight: 800; color: var(--ink); }
-.home-me-sub { font-size: .66rem; color: var(--muted); }
-.home-me-arrow { color: var(--ink); font-size: 1.4rem; font-weight: 800; }
 
 /* ── ปุ่มเครื่องมือผู้ดูแล (แอดมินเท่านั้น) — โทนเทา ไม่แย่งความสนใจ ── */
 .home-admin-btn {
