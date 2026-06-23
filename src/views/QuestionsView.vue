@@ -219,6 +219,12 @@
             <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @click.stop @change="toggleSelect(q.id)" />
             <span class="qz-badge" :class="q.isPublished ? 'pub' : 'draft'">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }}</span>
             <span v-if="q.domain" class="qz-cat">{{ domainLabel(q.domain) || q.domain }}</span>
+            <span v-if="problemPct(q.id) !== null" class="qz-badge-stat low">
+              <Emoji char="🔴" /> {{ problemPct(q.id) }}%
+            </span>
+            <span v-if="reportCountMap[q.id]" class="qz-badge-stat rep">
+              <Emoji char="🚩" /> {{ reportCountMap[q.id] }}
+            </span>
             <span class="qz-row-q">{{ q.question }}</span>
             <span class="qz-chev" :class="{ open: expandedId === q.id }">▸</span>
           </div>
@@ -263,7 +269,8 @@ import { buildMeta } from '../utils/questionsMeta.js'
 import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js'
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail } from '../utils/mailbox.js'
-import { REPORT_REWARD } from '../data/index.js'
+import { pctCorrect, isProblem } from '../utils/questionStats.js'
+import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 
 const authStore = useAuthStore()
@@ -391,7 +398,12 @@ function removeChoice(i) {
   else if (draft.value.answer > i) draft.value.answer--
 }
 
-onMounted(() => { if (authStore.isQuestionEditor) load() })
+onMounted(() => {
+  if (!authStore.isQuestionEditor) return
+  load()
+  loadStats()
+  if (authStore.isAcademic) loadReports()
+})
 
 // ── bulk JSON import ──
 const FORMAT_EXAMPLE = `[
@@ -602,6 +614,30 @@ const reportsLoading = ref(false)
 const resolvingId = ref(null)        // questionId ที่กำลังปิด
 const reportGroups = computed(() => groupReports(reports.value))
 
+const statMap = ref({})              // { qid: { a, c } } — สถิติ %ถูกรายข้อ
+const reportsLoaded = ref(false)     // กัน loadReports ซ้ำ (mount + กางแผง)
+
+const reportCountMap = computed(() => {
+  const m = {}
+  for (const g of reportGroups.value) m[g.questionId] = g.count
+  return m
+})
+function problemPct(qid) {
+  const s = statMap.value[qid]
+  return isProblem(s, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT)
+    ? pctCorrect(s.a, s.c) : null
+}
+
+async function loadStats() {
+  try {
+    const snap = await getDocs(collection(db, 'questionStats'))
+    usage.track(snap.size)
+    const m = {}
+    snap.docs.forEach(d => { m[d.id] = d.data() })
+    statMap.value = m
+  } catch (e) { console.error('[questionStats load]', e) }
+}
+
 function questionExists(qid) { return list.value.some(x => x.id === qid) }
 function reportQuestionText(g) {
   const q = list.value.find(x => x.id === g.questionId)
@@ -624,13 +660,14 @@ async function loadReports() {
     ))
     usage.track(snap.size)
     reports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    reportsLoaded.value = true
   } catch (e) { console.error('[reports load]', e); toast('โหลดรายการที่ถูกแจ้งไม่สำเร็จ', 'error') }
   finally { reportsLoading.value = false }
 }
 
 function onReportsToggle(e) {
   reportsOpen.value = e.target.open
-  if (e.target.open) loadReports()
+  if (e.target.open && !reportsLoaded.value) loadReports()
 }
 
 function editReported(g) {
@@ -759,6 +796,9 @@ async function resolveReports(g, verdict) {
 .qz-badge.pub { background: rgba(34,197,94,.15); color: #15803d; }
 .qz-badge.draft { background: rgba(0,0,0,.07); color: rgba(0,0,0,.5); }
 .qz-cat { font-size: .62rem; color: #4f46e5; font-weight: 700; }
+.qz-badge-stat { flex-shrink: 0; font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+.qz-badge-stat.low { background: #fef2f2; color: #b91c1c; }
+.qz-badge-stat.rep { background: #fff7ed; color: #c2410c; }
 .qz-choices { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .qz-choices li { font-size: .76rem; color: rgba(0,0,0,.6); display: flex; gap: 7px; align-items: baseline; padding: 4px 8px; border-radius: 7px; }
 .qz-choices li.correct { background: rgba(34,197,94,.1); color: #15803d; font-weight: 700; }
