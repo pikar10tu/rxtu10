@@ -87,9 +87,23 @@ service cloud.firestore {
       //  delete: เจ้าของ หรือ admin
       match /mail/{mailId} {
         allow read:   if request.auth != null && request.auth.uid == userId;
-        allow create: if isAcademic();
+        // create: ทีมงาน (academic) สร้างได้ทุกแบบ · owner สร้างได้เฉพาะจดหมายต้อนรับแม่แบบเป๊ะ
+        //   doc id ตายตัว 'welcome-v1' → มีได้ไม่เกิน 1 ฉบับ/คน (ซ้ำ = update ซึ่งจำกัด field)
+        allow create: if isAcademic()
+          || (
+            request.auth != null && request.auth.uid == userId
+            && mailId == 'welcome-v1'
+            && request.resource.data.get('from', '') == 'welcome'
+            && request.resource.data.get('claimed', true) == false
+            && request.resource.data.reward.keys().hasOnly(['coins', 'tickets'])
+            && request.resource.data.reward.get('coins', 0) == 15000
+            && request.resource.data.reward.get('tickets', 0) == 50
+          );
+        // update: เจ้าของ แก้ได้เฉพาะ read/claimed และ claimed เปลี่ยนได้ทางเดียว false→true (กดรับซ้ำไม่ได้)
         allow update: if request.auth != null && request.auth.uid == userId
-                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'claimed']);
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'claimed'])
+                      && (resource.data.get('claimed', false) == false
+                          || request.resource.data.get('claimed', false) == true);
         allow delete: if (request.auth != null && request.auth.uid == userId) || isAdmin();
       }
 

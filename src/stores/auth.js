@@ -5,12 +5,13 @@ import {
     signOut, onAuthStateChanged,
 } from 'firebase/auth'
 import {
-    doc, getDoc, setDoc, updateDoc, onSnapshot,
+    doc, getDoc, setDoc, updateDoc, onSnapshot, collection, writeBatch,
     serverTimestamp, increment,
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY, CONSENT_VERSION } from '../firebase/config.js'
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
 import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
+import { buildWelcomeGiftMail } from '../utils/mailbox.js'
 import { useToast } from '../composables/useToast.js'
 import { useUsageStore } from './usage.js'
 import { migratePets } from '../utils/petMigration.js'
@@ -150,6 +151,27 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // One-time: ส่งจดหมายของขวัญต้อนรับ (doc id ตายตัว 'welcome-v1' — rules ตรวจแม่แบบเป๊ะ)
+    // batch เขียน 2 docs atomic: สร้างจดหมาย + ตั้ง flag กันส่งซ้ำ
+    let _welcomeGifting = false
+    async function runWelcomeGiftIfNeeded() {
+        const u = userData.value
+        if (!u || u.welcomeGiftV1 === true || _welcomeGifting) return
+        const uid = currentUser.value?.uid
+        if (!uid) return
+        _welcomeGifting = true
+        try {
+            const batch = writeBatch(db)
+            batch.set(doc(db, 'users', uid, 'mail', 'welcome-v1'), buildWelcomeGiftMail(serverTimestamp()))
+            batch.update(doc(db, 'users', uid), { welcomeGiftV1: true })
+            await batch.commit()
+        } catch (e) {
+            console.error('[welcome gift]', e)
+        } finally {
+            _welcomeGifting = false
+        }
+    }
+
     // ── Onboarding actions ──
     // ยอมรับ consent → persist consent block (ค่าเดียวที่ต้องเขียนจริงสำหรับคนเก่า)
     async function acceptConsent() {
@@ -223,6 +245,7 @@ export const useAuthStore = defineStore('auth', () => {
                     if (_blockSnapshot) return
                     userData.value = normalizeUserData(snap.data())
                     runPetMigrationIfNeeded()
+                    runWelcomeGiftIfNeeded()
                 })
             } else {
                 if (_unsub) { _unsub(); _unsub = null }
