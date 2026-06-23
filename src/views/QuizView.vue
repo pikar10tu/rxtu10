@@ -42,8 +42,9 @@
     <template v-else-if="mode === 'quiz'">
       <div class="qv-bar-row">
         <button class="qv-quit" aria-label="ออกจากการทำข้อสอบ" @click="quit">✕</button>
-        <div class="qv-bar"><div class="qv-fill" :style="{ width: progress + '%' }"></div></div>
-        <span class="qv-count">{{ idx + 1 }}/{{ quiz.length }}</span>
+        <div v-if="variant === 'normal'" class="qv-bar"><div class="qv-fill" :style="{ width: progress + '%' }"></div></div>
+        <div v-else class="qv-zen-tag"><Emoji char="♾️" /> Zen</div>
+        <span class="qv-count">{{ variant === 'zen' ? `ข้อที่ ${idx + 1}` : `${idx + 1}/${quiz.length}` }}</span>
       </div>
       <div class="qv-running">คะแนน {{ correct }}/{{ answered }}</div>
 
@@ -93,11 +94,11 @@
       <div class="qv-result">
         <div class="qv-result-emoji">{{ resultEmoji }}</div>
         <div class="qv-result-title">ทำข้อสอบจบแล้ว!</div>
-        <div class="qv-result-score">{{ correct }}<span>/{{ quiz.length }}</span></div>
+        <div class="qv-result-score">{{ correct }}<span>/{{ sessionTotal }}</span></div>
         <div class="qv-result-pct">{{ pct }}%</div>
         <div v-if="coinsEarned" class="qv-result-coins">+{{ coinsEarned.toLocaleString() }} <Emoji char="🪙" /></div>
         <div v-else class="qv-result-nocoins">วันนี้รับเหรียญครบเพดานแล้ว</div>
-        <button class="qv-start" @click="mode = 'home'">ทำชุดใหม่</button>
+        <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
       </div>
     </template>
 
@@ -185,7 +186,8 @@ async function load() {
 onMounted(() => {
   if (!authStore.isLoggedIn) return
   load()
-  if (route.query.view === 'history') openHistory()
+  if (route.query.mode === 'zen') startZen()
+  else if (route.query.view === 'history') openHistory()
 })
 
 const dom = ref('__all')
@@ -205,6 +207,10 @@ const correct = ref(0)
 const answered = ref(0)
 const coinsEarned = ref(0)
 const answers = ref([])
+
+const ZEN_BATCH = 15
+const variant = ref('normal')   // 'normal' | 'zen'
+const sessionTotal = computed(() => variant.value === 'zen' ? answered.value : quiz.value.length)
 
 // ── ประวัติของฉัน (Phase 1 — private, ไม่มี leaderboard) ──
 const history = ref([])
@@ -268,7 +274,7 @@ async function sendReport() {
 
 const current = computed(() => quiz.value[idx.value] || null)
 const progress = computed(() => quiz.value.length ? Math.round((idx.value / quiz.value.length) * 100) : 0)
-const pct = computed(() => quiz.value.length ? Math.round((correct.value / quiz.value.length) * 100) : 0)
+const pct = computed(() => sessionTotal.value ? Math.round((correct.value / sessionTotal.value) * 100) : 0)
 const resultEmoji = computed(() => pct.value >= 80 ? '🏆' : pct.value >= 50 ? '😊' : '📚')
 
 function shuffle(arr) {
@@ -289,25 +295,31 @@ function shuffleChoices(q) {
 }
 
 const starting = ref(false)
+
+// ดึงข้อสุ่ม n ข้อ (windowed orderBy rand + wrap) — ใช้ร่วมทั้งโหมดทั่วไปและ Zen
+async function fetchQuestions(n) {
+  const R = Math.random()
+  const base = [where('isPublished', '==', true)]
+  if (dom.value !== '__all') base.push(where('domain', '==', dom.value))
+  const col = collection(db, 'questions')
+  const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(n)))
+  usage.track(firstSnap.size)
+  const first = firstSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+  let wrap = []
+  if (first.length < n) {
+    const wrapSnap = await getDocs(query(col, ...base, orderBy('rand'), limit(n)))
+    usage.track(wrapSnap.size)
+    wrap = wrapSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+  }
+  return quizSample(first, wrap, n).filter(q => Array.isArray(q.choices) && q.choices.length >= 2)
+}
+
 async function start() {
   if (starting.value) return
   starting.value = true
+  variant.value = 'normal'
   try {
-    const R = Math.random()
-    const base = [where('isPublished', '==', true)]
-    if (dom.value !== '__all') base.push(where('domain', '==', dom.value))
-    const col = collection(db, 'questions')
-    const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(len.value)))
-    usage.track(firstSnap.size)
-    const first = firstSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-    let wrap = []
-    if (first.length < len.value) {
-      const wrapSnap = await getDocs(query(col, ...base, orderBy('rand'), limit(len.value)))
-      usage.track(wrapSnap.size)
-      wrap = wrapSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-    }
-    const picks = quizSample(first, wrap, len.value)
-      .filter(q => Array.isArray(q.choices) && q.choices.length >= 2)
+    const picks = await fetchQuestions(len.value)
     quiz.value = shuffle(picks).map(shuffleChoices)
     idx.value = 0; resetRound()
     if (quiz.value.length) mode.value = 'quiz'
@@ -315,6 +327,29 @@ async function start() {
   } catch (e) {
     console.error('[quiz start]', e); toast('เริ่มข้อสอบไม่สำเร็จ', 'error')
   } finally { starting.value = false }
+}
+// Zen — ทำต่อเนื่องไม่จำกัด ทุกหมวด จนกดออก
+async function startZen() {
+  if (starting.value) return
+  starting.value = true
+  variant.value = 'zen'
+  dom.value = '__all'
+  try {
+    const picks = await fetchQuestions(ZEN_BATCH)
+    quiz.value = shuffle(picks).map(shuffleChoices)
+    idx.value = 0; resetRound()
+    if (quiz.value.length) mode.value = 'quiz'
+    else { toast('ยังไม่มีข้อสอบให้ทำ', 'error'); mode.value = 'home' }
+  } catch (e) {
+    console.error('[zen start]', e); toast('เริ่ม Zen ไม่สำเร็จ', 'error'); mode.value = 'home'
+  } finally { starting.value = false }
+}
+// โหลดข้อเพิ่มต่อท้ายเมื่อใกล้หมด batch
+async function loadMoreZen() {
+  try {
+    const more = await fetchQuestions(ZEN_BATCH)
+    if (more.length) quiz.value = [...quiz.value, ...shuffle(more).map(shuffleChoices)]
+  } catch (e) { console.error('[zen more]', e) }
 }
 // รีเซ็ต state รอบใหม่
 function resetRound() {
@@ -336,8 +371,14 @@ function choiceClass(i) {
   if (i === picked.value) return 'wrong'
   return 'dim'
 }
-function next() {
+async function next() {
   resetReport()
+  if (variant.value === 'zen') {
+    if (idx.value + 1 >= quiz.value.length - 2) await loadMoreZen()   // ใกล้หมด → เติม
+    if (idx.value + 1 < quiz.value.length) { idx.value++; picked.value = null }
+    else finish()   // คลังหมดจริง → จบนุ่มนวล
+    return
+  }
   if (idx.value + 1 < quiz.value.length) { idx.value++; picked.value = null }
   else finish()
 }
@@ -345,6 +386,7 @@ function quit() {
   if (answered.value > 0) finish()
   else mode.value = 'home'
 }
+function backToHome() { variant.value = 'normal'; mode.value = 'home' }
 
 async function finish() {
   mode.value = 'result'
@@ -373,7 +415,7 @@ async function finish() {
     await addDoc(collection(db, 'examSessions'), {
       userId: authStore.currentUser.uid,
       nickname: authStore.userData?.nickname || null,
-      total: quiz.value.length,
+      total: sessionTotal.value,
       correct: correct.value,
       pct: pct.value,
       domain: dom.value === '__all' ? null : dom.value,
@@ -441,6 +483,7 @@ async function finish() {
 .qv-bar { flex: 1; height: 7px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
 .qv-fill { height: 100%; background: linear-gradient(90deg,#4f46e5,#6366f1); transition: width .3s; }
 .qv-count { font-size: .68rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
+.qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }
 .qv-running { text-align: right; font-size: .68rem; font-weight: 700; color: #15803d; margin-bottom: 10px; }
 .qv-q { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 18px; font-size: .95rem; font-weight: 700; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
 .qv-choices { display: flex; flex-direction: column; gap: 10px; }
