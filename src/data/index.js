@@ -96,3 +96,8 @@ export { DRUGS } from './drugs.js';
 // เหรียญรางวัลเมื่อทีมวิชาการตัดสินว่า report ข้อสอบผิด "ผิดจริง" (verdict=valid).
 // ส่งจริงผ่าน Mailbox (track ถัดไป) — Phase 5 แค่ stamp ค่านี้ค้างไว้บน report doc.
 export const REPORT_REWARD = 50; // TBD รอเคาะตอนรีวิว economy
+
+// ── QUESTION STATS (SP2b) — เกณฑ์ flag "ข้อมีปัญหา" บนแถวย่อจัดการข้อสอบ ──
+// tunable pin: ปรับตัวเลขที่นี่ที่เดียว
+export const QUESTION_STAT_MIN_ATTEMPTS = 5; // ต้องถูกตอบ ≥ เท่านี้ก่อนจึง flag (กัน sample น้อยหลอก)
+export const QUESTION_STAT_PROBLEM_PCT  = 50; // %ถูก < เท่านี้ = ข้อมีปัญหา (โชว์ 🔴)
