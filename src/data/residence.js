@@ -30,7 +30,7 @@ export const RESIDENCE_TIERS = [
 ]
 
 export const MIN_RESIDENCE_LEVEL = 1
-export const MAX_RESIDENCE_LEVEL = 12 // released cap (array defines 15 for future tiers)
+export const MAX_RESIDENCE_LEVEL = 15 // released cap (array defines 15 for future tiers)
 
 // ── Lookups (all clamp the level into range, accept missing/undefined) ──
 export function clampLevel(level) {
