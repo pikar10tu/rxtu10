@@ -48,15 +48,17 @@
           <span v-for="r in rateList" :key="r.key" :style="{ color: r.color }">{{ r.label }} {{ r.pct }}%</span>
         </div>
 
-        <button v-if="tickets > 0" class="ticket-btn" :disabled="buying" @click="pull(1, true)">
-          <Emoji char="🎟️" /> ใช้ตั๋วฟรี สุ่ม 1 (×{{ tickets }})
-        </button>
+        <div v-if="tickets > 0" class="ticket-note"><Emoji char="🎟️" /> ตั๋วกาชา: {{ tickets }} ใบ (ใช้ตั๋วก่อนอัตโนมัติ)</div>
         <div class="pull-row">
-          <button class="pull-btn" :class="{ ok: coins >= PULL_COST }" :disabled="buying" @click="pull(1)">
-            สุ่ม 1<br><small>{{ PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
+          <button class="pull-btn" :class="{ ok: pay1.pay === 'ticket' || coins >= PULL_COST }" :disabled="buying" @click="pull(1)">
+            สุ่ม 1<br>
+            <small v-if="pay1.pay === 'ticket'">{{ pay1.amount }}<Emoji char="🎟️" /></small>
+            <small v-else>{{ PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
           </button>
-          <button class="pull-btn" :class="{ ok: coins >= TEN_PULL_COST }" :disabled="buying" @click="pull(10)">
-            สุ่ม 10<br><small>{{ TEN_PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
+          <button class="pull-btn" :class="{ ok: pay10.pay === 'ticket' || coins >= TEN_PULL_COST }" :disabled="buying" @click="pull(10)">
+            สุ่ม 10<br>
+            <small v-if="pay10.pay === 'ticket'">{{ pay10.amount }}<Emoji char="🎟️" /></small>
+            <small v-else>{{ TEN_PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
           </button>
         </div>
       </div>
@@ -139,7 +141,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { PETS, RARITY } from '../data/index.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
-import { rollMany, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
+import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
 
 const authStore = useAuthStore()
@@ -160,6 +162,8 @@ const guaranteed = computed(() => !!authStore.userData?.gachaGuaranteed)
 const legendaries = PETS.filter((p) => p.rarity === 'legendary')
 const targetPet = computed(() => legendaries.find((p) => p.id === target.value) || null)
 const pityLeft  = computed(() => Math.max(0, HARD_PITY - pity.value))
+const pay1  = computed(() => resolvePullPayment(1, tickets.value))
+const pay10 = computed(() => resolvePullPayment(10, tickets.value))
 
 const reveal = ref(null)       // { summary, multi }
 const pickerOpen = ref(false)
@@ -186,12 +190,10 @@ function closeReveal() { clearTimeout(revealTimer); reveal.value = null }
 
 const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, pct: GACHA_RATES[k], color: RARITY[k]?.color, label: RARITY[k]?.label }))
 
-async function pull(n, useFreeTicket = false) {
+async function pull(n) {
   if (buying.value) return
-  const rolls = useFreeTicket ? 1 : (n === 1 ? 1 : TEN_PULL_N) // สุ่ม 10 → ปั่น 11 ครั้ง ("เปิด 10 แถม 1")
-  const cost = useFreeTicket ? 0 : (n === 1 ? PULL_COST : TEN_PULL_COST)
-  if (useFreeTicket) { if (tickets.value < 1) return }
-  else if (coins.value < cost) { toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}`, 'error'); return }
+  const { rolls, pay, amount } = resolvePullPayment(n, tickets.value)
+  if (pay === 'coin' && coins.value < amount) { toast(`เหรียญไม่พอ! ต้องการ ${amount.toLocaleString()}`, 'error'); return }
 
   const state = { pity: pity.value, target: target.value, guaranteed: guaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
   const { results, nextState } = rollMany(rolls, state, PETS)
@@ -201,13 +203,18 @@ async function pull(n, useFreeTicket = false) {
 
   buying.value = true
   // NOTE: gachaTarget ไม่เขียนที่นี่ — เป็นของ chooseTarget() (กัน stale-target write)
+  const base = { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed }
   const optimistic = {
-    pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed,
-    ...(useFreeTicket ? { freeGachaTickets: tickets.value - 1 } : { coins: coins.value - cost, totalSpent: (authStore.userData?.totalSpent || 0) + cost }),
+    ...base,
+    ...(pay === 'ticket'
+      ? { freeGachaTickets: tickets.value - amount }
+      : { coins: coins.value - amount, totalSpent: (authStore.userData?.totalSpent || 0) + amount }),
   }
   const server = {
-    pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed,
-    ...(useFreeTicket ? { freeGachaTickets: increment(-1) } : { coins: increment(-cost), totalSpent: increment(cost) }),
+    ...base,
+    ...(pay === 'ticket'
+      ? { freeGachaTickets: increment(-amount) }
+      : { coins: increment(-amount), totalSpent: increment(amount) }),
   }
   const ok = await authStore.patchUser(optimistic, server)
   buying.value = false
@@ -243,8 +250,7 @@ async function chooseTarget(id) {
 .target-edit { font-weight: 800; color: var(--primary); font-size: .66rem; }
 .banner-guar { margin-top: 6px; font-size: .66rem; font-weight: 700; color: #059669; }
 .banner-rates { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: .6rem; font-weight: 700; }
-.ticket-btn { width: 100%; margin-bottom: 8px; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: var(--ink); background: var(--gold); box-shadow: var(--pop); cursor: pointer; }
-.ticket-btn:disabled { opacity: .5; }
+.ticket-note { font-size: .7rem; font-weight: 800; color: #b45309; margin-bottom: 8px; }
 .pull-row { display: flex; gap: 8px; }
 .pull-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .85rem; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .pull-btn small { font-size: .66rem; font-weight: 700; }
