@@ -4,6 +4,10 @@ import { useToast } from './useToast.js'
 import { simulateBattle } from '../utils/battleEngine.js'
 import { getFloorTeam, getTowerBonus, TOWER_MAX } from '../data/towerFloors.js'
 import { getPetDef } from '../data/index.js'
+import { doc, setDoc, increment, writeBatch } from 'firebase/firestore'
+import { db } from '../firebase/config.js'
+import { computeBattleStats } from '../utils/battleStats.js'
+import { useUsageStore } from '../stores/usage.js'
 
 /** activePets (species id) → battle units {id,rarity,element,grade} จาก pets ที่ owns */
 function resolveTeam(ids, pets) {
@@ -24,12 +28,33 @@ export function useTower() {
   const botTeam = computed(() => getFloorTeam(floor.value))
   const bonus = computed(() => getTowerBonus(best.value))
 
+  // best-effort: เขียนสถิติราย species (increment-only) — fail เงียบ ไม่ขวางการเล่น
+  async function recordStats(result, playerTeam, won) {
+    try {
+      const stats = computeBattleStats(result.log, playerTeam, won)
+      const ids = Object.keys(stats)
+      if (!ids.length) return
+      const batch = writeBatch(db)
+      for (const id of ids) {
+        const s = stats[id]
+        batch.set(doc(db, 'battleStats', id), {
+          battles: increment(s.battles), wins: increment(s.wins),
+          kills: increment(s.kills), deaths: increment(s.deaths),
+          dmgDealt: increment(s.dmgDealt), dmgTaken: increment(s.dmgTaken),
+        }, { merge: true })
+      }
+      await batch.commit()
+      useUsageStore().track(0, ids.length)
+    } catch (e) { console.error('[battleStats]', e) }
+  }
+
   async function fight() {
     if (!team.value.length) { toast('จัดทีมก่อนนะ (อย่างน้อย 1 ตัว)', 'info'); return null }
     const cleared = floor.value
     const seed = Date.now()
     const result = simulateBattle(team.value, botTeam.value, seed)
     const won = result.winner === 'A'
+    await recordStats(result, team.value, won)
     if (won) {
       const nextFloor = Math.min(TOWER_MAX, cleared + 1)
       const nextBest = Math.max(best.value, cleared)
