@@ -20,9 +20,9 @@
         @click="toggle(p.id)"
       >
         <span class="tp-el"><Emoji :char="elEmoji(p.id)" /></span>
-        <span v-if="p.grade" class="tp-grade">{{ gradeLabel(p.grade) }}</span>
         <span class="tp-emoji"><Emoji :char="defOf(p.id).emoji" /></span>
         <span class="tp-name">{{ defOf(p.id).name }}</span>
+        <PetStatLine :pet="p" />
       </button>
       <div v-if="!owned.length" class="tp-none">ยังไม่มีเพ็ท — ไปเปิดกาชาที่ร้านค้าก่อนนะ</div>
     </div>
@@ -35,9 +35,10 @@
 import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
 import PetDetailModal from '../pets/PetDetailModal.vue'
+import PetStatLine from '../shared/PetStatLine.vue'
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
-import { getPetDef, RARITY, ELEMENTS, GRADE_LABELS } from '../../data/index.js'
+import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
 import { residenceBattleSlots } from '../../data/residence.js'
 
 defineProps({ open: { type: Boolean, default: false } })
@@ -61,7 +62,6 @@ const filledCount = computed(() => slots.value.filter(Boolean).length)
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
 const rarityColor = (id) => RARITY[defOf(id).rarity]?.color || '#94a3b8'
 const elEmoji = (id) => ELEMENTS[defOf(id).element]?.emoji || '✊'
-const gradeLabel = (g) => GRADE_LABELS[Math.min(g, GRADE_LABELS.length - 1)] || g
 
 // เรียง legendary→common → เกรดสูงก่อน → ชื่อ (เหมือนหน้าเพ็ท)
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }

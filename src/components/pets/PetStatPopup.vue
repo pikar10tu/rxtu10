@@ -16,19 +16,6 @@
         <div class="ps-stat"><span><Emoji char="❤️" /></span><b>{{ hp }}</b><small>HP</small></div>
         <div class="ps-stat"><span><Emoji char="💰" /></span><b>{{ income }}</b><small>/วัน</small></div>
       </div>
-      <div class="ps-substats">
-        <span><Emoji char="🎯" /> Crit {{ crit }}%</span>
-        <span><Emoji char="💥" /> CritDMG {{ critDmg }}%</span>
-        <span v-if="lifesteal"><Emoji char="🩸" /> {{ lifesteal }}%</span>
-        <span v-if="dodge"><Emoji char="💨" /> {{ dodge }}%</span>
-      </div>
-
-      <div v-if="pot.length" class="ps-pot">
-        <div class="ps-pot-head"><Emoji char="⚗️" /> ศักยภาพ</div>
-        <div class="ps-pot-list">
-          <span v-for="(a, i) in pot" :key="i" class="ps-aff">{{ affixMeta(a.stat).label }} +{{ a.value }}%</span>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -36,24 +23,23 @@
 <script setup>
 import { computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
-import { RARITY, GRADE_LABELS, petStats } from '../../data/index.js'
+import { RARITY, GRADE_LABELS, getPetDef } from '../../data/index.js'
+import { buildCombatant } from '../../data/battle.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
-import { statBonusPct, affixMeta } from '../../data/potential.js'
 
 const props = defineProps({ pet: { type: Object, default: null } })
 defineEmits(['close'])
 
 const rc = computed(() => RARITY[props.pet?.rarity]?.color || '#94a3b8')
 const rarityLabel = computed(() => RARITY[props.pet?.rarity]?.label || props.pet?.rarity)
-const pot = computed(() => props.pet?.potential || [])
-const base = computed(() => (props.pet ? petStats(props.pet) : { atk: 0, hp: 0 }))
-const atk = computed(() => Math.round(base.value.atk * (1 + statBonusPct(pot.value, 'atk') / 100)))
-const hp = computed(() => Math.round(base.value.hp * (1 + statBonusPct(pot.value, 'hp') / 100)))
+// เลข combat จริง (= ที่ใช้สู้) — element จาก def
+const combat = computed(() => {
+  const p = props.pet; if (!p) return { atk: 0, maxHp: 0 }
+  return buildCombatant({ rarity: p.rarity, element: getPetDef(p.id)?.element || p.element, grade: p.grade })
+})
+const atk = computed(() => Math.round(combat.value.atk))
+const hp = computed(() => Math.round(combat.value.maxHp))
 const income = computed(() => props.pet ? petDailyCoins(props.pet) : 0)
-const crit = computed(() => 5 + statBonusPct(pot.value, 'crit'))
-const critDmg = computed(() => 50 + statBonusPct(pot.value, 'critDmg'))
-const lifesteal = computed(() => statBonusPct(pot.value, 'lifesteal'))
-const dodge = computed(() => statBonusPct(pot.value, 'dodge'))
 </script>
 
 <style scoped>

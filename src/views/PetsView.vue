@@ -35,12 +35,11 @@
           class="pt-cell" :style="{ borderColor: rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
-          <span v-if="p.grade > 0" class="pt-cell-grade">{{ GRADE_LABELS[Math.min(p.grade, GRADE_LABELS.length - 1)] }}</span>
           <span v-if="activeSet.has(p.id)" class="pt-cell-star"><Emoji char="⭐" /></span>
-          <span v-if="(p.potential || []).length" class="pt-cell-pot"><Emoji char="⚗️" />{{ p.potential.length }}</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
+          <PetStatLine :pet="p" />
         </button>
       </div>
     </template>
@@ -56,11 +55,12 @@ import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
-import { RARITY, GRADE_LABELS, PETS } from '../data/index.js'
+import { RARITY, PETS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'
 import { residenceBattleSlots } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
+import PetStatLine from '../components/shared/PetStatLine.vue'
 
 const authStore = useAuthStore()
 const sel = ref(null)

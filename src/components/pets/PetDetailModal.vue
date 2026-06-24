@@ -24,12 +24,6 @@
         <div class="pd-stat"><span><Emoji char="❤️" /></span><b>{{ hp }}</b><small>HP</small></div>
         <div class="pd-stat"><span><Emoji char="💰" /></span><b>{{ income }}</b><small>/วัน</small></div>
       </div>
-      <div class="pd-substats">
-        <span><Emoji char="🎯" /> Crit {{ crit }}%</span>
-        <span><Emoji char="💥" /> CritDMG {{ critDmg }}%</span>
-        <span v-if="lifesteal"><Emoji char="🩸" /> Lifesteal {{ lifesteal }}%</span>
-        <span v-if="dodge"><Emoji char="💨" /> Dodge {{ dodge }}%</span>
-      </div>
 
       <!-- evolve -->
       <div class="pd-section">
@@ -41,19 +35,6 @@
         </template>
       </div>
 
-      <!-- potential -->
-      <div class="pd-section">
-        <div class="pd-sec-head"><Emoji char="⚗️" /> ศักยภาพ ({{ (pet.potential || []).length }}/{{ slots }})</div>
-        <div class="pd-slots">
-          <div v-for="i in slots" :key="i" class="pd-slot" :class="{ filled: pet.potential && pet.potential[i-1] }">
-            <template v-if="pet.potential && pet.potential[i - 1]">
-              <span class="pd-slot-aff">{{ affixMeta(pet.potential[i-1].stat).label }} +{{ pet.potential[i-1].value }}%</span>
-            </template>
-            <span v-else class="pd-slot-empty">ว่าง</span>
-          </div>
-        </div>
-        <div class="pd-note small">ศักยภาพปรับได้เมื่อเปิดระบบสู้ (เร็วๆ นี้)</div>
-      </div>
     </div>
   </div>
 </template>
@@ -64,9 +45,9 @@ import Emoji from '../shared/Emoji.vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
-import { RARITY, GRADE_LABELS, petStats } from '../../data/index.js'
+import { RARITY, GRADE_LABELS, getPetDef } from '../../data/index.js'
+import { buildCombatant } from '../../data/battle.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
-import { slotsFor, statBonusPct, affixMeta } from '../../data/potential.js'
 import { residenceBattleSlots } from '../../data/residence.js'
 import { gradeUpCost, canUpgrade, MAX_GRADE } from '../../utils/petGrade.js'
 
@@ -106,20 +87,18 @@ const pet = computed(() => pets.value.find(p => p.id === props.petId) || null)
 
 const rc = computed(() => RARITY[pet.value?.rarity]?.color || '#94a3b8')
 const rarityLabel = computed(() => RARITY[pet.value?.rarity]?.label || pet.value?.rarity)
-const slots = computed(() => slotsFor(pet.value?.rarity))
 
 const upCost = computed(() => pet.value ? gradeUpCost(pet.value) : null)
 const canUp = computed(() => pet.value && canUpgrade(pet.value, auth.userData?.coins || 0))
 
-const base = computed(() => (pet.value ? petStats(pet.value) : { atk: 0, hp: 0 }))
-const pot = computed(() => pet.value?.potential || [])
-const atk = computed(() => Math.round(base.value.atk * (1 + statBonusPct(pot.value, 'atk') / 100)))
-const hp = computed(() => Math.round(base.value.hp * (1 + statBonusPct(pot.value, 'hp') / 100)))
+// เลข combat จริง (= ที่ใช้สู้) — element ดึงจาก def (per-species), grade V = ×2
+const combat = computed(() => {
+  const p = pet.value; if (!p) return { atk: 0, maxHp: 0 }
+  return buildCombatant({ rarity: p.rarity, element: getPetDef(p.id)?.element || p.element, grade: p.grade })
+})
+const atk = computed(() => Math.round(combat.value.atk))
+const hp = computed(() => Math.round(combat.value.maxHp))
 const income = computed(() => pet.value ? petDailyCoins(pet.value) : 0)
-const crit = computed(() => 5 + statBonusPct(pot.value, 'crit'))
-const critDmg = computed(() => 50 + statBonusPct(pot.value, 'critDmg'))
-const lifesteal = computed(() => statBonusPct(pot.value, 'lifesteal'))
-const dodge = computed(() => statBonusPct(pot.value, 'dodge'))
 
 async function commit(newPets, coinDelta = 0) {
   // reconcile the active team: drop any species no longer owned so a
