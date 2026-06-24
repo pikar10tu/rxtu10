@@ -81,6 +81,15 @@
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูสถิติ</div>
       </section>
 
+      <!-- ───── รีเซตหอคอย (ลาดเดอร์รายเดือน) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🏯" /> รีเซตหอคอย</span></div>
+        <div class="admin-hint">ลาดเดอร์รายเดือน — ตั้งชั้นหอคอยทุกคนกลับชั้น 1 (โบนัสหายจนไต่ใหม่ · ไม่แตะเพ็ท/เหรียญ)</div>
+        <button class="btn-mini" :disabled="resettingTower" @click="resetTower">
+          {{ resettingTower ? 'กำลังรีเซต…' : 'รีเซตชั้นหอคอยทุกคน' }}
+        </button>
+      </section>
+
       <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
       <section v-if="pendingGuests.length" class="admin-card">
         <div class="admin-card-head"><span><Emoji char="📨" /> คำขอเข้าชม (รออนุมัติ)</span></div>
@@ -342,6 +351,28 @@ async function loadBattleStats() {
     }).sort((a, b) => b.winPct - a.winPct)
   } catch (e) { console.error('[loadBattleStats]', e) }
   finally { loadingBattle.value = false }
+}
+
+// ── รีเซตชั้นหอคอยทุกคน (ลาดเดอร์รายเดือน) — batch ทุก user doc, เฉพาะ 2 field หอคอย ──
+const resettingTower = ref(false)
+async function resetTower() {
+  if (resettingTower.value) return
+  const ok = await confirm('รีเซตชั้นหอคอยของผู้เล่นทุกคน?\n• towerFloor→1, towerBest→0\n• โบนัสรายได้หอคอยจะหายจนกว่าจะไต่ใหม่\n• เพ็ท/ทีม/เหรียญไม่ถูกแตะ')
+  if (!ok) return
+  resettingTower.value = true
+  try {
+    const snap = await getDocs(collection(db, 'users'))
+    let batch = writeBatch(db), n = 0, total = 0
+    for (const d of snap.docs) {
+      batch.set(d.ref, { towerFloor: 1, towerBest: 0 }, { merge: true })
+      n++; total++
+      if (n >= 450) { await batch.commit(); batch = writeBatch(db); n = 0 }  // chunk กันเกิน 500
+    }
+    if (n > 0) await batch.commit()
+    usage.track(snap.size, total)
+    toast(`รีเซตหอคอย ${total} คนแล้ว`, 'success')
+  } catch (e) { console.error('[resetTower]', e); toast('รีเซตไม่สำเร็จ', 'error') }
+  finally { resettingTower.value = false }
 }
 
 // ── ส่งจดหมายถึงสมาชิก (Mailbox broadcast) ──
