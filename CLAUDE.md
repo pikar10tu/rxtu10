@@ -80,7 +80,10 @@ single-file component + scoped style · สีธีมหลัก indigo (#4f4
 
 ## กับดักที่เคยเจอแล้ว (อย่าทำซ้ำ)
 
-1. login มือถือต้อง `signInWithRedirect` (popup โดนบล็อก) — แก้แล้วใน stores/auth.js อย่า revert
+1. login ใช้ `signInWithPopup` ทุกอุปกรณ์ (รวมมือถือ) — **อย่าเปลี่ยนกลับไป redirect เป็นค่าหลัก**
+   เหตุ: host คนละโดเมนกับ authDomain → signInWithRedirect พึ่ง third-party storage ที่ Safari/Chrome
+   มือถือบล็อก → ล็อกอินแล้วเด้งกลับหน้า login. popup เลี่ยงได้. redirect เหลือเป็น fallback เท่านั้น.
+   (in-app webview เช่น LINE บล็อกทั้งคู่ → LoginLanding เตือนให้เปิดในเบราว์เซอร์จริง)
 2. Firestore ต้อง force long-polling — เครือข่ายมหาลัย/มือถือบล็อก WebChannel
 3. แก้ rules แล้วลืม deploy = ไม่มีผลจริง (rules ขึ้นผ่าน `firebase deploy` เท่านั้น — Pages/Actions ไม่แตะ rules)
 4. repo เดียวกันมี 2 ประวัติ: v1 (vanilla JS, branch main) และ v2 (โฟลเดอร์นี้, branch master)

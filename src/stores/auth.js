@@ -46,30 +46,31 @@ export const useAuthStore = defineStore('auth', () => {
     const incomeBonusPct = computed(() => incomeBonusFromTags(effectiveTags(userData.value)))
 
     // ── Actions ──
-    // มือถือ: popup มักโดนบล็อก → ใช้ signInWithRedirect;
-    // เดสก์ท็อป: popup (UX ดีกว่า) แล้ว fallback เป็น redirect ถ้าโดนบล็อก
+    // ⚠️ POPUP-FIRST ทุกอุปกรณ์ (รวมมือถือ) — อย่าเปลี่ยนกลับไปใช้ redirect เป็นค่าหลัก
+    // เหตุผล: host (pikar10tu.github.io / *.web.app) คนละโดเมนกับ authDomain
+    // (rxtu10dashboard.firebaseapp.com) → signInWithRedirect ต้องส่ง credential ข้ามโดเมนกลับมา
+    // ซึ่งพึ่ง third-party storage/cookie; Safari (ITP) บนไอโฟน + Chrome แอนดรอยด์บล็อกอันนี้
+    // → ล็อกอินสำเร็จแต่เด้งกลับหน้า login (getRedirectResult ว่าง). popup เลี่ยงปัญหานี้เพราะ
+    // ทำ flow ใน popup เดียวกัน. ปุ่มกด = user gesture จึงไม่โดน popup-blocker บนมือถือยุคใหม่.
+    // redirect เหลือไว้เป็น fallback เฉพาะตอน popup ใช้ไม่ได้ (webview/บล็อก) เท่านั้น.
     // หมายเหตุ: ไม่เรียก ensureDoc ที่นี่ — onAuthStateChanged ใน init() สร้าง doc ให้
     // (กันกรณี auth สำเร็จแต่ Firestore เชื่อมไม่ได้ จะได้ไม่ขึ้น error หลอก)
-    const _isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent)
     async function login() {
         const { toast } = useToast()
         provider.setCustomParameters({ prompt: 'select_account' })
-        if (_isMobile) {
-            try { await signInWithRedirect(auth, provider) }
-            catch (e) {
-                console.error('[login redirect]', e.code, e)
-                toast(`Login ไม่สำเร็จ: ${e.code || e.message || e}`, 'error', 6000)
-            }
-            return
-        }
         try {
             await signInWithPopup(auth, provider)
         } catch (e) {
+            // ผู้ใช้ปิด popup เอง → เงียบไว้ ไม่ต้อง fallback (จะงงว่าทำไมเด้งออก)
             if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return
-            if (e.code === 'auth/popup-blocked') {
-                // popup โดนบล็อก → redirect แทน
+            // popup เปิดไม่ได้จริง (โดนบล็อก/อยู่ใน webview ที่ไม่รองรับ) → ลอง redirect แทน
+            if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
                 try { await signInWithRedirect(auth, provider); return }
-                catch (e2) { console.error('[login redirect fallback]', e2.code, e2) }
+                catch (e2) {
+                    console.error('[login redirect fallback]', e2.code, e2)
+                    toast(`Login ไม่สำเร็จ: ${e2.code || e2.message || e2}`, 'error', 6000)
+                    return
+                }
             }
             console.error('[login popup]', e.code, e)
             toast(`Login ไม่สำเร็จ: ${e.code || e.message || e}`, 'error', 6000)
