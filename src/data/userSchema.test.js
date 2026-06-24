@@ -43,3 +43,24 @@ test('normalizeUserData คงค่า welcome flags เดิม', () => {
   assert.equal(d.welcomeGiftV1, true)
   assert.equal(d.welcomeBoxSeen, true)
 })
+
+// ── ทีมสู้หอคอย: activePets ยาว 4 ──
+test('default activePets ยาว 4', () => {
+  assert.equal(USER_DEFAULTS.activePets.length, 4)
+})
+
+test('normalize: activePets เดิม 3 ช่อง → pad เป็น 4', () => {
+  const d = normalizeUserData({ activePets: ['cat', 'fox', 'owl'] })
+  assert.deepEqual(d.activePets, ['cat', 'fox', 'owl', null])
+})
+
+test('normalize: activePets ยาวเกิน → ตัดเหลือ 4', () => {
+  const d = normalizeUserData({ activePets: ['a', 'b', 'c', 'd', 'e'] })
+  assert.equal(d.activePets.length, 4)
+  assert.deepEqual(d.activePets, ['a', 'b', 'c', 'd'])
+})
+
+test('normalize: legacy activePet → slot 0 (ยาว 4)', () => {
+  const d = normalizeUserData({ activePet: 'cat' })
+  assert.deepEqual(d.activePets, ['cat', null, null, null])
+})

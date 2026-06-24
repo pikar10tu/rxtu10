@@ -17,7 +17,7 @@ export const USER_DEFAULTS = {
   pets: [],
   eggs: [],
   activePet: null,
-  activePets: [null, null, null],
+  activePets: [null, null, null, null],
   pvpVictories: 0,
   studentId: null,
   nickname: null,
@@ -97,14 +97,17 @@ export function normalizeUserData(data) {
 
   // migration: legacy single `activePet` → `activePets` slot 0 (once)
   if (data.activePet && !(data.activePets || []).some(Boolean)) {
-    d.activePets = [data.activePet, null, null]
+    d.activePets = [data.activePet, null, null, null]
   }
 
   // arrays must be arrays
   d.pets       = Array.isArray(d.pets) ? d.pets : []
   d.eggs       = Array.isArray(d.eggs) ? d.eggs : []
   d.tags       = Array.isArray(d.tags) ? d.tags : []
-  d.activePets = Array.isArray(d.activePets) ? d.activePets : [null, null, null]
+  // ทีม 4 ตัว: ยาว 4 เสมอ (pad null / ตัดส่วนเกิน)
+  const TEAM_SIZE = 4
+  d.activePets = (Array.isArray(d.activePets) ? d.activePets : []).slice(0, TEAM_SIZE)
+  while (d.activePets.length < TEAM_SIZE) d.activePets.push(null)
 
   // deep-default nested objects so a missing sub-field can't crash a view
   d.contact   = { ...USER_DEFAULTS.contact,   ...(isObj(data.contact)   ? data.contact   : {}) }
