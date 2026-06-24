@@ -1,43 +1,53 @@
 <!-- BattleReplay v2 — event-driven (dispatch ตาม event.t) · melee/ranged · ป้ายธาตุ/crit/ตาย ·
-     controls: pause/speed/skip · แตะตัว = pause + inspect (มีช่อง passive รอ §5.5 master plan) -->
+     UI: ป้ายฝั่ง + badge ธาตุ + กรอบสีแยกข้าง = ดูรู้เรื่องว่าใครฝั่งไหน/ตีใคร/แพ้ทางมั้ย
+     controls: pause/speed/skip · แตะตัว = pause + inspect (ช่อง passive รอ §5.5 master plan)
+     ⚠️ ทุก emoji ผ่าน <Emoji> (Fluent self-host) — อย่าใส่ emoji ดิบในเทมเพลต (เป็น tofu บนบางเครื่อง) -->
 <template>
   <div v-if="data" class="br-ov">
     <div class="br-box" :class="{ hitstop: hitStop }">
       <div class="br-round" v-if="!done">รอบ {{ round }}</div>
 
+      <div class="br-side foe-label"><i class="dot foe"></i> ศัตรู</div>
       <div class="br-team">
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
-             class="br-unit" :class="unitClass('B'+i)" @click="inspect('B'+i)">
-          <Emoji :char="defOf(p.id).emoji" />
+             class="br-unit foe" :class="unitClass('B'+i)" @click="inspect('B'+i)">
+          <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
+          <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp"><div class="br-hp-fill" :style="{ width: hpPct('B'+i) + '%' }"></div></div>
           <span v-for="pop in popsFor('B'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)">-{{ pop.dmg }}</span>
-          <span v-if="callouts['B'+i]" class="br-call" :class="callouts['B'+i].kind">{{ callouts['B'+i].text }}</span>
-          <span v-if="(hp['B'+i] ?? 100) <= 0" class="br-puff">💀</span>
+          <span v-if="callouts['B'+i]" class="br-call" :class="callouts['B'+i].kind">
+            {{ callouts['B'+i].text }}<Emoji :char="callouts['B'+i].icon" />
+          </span>
+          <span v-if="(hp['B'+i] ?? 100) <= 0" class="br-puff"><Emoji char="💀" /></span>
         </div>
       </div>
 
-      <div class="br-vs">⚔️ ชั้น {{ data.cleared }}</div>
+      <div class="br-vs"><Emoji char="⚔️" /> ชั้น {{ data.cleared }}</div>
 
       <div class="br-team">
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
              class="br-unit me" :class="unitClass('A'+i)" @click="inspect('A'+i)">
-          <Emoji :char="defOf(p.id).emoji" />
+          <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
+          <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp"><div class="br-hp-fill mine" :style="{ width: hpPct('A'+i) + '%' }"></div></div>
           <span v-for="pop in popsFor('A'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)">-{{ pop.dmg }}</span>
-          <span v-if="callouts['A'+i]" class="br-call" :class="callouts['A'+i].kind">{{ callouts['A'+i].text }}</span>
-          <span v-if="(hp['A'+i] ?? 100) <= 0" class="br-puff">💀</span>
+          <span v-if="callouts['A'+i]" class="br-call" :class="callouts['A'+i].kind">
+            {{ callouts['A'+i].text }}<Emoji :char="callouts['A'+i].icon" />
+          </span>
+          <span v-if="(hp['A'+i] ?? 100) <= 0" class="br-puff"><Emoji char="💀" /></span>
         </div>
       </div>
+      <div class="br-side me-label"><i class="dot me"></i> ทีมคุณ</div>
 
       <!-- projectile layer (ranged) — พิกัดสัมพัทธ์กับ .br-box -->
       <div class="br-proj-layer">
-        <span v-for="pj in projectiles" :key="pj.k" class="br-proj" :style="projStyle(pj)">{{ pj.emoji }}</span>
+        <span v-for="pj in projectiles" :key="pj.k" class="br-proj" :style="projStyle(pj)"><Emoji :char="pj.emoji" /></span>
       </div>
 
       <div class="br-ctrl">
         <template v-if="!done">
-          <button class="br-btn sm" @click="togglePause">{{ paused ? '▶' : '⏸' }}</button>
-          <button class="br-btn sm" @click="cycleSpeed">×{{ speed }}</button>
+          <button class="br-btn sm" @click="togglePause">{{ paused ? '▶ เล่น' : '⏸ พัก' }}</button>
+          <button class="br-btn sm" @click="cycleSpeed">เร็ว ×{{ speed }}</button>
           <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
         </template>
         <template v-else>
@@ -52,10 +62,10 @@
       <div class="br-card">
         <div class="br-card-emoji"><Emoji :char="insp.def.emoji" /></div>
         <div class="br-card-name">{{ insp.def.name }}</div>
-        <div class="br-card-row"><span>ธาตุ</span><b>{{ elName(insp.def.element) }}</b></div>
+        <div class="br-card-row"><span>ธาตุ</span><b><Emoji :char="insp.elEmoji" /> {{ insp.elName }}</b></div>
         <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ insp.grade }}</b></div>
-        <div class="br-card-row"><span>ATK</span><b>{{ insp.atk }}</b></div>
-        <div class="br-card-row"><span>HP</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
+        <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
+        <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
         <div class="br-card-pass"><span>Passive</span><b>{{ insp.passive ? insp.passive.name : '—' }}</b></div>
         <button class="br-btn sm" @click="inspectUid = null">ปิด</button>
       </div>
@@ -66,7 +76,8 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS, RARITY } from '../../data/index.js'
+import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS } from '../../data/index.js'
+import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 
 const props = defineProps({ data: { type: Object, default: null } })
@@ -75,7 +86,9 @@ defineEmits(['close'])
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
 const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], lungeMs: 150, projMs: 280, hitStopMs: 130 }
 
+const EL_NAME = { fist: 'หมัด', scissors: 'กรรไกร', paper: 'กระดาษ' }
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
+const elEmoji = (p) => ELEMENTS[p?.element]?.emoji || '✊'
 
 const idx = ref(0)
 const round = ref(1)
@@ -87,7 +100,7 @@ const flashing = ref(null)
 const acting = ref(null)
 const inspectUid = ref(null)
 const projectiles = ref([])      // [{k, emoji, x0,y0,x1,y1}]
-const callouts = ref({})         // uid → {k, text, kind}
+const callouts = ref({})         // uid → {k, text, icon, kind}
 const hitStop = ref(false)
 let timer = null, popKey = 0, projKey = 0, calloutKey = 0
 let maxHp = {}
@@ -138,7 +151,7 @@ function playMotion(e, onImpact) {
   const a = centerOf(e.attacker), t = centerOf(e.target), el = els[e.attacker]
   if (a && t && el) {
     el.style.transition = `transform ${REPLAY_CFG.lungeMs / speed.value}ms ease-out`
-    el.style.transform = `translate(${(t.x - a.x) * 0.6}px, ${(t.y - a.y) * 0.6}px) scale(1.15)`
+    el.style.transform = `translate(${(t.x - a.x) * 0.55}px, ${(t.y - a.y) * 0.55}px) scale(1.12)`
     setTimeout(() => {
       onImpact()
       el.style.transform = ''
@@ -165,8 +178,9 @@ function applyAttack(e) {
     setTimeout(() => { pops.value = { ...pops.value, [e.target]: (pops.value[e.target] || []).filter(p => p.k !== k) } }, 600)
     if (e.eff === 'super' || e.eff === 'weak') {
       const ck = calloutKey++
-      callouts.value = { ...callouts.value, [e.target]: { k: ck, text: e.eff === 'super' ? 'แพ้ทาง! ⚡' : 'ต้านทาน 🛡️', kind: e.eff } }
-      setTimeout(() => { if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 700)
+      const cal = e.eff === 'super' ? { text: 'แพ้ทาง! ', icon: '⚡' } : { text: 'ต้านทาน ', icon: '🛡️' }
+      callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
+      setTimeout(() => { if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
     }
     if (e.crit) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }
   })
@@ -217,7 +231,6 @@ function projStyle(pj) {
   return { '--x0': pj.x0 + 'px', '--y0': pj.y0 + 'px', '--x1': pj.x1 + 'px', '--y1': pj.y1 + 'px',
            animationDuration: (REPLAY_CFG.projMs / speed.value) + 'ms' }
 }
-function elName(el) { return ELEMENTS[el]?.emoji || '?' }
 function rarityLabel(r) { return RARITY[r]?.label || r }
 const insp = computed(() => {
   const uid = inspectUid.value; if (!uid) return null
@@ -225,10 +238,11 @@ const insp = computed(() => {
   const arr = uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam
   const p = arr?.[i] || {}
   const c = buildCombatant(p)
+  const def = getPetDef(p.id) || { emoji: '❓', name: '?', element: 'scissors', rarity: 'common' }
   return {
-    def: getPetDef(p.id) || { emoji: '❓', name: '?', element: 'scissors', rarity: 'common' },
-    grade: p.grade || 0, atk: Math.round(c.atk), hpMax: Math.round(c.maxHp),
-    hpNow: Math.round(c.maxHp * (hp.value[uid] ?? 100) / 100), passive: passiveOf(getPetDef(p.id)),
+    def, grade: p.grade || 0, atk: Math.round(c.atk), hpMax: Math.round(c.maxHp),
+    hpNow: Math.round(c.maxHp * (hp.value[uid] ?? 100) / 100), passive: passiveOf(def),
+    elEmoji: ELEMENTS[def.element]?.emoji || '✊', elName: EL_NAME[def.element] || def.element,
   }
 })
 
@@ -237,45 +251,65 @@ onUnmounted(() => clearTimeout(timer))
 </script>
 
 <style scoped>
-.br-ov { position: fixed; inset: 0; z-index: 420; background: rgba(15,23,42,.82); display: flex; align-items: center; justify-content: center; padding: 16px; }
-.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; position: relative; }
+.br-ov { position: fixed; inset: 0; z-index: 420; background: rgba(15,23,42,.88); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; }
 .br-box.hitstop { animation: br-hitstop .12s; }
 @keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
-.br-round { text-align: center; color: rgba(255,255,255,.7); font-weight: 800; font-size: .72rem; letter-spacing: .05em; }
+.br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
+
+.br-side { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; color: rgba(255,255,255,.8); padding: 0 2px; }
+.br-side .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
+.dot.foe { background: #f87171; }
+.dot.me { background: #34d399; }
+.me-label { margin-top: 2px; }
+
 .br-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 2rem; background: rgba(255,255,255,.08); border-radius: 14px; transition: transform .1s; cursor: pointer; }
-.br-unit.acting { transform: scale(1.18); z-index: 2; }
-.br-unit.flash { animation: br-shake .18s; }
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: transform .1s, box-shadow .15s, border-color .15s; cursor: pointer; }
+.br-unit.foe { border-color: rgba(248,113,113,.35); }
+.br-unit.me  { border-color: rgba(52,211,153,.4); }
+.br-face { font-size: 2rem; line-height: 1; }
+.br-el { position: absolute; top: 3px; left: 3px; font-size: .8rem; background: rgba(0,0,0,.45); border-radius: 8px; padding: 1px 3px; line-height: 1; }
+.br-unit.acting { transform: translateY(-4px) scale(1.14); z-index: 3; box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
+.br-unit.flash { animation: br-shake .2s; box-shadow: 0 0 0 3px #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
-@keyframes br-shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-4px) } 75% { transform: translateX(4px) } }
-.br-hp { width: 80%; height: 5px; background: rgba(255,255,255,.2); border-radius: 999px; margin-top: 4px; overflow: hidden; }
-.br-hp-fill { height: 100%; background: #ef4444; transition: width .15s; }
+@keyframes br-shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-5px) } 75% { transform: translateX(5px) } }
+
+.br-hp { width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
+.br-hp-fill { height: 100%; background: #ef4444; border-radius: 999px; transition: width .2s ease-out; }
 .br-hp-fill.mine { background: #34d399; }
-.br-pop { position: absolute; top: -2px; font-weight: 800; font-size: .8rem; color: #fca5a5; animation: br-rise .6s ease-out forwards; pointer-events: none; }
-.br-pop.crit { color: #fbbf24; font-size: 1.05rem; }
-.br-pop.super { color: #f87171; }
-.br-pop.weak { color: #cbd5e1; font-size: .7rem; }
-@keyframes br-rise { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-22px); opacity: 0 } }
-.br-call { position: absolute; top: -18px; font-weight: 800; font-size: .62rem; white-space: nowrap; padding: 1px 5px; border-radius: 6px; animation: br-rise .7s ease-out forwards; pointer-events: none; }
-.br-call.super { background: #f87171; color: #fff; }
-.br-call.weak { background: rgba(203,213,225,.9); color: #334155; }
-.br-puff { position: absolute; font-size: 1.1rem; animation: br-puff .5s ease-out forwards; pointer-events: none; }
-@keyframes br-puff { from { transform: translateY(0) scale(.6); opacity: 1 } to { transform: translateY(-14px) scale(1.2); opacity: 0 } }
+
+.br-pop { position: absolute; top: 0; font-weight: 800; font-size: .9rem; color: #fecaca; text-shadow: 0 1px 2px rgba(0,0,0,.6); animation: br-rise .6s ease-out forwards; pointer-events: none; }
+.br-pop.crit { color: #fbbf24; font-size: 1.2rem; }
+.br-pop.super { color: #fca5a5; }
+.br-pop.weak { color: #cbd5e1; font-size: .78rem; }
+@keyframes br-rise { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-24px); opacity: 0 } }
+
+.br-call { position: absolute; top: -16px; display: inline-flex; align-items: center; gap: 2px; font-weight: 800; font-size: .6rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; animation: br-rise .75s ease-out forwards; pointer-events: none; z-index: 4; }
+.br-call.super { background: #ef4444; color: #fff; }
+.br-call.weak { background: rgba(203,213,225,.95); color: #334155; }
+
+.br-puff { position: absolute; font-size: 1.2rem; animation: br-puff .5s ease-out forwards; pointer-events: none; }
+@keyframes br-puff { from { transform: translateY(0) scale(.6); opacity: 1 } to { transform: translateY(-16px) scale(1.25); opacity: 0 } }
+
 .br-proj-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.br-proj { position: absolute; left: 0; top: 0; font-size: 1.3rem; transform: translate(var(--x0), var(--y0)); animation: br-fly linear forwards; }
+.br-proj { position: absolute; left: 0; top: 0; font-size: 1.4rem; transform: translate(var(--x0), var(--y0)); animation: br-fly linear forwards; }
 @keyframes br-fly { from { transform: translate(var(--x0), var(--y0)) } to { transform: translate(var(--x1), var(--y1)) } }
-.br-vs { text-align: center; color: #fff; font-weight: 800; font-size: .9rem; letter-spacing: .04em; }
-.br-ctrl { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
-.br-btn { border: 2px solid #fff; background: rgba(255,255,255,.12); color: #fff; border-radius: 12px; padding: 10px 24px; font-family: inherit; font-weight: 800; cursor: pointer; }
-.br-btn.sm { padding: 8px 14px; font-size: .82rem; }
-.br-result { font-size: 1.15rem; font-weight: 800; color: #fff; }
+
+.br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
+
+.br-ctrl { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.br-btn { border: 2px solid #fff; background: rgba(255,255,255,.14); color: #fff; border-radius: 12px; padding: 10px 22px; font-family: inherit; font-weight: 800; cursor: pointer; transition: background .12s; }
+.br-btn:active { background: rgba(255,255,255,.28); }
+.br-btn.sm { padding: 9px 14px; font-size: .82rem; }
+.br-result { font-size: 1.2rem; font-weight: 800; color: #fff; }
 .br-result.win { color: #34d399; }
-.br-inspect { position: fixed; inset: 0; z-index: 430; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.4); }
-.br-card { background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 16px; padding: 16px 18px; width: 240px; display: flex; flex-direction: column; gap: 6px; }
-.br-card-emoji { font-size: 2.6rem; text-align: center; }
-.br-card-name { text-align: center; font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
-.br-card-row, .br-card-pass { display: flex; justify-content: space-between; font-size: .8rem; }
+
+.br-inspect { position: fixed; inset: 0; z-index: 430; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.5); }
+.br-card { background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 18px; padding: 16px 18px; width: 250px; display: flex; flex-direction: column; gap: 7px; }
+.br-card-emoji { font-size: 2.8rem; text-align: center; }
+.br-card-name { text-align: center; font-weight: 800; font-size: 1.1rem; margin-bottom: 4px; }
+.br-card-row, .br-card-pass { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; }
 .br-card-row span, .br-card-pass span { color: rgba(255,255,255,.6); }
-.br-card-pass { border-top: 1px solid rgba(255,255,255,.15); margin-top: 4px; padding-top: 6px; }
-.br-card .br-btn { margin-top: 8px; }
+.br-card-pass { border-top: 1px solid rgba(255,255,255,.15); margin-top: 4px; padding-top: 7px; }
+.br-card .br-btn { margin-top: 10px; }
 </style>
