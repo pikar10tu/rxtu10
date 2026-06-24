@@ -13,7 +13,11 @@
              class="br-unit foe" :class="unitClass('B'+i)" @click="inspect('B'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
-          <div class="br-hp"><div class="br-hp-fill" :style="{ width: hpPct('B'+i) + '%' }"></div></div>
+          <div class="br-hp">
+            <div class="br-hp-fill" :style="{ width: hpPct('B'+i) + '%' }"></div>
+            <span v-for="(t, ti) in ticksFor('B'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
+          </div>
+          <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe">{{ curHp('B'+i) }}</span></div>
           <span v-for="pop in popsFor('B'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)">-{{ pop.dmg }}</span>
           <span v-if="callouts['B'+i]" class="br-call" :class="callouts['B'+i].kind">
             {{ callouts['B'+i].text }}<Emoji :char="callouts['B'+i].icon" />
@@ -29,7 +33,11 @@
              class="br-unit me" :class="unitClass('A'+i)" @click="inspect('A'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
-          <div class="br-hp"><div class="br-hp-fill mine" :style="{ width: hpPct('A'+i) + '%' }"></div></div>
+          <div class="br-hp">
+            <div class="br-hp-fill mine" :style="{ width: hpPct('A'+i) + '%' }"></div>
+            <span v-for="(t, ti) in ticksFor('A'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
+          </div>
+          <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me">{{ curHp('A'+i) }}</span></div>
           <span v-for="pop in popsFor('A'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)">-{{ pop.dmg }}</span>
           <span v-if="callouts['A'+i]" class="br-call" :class="callouts['A'+i].kind">
             {{ callouts['A'+i].text }}<Emoji :char="callouts['A'+i].icon" />
@@ -103,18 +111,28 @@ const projectiles = ref([])      // [{k, emoji, x0,y0,x1,y1}]
 const callouts = ref({})         // uid → {k, text, icon, kind}
 const hitStop = ref(false)
 let timer = null, popKey = 0, projKey = 0, calloutKey = 0
-let maxHp = {}
+let maxHp = {}, unitAtk = {}     // uid → maxHp / atk (static ต่อ unit จาก buildCombatant)
 const els = {}                   // uid → DOM el (วัดตำแหน่ง melee/ranged)
 function setEl(uid, el) { if (el) els[uid] = el }
+
+// ── การ์ดสไตล์ Hearthstone: ATK/HP เป็นเลข + หลอดเลือดขีดทุก 50 HP ──
+function atkOf(uid) { return unitAtk[uid] ?? 0 }
+function curHp(uid) { return Math.round((maxHp[uid] || 0) * (hp.value[uid] ?? 100) / 100) }
+function ticksFor(uid) {
+  const max = maxHp[uid] || 1, out = []
+  for (let h = 50; h < max; h += 50) out.push((h / max) * 100)  // % ตำแหน่งขีดทุก 50 HP
+  return out
+}
 
 const log = computed(() => props.data?.result?.log || [])
 const done = computed(() => idx.value >= log.value.length)
 const delay = computed(() => REPLAY_CFG.baseDelay / speed.value)
 
 function buildMax(d) {
-  maxHp = {}
-  ;(d?.botTeam || []).forEach((p, i) => { maxHp['B' + i] = buildCombatant(p).maxHp || 1 })
-  ;(d?.playerTeam || []).forEach((p, i) => { maxHp['A' + i] = buildCombatant(p).maxHp || 1 })
+  maxHp = {}; unitAtk = {}
+  const add = (p, uid) => { const c = buildCombatant(p); maxHp[uid] = Math.round(c.maxHp) || 1; unitAtk[uid] = Math.round(c.atk) }
+  ;(d?.botTeam || []).forEach((p, i) => add(p, 'B' + i))
+  ;(d?.playerTeam || []).forEach((p, i) => add(p, 'A' + i))
 }
 function reset() {
   clearTimeout(timer)
@@ -274,9 +292,15 @@ onUnmounted(() => clearTimeout(timer))
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
 @keyframes br-shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-5px) } 75% { transform: translateX(5px) } }
 
-.br-hp { width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
+.br-hp { position: relative; width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
 .br-hp-fill { height: 100%; background: #ef4444; border-radius: 999px; transition: width .2s ease-out; }
 .br-hp-fill.mine { background: #34d399; }
+.br-tick { position: absolute; top: 0; width: 1px; height: 100%; background: rgba(255,255,255,.55); }
+.br-stats { display: flex; justify-content: space-between; width: 84%; margin-top: 3px; }
+.br-atk, .br-hpn { font-size: .58rem; font-weight: 800; color: #fff; line-height: 1; padding: 2px 5px; border-radius: 999px; min-width: 14px; text-align: center; }
+.br-atk { background: #f59e0b; }       /* ATK = amber (Hearthstone-ish) */
+.br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
+.br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
 
 .br-pop { position: absolute; top: 0; font-weight: 800; font-size: .9rem; color: #fecaca; text-shadow: 0 1px 2px rgba(0,0,0,.6); animation: br-rise .6s ease-out forwards; pointer-events: none; }
 .br-pop.crit { color: #fbbf24; font-size: 1.2rem; }
