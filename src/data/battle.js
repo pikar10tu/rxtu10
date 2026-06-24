@@ -17,8 +17,9 @@ const COMBAT_BASE = {
   epic:      { atk: 13, hp: 63 },
   legendary: { atk: 14, hp: 70 },
 }
-// index = grade 0..5 (in-game cap = 5)
-const COMBAT_GRADE = [1.0, 1.06, 1.12, 1.19, 1.26, 1.34]
+// index = grade 0..5 (in-game cap = 5) — เกรด V = ×2 (จูน 26 มิ.ย. ให้อัพเกรดเห็นผล
+// "เก่งขึ้น" ชัด ~2 เท่า แต่ไม่ถล่มขาดแบบเลข display เก่า ×4.5; ผ่าน sim บาลานซ์แล้ว)
+const COMBAT_GRADE = [1.0, 1.15, 1.32, 1.52, 1.74, 2.0]
 const ELEMENT_BIAS = {
   fist:     { atk: 1.2,  hp: 0.85 },
   scissors: { atk: 1.0,  hp: 1.0  },

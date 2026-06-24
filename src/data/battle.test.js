@@ -17,9 +17,16 @@ test('buildCombatant: fist เกรด 0 legendary — bias atk↑ hp↓', () =
   assert.equal(c.element, 'fist')
 })
 
-test('buildCombatant: clamp เกรดเกิน 5 → ใช้ index 5', () => {
+test('buildCombatant: clamp เกรดเกิน 5 → ใช้ index 5 (V=×2.0)', () => {
   const c = buildCombatant({ id: 'x', rarity: 'common', element: 'scissors', grade: 99 })
-  assert.equal(Math.round(c.atk), Math.round(10 * 1.34))
+  assert.equal(Math.round(c.atk), Math.round(10 * 2.0))
+  assert.equal(Math.round(c.maxHp), Math.round(50 * 2.0))
+})
+
+test('buildCombatant: เกรด V แรงกว่าเกรด 0 ราว 2 เท่า (เห็นผลอัพเกรด)', () => {
+  const g0 = buildCombatant({ rarity: 'legendary', element: 'scissors', grade: 0 })
+  const g5 = buildCombatant({ rarity: 'legendary', element: 'scissors', grade: 5 })
+  assert.ok(g5.atk / g0.atk >= 1.9 && g5.atk / g0.atk <= 2.1)
 })
 
 test('elementMult: ได้เปรียบ/เสียเปรียบ/เสมอ', () => {
