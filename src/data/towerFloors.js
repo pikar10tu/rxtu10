@@ -48,3 +48,16 @@ export function getTowerBonus(bestFloor) {
   if (b >= 10) return 500
   return 0
 }
+
+// floor → โซนแฟนซีตาม tier (UI หอคอย) — ช่วงเดียวกับ getFloorTeam (tier 12.5)
+const ZONES = [
+  { name: 'ลานประลอง',     art: '🛡️', color: '#84cc16', from: 1,  to: 12 },
+  { name: 'หอเวทเก่า',      art: '🔮', color: '#60a5fa', from: 13, to: 25 },
+  { name: 'ปราการอสูร',     art: '👹', color: '#c084fc', from: 26, to: 38 },
+  { name: 'ยอดหอคอยมังกร', art: '🐉', color: '#fbbf24', from: 39, to: 50 },
+]
+export function floorZone(floor) {
+  const f = Math.max(1, Math.min(TOWER_MAX, Math.floor(floor) || 1))
+  return ZONES.find(z => f >= z.from && f <= z.to) || ZONES[ZONES.length - 1]
+}
+export const TOWER_BONUS_FLOORS = [10, 20, 30, 40, 50]  // ชั้นที่ getTowerBonus กระโดด (หมุดบนแถบ)
