@@ -7,16 +7,22 @@
       </div>
       <div class="help-scroll">
         <span v-if="section.soon" class="help-soon">เร็วๆ นี้</span>
-        <ul class="help-body">
-          <li v-for="(line, j) in section.body" :key="j">{{ line }}</li>
-        </ul>
+        <div class="help-body">
+          <p v-for="(line, j) in section.body" :key="j">{{ line }}</p>
+        </div>
         <table v-if="section.table === 'residence'" class="help-tbl">
           <thead><tr><th>Lv</th><th>ที่อยู่อาศัย</th><th>รายได้/วัน</th></tr></thead>
           <tbody>
-            <tr v-for="t in residenceRows" :key="t.level">
+            <tr v-for="t in residenceRows" :key="t.level" :class="{ masked: t.level > revealUpTo }">
               <td>{{ t.level }}</td>
-              <td><Emoji :char="t.art" /> {{ t.tierName }}</td>
-              <td>{{ t.dailyIncome.toLocaleString() }}</td>
+              <template v-if="t.level <= revealUpTo">
+                <td><Emoji :char="t.art" /> {{ t.tierName }}</td>
+                <td>{{ t.dailyIncome.toLocaleString() }}</td>
+              </template>
+              <template v-else>
+                <td><Emoji char="🔒" /> ลับ</td>
+                <td>????</td>
+              </template>
             </tr>
           </tbody>
         </table>
@@ -30,11 +36,16 @@ import Emoji from '../shared/Emoji.vue'
 import { computed } from 'vue'
 import { GUIDE } from '../../data/guide.js'
 import { useHelp } from '../../composables/useHelp.js'
+import { useAuthStore } from '../../stores/auth.js'
 import { RESIDENCE_TIERS, MAX_RESIDENCE_LEVEL } from '../../data/residence.js'
 
 const { helpTopic, closeHelp } = useHelp()
+const auth = useAuthStore()
 const section = computed(() => helpTopic.value ? GUIDE[helpTopic.value] : null)
 const residenceRows = computed(() => RESIDENCE_TIERS.filter(t => t.level <= MAX_RESIDENCE_LEVEL))
+// เปิดเผยแค่ถึงเลเวลถัดไปของผู้เล่น (กันสปอยบ้านสูงๆ) — ที่เหลือ mask เป็น ????
+const myLevel = computed(() => auth.userData?.residence?.level || 1)
+const revealUpTo = computed(() => Math.min(myLevel.value + 1, MAX_RESIDENCE_LEVEL))
 </script>
 
 <style scoped>
@@ -46,10 +57,11 @@ const residenceRows = computed(() => RESIDENCE_TIERS.filter(t => t.level <= MAX_
 .help-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; font-size: .9rem; cursor: pointer; }
 .help-scroll { overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 22px; }
 .help-soon { display: inline-block; font-size: .58rem; font-weight: 700; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; margin-bottom: 8px; }
-.help-body { margin: 0 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 7px; }
-.help-body li { font-size: .82rem; color: rgba(0,0,0,.65); line-height: 1.55; }
+.help-body { margin: 0 0 12px; display: flex; flex-direction: column; gap: 10px; }
+.help-body p { margin: 0; font-size: .82rem; color: rgba(0,0,0,.65); line-height: 1.6; }
 .help-tbl { width: 100%; border-collapse: collapse; font-size: .72rem; }
 .help-tbl th, .help-tbl td { border: 1px solid rgba(0,0,0,.1); padding: 5px 8px; text-align: left; }
 .help-tbl th { background: rgba(0,0,0,.04); font-weight: 700; }
 .help-tbl td:last-child, .help-tbl th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.help-tbl tr.masked td { color: rgba(0,0,0,.32); letter-spacing: .04em; }
 </style>

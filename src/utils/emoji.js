@@ -40,3 +40,20 @@ export function fluentFile(emoji) {
   const cp = emojiCodepoint(emoji)
   return cp ? `emoji/fluent/${cp}.svg` : ''
 }
+
+// emoji ดิบ (base pictographic + VS16/ZWJ/skin-tone) — เดียวกับ scripts/fetch-fluent
+const EMOJI_RE = /\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*/gu
+
+/**
+ * แปลง emoji ดิบในสตริง → <img> Fluent (เหมือนกันทุกเครื่อง) สำหรับใช้กับ v-html
+ * เช่น ข้อความใน ConfirmModal ที่ประกอบเป็น string ไว้ก่อน (ฝัง <Emoji> ไม่ได้)
+ * `base` = import.meta.env.BASE_URL · emoji ที่ไม่มีไฟล์จะคงตัวเดิม (fallback เครื่อง)
+ */
+export function emojifyHtml(text, base = '') {
+  return String(text).replace(EMOJI_RE, (m) => {
+    const f = fluentFile(m)
+    if (!f) return m
+    return `<img src="${base}${f}" alt="${m}" aria-hidden="true" `
+      + `style="width:1em;height:1em;vertical-align:-.125em;object-fit:contain;display:inline-block">`
+  })
+}

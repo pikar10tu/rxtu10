@@ -15,8 +15,11 @@
 import Emoji from '../shared/Emoji.vue'
 import { computed } from 'vue'
 import { useConfirm } from '../../composables/useConfirm.js'
+import { emojifyHtml } from '../../utils/emoji.js'
 const { visible, message, ok, cancel } = useConfirm()
 const msgHtml = computed(() =>
-    message.value.split('\n').map(l => `<div>${l}</div>`).join('')
+    message.value.split('\n')
+        .map(l => `<div>${emojifyHtml(l, import.meta.env.BASE_URL)}</div>`)
+        .join('')
 )
 </script>
