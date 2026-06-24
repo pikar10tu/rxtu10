@@ -50,7 +50,7 @@ export const useMailbox = defineStore('mailbox', () => {
   async function claim(id) {
     const uid = auth.currentUser?.uid
     const m = mails.value.find(x => x.id === id)
-    if (!uid || !canClaim(m)) return 0
+    if (!uid || !canClaim(m)) return { coins: 0, tickets: 0 }
     try {
       const result = await runTransaction(db, async (tx) => {
         const ref = doc(db, 'users', uid, 'mail', id)
