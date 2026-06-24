@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content">
-    <div class="page-title pv-head"><span><Emoji char="🎮" /> Play</span><HelpButton topic="farm" /></div>
+    <div class="page-title pv-head"><span><Emoji char="🎮" /> Play</span><HelpButton topic="play" /></div>
 
     <!-- กระดานข่าว (เห็นได้ทุกคน · collapsed แสดงบรรทัดล่าสุด กดกาง log) -->
     <NewsBoard />

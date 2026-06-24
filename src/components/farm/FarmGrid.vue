@@ -1,7 +1,7 @@
 <template>
   <div class="farm">
     <div class="farm-head">
-      <span class="farm-title"><Emoji char="🌾" /> ฟาร์ม</span>
+      <span class="farm-title"><Emoji char="🌾" /> ฟาร์ม <HelpButton topic="farm" /></span>
       <span class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} {{ upcomingEmojis }}</template></span>
     </div>
 
@@ -59,6 +59,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Emoji from '../shared/Emoji.vue'
+import HelpButton from '../help/HelpButton.vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useFarm } from '../../composables/useFarm.js'
 import { getCrop } from '../../data/crops.js'
