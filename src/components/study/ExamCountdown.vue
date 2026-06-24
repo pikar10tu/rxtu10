@@ -1,13 +1,13 @@
 <template>
-  <div v-if="items.length" class="ec-wrap">
-    <div v-for="e in items" :key="e.id" class="ec-card">
-      <span class="ec-emoji"><Emoji :char="e.emoji || '🎯'" /></span>
+  <div v-if="next" class="ec-wrap">
+    <div class="ec-card">
+      <span class="ec-emoji"><Emoji :char="next.emoji || '🎯'" /></span>
       <div class="ec-body">
-        <div class="ec-label">{{ e.label }}</div>
-        <div class="ec-date">{{ fmtRange(e) }}</div>
+        <div class="ec-label">{{ next.label }}</div>
+        <div class="ec-date">{{ fmtRange(next) }}</div>
       </div>
       <div class="ec-count">
-        <template v-if="e.days > 0"><b>{{ e.days }}</b><small>เหลือ (วัน)</small></template>
+        <template v-if="next.days > 0"><b>{{ next.days }}</b><small>เหลือ (วัน)</small></template>
         <b v-else class="ec-today">วันนี้!</b>
       </div>
     </div>
@@ -26,7 +26,8 @@ let timer = null
 onMounted(() => { timer = setInterval(() => { now.value = Date.now() }, 60000) })
 onUnmounted(() => clearInterval(timer))
 
-const items = computed(() => upcomingExams(EXAMS, now.value))
+// โชว์ bubble เดียว = วันสอบที่ใกล้ที่สุด (CC1/CC2 ติดกัน → รวบเหลืออันใกล้สุด)
+const next = computed(() => upcomingExams(EXAMS, now.value)[0])
 
 function fmtDate(iso) {
   // th-TH-u-ca-gregory = เดือนภาษาไทย แต่ปีเป็น ค.ศ. (ไม่ใช่ พ.ศ.)

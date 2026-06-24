@@ -11,6 +11,8 @@
     <template v-if="authStore.isLoggedIn">
       <!-- นับถอยหลังสู่วันสอบ (ย้ายมาจาก Study — ข้อมูลสรุปรายวัน เห็นทันทีเปิดแอป) -->
       <ExamCountdown />
+      <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink (ขยับขึ้นใต้ countdown) -->
+      <ResidenceCard />
 
       <!-- เหรียญ + รับรายได้รายวัน (ส่วนตัว เห็นเฉพาะเจ้าของ) -->
       <DailyCard />
@@ -18,8 +20,6 @@
       <DailyQuestCard />
       <!-- กล่องจดหมาย (รางวัล/ประกาศ) -->
       <MailboxCard />
-      <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
-      <ResidenceCard />
 
       <!-- เครื่องมือผู้ดูแล — เฉพาะแอดมิน (Shop ไป nav, Pets ไป Play แล้ว) -->
       <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-admin-btn">
