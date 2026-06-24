@@ -104,6 +104,21 @@ export function floorZone(floor) // → { name, color, art, from, to }
 
 ---
 
+## ส่วน 5 — Admin: ปุ่มรีเซตชั้นหอคอยทุกคน (ลาดเดอร์รายเดือน)
+
+ไฟล์: `views/AdminView.vue` — เพิ่ม section "🏯 รีเซตหอคอย" (วางแผนกดเดือนละครั้ง)
+
+- ปุ่ม "รีเซตชั้นหอคอยทุกคน" → `useConfirm` ยืนยันก่อน (destructive: กระทบทุกคน)
+  ข้อความยืนยันบอกชัด: "ตั้ง `towerFloor`→1, `towerBest`→0 ของผู้เล่นทุกคน · โบนัสรายได้หอคอยจะหายจนกว่าจะไต่ใหม่ · เพ็ท/ทีมไม่ถูกแตะ"
+- กลไก: `getDocs(collection(db,'users'))` → `writeBatch` set `{ towerFloor:1, towerBest:0 }` (merge) ทุก doc →
+  commit · `usage.track(reads=N, writes=N)` · จำนวนคนชั้นปี < 500 → batch เดียวพอ (ถ้าเกินค่อยแบ่ง chunk 450)
+- best-effort + toast ผล ("รีเซตหอคอย N คนแล้ว" / error) · ปุ่ม disabled ระหว่างทำ
+- **ไม่ต้องแก้ rules**: rules `allow update: if isAdmin()` ให้แอดมินเขียน field ใดก็ได้บน user doc ทุกคนอยู่แล้ว
+  (towerFloor/towerBest ไม่ได้ถูก guard ใน admin branch) — ยืนยันก่อนทำจริง
+- **ไม่แตะ** coins/pets/activePets/residence — เฉพาะ 2 field หอคอย
+
+---
+
 ## ไฟล์ที่แตะ
 
 | ไฟล์ | งาน |
@@ -113,6 +128,7 @@ export function floorZone(floor) // → { name, color, art, from, to }
 | `src/components/battle/TeamPicker.vue` | battleSlots + แตะช่อง→PetDetailModal(ฝังใน) + แตะ pool→toggle |
 | `src/views/PetsView.vue` | แถบ "ทีมต่อสู้" + ปุ่มจัดทีม (เปิด TeamPicker) |
 | `src/components/home/DailyCard.vue` | บรรทัดรายได้ 🏯 หอคอย |
+| `src/views/AdminView.vue` | ปุ่มรีเซตชั้นหอคอยทุกคน (confirm + batch) |
 
 reuse ตามเดิม: `PetDetailModal` (prop petId), `useTower`, `buildCombatant`, `residenceBattleSlots`, `ELEMENTS`
 
@@ -120,9 +136,10 @@ reuse ตามเดิม: `PetDetailModal` (prop petId), `useTower`, `buildCo
 - `node --test src/data/towerFloors.test.js` (floorZone: ขอบเขตชั้น 1/12/13/25/26/38/39/50 → โซนถูก)
 - `npm run build` ผ่าน
 - manual (dev): หอคอย — แถบไต่ชั้นถูกตาม floor/best · แตะทีมคุณ→detail · แตะศัตรู→scout · จัดทีม battleSlots ถูกตามเลเวลบ้าน · หน้าเพ็ท แถบทีม+จัดทีม · Home เห็นบรรทัดหอคอยเมื่อ best≥10
+- manual (admin): ปุ่มรีเซตหอคอย → ยืนยัน → ตรวจ Firestore ว่า towerFloor/towerBest ของ user รีเซต (ทดสอบบน doc ตัวเองก่อน)
 
 ## Deploy / อนุมัติ
 1. `git push origin master` (เว็บหลัก) — **ไม่มี rules deploy** (ไม่แตะ rules)
 
 ## Out of scope (ภายหลัง)
-- reset ชั้นหอคอยทุกคน · Expedition · passive จริง · market
+- Expedition · passive จริง · market · cron auto-reset (รอบนี้รีเซตด้วยมือ admin)
