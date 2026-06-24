@@ -44,28 +44,28 @@ export function petStats(p){
 // ── PETS POOL ──
 export const PETS = [
   // ── LEGENDARY ──
-  { id:"bahamut",   emoji:"🐉", name:"บาฮามุท",  rarity:"legendary", element:"fist",     flavor:"ราชันมังกรบรรพกาล กางปีกปัดเป่าโรคร้าย", hatchMins:60 },
+  { id:"bahamut",   emoji:"🐉", name:"บาฮามุท",  rarity:"legendary", element:"fist",     flavor:"ราชันมังกรบรรพกาล กางปีกปัดเป่าโรคร้าย", hatchMins:60, atkStyle:"ranged", projectile:"🔥" },
   { id:"kirin",     emoji:"👹", name:"โอนิ",      rarity:"legendary", element:"fist",     flavor:"อสูรเขาเดียวจากตำนาน พลังทำลายล้างมหาศาล", hatchMins:60 },
   { id:"trex",      emoji:"🦖", name:"ทีเร็กซ์",  rarity:"legendary", element:"fist",     flavor:"ราชานักล่าแห่งยุคดึกดำบรรพ์ กัดทีเดียวจบ", hatchMins:60 },
   { id:"ouroboros", emoji:"🐍", name:"อูโรโบรอส", rarity:"legendary", element:"scissors", flavor:"งูกลืนหางตัวเอง วัฏจักรไม่มีวันสิ้นสุด", hatchMins:60 },
   { id:"simurgh",   emoji:"🦅", name:"กริฟฟิน",   rarity:"legendary", element:"scissors", flavor:"ราชาแห่งเวหา ปีกครึ่งอินทรีครึ่งสิงห์", hatchMins:60 },
-  { id:"phoenix",   emoji:"🐦‍🔥", name:"ฟีนิกซ์", rarity:"legendary", element:"scissors", flavor:"เกิดใหม่จากเถ้าถ่าน ไม่มีวันดับสูญ", hatchMins:60 },
-  { id:"whale",     emoji:"🐳", name:"คุณวาฬ",    rarity:"legendary", element:"paper",    flavor:"เจ้าสมุทรผู้ใจดี โอบอุ้มทั้งทีมไว้ในอ้อมอก", hatchMins:60 },
+  { id:"phoenix",   emoji:"🐦‍🔥", name:"ฟีนิกซ์", rarity:"legendary", element:"scissors", flavor:"เกิดใหม่จากเถ้าถ่าน ไม่มีวันดับสูญ", hatchMins:60, atkStyle:"ranged", projectile:"🔥" },
+  { id:"whale",     emoji:"🐳", name:"คุณวาฬ",    rarity:"legendary", element:"paper",    flavor:"เจ้าสมุทรผู้ใจดี โอบอุ้มทั้งทีมไว้ในอ้อมอก", hatchMins:60, atkStyle:"ranged", projectile:"💧" },
   { id:"qilin",     emoji:"🐘", name:"บากุ",      rarity:"legendary", element:"paper",    flavor:"ปีศาจกินฝันร้าย รวมถึงฝันว่าสอบตก", hatchMins:60 },
   { id:"mammoth",   emoji:"🦣", name:"แมมมอธ",    rarity:"legendary", element:"paper",    flavor:"ยักษ์ขนยาวแห่งยุคน้ำแข็ง เกราะหนาปราการ", hatchMins:60 },
   // ── EPIC ──
-  { id:"dragon",    emoji:"🐲", name:"มังกร",     rarity:"epic", element:"fist",     flavor:"พ่นไฟ purify impurity แต่เผา reactor ไปด้วย", hatchMins:1 },
+  { id:"dragon",    emoji:"🐲", name:"มังกร",     rarity:"epic", element:"fist",     flavor:"พ่นไฟ purify impurity แต่เผา reactor ไปด้วย", hatchMins:1, atkStyle:"ranged", projectile:"🔥" },
   { id:"cerberus",  emoji:"🐕", name:"เซอร์เบอรัส", rarity:"epic", element:"fist",   flavor:"หมา 3 หัวเฝ้า drug interaction เห่าทุกครั้งที่เจอ grapefruit", hatchMins:1 },
-  { id:"unicorn",   emoji:"🦄", name:"ยูนิคอร์น", rarity:"epic", element:"scissors", flavor:"เขาเป็น magic wand บดยาในโกร่งเนียนกริ๊บ", hatchMins:1 },
-  { id:"fairy",     emoji:"🧚", name:"ภูต",       rarity:"epic", element:"scissors", flavor:"ภูตน้อยเจ้าเวทมนตร์ โปรยละอองเสริมพลังทั้งทีม", hatchMins:1 },
+  { id:"unicorn",   emoji:"🦄", name:"ยูนิคอร์น", rarity:"epic", element:"scissors", flavor:"เขาเป็น magic wand บดยาในโกร่งเนียนกริ๊บ", hatchMins:1, atkStyle:"ranged", projectile:"💫" },
+  { id:"fairy",     emoji:"🧚", name:"ภูต",       rarity:"epic", element:"scissors", flavor:"ภูตน้อยเจ้าเวทมนตร์ โปรยละอองเสริมพลังทั้งทีม", hatchMins:1, atkStyle:"ranged", projectile:"✨" },
   { id:"panda",     emoji:"🐼", name:"แพนด้า",    rarity:"epic", element:"paper",    flavor:"ตาดำคล้ำเพราะอดนอนติว ไม่ใช่ลายประจำสายพันธุ์", hatchMins:1 },
-  { id:"genie",     emoji:"🧞", name:"จินนี่",    rarity:"epic", element:"paper",    flavor:"จินนี่จากตะเกียง ขอพรได้ แต่ใช้ไปกับการบ้านหมดแล้ว", hatchMins:1 },
+  { id:"genie",     emoji:"🧞", name:"จินนี่",    rarity:"epic", element:"paper",    flavor:"จินนี่จากตะเกียง ขอพรได้ แต่ใช้ไปกับการบ้านหมดแล้ว", hatchMins:1, atkStyle:"ranged", projectile:"✨" },
   // ── RARE ──
   { id:"wolf",      emoji:"🐺", name:"หมาป่า",    rarity:"rare", element:"fist",     flavor:"หอนเรียกก๊วนมาติว สุดท้ายนั่งเล่นเกมกันหมด", hatchMins:1 },
   { id:"shark",     emoji:"🦈", name:"ฉลาม",      rarity:"rare", element:"fist",     flavor:"ว่ายไม่หยุดเหมือน deadline ที่ไม่เคยหยุดวิ่งเข้ามา", hatchMins:1 },
   { id:"fox",       emoji:"🦊", name:"จิ้งจอก",   rarity:"rare", element:"scissors", flavor:"ได้กลิ่น drug interaction ก่อน Micromedex โหลดเสร็จ", hatchMins:1 },
   { id:"rabbit",    emoji:"🐰", name:"กระต่าย",   rarity:"rare", element:"scissors", flavor:"ออกฤทธิ์เร็วกว่า IV push ซะอีก", hatchMins:1 },
-  { id:"owl",       emoji:"🦉", name:"นกฮูก",     rarity:"rare", element:"paper",    flavor:"อ่านหนังสือทั้งคืน ตื่นมาจำได้แค่หน้าปก", hatchMins:1 },
+  { id:"owl",       emoji:"🦉", name:"นกฮูก",     rarity:"rare", element:"paper",    flavor:"อ่านหนังสือทั้งคืน ตื่นมาจำได้แค่หน้าปก", hatchMins:1, atkStyle:"ranged", projectile:"🪶" },
   { id:"seal",      emoji:"🦭", name:"แมวน้ำ",    rarity:"rare", element:"paper",    flavor:"ตบมือให้ตัวเองทุกครั้งที่ตอบ ทั้งที่ตอบผิด", hatchMins:1 },
   // ── COMMON ──
   { id:"hedgehog",  emoji:"🦔", name:"เม่น",      rarity:"common", element:"fist",     flavor:"หนามแหลมเหมือนเข็ม 18G แต่ใจอ่อนยิ่งกว่าวุ้น", hatchMins:1 },
@@ -77,6 +77,12 @@ export const PETS = [
 ];
 
 export const getPetDef = (id) => PETS.find(p => p.id === id) || null;
+
+// รูปแบบการตีใน replay (data ล้วน ปรับได้) — default melee
+export function atkStyleOf(def){ return def?.atkStyle === 'ranged' ? 'ranged' : 'melee'; }
+export function projectileOf(def){ return def?.projectile || '✦'; }
+// passive signature (ปูทาง — รอบนี้ทุกตัวยังไม่มี → null) ดู docs/economy-battle-master-plan.md §5.5
+export function passiveOf(def){ return def?.passive || null; }
 
 export const HATCH_LABELS = { common:"1 นาที", rare:"1 นาที", epic:"1 นาที", legendary:"1 นาที", glow:"1 นาที" };
 export const EGG_TYPES = {
