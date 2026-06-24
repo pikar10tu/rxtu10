@@ -7,6 +7,19 @@
     </div>
 
     <template v-if="authStore.isLoggedIn">
+      <div class="pt-team">
+        <div class="pt-team-head">
+          <span><Emoji char="⚔️" /> ทีมต่อสู้ ({{ teamSlots.filter(Boolean).length }}/{{ battleSlots }})</span>
+          <button class="pt-team-edit" @click="pickOpen = true">จัดทีม</button>
+        </div>
+        <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 1fr)` }">
+          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" @click="id && (sel = id)">
+            <template v-if="id"><Emoji :char="defOf(id).emoji" /></template>
+            <span v-else class="pt-team-empty">+</span>
+          </div>
+        </div>
+      </div>
+
       <div class="pt-summary">
         <div><b>{{ pets.length }}</b>/{{ PETS.length }} <small>ชนิด</small></div>
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
@@ -34,6 +47,7 @@
     <div v-else class="pt-empty">เข้าสู่ระบบก่อนนะ</div>
 
     <PetDetailModal :pet-id="sel" @close="sel = null" />
+    <TeamPicker v-model:open="pickOpen" />
   </div>
 </template>
 
@@ -44,12 +58,23 @@ import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, GRADE_LABELS, PETS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'
+import { residenceBattleSlots } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
+import TeamPicker from '../components/battle/TeamPicker.vue'
 
 const authStore = useAuthStore()
 const sel = ref(null)
+const pickOpen = ref(false)
 
 const pets = computed(() => authStore.userData?.pets || [])
+const battleSlots = computed(() => residenceBattleSlots(authStore.userData?.residence?.level || 1))
+const teamSlots = computed(() => {
+  const owned = new Set(pets.value.map(p => p.id))
+  const a = (authStore.userData?.activePets || []).filter(id => id && owned.has(id)).slice(0, battleSlots.value)
+  while (a.length < battleSlots.value) a.push(null)
+  return a
+})
+const defOf = (id) => PETS.find(p => p.id === id) || { emoji: '❓' }
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
 const activeSet = computed(() => {
@@ -68,6 +93,14 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-bottom: 14px; }
 .pt-back { border: 2px solid var(--ink); background: #fff; width: 32px; height: 32px; border-radius: 10px; font-size: 1.2rem; cursor: pointer; line-height: 1; box-shadow: var(--pop); }
 .pt-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.pt-team { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px; margin-bottom: 10px; }
+.pt-team-head { display: flex; align-items: center; justify-content: space-between; font-size: .8rem; font-weight: 800; margin-bottom: 8px; }
+.pt-team-edit { border: 2px solid var(--ink); background: #fff; border-radius: 10px; padding: 5px 12px; font-family: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); }
+.pt-team-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.pt-team-slots { display: grid; gap: 8px; }
+.pt-team-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; background: #f8fafc; }
+.pt-team-slot.filled { border-style: solid; border-color: var(--ink); background: #eef2ff; cursor: pointer; }
+.pt-team-empty { color: rgba(0,0,0,.25); font-size: 1.4rem; }
 .pt-summary { display: flex; background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; margin-bottom: 10px; }
 .pt-summary > div { flex: 1; text-align: center; padding: 12px 4px; border-right: 1px solid var(--border, #efe7fb); }
 .pt-summary > div:last-child { border-right: none; }
