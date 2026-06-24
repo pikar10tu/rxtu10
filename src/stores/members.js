@@ -6,9 +6,7 @@ import { R_SCI, R_CARE, RN } from '../data/students.js'
 import { normalizeUserData } from '../data/userSchema.js'
 import { readCache, slimForCache, MEMBERS_CACHE_KEY, MEMBERS_CACHE_TTL } from '../utils/membersCache.js'
 import { useUsageStore } from './usage.js'
-
-// ตัด emoji ตกแต่งท้ายชื่อเล่นออก (roster format "ชื่อ <emoji> (รหัส)" + เผื่อ user ที่ตั้ง emoji เอง)
-const stripTrailingEmoji = (s) => (s || '').replace(/\s*(\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)+\s*$/u, '').trim()
+import { stripTrailingEmoji } from '../utils/text.js'
 
 export const useMembersStore = defineStore('members', () => {
     const fbUsers    = ref({})   // { studentId: userObject }

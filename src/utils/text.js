@@ -24,6 +24,13 @@ export function cleanText(str, max = 500) {
   return stripControls(String(str ?? '')).trim().slice(0, max)
 }
 
+// ตัด emoji ตกแต่งท้ายชื่อเล่นออก (roster format "ชื่อ <emoji> (รหัส)" + เผื่อ user ที่ตั้ง emoji เอง)
+// รองรับ variation-selector / ZWJ-sequence / skin-tone modifier · ตัดเฉพาะท้ายสุด ไม่แตะ emoji กลางชื่อ
+// ใช้ทั้งตอนแสดงผล (members store) และ cleanup ค่าใน DB (admin tool)
+export function stripTrailingEmoji(s) {
+  return (s || '').replace(/\s*(\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)+\s*$/u, '').trim()
+}
+
 // Length caps — single source of truth; mirror these in input maxlength attrs.
 export const LIMITS = {
   contact: 40,

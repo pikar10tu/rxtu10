@@ -203,6 +203,15 @@
         </div>
       </section>
 
+      <!-- ───── เคลีย emoji จากชื่อในฐานข้อมูล ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🧹" /> เคลีย emoji จากชื่อ</span></div>
+        <div class="admin-hint">ตัด emoji ท้ายชื่อเล่นที่ค้างในฐานข้อมูล — เขียนทับเฉพาะ doc ที่มี emoji จริง (ชื่อสะอาดอยู่แล้วไม่ถูกแตะ)</div>
+        <button class="btn-mini btn-gold" :disabled="cleaning" @click="cleanupNicknames">
+          {{ cleaning ? 'กำลังเคลีย…' : 'เคลีย emoji จากชื่อในฐานข้อมูล' }}
+        </button>
+      </section>
+
       <!-- ───── รายงานการโกง (cheat logs) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -275,7 +284,7 @@ import { useAppConfig } from '../composables/useAppConfig.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
-import { cleanText, LIMITS } from '../utils/text.js'
+import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { TAG_LIST } from '../data/tags.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
@@ -328,6 +337,37 @@ async function sendBroadcast() {
   } catch (e) {
     console.error('[broadcast]', e); toast('ส่งจดหมายไม่สำเร็จ', 'error')
   } finally { bcSending.value = false }
+}
+
+// ── เคลีย emoji ท้ายชื่อเล่นที่ค้างในฐานข้อมูล (one-time, อ่านค่าดิบจาก Firestore) ──
+// เขียนทับเฉพาะ doc ที่ stripTrailingEmoji แล้วต่างจากเดิม + ไม่ทำให้ชื่อกลายเป็นว่าง (ข้าม emoji ล้วน)
+const cleaning = ref(false)
+async function cleanupNicknames() {
+  if (cleaning.value) return
+  if (!await confirm('เคลีย emoji ท้ายชื่อเล่นที่ค้างในฐานข้อมูล? (เขียนทับเฉพาะ doc ที่มี emoji จริง)')) return
+  cleaning.value = true
+  try {
+    const snap = await getDocs(collection(db, 'users'))
+    const dirty = []
+    snap.forEach(d => {
+      const raw = d.data().nickname
+      if (typeof raw !== 'string') return
+      const clean = stripTrailingEmoji(raw)
+      if (clean && clean !== raw) dirty.push({ ref: d.ref, clean })
+    })
+    if (!dirty.length) { toast('ไม่มีชื่อที่ต้องเคลีย', 'info'); return }
+    for (let i = 0; i < dirty.length; i += 450) {
+      const chunk = dirty.slice(i, i + 450)
+      const batch = writeBatch(db)
+      for (const { ref: r, clean } of chunk) batch.update(r, { nickname: clean })
+      await batch.commit()
+    }
+    usage.track(snap.size, dirty.length)
+    await members.loadFbUsers({ force: true })
+    toast(`เคลีย emoji จากชื่อ ${dirty.length} คนแล้ว`, 'success')
+  } catch (e) {
+    console.error('[cleanup nicknames]', e); toast('เคลียไม่สำเร็จ', 'error')
+  } finally { cleaning.value = false }
 }
 
 // ── usage gauge (ประมาณการในแอป) ──
