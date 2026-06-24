@@ -24,6 +24,11 @@ export function questClaimable(dq, today) {
   return questComplete(dq, today) && !dq.claimed
 }
 
+// true = วันนี้ยังไม่กดรับรางวัลเควส (ใช้ขับจุดแดงบนปุ่ม header)
+export function questNotClaimed(dq, today) {
+  return !(dq && dq.date === today && dq.claimed)
+}
+
 export function questIncomeMult(userData, now) {
   const until = userData?.incomeBuffUntil
   return (until && now < until) ? 1.5 : 1

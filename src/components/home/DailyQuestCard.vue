@@ -1,7 +1,5 @@
 <template>
-  <div class="dq-card">
-    <div class="dq-head"><Emoji char="🎯" /> เควสต์ประจำวัน</div>
-
+  <div class="dq-body">
     <div class="dq-tasks">
       <div class="dq-task" :class="{ done: q.quiz >= GOALS.quiz }">
         <span class="dq-task-l"><Emoji char="📝" /> ทำข้อสอบ</span>
@@ -75,8 +73,7 @@ async function claimReward() {
 </script>
 
 <style scoped>
-.dq-card { background: #fff; border: 2px solid var(--ink); border-radius: 18px; padding: 14px; margin-bottom: 14px; box-shadow: var(--pop); }
-.dq-head { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; color: var(--ink); margin-bottom: 10px; }
+.dq-body { display: flex; flex-direction: column; }
 .dq-tasks { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
 .dq-task { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; font-weight: 700; color: rgba(0,0,0,.65); padding: 7px 10px; border: 2px solid rgba(0,0,0,.1); border-radius: 10px; }
 .dq-task.done { border-color: var(--mint, #34d399); background: rgba(52,211,153,.12); color: var(--ink); }
