@@ -46,7 +46,7 @@
 
       <div class="br-ctrl">
         <template v-if="!done">
-          <button class="br-btn sm" @click="togglePause">{{ paused ? '▶ เล่น' : '⏸ พัก' }}</button>
+          <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
           <button class="br-btn sm" @click="cycleSpeed">เร็ว ×{{ speed }}</button>
           <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
         </template>
