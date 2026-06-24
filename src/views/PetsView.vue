@@ -12,7 +12,7 @@
           <span><Emoji char="⚔️" /> ทีมต่อสู้ ({{ teamSlots.filter(Boolean).length }}/{{ battleSlots }})</span>
           <button class="pt-team-edit" @click="pickOpen = true">จัดทีม</button>
         </div>
-        <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 1fr)` }">
+        <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
           <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" @click="id && (sel = id)">
             <PetThumb v-if="id" :pet="teamPetOf(id)" />
             <span v-else class="pt-team-empty">+</span>
@@ -99,7 +99,7 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-team-head { display: flex; align-items: center; justify-content: space-between; font-size: .8rem; font-weight: 800; margin-bottom: 8px; }
 .pt-team-edit { border: 2px solid var(--ink); background: #fff; border-radius: 10px; padding: 5px 12px; font-family: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); }
 .pt-team-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pt-team-slots { display: grid; gap: 8px; }
+.pt-team-slots { display: grid; gap: 8px; justify-content: center; }
 .pt-team-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; background: #f8fafc; }
 .pt-team-slot.filled { border: none; background: none; cursor: pointer; }
 .pt-team-empty { color: rgba(0,0,0,.25); font-size: 1.4rem; }
