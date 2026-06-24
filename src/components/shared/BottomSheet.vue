@@ -7,18 +7,23 @@
   ปิดเมื่อคลิกพื้นหลังหรือปุ่ม ✕
 -->
 <template>
-  <div v-if="open" class="sheet-ov" @click.self="close">
-    <div class="sheet-box">
-      <div class="sheet-head">
-        <span class="sheet-title"><Emoji :char="icon" /> {{ title }}</span>
-        <span class="sheet-actions"><slot name="actions" /></span>
-        <button class="sheet-x" aria-label="ปิด" @click="close">✕</button>
-      </div>
-      <div class="sheet-scroll">
-        <slot />
+  <!-- Teleport ไป body: #main-content เป็น position:fixed = สร้าง stacking context
+       ทำให้ sheet (z400) ที่ render ข้างในสู้ #bottom-nav (z200) ที่ root ไม่ได้ → nav ทับก้น sheet
+       ย้ายมาระดับ root (เหมือน Farm modal/ConfirmModal) z-index จึงมีผลจริง -->
+  <Teleport to="body">
+    <div v-if="open" class="sheet-ov" @click.self="close">
+      <div class="sheet-box">
+        <div class="sheet-head">
+          <span class="sheet-title"><Emoji :char="icon" /> {{ title }}</span>
+          <span class="sheet-actions"><slot name="actions" /></span>
+          <button class="sheet-x" aria-label="ปิด" @click="close">✕</button>
+        </div>
+        <div class="sheet-scroll">
+          <slot />
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>
