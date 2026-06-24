@@ -30,6 +30,7 @@ export function simulateBattle(teamA, teamB, seed) {
     const tg = pick(foes)
     if (!tg) return
     let m = elementMult(att.element, tg.element)
+    const eff = m > 1 ? 'super' : (m < 1 ? 'weak' : 'neutral')  // ธาตุล้วน ก่อนคูณ crit/variance
     const crit = rand() < BATTLE_CFG.critRate
     if (crit) m *= BATTLE_CFG.critMult
     m *= 1 + (rand() * 2 - 1) * BATTLE_CFG.variance
@@ -37,13 +38,14 @@ export function simulateBattle(teamA, teamB, seed) {
     tg.hp -= dmg
     log.push({
       t: 'attack', side: att.side, attacker: att.uid, target: tg.uid,
-      dmg: Math.round(dmg), crit, targetHpAfter: Math.max(0, Math.round(tg.hp)), dead: tg.hp <= 0,
+      dmg: Math.round(dmg), crit, eff, targetHpAfter: Math.max(0, Math.round(tg.hp)), dead: tg.hp <= 0,
     })
   }
 
   let round = 0
   while (round < BATTLE_CFG.maxRounds && alive(A).length && alive(B).length) {
     round++
+    log.push({ t: 'round', n: round })
     const act = []
     A.forEach(f => { if (f.hp > 0) act.push([f, B]) })
     B.forEach(f => { if (f.hp > 0) act.push([f, A]) })

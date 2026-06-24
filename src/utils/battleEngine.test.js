@@ -38,3 +38,20 @@ test('ทีมว่างฝั่งหนึ่ง → อีกฝั่ง
   assert.equal(simulateBattle(mono('common', 'fist', 0), [], 1).winner, 'A')
   assert.equal(simulateBattle([], mono('common', 'fist', 0), 1).winner, 'B')
 })
+
+test('attack event มี eff ตรงกับ matchup ธาตุ', () => {
+  // fist ชนะ scissors → ผู้ตีฝั่ง A (fist) ควรมี eff:'super', ฝั่ง B (scissors→fist) eff:'weak'
+  const r = simulateBattle(mono('rare', 'fist', 3), mono('rare', 'scissors', 3), 7)
+  const atkA = r.log.filter(e => e.t === 'attack' && e.side === 'A')
+  const atkB = r.log.filter(e => e.t === 'attack' && e.side === 'B')
+  assert.ok(atkA.length && atkA.every(e => e.eff === 'super'), 'A (fist) ตี scissors = super ทุกครั้ง')
+  assert.ok(atkB.length && atkB.every(e => e.eff === 'weak'), 'B (scissors) ตี fist = weak ทุกครั้ง')
+  assert.ok(['super', 'weak', 'neutral'].includes(atkA[0].eff))
+})
+
+test('log มี round marker ต้นแต่ละรอบ ตามจำนวน rounds', () => {
+  const r = simulateBattle(mono('rare', 'fist', 3), mono('rare', 'scissors', 3), 7)
+  const rounds = r.log.filter(e => e.t === 'round')
+  assert.equal(rounds.length, r.rounds)
+  assert.equal(rounds[0].n, 1)
+})
