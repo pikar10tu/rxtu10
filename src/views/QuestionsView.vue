@@ -109,7 +109,7 @@
 
       <!-- ── editor ── -->
       <section class="qz-card">
-        <div class="qz-card-head">{{ draft.id ? '✏️ แก้ไขข้อสอบ' : '➕ เพิ่มข้อสอบใหม่' }}</div>
+        <div class="qz-card-head"><Emoji :char="draft.id ? '✏️' : '➕'" /> {{ draft.id ? 'แก้ไขข้อสอบ' : 'เพิ่มข้อสอบใหม่' }}</div>
 
         <label class="qz-label">โจทย์</label>
         <textarea v-model="draft.question" :maxlength="LIMITS.question" class="qz-input" rows="3" placeholder="พิมพ์คำถาม…"></textarea>
