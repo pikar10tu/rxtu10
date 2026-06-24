@@ -37,7 +37,11 @@
       <SectionTitle><Emoji char="⚔️" /> สนามประลอง</SectionTitle>
       <div class="play-grid">
         <SoonCard emoji="⚔️" label="PvP สู้กัน" />
-        <SoonCard emoji="🏯" label="ปีนหอคอย" />
+        <RouterLink to="/tower" class="game-card">
+          <span class="gc-emoji"><Emoji char="🏯" /></span>
+          <span class="gc-name">ปีนหอคอย</span>
+          <span class="gc-badge grow">ไต่ชั้น · ปลดโบนัส</span>
+        </RouterLink>
         <SoonCard emoji="🗺️" label="ผจญภัย Co-op" />
         <SoonCard emoji="🍬" label="เภสัช Crush" />
       </div>

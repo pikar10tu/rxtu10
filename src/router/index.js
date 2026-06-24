@@ -13,6 +13,7 @@ const routes = [
     { path: '/admin',     name: 'admin',     component: () => import('../views/AdminView.vue')     },
     { path: '/me',        name: 'me',        component: () => import('../views/MeView.vue')        },
     { path: '/pets',      name: 'pets',      component: () => import('../views/PetsView.vue')      },
+    { path: '/tower',     name: 'tower',     component: () => import('../views/TowerView.vue')     },
 ]
 
 export const router = createRouter({
