@@ -14,7 +14,7 @@
         </div>
         <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 1fr)` }">
           <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" @click="id && (sel = id)">
-            <template v-if="id"><Emoji :char="defOf(id).emoji" /></template>
+            <PetThumb v-if="id" :pet="teamPetOf(id)" />
             <span v-else class="pt-team-empty">+</span>
           </div>
         </div>
@@ -61,6 +61,7 @@ import { residenceBattleSlots } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import PetStatLine from '../components/shared/PetStatLine.vue'
+import PetThumb from '../components/shared/PetThumb.vue'
 
 const authStore = useAuthStore()
 const sel = ref(null)
@@ -75,6 +76,7 @@ const teamSlots = computed(() => {
   return a
 })
 const defOf = (id) => PETS.find(p => p.id === id) || { emoji: '❓' }
+const teamPetOf = (id) => pets.value.find(p => p.id === id) || { id }
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
 const activeSet = computed(() => {
@@ -99,7 +101,7 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-team-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pt-team-slots { display: grid; gap: 8px; }
 .pt-team-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; background: #f8fafc; }
-.pt-team-slot.filled { border-style: solid; border-color: var(--ink); background: #eef2ff; cursor: pointer; }
+.pt-team-slot.filled { border: none; background: none; cursor: pointer; }
 .pt-team-empty { color: rgba(0,0,0,.25); font-size: 1.4rem; }
 .pt-summary { display: flex; background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; margin-bottom: 10px; }
 .pt-summary > div { flex: 1; text-align: center; padding: 12px 4px; border-right: 1px solid var(--border, #efe7fb); }

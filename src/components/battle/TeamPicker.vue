@@ -5,7 +5,7 @@
   <BottomSheet :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
     <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 1fr)` }">
       <div v-for="(id, i) in slots" :key="i" class="tp-slot" :class="{ filled: id }" @click="id && (detailId = id)">
-        <template v-if="id"><Emoji :char="defOf(id).emoji" /></template>
+        <PetThumb v-if="id" :pet="slotPetOf(id)" />
         <span v-else class="tp-empty">+</span>
       </div>
     </div>
@@ -36,6 +36,7 @@ import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
 import PetDetailModal from '../pets/PetDetailModal.vue'
 import PetStatLine from '../shared/PetStatLine.vue'
+import PetThumb from '../shared/PetThumb.vue'
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
@@ -60,6 +61,7 @@ const slots = computed(() => {
 const filledCount = computed(() => slots.value.filter(Boolean).length)
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
+const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
 const rarityColor = (id) => RARITY[defOf(id).rarity]?.color || '#94a3b8'
 const elEmoji = (id) => ELEMENTS[defOf(id).element]?.emoji || '✊'
 
@@ -83,7 +85,7 @@ function toggle(id) {
 <style scoped>
 .tp-slots { display: grid; gap: 8px; margin-bottom: 6px; }
 .tp-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: #f8fafc; }
-.tp-slot.filled { border-style: solid; border-color: var(--ink); background: #eef2ff; cursor: pointer; }
+.tp-slot.filled { border: none; background: none; cursor: pointer; }
 .tp-empty { color: rgba(0,0,0,.25); font-size: 1.6rem; }
 .tp-hint { font-size: .68rem; color: rgba(0,0,0,.45); text-align: center; margin-bottom: 12px; }
 

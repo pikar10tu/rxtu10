@@ -27,9 +27,8 @@
       <!-- Tier 3: active team (tap to see stats) -->
       <div class="pf-team-label"><Emoji char="⭐" /> ทีม Active</div>
       <div v-if="showcase.length" class="pf-showcase">
-        <button v-for="(p, i) in showcase" :key="p.id || i" class="pf-pet" :class="'r-' + (p.rarity || 'common')" @click="petPopup = p">
-          <Emoji :char="p.emoji" />
-          <span v-if="p.grade > 0" class="pf-pet-g">{{ p.grade }}</span>
+        <button v-for="(p, i) in showcase" :key="p.id || i" class="pf-pet" @click="petPopup = p">
+          <PetThumb :pet="p" />
         </button>
       </div>
       <div v-else class="pf-team-empty">ยังไม่ได้ตั้งทีม</div>
@@ -54,6 +53,7 @@ import { letterAvatar, fallbackAvatar } from '../../utils/avatar.js'
 import TagChips from '../shared/TagChips.vue'
 import AchievementGrid from '../shared/AchievementGrid.vue'
 import PetStatPopup from '../pets/PetStatPopup.vue'
+import PetThumb from '../shared/PetThumb.vue'
 
 const props = defineProps({ member: { type: Object, default: null } })
 defineEmits(['close'])
@@ -118,12 +118,8 @@ const hasContact = computed(() => {
 .pf-team-label { font-size: .66rem; font-weight: 800; color: var(--muted, #9b8fb0); text-align: center; padding: 12px 0 0; border-top: 1px solid rgba(0,0,0,.06); }
 .pf-team-empty { text-align: center; font-size: .7rem; color: rgba(0,0,0,.35); padding: 8px 0 14px; }
 .pf-showcase { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px 12px 12px; max-height: 180px; overflow-y: auto; }
-.pf-pet { position: relative; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 12px; border: 2px solid #cbd5e1; background: rgba(0,0,0,.03); cursor: pointer; font-family: inherit; }
+.pf-pet { width: 58px; padding: 0; border: none; background: none; cursor: pointer; font-family: inherit; }
 .pf-pet:active { transform: scale(.92); }
-.pf-pet-g { position: absolute; top: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .5rem; font-weight: 800; padding: 0 4px; border-radius: 999px; border: 1.5px solid #fff; }
-.pf-pet.r-rare { border-color: #60a5fa; }
-.pf-pet.r-epic { border-color: #c084fc; }
-.pf-pet.r-legendary { border-color: #fbbf24; }
 .pf-contact { padding: 12px 16px 16px; border-top: 1px solid rgba(0,0,0,.06); display: flex; flex-direction: column; gap: 6px; font-size: .78rem; color: rgba(0,0,0,.65); }
 .pf-contact div { display: flex; gap: 8px; align-items: center; }
 </style>

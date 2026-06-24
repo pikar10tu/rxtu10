@@ -36,8 +36,7 @@
           <span class="tw-label">ศัตรู</span>
           <span class="tw-team">
             <button v-for="(p, i) in botTeam" :key="i" class="tw-mon" @click="scout = p">
-              <Emoji :char="defOf(p.id).emoji" />
-              <PetStatLine :pet="p" />
+              <PetThumb :pet="p" />
             </button>
           </span>
         </div>
@@ -47,8 +46,7 @@
           <span class="tw-team">
             <template v-if="team.length">
               <button v-for="(p, i) in team" :key="i" class="tw-mon" @click="detailId = p.id">
-                <Emoji :char="defOf(p.id).emoji" />
-                <PetStatLine :pet="p" />
+                <PetThumb :pet="p" />
               </button>
             </template>
             <span v-else class="tw-empty">ยังไม่ได้จัดทีม</span>
@@ -97,7 +95,7 @@ import { buildCombatant } from '../data/battle.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
-import PetStatLine from '../components/shared/PetStatLine.vue'
+import PetThumb from '../components/shared/PetThumb.vue'
 
 const authStore = useAuthStore()
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX } = useTower()
@@ -160,7 +158,7 @@ async function onFight() {
 .tw-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
 .tw-label { font-size: .68rem; color: rgba(0,0,0,.45); width: 48px; flex-shrink: 0; }
 .tw-team { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
-.tw-mon { border: none; background: rgba(0,0,0,.04); border-radius: 10px; font-size: 1.6rem; padding: 4px 5px 5px; cursor: pointer; line-height: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tw-mon { border: none; background: none; padding: 0; cursor: pointer; width: 54px; }
 .tw-mon:active { transform: scale(.92); }
 .tw-empty { font-size: .76rem; color: rgba(0,0,0,.35); }
 .tw-vs { text-align: center; font-weight: 800; font-size: .72rem; color: rgba(0,0,0,.3); display: flex; align-items: center; justify-content: center; gap: 4px; }
