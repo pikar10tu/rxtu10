@@ -57,6 +57,30 @@
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูค่า</div>
       </section>
 
+      <!-- ───── สถิติการสู้ (หอคอย) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span><Emoji char="⚔️" /> สถิติการสู้ (หอคอย)</span>
+          <button class="btn-mini" :disabled="loadingBattle" @click="loadBattleStats">
+            {{ loadingBattle ? 'กำลังโหลด…' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">win% ราย species จากการเล่นจริง — ไว้จูนตัวเลขสมดุล (เขียว ≥60 / แดง ≤40)</div>
+        <table v-if="battleStats.length" class="bstat">
+          <thead><tr><th>ตัว</th><th>สู้</th><th>ชนะ%</th><th>ดาเมจ/ไฟต์</th><th>K/D</th></tr></thead>
+          <tbody>
+            <tr v-for="s in battleStats" :key="s.id">
+              <td><Emoji :char="s.emoji" /> {{ s.name }}</td>
+              <td>{{ s.battles }}</td>
+              <td :class="{ hi: s.winPct >= 60, lo: s.winPct <= 40 }">{{ s.winPct }}%</td>
+              <td>{{ s.avgDmg }}</td>
+              <td>{{ s.kills }}/{{ s.deaths }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูสถิติ</div>
+      </section>
+
       <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
       <section v-if="pendingGuests.length" class="admin-card">
         <div class="admin-card-head"><span><Emoji char="📨" /> คำขอเข้าชม (รออนุมัติ)</span></div>
@@ -287,6 +311,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { TAG_LIST } from '../data/tags.js'
+import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 
@@ -296,6 +321,28 @@ const usage     = useUsageStore()
 const { maintenance } = useAppConfig()
 const { toast } = useToast()
 const { confirm } = useConfirm()
+
+// สถิติการสู้ราย species (อ่านทั้ง collection — admin คนเดียว cost ไม่สำคัญ)
+const battleStats = ref([])
+const loadingBattle = ref(false)
+async function loadBattleStats() {
+  loadingBattle.value = true
+  try {
+    const snap = await getDocs(collection(db, 'battleStats'))
+    usage.track(snap.size)
+    battleStats.value = snap.docs.map(d => {
+      const x = d.data(), def = getPetDef(d.id) || { emoji: '❓', name: d.id }
+      const battles = x.battles || 0
+      return {
+        id: d.id, emoji: def.emoji, name: def.name, battles,
+        winPct: battles ? Math.round((x.wins || 0) / battles * 100) : 0,
+        avgDmg: battles ? Math.round((x.dmgDealt || 0) / battles) : 0,
+        kills: x.kills || 0, deaths: x.deaths || 0,
+      }
+    }).sort((a, b) => b.winPct - a.winPct)
+  } catch (e) { console.error('[loadBattleStats]', e) }
+  finally { loadingBattle.value = false }
+}
 
 // ── ส่งจดหมายถึงสมาชิก (Mailbox broadcast) ──
 const bcTitle = ref('')
@@ -643,6 +690,11 @@ async function setRole(m, role) {
   background: #fff; overflow: hidden; margin-bottom: 6px;
 }
 .usage-bar i { display: block; height: 100%; transition: width .3s; }
+.bstat { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .8rem; }
+.bstat th, .bstat td { text-align: left; padding: 5px 6px; border-bottom: 1px solid rgba(0,0,0,.08); }
+.bstat th { color: rgba(0,0,0,.45); font-weight: 700; }
+.bstat td.hi { color: #15803d; font-weight: 800; }
+.bstat td.lo { color: #b91c1c; font-weight: 800; }
 .admin-search {
   width: 100%;
   box-sizing: border-box;
