@@ -14,7 +14,8 @@
 
       <!-- active team toggle -->
       <button class="pd-active" :class="{ on: isActive }" :disabled="busy" @click="toggleActive">
-        {{ isActive ? '⭐ อยู่ในทีม Active (กดเพื่อเอาออก)' : `☆ ตั้งเป็นทีม Active (${activeList.length}/${battleSlots})` }}
+        <template v-if="isActive"><Emoji char="⭐" /> อยู่ในทีม Active · กดเพื่อเอาออก</template>
+        <template v-else><Emoji char="➕" /> ตั้งเป็นทีม Active ({{ activeList.length }}/{{ battleSlots }})</template>
       </button>
 
       <!-- stats -->
