@@ -216,6 +216,31 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── Battle stats (Tower) — ตัวนับสถิติการสู้ราย species (increment-only) ──
+    //  read:  ผู้แก้คลัง (academic+instructor) เพื่อจูนตัวเลขจากการเล่นจริง
+    //  write: ผู้ล็อกอิน แตะได้แค่ field ชุดนี้ และต้องไม่ลดลง (increment เท่านั้น)
+    match /battleStats/{petId} {
+      function statFields() { return ['battles','wins','kills','deaths','dmgDealt','dmgTaken']; }
+      allow read:   if canEditQuestions();
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(statFields())
+        && request.resource.data.battles  is int && request.resource.data.battles  >= 0
+        && request.resource.data.wins     is int && request.resource.data.wins     >= 0
+        && request.resource.data.kills    is int && request.resource.data.kills    >= 0
+        && request.resource.data.deaths   is int && request.resource.data.deaths   >= 0
+        && request.resource.data.dmgDealt is int && request.resource.data.dmgDealt >= 0
+        && request.resource.data.dmgTaken is int && request.resource.data.dmgTaken >= 0;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(statFields())
+        && request.resource.data.battles  >= resource.data.get('battles', 0)
+        && request.resource.data.wins     >= resource.data.get('wins', 0)
+        && request.resource.data.kills    >= resource.data.get('kills', 0)
+        && request.resource.data.deaths   >= resource.data.get('deaths', 0)
+        && request.resource.data.dmgDealt >= resource.data.get('dmgDealt', 0)
+        && request.resource.data.dmgTaken >= resource.data.get('dmgTaken', 0);
+      allow delete: if isAdmin();
+    }
+
     // ── Question reports (Phase 5) — นักศึกษาแจ้งข้อสอบผิด ──
     //  read:   academic เท่านั้น (คนน้อย → ไม่กระทบเพดาน reads รายวันของนักศึกษา)
     //  create: ผู้ล็อกอิน สร้าง report ของตัวเอง (reportedBy ต้องเป็น uid ตัวเอง)
