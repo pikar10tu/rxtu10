@@ -3,7 +3,7 @@
      คลังเรียง rarity (legendary→common) + เกรด · โชว์ ธาตุ/เกรด/ชื่อ ต่อตัว -->
 <template>
   <BottomSheet :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
-    <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 1fr)` }">
+    <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 64px)` }">
       <div v-for="(id, i) in slots" :key="i" class="tp-slot" :class="{ filled: id }" @click="id && (detailId = id)">
         <PetThumb v-if="id" :pet="slotPetOf(id)" />
         <span v-else class="tp-empty">+</span>
@@ -83,7 +83,7 @@ function toggle(id) {
 </script>
 
 <style scoped>
-.tp-slots { display: grid; gap: 8px; margin-bottom: 6px; }
+.tp-slots { display: grid; gap: 8px; margin-bottom: 6px; justify-content: center; }
 .tp-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: #f8fafc; }
 .tp-slot.filled { border: none; background: none; cursor: pointer; }
 .tp-empty { color: rgba(0,0,0,.25); font-size: 1.6rem; }
