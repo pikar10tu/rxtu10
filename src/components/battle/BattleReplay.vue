@@ -72,7 +72,8 @@ import { buildCombatant } from '../../data/battle.js'
 const props = defineProps({ data: { type: Object, default: null } })
 defineEmits(['close'])
 
-const REPLAY_CFG = { baseDelay: 180, speeds: [1, 2, 4], lungeMs: 130, projMs: 260, hitStopMs: 120 }
+// baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], lungeMs: 150, projMs: 280, hitStopMs: 130 }
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
 
