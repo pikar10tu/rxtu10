@@ -12,6 +12,7 @@
 `simulateBattle(teamA, teamB, seed)` รองรับ team-vs-team อยู่แล้ว
 
 **ขอบเขต spec นี้ = ซับโปรเจกต์ (1) แกน PvP เท่านั้น:** combat loop + เรต + state ซีซั่น + เลือกคู่ (คน+บอท)
+\+ เปิดตัวแบบ gated (จัดทีม/เห็นแต้มได้ก่อน, บุกได้เมื่อ admin เปิด)
 **นอกขอบเขต (ทำเป็นสเปกแยกภายหลัง):** (2) ลีดเดอร์บอร์ด UI เต็ม · (3) รางวัลซีซั่น + ดิวิชั่น/ทีเยอร์
 
 ## หลักการออกแบบที่ยึด
@@ -24,7 +25,8 @@
 
 ## โมเดลหลัก: Attack-only ladder
 
-- ทุกคนมี **"ทีมรับ" = snapshot ของ `activePets`** (อัปเดตอัตโนมัติเมื่อจัดทีม — ไม่มี state แยก)
+- **ทีมรับ = ทีม `activePets` ปัจจุบัน (ตัวเดียวกับที่ใช้หอคอย) — ไม่แยกทีมรุก/รับ, ไม่มี field/snapshot แยก**
+  - ตอนถูกบุก คู่ต่อสู้สู้กับ `activePets` ของเรา **อ่านสดจาก members cache** (มี TTL = อาจช้ากว่าจริงนิดหน่อย ยอมรับได้ + ถูก) · จัดทีมใช้ `TeamPicker` เดิม
 - ผู้เล่น **"บุก"** ทีมรับของคนอื่น → `simulateBattle(myTeam, oppSnapshot, seed)` · ชนะ = เรตขึ้น, แพ้ = เรตลงนิดหน่อย
 - **เรตขยับเฉพาะตอนเราบุกเอง** (เขียน user doc ตัวเองเท่านั้น) → ไม่มี cross-user write
   - ผลข้างเคียงที่ยอมรับ: ตอนทีมเราถูกคนอื่นบุก เราไม่เสีย/ได้เรตสด (defense ไม่กระทบเรตเรา) — แลกกับต้นทุน/ความเรียบของ rules
@@ -89,8 +91,8 @@ nextRating(my, opp, won, { K=32, mult=1 }) =
 ## Flow การบุก (composable `useArena.js`)
 
 1. โหลด: ถ้า `pvp.seasonId !== currentSeason` → เตรียม soft-reset (apply ตอนเขียนครั้งแรก)
-2. โชว์เรต/โควต้า/พูลคู่ต่อสู้
-3. กดท้า → `simulateBattle(myTeam, oppSnapshot, Date.now())` → เปิด `BattleReplay`
+2. โชว์เรต/โควต้า/พูลคู่ต่อสู้ (เห็น + จัดทีมได้เสมอ)
+3. กดท้า (เปิดเมื่อ `pvpOpen` หรือเป็น admin · ดู gated launch) → `simulateBattle(myTeam, oppSnapshot, Date.now())` → เปิด `BattleReplay`
 4. จบ replay → `patchUser` (เขียน doc ตัวเองอย่างเดียว) — กินโควต้า `pvpAttacksUsed++` เสมอ (+ soft-reset ถ้าซีซั่นใหม่):
    - **คนจริง:** `pvp.rating = nextRating(my, opp, won, { mult: 1 })`, `wins/losses++`, `coins += reward`
    - **บอท:** `pvp.rating = nextRating(my, botRating, won, { mult: 0.5 })`, `wins/losses++`, `coins += reward`
@@ -103,9 +105,22 @@ nextRating(my, opp, won, { K=32, mult=1 }) =
 > **ศัพท์ copy:** ใช้ "ครั้ง"/"โจมตี"/"บุก" (เช่น "โจมตีได้อีก 3 ครั้งวันนี้") — **เลี่ยงคำว่า "ศึก"** (โบราณไป)
 **ลีดเดอร์บอร์ดเต็ม + รางวัลซีซั่น = ซับโปรเจกต์ (2)/(3)** (spec นี้แค่ทำให้เล่น/เทสได้ครบลูป)
 
+## เปิดตัวแบบ gated (soft launch ผ่าน Admin)
+
+เปิดให้เพื่อน "เข้าไปจัดทีม + เห็นแต้มประลอง" ได้ก่อน แต่ **ยังบุกไม่ได้** จนกว่า admin จะกดเปิดพร้อมกันทุกคน
+ใช้แพทเทิร์น launch gate เดิม (`config/app` + `useAppConfig` + toggle ใน Admin · live-read ไม่ต้อง deploy):
+
+- **flag:** `config/app.pvpOpen: bool` (default `false`) — public-read, admin-write (rules `config/{doc}` เดิมครอบอยู่แล้ว → ไม่แก้ rules)
+- **useAppConfig:** เพิ่ม expose `pvpOpen` (อ่านสดเหมือน `maintenance`)
+- **ก่อนเปิด (`pvpOpen=false`):** หน้าสนามประลองเข้าได้ · เห็นแต้มประลอง + จัดทีม (`TeamPicker`) ได้ · **ปุ่มท้า/โจมตีปิด** โชว์ "เปิดเร็วๆ นี้ 🔜"
+- **เปิด (`pvpOpen=true`):** admin กดใน Admin panel → ทุกคนบุกได้ทันทีพร้อมกัน ไม่ต้อง deploy
+- **Admin panel:** เพิ่ม toggle "เปิด/ปิด สนามประลอง" (ข้างปุ่ม maintenance เดิม)
+- admin เห็นปุ่มโจมตีเปิดเสมอ (ไว้ทดสอบก่อนเปิดจริง — เหมือน `shopOpen` ที่ admin เห็นร้านปกติ)
+
 ## ความปลอดภัย (rules)
 
 - `pvp`, `pvpAttackDate`, `pvpAttacksUsed`, `coins` = field บน user doc เจ้าของ → ครอบด้วย rules เดิม (owner write + coins guard)
+- `config/app.pvpOpen` = public-read/admin-write → ครอบด้วย rule `config/{doc}` เดิม
 - **ไม่ต้องแก้/deploy rules** · trust-based ตามแนวทั้งแอป (PvE/PvP client-only ปลอม snapshot ตัวเองได้ = ยอมรับสำหรับแอปชั้นปี)
 
 ## เทส (node --test, pure)
