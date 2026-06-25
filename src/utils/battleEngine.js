@@ -42,16 +42,28 @@ export function simulateBattle(teamA, teamB, seed) {
     })
   }
 
-  let round = 0
-  while (round < BATTLE_CFG.maxRounds && alive(A).length && alive(B).length) {
-    round++
-    log.push({ t: 'round', n: round })
-    const act = []
-    A.forEach(f => { if (f.hp > 0) act.push([f, B]) })
-    B.forEach(f => { if (f.hp > 0) act.push([f, A]) })
-    // สุ่มลำดับ (กัน first-mover)
-    for (let i = act.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1));[act[i], act[j]] = [act[j], act[i]] }
-    for (const [f, foes] of act) if (f.hp > 0) hit(f, foes)
+  const countAlive = (t) => t.reduce((n, f) => n + (f.hp > 0 ? 1 : 0), 0)
+  // หาตัวออกตี: ไล่จาก cursor ไปขวา วนกลับมาซ้าย เจอตัวแรกที่ยังไม่ตาย (-1 = ไม่มี)
+  const nextAttacker = (team, cursor) => {
+    const n = team.length
+    for (let k = 0; k < n; k++) { const i = (cursor + k) % n; if (team[i].hp > 0) return i }
+    return -1
+  }
+
+  // ใครก่อน: ฝั่งตัวเยอะกว่าตีก่อน · เท่ากัน → สุ่ม (ดึงจาก rand เดิม คง deterministic)
+  const ca = countAlive(A), cb = countAlive(B)
+  const first = ca > cb ? 'A' : cb > ca ? 'B' : (rand() < 0.5 ? 'A' : 'B')
+  const cursor = { A: 0, B: 0 }
+  let cur = first, round = 0, turns = 0
+
+  while (alive(A).length && alive(B).length && turns < BATTLE_CFG.maxTurns) {
+    if (cur === first) { round++; log.push({ t: 'round', n: round }) }   // ต้น cycle ใหม่
+    const team = cur === 'A' ? A : B
+    const foes = cur === 'A' ? B : A
+    const ai = nextAttacker(team, cursor[cur])
+    if (ai !== -1) { hit(team[ai], foes); cursor[cur] = (ai + 1) % team.length }
+    turns++
+    cur = cur === 'A' ? 'B' : 'A'   // สลับฝั่งเสมอ
   }
 
   const pct = (t) => { const max = t.reduce((s, f) => s + f.maxHp, 0); return max ? t.reduce((s, f) => s + Math.max(0, f.hp), 0) / max : 0 }
