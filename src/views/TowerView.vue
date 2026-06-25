@@ -2,7 +2,10 @@
   <div class="tab-content">
     <div class="page-title tw-head">
       <span><Emoji char="🏯" /> หอคอย</span>
-      <RouterLink to="/play" class="tw-back">‹ กลับ</RouterLink>
+      <span class="tw-head-r">
+        <HelpButton topic="tower" />
+        <RouterLink to="/play" class="tw-back">‹ กลับ</RouterLink>
+      </span>
     </div>
 
     <template v-if="authStore.isLoggedIn">
@@ -96,6 +99,7 @@ import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
+import HelpButton from '../components/help/HelpButton.vue'
 
 const authStore = useAuthStore()
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX } = useTower()
@@ -134,6 +138,7 @@ async function onFight() {
 
 <style scoped>
 .tw-head { display: flex; align-items: center; justify-content: space-between; }
+.tw-head-r { display: flex; align-items: center; gap: 8px; }
 .tw-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
 
 .tw-climb { background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 10px 12px; box-shadow: var(--pop); margin-bottom: 12px; }
