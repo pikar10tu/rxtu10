@@ -38,19 +38,19 @@ export function getFloorTeam(floor) {
   return team
 }
 
-/** ชั้นสูงสุดที่เคยผ่าน → โบนัสเหรียญ idle/วัน (flat, มี cap — ไม่ทวีคูณ)
- *  มีโบนัสตั้งแต่ชั้น 1 (ผ่านชั้นแรกก็ได้รางวัล passive เลย) · ค่าชั้น 10+ คงเดิมเพื่อไม่กระทบสมดุลปลายเกม */
+// โบนัสรายได้ idle/วัน จากชั้นสูงสุด — เพิ่มขึ้น "ทุกชั้น" (ไม่ใช่ขั้นบันได) · ตันที่ชั้น 50
+export const TOWER_BONUS_MIN = 50      // โบนัส/วัน ที่ชั้น 1 (ก้าวแรกก็ได้รางวัล)
+export const TOWER_BONUS_MAX = 12000   // โบนัส/วัน ที่ชั้น 50 (ตัน — คงเดิมเพื่อสมดุลปลายเกม)
+const TOWER_BONUS_POW = 1.7            // >1 = เร่งขึ้นช่วงท้าย (ชั้นสูงคุ้มกว่าตามความยาก)
+
+/** ชั้นสูงสุดที่เคยผ่าน → โบนัสเหรียญ idle/วัน · เพิ่มทุกชั้น 1→50 แล้วตัน (ปัดลง 5) */
 export function getTowerBonus(bestFloor) {
-  const b = bestFloor || 0
-  if (b >= 50) return 12000
-  if (b >= 40) return 8000
-  if (b >= 30) return 4000
-  if (b >= 20) return 1500
-  if (b >= 10) return 500
-  if (b >= 5)  return 250
-  if (b >= 3)  return 120
-  if (b >= 1)  return 50
-  return 0
+  const b = Math.floor(bestFloor || 0)
+  if (b < 1) return 0
+  const f = Math.min(TOWER_MAX, b)
+  const t = Math.pow((f - 1) / (TOWER_MAX - 1), TOWER_BONUS_POW)  // 0 ที่ชั้น 1 → 1 ที่ชั้น 50
+  const raw = TOWER_BONUS_MIN + (TOWER_BONUS_MAX - TOWER_BONUS_MIN) * t
+  return Math.round(raw / 5) * 5
 }
 
 // floor → โซนแฟนซีตาม tier (UI หอคอย) — ช่วงเดียวกับ getFloorTeam (tier 12.5)
@@ -64,4 +64,4 @@ export function floorZone(floor) {
   const f = Math.max(1, Math.min(TOWER_MAX, Math.floor(floor) || 1))
   return ZONES.find(z => f >= z.from && f <= z.to) || ZONES[ZONES.length - 1]
 }
-export const TOWER_BONUS_FLOORS = [1, 3, 5, 10, 20, 30, 40, 50]  // ชั้นที่ getTowerBonus กระโดด (หมุดบนแถบ)
+export const TOWER_BONUS_FLOORS = [10, 20, 30, 40, 50]  // แลนด์มาร์กหลักสิบ (หมุดอ้างอิงบนแถบ — โบนัสจริงเพิ่มทุกชั้น)
