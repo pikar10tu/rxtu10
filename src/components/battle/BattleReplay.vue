@@ -100,7 +100,7 @@
         <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ insp.grade }}</b></div>
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
         <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
-        <div class="br-card-pass"><span>Passive</span><b>{{ insp.passive ? insp.passive.name : '—' }}</b></div>
+        <div class="br-card-pass"><span>Passive</span><b>{{ insp.passive ? insp.passive.name : 'เร็วๆ นี้' }}</b></div>
         <button class="br-btn sm" @click="inspectUid = null">ปิด</button>
       </div>
     </div>
