@@ -5,6 +5,9 @@
 <template>
   <div v-if="data" class="br-ov">
     <div class="br-box" :class="{ hitstop: hitStop }">
+      <div v-if="introPhase" class="br-intro" @click="skipIntro">
+        <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
+      </div>
       <div class="br-round" v-if="!done">รอบ {{ round }}</div>
 
       <div class="br-side foe-label"><i class="dot foe"></i> ศัตรู</div>
@@ -59,7 +62,30 @@
           <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
         </template>
         <template v-else>
-          <div class="br-result" :class="{ win: data.won }">{{ data.won ? `ชนะ! ขึ้นชั้น ${data.cleared + 1}` : 'แพ้ ลองใหม่ได้เลย' }}</div>
+          <div class="br-sum">
+            <div class="br-result" :class="{ win: data.won }">{{ data.won ? `ชนะ! ขึ้นชั้น ${data.cleared + 1}` : 'แพ้ ลองใหม่ได้เลย' }}</div>
+            <div v-if="data.won" class="br-reward"><Emoji char="🎁" /> ได้รับ: ขึ้นชั้น {{ data.cleared + 1 }}</div>
+
+            <div class="br-sum-team">
+              <div class="br-sum-head"><i class="dot me"></i> ทีมคุณ</div>
+              <div v-for="u in summary.teamA" :key="u.uid" class="br-sum-row" :class="{ mvp: summary.mvp.A === u.uid, win: data.won, dead: u.dead }">
+                <span v-if="summary.mvp.A === u.uid" class="br-mvp">MVP</span>
+                <span class="br-sum-face"><Emoji :char="defOf(u.id).emoji" /></span>
+                <span class="br-sum-dmg"><Emoji char="⚔️" />{{ u.dmgDealt }}</span>
+                <span class="br-sum-dmg taken"><Emoji char="🛡️" />{{ u.dmgTaken }}</span>
+              </div>
+            </div>
+
+            <div class="br-sum-team">
+              <div class="br-sum-head"><i class="dot foe"></i> ศัตรู</div>
+              <div v-for="u in summary.teamB" :key="u.uid" class="br-sum-row" :class="{ mvp: summary.mvp.B === u.uid, win: !data.won, dead: u.dead }">
+                <span v-if="summary.mvp.B === u.uid" class="br-mvp">MVP</span>
+                <span class="br-sum-face"><Emoji :char="defOf(u.id).emoji" /></span>
+                <span class="br-sum-dmg"><Emoji char="⚔️" />{{ u.dmgDealt }}</span>
+                <span class="br-sum-dmg taken"><Emoji char="🛡️" />{{ u.dmgTaken }}</span>
+              </div>
+            </div>
+          </div>
           <button class="br-btn" @click="$emit('close')">ปิด</button>
         </template>
       </div>
@@ -87,6 +113,7 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS } from '../../data/index.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
+import { computeBattleSummary } from '../../utils/battleSummary.js'
 
 const props = defineProps({ data: { type: Object, default: null } })
 defineEmits(['close'])
@@ -110,6 +137,8 @@ const inspectUid = ref(null)
 const projectiles = ref([])      // [{k, emoji, x0,y0,x1,y1}]
 const callouts = ref({})         // uid → {k, text, icon, kind}
 const hitStop = ref(false)
+const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
+let introTimer = null
 let timer = null, popKey = 0, projKey = 0, calloutKey = 0
 let maxHp = {}, unitAtk = {}     // uid → maxHp / atk (static ต่อ unit จาก buildCombatant)
 const els = {}                   // uid → DOM el (วัดตำแหน่ง melee/ranged)
@@ -126,6 +155,10 @@ function ticksFor(uid) {
 
 const log = computed(() => props.data?.result?.log || [])
 const done = computed(() => idx.value >= log.value.length)
+const summary = computed(() => done.value
+  ? computeBattleSummary(log.value, props.data?.playerTeam || [], props.data?.botTeam || [])
+  : null)
+function uname(uid) { return defForUid(uid)?.name || '?' }
 const delay = computed(() => REPLAY_CFG.baseDelay / speed.value)
 
 function buildMax(d) {
@@ -135,10 +168,25 @@ function buildMax(d) {
   ;(d?.playerTeam || []).forEach((p, i) => add(p, 'A' + i))
 }
 function reset() {
-  clearTimeout(timer)
+  clearTimeout(timer); clearTimeout(introTimer); introPhase.value = null   // กันค้างตอน replay ใหม่
   idx.value = 0; round.value = 1; pops.value = {}; flashing.value = null; acting.value = null
   paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}; hitStop.value = false
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
+  runIntro()
+}
+
+// intro READY?→GO! ก่อนเริ่มเล่น log (แตะข้ามได้)
+function runIntro() {
+  introPhase.value = 'ready'
+  introTimer = setTimeout(() => {
+    introPhase.value = 'go'
+    introTimer = setTimeout(() => { introPhase.value = null; step() }, 400)
+  }, 700)
+}
+function skipIntro() {
+  if (introPhase.value === null) return
+  clearTimeout(introTimer)
+  introPhase.value = null
   step()
 }
 
@@ -265,7 +313,7 @@ const insp = computed(() => {
 })
 
 watch(() => props.data, (d) => { if (d) { buildMax(d); reset() } }, { immediate: true })
-onUnmounted(() => clearTimeout(timer))
+onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer) })
 </script>
 
 <style scoped>
@@ -336,4 +384,26 @@ onUnmounted(() => clearTimeout(timer))
 .br-card-row span, .br-card-pass span { color: rgba(255,255,255,.6); }
 .br-card-pass { border-top: 1px solid rgba(255,255,255,.15); margin-top: 4px; padding-top: 7px; }
 .br-card .br-btn { margin-top: 10px; }
+
+.br-intro { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.br-intro-txt { font-weight: 900; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.6); letter-spacing: .05em; }
+.br-intro-txt.ready { font-size: 2.2rem; animation: br-ready .7s ease; }
+.br-intro-txt.go { font-size: 3.4rem; color: #fde68a; animation: br-go .4s ease; }
+@keyframes br-ready { from { opacity: 0; transform: scale(.7) } to { opacity: 1; transform: scale(1) } }
+@keyframes br-go { from { opacity: 0; transform: scale(1.6) } to { opacity: 1; transform: scale(1) } }
+
+.br-sum { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.br-reward { text-align: center; color: #fde68a; font-weight: 800; font-size: .8rem; }
+.br-sum-team { background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
+.br-sum-head { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.8); font-weight: 800; font-size: .72rem; margin-bottom: 6px; }
+.br-sum-head .dot { width: 8px; height: 8px; border-radius: 999px; }
+.br-sum-row { position: relative; display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 9px; border: 2px solid transparent; }
+.br-sum-row.dead { opacity: .45; }
+.br-sum-row.mvp.win { border-color: #fbbf24; background: rgba(251,191,36,.12); }
+.br-sum-row.mvp:not(.win) { border-color: #c084fc; background: rgba(192,132,252,.12); }
+.br-mvp { position: absolute; top: -8px; left: 8px; font-size: .54rem; font-weight: 900; color: #1e293b; background: #fbbf24; padding: 1px 5px; border-radius: 999px; }
+.br-sum-row.mvp:not(.win) .br-mvp { background: #c084fc; color: #fff; }
+.br-sum-face { font-size: 1.3rem; }
+.br-sum-dmg { font-size: .68rem; font-weight: 800; color: #fde68a; display: inline-flex; align-items: center; gap: 2px; }
+.br-sum-dmg.taken { color: #fca5a5; margin-left: auto; }
 </style>
