@@ -6,6 +6,7 @@
         <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
         <div class="pd-name">{{ pet.name }}</div>
         <div class="pd-tags">
+          <span class="pd-tag"><Emoji :char="ELEMENTS[elDef]?.emoji || '✊'" /> {{ EL_NAME[elDef] || elDef }}</span>
           <span class="pd-tag">{{ rarityLabel }}</span>
           <span class="pd-tag" v-if="pet.grade > 0">เกรด {{ GRADE_LABELS[Math.min(pet.grade, GRADE_LABELS.length - 1)] }}</span>
           <span class="pd-tag">copies {{ pet.copies || 0 }}</span>
@@ -35,6 +36,12 @@
         </template>
       </div>
 
+      <!-- ทักษะเฉพาะ — ยังไม่เปิด (ดู economy-battle-master-plan §5.5) -->
+      <div class="pd-section">
+        <div class="pd-sec-head"><Emoji char="✨" /> ทักษะเฉพาะ <span class="pd-soon">เร็วๆ นี้</span></div>
+        <div class="pd-note">สัตว์เลี้ยงแต่ละตัวจะมีทักษะพิเศษในการต่อสู้ กำลังจะมาเร็วๆ นี้</div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -45,7 +52,7 @@ import Emoji from '../shared/Emoji.vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
-import { RARITY, GRADE_LABELS, getPetDef } from '../../data/index.js'
+import { RARITY, GRADE_LABELS, getPetDef, ELEMENTS, EL_NAME } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
 import { residenceBattleSlots } from '../../data/residence.js'
@@ -87,6 +94,7 @@ const pet = computed(() => pets.value.find(p => p.id === props.petId) || null)
 
 const rc = computed(() => RARITY[pet.value?.rarity]?.color || '#94a3b8')
 const rarityLabel = computed(() => RARITY[pet.value?.rarity]?.label || pet.value?.rarity)
+const elDef = computed(() => getPetDef(pet.value?.id)?.element || pet.value?.element || 'scissors')
 
 const upCost = computed(() => pet.value ? gradeUpCost(pet.value) : null)
 const canUp = computed(() => pet.value && canUpgrade(pet.value, auth.userData?.coins || 0))
@@ -157,6 +165,7 @@ async function evolve() {
 .pd-sec-head { font-weight: 800; font-size: .82rem; margin-bottom: 8px; }
 .pd-note { font-size: .68rem; color: rgba(0,0,0,.5); margin-bottom: 8px; }
 .pd-note.small { font-size: .58rem; margin: 6px 0 0; }
+.pd-soon { font-size: .54rem; font-weight: 700; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
 .pd-btn { width: 100%; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .pd-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .pd-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }

@@ -37,6 +37,7 @@
         >
           <span v-if="activeSet.has(p.id)" class="pt-cell-star"><Emoji char="⭐" /></span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
+          <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.emoji || '✊'" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
           <PetStatLine :pet="p" />
@@ -55,7 +56,7 @@ import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
-import { RARITY, PETS } from '../data/index.js'
+import { RARITY, PETS, ELEMENTS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'
 import { residenceBattleSlots } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
@@ -124,4 +125,5 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-pot { position: absolute; top: -5px; right: -5px; background: #7c3aed; color: #fff; font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-star { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .54rem; font-weight: 800; color: rgba(0,0,0,.4); }
+.pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }
 </style>
