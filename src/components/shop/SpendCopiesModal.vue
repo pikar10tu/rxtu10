@@ -16,9 +16,9 @@
             <span class="sc-emoji"><Emoji :char="p.emoji" /></span>
             <span class="sc-name">{{ p.name }} <small>({{ p.copies }})</small></span>
             <div class="sc-step">
-              <button class="sc-pm" :disabled="(alloc[p.id] || 0) <= 0" @click="setN(p, (alloc[p.id] || 0) - 1)">−</button>
+              <button class="sc-pm" :aria-label="`ลด ${p.name}`" :disabled="(alloc[p.id] || 0) <= 0" @click="setN(p, (alloc[p.id] || 0) - 1)">−</button>
               <span class="sc-n">{{ alloc[p.id] || 0 }}</span>
-              <button class="sc-pm" :disabled="(alloc[p.id] || 0) >= p.copies" @click="setN(p, (alloc[p.id] || 0) + 1)">+</button>
+              <button class="sc-pm" :aria-label="`เพิ่ม ${p.name}`" :disabled="(alloc[p.id] || 0) >= p.copies" @click="setN(p, (alloc[p.id] || 0) + 1)">+</button>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ function confirm() {
 </script>
 
 <style scoped>
-.ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain; }
 .sc-box { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 82vh; display: flex; flex-direction: column; }
 .sc-head { font-weight: 800; text-align: center; }
 .sc-sub { font-size: .72rem; color: rgba(0,0,0,.6); text-align: center; margin: 4px 0 12px; }

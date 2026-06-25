@@ -2,7 +2,7 @@
   <div id="app-root">
     <div id="ticker-text" style="display:none"></div>
 
-    <div v-if="authStore.loading || !configLoaded" class="loading-screen">กำลังโหลด...</div>
+    <div v-if="authStore.loading || !configLoaded" class="loading-screen">กำลังโหลด…</div>
 
     <!-- ยังไม่ login → จอ login (ไม่ใช่จอปรับปรุง) -->
     <LoginLanding v-else-if="!authStore.isLoggedIn" />
@@ -18,6 +18,7 @@
          bank); everyone else gets the maintenance screen. Admin flips it from the
          Admin tab — no redeploy needed. -->
     <template v-else-if="authStore.isQuestionEditor || !maintenance">
+      <a href="#main-content" class="skip-link">ข้ามไปเนื้อหาหลัก</a>
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">

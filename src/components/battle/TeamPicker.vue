@@ -4,10 +4,15 @@
 <template>
   <BottomSheet :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
     <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
-      <div v-for="(id, i) in slots" :key="i" class="tp-slot" :class="{ filled: id }" @click="id && (detailId = id)">
+      <button
+        v-for="(id, i) in slots" :key="i" type="button"
+        class="tp-slot" :class="{ filled: id }" :disabled="!id"
+        :aria-label="id ? `ดูเพ็ทช่อง ${i + 1}` : `ช่องว่าง ${i + 1}`"
+        @click="id && (detailId = id)"
+      >
         <PetThumb v-if="id" :pet="slotPetOf(id)" />
         <span v-else class="tp-empty">+</span>
-      </div>
+      </button>
     </div>
     <div class="tp-hint">{{ filledCount }}/{{ battleSlots }} · แตะตัวในทีมเพื่อดู/ถอด · แตะคลังเพื่อสลับ</div>
 
@@ -84,8 +89,9 @@ function toggle(id) {
 
 <style scoped>
 .tp-slots { display: grid; gap: 8px; margin-bottom: 6px; justify-content: center; }
-.tp-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: #f8fafc; }
+.tp-slot { width: 100%; padding: 0; font-family: inherit; aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: #f8fafc; }
 .tp-slot.filled { border: none; background: none; cursor: pointer; }
+.tp-slot:disabled { opacity: 1; cursor: default; }  /* ช่องว่าง = placeholder ไม่ใช่ปุ่มที่ถูกปิด */
 .tp-empty { color: rgba(0,0,0,.25); font-size: 1.6rem; }
 .tp-hint { font-size: .68rem; color: rgba(0,0,0,.45); text-align: center; margin-bottom: 12px; }
 

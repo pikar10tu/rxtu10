@@ -90,7 +90,7 @@
     <Teleport to="body">
       <div v-if="infoPet" class="ov" @click.self="infoPet = null">
         <div class="info-box">
-          <button class="info-x" @click="infoPet = null">✕</button>
+          <button class="info-x" aria-label="ปิด" @click="infoPet = null">✕</button>
           <div class="info-emoji"><Emoji :char="infoPet.emoji" /></div>
           <div class="info-name">{{ infoPet.name }}</div>
           <div class="info-rarity" :style="{ background: rarityColor(infoPet.rarity) }">{{ RARITY[infoPet.rarity]?.label }}</div>
@@ -105,7 +105,9 @@
     <Teleport to="body">
       <div v-if="reveal" class="rv-ov" :class="[`r-${reveal.best}`, reveal.phase]" @click.self="closeReveal">
         <!-- จังหวะลุ้น: ลูกแก้วเรืองแสงสี rarity สูงสุด -->
-        <div v-if="reveal.phase === 'anticipate'" class="anti" :style="{ '--glow': rarityColor(reveal.best) }" @click="skipReveal">
+        <div v-if="reveal.phase === 'anticipate'" class="anti" role="button" tabindex="0"
+          aria-label="ข้ามการอัญเชิญ" :style="{ '--glow': rarityColor(reveal.best) }"
+          @click="skipReveal" @keydown.enter.prevent="skipReveal" @keydown.space.prevent="skipReveal">
           <div class="orb"><span class="orb-core"></span></div>
           <div class="anti-txt">กำลังอัญเชิญ…</div>
           <div class="anti-skip">แตะเพื่อข้าม</div>
@@ -257,7 +259,7 @@ async function chooseTarget(id) {
 .pull-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .pull-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pull-btn:disabled { opacity: .6; }
-.ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain; }
 .picker { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 80vh; overflow-y: auto; }
 .picker-head { font-weight: 800; margin-bottom: 12px; text-align: center; }
 .picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
@@ -279,7 +281,7 @@ async function chooseTarget(id) {
 .info-passive { font-size: .66rem; color: rgba(0,0,0,.45); background: rgba(0,0,0,.04); border-radius: 9px; padding: 7px; }
 .info-target { width: 100%; margin-top: 14px; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 /* ── reveal: ลุ้น (anticipate) → เผย (show) ── */
-.rv-ov { position: fixed; inset: 0; z-index: 410; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(10,8,20,.74); }
+.rv-ov { position: fixed; inset: 0; z-index: 410; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(10,8,20,.74); overscroll-behavior: contain; }
 .rv-ov.anticipate { cursor: pointer; }
 
 .anti { display: flex; flex-direction: column; align-items: center; gap: 16px; }
