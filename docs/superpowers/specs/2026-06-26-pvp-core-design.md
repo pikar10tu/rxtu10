@@ -19,7 +19,7 @@
 1. **Firestore แทบไม่เพิ่มต้นทุน** (memory flag เรื่อง cost) — ไม่มี collection ใหม่, ไม่มี cross-user write
 2. **rules ไม่ต้องแก้/deploy** — `pvp` เป็น field บน user doc เจ้าของ (เหมือน `incomeBuffUntil`)
 3. **ไม่ลงโทษ** — โปรเกรสถาวร (เพ็ท/เกรด/หอคอย) ไม่ถูกแตะ · รีแค่เรตซีซั่นแบบ soft
-4. **บอท = ซ้อม ไม่ใช่บันได** — เพิ่มความหลากหลาย/คู่สู้เสมอ แต่ไม่ทำลายการแข่งสังคม
+4. **บอท = คู่เสริมความหลากหลาย** — นับรวมในโควต้า + ให้เรต ×0.5 → ไต่ได้แต่ช้ากว่า อันดับยังเอนไปทางชนะคนจริง
 5. **pure logic + เทส** ตามแพทเทิร์น utils ของโปรเจกต์
 
 ## โมเดลหลัก: Attack-only ladder
@@ -28,30 +28,29 @@
 - ผู้เล่น **"บุก"** ทีมรับของคนอื่น → `simulateBattle(myTeam, oppSnapshot, seed)` · ชนะ = เรตขึ้น, แพ้ = เรตลงนิดหน่อย
 - **เรตขยับเฉพาะตอนเราบุกเอง** (เขียน user doc ตัวเองเท่านั้น) → ไม่มี cross-user write
   - ผลข้างเคียงที่ยอมรับ: ตอนทีมเราถูกคนอื่นบุก เราไม่เสีย/ได้เรตสด (defense ไม่กระทบเรตเรา) — แลกกับต้นทุน/ความเรียบของ rules
-- **ลิมิตบุกคนจริง ~5 ครั้ง/วัน** (รีเซ็ต write-time ตามวันที่ เหมือน `studyCoinDate`) → คุมต้นทุน + กันผู้นำวิ่งหนี
+- **ลิมิตบุก ~5 ครั้ง/วัน (รวมคน+บอท)** (รีเซ็ต write-time ตามวันที่ เหมือน `studyCoinDate`) → คุมต้นทุน + กันผู้นำวิ่งหนี + ไม่ต้องมีเพดานเหรียญแยก (โควต้าคุมอยู่แล้ว)
 - **ดู replay ได้** (reuse `BattleReplay.vue`) — ของเล่นโซเชียล "เราชนะนาย!"
 
 ## บอทในพูลคู่ต่อสู้
 
 - พูลคู่ต่อสู้ = **คนจริงเรตใกล้กัน (จาก members cache)** + **บอท 1–2 ตัว** (โชว์รวม ~5 ตัวเลือก)
 - บอทสร้างแบบ procedural (สเกลตามเรตผู้เล่น) — แนวเดียวกับ `getFloorTeam` ใน `towerFloors.js`
-- **บอท = ซ้อม:** ชนะบอท → ได้**เหรียญน้อย** (ไม่ขยับเรต, ไม่นับ win สังคม) · **สู้ไม่จำกัดจำนวน** + **ไม่กินโควต้าบุกคนจริง**
-  - ⚠️ กันฟาร์มเหรียญไม่จำกัด: **เหรียญจากบอทมีเพดาน/วัน** (แพทเทิร์นเดียวกับ `studyCoinsToday`/`quizDailyCap`) — เกินเพดานยังสู้/ดู replay ได้แต่ไม่ได้เหรียญ
-- เหตุผล: คู่สู้เสมอ + มือใหม่มีที่ซ้อม แต่ลีดเดอร์บอร์ดยังเป็นการแข่งคนจริงล้วน
+- **บอทนับรวมในโควต้า 5/วัน** (เหมือนบุกคนจริง) → สู้บอทไม่ใช่ของฟรีไม่จำกัด = ไม่มีช่องฟาร์ม จึง**ไม่ต้องมีเพดานเหรียญ**
+- **บอทให้ทั้งเหรียญและเรต แต่เรต ×0.5 ของคนจริง** (`BOT_RATING_MULT = 0.5`) → ไต่อันดับได้แต่ช้ากว่าชนะเพื่อน
+  - บอทมีเรตของตัวเอง (= เรตผู้เล่น โดยประมาณ) ใช้คิด Elo · delta สุดท้าย (ทั้งได้/เสีย) คูณ 0.5
+- เหตุผล: คู่สู้เสมอ + มือใหม่มีที่ซ้อม/ไต่ได้ + หลากหลายขึ้น แต่อันดับยังเอนไปทาง "ชนะคนจริง" เป็นหลัก
 
 ## Data model (เพิ่มใน `data/userSchema.js`)
 
 ```js
 pvp: {
   rating: 1000,     // เรตเริ่มต้น (Elo-ish)
-  wins: 0,          // ชนะคนจริง (สะสมในซีซั่น)
+  wins: 0,          // ชนะสะสมในซีซั่น (รวมบอท)
   losses: 0,
   seasonId: null,   // ซีซั่นล่าสุดที่เล่น (YYYY-MM) — ใช้ lazy reset
 },
 pvpAttackDate: null,   // YYYY-MM-DD (local) รีโควต้าบุกรายวัน
-pvpAttacksUsed: 0,     // จำนวนบุกคนจริงที่ใช้ไปวันนี้
-pvpBotCoinDate: null,  // YYYY-MM-DD (local) รีเพดานเหรียญบอทรายวัน
-pvpBotCoinsToday: 0,   // เหรียญจากบอทที่ได้ไปวันนี้ (cap กันฟาร์ม)
+pvpAttacksUsed: 0,     // จำนวนบุกที่ใช้ไปวันนี้ (รวมคน+บอท)
 ```
 - normalize: `{ ...USER_DEFAULTS, ...data }` + deep-default `pvp` (เหมือน `dailyQuest`)
 - เพิ่ม `pvp` เข้า **light subset ใน `members.js`** (เหมือน `towerBest`) → ลีดเดอร์บอร์ด/พูลคู่ derive จาก cache เดิม = ไม่มี read เพิ่ม
@@ -68,9 +67,11 @@ pvpBotCoinsToday: 0,   // เหรียญจากบอทที่ได้
 
 ```
 expectedScore(my, opp) = 1 / (1 + 10^((opp − my) / 400))
-nextRating(my, opp, won, K=32) = round(my + K × ((won?1:0) − expectedScore(my, opp)))   // clamp ≥ RATING_FLOOR
+nextRating(my, opp, won, { K=32, mult=1 }) =
+    round(my + mult × K × ((won?1:0) − expectedScore(my, opp)))   // clamp ≥ RATING_FLOOR
 ```
-ชนะคนแกร่งกว่า = ได้เยอะ · แพ้คนอ่อนกว่า = เสียเยอะ → ปรับสมดุล "คนนำ vs คนตาม" ในตัว
+- คนจริง: `mult = 1` · บอท: `mult = BOT_RATING_MULT (0.5)` → delta ทั้งได้/เสีย คูณครึ่ง
+- ชนะคนแกร่งกว่า = ได้เยอะ · แพ้คนอ่อนกว่า = เสียเยอะ → ปรับสมดุล "คนนำ vs คนตาม" ในตัว
 
 ## การเลือกคู่ (pure util `utils/pvpMatch.js` + เทส)
 
@@ -88,10 +89,10 @@ nextRating(my, opp, won, K=32) = round(my + K × ((won?1:0) − expectedScore(my
 1. โหลด: ถ้า `pvp.seasonId !== currentSeason` → เตรียม soft-reset (apply ตอนเขียนครั้งแรก)
 2. โชว์เรต/โควต้า/พูลคู่ต่อสู้
 3. กดท้า → `simulateBattle(myTeam, oppSnapshot, Date.now())` → เปิด `BattleReplay`
-4. จบ replay → `patchUser` (เขียน doc ตัวเองอย่างเดียว):
-   - **คนจริง:** `pvp.rating = nextRating(...)`, `wins/losses++`, `pvpAttacksUsed++` (+ soft-reset ถ้าซีซั่นใหม่)
-   - **บอท:** `coins += grant` โดย `grant = clamp(reward, 0, capเหลือวันนี้)` (reuse แนว `quizGrant`), อัปเดต `pvpBotCoinsToday`, ไม่แตะเรต, ไม่กินโควต้าคนจริง
-5. โควต้าหมด → ปุ่มบุกคนจริงปิด (ยังซ้อมบอทได้)
+4. จบ replay → `patchUser` (เขียน doc ตัวเองอย่างเดียว) — กินโควต้า `pvpAttacksUsed++` เสมอ (+ soft-reset ถ้าซีซั่นใหม่):
+   - **คนจริง:** `pvp.rating = nextRating(my, opp, won, { mult: 1 })`, `wins/losses++`, `coins += reward`
+   - **บอท:** `pvp.rating = nextRating(my, botRating, won, { mult: 0.5 })`, `wins/losses++`, `coins += reward`
+5. โควต้าหมด (5/วัน) → ปุ่มท้าปิดทั้งคน+บอท จนวันถัดไป
 
 ## UI ขั้นต่ำ (spec นี้) — "สนามประลอง (Arena)"
 
@@ -105,11 +106,10 @@ nextRating(my, opp, won, K=32) = round(my + K × ((won?1:0) − expectedScore(my
 
 ## เทส (node --test, pure)
 
-- `pvpRating.test.js`: expectedScore สมมาตร, ชนะคนแกร่ง > ชนะคนอ่อน, clamp floor
+- `pvpRating.test.js`: expectedScore สมมาตร, ชนะคนแกร่ง > ชนะคนอ่อน, clamp floor, **mult 0.5 = delta ครึ่งของ mult 1** (ทั้งได้/เสีย)
 - `pvpMatch.test.js`: เลือกคนเรตใกล้สุด, ตัดตัวเอง/คนไม่มีทีม, เติมบอทครบจำนวน, deterministic
 - `pvpBot.test.js`: คืน 4 ตัวเสมอ, สเกลตามเรต, deterministic
 - ซีซั่น soft-reset: pure helper `applySeasonReset(pvp, currentSeason)` มีเทส (บีบเข้ากลาง, รี wins/losses, stamp seasonId)
-- เพดานเหรียญบอท: pure helper (เช่น reuse `quizGrant`) มีเทส (clamp 0..capเหลือ, ข้ามวันรีเซ็ต)
 - UI/flow: manual ใน dev
 
 ## ลำดับถัดไปหลัง spec นี้
