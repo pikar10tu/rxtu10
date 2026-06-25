@@ -26,6 +26,10 @@ a { text-decoration: none; color: inherit; }
 
 html, body {
   height: 100%;
+  /* กัน pull-to-refresh / overscroll bounce บน iOS — ตัว scroll จริงคือ #main-content
+     (position:fixed) เลยล็อก html/body ได้ปลอดภัย ไม่กระทบ modal/nav/sheet */
+  overflow: hidden;
+  overscroll-behavior: none;
   /* Kanit = ฟอนต์ธีม; ตามด้วย system fallback แล้วปิดท้ายด้วยฟอนต์ emoji
      เพื่อให้ emoji แสดงเป็นสีเสมอ (กันขึ้นเป็นสี่เหลี่ยม □ บนบางเครื่อง) */
   font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
