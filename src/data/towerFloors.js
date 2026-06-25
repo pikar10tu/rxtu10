@@ -38,7 +38,8 @@ export function getFloorTeam(floor) {
   return team
 }
 
-/** ชั้นสูงสุดที่เคยผ่าน → โบนัสเหรียญ idle/วัน (flat, มี cap — ไม่ทวีคูณ) */
+/** ชั้นสูงสุดที่เคยผ่าน → โบนัสเหรียญ idle/วัน (flat, มี cap — ไม่ทวีคูณ)
+ *  มีโบนัสตั้งแต่ชั้น 1 (ผ่านชั้นแรกก็ได้รางวัล passive เลย) · ค่าชั้น 10+ คงเดิมเพื่อไม่กระทบสมดุลปลายเกม */
 export function getTowerBonus(bestFloor) {
   const b = bestFloor || 0
   if (b >= 50) return 12000
@@ -46,6 +47,9 @@ export function getTowerBonus(bestFloor) {
   if (b >= 30) return 4000
   if (b >= 20) return 1500
   if (b >= 10) return 500
+  if (b >= 5)  return 250
+  if (b >= 3)  return 120
+  if (b >= 1)  return 50
   return 0
 }
 
@@ -60,4 +64,4 @@ export function floorZone(floor) {
   const f = Math.max(1, Math.min(TOWER_MAX, Math.floor(floor) || 1))
   return ZONES.find(z => f >= z.from && f <= z.to) || ZONES[ZONES.length - 1]
 }
-export const TOWER_BONUS_FLOORS = [10, 20, 30, 40, 50]  // ชั้นที่ getTowerBonus กระโดด (หมุดบนแถบ)
+export const TOWER_BONUS_FLOORS = [1, 3, 5, 10, 20, 30, 40, 50]  // ชั้นที่ getTowerBonus กระโดด (หมุดบนแถบ)
