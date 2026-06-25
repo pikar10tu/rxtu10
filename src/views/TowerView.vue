@@ -89,7 +89,7 @@ import { RouterLink } from 'vue-router'
 import { ref, computed } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useTower } from '../composables/useTower.js'
-import { getPetDef, ELEMENTS, RARITY } from '../data/index.js'
+import { getPetDef, ELEMENTS, RARITY, EL_NAME } from '../data/index.js'
 import { floorZone, TOWER_BONUS_FLOORS } from '../data/towerFloors.js'
 import { buildCombatant } from '../data/battle.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
@@ -107,7 +107,6 @@ const busy = ref(false)
 const detailId = ref(null)
 const scout = ref(null)
 
-const EL_NAME = { fist: 'หมัด', scissors: 'กรรไกร', paper: 'กระดาษ' }
 const zone = computed(() => floorZone(floor.value))
 const isMilestone = (n) => TOWER_BONUS_FLOORS.includes(n)
 const climbFloors = computed(() => {

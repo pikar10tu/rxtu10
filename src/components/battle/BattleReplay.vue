@@ -110,7 +110,7 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS } from '../../data/index.js'
+import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS, EL_NAME } from '../../data/index.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { computeBattleSummary } from '../../utils/battleSummary.js'
@@ -121,7 +121,6 @@ defineEmits(['close'])
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
 const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], lungeMs: 150, projMs: 280, hitStopMs: 130 }
 
-const EL_NAME = { fist: 'หมัด', scissors: 'กรรไกร', paper: 'กระดาษ' }
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
 const elEmoji = (p) => ELEMENTS[p?.element]?.emoji || '✊'
 

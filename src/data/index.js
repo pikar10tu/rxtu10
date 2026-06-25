@@ -23,6 +23,8 @@ export const ELEMENTS = {
     paper:   { emoji:'✋', beats:'fist'     },
 };
 export const _EL_NAME = { fist:'✊ ค้อน', scissors:'✌️ กรรไกร', paper:'✋ กระดาษ' };
+// ชื่อธาตุกลาง (ล้วน ไม่มี emoji) — ใช้ทุกที่ที่โชว์ชื่อธาตุ · emoji ดึงจาก ELEMENTS แยก
+export const EL_NAME = { fist: 'ค้อน', scissors: 'กรรไกร', paper: 'กระดาษ' };
 export function elementBeats(attEl, defEl){ return ELEMENTS[attEl]?.beats === defEl; }
 
 // ── BASE STATS ──
