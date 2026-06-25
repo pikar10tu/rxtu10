@@ -6,17 +6,17 @@ export const DAY_MS = 24 * 60 * 60 * 1000
 /**
  * @param baseRatePerDay เรท/วัน ก่อนบัฟ (บ้าน+เพ็ท+หอคอย × โบนัส tag แล้ว)
  * @param lastMs ms เก็บรายได้ครั้งล่าสุด · now ms ปัจจุบัน
- * @param buffUntil ms ที่บัฟหมดอายุ (0/ไม่มี = ไม่มีบัฟ) · ช่วงบัฟ = [buffUntil − buffMs, buffUntil]
+ * @param buffFrom/buffUntil ช่วงบัฟ active จริง [from, until] (รองรับสแตคต่อเวลา = until ยาวเกิน 24ชม.)
  * @returns เหรียญสะสม (floor) — หน้าต่างสะสม cap 24ชม.
  */
-export function accruedCoins({ baseRatePerDay, lastMs, now, buffUntil = 0, buffMult = 1.5, buffMs = DAY_MS }) {
+export function accruedCoins({ baseRatePerDay, lastMs, now, buffFrom = 0, buffUntil = 0, buffMult = 1.5 }) {
   if (!(baseRatePerDay > 0) || !(now > lastMs)) return 0
   const winStart = Math.max(lastMs, now - DAY_MS)   // cap สะสม 24ชม.
   const totalMs = now - winStart
   let buffedMs = 0
-  if (buffUntil > 0 && buffMult !== 1) {
-    const bStart = buffUntil - buffMs
-    buffedMs = Math.max(0, Math.min(now, buffUntil) - Math.max(winStart, bStart))
+  if (buffUntil > buffFrom && buffMult !== 1) {
+    // ส่วนที่หน้าต่างสะสม [winStart, now] ทับช่วงบัฟ [buffFrom, buffUntil]
+    buffedMs = Math.max(0, Math.min(now, buffUntil) - Math.max(winStart, buffFrom))
   }
   const weightedMs = (totalMs - buffedMs) + buffMult * buffedMs
   return Math.floor(baseRatePerDay * weightedMs / DAY_MS)

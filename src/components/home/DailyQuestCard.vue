@@ -61,11 +61,17 @@ const claiming = ref(false)
 async function claimReward() {
   if (claiming.value || !claimable.value) return
   claiming.value = true
-  const until = Date.now() + BUFF_MS
+  const t = Date.now()
+  const curUntil = auth.userData?.incomeBuffUntil || 0
+  const active = curUntil > t
+  // สแตค: บัฟยัง active → ต่อเวลา +24ชม. จากปลายเดิม (คงเวลาเริ่มเดิม)
+  //       บัฟหมดแล้ว → เริ่มบัฟใหม่สดจากตอนนี้
+  const from  = active ? (auth.userData?.incomeBuffFrom || t) : t
+  const until = (active ? curUntil : t) + BUFF_MS
   const dq = { ...auth.userData.dailyQuest, claimed: true }
   const ok = await auth.patchUser(
-    { dailyQuest: dq, freeGachaTickets: tickets.value + 1, incomeBuffUntil: until },
-    { 'dailyQuest.claimed': true, freeGachaTickets: increment(1), incomeBuffUntil: until },
+    { dailyQuest: dq, freeGachaTickets: tickets.value + 1, incomeBuffUntil: until, incomeBuffFrom: from },
+    { 'dailyQuest.claimed': true, freeGachaTickets: increment(1), incomeBuffUntil: until, incomeBuffFrom: from },
   )
   toast(ok ? 'รับรางวัลแล้ว! รายได้ ×1.5 24 ชม. + ตั๋วกาชาฟรี' : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
   claiming.value = false

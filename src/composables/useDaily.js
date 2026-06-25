@@ -52,10 +52,15 @@ export function useDaily() {
   const elapsedMs   = computed(() => Math.max(0, Math.min(DAY_MS, now.value - lastMs())))
   const fillPct     = computed(() => Math.min(100, (elapsedMs.value / DAY_MS) * 100))
   // คิดบัฟ ×1.5 เฉพาะช่วงที่บัฟ active จริง (ไม่ย้อนหลังทั้งก้อน)
-  const accrued     = computed(() => accruedCoins({
-    baseRatePerDay: baseRatePerDay.value, lastMs: lastMs(), now: now.value,
-    buffUntil: auth.userData?.incomeBuffUntil || 0, buffMult: BUFF_MULT, buffMs: BUFF_MS,
-  }))
+  // legacy fallback: user เก่าที่มีแต่ incomeBuffUntil → เดา from = until − 24ชม.
+  const accrued     = computed(() => {
+    const until = auth.userData?.incomeBuffUntil || 0
+    const from  = auth.userData?.incomeBuffFrom || (until ? until - BUFF_MS : 0)
+    return accruedCoins({
+      baseRatePerDay: baseRatePerDay.value, lastMs: lastMs(), now: now.value,
+      buffFrom: from, buffUntil: until, buffMult: BUFF_MULT,
+    })
+  })
   const isFull      = computed(() => elapsedMs.value >= DAY_MS)
   const remainingMs = computed(() => Math.max(0, DAY_MS - elapsedMs.value))
 

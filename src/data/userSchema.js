@@ -58,6 +58,7 @@ export const USER_DEFAULTS = {
   gachaTarget: null,       // species id ของ legendary ที่เลือกเป็นเป้า (null = ไม่เลือก → new-first)
   gachaGuaranteed: false,  // true = legendary ครั้งหน้าการันตีตัวเป้า (จาก lose 50/50)
   incomeBuffUntil: null,
+  incomeBuffFrom: null,    // ms เริ่มบัฟ (คู่กับ incomeBuffUntil) — รองรับสแตคต่อเวลา
   petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
   // ── onboarding / identity (first-run) ──
   consent: { accepted: false, version: null, at: null },  // PDPA
