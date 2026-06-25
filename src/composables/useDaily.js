@@ -5,9 +5,11 @@ import { useToast } from './useToast.js'
 import { residenceDailyIncome } from '../data/residence.js'
 import { totalPetDaily } from '../utils/petUtils.js'
 import { getTowerBonus } from '../data/towerFloors.js'
-import { questIncomeMult } from '../utils/dailyQuest.js'
+import { questIncomeMult, BUFF_MS } from '../utils/dailyQuest.js'
+import { accruedCoins } from '../utils/idleIncome.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+const BUFF_MULT = 1.5   // ต้องตรงกับ questIncomeMult
 
 /**
  * Idle income: residence + stored-pet income accrues hourly, capped at 24h.
@@ -33,7 +35,10 @@ export function useDaily() {
 
   const buffMult   = computed(() => questIncomeMult(auth.userData, now.value))
   const buffActive = computed(() => buffMult.value > 1)
-  const ratePerDay = computed(() => Math.round((baseIncome.value + petIncome.value + towerBonus.value) * (1 + bonusPct.value / 100) * buffMult.value))
+  // เรท/วัน ก่อนบัฟ — ใช้คิดรายได้สะสมแบบแยกช่วงบัฟ (ดู accruedCoins)
+  const baseRatePerDay = computed(() => Math.round((baseIncome.value + petIncome.value + towerBonus.value) * (1 + bonusPct.value / 100)))
+  // เรท/วัน ปัจจุบัน (รวมบัฟ) — สำหรับโชว์บน UI เท่านั้น
+  const ratePerDay = computed(() => Math.round(baseRatePerDay.value * buffMult.value))
   const ratePerHour = computed(() => Math.round(ratePerDay.value / 24))
 
   function lastMs() {
@@ -46,7 +51,11 @@ export function useDaily() {
 
   const elapsedMs   = computed(() => Math.max(0, Math.min(DAY_MS, now.value - lastMs())))
   const fillPct     = computed(() => Math.min(100, (elapsedMs.value / DAY_MS) * 100))
-  const accrued     = computed(() => Math.floor(ratePerDay.value * elapsedMs.value / DAY_MS))
+  // คิดบัฟ ×1.5 เฉพาะช่วงที่บัฟ active จริง (ไม่ย้อนหลังทั้งก้อน)
+  const accrued     = computed(() => accruedCoins({
+    baseRatePerDay: baseRatePerDay.value, lastMs: lastMs(), now: now.value,
+    buffUntil: auth.userData?.incomeBuffUntil || 0, buffMult: BUFF_MULT, buffMs: BUFF_MS,
+  }))
   const isFull      = computed(() => elapsedMs.value >= DAY_MS)
   const remainingMs = computed(() => Math.max(0, DAY_MS - elapsedMs.value))
 

@@ -113,6 +113,7 @@ export const useAuthStore = defineStore('auth', () => {
      */
     async function patchUser(optimistic, server) {
         if (!currentUser.value) return false
+        const prev = userData.value   // เก็บไว้ rollback ถ้าเขียนไม่สำเร็จ
         blockSnapshot()
         setUserDataOptimistic(optimistic)
         try {
@@ -121,6 +122,9 @@ export const useAuthStore = defineStore('auth', () => {
             return true
         } catch (e) {
             console.error('[patchUser]', e)
+            // เขียนล้มเหลว → คืน state เดิม (กัน UI โชว์ผลลวงจน snapshot รอบหน้าค่อยแก้)
+            userData.value = prev
+            _blockSnapshot = false   // ปลดบล็อกทันที ให้ snapshot ของจริงไหลกลับมาได้เลย
             return false
         }
     }
