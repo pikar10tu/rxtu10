@@ -20,6 +20,9 @@ export const useMembersStore = defineStore('members', () => {
         const sci  = R_SCI.map(s  => parse(s, 'sci'))
         const care = R_CARE.map(s => parse(s, 'care'))
         const names = RN.split(/(?=นาย|นางสาว)/).filter(n => n.trim()).map(n => n.replace(/^นาย|^นางสาว/, '').trim())
+        // ⚠️ RN ถูกเขียนเรียงตาม id ascending ของทุกคน (Sci+Care รวม) มาตั้งแต่ต้น
+        //    → จึงต้อง sort all ตาม id ก่อน แล้วค่อย map ชื่อด้วย index ให้ตรงลำดับ
+        //    ถ้าแก้ลำดับ RN หรือเอา sort ออก ชื่อจริงจะเลื่อนผิดคนทั้งหมด (ดู v1 app.js)
         const all = [...sci, ...care].sort((a, b) => a.id.localeCompare(b.id))
         all.forEach((s, i) => { s.realName = names[i] || 'ไม่ระบุ' })
         students.value = all
