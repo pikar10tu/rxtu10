@@ -6,7 +6,8 @@
 import { elementBeats } from './index.js'
 
 export const BATTLE_CFG = {
-  teamSize: 4, maxRounds: 30,
+  teamSize: 4, maxRounds: 30,   // maxRounds = legacy (ไม่ใช้เป็น cap แล้ว ดู maxTurns)
+  maxTurns: 300,                // cap จำนวนการตีรวม กันลูปยาวผิดปกติ (1 ตัวออกตี = 1 turn)
   elementAdv: 1.20, elementDis: 0.83,
   critRate: 0.12, critMult: 1.6, variance: 0.22,
 }
