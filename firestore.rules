@@ -69,13 +69,6 @@ service cloud.firestore {
             || request.resource.data.get('guestStatus', null) == 'pending'
           )
         )
-        // anyone logged in may toggle likes on ANY profile (only these fields)
-        || (
-          // anyone may give likes (daily); only these fields, and likes can only go UP
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy'])
-          && request.resource.data.likes is int
-          && request.resource.data.likes >= resource.data.get('likes', 0)
-        )
       );
       allow delete: if isAdmin();
 
