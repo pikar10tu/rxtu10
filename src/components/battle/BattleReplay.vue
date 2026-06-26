@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <div class="br-vs"><Emoji char="⚔️" /> ชั้น {{ data.cleared }}</div>
+      <div class="br-vs"><Emoji char="⚔️" /> {{ data.vsLabel ?? ('ชั้น ' + data.cleared) }}</div>
 
       <div class="br-team">
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
@@ -63,8 +63,8 @@
         </template>
         <template v-else>
           <div class="br-sum">
-            <div class="br-result" :class="{ win: data.won }">{{ data.won ? `ชนะ! ขึ้นชั้น ${data.cleared + 1}` : 'แพ้ ลองใหม่ได้เลย' }}</div>
-            <div v-if="data.won" class="br-reward"><Emoji char="🎁" /> ได้รับ: ขึ้นชั้น {{ data.cleared + 1 }}</div>
+            <div class="br-result" :class="{ win: data.won }">{{ data.won ? (data.winText ?? `ชนะ! ขึ้นชั้น ${data.cleared + 1}`) : (data.loseText ?? 'แพ้ ลองใหม่ได้เลย') }}</div>
+            <div v-if="data.won && (data.rewardText ?? data.cleared != null)" class="br-reward"><Emoji char="🎁" /> {{ data.rewardText ?? ('ได้รับ: ขึ้นชั้น ' + (data.cleared + 1)) }}</div>
 
             <div class="br-sum-team">
               <div class="br-sum-head"><i class="dot me"></i> ทีมคุณ</div>
