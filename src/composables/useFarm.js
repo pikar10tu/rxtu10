@@ -64,12 +64,12 @@ export function useFarm() {
     if (!crop) return
     if (plots.value[i]) { toast('แปลงนี้มีพืชอยู่แล้ว', 'info'); return }
     if ((auth.userData?.coins || 0) < crop.seedCost) {
-      toast(`เหรียญไม่พอ! เมล็ด ${crop.name} ราคา ${crop.seedCost}🪙`, 'error'); return
+      toast(`เหรียญไม่พอ! เมล็ด ${crop.name} ราคา ${crop.seedCost} เหรียญ`, 'error'); return
     }
     const next = clonePlots()
     next[i] = { seedId, plantedAt: Date.now() }
     await commit(next, { coinDelta: -crop.seedCost })
-    toast(`ปลูก ${crop.emoji} ${crop.name} แล้ว`, 'success')
+    toast(`ปลูก ${crop.name} แล้ว`, 'success')
   }
 
   async function harvest(i) {
@@ -82,7 +82,7 @@ export function useFarm() {
     const inv = { ...inventory.value }
     inv[p.seedId] = (inv[p.seedId] || 0) + 1
     await commit(next, { inventory: inv })
-    toast(`เก็บเกี่ยว ${st.crop.emoji} ${st.crop.name}!`, 'success')
+    toast(`เก็บเกี่ยว ${st.crop.name}!`, 'success')
   }
 
   async function sell(cropId, qty = null) {
@@ -95,7 +95,7 @@ export function useFarm() {
     inv[cropId] = have - n
     if (inv[cropId] <= 0) delete inv[cropId]
     await commit(clonePlots(), { coinDelta: gain, inventory: inv, salesGain: gain })
-    toast(`ขาย ${crop.emoji} ×${n} = +${gain.toLocaleString()}🪙`, 'success')
+    toast(`ขาย ${crop.name} ×${n} = +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 
   async function sellAll() {
@@ -106,7 +106,7 @@ export function useFarm() {
     }
     if (gain <= 0) { toast('ไม่มีผลผลิตให้ขาย', 'info'); return }
     await commit(clonePlots(), { coinDelta: gain, inventory: {}, salesGain: gain })
-    toast(`ขายทั้งหมด +${gain.toLocaleString()}🪙`, 'success')
+    toast(`ขายทั้งหมด +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 
   return {
