@@ -16,6 +16,7 @@ import { db } from '../firebase/config.js'
 // ════════════════════════════════════════════════════════════
 
 const maintenance  = ref(true)
+const pvpOpen      = ref(false)   // สนามประลองเปิดให้ทุกคนบุกหรือยัง (admin toggle)
 const configLoaded = ref(false)
 let _started = false
 
@@ -28,6 +29,7 @@ export function initAppConfig() {
       const d = snap.data()
       // missing doc → stay locked (safe default)
       maintenance.value = d ? d.maintenance !== false : true
+      pvpOpen.value = d?.pvpOpen === true   // default ปิด จนกว่า admin เปิด
       configLoaded.value = true
     },
     (e) => { console.error('[appConfig]', e); configLoaded.value = true },
@@ -35,5 +37,5 @@ export function initAppConfig() {
 }
 
 export function useAppConfig() {
-  return { maintenance, configLoaded }
+  return { maintenance, configLoaded, pvpOpen }
 }
