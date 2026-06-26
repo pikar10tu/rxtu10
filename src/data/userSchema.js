@@ -59,6 +59,10 @@ export const USER_DEFAULTS = {
   gachaGuaranteed: false,  // true = legendary ครั้งหน้าการันตีตัวเป้า (จาก lose 50/50)
   incomeBuffUntil: null,
   incomeBuffFrom: null,    // ms เริ่มบัฟ (คู่กับ incomeBuffUntil) — รองรับสแตคต่อเวลา
+  // ── PvP (สนามประลอง) ──
+  pvp: { rating: 1000, wins: 0, losses: 0, seasonId: null },
+  pvpAttackDate: null,   // YYYY-MM-DD (local) รีโควต้าบุกรายวัน
+  pvpAttacksUsed: 0,     // จำนวนบุกที่ใช้ไปวันนี้ (รวมคน+บอท)
   petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
   // ── onboarding / identity (first-run) ──
   consent: { accepted: false, version: null, at: null },  // PDPA
@@ -116,6 +120,7 @@ export function normalizeUserData(data) {
   d.farm      = { ...USER_DEFAULTS.farm,      ...(isObj(data.farm)      ? data.farm      : {}) }
   d.study     = { ...USER_DEFAULTS.study,     ...(isObj(data.study)     ? data.study     : {}) }
   d.dailyQuest = { ...USER_DEFAULTS.dailyQuest, ...(isObj(data.dailyQuest) ? data.dailyQuest : {}) }
+  d.pvp        = { ...USER_DEFAULTS.pvp,        ...(isObj(data.pvp)        ? data.pvp        : {}) }
   d.likedBy   = isObj(data.likedBy) ? data.likedBy : {}
 
   return d

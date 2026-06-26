@@ -64,3 +64,18 @@ test('normalize: legacy activePet → slot 0 (ยาว 4)', () => {
   const d = normalizeUserData({ activePet: 'cat' })
   assert.deepEqual(d.activePets, ['cat', null, null, null])
 })
+
+// ── PvP (สนามประลอง) ──
+test('normalizeUserData: pvp defaults ครบ', () => {
+  const d = normalizeUserData({})
+  assert.equal(d.pvp.rating, 1000)
+  assert.equal(d.pvp.wins, 0)
+  assert.equal(d.pvp.seasonId, null)
+  assert.equal(d.pvpAttacksUsed, 0)
+  assert.equal(d.pvpAttackDate, null)
+})
+test('normalizeUserData: pvp บางส่วน merge กับ default', () => {
+  const d = normalizeUserData({ pvp: { rating: 1234 } })
+  assert.equal(d.pvp.rating, 1234)
+  assert.equal(d.pvp.wins, 0) // เติม default
+})
