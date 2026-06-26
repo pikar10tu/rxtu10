@@ -3,20 +3,11 @@ import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { simulateBattle } from '../utils/battleEngine.js'
 import { getFloorTeam, getTowerBonus, TOWER_MAX } from '../data/towerFloors.js'
-import { getPetDef } from '../data/index.js'
+import { resolveBattleTeam } from '../utils/petTeam.js'
 import { doc, setDoc, increment, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { computeBattleStats } from '../utils/battleStats.js'
 import { useUsageStore } from '../stores/usage.js'
-
-/** activePets (species id) → battle units {id,rarity,element,grade} จาก pets ที่ owns */
-function resolveTeam(ids, pets) {
-  return (ids || []).filter(Boolean).map(id => {
-    const inst = (pets || []).find(p => (p.id || p.species) === id) || {}
-    const def = getPetDef(id) || {}
-    return { id, rarity: inst.rarity || def.rarity || 'common', element: def.element || 'scissors', grade: inst.grade || 0 }
-  })
-}
 
 export function useTower() {
   const auth = useAuthStore()
@@ -24,7 +15,7 @@ export function useTower() {
 
   const floor = computed(() => auth.userData?.towerFloor || 1)
   const best  = computed(() => auth.userData?.towerBest || 0)
-  const team  = computed(() => resolveTeam(auth.userData?.activePets, auth.userData?.pets))
+  const team  = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets))
   const botTeam = computed(() => getFloorTeam(floor.value))
   const bonus = computed(() => getTowerBonus(best.value))
 
