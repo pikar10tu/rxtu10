@@ -27,6 +27,25 @@
         </div>
       </section>
 
+      <!-- ───── สนามประลอง (PvP open/close gate) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="⚔️" /> สนามประลอง (PvP)</span></div>
+        <div class="admin-hint">
+          เปิดให้ทั้งชั้นปีเริ่มบุกกันได้ — ก่อนเปิด ทุกคนเข้าไปจัดทีม/เห็นแต้มได้ แต่ยังบุกไม่ได้ · มีผลทันที ไม่ต้อง deploy
+        </div>
+        <div class="maint-toggle">
+          <span class="maint-state" :class="pvpOpen ? 'on' : 'off'">
+            {{ pvpOpen ? '🟢 เปิดให้บุกแล้ว' : '🔒 ยังไม่เปิด (จัดทีม/ดูแต้มได้)' }}
+          </span>
+          <button
+            class="btn-mini" :class="pvpOpen ? 'btn-gray' : 'btn-gold'"
+            :disabled="savingPvp" @click="togglePvp"
+          >
+            {{ savingPvp ? '...' : (pvpOpen ? 'ปิดสนาม' : 'เปิดสนาม ⚔️') }}
+          </button>
+        </div>
+      </section>
+
       <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -327,7 +346,7 @@ import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usage
 const authStore = useAuthStore()
 const members   = useMembersStore()
 const usage     = useUsageStore()
-const { maintenance } = useAppConfig()
+const { maintenance, pvpOpen } = useAppConfig()
 const { toast } = useToast()
 const { confirm } = useConfirm()
 
@@ -477,6 +496,22 @@ async function toggleMaintenance() {
     toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
   } finally {
     savingMaint.value = false
+  }
+}
+
+// ── เปิด/ปิด สนามประลอง (config/app.pvpOpen) ──
+const savingPvp = ref(false)
+async function togglePvp() {
+  const next = !pvpOpen.value
+  savingPvp.value = true
+  try {
+    await setDoc(doc(db, 'config', 'app'), { pvpOpen: next }, { merge: true })
+    toast(next ? 'เปิดสนามประลองแล้ว ⚔️' : 'ปิดสนามประลองแล้ว', 'success')
+  } catch (e) {
+    console.error('[admin pvpOpen]', e)
+    toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
+  } finally {
+    savingPvp.value = false
   }
 }
 
