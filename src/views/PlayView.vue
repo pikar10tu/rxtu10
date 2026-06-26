@@ -36,7 +36,11 @@
       <!-- ── สนามประลอง (เร็วๆ นี้) ── -->
       <SectionTitle><Emoji char="⚔️" /> สนามประลอง</SectionTitle>
       <div class="play-grid">
-        <SoonCard emoji="⚔️" label="PvP สู้กัน" />
+        <RouterLink to="/arena" class="game-card">
+          <span class="gc-emoji"><Emoji char="⚔️" /></span>
+          <span class="gc-name">สนามประลอง</span>
+          <span class="gc-badge grow">PvP · แต้มประลอง</span>
+        </RouterLink>
         <RouterLink to="/tower" class="game-card">
           <span class="gc-emoji"><Emoji char="🏯" /></span>
           <span class="gc-name">ปีนหอคอย</span>
