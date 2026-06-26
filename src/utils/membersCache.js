@@ -2,7 +2,7 @@
 // ตัวถ่วง read หลักคือ members (อ่านทั้ง collection ~150 docs/เซสชัน) — cache TTL 8 ชม./เครื่อง
 // bump key v1→v2→v3 ถ้า shape ของ light subset เปลี่ยน
 
-export const MEMBERS_CACHE_KEY = 'rxtu10:members:v3' // v3: เพิ่ม accountType/guestStatus/guestReason (invalidate cache เก่า ไม่งั้นซ่อน guest ที่เพิ่งอนุมัติจนกว่า TTL หมด)
+export const MEMBERS_CACHE_KEY = 'rxtu10:members:v4' // v4: เพิ่ม pvp (light subset เปลี่ยน)
 export const MEMBERS_CACHE_TTL = 8 * 60 * 60 * 1000 // 8 ชม.
 
 // ตัดฟิลด์หนัก (base64 customPhoto) ออกก่อนเขียน cache — กัน localStorage quota (~5MB) ระเบิด
