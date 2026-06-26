@@ -14,7 +14,8 @@ import { currentSeasonId, applySeasonReset } from '../utils/pvpSeason.js'
 import { getPvpBot } from '../utils/pvpBot.js'
 import { pickHumanOpponents } from '../utils/pvpMatch.js'
 
-// วันที่วันนี้ตามเวลาเครื่อง YYYY-MM-DD
+// คีย์วันที่รายวัน (UTC) — ใช้ toISOString ให้ตรงกับ daily-reset อื่นของแอป
+// (quizCoinDate/studyCoinDate/dailyQuest ใช้ UTC เหมือนกันหมด → คงไว้เพื่อความสอดคล้อง)
 const todayStr = () => new Date().toISOString().slice(0, 10)
 
 export function useArena() {
@@ -67,7 +68,7 @@ export function useArena() {
       : 0
     // เหรียญ: ชนะคนจริง = PVP_WIN_COIN, ชนะบอท = PVP_BOT_COIN, แพ้ = 0
     const coin = won ? (opp.isBot ? PVP_BOT_COIN : PVP_WIN_COIN) : 0
-    await auth.patchUser(
+    const ok = await auth.patchUser(
       {
         pvp: nextPvp, pvpAttackDate: today, pvpAttacksUsed: usedBefore + 1,
         ...(coin ? { coins: (auth.userData?.coins || 0) + coin } : {}),
@@ -77,7 +78,9 @@ export function useArena() {
         ...(coin ? { coins: increment(coin) } : {}),
       },
     )
-    return { newRating, delta: newRating - base.rating, coin }
+    // patchUser คืน false เมื่อเขียน Firestore ล้มเหลว (+rollback optimistic แล้ว)
+    // → คืน ok=false ให้ fight() ไม่โชว์ replay ลวง
+    return { ok, newRating, delta: newRating - base.rating, coin }
   }
 
   // บุก: ตรวจสอบโควต้า+ทีม → จำลองการสู้ → เขียนผล → คืน replayData
@@ -94,13 +97,15 @@ export function useArena() {
     const oppTeam = opp.isBot
       ? opp.team
       : resolveBattleTeam(opp.activePets, opp.pets)
-    if (!oppTeam.length) {
+    if (!oppTeam?.length) {
       toast('คู่ต่อสู้ยังไม่ได้จัดทีม', 'info')
       return null
     }
     const result = simulateBattle(myTeam.value, oppTeam, Date.now())
     const won = result.winner === 'A'
-    const { delta, coin } = await applyResult(opp, won)
+    const { ok, delta, coin } = await applyResult(opp, won)
+    // เขียนผลไม่สำเร็จ → toast error + ไม่โชว์ replay (เหมือน useFarm/useDaily)
+    if (!ok) { toast('บันทึกผลประลองไม่สำเร็จ', 'error'); return null }
     const name = opp.isBot ? 'หุ่นซ้อม' : (opp.nickname || 'คู่ต่อสู้')
     const sign = delta >= 0 ? '+' : ''
     return {
