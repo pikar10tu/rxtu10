@@ -15,6 +15,7 @@ const routes = [
     { path: '/pets',      name: 'pets',      component: () => import('../views/PetsView.vue')      },
     { path: '/tower',     name: 'tower',     component: () => import('../views/TowerView.vue')     },
     { path: '/arena',     name: 'arena',     component: () => import('../views/ArenaView.vue')     },
+    { path: '/expedition', name: 'expedition', component: () => import('../views/ExpeditionView.vue') },
 ]
 
 export const router = createRouter({
