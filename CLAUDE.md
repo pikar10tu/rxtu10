@@ -54,7 +54,7 @@ gates: `auth.isAdmin`, `auth.isAcademic` (admin ⊃ academic) · user แก้ 
 
 **ข้อความจากผู้ใช้ทุกช่อง:** ผ่าน `cleanText(str, LIMITS.xxx)` จาก utils/text.js ก่อนเขียนเสมอ
 
-**สไตล์:** คอมเมนต์/commit เป็นไทยปนอังกฤษ · commit รูปแบบ `Area: อะไร (ทำไม)` ·
+**สไตล์:** คอมเมนต์/commit เป็นไทยปนอังกฤษ · commit รูปแบบ `Area: อะไร (ทำไม)` · โทนข้อความผู้ใช้: ยึด docs/voice-guide.md (เป็นกันเอง อธิบายฟังก์ชันชัด ไม่ใช้คำหวือหวา) ·
 single-file component + scoped style · สีธีมหลัก indigo (#4f46e5) ใน style.css
 
 ## Data model (Firestore)
