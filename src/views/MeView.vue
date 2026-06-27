@@ -132,7 +132,7 @@ async function sendFeedback() {
     fbText.value = ''
     fbCat.value = 'idea'
     fbOpen.value = false
-    toast('ส่งข้อเสนอแนะแล้ว ขอบคุณมากครับ 🙏', 'success')
+    toast('ส่งข้อเสนอแนะแล้ว ขอบคุณมาก', 'success')
   } catch (e) {
     console.error('[feedback]', e)
     toast('ส่งไม่สำเร็จ', 'error')
@@ -178,7 +178,7 @@ async function save() {
   try {
     await updateDoc(doc(db, 'users', auth.currentUser.uid), patch)
     newPhoto.value = null
-    toast('บันทึกโปรไฟล์แล้ว ✅', 'success')
+    toast('บันทึกโปรไฟล์แล้ว', 'success')
   } catch (e) {
     console.error('[me save]', e)
     toast('บันทึกไม่สำเร็จ', 'error')

@@ -26,11 +26,11 @@ export function useResidence() {
 
   async function upgrade() {
     if (!auth.currentUser) return
-    if (isMax.value) { toast('ที่อยู่อาศัยระดับสูงสุดแล้ว 🏰', 'info'); return }
+    if (isMax.value) { toast('ที่อยู่อาศัยระดับสูงสุดแล้ว', 'info'); return }
 
     const cost = upgradeCostFrom(level.value)
     if (coins.value < cost) {
-      toast(`เหรียญไม่พอ! ต้องการ ${cost.toLocaleString()}🪙`, 'error')
+      toast(`เหรียญไม่พอ ต้องการ ${cost.toLocaleString()} เหรียญ`, 'error')
       return
     }
 
