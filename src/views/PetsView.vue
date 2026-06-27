@@ -25,9 +25,9 @@
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
-      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูสเตตัส · วิวัฒน์ · ใส่ศักยภาพ <Emoji char="⚗️" /></div>
+      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์ · ใส่ศักยภาพ <Emoji char="⚗️" /></div>
 
-      <div v-if="!sorted.length" class="pt-empty">ยังไม่มีสัตว์เลี้ยง — ไปสุ่มไข่ที่ Shop ก่อนนะ <Emoji char="🥚" /></div>
+      <div v-if="!sorted.length" class="pt-empty">ยังไม่มีสัตว์เลี้ยง — ไปที่ Shop แล้วกดอัญเชิญก่อนนะ <Emoji char="🥚" /></div>
 
       <div v-else class="pt-grid">
         <button

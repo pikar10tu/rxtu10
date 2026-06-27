@@ -62,7 +62,7 @@
           </button>
         </div>
       </div>
-      <div class="shop-note">สุ่ม 10 ได้ 11 ตัว · ตัวซ้ำ → +1 copy (ใช้อัพเกรด)</div>
+      <div class="shop-note">สุ่ม 10 ได้ 11 ตัว · ตัวซ้ำ → +1 copy (ใช้วิวัฒน์หรือหลอม)</div>
       </template>
     </template>
     <div v-else class="shop-login">เข้าสู่ระบบเพื่อช้อป</div>
@@ -95,7 +95,7 @@
           <div class="info-name">{{ infoPet.name }}</div>
           <div class="info-rarity" :style="{ background: rarityColor(infoPet.rarity) }">{{ RARITY[infoPet.rarity]?.label }}</div>
           <div class="info-flavor">“{{ infoPet.flavor }}”</div>
-          <div class="info-passive"><Emoji char="🔒" /> พาสซีฟ — รอระบบต่อสู้ (เร็วๆ นี้)</div>
+          <div class="info-passive"><Emoji char="🔒" /> ทักษะพิเศษ — มาพร้อมระบบต่อสู้ (เร็วๆ นี้)</div>
           <button class="info-target" @click="chooseTarget(infoPet.id); infoPet = null">ตั้งเป็นเป้าหมาย</button>
         </div>
       </div>

@@ -131,11 +131,11 @@ async function commit(newPets, coinDelta = 0) {
 async function evolve() {
   if (busy.value || !pet.value || !upCost.value) return
   const p = pet.value
-  if (!canUp.value) { toast('copies หรือเหรียญไม่พอ', 'info'); return }
+  if (!canUp.value) { toast('copies หรือเหรียญของคุณไม่พอ', 'info'); return }
   const newPets = pets.value.map(x => x.id === p.id
     ? { ...x, grade: (x.grade || 0) + 1, copies: (x.copies || 0) - upCost.value.copies } : x)
   busy.value = true
-  try { await commit(newPets, -upCost.value.coins); toast(`วิวัฒน์ → เกรด ${GRADE_LABELS[(p.grade || 0) + 1]}!`, 'success') }
+  try { await commit(newPets, -upCost.value.coins); toast(`วิวัฒน์สำเร็จ! ได้เกรด ${GRADE_LABELS[(p.grade || 0) + 1]}`, 'success') }
   catch (e) { console.error('[evolve]', e); toast('วิวัฒน์ไม่สำเร็จ', 'error') }
   finally { busy.value = false }
 }
