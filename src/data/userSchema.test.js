@@ -79,3 +79,16 @@ test('normalizeUserData: pvp บางส่วน merge กับ default', () 
   assert.equal(d.pvp.rating, 1234)
   assert.equal(d.pvp.wins, 0) // เติม default
 })
+
+// ── Expedition (ส่งผจญภัย) ──
+test('normalizeUserData: expedition default = null', () => {
+  assert.equal(normalizeUserData({}).expedition, null)
+})
+test('normalizeUserData: expedition object คงไว้', () => {
+  const exp = { petIds: ['a', 'b', 'c'], missionId: 'forest', durationId: 'short', startedAt: 1, endsAt: 2, party: [] }
+  assert.deepEqual(normalizeUserData({ expedition: exp }).expedition, exp)
+})
+test('normalizeUserData: expedition ชนิดผิด (array/number) → null', () => {
+  assert.equal(normalizeUserData({ expedition: [] }).expedition, null)
+  assert.equal(normalizeUserData({ expedition: 5 }).expedition, null)
+})

@@ -63,6 +63,8 @@ export const USER_DEFAULTS = {
   pvp: { rating: 1000, wins: 0, losses: 0, seasonId: null },
   pvpAttackDate: null,   // YYYY-MM-DD (local) รีโควต้าบุกรายวัน
   pvpAttacksUsed: 0,     // จำนวนบุกที่ใช้ไปวันนี้ (รวมคน+บอท)
+  // ── Expedition (ส่งผจญภัย) ──
+  expedition: null,   // { petIds:[3], party:[{id,rarity,element,grade}], missionId, durationId, startedAt, endsAt } | null (1 สายต่อครั้ง)
   petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
   // ── onboarding / identity (first-run) ──
   consent: { accepted: false, version: null, at: null },  // PDPA
@@ -121,6 +123,7 @@ export function normalizeUserData(data) {
   d.study     = { ...USER_DEFAULTS.study,     ...(isObj(data.study)     ? data.study     : {}) }
   d.dailyQuest = { ...USER_DEFAULTS.dailyQuest, ...(isObj(data.dailyQuest) ? data.dailyQuest : {}) }
   d.pvp        = { ...USER_DEFAULTS.pvp,        ...(isObj(data.pvp)        ? data.pvp        : {}) }
+  d.expedition = isObj(data.expedition) ? data.expedition : null
   d.likedBy   = isObj(data.likedBy) ? data.likedBy : {}
 
   return d
