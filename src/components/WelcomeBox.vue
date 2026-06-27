@@ -10,7 +10,7 @@
           <div class="wb-gift"><Emoji char="🎟️" /> ตั๋วกาชา {{ WELCOME_GIFT_TICKETS }} ใบ</div>
         </div>
         <div class="wb-hint">เปิด <b>กล่องจดหมาย</b> ที่หน้าหลักเพื่อกดรับ</div>
-        <button class="wb-btn" @click="close">รับทราบ</button>
+        <button class="wb-btn" @click="close">เริ่มเล่นเลย</button>
       </div>
     </div>
   </Teleport>
