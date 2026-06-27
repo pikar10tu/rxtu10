@@ -19,11 +19,12 @@
     <div class="tp-pool">
       <button
         v-for="p in sortedOwned" :key="p.id"
-        class="tp-pet" :class="{ active: activeIds.includes(p.id) }"
+        class="tp-pet" :class="{ active: activeIds.includes(p.id), away: expeditionIds.has(p.id) }"
         :style="{ borderColor: rarityColor(p.id) }"
-        :disabled="!activeIds.includes(p.id) && filledCount >= battleSlots"
+        :disabled="expeditionIds.has(p.id) || (!activeIds.includes(p.id) && filledCount >= battleSlots)"
         @click="toggle(p.id)"
       >
+        <span v-if="expeditionIds.has(p.id)" class="tp-away"><Emoji char="🗺️" /></span>
         <span class="tp-el"><Emoji :char="elEmoji(p.id)" /></span>
         <span class="tp-emoji"><Emoji :char="defOf(p.id).emoji" /></span>
         <span class="tp-name">{{ defOf(p.id).name }}</span>
@@ -53,6 +54,8 @@ defineEmits(['update:open'])
 const auth = useAuthStore()
 const detailId = ref(null)
 const owned = computed(() => auth.userData?.pets || [])
+// เพ็ทที่กำลังออกผจญภัย — เอาเข้าทีมไม่ได้จนกว่าจะกลับ
+const expeditionIds = computed(() => new Set(auth.userData?.expedition?.petIds || []))
 const battleSlots = computed(() => residenceBattleSlots(auth.userData?.residence?.level || 1))
 const ownedIds = computed(() => new Set(owned.value.map(p => p.id)))
 // active เฉพาะตัวที่ยังครอบครอง ตัดให้ยาวไม่เกิน battleSlots
@@ -79,6 +82,7 @@ const sortedOwned = computed(() => owned.value.slice().sort((a, b) => {
 
 async function save(next) { await auth.patchUser({ activePets: next }, { activePets: next }) }
 function toggle(id) {
+  if (expeditionIds.value.has(id)) return
   const cur = activeIds.value.slice()
   const at = cur.indexOf(id)
   if (at >= 0) cur.splice(at, 1)
@@ -102,6 +106,8 @@ function toggle(id) {
 .tp-pet:disabled { opacity: .4; cursor: not-allowed; }
 .tp-emoji { font-size: 1.7rem; line-height: 1; }
 .tp-name { font-size: .54rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tp-pet.away { opacity: .45; }
+.tp-away { position: absolute; top: 2px; right: 3px; font-size: .7rem; line-height: 1; }
 .tp-el { position: absolute; top: 2px; left: 3px; font-size: .72rem; line-height: 1; }
 .tp-grade { position: absolute; top: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .52rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; border: 2px solid #fff; }
 .tp-none { grid-column: 1 / -1; text-align: center; font-size: .76rem; color: rgba(0,0,0,.4); padding: 16px 0; }
