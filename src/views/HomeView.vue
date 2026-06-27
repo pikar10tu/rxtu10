@@ -21,6 +21,8 @@
 
       <!-- เหรียญ + รับรายได้รายวัน (ส่วนตัว เห็นเฉพาะเจ้าของ) -->
       <DailyCard />
+      <!-- สถานะส่งผจญภัย (โชว์เฉพาะตอนกำลังไป/กลับมาแล้ว) -->
+      <ExpeditionCard />
 
       <!-- เครื่องมือผู้ดูแล — เฉพาะแอดมิน (Shop ไป nav, Pets ไป Play แล้ว) -->
       <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-admin-btn">
@@ -50,6 +52,7 @@ import { useMailbox } from '../stores/mailbox.js'
 import { questNotClaimed } from '../utils/dailyQuest.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
+import ExpeditionCard from '../components/home/ExpeditionCard.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
 import ExamCountdown from '../components/study/ExamCountdown.vue'
