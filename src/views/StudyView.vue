@@ -40,7 +40,7 @@
         {{ queueSize ? `เริ่มทบทวน ${queueSize} ใบ` : '🎉 วันนี้ทบทวนครบแล้ว!' }}
       </button>
       <div v-if="!queueSize" class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือกดด้านล่างเพื่อฝึกแบบสุ่ม</div>
-      <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่นับ SRS) <Emoji char="🎲" /></button>
+      <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (ไม่บันทึกความคืบหน้า) <Emoji char="🎲" /></button>
 
       <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
 
