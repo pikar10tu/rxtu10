@@ -506,7 +506,7 @@ async function togglePvp() {
   savingPvp.value = true
   try {
     await setDoc(doc(db, 'config', 'app'), { pvpOpen: next }, { merge: true })
-    toast(next ? 'เปิดสนามประลองแล้ว ⚔️' : 'ปิดสนามประลองแล้ว', 'success')
+    toast(next ? 'เปิดสนามประลองแล้ว' : 'ปิดสนามประลองแล้ว', 'success')
   } catch (e) {
     console.error('[admin pvpOpen]', e)
     toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
