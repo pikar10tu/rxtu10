@@ -6,9 +6,15 @@
     <NewsBoard />
 
     <template v-if="authStore.isLoggedIn">
-      <!-- ── สวน & สัตว์ ── -->
-      <SectionTitle><Emoji char="🌾" /> สวน &amp; สัตว์</SectionTitle>
+      <!-- ── เพ็ท & สะสม ── -->
+      <SectionTitle><Emoji char="🐾" /> เพ็ท &amp; สะสม</SectionTitle>
       <div class="play-grid">
+        <RouterLink to="/pets" class="game-card">
+          <span class="gc-emoji"><Emoji char="🐾" /></span>
+          <span class="gc-name">สัตว์เลี้ยง</span>
+          <span class="gc-badge grow">คลัง · ห้องทดลอง</span>
+        </RouterLink>
+
         <!-- Farm: live entry card → opens modal -->
         <button class="game-card" @click="farmOpen = true">
           <span class="gc-emoji"><Emoji char="🌾" /></span>
@@ -18,11 +24,29 @@
           <span v-else class="gc-badge grow"><Emoji char="🌱" /> กำลังโต</span>
         </button>
 
-        <RouterLink to="/pets" class="game-card">
-          <span class="gc-emoji"><Emoji char="🐾" /></span>
-          <span class="gc-name">สัตว์เลี้ยง</span>
-          <span class="gc-badge grow">คลัง · ห้องทดลอง</span>
+        <RouterLink to="/expedition" class="game-card">
+          <span class="gc-emoji"><Emoji char="🗺️" /></span>
+          <span class="gc-name">ส่งผจญภัย</span>
+          <span v-if="expState === 'ready'" class="gc-badge ready"><Emoji char="🎉" /> กลับมาแล้ว!</span>
+          <span v-else-if="expState === 'active'" class="gc-badge plant"><Emoji char="⏳" /> กำลังไป</span>
+          <span v-else class="gc-badge grow">ส่งเพ็ทหารางวัล</span>
         </RouterLink>
+      </div>
+
+      <!-- ── ประลอง ── -->
+      <SectionTitle><Emoji char="⚔️" /> ประลอง</SectionTitle>
+      <div class="play-grid">
+        <RouterLink to="/tower" class="game-card">
+          <span class="gc-emoji"><Emoji char="🏯" /></span>
+          <span class="gc-name">ปีนหอคอย</span>
+          <span class="gc-badge grow">ไต่ชั้น · ปลดโบนัส</span>
+        </RouterLink>
+        <RouterLink to="/arena" class="game-card">
+          <span class="gc-emoji"><Emoji char="⚔️" /></span>
+          <span class="gc-name">สนามประลอง</span>
+          <span class="gc-badge grow">PvP · แต้มประลอง</span>
+        </RouterLink>
+        <SoonCard emoji="🐲" label="บอสรวมรุ่น" />
       </div>
 
       <!-- ── ร้านค้า ── (การ์ดเดียวเต็มแถว → /shop เจอ 2 แท็บเดิม) -->
@@ -33,20 +57,9 @@
         <span class="gc-badge grow">อัญเชิญ · ห้องทดลอง</span>
       </RouterLink>
 
-      <!-- ── สนามประลอง (เร็วๆ นี้) ── -->
-      <SectionTitle><Emoji char="⚔️" /> สนามประลอง</SectionTitle>
+      <!-- ── มินิเกม (เร็วๆ นี้) ── -->
+      <SectionTitle><Emoji char="🎮" /> มินิเกม</SectionTitle>
       <div class="play-grid">
-        <RouterLink to="/arena" class="game-card">
-          <span class="gc-emoji"><Emoji char="⚔️" /></span>
-          <span class="gc-name">สนามประลอง</span>
-          <span class="gc-badge grow">PvP · แต้มประลอง</span>
-        </RouterLink>
-        <RouterLink to="/tower" class="game-card">
-          <span class="gc-emoji"><Emoji char="🏯" /></span>
-          <span class="gc-name">ปีนหอคอย</span>
-          <span class="gc-badge grow">ไต่ชั้น · ปลดโบนัส</span>
-        </RouterLink>
-        <SoonCard emoji="🗺️" label="ผจญภัย Co-op" />
         <SoonCard emoji="🍬" label="เภสัช Crush" />
       </div>
 
@@ -77,6 +90,8 @@ import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useFarm } from '../composables/useFarm.js'
+import { useExpedition } from '../composables/useExpedition.js'
+import { expeditionState } from '../utils/expedition.js'
 import FarmGrid from '../components/farm/FarmGrid.vue'
 import NewsBoard from '../components/home/NewsBoard.vue'
 import SectionTitle from '../components/shared/SectionTitle.vue'
@@ -84,6 +99,9 @@ import SoonCard from '../components/shared/SoonCard.vue'
 
 const authStore = useAuthStore()
 const farm = useFarm()
+const { exp } = useExpedition()
+// badge การ์ดส่งผจญภัย — ใช้ now (5s tick ที่มีอยู่แล้ว) เช็คว่ากลับมายัง
+const expState = computed(() => expeditionState(exp.value, now.value))
 
 const farmOpen = ref(false)
 
