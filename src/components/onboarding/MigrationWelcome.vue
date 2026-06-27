@@ -10,7 +10,7 @@
           <span class="mw-emoji"><Emoji :char="tier.art" /></span>
           <div>
             <b>ที่อยู่อาศัยของคุณ: {{ tier.tierName }} (Lv.{{ level }})</b>
-            <div class="mw-note">ความมั่งคั่งเดิมของคุณถูกแปลงเป็นเลเวลที่อยู่อาศัย — ยิ่งสูงยิ่งเก๋า!</div>
+            <div class="mw-note">ความมั่งคั่งเดิมของคุณถูกแปลงเป็นเลเวลที่อยู่อาศัยแล้ว — ยิ่งอัปสูง รายได้ต่อวันยิ่งเยอะ</div>
           </div>
         </div>
         <div v-if="isFounder" class="mw-item">
