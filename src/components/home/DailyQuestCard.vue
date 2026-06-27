@@ -16,7 +16,7 @@
     </div>
 
     <button v-if="!claimed" class="dq-claim" :class="{ ready: claimable }" :disabled="!claimable || claiming" @click="claimReward">
-      {{ claiming ? 'กำลังรับ…' : (claimable ? 'รับรางวัล (×1.5 + ตั๋วฟรี)' : 'ทำให้ครบเพื่อรับรางวัล') }}
+      {{ claiming ? 'กำลังรับ…' : (claimable ? 'รับรางวัล — รายได้ ×1.5 + ตั๋วฟรี' : 'ทำให้ครบเพื่อรับรางวัล') }}
     </button>
     <div v-else class="dq-claimed"><Emoji char="✅" /> รับรางวัลแล้ววันนี้</div>
 

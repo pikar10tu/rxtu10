@@ -54,7 +54,7 @@ const claimingId = ref(null)
 function hasReward(m) { return rewardCoins(m) > 0 || rewardTickets(m) > 0 }
 function typeIcon(m) { return m.type === 'reward' ? '🎁' : m.type === 'gift' ? '🎁' : '📢' }
 function fromLabel(from) {
-  return from === 'system' ? 'ระบบ' : from === 'daily' ? 'เดลี่' : from === 'admin' ? 'แอดมิน' : 'เพื่อน'
+  return from === 'system' ? 'ระบบ' : from === 'daily' ? 'รายวัน' : from === 'admin' ? 'แอดมิน' : 'เพื่อน'
 }
 function fmtTime(t) {
   const ms = t?.toMillis ? t.toMillis() : (t?.toDate ? t.toDate().getTime() : new Date(t).getTime())
