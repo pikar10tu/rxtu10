@@ -8,21 +8,21 @@
     </div>
 
     <template v-else>
-      <!-- ───── เปิด/ปิดเว็บ (launch gate) ───── -->
+      <!-- ───── โหมดซ่อมบำรุง (config/app.maintenance) ───── -->
       <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🚀" /> สถานะการเปิดเว็บ</span></div>
+        <div class="admin-card-head"><span><Emoji char="🚧" /> โหมดซ่อมบำรุง</span></div>
         <div class="admin-hint">
-          เปิดให้ทั้งชั้นปีใช้ หรือปิดเข้าโหมดปรับปรุง (เห็นเฉพาะแอดมิน/ทีมวิชาการ) — มีผลทันที ไม่ต้อง deploy
+          ปกติเว็บเปิดให้ทั้งชั้นปีใช้ · กดปิดเพื่อเข้าโหมดซ่อมบำรุง (เห็นเฉพาะแอดมิน/ทีมวิชาการ) เผื่อเว็บล่มหรือชนลิมิต Firebase — มีผลทันที ไม่ต้อง deploy
         </div>
         <div class="maint-toggle">
           <span class="maint-state" :class="maintenance ? 'off' : 'on'">
-            {{ maintenance ? '🔒 ปิดปรับปรุง (เฉพาะทีมงาน)' : '🟢 เปิดให้ทุกคนใช้' }}
+            {{ maintenance ? '🔒 ปิดซ่อมบำรุง (เฉพาะทีมงาน)' : '🟢 เปิดให้ทุกคนใช้' }}
           </span>
           <button
             class="btn-mini" :class="maintenance ? 'btn-gold' : 'btn-gray'"
             :disabled="savingMaint" @click="toggleMaintenance"
           >
-            {{ savingMaint ? '...' : (maintenance ? 'เปิดเว็บ 🚀' : 'ปิดปรับปรุง') }}
+            {{ savingMaint ? '...' : (maintenance ? 'เปิดเว็บอีกครั้ง' : 'ปิดซ่อมบำรุง') }}
           </button>
         </div>
       </section>
@@ -483,14 +483,14 @@ const barColor = (v, max) => {
   return s === 'danger' ? '#ef4444' : s === 'warn' ? '#f59e0b' : '#22c55e'
 }
 
-// ── launch gate toggle (config/app.maintenance) ──
+// ── maintenance toggle (config/app.maintenance) ──
 const savingMaint = ref(false)
 async function toggleMaintenance() {
   const next = !maintenance.value
   savingMaint.value = true
   try {
     await setDoc(doc(db, 'config', 'app'), { maintenance: next }, { merge: true })
-    toast(next ? 'เข้าโหมดปรับปรุงแล้ว' : 'เปิดเว็บให้ทุกคนแล้ว 🚀', 'success')
+    toast(next ? 'เข้าโหมดซ่อมบำรุงแล้ว — เห็นเฉพาะทีมงาน' : 'เปิดเว็บให้ทุกคนแล้ว', 'success')
   } catch (e) {
     console.error('[admin maintenance]', e)
     toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
