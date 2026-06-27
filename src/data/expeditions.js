@@ -1,12 +1,14 @@
 // src/data/expeditions.js
 // Expedition (ส่งผจญภัย) — ค่าคงที่เกม + มิชชัน + reward table (ปรับเลขที่นี่ที่เดียว)
-// ⚠️ ทั้งหมด draft pin — ต้อง number pass + sim ก่อนเปิดจริง (spec §8)
+// เลขจูนผ่าน sim แล้ว (scripts/expedition-sim.mjs · 27 มิ.ย. 2026):
+// floor ต่ำพอไม่ทับรายได้บ้านต้นเกม · คุณภาพสายดันรายได้ขึ้นชัด (POWER_K สูง) ·
+// เพดานปลายเกม (สายสุด) ~10–11% ของบ้าน Lv12/วัน · ตั๋วปลายเกม ~1/วัน
 
 // ระยะเวลา 3 ระดับ (ผู้เล่นเลือก) · hours = ระยะเวลาจริง · ยาว = คุ้มกว่าต่อรอบ แต่รอนาน
 export const DURATIONS = [
-  { id: 'short',  label: 'สั้น',  hours: 1, baseCoins: 120,  coinCap: 400,  ticketChance: 0.04 },
-  { id: 'medium', label: 'กลาง', hours: 4, baseCoins: 450,  coinCap: 1500, ticketChance: 0.12 },
-  { id: 'long',   label: 'ยาว',  hours: 8, baseCoins: 1000, coinCap: 3500, ticketChance: 0.25 },
+  { id: 'short',  label: 'สั้น',  hours: 1, baseCoins: 40,  coinCap: 250,  ticketChance: 0.02 },
+  { id: 'medium', label: 'กลาง', hours: 4, baseCoins: 150, coinCap: 1100, ticketChance: 0.06 },
+  { id: 'long',   label: 'ยาว',  hours: 8, baseCoins: 320, coinCap: 3000, ticketChance: 0.10 },
 ]
 
 // มิชชันคงที่ — ครอบ 3 ธาตุ เพื่อให้เลือก element-match ได้เสมอ · ส่งตัวธาตุตรง = โบนัส
@@ -19,9 +21,9 @@ export const MISSIONS = [
 // คุณภาพเพ็ท → น้ำหนัก (rarity) · เกรด I-V (เก็บเป็น 0..5) เพิ่มทีละ GRADE_K
 export const RARITY_WEIGHT = { common: 1, rare: 2, epic: 4, legendary: 7 }
 export const GRADE_K = 0.15        // +15%/เกรด ต่อน้ำหนัก rarity
-export const POWER_K = 0.04        // partyPower → ตัวคูณเหรียญ
-export const ELEMENT_K = 0.15      // ต่อ 1 ตัวที่ธาตุตรง → +15%
-export const TICKET_POWER_K = 0.008 // partyPower → +โอกาสตั๋ว
+export const POWER_K = 0.18        // partyPower → ตัวคูณเหรียญ (สูง = คุณภาพสายมีผลชัด)
+export const ELEMENT_K = 0.12      // ต่อ 1 ตัวที่ธาตุตรง → +12% (โบนัสเสริม ไม่ครอบงำ)
+export const TICKET_POWER_K = 0.006 // partyPower → +โอกาสตั๋ว (ต่ำ = กันเพดานตั๋ว whale + เลี่ยง short-spam)
 export const TICKET_EL_K = 0.05     // โบนัสธาตุ → +โอกาสตั๋ว
 export const TICKET_CHANCE_MAX = 0.9
 
