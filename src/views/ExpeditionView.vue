@@ -81,7 +81,7 @@
             <span>{{ REWARD_TYPES[r.type]?.label || r.type }}</span>
             <b>+{{ r.amount.toLocaleString() }}</b>
           </div>
-          <div v-if="!result.length" class="ex-rv-row ex-rv-empty">รอบนี้ไม่ได้ของพิเศษ — ลองส่งสายเก่งขึ้นนะ</div>
+          <div v-if="!result.length" class="ex-rv-row ex-rv-empty">รอบนี้ไม่ได้ของพิเศษ — ลองส่งเพ็ทที่มีธาตุตรงมิชชันนะ</div>
           <button class="ex-go" @click="result = null">เยี่ยม!</button>
         </div>
       </div>
