@@ -229,7 +229,7 @@ async function save() {
 .fb-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
 .fb-box { background: #fff; width: 100%; max-width: 380px; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 16px; margin: auto 0; }
 .fb-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .92rem; margin-bottom: 12px; }
-.fb-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
+.fb-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .fb-cats { display: flex; gap: 6px; margin-bottom: 10px; }
 .fb-cat-btn { flex: 1; border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 10px; padding: 8px 4px; font-family: inherit; font-size: .72rem; font-weight: 700; color: rgba(0,0,0,.5); cursor: pointer; }
 .fb-cat-btn.on { background: var(--primary); border-color: var(--ink); color: #fff; }

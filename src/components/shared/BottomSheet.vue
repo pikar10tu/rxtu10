@@ -45,6 +45,6 @@ function close() { emit('update:open', false) }
 .sheet-head { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid rgba(0,0,0,.07); }
 .sheet-title { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; color: var(--ink); margin-right: auto; }
 .sheet-actions { display: flex; align-items: center; gap: 6px; }
-.sheet-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; font-size: .9rem; cursor: pointer; flex-shrink: 0; }
+.sheet-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 40px; height: 40px; font-size: .9rem; cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
 .sheet-scroll { overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px calc(22px + env(safe-area-inset-bottom, 0px)); }
 </style>

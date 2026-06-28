@@ -273,7 +273,7 @@ async function chooseTarget(id) {
 .picker-have { font-size: .5rem; color: #059669; font-weight: 800; }
 .picker-clear { width: 100%; margin-top: 12px; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; background: #fff; cursor: pointer; }
 .info-box { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 20px 20px; text-align: center; max-width: 320px; width: 100%; }
-.info-x { position: absolute; right: 12px; top: 12px; border: none; background: rgba(0,0,0,.08); border-radius: 8px; width: 26px; height: 26px; cursor: pointer; }
+.info-x { position: absolute; right: 12px; top: 12px; border: none; background: rgba(0,0,0,.08); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .info-emoji { font-size: 3.4rem; }
 .info-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
 .info-rarity { display: inline-block; color: #fff; font-size: .58rem; font-weight: 800; padding: 2px 10px; border-radius: 999px; margin-top: 6px; }
