@@ -32,7 +32,7 @@ async function close() {
 
 <style scoped>
 .wb-ov { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.wb-box { background: #fff; border: 2px solid var(--ink); border-radius: 20px; padding: 24px 20px; box-shadow: var(--pop); max-width: 320px; width: 100%; text-align: center; }
+.wb-box { background: #fff; border: 2px solid var(--ink); border-radius: 20px; padding: 24px 20px; box-shadow: var(--pop); max-width: 320px; width: 100%; text-align: center; max-height: 88vh; overflow-y: auto; }
 .wb-emoji { font-size: 3rem; }
 .wb-title { font-size: 1.25rem; font-weight: 800; color: var(--ink); margin-top: 6px; }
 .wb-sub { font-size: .82rem; color: rgba(0,0,0,.55); margin-top: 4px; }

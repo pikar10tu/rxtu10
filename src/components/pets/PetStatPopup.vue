@@ -44,7 +44,7 @@ const income = computed(() => props.pet ? petDailyCoins(props.pet) : 0)
 
 <style scoped>
 .ps-ov { position: fixed; inset: 0; z-index: 250; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.ps-box { background: #fff; width: 100%; max-width: 320px; border-radius: 20px; overflow: hidden; }
+.ps-box { background: #fff; width: 100%; max-width: 320px; border-radius: 20px; overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .ps-hero { position: relative; padding: 20px 16px 14px; text-align: center; color: #fff; }
 .ps-x { position: absolute; left: 10px; top: 10px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 26px; height: 26px; cursor: pointer; }
 .ps-emoji { font-size: 3rem; }

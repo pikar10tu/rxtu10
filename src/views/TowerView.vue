@@ -176,7 +176,7 @@ async function onFight() {
 .tw-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
 
 .tw-scout { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.tw-scout-box { background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 18px; padding: 16px 18px; width: 240px; display: flex; flex-direction: column; gap: 7px; }
+.tw-scout-box { background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 18px; padding: 16px 18px; width: 240px; display: flex; flex-direction: column; gap: 7px; max-height: 88vh; overflow-y: auto; }
 .tw-scout-emoji { font-size: 2.8rem; text-align: center; }
 .tw-scout-name { text-align: center; font-weight: 800; font-size: 1.1rem; margin-bottom: 4px; }
 .tw-scout-row { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; }

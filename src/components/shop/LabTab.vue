@@ -144,7 +144,7 @@ async function onConfirm(allocation) {
 .lab-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .lab-btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
 .ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.rv-box { position: relative; overflow: hidden; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
+.rv-box { position: relative; overflow: hidden; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; max-height: 88vh; overflow-y: auto; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
 .rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 38px 4px rgba(245,158,11,.5), var(--pop-lg); }
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); }
 .rv-emoji-wrap { position: relative; display: grid; place-items: center; width: 110px; height: 110px; margin: 10px auto; }

@@ -406,7 +406,7 @@ async function sendReport() {
 
 /* report modal */
 .sv-rep-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.sv-rep-box { background: #fff; width: 100%; max-width: 380px; border-radius: 18px; padding: 16px; }
+.sv-rep-box { background: #fff; width: 100%; max-width: 380px; border-radius: 18px; padding: 16px; max-height: 88vh; overflow-y: auto; }
 .sv-rep-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .92rem; margin-bottom: 10px; }
 .sv-rep-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
 .sv-rep-drug { font-size: .74rem; color: #475569; background: #f1f5f9; border-radius: 10px; padding: 8px 11px; margin-bottom: 10px; }

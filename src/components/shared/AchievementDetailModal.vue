@@ -36,7 +36,7 @@ function fmtDate(ts) {
 
 <style scoped>
 .ad-ov { position: fixed; inset: 0; z-index: 260; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.ad-box { position: relative; background: #fff; width: 100%; max-width: 320px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 18px 18px; text-align: center; }
+.ad-box { position: relative; background: #fff; width: 100%; max-width: 320px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 18px 18px; text-align: center; max-height: 88vh; overflow-y: auto; }
 .ad-x { position: absolute; left: 10px; top: 10px; border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 28px; height: 28px; cursor: pointer; }
 .ad-icon { font-size: 3.2rem; line-height: 1; }
 .ad-title { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-top: 8px; }

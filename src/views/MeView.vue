@@ -224,8 +224,10 @@ async function save() {
 .me-logout:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 
 /* feedback modal */
-.fb-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.fb-box { background: #fff; width: 100%; max-width: 380px; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 16px; }
+/* align-items:flex-start + overflow + box margin:auto = จัดกลางเมื่อเตี้ย, เลื่อนได้เมื่อสูงเกินจอ
+   สำคัญตอนคีย์บอร์ดมือถือเด้งขึ้น (textarea) — ปุ่มส่งจะไม่จมใต้คีย์บอร์ด เลื่อนถึงได้เสมอ */
+.fb-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
+.fb-box { background: #fff; width: 100%; max-width: 380px; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 16px; margin: auto 0; }
 .fb-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .92rem; margin-bottom: 12px; }
 .fb-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
 .fb-cats { display: flex; gap: 6px; margin-bottom: 10px; }

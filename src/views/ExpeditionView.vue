@@ -210,7 +210,7 @@ async function onClaim() {
 .ex-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
 /* reward popup overlay */
 .ex-ov { position: fixed; inset: 0; z-index: 420; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.ex-rv { background: #fff; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 22px; max-width: 300px; width: 100%; text-align: center; }
+.ex-rv { background: #fff; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 22px; max-width: 300px; width: 100%; text-align: center; max-height: 88vh; overflow-y: auto; }
 .ex-rv-h { font-weight: 800; font-size: 1rem; margin-bottom: 12px; }
 .ex-rv-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: .9rem; font-weight: 700; padding: 5px 0; }
 .ex-rv-row b { color: var(--primary); }
