@@ -3,7 +3,7 @@
      controls: pause/speed/skip · แตะตัว = pause + inspect (ช่อง passive รอ §5.5 master plan)
      ⚠️ ทุก emoji ผ่าน <Emoji> (Fluent self-host) — อย่าใส่ emoji ดิบในเทมเพลต (เป็น tofu บนบางเครื่อง) -->
 <template>
-  <div v-if="data" class="br-ov">
+  <div v-if="data" class="br-ov" :class="{ result: done }">
     <div class="br-box" :class="{ hitstop: hitStop }">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
@@ -317,7 +317,13 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer) })
 
 <style scoped>
 .br-ov { position: fixed; inset: 0; z-index: 420; background: rgba(15,23,42,.88); display: flex; align-items: center; justify-content: center; padding: 16px; }
+/* result state อาจสูงเกินจอ (สรุป + MVP 2 ทีม + ปุ่มปิด) → ให้ overlay เลื่อนได้
+   ไม่งั้นปุ่ม "ปิด" หลุดใต้จอ ดูเหมือนโดน bottom-nav บัง. replay phase ยังล็อกกลางจอเหมือนเดิม */
+.br-ov.result { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 .br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+/* margin:auto = จัดกลางแนวตั้งเมื่อเนื้อหาเตี้ย, เลื่อนได้เมื่อสูงเกินจอ */
+.br-ov.result .br-box { margin: auto 0; }
 .br-box.hitstop { animation: br-hitstop .12s; }
 @keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
 .br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
