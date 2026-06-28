@@ -138,7 +138,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .farm-sheet-head { flex: none; position: relative; display: flex; align-items: center; justify-content: center; padding: 8px 8px 4px; }
 .farm-sheet-grab { width: 38px; height: 4px; border-radius: 999px; background: rgba(0,0,0,.15); }
 .farm-x { position: absolute; right: 8px; top: 6px; border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: .9rem; }
-.farm-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 4px 12px 24px; }
+.farm-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 4px 12px calc(24px + env(safe-area-inset-bottom, 0px)); }
 /* farm card blends into the sheet (no card-in-card chrome) */
 .farm-scroll :deep(.farm) { border: none; border-radius: 0; box-shadow: none; padding: 0; background: transparent; }
 

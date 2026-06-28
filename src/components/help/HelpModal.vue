@@ -55,7 +55,7 @@ const revealUpTo = computed(() => Math.min(myLevel.value + 1, MAX_RESIDENCE_LEVE
 .help-head { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,.07); }
 .help-head span:first-child { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; color: var(--ink); }
 .help-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; font-size: .9rem; cursor: pointer; }
-.help-scroll { overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 22px; }
+.help-scroll { overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px calc(22px + env(safe-area-inset-bottom, 0px)); }
 .help-soon { display: inline-block; font-size: .58rem; font-weight: 700; color: #b45309; background: rgba(251,191,36,.18); padding: 2px 7px; border-radius: 999px; margin-bottom: 8px; }
 .help-body { margin: 0 0 12px; display: flex; flex-direction: column; gap: 10px; }
 .help-body p { margin: 0; font-size: .82rem; color: rgba(0,0,0,.65); line-height: 1.6; }
