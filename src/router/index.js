@@ -9,6 +9,7 @@ const routes = [
     { path: '/study',     name: 'study',     component: () => import('../views/StudyView.vue')     },
     { path: '/quiz',      name: 'quiz',      component: () => import('../views/QuizView.vue')      },
     { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue') },
+    { path: '/review',    name: 'review',    component: () => import('../views/ReviewView.vue')    },
     { path: '/shop',      name: 'shop',      component: () => import('../views/ShopView.vue')      },
     { path: '/admin',     name: 'admin',     component: () => import('../views/AdminView.vue')     },
     { path: '/me',        name: 'me',        component: () => import('../views/MeView.vue')        },
