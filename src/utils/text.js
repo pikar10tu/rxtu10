@@ -44,4 +44,6 @@ export const LIMITS = {
   category: 60,
   explanation: 1000,
   comment: 1000,
+  reviewReason: 1000,
+  reviewRef: 300,
 }
