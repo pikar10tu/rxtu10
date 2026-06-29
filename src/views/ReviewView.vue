@@ -208,6 +208,10 @@ async function submit() {
       ts: serverTimestamp(),
     })
     // 2) aggregate บนเอกสารข้อสอบ (ให้ pull-model หาข้อถัดไปจากการอ่านคลังครั้งเดียว)
+    //  ⚠️ reviewStatus = "ค่าบอกใบ้" เท่านั้น — ถ้า 2 คนส่งพร้อมกัน อาจคำนวณจากภาพเก่า
+    //     (reviewVerdicts/reviewedBy merge ปลอดภัยด้วย dot-path/arrayUnion แต่ reviewStatus
+    //     เป็น last-write-wins) · ทุก consumer ในเฟสนี้ recompute จาก reviewVerdicts อยู่แล้ว
+    //     → เฟส publish-gating อนาคต "อย่าเชื่อ reviewStatus ตรงๆ" ให้ computeStatus ใหม่จาก verdicts
     batch.update(doc(db, 'questions', q.id), {
       reviewedBy: arrayUnion(uid),
       [`reviewVerdicts.${uid}`]: v,
