@@ -53,6 +53,15 @@
         </span>
         <span class="sv-quizlink-go">›</span>
       </RouterLink>
+
+      <RouterLink v-if="authStore.isQuestionEditor" to="/review" class="sv-quizlink sv-acadlink">
+        <span class="sv-quizlink-emoji"><Emoji char="🔍" /></span>
+        <span class="sv-quizlink-text">
+          <b>ตรวจข้อสอบ (วิชาการ)</b>
+          <small>ระบบสุ่มข้อให้ช่วยตรวจความถูกต้อง · เฉพาะทีมวิชาการ</small>
+        </span>
+        <span class="sv-quizlink-go">›</span>
+      </RouterLink>
     </template>
 
     <!-- ── REVIEW ── -->
