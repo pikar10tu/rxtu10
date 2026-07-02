@@ -26,6 +26,7 @@ export function computeStatus(question) {
 //  ข้อ import ไม่นับเป็น "ข้อตัวเอง" — createdBy คือคนกด import ไม่ใช่คนแต่งโจทย์
 export function needsReviewBy(question, myUid) {
   if (!myUid || !question) return false
+  if (question.retired) return false   // นำออกจากการใช้งานแล้ว — ไม่ต้องตรวจ
   if (question.createdBy === myUid && question.source !== 'import') return false
   const reviewedBy = question.reviewedBy || []
   if (reviewedBy.includes(myUid)) return false
@@ -56,6 +57,17 @@ export function tallyReviewCounts(questions) {
 export function nextReviewQueue(questions, myUid) {
   if (!myUid) return []
   return (questions || []).filter(q => needsReviewBy(q, myUid))
+}
+
+// ป้าย verdict / สถานะตรวจ — ใช้ร่วมหน้า Review + Questions
+export const VERDICT_LABEL = { correct: 'ถูกต้อง', fix: 'ต้องแก้', wrong: 'ผิด' }
+export const REVIEW_STATUS_LABEL = {
+  pending: 'รอตรวจ', passed: 'ผ่านตรวจ', conflict: 'ขัดแย้ง', failed: 'ไม่ผ่าน', retired: 'นำออก',
+}
+
+// key ป้ายสถานะของข้อ — 'retired' (นำออก) ทับสถานะที่คำนวณจากตัวนับ
+export function reviewStatusKey(question) {
+  return question?.retired ? 'retired' : computeStatus(question)
 }
 
 // leaderboard เรียงมาก→น้อย (tiebreak ชื่อ) แมพ uid→ชื่อจริงผ่าน nameMap
