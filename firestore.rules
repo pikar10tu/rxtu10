@@ -120,6 +120,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Topics — รายชื่อหมวด/หัวข้อข้อสอบ (dropdown) ──
+    //  read: public ผ่าน match /config/{doc} ด้านบนอยู่แล้ว (นักศึกษาใช้ดู label สถิติในอนาคต)
+    //  write: กว้างกว่า config ปกติ — วิชาการ/อาจารย์เพิ่มหัวข้อเองได้ระหว่างตรวจข้อสอบ
+    match /config/topics {
+      allow write: if canEditQuestions();
+    }
+
     // ── Cheat logs — anyone may log themselves; only admin reads ──
     match /cheatLogs/{id} {
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
@@ -161,10 +168,14 @@ service cloud.firestore {
       function reviewUntouched() {
         return !request.resource.data.diff(resource.data).affectedKeys().hasAny(reviewKeys());
       }
+      // ชุด key ที่ยอมให้แตะตอน "ส่งผลตรวจ" = review keys + category (ติดแท็กหมวดระหว่างตรวจ)
+      function reviewSubmitKeys() {
+        return ['reviewedBy', 'reviewPass', 'reviewFail', 'reviewStatus', 'reviewVerdicts', 'category'].toSet();
+      }
       // ส่งผลตรวจจริง: แตะเฉพาะ review fields + ไม่เคยตรวจ + ไม่ใช่ข้อตัวเอง (ยกเว้น import)
       // + เสียงรวม +1 พอดี + transaction เดียวกันต้องเขียน reviews/{uid} ของตัวเองด้วย
       function isReviewSubmit(qid) {
-        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(reviewKeys())
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(reviewSubmitKeys())
           && !(request.auth.uid in resource.data.get('reviewedBy', []))
           && (request.auth.uid in request.resource.data.get('reviewedBy', []))
           && (resource.data.get('createdBy', '') != request.auth.uid
