@@ -21,7 +21,7 @@ import { useTopics } from '../../composables/useTopics.js'
 import { useToast } from '../../composables/useToast.js'
 import { LIMITS } from '../../utils/text.js'
 
-const props = defineProps({ modelValue: { type: String, default: '' } })
+const props = defineProps({ modelValue: { type: String, default: null } })
 const emit = defineEmits(['update:modelValue'])
 const { topics, loadTopics, addTopic } = useTopics()
 const { toast } = useToast()
@@ -47,6 +47,7 @@ async function confirmAdd() {
   try {
     const name = await addTopic(newName.value)
     if (name) { emit('update:modelValue', name); adding.value = false; newName.value = '' }
+    else toast('ชื่อหัวข้อใช้ไม่ได้ ลองพิมพ์ใหม่', 'error')   // cleanText strip จนว่าง
   } catch (e) { console.error('[topic add]', e); toast('เพิ่มหัวข้อไม่สำเร็จ', 'error') }
   finally { busy.value = false }
 }

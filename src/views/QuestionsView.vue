@@ -430,6 +430,8 @@ function blankDraft() {
   return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false, domain: null }
 }
 const draft = ref(blankDraft())
+// รีวิวของข้อที่กำลังแก้ (ประกาศก่อน resetDraft — กัน TDZ ถ้าอนาคตมีใครเรียกตอน setup)
+const editReviews = ref([])
 function resetDraft() { draft.value = blankDraft(); editReviews.value = [] }
 
 const valid = computed(() => {
@@ -639,8 +641,7 @@ async function save() {
   finally { saving.value = false }
 }
 
-// รีวิวของข้อที่กำลังแก้ — โชว์เหตุผลผู้ตรวจให้คนแก้เห็น (วงจร ตรวจ→รู้ผล→แก้ ครบรอบ)
-const editReviews = ref([])
+// โหลดรีวิวของข้อที่กำลังแก้ — โชว์เหตุผลผู้ตรวจให้คนแก้เห็น (วงจร ตรวจ→รู้ผล→แก้ ครบรอบ)
 async function loadEditReviews(q) {
   editReviews.value = []
   if (!q.reviewedBy?.length) return
