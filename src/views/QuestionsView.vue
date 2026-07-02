@@ -256,7 +256,7 @@
 import Emoji from '../components/shared/Emoji.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, setDoc } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, setDoc, deleteField } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -271,6 +271,7 @@ import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail } from '../utils/mailbox.js'
 import { pctCorrect, isProblem } from '../utils/questionStats.js'
+import { reviewContentChanged, REVIEW_RESET } from '../utils/questionReview.js'
 import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 
@@ -565,6 +566,12 @@ async function save() {
   if (payload.answer >= payload.choices.length) payload.answer = 0
   try {
     if (d.id) {
+      // เนื้อหาที่ผลตรวจผูกอยู่เปลี่ยน (โจทย์/ตัวเลือก/เฉลย/คำอธิบาย) → ล้างผลตรวจ
+      // ให้กลับเข้าคิว peer-review ใหม่ — toggle publish/หมวดไม่ล้าง (ไม่ทิ้งงานผู้ตรวจฟรี)
+      const before = list.value.find(q => q.id === d.id)
+      if (reviewContentChanged(before, payload)) {
+        Object.assign(payload, REVIEW_RESET, { reviewVerdicts: deleteField() })
+      }
       await updateDoc(doc(db, 'questions', d.id), payload)
       toast('บันทึกการแก้ไขแล้ว', 'success')
     } else {

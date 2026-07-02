@@ -95,7 +95,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, getDocs, doc, writeBatch, arrayUnion, serverTimestamp, query, orderBy } from 'firebase/firestore'
+import { collection, getDocs, doc, writeBatch, arrayUnion, increment, deleteField, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
@@ -133,11 +133,11 @@ const myUid = computed(() => authStore.currentUser?.uid || null)
 const queue = computed(() =>
   nextReviewQueue(list.value, myUid.value).filter(q => !skippedIds.value.has(q.id)))
 const current = computed(() => queue.value[0] || null)
-const currentStatus = computed(() => current.value ? computeStatus(current.value.reviewVerdicts || {}) : null)
+const currentStatus = computed(() => current.value ? computeStatus(current.value) : null)
 
 const summary = computed(() => ({
   remaining: nextReviewQueue(list.value, myUid.value).length,
-  conflicts: list.value.filter(q => computeStatus(q.reviewVerdicts || {}) === 'conflict').length,
+  conflicts: list.value.filter(q => computeStatus(q) === 'conflict').length,
 }))
 
 const canSubmit = computed(() => !!verdict.value && !!reason.value.trim())
@@ -170,11 +170,13 @@ async function load() {
 // เปลี่ยนข้อปัจจุบัน → ล้างฟอร์ม + โหลดรีวิวเดิมถ้าเป็นข้อ conflict (ให้คนที่ 3 เห็น)
 watch(current, async (q) => {
   verdict.value = null; reason.value = ''; refText.value = ''; priorReviews.value = []
-  if (q && computeStatus(q.reviewVerdicts || {}) === 'conflict') {
+  if (q && currentStatus.value === 'conflict') {
     try {
       const snap = await getDocs(collection(db, 'questions', q.id, 'reviews'))
       usage.track(snap.size)
-      priorReviews.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      // กรองเฉพาะรีวิวของรอบปัจจุบัน — subdoc รอบก่อน reset (แก้เนื้อหาแล้ว) ยังค้างอยู่
+      priorReviews.value = snap.docs.filter(d => (q.reviewedBy || []).includes(d.id))
+        .map(d => ({ id: d.id, ...d.data() }))
     } catch (e) { console.error('[review priors]', e) }
   }
 }, { immediate: true })
@@ -194,8 +196,10 @@ async function submit() {
   const u = authStore.userData || {}
   const reviewerName = u.realName || u.nickname || u.name || 'ไม่ระบุ'   // snapshot ชื่อจริง
   const v = verdict.value
-  const newVerdicts = { ...(q.reviewVerdicts || {}), [uid]: v }
-  const newStatus = computeStatus(newVerdicts)
+  const isPass = v === 'correct'
+  const newPass = (q.reviewPass || 0) + (isPass ? 1 : 0)
+  const newFail = (q.reviewFail || 0) + (isPass ? 0 : 1)
+  const newStatus = computeStatus({ reviewPass: newPass, reviewFail: newFail })
   try {
     const batch = writeBatch(db)
     // 1) รายละเอียดเต็มใน subcollection (doc id = uid → กันตรวจซ้ำ)
@@ -208,23 +212,22 @@ async function submit() {
       ts: serverTimestamp(),
     })
     // 2) aggregate บนเอกสารข้อสอบ (ให้ pull-model หาข้อถัดไปจากการอ่านคลังครั้งเดียว)
-    //  ⚠️ reviewStatus = "ค่าบอกใบ้" เท่านั้น — ถ้า 2 คนส่งพร้อมกัน อาจคำนวณจากภาพเก่า
-    //     (reviewVerdicts/reviewedBy merge ปลอดภัยด้วย dot-path/arrayUnion แต่ reviewStatus
-    //     เป็น last-write-wins) · ทุก consumer ในเฟสนี้ recompute จาก reviewVerdicts อยู่แล้ว
-    //     → เฟส publish-gating อนาคต "อย่าเชื่อ reviewStatus ตรงๆ" ให้ computeStatus ใหม่จาก verdicts
+    //  เก็บแค่ตัวนับ pass/fail — ห้ามเก็บ uid→verdict บน doc (ข้อ published นักศึกษาอ่านได้ทั้งใบ)
+    //  ตัวนับ merge ปลอดภัยด้วย increment/arrayUnion แม้ 2 คนส่งพร้อมกัน
+    //  ⚠️ reviewStatus = "ค่าบอกใบ้" เท่านั้น (last-write-wins อาจคำนวณจากภาพเก่า)
+    //     → consumer ทุกตัวให้ computeStatus ใหม่จาก reviewPass/reviewFail เสมอ
     batch.update(doc(db, 'questions', q.id), {
       reviewedBy: arrayUnion(uid),
-      [`reviewVerdicts.${uid}`]: v,
+      [isPass ? 'reviewPass' : 'reviewFail']: increment(1),
       reviewStatus: newStatus,
+      reviewVerdicts: deleteField(),   // ล้าง map โครงเก่า (ถ้ามี) — กัน verdict รายคนหลุดถึงนักศึกษา
     })
     await batch.commit()
     usage.track(0, 2)
     // อัปเดต local list ให้คิว/leaderboard เลื่อนทันที (ไม่ reload ทั้งคลัง)
     const idx = list.value.findIndex(x => x.id === q.id)
     if (idx >= 0) {
-      const reviewedBy = [...(q.reviewedBy || [])]
-      if (!reviewedBy.includes(uid)) reviewedBy.push(uid)
-      list.value[idx] = { ...q, reviewedBy, reviewVerdicts: newVerdicts, reviewStatus: newStatus }
+      list.value[idx] = { ...q, reviewedBy: [...(q.reviewedBy || []), uid], reviewPass: newPass, reviewFail: newFail, reviewStatus: newStatus }
     }
     toast('ส่งผลตรวจแล้ว ขอบคุณ!', 'success')
   } catch (e) { console.error('[review submit]', e); toast('ส่งไม่สำเร็จ', 'error') }

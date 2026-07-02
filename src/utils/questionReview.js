@@ -3,16 +3,19 @@
 //  verdict: 'correct' (ผ่าน) | 'fix' | 'wrong' (ทั้งคู่นับเป็น fail)
 //  reviewStatus: pending | passed | conflict | failed
 //  คุมคิว pull-model + leaderboard "ใครตรวจกี่ข้อ"
+//
+//  aggregate บนเอกสารข้อสอบเก็บแค่ตัวนับ reviewPass/reviewFail —
+//  ห้ามเก็บ map uid→verdict บน doc เพราะข้อ published นักศึกษาอ่านได้ทั้งใบ
+//  (รายละเอียดว่าใครตัดสินอะไรอยู่ใน subcollection reviews ที่ rules กันไว้)
 // ════════════════════════════════════════════════════════════
 
-// สรุปสถานะจาก verdict ทั้งหมดของข้อหนึ่ง
+// สรุปสถานะจากตัวนับเสียงบนเอกสารข้อสอบ
 //  <2 เสียง → pending · pass>fail → passed · fail>pass → failed · เสมอ → conflict
 //  (2 เสียงเสมอ = correct+fail = ขัดแย้ง รอคนที่ 3 · 3 เสียงไม่มีทางเสมอ → ตัดสินได้)
-export function computeStatus(verdictsMap) {
-  const verdicts = Object.values(verdictsMap || {})
-  if (verdicts.length < 2) return 'pending'
-  let pass = 0, fail = 0
-  for (const v of verdicts) (v === 'correct' ? pass++ : fail++)
+export function computeStatus(question) {
+  const pass = question?.reviewPass || 0
+  const fail = question?.reviewFail || 0
+  if (pass + fail < 2) return 'pending'
   if (pass > fail) return 'passed'
   if (fail > pass) return 'failed'
   return 'conflict'
@@ -20,14 +23,25 @@ export function computeStatus(verdictsMap) {
 
 // ข้อนี้ "ต้องให้ฉันตรวจ" ไหม
 //  กันตรวจข้อตัวเอง · กันตรวจซ้ำ · ครบ 2 แล้วหยุด (ยกเว้น conflict ที่รอคนที่ 3)
+//  ข้อ import ไม่นับเป็น "ข้อตัวเอง" — createdBy คือคนกด import ไม่ใช่คนแต่งโจทย์
 export function needsReviewBy(question, myUid) {
   if (!myUid || !question) return false
-  if (question.createdBy === myUid) return false
+  if (question.createdBy === myUid && question.source !== 'import') return false
   const reviewedBy = question.reviewedBy || []
   if (reviewedBy.includes(myUid)) return false
-  const status = computeStatus(question.reviewVerdicts || {})
-  return reviewedBy.length < 2 || status === 'conflict'
+  return reviewedBy.length < 2 || computeStatus(question) === 'conflict'
 }
+
+// เนื้อหาที่ผลตรวจผูกอยู่เปลี่ยนไหม (โจทย์/ตัวเลือก/เฉลย/คำอธิบาย)
+//  ใช้ตัดสินว่าแก้ข้อสอบแล้วต้องล้างผลตรวจให้กลับเข้าคิว — toggle publish/หมวดไม่นับ
+export function reviewContentChanged(before, after) {
+  if (!before || !after) return true
+  const key = q => JSON.stringify([q.question, q.choices, q.answer, q.explanation ?? null])
+  return key(before) !== key(after)
+}
+
+// payload ล้างสถานะตรวจ (ใช้ตอนเนื้อหาข้อสอบเปลี่ยน → กลับเข้าคิว peer-review ใหม่)
+export const REVIEW_RESET = { reviewedBy: [], reviewPass: 0, reviewFail: 0, reviewStatus: 'pending' }
 
 // uid → จำนวนข้อที่ตรวจไปแล้ว (นับจาก reviewedBy ทั้งคลัง = ตัวนับ leaderboard)
 export function tallyReviewCounts(questions) {
