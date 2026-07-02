@@ -155,8 +155,35 @@ service cloud.firestore {
 
     // ── Question bank — editable by Academic Team + Instructors (อาจารย์) ──
     match /questions/{id} {
+      // field สรุปผลตรวจบน doc (reviewedBy/reviewPass/reviewFail/reviewStatus) —
+      // คิว/สถานะอ่านจาก field พวกนี้ตรงๆ เลยต้องกันแก้มั่ว (ปั่น leaderboard/ปั๊ม passed)
+      function reviewKeys() { return ['reviewedBy', 'reviewPass', 'reviewFail', 'reviewStatus', 'reviewVerdicts'].toSet(); }
+      function reviewUntouched() {
+        return !request.resource.data.diff(resource.data).affectedKeys().hasAny(reviewKeys());
+      }
+      // ส่งผลตรวจจริง: แตะเฉพาะ review fields + ไม่เคยตรวจ + ไม่ใช่ข้อตัวเอง (ยกเว้น import)
+      // + เสียงรวม +1 พอดี + transaction เดียวกันต้องเขียน reviews/{uid} ของตัวเองด้วย
+      function isReviewSubmit(qid) {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(reviewKeys())
+          && !(request.auth.uid in resource.data.get('reviewedBy', []))
+          && (request.auth.uid in request.resource.data.get('reviewedBy', []))
+          && (resource.data.get('createdBy', '') != request.auth.uid
+              || resource.data.get('source', '') == 'import')
+          && request.resource.data.get('reviewPass', 0) + request.resource.data.get('reviewFail', 0)
+             == resource.data.get('reviewPass', 0) + resource.data.get('reviewFail', 0) + 1
+          && existsAfter(/databases/$(database)/documents/questions/$(qid)/reviews/$(request.auth.uid));
+      }
+      // ล้างผลตรวจกลับค่าเริ่มต้นเป๊ะ (ตอนแก้เนื้อหาข้อ → กลับเข้าคิวตรวจใหม่)
+      function isReviewReset() {
+        return request.resource.data.get('reviewedBy', ['x']).size() == 0
+          && request.resource.data.get('reviewPass', 1) == 0
+          && request.resource.data.get('reviewFail', 1) == 0
+          && request.resource.data.get('reviewStatus', '') == 'pending';
+      }
       allow read:  if request.auth != null && (resource.data.get('isPublished', false) == true || canEditQuestions());
-      allow write: if canEditQuestions();
+      allow create, delete: if canEditQuestions();
+      allow update: if canEditQuestions()
+        && (isAdmin() || reviewUntouched() || isReviewSubmit(id) || isReviewReset());
 
       // ── Comments (SP1) — thread วิชาการ↔อาจารย์ ต่อข้อ (นักศึกษาเข้าไม่ถึง) ──
       match /comments/{commentId} {
@@ -172,17 +199,27 @@ service cloud.firestore {
       //  doc id = uid ของผู้ตรวจ → กันตรวจซ้ำ + กันปลอมเป็นคนอื่น
       //  read:   canEditQuestions (วิชาการ+อาจารย์+แอดมิน) — นักศึกษาเข้าไม่ถึง
       //  create: ต้องเป็นเจ้าของจริง (id == uid และ field reviewerUid == uid)
-      //  update: เจ้าของ (แก้รีวิวตัวเอง) หรือ admin
-      //  delete: admin
+      //  update: เจ้าของแก้ reason/ref ได้ (ห้ามเปลี่ยน verdict/reviewerUid — กัน desync
+      //          กับตัวนับบน doc และกันสวมชื่อคนอื่น) · admin เต็มสิทธิ์
+      //  delete: admin (แล้วใช้ปุ่ม "ล้างผลตรวจ" ใน Questions ให้ aggregate กลับเข้าคิว)
       match /reviews/{reviewerUid} {
         allow read:   if canEditQuestions();
         allow create: if canEditQuestions()
           && reviewerUid == request.auth.uid
           && request.resource.data.get('reviewerUid', '') == request.auth.uid;
         allow update: if isAdmin()
-          || (request.auth != null && resource.data.get('reviewerUid', '') == request.auth.uid);
+          || (canEditQuestions()
+              && reviewerUid == request.auth.uid
+              && request.resource.data.get('reviewerUid', '') == resource.data.get('reviewerUid', '')
+              && request.resource.data.get('verdict', '') == resource.data.get('verdict', ''));
         allow delete: if isAdmin();
       }
+    }
+
+    // ── Review meta — ตัวนับ leaderboard "ใครตรวจกี่ข้อ" + ชื่อ snapshot ──
+    //  collection แยก (ไม่ใช่ config/ ที่ public-read) เพราะนักศึกษาต้องมองไม่เห็น
+    match /reviewMeta/{doc} {
+      allow read, write: if canEditQuestions();
     }
 
     // ── Exam sessions (Phase 2) — owner-only, CREATE-ONLY ──

@@ -46,4 +46,5 @@ export const LIMITS = {
   comment: 1000,
   reviewReason: 1000,
   reviewRef: 300,
+  reviewerName: 60,
 }

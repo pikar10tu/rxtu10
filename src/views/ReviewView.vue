@@ -73,6 +73,10 @@
         </div>
       </section>
 
+      <div v-else-if="summary.remaining" class="rv-empty">
+        <Emoji char="⏭️" /> ข้ามไว้ {{ summary.remaining }} ข้อ — ยังไม่ได้ตรวจ
+        <button class="rv-btn rv-gray rv-unskip" @click="unskipAll">ดูข้อที่ข้ามอีกรอบ</button>
+      </div>
       <div v-else class="rv-empty rv-done">
         <Emoji char="🎉" /> ตรวจครบทุกข้อที่เข้าคิวให้คุณแล้ว — ขอบคุณมาก!
       </div>
@@ -95,18 +99,16 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, getDocs, doc, writeBatch, arrayUnion, increment, deleteField, serverTimestamp, query, orderBy } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, runTransaction, arrayUnion, increment, deleteField, serverTimestamp, query, where } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
-import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { domainLabel } from '../data/domains.js'
-import { computeStatus, tallyReviewCounts, nextReviewQueue, buildLeaderboard } from '../utils/questionReview.js'
+import { computeStatus, nextReviewQueue, buildLeaderboard } from '../utils/questionReview.js'
 
 const authStore = useAuthStore()
-const members = useMembersStore()
 const usage = useUsageStore()
 const { toast } = useToast()
 
@@ -142,27 +144,29 @@ const summary = computed(() => ({
 
 const canSubmit = computed(() => !!verdict.value && !!reason.value.trim())
 
-// uid → ชื่อจริง จาก members store (รวม guestUsers เพราะ instructor=อาจารย์ เป็น guest)
-const nameByUid = computed(() => {
-  const m = {}
-  const all = [...Object.values(members.fbUsers), ...members.guestUsers]
-  for (const u of all) if (u.uid) m[u.uid] = u.realName || u.nickname || 'ไม่ระบุ'
-  return m
-})
-const leaderboard = computed(() => buildLeaderboard(tallyReviewCounts(list.value), nameByUid.value))
+// leaderboard จาก reviewMeta doc (ตัวนับ + ชื่อ snapshot ตอน submit) — 1 read
+// ไม่ต้องอ่านทั้งคลัง/users collection และไม่พึ่ง members store (บางคนไม่มี studentId)
+const meta = ref({ counts: {}, names: {} })
+const leaderboard = computed(() => buildLeaderboard(meta.value.counts || {}, meta.value.names || {}))
 
 onMounted(() => {
   if (!authStore.isQuestionEditor) return
-  members.loadFbUsers()   // ได้ชื่อจริงให้ leaderboard (cache ข้ามเซสชันถ้ามี)
   load()
 })
 
 async function load() {
   loading.value = true
   try {
-    const snap = await getDocs(query(collection(db, 'questions'), orderBy('createdAt', 'desc')))
-    usage.track(snap.size)
+    // อ่านเฉพาะข้อที่ยังมีงานตรวจ — ข้อเก่าก่อนระบบตรวจไม่มี field reviewStatus จะไม่ติด query
+    // แอดมินต้องกด "ซิงก์ระบบตรวจ" ในหน้า Admin ครั้งเดียวก่อนเริ่มใช้
+    const [snap, metaSnap] = await Promise.all([
+      getDocs(query(collection(db, 'questions'), where('reviewStatus', 'in', ['pending', 'conflict']))),
+      getDoc(doc(db, 'reviewMeta', 'main')),
+    ])
+    usage.track(snap.size + 1)
     list.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+    if (metaSnap.exists()) meta.value = metaSnap.data()
   } catch (e) { console.error('[review load]', e); toast('โหลดข้อสอบไม่สำเร็จ', 'error') }
   finally { loading.value = false }
 }
@@ -173,6 +177,7 @@ watch(current, async (q) => {
   if (q && currentStatus.value === 'conflict') {
     try {
       const snap = await getDocs(collection(db, 'questions', q.id, 'reviews'))
+      if (current.value?.id !== q.id) return   // เลื่อนข้อไปแล้วระหว่างรอเน็ต — ทิ้งผลชุดนี้ กันโชว์รีวิวผิดข้อ
       usage.track(snap.size)
       // กรองเฉพาะรีวิวของรอบปัจจุบัน — subdoc รอบก่อน reset (แก้เนื้อหาแล้ว) ยังค้างอยู่
       priorReviews.value = snap.docs.filter(d => (q.reviewedBy || []).includes(d.id))
@@ -187,6 +192,7 @@ function skip() {
   next.add(current.value.id)
   skippedIds.value = next   // Set ใหม่ → computed queue เลื่อนไปข้อถัดไป
 }
+function unskipAll() { skippedIds.value = new Set() }
 
 async function submit() {
   if (!canSubmit.value || submitting.value || !current.value || !myUid.value) return
@@ -194,40 +200,58 @@ async function submit() {
   const q = current.value
   const uid = myUid.value
   const u = authStore.userData || {}
-  const reviewerName = u.realName || u.nickname || u.name || 'ไม่ระบุ'   // snapshot ชื่อจริง
+  const reviewerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)   // snapshot ชื่อจริง
   const v = verdict.value
   const isPass = v === 'correct'
-  const newPass = (q.reviewPass || 0) + (isPass ? 1 : 0)
-  const newFail = (q.reviewFail || 0) + (isPass ? 0 : 1)
-  const newStatus = computeStatus({ reviewPass: newPass, reviewFail: newFail })
+  let newPass = 0, newFail = 0, newStatus = 'pending', already = false
   try {
-    const batch = writeBatch(db)
-    // 1) รายละเอียดเต็มใน subcollection (doc id = uid → กันตรวจซ้ำ)
-    batch.set(doc(db, 'questions', q.id, 'reviews', uid), {
-      reviewerUid: uid,
-      reviewerName,
-      verdict: v,
-      reason: cleanText(reason.value, LIMITS.reviewReason),
-      ref: cleanText(refText.value, LIMITS.reviewRef),
-      ts: serverTimestamp(),
+    // transaction: อ่านค่าสดก่อนคำนวณ → reviewStatus บน doc เชื่อถือได้แม้ 2 คนส่งพร้อมกัน
+    // (จำเป็น เพราะ load() query จาก reviewStatus ตรงๆ — ถ้าค่าเพี้ยนข้อจะหลุดคิวถาวร)
+    await runTransaction(db, async (tx) => {
+      already = false
+      const qRef = doc(db, 'questions', q.id)
+      const snap = await tx.get(qRef)
+      if (!snap.exists()) { already = true; return }   // ข้อถูกลบระหว่างตรวจ
+      const cur = snap.data()
+      if ((cur.reviewedBy || []).includes(uid)) { already = true; return }   // เคยส่งไปแล้ว (เช่น จากอีกเครื่อง)
+      newPass = (cur.reviewPass || 0) + (isPass ? 1 : 0)
+      newFail = (cur.reviewFail || 0) + (isPass ? 0 : 1)
+      newStatus = computeStatus({ reviewPass: newPass, reviewFail: newFail })
+      // 1) รายละเอียดเต็มใน subcollection (doc id = uid → กันตรวจซ้ำ)
+      tx.set(doc(db, 'questions', q.id, 'reviews', uid), {
+        reviewerUid: uid,
+        reviewerName,
+        verdict: v,
+        reason: cleanText(reason.value, LIMITS.reviewReason),
+        ref: cleanText(refText.value, LIMITS.reviewRef),
+        ts: serverTimestamp(),
+      })
+      // 2) aggregate: ตัวนับ pass/fail + สถานะ — ห้ามเก็บ uid→verdict บน doc
+      //    (ข้อ published นักศึกษาอ่านได้ทั้งใบ) · rules บังคับว่า update แบบนี้
+      //    ต้องมาพร้อม reviews/{uid} ของตัวเองใน transaction เดียวกัน
+      tx.update(qRef, {
+        reviewedBy: arrayUnion(uid),
+        reviewPass: newPass,
+        reviewFail: newFail,
+        reviewStatus: newStatus,
+        reviewVerdicts: deleteField(),   // ล้าง map โครงเก่า (ถ้ามี)
+      })
+      // 3) ตัวนับ leaderboard + ชื่อ snapshot (collection แยก — นักศึกษาอ่านไม่ได้)
+      tx.set(doc(db, 'reviewMeta', 'main'),
+        { counts: { [uid]: increment(1) }, names: { [uid]: reviewerName } }, { merge: true })
     })
-    // 2) aggregate บนเอกสารข้อสอบ (ให้ pull-model หาข้อถัดไปจากการอ่านคลังครั้งเดียว)
-    //  เก็บแค่ตัวนับ pass/fail — ห้ามเก็บ uid→verdict บน doc (ข้อ published นักศึกษาอ่านได้ทั้งใบ)
-    //  ตัวนับ merge ปลอดภัยด้วย increment/arrayUnion แม้ 2 คนส่งพร้อมกัน
-    //  ⚠️ reviewStatus = "ค่าบอกใบ้" เท่านั้น (last-write-wins อาจคำนวณจากภาพเก่า)
-    //     → consumer ทุกตัวให้ computeStatus ใหม่จาก reviewPass/reviewFail เสมอ
-    batch.update(doc(db, 'questions', q.id), {
-      reviewedBy: arrayUnion(uid),
-      [isPass ? 'reviewPass' : 'reviewFail']: increment(1),
-      reviewStatus: newStatus,
-      reviewVerdicts: deleteField(),   // ล้าง map โครงเก่า (ถ้ามี) — กัน verdict รายคนหลุดถึงนักศึกษา
-    })
-    await batch.commit()
-    usage.track(0, 2)
-    // อัปเดต local list ให้คิว/leaderboard เลื่อนทันที (ไม่ reload ทั้งคลัง)
+    usage.track(1, already ? 0 : 3)
+    // อัปเดต local ให้คิว/leaderboard เลื่อนทันที (ไม่ reload)
     const idx = list.value.findIndex(x => x.id === q.id)
     if (idx >= 0) {
-      list.value[idx] = { ...q, reviewedBy: [...(q.reviewedBy || []), uid], reviewPass: newPass, reviewFail: newFail, reviewStatus: newStatus }
+      const patch = already ? {} : { reviewPass: newPass, reviewFail: newFail, reviewStatus: newStatus }
+      list.value[idx] = { ...q, reviewedBy: [...(q.reviewedBy || []), uid], ...patch }
+    }
+    if (!already) {
+      meta.value = {
+        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+        names: { ...(meta.value.names || {}), [uid]: reviewerName },
+      }
     }
     toast('ส่งผลตรวจแล้ว ขอบคุณ!', 'success')
   } catch (e) { console.error('[review submit]', e); toast('ส่งไม่สำเร็จ', 'error') }
@@ -287,6 +311,7 @@ async function submit() {
 .rv-primary:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .rv-primary:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .rv-gray { background: #fff; color: var(--ink); flex: 0 0 110px; }
+.rv-unskip { flex: none; display: block; margin: 12px auto 0; padding: 9px 18px; font-size: .78rem; }
 
 .rv-board { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px; }
 .rv-board-head { font-weight: 800; font-size: .9rem; margin-bottom: 10px; }

@@ -149,6 +149,9 @@
             {{ saving ? 'กำลังบันทึก…' : (draft.id ? 'บันทึกการแก้ไข' : 'เพิ่มข้อสอบ') }}
           </button>
         </div>
+        <button v-if="draft.id && authStore.isAdmin" class="qz-mini" style="margin-top:8px" @click="resetReviewState">
+          🔍 ล้างผลตรวจข้อนี้ (ส่งกลับเข้าคิว peer-review)
+        </button>
       </section>
 
       <!-- ── list ── -->
@@ -355,6 +358,21 @@ async function batchPublish(value) {
   finally { batchBusy.value = false }
 }
 
+// แอดมินสั่งล้างผลตรวจ (รีวิวพลาด/อยากให้ตรวจใหม่โดยไม่แก้เนื้อหา) — ทางที่ถูกต้องแทนการ
+// ลบ review subdoc ตรงๆ ซึ่งทิ้ง aggregate ค้าง · ตัวนับ leaderboard ไม่ลด (เครดิตผู้ตรวจเดิมยังอยู่
+// subdoc เก่าถูกกรองออกจากจอ conflict ด้วย reviewedBy และถูกเขียนทับเมื่อตรวจรอบใหม่)
+async function resetReviewState() {
+  const id = draft.value.id
+  if (!id || !(await confirm('ล้างผลตรวจข้อนี้ให้กลับเข้าคิว peer-review ใหม่?'))) return
+  try {
+    await updateDoc(doc(db, 'questions', id), { ...REVIEW_RESET, reviewVerdicts: deleteField() })
+    usage.track(0, 1)
+    const idx = list.value.findIndex(q => q.id === id)
+    if (idx >= 0) list.value[idx] = { ...list.value[idx], ...REVIEW_RESET }
+    toast('ล้างผลตรวจแล้ว — ข้อนี้กลับเข้าคิวตรวจใหม่', 'success')
+  } catch (e) { console.error('[review reset]', e); toast('ล้างไม่สำเร็จ', 'error') }
+}
+
 async function batchDelete() {
   const ids = [...selected.value]
   if (!ids.length || batchBusy.value) return
@@ -457,6 +475,7 @@ async function runImport() {
       createdBy: authStore.currentUser?.uid || null,
       createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
       source: 'import',
+      ...REVIEW_RESET,   // ประทับ reviewStatus:'pending' — หน้า /review query จาก field นี้
     }
     const col = collection(db, 'questions')
     // chunk ละ 500 — Firestore batch จำกัด 500 ops/commit
@@ -577,6 +596,7 @@ async function save() {
     } else {
       await addDoc(collection(db, 'questions'), {
         ...payload,
+        ...REVIEW_RESET,   // ประทับ reviewStatus:'pending' — หน้า /review query จาก field นี้
         rand: Math.random(),
         createdBy: authStore.currentUser?.uid || null,
         createdByName: authStore.userData?.nickname || authStore.userData?.name || null,

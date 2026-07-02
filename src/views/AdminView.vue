@@ -55,6 +55,13 @@
         <RouterLink to="/review" class="btn-mini btn-gold" style="display:inline-block;text-decoration:none;margin-top:4px">
           ไปหน้าตรวจข้อสอบ 🔍
         </RouterLink>
+        <div class="admin-hint" style="margin-top:10px">
+          ซิงก์ = เติมสถานะตรวจให้ข้อเก่า (ครั้งแรกต้องกด ไม่งั้นหน้า /review มองไม่เห็นข้อพวกนั้น)
+          + คำนวณตัวนับ "ใครตรวจกี่ข้อ" ใหม่ · กดซ้ำได้ ปลอดภัย
+        </div>
+        <button class="btn-mini" :disabled="reviewSyncBusy" @click="syncReviewSystem">
+          {{ reviewSyncBusy ? 'กำลังซิงก์…' : '🔄 ซิงก์ระบบตรวจ' }}
+        </button>
       </section>
 
       <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
@@ -339,7 +346,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { doc, updateDoc, setDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch } from 'firebase/firestore'
+import { doc, updateDoc, setDoc, collection, getDocs, getDoc, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
@@ -354,6 +361,7 @@ import { TAG_LIST } from '../data/tags.js'
 import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
+import { computeStatus, tallyReviewCounts } from '../utils/questionReview.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
@@ -361,6 +369,39 @@ const usage     = useUsageStore()
 const { maintenance, pvpOpen } = useAppConfig()
 const { toast } = useToast()
 const { confirm } = useConfirm()
+
+// ซิงก์ระบบตรวจข้อสอบ: เติม reviewStatus ให้ข้อเก่า (ก่อนมีระบบตรวจ — query หน้า /review
+// มองไม่เห็นข้อที่ไม่มี field นี้) + ซ่อมสถานะที่ drift + ล้าง reviewVerdicts โครงเก่า
+// + rebuild ตัวนับ leaderboard จาก reviewedBy ทั้งคลัง · idempotent กดซ้ำได้
+const reviewSyncBusy = ref(false)
+async function syncReviewSystem() {
+  if (reviewSyncBusy.value) return
+  reviewSyncBusy.value = true
+  try {
+    const snap = await getDocs(collection(db, 'questions'))
+    const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    const stale = all.filter(q => (q.reviewStatus || null) !== computeStatus(q) || q.reviewVerdicts !== undefined)
+    for (let i = 0; i < stale.length; i += 500) {
+      const batch = writeBatch(db)
+      for (const q of stale.slice(i, i + 500)) {
+        batch.update(doc(db, 'questions', q.id), {
+          reviewStatus: computeStatus(q),
+          reviewPass: q.reviewPass || 0,
+          reviewFail: q.reviewFail || 0,
+          reviewVerdicts: deleteField(),
+        })
+      }
+      await batch.commit()
+    }
+    // ตัวนับใหม่จากคลังจริง — ชื่อคงของเดิมไว้ (ชื่อมาจาก snapshot ตอน submit)
+    const metaRef = doc(db, 'reviewMeta', 'main')
+    const cur = await getDoc(metaRef)
+    await setDoc(metaRef, { counts: tallyReviewCounts(all), names: cur.exists() ? (cur.data().names || {}) : {} })
+    usage.track(snap.size + 1, stale.length + 1)
+    toast(`ซิงก์แล้ว — อัปเดต ${stale.length} ข้อ`, 'success')
+  } catch (e) { console.error('[review sync]', e); toast('ซิงก์ไม่สำเร็จ', 'error') }
+  finally { reviewSyncBusy.value = false }
+}
 
 // สถิติการสู้ราย species (อ่านทั้ง collection — admin คนเดียว cost ไม่สำคัญ)
 const battleStats = ref([])
