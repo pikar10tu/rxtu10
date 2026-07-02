@@ -127,7 +127,7 @@
         <button class="qz-add-choice" type="button" :disabled="draft.choices.length >= 6" @click="draft.choices.push('')">+ เพิ่มตัวเลือก</button>
 
         <label class="qz-label">หมวด / กลุ่มเนื้อหา</label>
-        <input v-model="draft.category" :maxlength="LIMITS.category" class="qz-input" placeholder="เช่น ยาปฏิชีวนะ, ระบบหัวใจ, เภสัชจลนศาสตร์…" />
+        <TopicSelect v-model="draft.category" />
 
         <label class="qz-label">หมวดใหญ่ (domain)</label>
         <select v-model="draft.domain" class="qz-input">
@@ -143,6 +143,15 @@
           เผยแพร่ให้นักศึกษาเห็น (ติ๊กออก = ร่าง เห็นเฉพาะทีมวิชาการ)
         </label>
 
+        <div v-if="draft.id && editReviews.length" class="qz-reviews">
+          <div class="qz-reviews-head"><Emoji char="🔍" /> ผลตรวจจากทีมวิชาการ ({{ editReviews.length }})</div>
+          <div v-for="r in editReviews" :key="r.id" class="qz-review">
+            <b>{{ r.reviewerName || 'ไม่ระบุ' }}</b> — {{ VERDICT_LABEL[r.verdict] || r.verdict }}
+            <div v-if="r.reason" class="qz-review-reason">{{ r.reason }}</div>
+            <div v-if="r.ref" class="qz-review-ref">เรฟ: {{ r.ref }}</div>
+          </div>
+          <div class="qz-reviews-hint">แก้โจทย์/ตัวเลือก/เฉลย/คำอธิบายแล้วบันทึก → ผลตรวจถูกล้าง ข้อกลับเข้าคิวตรวจใหม่อัตโนมัติ</div>
+        </div>
         <div class="qz-actions">
           <button v-if="draft.id" class="qz-btn qz-gray" @click="resetDraft">ยกเลิก</button>
           <button class="qz-btn qz-primary" :disabled="!valid || saving" @click="save">
@@ -151,6 +160,12 @@
         </div>
         <button v-if="draft.id && authStore.isAdmin" class="qz-mini" style="margin-top:8px" @click="resetReviewState">
           🔍 ล้างผลตรวจข้อนี้ (ส่งกลับเข้าคิว peer-review)
+        </button>
+        <button v-if="draft.id && !isDraftRetired" class="qz-mini" style="margin-top:8px" @click="retireQuestion">
+          🗑️ นำออกจากการใช้งาน (ไม่ลบ — เก็บไว้ นำกลับมาได้)
+        </button>
+        <button v-if="draft.id && isDraftRetired" class="qz-mini" style="margin-top:8px" @click="unretireQuestion">
+          ↩️ นำกลับมาใช้ (กลับเข้าคิวตรวจใหม่)
         </button>
       </section>
 
@@ -189,6 +204,14 @@
             <option value="__none">ไม่ระบุหมวด</option>
           </select>
         </div>
+        <select v-model="reviewFilter" class="qz-input qz-filter-rv" aria-label="กรองตามสถานะตรวจ">
+          <option value="">สถานะตรวจ: ทั้งหมด</option>
+          <option value="pending">รอตรวจ</option>
+          <option value="passed">ผ่านตรวจ</option>
+          <option value="conflict">ขัดแย้ง</option>
+          <option value="failed">ไม่ผ่าน</option>
+          <option value="retired">นำออก</option>
+        </select>
       </div>
 
       <!-- ── เลือกหลายข้อ + batch ── -->
@@ -221,6 +244,7 @@
           <div class="qz-row" role="button" tabindex="0" :aria-expanded="expandedId === q.id" @click="toggleExpand(q.id)" @keydown.enter.space.prevent="toggleExpand(q.id)">
             <input class="qz-check-item" type="checkbox" :checked="selected.has(q.id)" @click.stop @change="toggleSelect(q.id)" />
             <span class="qz-badge" :class="q.isPublished ? 'pub' : 'draft'">{{ q.isPublished ? 'เผยแพร่' : 'ร่าง' }}</span>
+            <span class="qz-badge rv" :class="reviewStatusKey(q)">{{ REVIEW_STATUS_LABEL[reviewStatusKey(q)] }}</span>
             <span v-if="q.domain" class="qz-cat">{{ domainLabel(q.domain) || q.domain }}</span>
             <span v-if="problemPct(q.id) !== null" class="qz-badge-stat low">
               <Emoji char="🔴" /> {{ problemPct(q.id) }}%
@@ -274,9 +298,10 @@ import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail } from '../utils/mailbox.js'
 import { pctCorrect, isProblem } from '../utils/questionStats.js'
-import { reviewContentChanged, REVIEW_RESET } from '../utils/questionReview.js'
+import { reviewContentChanged, REVIEW_RESET, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL } from '../utils/questionReview.js'
 import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
+import TopicSelect from '../components/questions/TopicSelect.vue'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -295,6 +320,7 @@ const search = ref('')
 const statusFilter = ref('all')   // all | published | draft
 const catFilter = ref('__all')
 const domainFilter = ref('__all')
+const reviewFilter = ref('')      // '' | pending | passed | conflict | failed | retired
 const visibleCount = ref(PAGE)
 const selected = ref(new Set())   // เก็บ id ที่เลือก (Vue 3 track Set ได้)
 const batchBusy = ref(false)
@@ -308,6 +334,8 @@ const filtered = computed(() => {
   })
   if (domainFilter.value === '__none') r = r.filter(q => !q.domain)
   else if (domainFilter.value !== '__all') r = r.filter(q => q.domain === domainFilter.value)
+  // กรองสถานะตรวจ — ต้องอยู่ท้ายสุดเพื่อให้นับ filtered.length ถูก (count บนหัว + batch ใช้ filtered)
+  if (reviewFilter.value) r = r.filter(q => reviewStatusKey(q) === reviewFilter.value)
   return r
 })
 const visible = computed(() => filtered.value.slice(0, visibleCount.value))
@@ -317,7 +345,7 @@ const allFilteredSelected = computed(() =>
   filtered.value.length > 0 && filtered.value.every(q => selected.value.has(q.id)))
 
 // กรองใหม่ → รีเซ็ตจำนวนที่โชว์ (กัน DOM ค้างเยอะ)
-watch([search, statusFilter, catFilter, domainFilter], () => { visibleCount.value = PAGE })
+watch([search, statusFilter, catFilter, domainFilter, reviewFilter], () => { visibleCount.value = PAGE })
 
 function toggleSelect(id) {
   if (selected.value.has(id)) selected.value.delete(id)
@@ -402,7 +430,7 @@ function blankDraft() {
   return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false, domain: null }
 }
 const draft = ref(blankDraft())
-function resetDraft() { draft.value = blankDraft() }
+function resetDraft() { draft.value = blankDraft(); editReviews.value = [] }
 
 const valid = computed(() => {
   const d = draft.value
@@ -589,7 +617,8 @@ async function save() {
       // ให้กลับเข้าคิว peer-review ใหม่ — toggle publish/หมวดไม่ล้าง (ไม่ทิ้งงานผู้ตรวจฟรี)
       const before = list.value.find(q => q.id === d.id)
       if (reviewContentChanged(before, payload)) {
-        Object.assign(payload, REVIEW_RESET, { reviewVerdicts: deleteField() })
+        // แก้เนื้อหา = ตั้งใจนำกลับมาใช้ — ล้างทั้งผลตรวจและสถานะนำออก ให้วนเข้าคิวตรวจใหม่
+        Object.assign(payload, REVIEW_RESET, { reviewVerdicts: deleteField(), retired: deleteField() })
       }
       await updateDoc(doc(db, 'questions', d.id), payload)
       toast('บันทึกการแก้ไขแล้ว', 'success')
@@ -610,6 +639,50 @@ async function save() {
   finally { saving.value = false }
 }
 
+// รีวิวของข้อที่กำลังแก้ — โชว์เหตุผลผู้ตรวจให้คนแก้เห็น (วงจร ตรวจ→รู้ผล→แก้ ครบรอบ)
+const editReviews = ref([])
+async function loadEditReviews(q) {
+  editReviews.value = []
+  if (!q.reviewedBy?.length) return
+  try {
+    const snap = await getDocs(collection(db, 'questions', q.id, 'reviews'))
+    usage.track(snap.size)
+    // เฉพาะรีวิวรอบปัจจุบัน (กรองด้วย reviewedBy — subdoc รอบก่อน reset อาจค้าง)
+    editReviews.value = snap.docs.filter(d => (q.reviewedBy || []).includes(d.id)).map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[edit reviews]', e) }
+}
+
+const isDraftRetired = computed(() => {
+  const q = list.value.find(x => x.id === draft.value.id)
+  return !!q?.retired
+})
+
+// นำออก = ปลดระวาง: ถอนเผยแพร่ + ไม่เข้าคิวตรวจ (needsReviewBy กรอง retired) — ไม่ลบ ไม่แตะผลตรวจเดิม
+async function retireQuestion() {
+  const id = draft.value.id
+  if (!id || !(await confirm('นำข้อนี้ออกจากการใช้งาน? (ถอนเผยแพร่ + ไม่เข้าคิวตรวจ — นำกลับมาได้ทีหลัง)'))) return
+  try {
+    await updateDoc(doc(db, 'questions', id), { retired: true, isPublished: false, updatedAt: serverTimestamp() })
+    usage.track(0, 1)
+    const idx = list.value.findIndex(q => q.id === id)
+    if (idx >= 0) list.value[idx] = { ...list.value[idx], retired: true, isPublished: false }
+    toast('นำออกแล้ว — นำกลับมาได้จากปุ่มเดิม', 'success')
+  } catch (e) { console.error('[retire]', e); toast('ทำไม่สำเร็จ', 'error') }
+}
+
+// นำกลับ = ล้างผลตรวจกลับเข้าคิว (ยังเป็นร่าง — ให้ทีมตรวจก่อนค่อยเผยแพร่เอง)
+async function unretireQuestion() {
+  const id = draft.value.id
+  if (!id || !(await confirm('นำข้อนี้กลับมาใช้? (ล้างผลตรวจเดิม กลับเข้าคิวตรวจใหม่ — ยังเป็นร่างจนกว่าจะเผยแพร่)'))) return
+  try {
+    await updateDoc(doc(db, 'questions', id), { retired: deleteField(), ...REVIEW_RESET, reviewVerdicts: deleteField(), updatedAt: serverTimestamp() })
+    usage.track(0, 1)
+    const idx = list.value.findIndex(q => q.id === id)
+    if (idx >= 0) list.value[idx] = { ...list.value[idx], retired: false, ...REVIEW_RESET }
+    toast('นำกลับมาแล้ว — ข้อนี้เข้าคิวตรวจใหม่', 'success')
+  } catch (e) { console.error('[unretire]', e); toast('ทำไม่สำเร็จ', 'error') }
+}
+
 function edit(q) {
   draft.value = {
     id: q.id,
@@ -621,6 +694,7 @@ function edit(q) {
     isPublished: !!q.isPublished,
     domain: q.domain || null,
   }
+  loadEditReviews(q) // โหลดเหตุผลผู้ตรวจ (ไม่ await — ไม่บล็อก UX)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -857,4 +931,22 @@ async function resolveReports(g, verdict) {
 .qz-dup-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
 .qz-dup-items li { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .qz-dup-acts { display: flex; gap: 6px; }
+
+/* ── ป้ายสถานะตรวจ ── */
+.qz-badge.rv.pending { background: #eef2ff; color: #4f46e5; }
+.qz-badge.rv.passed { background: rgba(34,197,94,.15); color: #15803d; }
+.qz-badge.rv.conflict { background: #fff7ed; color: #c2410c; }
+.qz-badge.rv.failed { background: #fef2f2; color: #b91c1c; }
+.qz-badge.rv.retired { background: rgba(0,0,0,.12); color: rgba(0,0,0,.55); }
+
+/* ── ตัวกรองสถานะตรวจ ── */
+.qz-filter-rv { margin-top: 6px; }
+
+/* ── แผงเหตุผลผู้ตรวจ ── */
+.qz-reviews { margin: 10px 0; border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; background: #fffdf7; }
+.qz-reviews-head { font-size: .72rem; font-weight: 800; color: #c2410c; margin-bottom: 6px; }
+.qz-review { font-size: .78rem; margin-bottom: 7px; }
+.qz-review-reason { color: rgba(0,0,0,.7); white-space: pre-wrap; overflow-wrap: anywhere; }
+.qz-review-ref { font-size: .68rem; color: rgba(0,0,0,.45); overflow-wrap: anywhere; }
+.qz-reviews-hint { font-size: .68rem; color: rgba(0,0,0,.5); margin-top: 4px; }
 </style>
