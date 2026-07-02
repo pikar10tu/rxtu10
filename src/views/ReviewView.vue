@@ -58,7 +58,10 @@
             >{{ v.label }}</button>
           </div>
 
-          <label class="rv-label">เหตุผล (บังคับ)</label>
+          <label class="rv-label">หมวด / หัวข้อ (ติดแท็กระหว่างตรวจ — ใช้ทำสถิติรายหัวข้อ)</label>
+          <TopicSelect v-model="topic" />
+
+          <label class="rv-label">เหตุผล (บังคับเมื่อ "ต้องแก้ / ผิด")</label>
           <textarea v-model="reason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="อธิบายว่าทำไมตัดสินแบบนี้…"></textarea>
 
           <label class="rv-label">เรฟอ้างอิง (ไม่บังคับ)</label>
@@ -106,11 +109,14 @@ import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { domainLabel } from '../data/domains.js'
-import { computeStatus, nextReviewQueue, buildLeaderboard } from '../utils/questionReview.js'
+import { computeStatus, nextReviewQueue, buildLeaderboard, VERDICT_LABEL } from '../utils/questionReview.js'
+import TopicSelect from '../components/questions/TopicSelect.vue'
+import { useConfirm } from '../composables/useConfirm.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
 const { toast } = useToast()
+const { confirm } = useConfirm()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const VERDICTS = [
@@ -118,8 +124,6 @@ const VERDICTS = [
   { key: 'fix',     label: '🛠️ ต้องแก้' },
   { key: 'wrong',   label: '❌ ผิด' },
 ]
-const VERDICT_LABEL = { correct: 'ถูกต้อง', fix: 'ต้องแก้', wrong: 'ผิด' }
-
 const list = ref([])
 const loading = ref(false)
 const submitting = ref(false)
@@ -128,6 +132,7 @@ const verdict = ref(null)
 const reason = ref('')
 const refText = ref('')
 const priorReviews = ref([])
+const topic = ref(null)   // แท็กหมวดของข้อปัจจุบัน (ตั้งต้นจาก category เดิม แก้ได้ระหว่างตรวจ)
 
 const myUid = computed(() => authStore.currentUser?.uid || null)
 
@@ -139,10 +144,11 @@ const currentStatus = computed(() => current.value ? computeStatus(current.value
 
 const summary = computed(() => ({
   remaining: nextReviewQueue(list.value, myUid.value).length,
-  conflicts: list.value.filter(q => computeStatus(q) === 'conflict').length,
+  conflicts: list.value.filter(q => !q.retired && computeStatus(q) === 'conflict').length,
 }))
 
-const canSubmit = computed(() => !!verdict.value && !!reason.value.trim())
+// เหตุผลบังคับเฉพาะ verdict ที่ไม่ผ่าน — "ถูกต้อง" ไม่ต้องพิมพ์ (ลด friction กันเหตุผลขยะ)
+const canSubmit = computed(() => !!verdict.value && (verdict.value === 'correct' || !!reason.value.trim()))
 
 // leaderboard จาก reviewMeta doc (ตัวนับ + ชื่อ snapshot ตอน submit) — 1 read
 // ไม่ต้องอ่านทั้งคลัง/users collection และไม่พึ่ง members store (บางคนไม่มี studentId)
@@ -174,6 +180,7 @@ async function load() {
 // เปลี่ยนข้อปัจจุบัน → ล้างฟอร์ม + โหลดรีวิวเดิมถ้าเป็นข้อ conflict (ให้คนที่ 3 เห็น)
 watch(current, async (q) => {
   verdict.value = null; reason.value = ''; refText.value = ''; priorReviews.value = []
+  topic.value = q?.category || null
   if (q && currentStatus.value === 'conflict') {
     try {
       const snap = await getDocs(collection(db, 'questions', q.id, 'reviews'))
@@ -196,6 +203,8 @@ function unskipAll() { skippedIds.value = new Set() }
 
 async function submit() {
   if (!canSubmit.value || submitting.value || !current.value || !myUid.value) return
+  const lbl = VERDICT_LABEL[verdict.value] || verdict.value
+  if (!(await confirm(`ยืนยันส่งผลตรวจ: "${lbl}"?\nส่งแล้วแก้เองไม่ได้ — ถ้ากดพลาดให้แจ้งแอดมินล้างผลตรวจ`))) return
   submitting.value = true
   const q = current.value
   const uid = myUid.value
@@ -213,6 +222,8 @@ async function submit() {
       const snap = await tx.get(qRef)
       if (!snap.exists()) { already = true; return }   // ข้อถูกลบระหว่างตรวจ
       const cur = snap.data()
+      // ข้อถูกแก้เนื้อหาไประหว่างเราดูอยู่ (qhash เปลี่ยน) — verdict เราตัดสินจากเวอร์ชันเก่า ห้ามนับ
+      if ((cur.qhash || null) !== (q.qhash || null)) throw new Error('__stale')
       if ((cur.reviewedBy || []).includes(uid)) { already = true; return }   // เคยส่งไปแล้ว (เช่น จากอีกเครื่อง)
       newPass = (cur.reviewPass || 0) + (isPass ? 1 : 0)
       newFail = (cur.reviewFail || 0) + (isPass ? 0 : 1)
@@ -229,13 +240,15 @@ async function submit() {
       // 2) aggregate: ตัวนับ pass/fail + สถานะ — ห้ามเก็บ uid→verdict บน doc
       //    (ข้อ published นักศึกษาอ่านได้ทั้งใบ) · rules บังคับว่า update แบบนี้
       //    ต้องมาพร้อม reviews/{uid} ของตัวเองใน transaction เดียวกัน
-      tx.update(qRef, {
+      const qPatch = {
         reviewedBy: arrayUnion(uid),
         reviewPass: newPass,
         reviewFail: newFail,
         reviewStatus: newStatus,
         reviewVerdicts: deleteField(),   // ล้าง map โครงเก่า (ถ้ามี)
-      })
+      }
+      if (topic.value && topic.value !== (cur.category || null)) qPatch.category = topic.value
+      tx.update(qRef, qPatch)
       // 3) ตัวนับ leaderboard + ชื่อ snapshot (collection แยก — นักศึกษาอ่านไม่ได้)
       tx.set(doc(db, 'reviewMeta', 'main'),
         { counts: { [uid]: increment(1) }, names: { [uid]: reviewerName } }, { merge: true })
@@ -244,7 +257,7 @@ async function submit() {
     // อัปเดต local ให้คิว/leaderboard เลื่อนทันที (ไม่ reload)
     const idx = list.value.findIndex(x => x.id === q.id)
     if (idx >= 0) {
-      const patch = already ? {} : { reviewPass: newPass, reviewFail: newFail, reviewStatus: newStatus }
+      const patch = already ? {} : { reviewPass: newPass, reviewFail: newFail, reviewStatus: newStatus, ...(topic.value ? { category: topic.value } : {}) }
       list.value[idx] = { ...q, reviewedBy: [...(q.reviewedBy || []), uid], ...patch }
     }
     if (!already) {
@@ -254,8 +267,12 @@ async function submit() {
       }
     }
     toast('ส่งผลตรวจแล้ว ขอบคุณ!', 'success')
-  } catch (e) { console.error('[review submit]', e); toast('ส่งไม่สำเร็จ', 'error') }
-  finally { submitting.value = false }
+  } catch (e) {
+    if (e.message === '__stale') {
+      toast('ข้อนี้เพิ่งถูกแก้เนื้อหา — โหลดคิวใหม่ให้แล้ว', 'error')
+      load()
+    } else { console.error('[review submit]', e); toast('ส่งไม่สำเร็จ', 'error') }
+  } finally { submitting.value = false }
 }
 </script>
 
