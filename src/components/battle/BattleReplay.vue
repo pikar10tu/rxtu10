@@ -21,7 +21,7 @@
             <span v-for="(t, ti) in ticksFor('B'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
           <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe">{{ curHp('B'+i) }}</span></div>
-          <span v-for="pop in popsFor('B'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)">-{{ pop.dmg }}</span>
+          <span v-for="pop in popsFor('B'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)" :style="{ marginLeft: pop.x + 'px' }">-{{ pop.dmg }}</span>
           <span v-if="callouts['B'+i]" class="br-call" :class="callouts['B'+i].kind">
             {{ callouts['B'+i].text }}<Emoji :char="callouts['B'+i].icon" />
           </span>
@@ -41,7 +41,7 @@
             <span v-for="(t, ti) in ticksFor('A'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
           <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me">{{ curHp('A'+i) }}</span></div>
-          <span v-for="pop in popsFor('A'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)">-{{ pop.dmg }}</span>
+          <span v-for="pop in popsFor('A'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)" :style="{ marginLeft: pop.x + 'px' }">-{{ pop.dmg }}</span>
           <span v-if="callouts['A'+i]" class="br-call" :class="callouts['A'+i].kind">
             {{ callouts['A'+i].text }}<Emoji :char="callouts['A'+i].icon" />
           </span>
@@ -253,13 +253,14 @@ function applyAttack(e) {
       flashing.value = e.target
       hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
       const k = popKey++
-      pops.value = { ...pops.value, [e.target]: [...(pops.value[e.target] || []), { k, dmg: e.dmg, crit: e.crit, eff: e.eff }] }
-      setTimeout(() => { pops.value = { ...pops.value, [e.target]: (pops.value[e.target] || []).filter(p => p.k !== k) } }, 600)
+      const x = Math.round(Math.random() * 28 - 14)   // offset แนวนอนสุ่ม ±14px กันเลขหลายป็อปซ้อนทับ
+      pops.value = { ...pops.value, [e.target]: [...(pops.value[e.target] || []), { k, dmg: e.dmg, crit: e.crit, eff: e.eff, x }] }
+      setTimeout(() => { if (g !== gen) return; pops.value = { ...pops.value, [e.target]: (pops.value[e.target] || []).filter(p => p.k !== k) } }, REPLAY_CFG.popMs)
       if (e.eff === 'super' || e.eff === 'weak') {
         const ck = calloutKey++
         const cal = e.eff === 'super' ? { text: 'แพ้ทาง! ', icon: '⚡' } : { text: 'ต้านทาน ', icon: '🛡️' }
         callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
-        setTimeout(() => { if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
+        setTimeout(() => { if (g !== gen) return; if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
       }
       if (e.crit) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }
     })
@@ -381,9 +382,15 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 /* telegraph: เงื้อก่อนตี — ลอย+เอนถอยหลัง (--wx/--wy ตั้ง inline จาก startWindup) + เรืองแสงเหลือง */
 .br-unit.windup { transform: translate(var(--wx, 0px), var(--wy, -6px)) scale(1.08); z-index: 3;
   box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
-.br-unit.flash { animation: br-shake .2s; box-shadow: 0 0 0 3px #f87171; }
+.br-unit.flash { animation: br-shake .25s; box-shadow: 0 0 0 3px #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
-@keyframes br-shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-5px) } 75% { transform: translateX(5px) } }
+@keyframes br-shake {
+  0%, 100% { transform: translateX(0); filter: none }
+  15% { filter: brightness(2.2) saturate(.4) }
+  25% { transform: translateX(-7px); filter: brightness(1.6) }
+  50% { transform: translateX(6px) }
+  75% { transform: translateX(-5px) }
+}
 
 .br-hp { position: relative; width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
 .br-hp-fill { height: 100%; background: #ef4444; border-radius: 999px; transition: width .2s ease-out; }
@@ -395,10 +402,19 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
 .br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
 
-.br-pop { position: absolute; top: 0; font-weight: 800; font-size: .9rem; color: #fecaca; text-shadow: 0 1px 2px rgba(0,0,0,.6); animation: br-rise .6s ease-out forwards; pointer-events: none; }
-.br-pop.crit { color: #fbbf24; font-size: 1.2rem; }
+/* เลขดาเมจ: ใหญ่ + stroke เข้ม อ่านออกทุกพื้นหลัง + เด้งแล้วลอย 40px ค้าง .9 วิ */
+.br-pop { position: absolute; top: 0; font-weight: 900; font-size: 1.5rem; color: #fecaca; z-index: 6;
+  -webkit-text-stroke: 4px rgba(15, 23, 42, .85); paint-order: stroke fill;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .7); animation: br-pop-rise .9s ease-out forwards; pointer-events: none; }
+.br-pop.crit { color: #fbbf24; font-size: 2rem; }
 .br-pop.super { color: #fca5a5; }
-.br-pop.weak { color: #cbd5e1; font-size: .78rem; }
+.br-pop.weak { color: #cbd5e1; font-size: 1.1rem; }
+@keyframes br-pop-rise {
+  0% { transform: translateY(0) scale(.6); opacity: 0 }
+  18% { transform: translateY(-6px) scale(1.15); opacity: 1 }
+  35% { transform: translateY(-12px) scale(1); opacity: 1 }
+  100% { transform: translateY(-40px) scale(1); opacity: 0 }
+}
 @keyframes br-rise { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-24px); opacity: 0 } }
 
 .br-call { position: absolute; top: -16px; display: inline-flex; align-items: center; gap: 2px; font-weight: 800; font-size: .6rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; animation: br-rise .75s ease-out forwards; pointer-events: none; z-index: 4; }
