@@ -3,7 +3,7 @@
      controls: pause/speed/skip · แตะตัว = pause + inspect (ช่อง passive รอ §5.5 master plan)
      ⚠️ ทุก emoji ผ่าน <Emoji> (Fluent self-host) — อย่าใส่ emoji ดิบในเทมเพลต (เป็น tofu บนบางเครื่อง) -->
 <template>
-  <div v-if="data" class="br-ov" :class="{ result: done }">
+  <div v-if="data" class="br-ov">
     <div class="br-box" :class="{ hitstop: hitStop }">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
@@ -55,39 +55,48 @@
         <span v-for="pj in projectiles" :key="pj.k" class="br-proj" :style="projStyle(pj)"><Emoji :char="pj.emoji" /></span>
       </div>
 
-      <div class="br-ctrl">
-        <template v-if="!done">
-          <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
-          <button class="br-btn sm" @click="cycleSpeed">เร็ว ×{{ speed }}</button>
-          <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
-        </template>
-        <template v-else>
-          <div class="br-sum">
-            <div class="br-result" :class="{ win: data.won }">{{ data.won ? (data.winText ?? `ชนะ! ขึ้นชั้น ${data.cleared + 1}`) : (data.loseText ?? 'แพ้ ลองใหม่ได้เลย') }}</div>
-            <div v-if="data.won && (data.rewardText ?? data.cleared != null)" class="br-reward"><Emoji char="🎁" /> {{ data.rewardText ?? ('ได้รับ: ขึ้นชั้น ' + (data.cleared + 1)) }}</div>
+      <div class="br-ctrl" v-if="!done">
+        <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
+        <button class="br-btn sm" @click="cycleSpeed">เร็ว ×{{ speed }}</button>
+        <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
+      </div>
+    </div>
 
-            <div class="br-sum-team">
-              <div class="br-sum-head"><i class="dot me"></i> ทีมคุณ</div>
-              <div v-for="u in summary.teamA" :key="u.uid" class="br-sum-row" :class="{ mvp: summary.mvp.A === u.uid, win: data.won, dead: u.dead }">
-                <span v-if="summary.mvp.A === u.uid" class="br-mvp">MVP</span>
-                <span class="br-sum-face"><Emoji :char="defOf(u.id).emoji" /></span>
-                <span class="br-sum-dmg"><Emoji char="⚔️" />{{ u.dmgDealt }}</span>
-                <span class="br-sum-dmg taken"><Emoji char="🛡️" />{{ u.dmgTaken }}</span>
-              </div>
-            </div>
+    <!-- peek สนามหลังจบ: ปุ่มลอยกลับเข้าหน้าสรุป -->
+    <button v-if="resultReady && !resultOpen" class="br-btn br-peek-btn" @click="resultOpen = true">
+      <Emoji char="📋" /> ดูสรุป
+    </button>
 
-            <div class="br-sum-team">
-              <div class="br-sum-head"><i class="dot foe"></i> ศัตรู</div>
-              <div v-for="u in summary.teamB" :key="u.uid" class="br-sum-row" :class="{ mvp: summary.mvp.B === u.uid, win: !data.won, dead: u.dead }">
-                <span v-if="summary.mvp.B === u.uid" class="br-mvp">MVP</span>
-                <span class="br-sum-face"><Emoji :char="defOf(u.id).emoji" /></span>
-                <span class="br-sum-dmg"><Emoji char="⚔️" />{{ u.dmgDealt }}</span>
-                <span class="br-sum-dmg taken"><Emoji char="🛡️" />{{ u.dmgTaken }}</span>
-              </div>
-            </div>
+    <!-- modal สรุปผล — แตะนอกกล่อง = peek สนาม (ไม่ใช่ปิดทิ้ง กันกดพลาด) -->
+    <div v-if="resultOpen && summary" class="br-result-ov" @click.self="resultOpen = false">
+      <div class="br-modal">
+        <div class="br-result" :class="{ win: data.won }">{{ data.won ? (data.winText ?? `ชนะ! ขึ้นชั้น ${data.cleared + 1}`) : (data.loseText ?? 'แพ้ ลองใหม่ได้เลย') }}</div>
+        <div v-if="data.won && (data.rewardText ?? data.cleared != null)" class="br-reward"><Emoji char="🎁" /> {{ data.rewardText ?? ('ได้รับ: ขึ้นชั้น ' + (data.cleared + 1)) }}</div>
+
+        <div class="br-sum-team">
+          <div class="br-sum-head"><i class="dot me"></i> ทีมคุณ</div>
+          <div v-for="u in summary.teamA" :key="u.uid" class="br-sum-row" :class="{ mvp: summary.mvp.A === u.uid, win: data.won, dead: u.dead }">
+            <span v-if="summary.mvp.A === u.uid" class="br-mvp">MVP</span>
+            <span class="br-sum-face"><Emoji :char="defOf(u.id).emoji" /></span>
+            <span class="br-sum-dmg"><Emoji char="⚔️" />{{ u.dmgDealt }}</span>
+            <span class="br-sum-dmg taken"><Emoji char="🛡️" />{{ u.dmgTaken }}</span>
           </div>
+        </div>
+
+        <div class="br-sum-team">
+          <div class="br-sum-head"><i class="dot foe"></i> ศัตรู</div>
+          <div v-for="u in summary.teamB" :key="u.uid" class="br-sum-row" :class="{ mvp: summary.mvp.B === u.uid, win: !data.won, dead: u.dead }">
+            <span v-if="summary.mvp.B === u.uid" class="br-mvp">MVP</span>
+            <span class="br-sum-face"><Emoji :char="defOf(u.id).emoji" /></span>
+            <span class="br-sum-dmg"><Emoji char="⚔️" />{{ u.dmgDealt }}</span>
+            <span class="br-sum-dmg taken"><Emoji char="🛡️" />{{ u.dmgTaken }}</span>
+          </div>
+        </div>
+
+        <div class="br-modal-btns">
+          <button class="br-btn sm" @click="resultOpen = false"><Emoji char="👀" /> ดูสนาม</button>
           <button class="br-btn" @click="$emit('close')">ปิด</button>
-        </template>
+        </div>
       </div>
     </div>
 
@@ -139,6 +148,9 @@ const projectiles = ref([])      // [{k, emoji, x0,y0,x1,y1}]
 const callouts = ref({})         // uid → {k, text, icon, kind}
 const hitStop = ref(false)
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
+const resultOpen = ref(false)    // modal สรุปโชว์อยู่
+const resultReady = ref(false)   // จบไฟต์+ผ่านจังหวะรอแล้ว — ใช้โชว์ปุ่มลอย "ดูสรุป" ตอน peek
+let resultTimer = null
 let introTimer = null
 const winding = ref(null)        // uid ที่กำลังเงื้อ (telegraph) — โชว์คลาส .windup
 let windupTimer = null
@@ -174,6 +186,7 @@ function buildMax(d) {
 function reset() {
   gen++                                                                     // ยกเลิก callback ค้างทุกตัว
   clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer)
+  clearTimeout(resultTimer); resultOpen.value = false; resultReady.value = false
   introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge/windup ค้างจากไฟต์ก่อน (component ถูก mount ค้างไว้ ใช้ซ้ำ)
   idx.value = 0; round.value = 1; pops.value = {}; flashing.value = null; acting.value = null
@@ -319,6 +332,7 @@ function skipToEnd() {
   hp.value = finalHp; pops.value = {}; callouts.value = {}; projectiles.value = []; acting.value = null; flashing.value = null
   round.value = end?.rounds || round.value
   idx.value = log.value.length
+  clearTimeout(resultTimer); resultReady.value = true; resultOpen.value = true   // ข้าม = เปิดสรุปทันที
 }
 function inspect(uid) { paused.value = true; clearTimeout(timer); inspectUid.value = uid }
 
@@ -350,18 +364,17 @@ const insp = computed(() => {
 })
 
 watch(() => props.data, (d) => { if (d) { buildMax(d); reset() } }, { immediate: true })
-onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer) })
+// ตีจบ → เว้น ~0.5 วิ ให้เห็นสนามจบ แล้วเปิด modal สรุป (skipToEnd เปิดทันทีเอง — เช็ก resultReady กันตั้งซ้ำ)
+watch(done, (v) => {
+  if (!v || resultReady.value) return
+  resultTimer = setTimeout(() => { resultReady.value = true; resultOpen.value = true }, REPLAY_CFG.resultDelayMs)
+}, { immediate: true })
+onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer); clearTimeout(resultTimer) })
 </script>
 
 <style scoped>
 .br-ov { position: fixed; inset: 0; z-index: 420; background: rgba(15,23,42,.88); display: flex; align-items: center; justify-content: center; padding: 16px; }
-/* result state อาจสูงเกินจอ (สรุป + MVP 2 ทีม + ปุ่มปิด) → ให้ overlay เลื่อนได้
-   ไม่งั้นปุ่ม "ปิด" หลุดใต้จอ ดูเหมือนโดน bottom-nav บัง. replay phase ยังล็อกกลางจอเหมือนเดิม */
-.br-ov.result { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 .br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; }
-/* margin:auto = จัดกลางแนวตั้งเมื่อเนื้อหาเตี้ย, เลื่อนได้เมื่อสูงเกินจอ */
-.br-ov.result .br-box { margin: auto 0; }
 .br-box.hitstop { animation: br-hitstop .12s; }
 @keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
 .br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
@@ -453,7 +466,6 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 @keyframes br-ready { from { opacity: 0; transform: scale(.7) } to { opacity: 1; transform: scale(1) } }
 @keyframes br-go { from { opacity: 0; transform: scale(1.6) } to { opacity: 1; transform: scale(1) } }
 
-.br-sum { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 .br-reward { text-align: center; color: #fde68a; font-weight: 800; font-size: .8rem; }
 .br-sum-team { background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
 .br-sum-head { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.8); font-weight: 800; font-size: .72rem; margin-bottom: 6px; }
@@ -467,4 +479,20 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .br-sum-face { font-size: 1.3rem; }
 .br-sum-dmg { font-size: .68rem; font-weight: 800; color: #fde68a; display: inline-flex; align-items: center; gap: 2px; }
 .br-sum-dmg.taken { color: #fca5a5; margin-left: auto; }
+
+/* modal สรุปผล — ทับสนามที่มืดลง เลื่อนในตัวเองได้ ไม่โดน bottom-nav/safe-area บัง */
+.br-result-ov { position: fixed; inset: 0; z-index: 425; background: rgba(15, 23, 42, .72);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.br-modal { width: 100%; max-width: 380px; background: #1e293b; border: 2px solid rgba(255,255,255,.25);
+  border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 8px;
+  max-height: calc(100dvh - 72px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  animation: br-modal-in .25s ease; }
+.br-modal .br-result { text-align: center; }
+@keyframes br-modal-in { from { opacity: 0; transform: scale(.92) translateY(10px) } to { opacity: 1; transform: none } }
+.br-modal-btns { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+/* ปุ่มลอยตอน peek สนาม — เกาะล่างกลาง เหนือ safe-area */
+.br-peek-btn { position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 424;
+  background: #4f46e5; border-color: #fff; box-shadow: 0 6px 20px rgba(0, 0, 0, .45); }
 </style>
