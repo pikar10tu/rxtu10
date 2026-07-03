@@ -210,25 +210,27 @@ function defForUid(uid) {
   return getPetDef(arr?.[i]?.id) || { emoji: '❓' }
 }
 function playMotion(e, onImpact) {
+  const g = gen
   const def = defForUid(e.attacker)
   if (atkStyleOf(def) === 'ranged') {
     const a = centerOf(e.attacker), t = centerOf(e.target)
     if (a && t) {
       const k = projKey++
       projectiles.value = [...projectiles.value, { k, emoji: projectileOf(def), x0: a.x, y0: a.y, x1: t.x, y1: t.y }]
-      setTimeout(() => { projectiles.value = projectiles.value.filter(p => p.k !== k); onImpact() }, REPLAY_CFG.projMs / speed.value)
+      setTimeout(() => { projectiles.value = projectiles.value.filter(p => p.k !== k); if (g === gen) onImpact() }, REPLAY_CFG.projMs / speed.value)
       return
     }
   }
-  // melee: lunge เข้าหาเป้า แล้วเด้งกลับ (transform ชั่วคราว)
+  // melee: พุ่งสุดตัวถึงศูนย์กลางเป้า (Hearthstone-style ชนทับ) แล้วเด้งกลับ — z-index สูงกันโดนการ์ดอื่นบัง
   const a = centerOf(e.attacker), t = centerOf(e.target), el = els[e.attacker]
   if (a && t && el) {
-    el.style.transition = `transform ${REPLAY_CFG.lungeMs / speed.value}ms ease-out`
-    el.style.transform = `translate(${(t.x - a.x) * 0.55}px, ${(t.y - a.y) * 0.55}px) scale(1.12)`
+    el.style.zIndex = '7'                        // เหนือ proj-layer (5) และ acting (3)
+    el.style.transition = `transform ${REPLAY_CFG.lungeMs / speed.value}ms cubic-bezier(.2, .7, .3, 1.1)`
+    el.style.transform = `translate(${t.x - a.x}px, ${t.y - a.y}px) scale(1.18)`
     setTimeout(() => {
-      onImpact()
-      el.style.transform = ''
-      setTimeout(() => { el.style.transition = '' }, REPLAY_CFG.lungeMs / speed.value)
+      if (g === gen) onImpact()
+      el.style.transform = ''                    // เด้งกลับที่เดิม (คืน style เสมอ แม้โดน skip — กันการ์ดค้างผิดที่)
+      setTimeout(() => { el.style.transition = ''; el.style.zIndex = '' }, REPLAY_CFG.lungeMs / speed.value)
     }, REPLAY_CFG.lungeMs / speed.value)
     return
   }
