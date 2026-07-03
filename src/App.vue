@@ -24,8 +24,8 @@
       <nav id="bottom-nav">
         <RouterLink to="/"        class="bn-item"><span class="bn-icon"><Emoji char="🏠" /></span>Home</RouterLink>
         <RouterLink to="/members" class="bn-item"><span class="bn-icon"><Emoji char="👥" /></span>Members</RouterLink>
+        <RouterLink to="/study"   class="bn-item bn-center"><span class="bn-icon"><Emoji char="📚" /></span>Study</RouterLink>
         <RouterLink to="/play"    class="bn-item"><span class="bn-icon"><Emoji char="🎮" /></span>Play</RouterLink>
-        <RouterLink to="/study"   class="bn-item"><span class="bn-icon"><Emoji char="📚" /></span>Study</RouterLink>
         <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>ฉัน</RouterLink>
       </nav>
 
