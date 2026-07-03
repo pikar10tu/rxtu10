@@ -119,7 +119,9 @@ const props = defineProps({ data: { type: Object, default: null } })
 defineEmits(['close'])
 
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
-const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], lungeMs: 150, projMs: 280, hitStopMs: 130 }
+// windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · popMs = เลขดาเมจค้างบนจอ
+// resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, projMs: 280, hitStopMs: 130, popMs: 900, resultDelayMs: 500 }
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
 const elEmoji = (p) => ELEMENTS[p?.element]?.emoji || '✊'
@@ -138,6 +140,9 @@ const callouts = ref({})         // uid → {k, text, icon, kind}
 const hitStop = ref(false)
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
 let introTimer = null
+const winding = ref(null)        // uid ที่กำลังเงื้อ (telegraph) — โชว์คลาส .windup
+let windupTimer = null
+let gen = 0                      // generation guard — reset/skip เพิ่มค่า เพื่อให้ callback ค้างจาก setTimeout รู้ตัวว่าโดนยกเลิก
 let timer = null, popKey = 0, projKey = 0, calloutKey = 0
 let maxHp = {}, unitAtk = {}     // uid → maxHp / atk (static ต่อ unit จาก buildCombatant)
 const els = {}                   // uid → DOM el (วัดตำแหน่ง melee/ranged)
@@ -167,7 +172,9 @@ function buildMax(d) {
   ;(d?.playerTeam || []).forEach((p, i) => add(p, 'A' + i))
 }
 function reset() {
-  clearTimeout(timer); clearTimeout(introTimer); introPhase.value = null   // กันค้างตอน replay ใหม่
+  gen++                                                                     // ยกเลิก callback ค้างทุกตัว
+  clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer)
+  introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
   idx.value = 0; round.value = 1; pops.value = {}; flashing.value = null; acting.value = null
   paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}; hitStop.value = false
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
@@ -234,21 +241,43 @@ const handlers = {
   end() { acting.value = null; flashing.value = null },
 }
 function applyAttack(e) {
-  acting.value = e.attacker
-  playMotion(e, () => {
-    flashing.value = e.target
-    hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
-    const k = popKey++
-    pops.value = { ...pops.value, [e.target]: [...(pops.value[e.target] || []), { k, dmg: e.dmg, crit: e.crit, eff: e.eff }] }
-    setTimeout(() => { pops.value = { ...pops.value, [e.target]: (pops.value[e.target] || []).filter(p => p.k !== k) } }, 600)
-    if (e.eff === 'super' || e.eff === 'weak') {
-      const ck = calloutKey++
-      const cal = e.eff === 'super' ? { text: 'แพ้ทาง! ', icon: '⚡' } : { text: 'ต้านทาน ', icon: '🛡️' }
-      callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
-      setTimeout(() => { if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
-    }
-    if (e.crit) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }
+  const g = gen
+  startWindup(e, () => {
+    if (g !== gen) return                       // โดน reset/skip ระหว่างเงื้อ
+    acting.value = e.attacker
+    playMotion(e, () => {
+      if (g !== gen) return                     // โดน reset/skip ระหว่างพุ่ง/ยิง
+      flashing.value = e.target
+      hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
+      const k = popKey++
+      pops.value = { ...pops.value, [e.target]: [...(pops.value[e.target] || []), { k, dmg: e.dmg, crit: e.crit, eff: e.eff }] }
+      setTimeout(() => { pops.value = { ...pops.value, [e.target]: (pops.value[e.target] || []).filter(p => p.k !== k) } }, 600)
+      if (e.eff === 'super' || e.eff === 'weak') {
+        const ck = calloutKey++
+        const cal = e.eff === 'super' ? { text: 'แพ้ทาง! ', icon: '⚡' } : { text: 'ต้านทาน ', icon: '🛡️' }
+        callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
+        setTimeout(() => { if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
+      }
+      if (e.crit) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }
+    })
   })
+}
+
+// telegraph: ลอยขึ้น + เรืองแสง + เอนถอยหลัง (ทิศตรงข้ามเป้า) ค้าง windupMs แล้วค่อยเข้าเฟส motion
+function startWindup(e, onDone) {
+  winding.value = e.attacker
+  const el = els[e.attacker], a = centerOf(e.attacker), t = centerOf(e.target)
+  if (el && a && t) {
+    const dx = t.x - a.x, dy = t.y - a.y, len = Math.hypot(dx, dy) || 1
+    el.style.setProperty('--wx', (-dx / len * 7).toFixed(1) + 'px')   // เอนถอย ~7px หนีเป้า
+    el.style.setProperty('--wy', (-dy / len * 7 - 4).toFixed(1) + 'px') // + ลอยขึ้นอีก 4px
+  }
+  windupTimer = setTimeout(() => { winding.value = null; onDone() }, REPLAY_CFG.windupMs / speed.value)
+}
+
+// motion ms ของ event attack (ranged = projectile, melee = lunge) — ใช้คำนวณคิวจังหวะ
+function motionMsOf(e) {
+  return atkStyleOf(defForUid(e.attacker)) === 'ranged' ? REPLAY_CFG.projMs : REPLAY_CFG.lungeMs
 }
 
 function step() {
@@ -260,7 +289,10 @@ function step() {
   if (h) h(e)                                   // type ที่ไม่รู้จัก = ข้ามเงียบ
   idx.value++
   const noDelay = e.t === 'round'               // round marker ไม่หน่วงเวลา
-  const extra = (e.t === 'attack' && e.crit) ? REPLAY_CFG.hitStopMs / speed.value : 0  // hit-stop ตอน crit
+  // attack กินเวลาเพิ่ม: windup + motion (impact เกิดตอนจบ motion) + hit-stop ตอน crit — แล้วค่อยคั่น baseDelay
+  const extra = e.t === 'attack'
+    ? (REPLAY_CFG.windupMs + motionMsOf(e) + (e.crit ? REPLAY_CFG.hitStopMs : 0)) / speed.value
+    : 0
   if (idx.value < log.value.length) timer = setTimeout(step, noDelay ? 0 : delay.value + extra)
   else { acting.value = null; flashing.value = null }
 }
@@ -274,7 +306,9 @@ function cycleSpeed() {
   speed.value = s[(s.indexOf(speed.value) + 1) % s.length]
 }
 function skipToEnd() {
-  clearTimeout(timer)
+  gen++                                                    // ตัด callback windup/lunge/impact ที่ค้างอยู่
+  clearTimeout(timer); clearTimeout(windupTimer); winding.value = null
+  Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge ค้างกลางทาง
   const end = log.value[log.value.length - 1]
   const finalHp = {}; Object.keys(maxHp).forEach(uid => finalHp[uid] = 100)
   for (const ev of log.value) if (ev.t === 'attack') finalHp[ev.target] = Math.max(0, Math.round((ev.targetHpAfter / (maxHp[ev.target] || 1)) * 100))
@@ -288,7 +322,7 @@ function hpPct(uid) { return hp.value[uid] ?? 100 }
 function popsFor(uid) { return pops.value[uid] || [] }
 function popClass(pop) { return { crit: pop.crit, super: pop.eff === 'super', weak: pop.eff === 'weak' } }
 function unitClass(uid) {
-  return { acting: acting.value === uid, flash: flashing.value === uid, dead: (hp.value[uid] ?? 100) <= 0 }
+  return { acting: acting.value === uid, windup: winding.value === uid, flash: flashing.value === uid, dead: (hp.value[uid] ?? 100) <= 0 }
 }
 
 // ── inspect helpers ──
@@ -312,7 +346,7 @@ const insp = computed(() => {
 })
 
 watch(() => props.data, (d) => { if (d) { buildMax(d); reset() } }, { immediate: true })
-onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer) })
+onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer) })
 </script>
 
 <style scoped>
@@ -341,6 +375,9 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer) })
 .br-face { font-size: 2rem; line-height: 1; }
 .br-el { position: absolute; top: 3px; left: 3px; font-size: .8rem; background: rgba(0,0,0,.45); border-radius: 8px; padding: 1px 3px; line-height: 1; }
 .br-unit.acting { transform: translateY(-4px) scale(1.14); z-index: 3; box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
+/* telegraph: เงื้อก่อนตี — ลอย+เอนถอยหลัง (--wx/--wy ตั้ง inline จาก startWindup) + เรืองแสงเหลือง */
+.br-unit.windup { transform: translate(var(--wx, 0px), var(--wy, -6px)) scale(1.08); z-index: 3;
+  box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
 .br-unit.flash { animation: br-shake .2s; box-shadow: 0 0 0 3px #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
 @keyframes br-shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-5px) } 75% { transform: translateX(5px) } }
