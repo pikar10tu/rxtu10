@@ -130,6 +130,7 @@ defineEmits(['close'])
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
 // windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · popMs = เลขดาเมจค้างบนจอ
 // resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
+// popMs คงที่เหมือนกัน (ตรงกับ CSS br-pop-rise .9s) — อ่านเลขทันแม้เร่ง ×4 อย่าหารด้วย speed
 const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, projMs: 280, hitStopMs: 130, popMs: 900, resultDelayMs: 500 }
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
@@ -193,6 +194,8 @@ function reset() {
   paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}; hitStop.value = false
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
   runIntro()
+  // log ว่าง = done ค้าง true ตั้งแต่แรก → watch(done) ไม่ยิงซ้ำ ต้องเปิดสรุปเองไม่งั้น overlay ไม่มีทางออก
+  if (done.value) { resultReady.value = true; resultOpen.value = true }
 }
 
 // intro READY?→GO! ก่อนเริ่มเล่น log (แตะข้ามได้)
