@@ -175,6 +175,7 @@ function reset() {
   gen++                                                                     // ยกเลิก callback ค้างทุกตัว
   clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer)
   introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
+  Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge/windup ค้างจากไฟต์ก่อน (component ถูก mount ค้างไว้ ใช้ซ้ำ)
   idx.value = 0; round.value = 1; pops.value = {}; flashing.value = null; acting.value = null
   paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}; hitStop.value = false
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
