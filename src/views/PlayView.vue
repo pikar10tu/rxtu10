@@ -41,11 +41,12 @@
           <span class="gc-name">ปีนหอคอย</span>
           <span class="gc-badge grow">ไต่ชั้น · ปลดโบนัส</span>
         </RouterLink>
-        <RouterLink to="/arena" class="game-card">
+        <RouterLink v-if="pvpOpen || authStore.isAdmin" to="/arena" class="game-card">
           <span class="gc-emoji"><Emoji char="⚔️" /></span>
           <span class="gc-name">สนามประลอง</span>
           <span class="gc-badge grow">PvP · แต้มประลอง</span>
         </RouterLink>
+        <SoonCard v-else emoji="⚔️" label="สนามประลอง" />
         <SoonCard emoji="🐲" label="บอสรวมรุ่น" />
       </div>
 
@@ -89,6 +90,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
+import { useAppConfig } from '../composables/useAppConfig.js'
 import { useFarm } from '../composables/useFarm.js'
 import { useExpedition } from '../composables/useExpedition.js'
 import { expeditionState } from '../utils/expedition.js'
@@ -98,6 +100,7 @@ import SectionTitle from '../components/shared/SectionTitle.vue'
 import SoonCard from '../components/shared/SoonCard.vue'
 
 const authStore = useAuthStore()
+const { pvpOpen } = useAppConfig()   // สนามประลองเปิดหรือยัง (ปิด = การ์ด "เร็วๆ นี้" กดเข้าไม่ได้)
 const farm = useFarm()
 const { exp } = useExpedition()
 // badge การ์ดส่งผจญภัย — ใช้ now (5s tick ที่มีอยู่แล้ว) เช็คว่ากลับมายัง

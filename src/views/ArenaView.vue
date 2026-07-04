@@ -49,8 +49,8 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
-import { RouterLink } from 'vue-router'
-import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
@@ -71,6 +71,11 @@ const busy = ref(false)
 
 // admin บุกได้เสมอ (ทดสอบก่อนเปิดจริง) เหมือน shopOpen
 const canFight = computed(() => pvpOpen.value || authStore.isAdmin)
+
+// สนามปิด (ไม่ใช่แอดมิน) = กันเข้าตรงผ่าน URL → เด้งกลับ /play (configLoaded แล้วเสมอเมื่อ view นี้ render)
+const router = useRouter()
+onMounted(() => { if (!canFight.value) router.replace('/play') })
+watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิดสนามระหว่างมีคนอยู่ในหน้า
 
 const oppPreview = (opp) => opp.isBot ? opp.team : resolveBattleTeam(opp.activePets, opp.pets)
 
