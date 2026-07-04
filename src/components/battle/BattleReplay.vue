@@ -124,6 +124,7 @@ import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS, EL_NAME } fro
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { computeBattleSummary } from '../../utils/battleSummary.js'
+import { fluentFile } from '../../utils/emoji.js'
 
 const props = defineProps({ data: { type: Object, default: null } })
 defineEmits(['close'])
@@ -184,6 +185,22 @@ function buildMax(d) {
   const add = (p, uid) => { const c = buildCombatant(p); maxHp[uid] = Math.round(c.maxHp) || 1; unitAtk[uid] = Math.round(c.atk) }
   ;(d?.botTeam || []).forEach((p, i) => add(p, 'B' + i))
   ;(d?.playerTeam || []).forEach((p, i) => add(p, 'A' + i))
+}
+
+// อุ่น cache รูป projectile ของ pet ranged ทั้งสองฝั่งก่อนเริ่มเล่น (intro หน่วง ~1.1 วิ ให้รูปโหลดทัน)
+// ไม่งั้นการยิงครั้งแรกของแต่ละอีโมจิ = รูปยังโหลดไม่เสร็จภายในเวลาบิน 280ms → projectile มองไม่เห็น
+const preloadedImgs = []
+function preloadProjectiles(d) {
+  const seen = new Set()
+  for (const p of [...(d?.playerTeam || []), ...(d?.botTeam || [])]) {
+    const def = getPetDef(p?.id)
+    if (!def || atkStyleOf(def) !== 'ranged') continue
+    const f = fluentFile(projectileOf(def))
+    if (!f || seen.has(f)) continue
+    seen.add(f)
+    const img = new Image(); img.src = import.meta.env.BASE_URL + f   // ตั้ง src = เบราว์เซอร์ fetch+cache ทันที
+    preloadedImgs.push(img)                                          // กัน GC จนโหลดเสร็จ
+  }
 }
 function reset() {
   gen++                                                                     // ยกเลิก callback ค้างทุกตัว
@@ -367,7 +384,7 @@ const insp = computed(() => {
   }
 })
 
-watch(() => props.data, (d) => { if (d) { buildMax(d); reset() } }, { immediate: true })
+watch(() => props.data, (d) => { if (d) { buildMax(d); preloadProjectiles(d); reset() } }, { immediate: true })
 // ตีจบ → เว้น ~0.5 วิ ให้เห็นสนามจบ แล้วเปิด modal สรุป (skipToEnd เปิดทันทีเอง — เช็ก resultReady กันตั้งซ้ำ)
 watch(done, (v) => {
   if (!v || resultReady.value) return
