@@ -9,26 +9,33 @@
 
 > "เบื้องต้นเท่านี้ก่อน ลำดับความสำคัญตามนี้เลย" · รายละเอียดเต็มใน memory `rxtu10_backlog_2026-06-29`
 
-1. **หน้าตรวจข้อสอบ (Peer Review วิชาการ)** — ✅ **spec เสร็จ → ลงมือ session หน้า** · `docs/superpowers/specs/2026-06-29-question-peer-review-design.md`
-   วิชาการ+อาจารย์สุ่มตรวจข้อสอบ · 2 คน/ข้อ (pull model) · ตัดสิน ถูกต้อง/ต้องแก้/ผิด + เหตุผล(บังคับ)+เรฟ(ไม่บังคับ) · บันทึกชื่อจริงผู้ตรวจ · ขัดแย้ง→รอคนที่ 3 · ตัวนับ "ใครตรวจกี่ข้อ" (academic+admin เห็น) · ยังไม่ gate การเผยแพร่ (เฟสหน้า)
-   → **เริ่ม session หน้าด้วย writing-plans จาก spec นี้**
-2. **ปรับ UI หน้า battle** — ตีเห็นชัด, เพิ่มตีไกล(ranged)พุ่งตีทุกตัว, เลขดาเมจชัดขึ้น, หน่วงก่อนตี=telegraph แบบ HS Battlegrounds, หน้าสรุปผล=หน้าต่างใหม่ (ยังไม่ brainstorm)
-3. **PvP gating + matchmaking** — ปิดอยู่=ไม่เห็นทีมใคร ขึ้น "เร็วๆ นี้" · เปิดแล้วสุ่ม 5 คนระดับใกล้เคียง + บอท 1–2 ตัว (ยังไม่ brainstorm)
+1. **หน้าตรวจข้อสอบ (Peer Review วิชาการ)** — ✅✅ **build+push+deploy เสร็จ (3 ก.ค.)** + review workflow v2 (วงจรผลตรวจ/นำออก-นำกลับ/หมวด dropdown) + rules deployed
+   ⏳ **รอ user กด "ซิงก์ระบบตรวจ" ใน Admin 1 ครั้ง → เทส /review จอจริง** (เติม reviewStatus ให้ข้อเก่า ไม่งั้นคิวว่าง)
+2. **ปรับ UI หน้า battle** — ✅✅ **build+push+deploy เสร็จ (3 ก.ค.)** · telegraph windup + melee พุ่ง 100% + เลขดาเมจ 1.5rem/crit 2rem + modal สรุปแยก+peek · +แก้ปุ่มปิดตอน peek (4 ก.ค.) · ⏳ รอ user เทสจอจริง
+3. **PvP gating + matchmaking** ⏭️ **ถัดไป — เริ่มด้วย brainstorm** — ปิดอยู่=ไม่เห็นทีมใคร ขึ้น "เร็วๆ นี้" · เปิดแล้วสุ่ม 5 คนระดับใกล้เคียง + บอท 1–2 ตัว (ยังไม่ brainstorm)
 4. **Expedition rework** — ปิดก่อนแล้วแก้: pet filter+กรอบใหญ่, ตัดธาตุ เหลือ ง่าย/กลาง/ยาก ตามเวลา, ตั้งชื่อใหม่ (ยังไม่ brainstorm)
 5. **บอสโลก** (World Boss รวมรุ่น) — ค่อยมาออกแบบ
 
 ---
 
-## ⏭️ ถัดไป (คิว session หน้า — บันทึก 24 มิ.ย. 2026)
+## 📝 อัปเดต session 3–4 ก.ค. 2026 (ล่าสุด)
 
-ตามลำดับความสำคัญ:
-1. 🚨 **เร่งด่วน: บั๊กล็อกอินบนมือถือ** — user จะมาแจ้งรายละเอียดครั้งหน้า (ยังไม่รู้อาการแน่ชัด)
-   ⚠️ เคยมีกับดักล็อกอินมือถือมาก่อน: ต้องใช้ `signInWithRedirect` (popup โดนบล็อก) + Firestore force long-polling — อย่า revert (ดู CLAUDE.md "กับดักที่เคยเจอ" ข้อ 1–2) · เริ่มจากถามอาการ/ขั้นที่ค้างก่อนเดา
-2. **ปรับแก้อนิเมชันหอคอย (Battle replay)** — v1 เป็น raw (เลขเด้ง/แฟลช/หลอดเลือด) ยังไม่ลื่น/ไม่ชัดพอ
-   ➕ **พร้อมกันนี้ต้อง RESET ชั้นหอคอยของทุกคน** (`towerFloor`→1, `towerBest`→0) — น่าจะทำผ่าน admin/migration หรือ one-time flag · เคาะวิธีตอนทำ (กระทบ user docs ทุกคน)
-3. **Expedition (exploration)** — ระบบ pet รอบ 2 ตาม master plan §5.8 (ส่งเพ็ทผจญภัยจับเวลา, รางวัล=ตั๋ว/shard ไม่ใช่เหรียญ) — ทำหลังจัดการ 1–2 เสร็จ
+- **คิว #1 Peer Review + workflow v2** ✅ deploy — ดู memory `rxtu10_backlog_2026-06-29` (10 จุด code-review + 5 tasks v2) · **user ต้องกดซิงก์ใน Admin ก่อนเทส**
+- **คิว #2 Battle UI clarity** ✅ deploy (plan `docs/superpowers/plans/2026-07-03-battle-ui-clarity.md`, 5 tasks + final review ผ่าน) · แก้ตามด้วย: ปุ่มปิดตอน peek สนาม
+- **Nav: ย้าย Study ไปกลาง + วงกลมลอยเน้นเรียน** ✅ deploy (spec `2026-07-03-study-center-nav-design.md`)
+- **งานแทรก user สั่ง 4 ก.ค. ✅ deploy ครบ 4:**
+  1. Battle: เพิ่มปุ่มปิดตอน peek สนามหลังจบ
+  2. Quiz: แบนเนอร์แจ้ง "ข้อสอบนำเข้าจากคลังเก่า รอทีมวิชาการตรวจ" (blanket, `.qv-notice` — ลบเมื่อมีข้อผ่านตรวจ)
+  3. **Daily quest rework**: quiz5/study5/gacha1 → **quiz5/ปลูกพืช3/กาชา2** · รางวัลคง buff ×1.5 + **ตั๋ว 1→3 ใบ** (field `dailyQuest.farm` แทน study)
+  4. **Admin econ editor**: ปุ่ม 💰 รายคนใน AdminView ปรับ **เหรียญ + เลเวลบ้าน** (rules `isAdmin()` อนุญาตอยู่แล้ว) — แอดมินไว้ลดเลเวลบ้านตัวเองตอนเปิดเซิฟ
 
-> Battle + หอคอย PvE v1 = ✅ deploy แล้ว 24 มิ.ย. (spec/plan ใน docs/superpowers/, commit ถึง 30dd28f)
+---
+
+## ⏭️ ถัดไป (คิว session หน้า — บันทึก 24 มิ.ย. 2026) — ⚠️ SUPERSEDED โดยคิว 29 มิ.ย. ด้านบน
+
+> ส่วนใหญ่ทำเสร็จแล้ว: อนิเมชันหอคอย ✅ (battle overhaul + battle UI clarity) · Expedition ✅ deploy 27 มิ.ย. · เก็บไว้อ้างอิง + 2 TODO ที่ยังค้าง:
+> 1. 🚨 **บั๊กล็อกอินมือถือ** — user ยังไม่ได้มาแจ้งอาการ (ถ้ามีปัญหาค่อยว่ากัน) · กับดักเดิม: `signInWithPopup` ทุกอุปกรณ์ + Firestore force long-polling อย่า revert (CLAUDE.md ข้อ 1–2)
+> 2. **RESET ชั้นหอคอยทุกคน** (`towerFloor`→1, `towerBest`→0) ตอนเปิดเซิฟ — ยังไม่ทำ · ตอนนี้มีปุ่มปรับรายคนใน Admin แล้ว แต่ยังไม่มี bulk reset (ทำ migration/one-time flag ตอนเปิด)
 
 ---
 
