@@ -206,8 +206,21 @@
                   :disabled="savingUid === m.uid"
                   @click="setRole(m, 'student')"
                 >− ถอนอาจารย์</button>
+                <button class="btn-mini btn-gray" title="ปรับเหรียญ/เลเวลบ้าน" @click="openEcon(m)"><Emoji char="💰" /></button>
                 <button class="btn-mini btn-gray" @click="editTagsUid = editTagsUid === m.uid ? null : m.uid"><Emoji char="🏷️" /></button>
               </div>
+            </div>
+            <!-- econ editor: ปรับเหรียญ + เลเวลบ้าน (แอดมินเท่านั้น — rules อนุญาต) -->
+            <div v-if="editEconUid === m.uid" class="econ-editor">
+              <label class="econ-field">
+                <span><Emoji char="🪙" /> เหรียญ</span>
+                <input v-model.number="econCoins" type="number" inputmode="numeric" min="0" max="50000000" />
+              </label>
+              <label class="econ-field">
+                <span><Emoji char="🏠" /> เลเวลบ้าน (1–12)</span>
+                <input v-model.number="econLevel" type="number" inputmode="numeric" min="1" max="12" />
+              </label>
+              <button class="btn-mini btn-gold" :disabled="savingUid === m.uid" @click="saveEcon(m)">บันทึก</button>
             </div>
             <!-- tag editor -->
             <div v-if="editTagsUid === m.uid" class="tag-editor">
@@ -571,6 +584,9 @@ async function togglePvp() {
 const search     = ref('')
 const savingUid  = ref(null)
 const editTagsUid = ref(null)
+const editEconUid = ref(null)   // แถวที่กำลังเปิดแผงปรับเหรียญ/เลเวลบ้าน
+const econCoins  = ref(0)
+const econLevel  = ref(1)
 
 function hasTag(m, id) { return (m.tags || []).includes(id) }
 async function toggleTag(m, id) {
@@ -752,6 +768,34 @@ async function setRole(m, role) {
     savingUid.value = null
   }
 }
+
+// เปิด/ปิดแผงปรับเหรียญ-เลเวลบ้าน + เติมค่าปัจจุบันของคนนั้น (toggle ที่แถวเดิม = ปิด)
+function openEcon(m) {
+  if (editEconUid.value === m.uid) { editEconUid.value = null; return }
+  econCoins.value = m.coins || 0
+  econLevel.value = m.residence?.level || 1
+  editEconUid.value = m.uid
+}
+
+async function saveEcon(m) {
+  const coins = Math.max(0, Math.min(Number(econCoins.value) || 0, 50000000))
+  const level = Math.max(1, Math.min(Math.round(Number(econLevel.value) || 1), 12))
+  if (!(await confirm(`ตั้งเหรียญ ${coins.toLocaleString()} + เลเวลบ้าน ${level} ให้ ${m.nickname}?`))) return
+  savingUid.value = m.uid
+  try {
+    // เขียน doc คนอื่นตรงๆ (rules: isAdmin เขียนได้) · 'residence.level' = dot-path กันทับ field อื่นใน residence
+    await updateDoc(doc(db, 'users', m.uid), { coins, 'residence.level': level })
+    m.coins = coins
+    m.residence = { ...(m.residence || {}), level }   // optimistic บน light object
+    editEconUid.value = null
+    toast(`ตั้งเหรียญ/เลเวลบ้านให้ ${m.nickname} แล้ว`, 'success')
+  } catch (e) {
+    console.error('[admin saveEcon]', e)
+    toast('บันทึกไม่สำเร็จ', 'error')
+  } finally {
+    savingUid.value = null
+  }
+}
 </script>
 
 <style scoped>
@@ -845,6 +889,9 @@ async function setRole(m, role) {
 }
 .role-top { display: flex; align-items: center; gap: 8px; }
 .tag-editor { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px; }
+.econ-editor { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding-top: 4px; }
+.econ-field { display: flex; flex-direction: column; gap: 3px; font-size: .64rem; font-weight: 700; color: rgba(0,0,0,.55); }
+.econ-field input { box-sizing: border-box; width: 130px; border: 2px solid var(--ink); border-radius: 8px; padding: 6px 8px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); }
 .tag-toggle {
   border: 1px solid rgba(0,0,0,.15); background: #fff; color: rgba(0,0,0,.55);
   border-radius: 999px; padding: 4px 9px; font-family: inherit; font-size: .64rem;
