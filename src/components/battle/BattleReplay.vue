@@ -62,10 +62,11 @@
       </div>
     </div>
 
-    <!-- peek สนามหลังจบ: ปุ่มลอยกลับเข้าหน้าสรุป -->
-    <button v-if="resultReady && !resultOpen" class="br-btn br-peek-btn" @click="resultOpen = true">
-      <Emoji char="📋" /> ดูสรุป
-    </button>
+    <!-- peek สนามหลังจบ: ปุ่มลอยกลับเข้าหน้าสรุป + ปิด (มีปุ่มปิดตรงนี้ด้วย ไม่ต้องกดดูสรุปกลับก่อน) -->
+    <div v-if="resultReady && !resultOpen" class="br-peek-bar">
+      <button class="br-btn sm br-peek-btn" @click="resultOpen = true"><Emoji char="📋" /> ดูสรุป</button>
+      <button class="br-btn sm" @click="$emit('close')">ปิด</button>
+    </div>
 
     <!-- modal สรุปผล — แตะนอกกล่อง = peek สนาม (ไม่ใช่ปิดทิ้ง กันกดพลาด) -->
     <div v-if="resultOpen && summary" class="br-result-ov" @click.self="resultOpen = false">
@@ -494,8 +495,8 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .br-modal .br-result { text-align: center; }
 @keyframes br-modal-in { from { opacity: 0; transform: scale(.92) translateY(10px) } to { opacity: 1; transform: none } }
 .br-modal-btns { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
-/* ปุ่มลอยตอน peek สนาม — เกาะล่างกลาง เหนือ safe-area */
-.br-peek-btn { position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 424;
-  background: #4f46e5; border-color: #fff; box-shadow: 0 6px 20px rgba(0, 0, 0, .45); }
+/* แถบปุ่มลอยตอน peek สนาม (ดูสรุป + ปิด) — เกาะล่างกลาง เหนือ safe-area */
+.br-peek-bar { position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 424; display: flex; gap: 8px; }
+.br-peek-btn { background: #4f46e5; border-color: #fff; box-shadow: 0 6px 20px rgba(0, 0, 0, .45); }
 </style>
