@@ -49,7 +49,7 @@ export const USER_DEFAULTS = {
   residence: { level: 1, upgradedAt: null },  // ที่อยู่อาศัย (prestige/coin sink)
   farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null },
   study: { cards: {} },                       // SRS flashcard progress
-  dailyQuest: { date: null, quiz: 0, study: 0, gacha: 0, claimed: false },
+  dailyQuest: { date: null, quiz: 0, farm: 0, gacha: 0, claimed: false },
   freeGachaTickets: 0,
   welcomeGiftV1: false,   // one-time: ส่งจดหมายของขวัญต้อนรับแล้ว (กัน client ส่งซ้ำ)
   welcomeBoxSeen: false,  // เห็น Welcome box ต้อนรับแล้ว (กัน popup เด้งซ้ำ)

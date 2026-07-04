@@ -10,29 +10,30 @@ const T = '2026-06-19'
 
 test('bump: doc ว่าง → เริ่มวันนี้ +1', () => {
   const dq = bumpDailyQuest(undefined, 'quiz', T)
-  assert.deepEqual(dq, { date: T, quiz: 1, study: 0, gacha: 0, claimed: false })
+  assert.deepEqual(dq, { date: T, quiz: 1, farm: 0, gacha: 0, claimed: false })
 })
 
 test('bump: +n สะสมในวันเดียว', () => {
-  let dq = bumpDailyQuest({ date: T, quiz: 2, study: 0, gacha: 0, claimed: false }, 'quiz', T, 3)
+  let dq = bumpDailyQuest({ date: T, quiz: 2, farm: 0, gacha: 0, claimed: false }, 'quiz', T, 3)
   assert.equal(dq.quiz, 5)
 })
 
 test('bump: ข้ามวัน → รีเซ็ตก่อนนับ (รวม claimed)', () => {
-  const old = { date: '2026-06-18', quiz: 9, study: 9, gacha: 9, claimed: true }
-  const dq = bumpDailyQuest(old, 'study', T)
-  assert.deepEqual(dq, { date: T, quiz: 0, study: 1, gacha: 0, claimed: false })
+  const old = { date: '2026-06-18', quiz: 9, farm: 9, gacha: 9, claimed: true }
+  const dq = bumpDailyQuest(old, 'farm', T)
+  assert.deepEqual(dq, { date: T, quiz: 0, farm: 1, gacha: 0, claimed: false })
 })
 
-test('questComplete: ครบทั้ง 3 + วันตรง', () => {
-  assert.equal(questComplete({ date: T, quiz: 5, study: 5, gacha: 1, claimed: false }, T), true)
-  assert.equal(questComplete({ date: T, quiz: 5, study: 4, gacha: 1, claimed: false }, T), false)
-  assert.equal(questComplete({ date: '2026-06-18', quiz: 9, study: 9, gacha: 9 }, T), false) // คนละวัน
+test('questComplete: ครบทั้ง 3 (quiz5/farm3/gacha2) + วันตรง', () => {
+  assert.equal(questComplete({ date: T, quiz: 5, farm: 3, gacha: 2, claimed: false }, T), true)
+  assert.equal(questComplete({ date: T, quiz: 5, farm: 2, gacha: 2, claimed: false }, T), false)
+  assert.equal(questComplete({ date: T, quiz: 5, farm: 3, gacha: 1, claimed: false }, T), false)
+  assert.equal(questComplete({ date: '2026-06-18', quiz: 9, farm: 9, gacha: 9 }, T), false) // คนละวัน
 })
 
 test('questClaimable: ครบและยังไม่รับ', () => {
-  assert.equal(questClaimable({ date: T, quiz: 5, study: 5, gacha: 1, claimed: false }, T), true)
-  assert.equal(questClaimable({ date: T, quiz: 5, study: 5, gacha: 1, claimed: true }, T), false)
+  assert.equal(questClaimable({ date: T, quiz: 5, farm: 3, gacha: 2, claimed: false }, T), true)
+  assert.equal(questClaimable({ date: T, quiz: 5, farm: 3, gacha: 2, claimed: true }, T), false)
 })
 
 test('questIncomeMult: buff active/หมดอายุ', () => {

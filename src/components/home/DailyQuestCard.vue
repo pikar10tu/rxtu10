@@ -5,9 +5,9 @@
         <span class="dq-task-l"><Emoji char="📝" /> ทำข้อสอบ</span>
         <span class="dq-task-n">{{ Math.min(q.quiz, GOALS.quiz) }}/{{ GOALS.quiz }}</span>
       </div>
-      <div class="dq-task" :class="{ done: q.study >= GOALS.study }">
-        <span class="dq-task-l"><Emoji char="📚" /> ทบทวนการ์ด</span>
-        <span class="dq-task-n">{{ Math.min(q.study, GOALS.study) }}/{{ GOALS.study }}</span>
+      <div class="dq-task" :class="{ done: q.farm >= GOALS.farm }">
+        <span class="dq-task-l"><Emoji char="🌱" /> ปลูกพืช</span>
+        <span class="dq-task-n">{{ Math.min(q.farm, GOALS.farm) }}/{{ GOALS.farm }}</span>
       </div>
       <div class="dq-task" :class="{ done: q.gacha >= GOALS.gacha }">
         <span class="dq-task-l"><Emoji char="🎰" /> เปิดกาชา</span>
@@ -16,7 +16,7 @@
     </div>
 
     <button v-if="!claimed" class="dq-claim" :class="{ ready: claimable }" :disabled="!claimable || claiming" @click="claimReward">
-      {{ claiming ? 'กำลังรับ…' : (claimable ? 'รับรางวัล — รายได้ ×1.5 + ตั๋วฟรี' : 'ทำให้ครบเพื่อรับรางวัล') }}
+      {{ claiming ? 'กำลังรับ…' : (claimable ? `รับรางวัล — รายได้ ×1.5 + ตั๋วฟรี ×${QUEST_TICKETS}` : 'ทำให้ครบเพื่อรับรางวัล') }}
     </button>
     <div v-else class="dq-claimed"><Emoji char="✅" /> รับรางวัลแล้ววันนี้</div>
 
@@ -31,7 +31,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
-import { QUEST_GOALS, BUFF_MS, questClaimable } from '../../utils/dailyQuest.js'
+import { QUEST_GOALS, BUFF_MS, QUEST_TICKETS, questClaimable } from '../../utils/dailyQuest.js'
 
 const auth = useAuthStore()
 const { toast } = useToast()
@@ -70,10 +70,10 @@ async function claimReward() {
   const until = (active ? curUntil : t) + BUFF_MS
   const dq = { ...auth.userData.dailyQuest, claimed: true }
   const ok = await auth.patchUser(
-    { dailyQuest: dq, freeGachaTickets: tickets.value + 1, incomeBuffUntil: until, incomeBuffFrom: from },
-    { 'dailyQuest.claimed': true, freeGachaTickets: increment(1), incomeBuffUntil: until, incomeBuffFrom: from },
+    { dailyQuest: dq, freeGachaTickets: tickets.value + QUEST_TICKETS, incomeBuffUntil: until, incomeBuffFrom: from },
+    { 'dailyQuest.claimed': true, freeGachaTickets: increment(QUEST_TICKETS), incomeBuffUntil: until, incomeBuffFrom: from },
   )
-  toast(ok ? 'รับรางวัลแล้ว! รายได้ ×1.5 24 ชม. + ตั๋วกาชาฟรี' : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
+  toast(ok ? `รับรางวัลแล้ว! รายได้ ×1.5 24 ชม. + ตั๋วกาชาฟรี ×${QUEST_TICKETS}` : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
   claiming.value = false
 }
 </script>

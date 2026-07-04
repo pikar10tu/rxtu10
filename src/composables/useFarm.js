@@ -6,6 +6,7 @@ import { residencePlots } from '../data/residence.js'
 import {
   getCrop, cropsForLevel, nextUnlock, growMs,
 } from '../data/crops.js'
+import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 /**
  * Farming logic bound to the logged-in user.
@@ -44,15 +45,17 @@ export function useFarm() {
   }
 
   // ── persistence helper: optimistic + Firestore ──
-  async function commit(newPlots, { coinDelta = 0, inventory: newInv, salesGain = 0 } = {}) {
+  async function commit(newPlots, { coinDelta = 0, inventory: newInv, salesGain = 0, dailyQuest = null } = {}) {
     const farm = { ...(auth.userData?.farm || {}), plots: newPlots }
     if (newInv) farm.inventory = newInv
     const optimistic = { farm, ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}) }
     if (salesGain) optimistic.farmSalesTotal = (auth.userData?.farmSalesTotal || 0) + salesGain
+    if (dailyQuest) optimistic.dailyQuest = dailyQuest
     const patch = { 'farm.plots': newPlots }
     if (newInv) patch['farm.inventory'] = newInv
     if (coinDelta) patch.coins = increment(coinDelta)
     if (salesGain) patch.farmSalesTotal = increment(salesGain)
+    if (dailyQuest) patch.dailyQuest = dailyQuest
     const ok = await auth.patchUser(optimistic, patch)
     if (!ok) toast('บันทึกฟาร์มไม่สำเร็จ', 'error')
   }
@@ -68,7 +71,10 @@ export function useFarm() {
     }
     const next = clonePlots()
     next[i] = { seedId, plantedAt: Date.now() }
-    await commit(next, { coinDelta: -crop.seedCost })
+    // นับเข้าเควสรายวัน "ปลูกพืช" (นับตอนปลูก 1 แปลง = +1)
+    const today = new Date().toISOString().slice(0, 10)
+    const dq = bumpDailyQuest(auth.userData?.dailyQuest, 'farm', today, 1)
+    await commit(next, { coinDelta: -crop.seedCost, dailyQuest: dq })
     toast(`ปลูก ${crop.name} แล้ว`, 'success')
   }
 
