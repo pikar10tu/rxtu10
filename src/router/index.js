@@ -17,6 +17,7 @@ const routes = [
     { path: '/tower',     name: 'tower',     component: () => import('../views/TowerView.vue')     },
     { path: '/arena',     name: 'arena',     component: () => import('../views/ArenaView.vue')     },
     { path: '/expedition', name: 'expedition', component: () => import('../views/ExpeditionView.vue') },
+    { path: '/play/farm',  name: 'play-farm',  component: () => import('../views/FarmView.vue')    },
 ]
 
 export const router = createRouter({
