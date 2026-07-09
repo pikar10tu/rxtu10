@@ -68,7 +68,7 @@
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
     <TeamPicker v-model:open="pickOpen" />
-    <BattleReplay :data="replay" @close="replay = null" />
+    <BattleReplay :data="replay" theme="tower" @close="replay = null" />
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
 
     <!-- scout ศัตรู (read-only) — Teleport ไป body: #main-content stacking context, z-index สู้ #bottom-nav ไม่ได้ (ดู CLAUDE.md) -->

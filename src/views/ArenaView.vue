@@ -43,7 +43,7 @@
     <div v-else class="ar-login">เข้าสู่ระบบเพื่อเล่น</div>
 
     <TeamPicker v-model:open="pickOpen" />
-    <BattleReplay :data="replay" @close="replay = null" />
+    <BattleReplay :data="replay" theme="arena" @close="replay = null" />
   </div>
 </template>
 

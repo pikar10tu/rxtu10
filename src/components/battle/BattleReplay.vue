@@ -6,7 +6,7 @@
   <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z420 สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
-  <div v-if="data" class="br-ov">
+  <div v-if="data" class="br-ov" :class="'br-theme-' + theme">
     <div class="br-box" :class="{ hitstop: hitStop }">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
@@ -130,7 +130,10 @@ import { buildCombatant } from '../../data/battle.js'
 import { computeBattleSummary } from '../../utils/battleSummary.js'
 import { fluentFile } from '../../utils/emoji.js'
 
-const props = defineProps({ data: { type: Object, default: null } })
+const props = defineProps({
+  data: { type: Object, default: null },
+  theme: { type: String, default: 'tower' },   // 'arena' | 'tower' — พื้นหลังสนาม
+})
 defineEmits(['close'])
 
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
@@ -398,7 +401,21 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 </script>
 
 <style scoped>
-.br-ov { position: fixed; inset: 0; z-index: 420; background: rgba(15,23,42,.88); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.br-ov { position: fixed; inset: 0; z-index: 420; background: #0f172a; display: flex; align-items: center; justify-content: center; padding: 16px; }
+/* Tower = ดันเจี้ยน/หอคอย: หินม่วง-น้ำเงินเข้ม + เรืองคบเพลิงอุ่นมุมล่าง (คงโทนเดิมแต่มีมิติ) */
+.br-theme-tower {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(76,29,149,.55), transparent 60%),
+    radial-gradient(80% 55% at 50% 100%, rgba(217,119,6,.22), transparent 70%),
+    linear-gradient(180deg, #1e1b4b, #0f172a 70%);
+}
+/* Arena = โคลอสเซียม: ฟ้าเย็นด้านบน → หินทรายอุ่นเข้มด้านล่าง + ลายเสาแนวตั้งจางๆ (คุมเข้มพอให้ตัวขาวอ่านออก) */
+.br-theme-arena {
+  background:
+    radial-gradient(100% 70% at 50% 10%, rgba(59,130,246,.28), transparent 55%),
+    linear-gradient(180deg, #3b2f1a 0%, #2a1f12 60%, #17100a 100%),
+    repeating-linear-gradient(90deg, rgba(255,220,150,.05) 0 2px, transparent 2px 46px);
+}
 .br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; }
 .br-box.hitstop { animation: br-hitstop .12s; }
 @keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
@@ -434,8 +451,8 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .br-hp-fill { height: 100%; background: #ef4444; border-radius: 999px; transition: width .2s ease-out; }
 .br-hp-fill.mine { background: #34d399; }
 .br-tick { position: absolute; top: 0; width: 1px; height: 100%; background: rgba(255,255,255,.55); }
-.br-stats { display: flex; justify-content: space-between; width: 84%; margin-top: 3px; }
-.br-atk, .br-hpn { font-size: .58rem; font-weight: 800; color: #fff; line-height: 1; padding: 2px 5px; border-radius: 999px; min-width: 14px; text-align: center; }
+.br-stats { display: flex; justify-content: space-between; align-items: center; gap: 3px; width: 88%; margin-top: 3px; }
+.br-atk, .br-hpn { font-size: .72rem; font-weight: 800; color: #fff; line-height: 1; padding: 2px 6px; border-radius: 999px; min-width: 18px; text-align: center; }
 .br-atk { background: #f59e0b; }       /* ATK = amber (Hearthstone-ish) */
 .br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
 .br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
