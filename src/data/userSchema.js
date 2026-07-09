@@ -17,7 +17,7 @@ export const USER_DEFAULTS = {
   pets: [],
   eggs: [],
   activePet: null,
-  activePets: [null, null, null, null],
+  activePets: [null, null, null],
   pvpVictories: 0,
   studentId: null,
   nickname: null,
@@ -104,7 +104,7 @@ export function normalizeUserData(data) {
 
   // migration: legacy single `activePet` → `activePets` slot 0 (once)
   if (data.activePet && !(data.activePets || []).some(Boolean)) {
-    d.activePets = [data.activePet, null, null, null]
+    d.activePets = [data.activePet, null, null]
   }
 
   // arrays must be arrays
@@ -112,7 +112,7 @@ export function normalizeUserData(data) {
   d.eggs       = Array.isArray(d.eggs) ? d.eggs : []
   d.tags       = Array.isArray(d.tags) ? d.tags : []
   // ทีม 4 ตัว: ยาว 4 เสมอ (pad null / ตัดส่วนเกิน)
-  const TEAM_SIZE = 4
+  const TEAM_SIZE = 3
   d.activePets = (Array.isArray(d.activePets) ? d.activePets : []).slice(0, TEAM_SIZE)
   while (d.activePets.length < TEAM_SIZE) d.activePets.push(null)
 

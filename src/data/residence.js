@@ -54,7 +54,10 @@ export const isMaxResidence = (level) => clampLevel(level) >= MAX_RESIDENCE_LEVE
 // ── Per-level accessors ──
 export const residenceDailyIncome  = (level) => getTier(level).dailyIncome
 export const residencePlots        = (level) => getTier(level).plots
-export const residenceBattleSlots  = (level) => getTier(level).battleSlots
+// ทีมต่อสู้ = 3 ช่องคงที่ทุกเลเวลบ้าน (เลิกเป็น perk บ้าน) — source เดียวคือ BATTLE_SLOTS
+export const BATTLE_SLOTS = 3
+// shim: importer เดิมยังเรียก residenceBattleSlots(level) ได้ (คืน 3 เสมอ) จนกว่าจะย้ายไปใช้ BATTLE_SLOTS ตรงๆ
+export const residenceBattleSlots  = () => BATTLE_SLOTS
 export const residenceEggSlots     = (level) => getTier(level).eggSlots
 export const residenceMarketOpen   = (level) => getTier(level).marketUnlocked
 

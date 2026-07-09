@@ -19,3 +19,8 @@ test('resolveBattleTeam: id ไม่มี instance → grade 0 + common', () =
   assert.equal(r[0].grade, 0)
   assert.equal(r[0].rarity, 'common')
 })
+test('resolveBattleTeam: cap ที่ BATTLE_SLOTS (3) — ส่ง 4 id คืน 3', () => {
+  const r = resolveBattleTeam(['a', 'b', 'c', 'd'], [])
+  assert.equal(r.length, 3)
+  assert.deepEqual(r.map(u => u.id), ['a', 'b', 'c'])
+})
