@@ -6,6 +6,7 @@ import { residencePlots } from '../data/residence.js'
 import {
   getCrop, cropsForLevel, nextUnlock, growMs,
 } from '../data/crops.js'
+import { nextPlotInfo, MAX_PLOTS } from '../data/farmPlots.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 
 /**
@@ -19,7 +20,22 @@ export function useFarm() {
   const { toast } = useToast()
 
   const level     = computed(() => auth.userData?.residence?.level || 1)
-  const plotCount = computed(() => residencePlots(level.value))
+  // เพดานตามเลเวลบ้าน (เดิม = จำนวนแปลงจริง → เปลี่ยนเป็น "เพดานสูงสุดที่ปลดได้")
+  const ceiling   = computed(() => residencePlots(level.value))
+  // แปลงที่ปลดแล้ว (เริ่ม 1) clamp 1..MAX_PLOTS
+  const plotsUnlocked = computed(() => {
+    const raw = Math.floor(Number(auth.userData?.farm?.plotsUnlocked))
+    return Math.max(1, Math.min(Number.isFinite(raw) ? raw : 1, MAX_PLOTS))
+  })
+  // แปลงที่เห็น/ปลูกได้จริง = min(ปลดแล้ว, เพดานบ้าน)
+  // กัน edge case: admin ลดเลเวลบ้าน → เพดานต่ำกว่าที่ปลด → ซ่อนแปลงเกิน ไม่ลบข้อมูล
+  const plotCount = computed(() => Math.min(plotsUnlocked.value, ceiling.value))
+  // สถานะปลดแปลงถัดไป (pure logic จาก farmPlots)
+  const nextPlot  = computed(() => nextPlotInfo({
+    plotsUnlocked: plotsUnlocked.value,
+    ceiling: ceiling.value,
+    coins: auth.userData?.coins || 0,
+  }))
 
   const inventory = computed(() => auth.userData?.farm?.inventory || {})
 
@@ -115,9 +131,28 @@ export function useFarm() {
     toast(`ขายทั้งหมด +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 
+  async function unlockPlot() {
+    const info = nextPlot.value
+    if (info.reason === 'maxed')    { toast('ปลดครบทุกแปลงแล้ว', 'info'); return }
+    if (info.reason === 'atCeiling'){ toast('อัปเลเวลบ้านเพื่อปลดแปลงเพิ่ม', 'info'); return }
+    if (info.reason === 'notEnoughCoins') {
+      toast(`เหรียญไม่พอ! ปลดแปลงราคา ${info.cost.toLocaleString()} เหรียญ`, 'error'); return
+    }
+    const newUnlocked = plotsUnlocked.value + 1
+    const optimistic = {
+      farm: { ...(auth.userData?.farm || {}), plotsUnlocked: newUnlocked },
+      coins: (auth.userData?.coins || 0) - info.cost,
+    }
+    const patch = { 'farm.plotsUnlocked': newUnlocked, coins: increment(-info.cost) }
+    const ok = await auth.patchUser(optimistic, patch)
+    if (ok) toast(`ปลดแปลงที่ ${newUnlocked} แล้ว!`, 'success')
+    else toast('ปลดแปลงไม่สำเร็จ', 'error')
+  }
+
   return {
-    level, plotCount, plots, inventory, seedChoices, upcomingSeed,
+    level, ceiling, plotsUnlocked, plotCount, nextPlot,
+    plots, inventory, seedChoices, upcomingSeed,
     status,
-    plant, harvest, sell, sellAll,
+    plant, harvest, sell, sellAll, unlockPlot,
   }
 }
