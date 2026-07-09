@@ -92,3 +92,16 @@ test('normalizeUserData: expedition ชนิดผิด (array/number) → nul
   assert.equal(normalizeUserData({ expedition: [] }).expedition, null)
   assert.equal(normalizeUserData({ expedition: 5 }).expedition, null)
 })
+
+// ── Farm plot-unlock (ระบบปลดแปลง) ──
+test('USER_DEFAULTS.farm.plotsUnlocked = 1 (เริ่ม 1 แปลง)', () => {
+  assert.equal(USER_DEFAULTS.farm.plotsUnlocked, 1)
+})
+test('normalizeUserData: doc ไม่มี plotsUnlocked → เติม 1 (คนเก่ารีเซ็ตเหลือ 1)', () => {
+  const d = normalizeUserData({ farm: { plots: [], inventory: {} } })
+  assert.equal(d.farm.plotsUnlocked, 1)
+})
+test('normalizeUserData: คงค่า plotsUnlocked เดิมถ้ามี', () => {
+  const d = normalizeUserData({ farm: { plotsUnlocked: 5 } })
+  assert.equal(d.farm.plotsUnlocked, 5)
+})
