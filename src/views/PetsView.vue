@@ -40,7 +40,7 @@
           <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.emoji || '✊'" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
-          <PetStatLine :pet="p" />
+          <span v-if="p.grade > 0" class="pt-cell-stars">{{ '★'.repeat(Math.min(p.grade, 5)) }}</span>
         </button>
       </div>
     </template>
@@ -61,7 +61,6 @@ import { petDailyCoins } from '../utils/petUtils.js'
 import { residenceBattleSlots } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
-import PetStatLine from '../components/shared/PetStatLine.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
 
 const authStore = useAuthStore()
@@ -121,6 +120,7 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pt-cell-emoji { font-size: 1.8rem; line-height: 1; }
 .pt-cell-name { font-size: .56rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pt-cell-stars { font-size: .62rem; color: #f59e0b; letter-spacing: -1px; line-height: 1; }
 .pt-cell-grade { position: absolute; top: -5px; left: -5px; background: #1e293b; color: #fff; font-size: .54rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-pot { position: absolute; top: -5px; right: -5px; background: #7c3aed; color: #fff; font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-star { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
