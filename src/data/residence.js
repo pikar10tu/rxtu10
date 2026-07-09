@@ -3,7 +3,8 @@
 // ════════════════════════════════════════════════════════════
 //  Narrative arc: สู้ชีวิต → สร้างตัว → ประสบความสำเร็จ → (อนาคต) เหนือระดับ
 //  15 tiers defined; only 1–12 are RELEASED (MAX_RESIDENCE_LEVEL).
-//  `residence.level` drives daily income, farm plots, pet-income bonus %, battle slots,
+//  `residence.level` drives daily income, farm plots, pet-income bonus %,
+//  (battle slots ไม่ผูกเลเวลแล้ว = BATTLE_SLOTS คงที่ 3 · field `battleSlots` ในตารางเป็น legacy)
 //  market unlock, seed tier, shop discount, art/frame. All numbers tunable.
 // ════════════════════════════════════════════════════════════
 
@@ -56,8 +57,6 @@ export const residenceDailyIncome  = (level) => getTier(level).dailyIncome
 export const residencePlots        = (level) => getTier(level).plots
 // ทีมต่อสู้ = 3 ช่องคงที่ทุกเลเวลบ้าน (เลิกเป็น perk บ้าน) — source เดียวคือ BATTLE_SLOTS
 export const BATTLE_SLOTS = 3
-// shim: importer เดิมยังเรียก residenceBattleSlots(level) ได้ (คืน 3 เสมอ) จนกว่าจะย้ายไปใช้ BATTLE_SLOTS ตรงๆ
-export const residenceBattleSlots  = () => BATTLE_SLOTS
 export const residenceEggSlots     = (level) => getTier(level).eggSlots
 export const residenceMarketOpen   = (level) => getTier(level).marketUnlocked
 

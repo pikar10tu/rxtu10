@@ -1,4 +1,4 @@
-<!-- TeamPicker — จัดทีม (= activePets, ช่อง = battleSlots ตามเลเวลบ้าน) ใช้ร่วมหอคอย+หน้าเพ็ท
+<!-- TeamPicker — จัดทีม (= activePets, 3 ช่องคงที่ = BATTLE_SLOTS) ใช้ร่วมหอคอย+หน้าเพ็ท
      แตะช่องที่มีตัว = เปิด PetDetailModal (ดู/วิวัฒน์/ถอด) · แตะตัวในคลัง = สลับเข้า/ออกทีม
      คลังเรียง rarity (legendary→common) + เกรด · โชว์ ธาตุ/เกรด/ชื่อ ต่อตัว -->
 <template>
@@ -46,7 +46,7 @@ import PetThumb from '../shared/PetThumb.vue'
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
-import { residenceBattleSlots } from '../../data/residence.js'
+import { BATTLE_SLOTS } from '../../data/residence.js'
 
 defineProps({ open: { type: Boolean, default: false } })
 defineEmits(['update:open'])
@@ -56,7 +56,7 @@ const detailId = ref(null)
 const owned = computed(() => auth.userData?.pets || [])
 // เพ็ทที่กำลังออกผจญภัย — เอาเข้าทีมไม่ได้จนกว่าจะกลับ
 const expeditionIds = computed(() => new Set(auth.userData?.expedition?.petIds || []))
-const battleSlots = computed(() => residenceBattleSlots(auth.userData?.residence?.level || 1))
+const battleSlots = computed(() => BATTLE_SLOTS)
 const ownedIds = computed(() => new Set(owned.value.map(p => p.id)))
 // active เฉพาะตัวที่ยังครอบครอง ตัดให้ยาวไม่เกิน battleSlots
 const activeIds = computed(() =>

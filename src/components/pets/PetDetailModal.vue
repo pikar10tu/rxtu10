@@ -58,7 +58,7 @@ import { useToast } from '../../composables/useToast.js'
 import { RARITY, GRADE_LABELS, getPetDef, ELEMENTS, EL_NAME } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
-import { residenceBattleSlots } from '../../data/residence.js'
+import { BATTLE_SLOTS } from '../../data/residence.js'
 import { gradeUpCost, canUpgrade, MAX_GRADE } from '../../utils/petGrade.js'
 
 const props = defineProps({ petId: { type: String, default: null } })
@@ -71,7 +71,7 @@ const busy = ref(false)
 const pets = computed(() => auth.userData?.pets || [])
 
 // ── Active team ──
-const battleSlots = computed(() => residenceBattleSlots(auth.userData?.residence?.level || 1))
+const battleSlots = computed(() => BATTLE_SLOTS)
 // only count active pets that are still owned — a species removed from the
 // collection can leave a ghost id in activePets and inflate the count.
 const activeList = computed(() => {

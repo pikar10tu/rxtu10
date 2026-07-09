@@ -58,7 +58,7 @@ import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, PETS, ELEMENTS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'
-import { residenceBattleSlots } from '../data/residence.js'
+import { BATTLE_SLOTS } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
@@ -68,7 +68,7 @@ const sel = ref(null)
 const pickOpen = ref(false)
 
 const pets = computed(() => authStore.userData?.pets || [])
-const battleSlots = computed(() => residenceBattleSlots(authStore.userData?.residence?.level || 1))
+const battleSlots = computed(() => BATTLE_SLOTS)
 const teamSlots = computed(() => {
   const owned = new Set(pets.value.map(p => p.id))
   const a = (authStore.userData?.activePets || []).filter(id => id && owned.has(id)).slice(0, battleSlots.value)
