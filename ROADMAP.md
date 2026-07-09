@@ -39,6 +39,12 @@ spec: `docs/superpowers/specs/2026-07-09-play-restructure-farm-plots-design.md`
 
 **ลำดับแนะนำ:** #1 ปรุงยา → #2 อาหารเพ็ท (สองอันนี้ทำให้ฟาร์มเป็นหัวใจกลางป้อนทั้งเภสัชกรรม+เพ็ท)
 
+### 🎨 งานแทรก 10 ก.ค. — UI polish (pet/arena/battle) + Active team 3
+spec `docs/superpowers/specs/2026-07-10-pet-arena-battle-polish-design.md` (brainstorm เสร็จ) — 4 อย่าง: (1) หน้า Pet declutter แบบ 7DS (ดาวเกรด+ขอบ rarity ถอด ATK/HP ไปดู detail) (2) พื้นหลังสนามธีมแยกโหมด Arena=โคลอสเซียม/Tower=หอคอย (prop theme) (3) เลข HP/ATK ในไฟต์ใหญ่ขึ้น (4) **Active team = 3 คงที่ทุกคน** ตัด battleSlots ออกจาก perk บ้าน (BATTLE_SLOTS=3, cap resolveBattleTeam, normalize slice 4→3)
+
+### 🏯 Backlog: Tower (หอคอย) rework — user มีแผนรื้อ (10 ก.ค., ยังไม่ brainstorm)
+ไว้ session ถัดไป · แยก brainstorm เอง · ปัจจุบัน tower ใช้ BattleReplay + useTower + towerFloors + bonus ladder (ดู economy-battle-master-plan §4)
+
 ---
 
 ## 📝 อัปเดต session 3–4 ก.ค. 2026
