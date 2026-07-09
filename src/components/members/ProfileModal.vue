@@ -1,4 +1,6 @@
 <template>
+  <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z-index สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้ (ดู CLAUDE.md) -->
+  <Teleport to="body">
   <div v-if="member" class="pf-ov" @click.self="$emit('close')">
     <div class="pf-box">
       <!-- Tier 1: hero (residence art = the flex background) -->
@@ -43,6 +45,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>

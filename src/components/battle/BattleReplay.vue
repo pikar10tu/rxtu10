@@ -3,6 +3,9 @@
      controls: pause/speed/skip · แตะตัว = pause + inspect (ช่อง passive รอ §5.5 master plan)
      ⚠️ ทุก emoji ผ่าน <Emoji> (Fluent self-host) — อย่าใส่ emoji ดิบในเทมเพลต (เป็น tofu บนบางเครื่อง) -->
 <template>
+  <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z420 สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้
+       → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
+  <Teleport to="body">
   <div v-if="data" class="br-ov">
     <div class="br-box" :class="{ hitstop: hitStop }">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
@@ -115,6 +118,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>

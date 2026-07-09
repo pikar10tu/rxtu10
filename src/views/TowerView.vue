@@ -71,7 +71,8 @@
     <BattleReplay :data="replay" @close="replay = null" />
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
 
-    <!-- scout ศัตรู (read-only) -->
+    <!-- scout ศัตรู (read-only) — Teleport ไป body: #main-content stacking context, z-index สู้ #bottom-nav ไม่ได้ (ดู CLAUDE.md) -->
+    <Teleport to="body">
     <div v-if="scout" class="tw-scout" @click.self="scout = null">
       <div class="tw-scout-box">
         <div class="tw-scout-emoji"><Emoji :char="defOf(scout.id).emoji" /></div>
@@ -83,6 +84,7 @@
         <button class="tw-scout-x" @click="scout = null">ปิด</button>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 

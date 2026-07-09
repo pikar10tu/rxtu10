@@ -1,4 +1,6 @@
 <template>
+  <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z-index สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้ (ดู CLAUDE.md) -->
+  <Teleport to="body">
   <div v-if="pet" class="pd-ov" @click.self="$emit('close')">
     <div class="pd-box">
       <div class="pd-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
@@ -44,6 +46,7 @@
 
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>

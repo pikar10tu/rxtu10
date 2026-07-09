@@ -107,7 +107,8 @@
       </div>
     </template>
 
-    <!-- ── REPORT modal ── -->
+    <!-- ── REPORT modal ── — Teleport ไป body: #main-content stacking context, z-index สู้ #bottom-nav ไม่ได้ (ดู CLAUDE.md) -->
+    <Teleport to="body">
     <div v-if="reportOpen" class="sv-rep-ov" @click.self="reportOpen = false">
       <div class="sv-rep-box">
         <div class="sv-rep-head">
@@ -127,6 +128,7 @@
         </button>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 

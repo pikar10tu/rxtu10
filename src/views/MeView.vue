@@ -41,7 +41,8 @@
       <button class="me-logout" @click="auth.logout()">ออกจากระบบ</button>
     </template>
 
-    <!-- ── feedback modal ── -->
+    <!-- ── feedback modal ── — Teleport ไป body: #main-content stacking context, z-index สู้ #bottom-nav ไม่ได้ (ดู CLAUDE.md) -->
+    <Teleport to="body">
     <div v-if="fbOpen" class="fb-ov" @click.self="fbOpen = false">
       <div class="fb-box">
         <div class="fb-head">
@@ -67,6 +68,7 @@
         </button>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 

@@ -1,4 +1,8 @@
 <template>
+  <!-- Teleport ไป body: #main-content เป็น position:fixed = สร้าง stacking context
+       → overlay ที่ render ใต้ RouterView ถูกขังในนั้น z-index สู้ #bottom-nav (z200) ที่ root ไม่ได้
+       → nav เพนต์ทับก้น sheet. ย้ายไประดับ root ให้ z-index มีผลจริง (ดู BottomSheet.vue / CLAUDE.md) -->
+  <Teleport to="body">
   <div v-if="open" class="sp-ov" @click.self="$emit('close')">
     <div class="sp-box">
       <div class="sp-head">
@@ -23,6 +27,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -37,7 +42,7 @@ defineEmits(['pick', 'close'])
 </script>
 
 <style scoped>
-/* z-index ต้อง > #bottom-nav (200) — เปิดทับ FarmGrid (farm-ov z-index 400) ด้วย */
+/* z-index > #bottom-nav (200) — มีผลจริงเพราะ Teleport ไป body แล้ว (ไม่งั้นโดน stacking context ขัง) */
 .sp-ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
 .sp-box { background: #fff; width: 100%; max-width: 480px; max-height: 80vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; }
 .sp-head { display: flex; justify-content: space-between; align-items: center; padding: 16px; font-weight: 800; border-bottom: 1px solid rgba(0,0,0,.07); }
