@@ -28,7 +28,8 @@ export function useFarm() {
     return Math.max(1, Math.min(Number.isFinite(raw) ? raw : 1, MAX_PLOTS))
   })
   // แปลงที่เห็น/ปลูกได้จริง = min(ปลดแล้ว, เพดานบ้าน)
-  // กัน edge case: admin ลดเลเวลบ้าน → เพดานต่ำกว่าที่ปลด → ซ่อนแปลงเกิน ไม่ลบข้อมูล
+  // กัน edge case: admin ลดเลเวลบ้าน → เพดานต่ำกว่าที่ปลด → ซ่อนแปลงส่วนเกิน
+  // (⚠️ พืชในแปลงที่ถูกซ่อนจะถูกตัดทิ้งเมื่อทำ action ฟาร์มครั้งถัดไป — commit เขียนทับทั้ง array)
   const plotCount = computed(() => Math.min(plotsUnlocked.value, ceiling.value))
   // สถานะปลดแปลงถัดไป (pure logic จาก farmPlots)
   const nextPlot  = computed(() => nextPlotInfo({

@@ -6,7 +6,7 @@
       <span class="fs-cap">· เพดานตามเลเวลบ้าน</span>
     </div>
 
-    <div v-if="info.reason === 'maxed'" class="fs-msg done">ปลดครบทุกแปลงแล้ว 🎉</div>
+    <div v-if="info.reason === 'maxed'" class="fs-msg done">ปลดครบทุกแปลงแล้ว <Emoji char="🎉" /></div>
     <div v-else-if="info.reason === 'atCeiling'" class="fs-msg">
       ปลดครบเพดานบ้านแล้ว — อัปเกรดบ้านเพื่อปลดแปลงเพิ่ม (ตอนนี้เพดาน {{ farm.ceiling.value }} แปลง)
     </div>
