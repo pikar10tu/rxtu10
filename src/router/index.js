@@ -18,6 +18,7 @@ const routes = [
     { path: '/arena',     name: 'arena',     component: () => import('../views/ArenaView.vue')     },
     { path: '/expedition', name: 'expedition', component: () => import('../views/ExpeditionView.vue') },
     { path: '/play/farm',  name: 'play-farm',  component: () => import('../views/FarmView.vue')    },
+    { path: '/play/pets',  name: 'play-pets',  component: () => import('../views/PetHubView.vue')  },
 ]
 
 export const router = createRouter({
