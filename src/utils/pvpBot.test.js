@@ -8,7 +8,7 @@ test('botPowerFor: เรตสูง เกรด/tier สูงกว่าเ
 })
 test('getPvpBot: คืน 4 ตัว + isBot + rating = เรตผู้เล่น', () => {
   const b = getPvpBot(1000, 12345)
-  assert.equal(b.team.length, 4)
+  assert.equal(b.team.length, 3)
   assert.equal(b.isBot, true)
   assert.equal(b.rating, 1000)
   b.team.forEach(p => { assert.ok(p.id && p.rarity && p.element); assert.ok(p.grade >= 0 && p.grade <= 5) })

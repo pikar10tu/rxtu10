@@ -5,7 +5,7 @@ import { getFloorTeam, getTowerBonus, TOWER_MAX, floorZone } from './towerFloors
 test('getFloorTeam คืน 4 ตัวเสมอ + deterministic', () => {
   for (const f of [1, 10, 25, 50]) {
     const t = getFloorTeam(f)
-    assert.equal(t.length, 4)
+    assert.equal(t.length, 3)
     assert.deepEqual(getFloorTeam(f), t)
     t.forEach(p => { assert.ok(p.id && p.rarity && p.element); assert.ok(p.grade >= 0 && p.grade <= 5) })
   }

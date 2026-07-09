@@ -111,7 +111,7 @@ export function normalizeUserData(data) {
   d.pets       = Array.isArray(d.pets) ? d.pets : []
   d.eggs       = Array.isArray(d.eggs) ? d.eggs : []
   d.tags       = Array.isArray(d.tags) ? d.tags : []
-  // ทีม 4 ตัว: ยาว 4 เสมอ (pad null / ตัดส่วนเกิน)
+  // ทีม 3 ตัว: ยาว 3 เสมอ (pad null / ตัดส่วนเกิน)
   const TEAM_SIZE = 3
   d.activePets = (Array.isArray(d.activePets) ? d.activePets : []).slice(0, TEAM_SIZE)
   while (d.activePets.length < TEAM_SIZE) d.activePets.push(null)

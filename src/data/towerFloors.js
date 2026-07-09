@@ -3,6 +3,7 @@
 //  deterministic จาก floor → ทีมบอทคงที่/ทดสอบได้
 // ════════════════════════════════════════════════════════════
 import { PETS } from './index.js'
+import { BATTLE_SLOTS } from './residence.js'
 
 export const TOWER_MAX = 50
 
@@ -19,7 +20,7 @@ function rng(seed) {
   }
 }
 
-/** ชั้น → ทีมบอท 4 ตัว (rarity/เกรดไต่ตามชั้น + ธาตุผสม) */
+/** ชั้น → ทีมบอท 3 ตัว (rarity/เกรดไต่ตามชั้น + ธาตุผสม) */
 export function getFloorTeam(floor) {
   const f = Math.max(1, Math.min(TOWER_MAX, Math.floor(floor) || 1))
   const rand = rng((f * 2654435761) >>> 0)
@@ -27,7 +28,7 @@ export function getFloorTeam(floor) {
   const grade = Math.min(5, Math.floor((f - 1) / 9))     // 0..5
   const rarity = RARITY_BY_TIER[tier]
   const team = []
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < BATTLE_SLOTS; i++) {
     const element = ELS[(f + i) % 3]
     const pool = PETS.filter(p => p.rarity === rarity && p.element === element)
     const fallback = PETS.filter(p => p.element === element)
