@@ -29,6 +29,12 @@ function rowFromItem(item) {
   let answer = Math.trunc(Number(item.answer))
   if (!Number.isFinite(answer) || answer < 0 || answer >= choices.length) answer = 0
 
+  // ชุดข้อสอบย้อนหลัง: รับ examSets (array) หรือ examSet (string เดี่ยว) — clean + ตัดว่าง
+  const rawSets = Array.isArray(item.examSets)
+    ? item.examSets
+    : (item.examSet != null ? [item.examSet] : [])
+  const examSets = rawSets.map(s => cleanText(s, LIMITS.category)).filter(Boolean)
+
   return {
     question,
     choices,
@@ -36,6 +42,7 @@ function rowFromItem(item) {
     category: cleanText(item.category, LIMITS.category) || null,
     explanation: cleanText(item.explanation, LIMITS.explanation) || null,
     domain: isDomainKey(item.domain) ? item.domain : null,
+    examSets,
     isPublished: false, // บังคับร่างเสมอ — ทีมวิชาการตรวจก่อน publish ทีละข้อ
   }
 }

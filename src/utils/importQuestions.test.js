@@ -17,7 +17,7 @@ test('นำเข้าข้อที่ถูกต้อง 1 ข้อ → 
   assert.equal(r.rows.length, 1)
   assert.deepEqual(r.rows[0], {
     question: 'ยาใดเป็น first-line', choices: ['A', 'B', 'C', 'D'], answer: 2,
-    category: 'ยาปฏิชีวนะ', explanation: 'เพราะ X', domain: null, isPublished: false,
+    category: 'ยาปฏิชีวนะ', explanation: 'เพราะ X', domain: null, isPublished: false, examSets: [],
   })
 })
 
@@ -128,4 +128,19 @@ test('domain มั่ว (ไม่อยู่ใน Care/Sci/Law) → null', 
 test('domain ไม่ส่งมา → null', () => {
   const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0 }))
   assert.equal(r.rows[0].domain, null)
+})
+
+test('examSets เป็น array → เก็บ (ผ่าน cleanText, ตัดว่าง)', () => {
+  const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0, examSets: ['PLE-CC1 ชุด 1', '  ', ''] }))
+  assert.deepEqual(r.rows[0].examSets, ['PLE-CC1 ชุด 1'])
+})
+
+test('examSet เดี่ยว (string) → กลายเป็น array 1 ตัว', () => {
+  const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0, examSet: 'PLE-CC1 ชุด 2' }))
+  assert.deepEqual(r.rows[0].examSets, ['PLE-CC1 ชุด 2'])
+})
+
+test('ไม่ส่ง examSets/examSet → []', () => {
+  const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0 }))
+  assert.deepEqual(r.rows[0].examSets, [])
 })
