@@ -31,6 +31,7 @@
             <p class="qz-fmt-note">
               <code>answer</code> = ลำดับตัวเลือกที่ถูก เริ่มที่ 0 · <code>choices</code> 2–6 ตัว ·
               <code>category</code>/<code>explanation</code> ไม่บังคับ ·
+              <code>examSets</code> = array ชื่อชุด เช่น <code>["PLE-CC1 ชุด 1"]</code> (หรือ <code>examSet</code> เดี่ยว) · ไม่บังคับ ·
               ทุกข้อนำเข้าเป็น <b>“ร่าง”</b> ต้องไปกดเผยแพร่ทีหลัง
             </p>
           </details>
@@ -38,6 +39,11 @@
           <div v-if="importError" class="qz-import-err"><Emoji char="⚠️" /> {{ importError }}</div>
           <div v-else-if="importText.trim()" class="qz-import-hint">
             พร้อมนำเข้า <b>{{ importCount }}</b> ข้อ<span v-if="importSkipped"> · ข้าม {{ importSkipped }} ข้อ (ผิดรูปแบบ)</span>
+          </div>
+
+          <div class="qz-import-sets">
+            <span class="qz-import-sets-label">ตั้งชุดให้ทุกข้อในไฟล์ (ข้อที่มีชุดของตัวเองใน JSON ใช้ของตัวเอง)</span>
+            <ExamSetSelect v-model="fileSets" />
           </div>
 
           <button class="qz-btn qz-primary qz-import-btn" :disabled="importing || !importCount" @click="runImport">
@@ -286,7 +292,7 @@
 import Emoji from '../components/shared/Emoji.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, setDoc, deleteField } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, setDoc, deleteField, arrayUnion } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -295,7 +301,10 @@ import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { bankStats } from '../utils/questionBankStats.js'
 import { parseImport } from '../utils/importQuestions.js'
-import { qhash, splitDuplicateRows, groupDuplicates } from '../utils/qhash.js'
+import { qhash, groupDuplicates } from '../utils/qhash.js'
+import { planImportWrites, stampFileSets } from '../utils/importTagging.js'
+import { keepKnownSets } from '../utils/examSets.js'
+import { useExamSets } from '../composables/useExamSets.js'
 import { buildMeta } from '../utils/questionsMeta.js'
 import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js'
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
@@ -456,6 +465,7 @@ onMounted(() => {
   if (!authStore.isQuestionEditor) return
   load()
   loadStats()
+  loadExamSets()
   if (authStore.isAcademic) loadReports()
 })
 
@@ -472,6 +482,8 @@ const FORMAT_EXAMPLE = `[
 const importText = ref('')
 const importing = ref(false)
 const fileEl = ref(null)
+const { sets: examSetOptions, loadExamSets } = useExamSets()
+const fileSets = ref([])   // ชุดที่จะ stamp ทั้งไฟล์
 
 // เลือกไฟล์ .json จากเครื่อง → เทเนื้อหาลง textarea (parse/preview เหมือนวางเอง)
 async function onFile(e) {
@@ -496,36 +508,49 @@ const importError = computed(() => (importText.value.trim() ? importParsed.value
 
 async function runImport() {
   if (importing.value) return
-  const { rows, skipped, error } = parseImport(importText.value)
+  const { rows: rawRows, skipped, error } = parseImport(importText.value)
   if (error) { toast(error, 'error'); return }
-  if (!rows.length) { toast('ไม่มีข้อที่นำเข้าได้', 'error'); return }
+  if (!rawRows.length) { toast('ไม่มีข้อที่นำเข้าได้', 'error'); return }
   importing.value = true
   try {
-    // กันซ้ำ: เทียบ qhash กับคลังที่โหลดอยู่ (list) + ซ้ำกันเองในก้อน → เขียนเฉพาะ fresh
-    const existingHashes = list.value.map(q => (typeof q.qhash === 'string' ? q.qhash : qhash(q.question)))
-    const { fresh, duplicates } = splitDuplicateRows(rows, existingHashes)
-    if (!fresh.length) { toast(`ทุกข้อซ้ำกับคลัง (${duplicates.length} ข้อ) — ไม่ได้นำเข้า`, 'error'); return }
+    const known = examSetOptions.value.map(s => s.name)
+    // 1) stamp ชุดทั้งไฟล์ให้ข้อที่ยังไม่มีชุด → 2) คัดเฉพาะชื่อชุดที่รู้จัก (กัน fragmentation)
+    const stamped = stampFileSets(rawRows, keepKnownSets(fileSets.value, known))
+    const rows = stamped.map(r => ({ ...r, examSets: keepKnownSets(r.examSets, known) }))
+    // 3) วางแผนเขียน: ข้อใหม่ = fresh, ข้อซ้ำคลัง+มีชุด = tagUpdate (arrayUnion เข้า doc เดิม)
+    const existing = list.value.map(q => ({ id: q.id, qhash: (typeof q.qhash === 'string' ? q.qhash : qhash(q.question)) }))
+    const { fresh, tagUpdates } = planImportWrites(rows, existing)
+    if (!fresh.length && !tagUpdates.length) { toast('ทุกข้อซ้ำคลังและไม่มีชุดใหม่ให้เพิ่ม', 'error'); return }
     const meta = {
       createdBy: authStore.currentUser?.uid || null,
       createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
       source: 'import',
-      ...REVIEW_RESET,   // ประทับ reviewStatus:'pending' — หน้า /review query จาก field นี้
+      ...REVIEW_RESET,
     }
+    // เขียน fresh (chunk 500) — ข้อใหม่พร้อม examSets
     const col = collection(db, 'questions')
-    // chunk ละ 500 — Firestore batch จำกัด 500 ops/commit
     for (let i = 0; i < fresh.length; i += 500) {
       const batch = writeBatch(db)
-      for (const row of fresh.slice(i, i + 500)) {
-        batch.set(doc(col), { ...row, ...meta, qhash: qhash(row.question), rand: Math.random(), createdAt: serverTimestamp() })
+      for (const r of fresh.slice(i, i + 500)) {
+        batch.set(doc(col), { ...r, ...meta, qhash: qhash(r.question), rand: Math.random(), createdAt: serverTimestamp() })
       }
       await batch.commit()
     }
-    if (skipped.length) console.warn('[questions import] ข้ามข้อ (index, เหตุผล):', skipped)
-    const parts = [`นำเข้า ${fresh.length} ข้อ`]
-    if (duplicates.length) parts.push(`ข้ามซ้ำ ${duplicates.length} ข้อ`)
+    // arrayUnion tag เข้า doc เดิม (chunk 500) — ไม่แตะ review keys → ไม่ล้างผลตรวจ
+    for (let i = 0; i < tagUpdates.length; i += 500) {
+      const batch = writeBatch(db)
+      for (const t of tagUpdates.slice(i, i + 500)) {
+        batch.update(doc(db, 'questions', t.id), { examSets: arrayUnion(...t.addSets), updatedAt: serverTimestamp() })
+      }
+      await batch.commit()
+    }
+    if (skipped.length) console.warn('[questions import] ข้ามข้อ:', skipped)
+    const parts = [`นำเข้าใหม่ ${fresh.length} ข้อ`]
+    if (tagUpdates.length) parts.push(`เพิ่มแท็กข้อเดิม ${tagUpdates.length} ข้อ`)
     if (skipped.length) parts.push(`ผิดรูปแบบ ${skipped.length} ข้อ`)
     toast(parts.join(' · '), 'success')
     importText.value = ''
+    fileSets.value = []
     await load()
     await recomputeMeta()
   } catch (e) {
@@ -956,4 +981,7 @@ async function resolveReports(g, verdict) {
 .qz-review-reason { color: rgba(0,0,0,.7); white-space: pre-wrap; overflow-wrap: anywhere; }
 .qz-review-ref { font-size: .68rem; color: rgba(0,0,0,.45); overflow-wrap: anywhere; }
 .qz-reviews-hint { font-size: .68rem; color: rgba(0,0,0,.5); margin-top: 4px; }
+
+.qz-import-sets { display: flex; flex-direction: column; gap: 5px; }
+.qz-import-sets-label { font-size: .7rem; font-weight: 700; color: #64748b; }
 </style>
