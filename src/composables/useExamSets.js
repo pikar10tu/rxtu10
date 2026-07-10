@@ -10,6 +10,7 @@ import { upsertExamSet } from '../utils/examSets.js'
 
 const sets = ref([])
 let loadPromise = null   // cache promise ไม่ใช่ boolean — กัน race (ดู addExamSet)
+let loadedOk = false     // gate writes: โหลดสำเร็จแล้วไป addExamSet ได้
 
 export function useExamSets() {
   const usage = useUsageStore()
@@ -22,6 +23,7 @@ export function useExamSets() {
           const snap = await getDoc(doc(db, 'config', 'examSets'))
           usage.track(1)
           if (snap.exists()) sets.value = snap.data().list || []
+          loadedOk = true   // gate write ตรวจสอบว่า config โหลดมาจริง กัน data loss จาก read-fail
         } catch (e) { console.error('[examSets]', e); loadPromise = null }   // ให้ retry ได้
       })()
     }
@@ -31,6 +33,7 @@ export function useExamSets() {
   // เพิ่ม/อัปเดตชุด — คืน entry ที่ clean แล้ว (null ถ้าชื่อว่าง)
   async function addExamSet(name, year) {
     await loadExamSets()   // ⚠️ กัน race: ต้องมี list ปัจจุบันครบก่อน upsert ไม่งั้น setDoc { list } ทับชุดเดิมหายหมด
+    if (!loadedOk) return null   // โหลด config ไม่สำเร็จ (read fail) → ไม่เขียนทับด้วย cache ว่าง กัน data loss
     const r = upsertExamSet(sets.value, name, year)
     if (!r) return null
     await setDoc(doc(db, 'config', 'examSets'), { list: r.list }, { merge: true })
