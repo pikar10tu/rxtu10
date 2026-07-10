@@ -127,6 +127,13 @@ service cloud.firestore {
       allow write: if canEditQuestions();
     }
 
+    // ── Exam sets — รายชื่อชุดข้อสอบย้อนหลัง (config/examSets.list = [{name, year}]) ──
+    //  read: public ผ่าน match /config/{doc} (นักศึกษาโหลด picker "ข้อสอบย้อนหลัง")
+    //  write: วิชาการ/อาจารย์เพิ่มชุดเองได้ระหว่างติดป้ายข้อสอบ (เหมือน topics)
+    match /config/examSets {
+      allow write: if canEditQuestions();
+    }
+
     // ── Cheat logs — anyone may log themselves; only admin reads ──
     match /cheatLogs/{id} {
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
