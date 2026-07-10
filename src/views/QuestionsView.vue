@@ -129,6 +129,9 @@
         <label class="qz-label">หมวด / กลุ่มเนื้อหา</label>
         <TopicSelect v-model="draft.category" />
 
+        <label class="qz-label">ชุดข้อสอบย้อนหลัง (ไม่บังคับ — 1 ข้ออยู่ได้หลายชุด)</label>
+        <ExamSetSelect v-model="draft.examSets" />
+
         <label class="qz-label">หมวดใหญ่ (domain)</label>
         <select v-model="draft.domain" class="qz-input">
           <option :value="null">— ไม่ระบุ —</option>
@@ -302,6 +305,7 @@ import { reviewContentChanged, REVIEW_RESET, reviewStatusKey, REVIEW_STATUS_LABE
 import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 import TopicSelect from '../components/questions/TopicSelect.vue'
+import ExamSetSelect from '../components/questions/ExamSetSelect.vue'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -427,7 +431,7 @@ async function publishAllFilteredDrafts() {
 }
 
 function blankDraft() {
-  return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false, domain: null }
+  return { id: null, question: '', choices: ['', '', '', ''], answer: 0, category: '', explanation: '', isPublished: false, domain: null, examSets: [] }
 }
 const draft = ref(blankDraft())
 // รีวิวของข้อที่กำลังแก้ (ประกาศก่อน resetDraft — กัน TDZ ถ้าอนาคตมีใครเรียกตอน setup)
@@ -608,6 +612,7 @@ async function save() {
     explanation: cleanText(d.explanation, LIMITS.explanation) || null,
     isPublished: !!d.isPublished,
     domain: d.domain || null,
+    examSets: Array.isArray(d.examSets) ? d.examSets : [],
     qhash: qhash(cleanText(d.question, LIMITS.question)), // กันซ้ำ + อัปเดตเมื่อแก้โจทย์
     updatedAt: serverTimestamp(),
   }
@@ -694,6 +699,7 @@ function edit(q) {
     explanation: q.explanation || '',
     isPublished: !!q.isPublished,
     domain: q.domain || null,
+    examSets: Array.isArray(q.examSets) ? [...q.examSets] : [],
   }
   loadEditReviews(q) // โหลดเหตุผลผู้ตรวจ (ไม่ await — ไม่บล็อก UX)
   window.scrollTo({ top: 0, behavior: 'smooth' })
