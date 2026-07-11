@@ -10,6 +10,15 @@
     </div>
 
     <template v-else>
+      <!-- ── แท็บงาน (in-component tabs — state ร่วมกัน ไม่ต้องอ่านคลังซ้ำ) ── -->
+      <div class="qz-tabs">
+        <button class="qz-tab" :class="{ on: activeTab === 'edit' }" @click="activeTab = 'edit'">✍️ เพิ่ม/แก้</button>
+        <button class="qz-tab" :class="{ on: activeTab === 'bank' }" @click="activeTab = 'bank'">📚 คลัง</button>
+        <button class="qz-tab" :class="{ on: activeTab === 'check' }" @click="activeTab = 'check'">🔍 ตรวจสอบ</button>
+      </div>
+
+      <!-- ── ✍️ แท็บ เพิ่ม/แก้ : นำเข้า JSON ── -->
+      <template v-if="activeTab === 'edit'">
       <!-- ── นำเข้าหลายข้อ (bulk JSON import) ── -->
       <details class="qz-import">
         <summary class="qz-import-sum"><Emoji char="📥" /> นำเข้าข้อสอบหลายข้อ (JSON)</summary>
@@ -58,7 +67,10 @@
           </button>
         </div>
       </details>
+      </template>
 
+      <!-- ── 🔍 แท็บ ตรวจสอบ : ข้อถูกแจ้ง + ตรวจข้อซ้ำ ── -->
+      <template v-if="activeTab === 'check'">
       <!-- ── ข้อที่ถูกแจ้งว่าผิด (questionReports) ── -->
       <details v-if="authStore.isAcademic" class="qz-reports" @toggle="onReportsToggle">
         <summary class="qz-reports-sum"><Emoji char="🚩" /> ข้อที่ถูกแจ้งว่าผิด<span v-if="reportsOpen"> ({{ reports.length }})</span></summary>
@@ -112,7 +124,10 @@
           </div>
         </div>
       </details>
+      </template>
 
+      <!-- ── ✍️ แท็บ เพิ่ม/แก้ : ฟอร์มข้อสอบ ── -->
+      <template v-if="activeTab === 'edit'">
       <!-- ── editor ── -->
       <section class="qz-card">
         <div class="qz-card-head"><Emoji :char="draft.id ? '✏️' : '➕'" /> {{ draft.id ? 'แก้ไขข้อสอบ' : 'เพิ่มข้อสอบใหม่' }}</div>
@@ -177,7 +192,10 @@
           ↩️ นำกลับมาใช้ (กลับเข้าคิวตรวจใหม่)
         </button>
       </section>
+      </template>
 
+      <!-- ── 📚 แท็บ คลัง : ค้นหา/กรอง/รายการ/batch ── -->
+      <template v-if="activeTab === 'bank'">
       <!-- ── list ── -->
       <div class="qz-list-head">
         <span>รายการข้อสอบ</span>
@@ -300,6 +318,7 @@
       <button v-if="filtered.length > visible.length" class="qz-btn qz-gray qz-more" @click="visibleCount += PAGE">
         แสดงเพิ่ม ({{ filtered.length - visible.length }} เหลือ)
       </button>
+      </template>
     </template>
   </div>
 </template>
@@ -340,6 +359,7 @@ const { confirm } = useConfirm()
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 
 const list = ref([])
+const activeTab = ref('edit')   // แท็บงานในหน้า: edit (เพิ่ม/แก้) | bank (คลัง) | check (ตรวจสอบ)
 const loading = ref(false)
 const saving = ref(false)
 
@@ -779,6 +799,7 @@ function edit(q) {
     examSets: Array.isArray(q.examSets) ? [...q.examSets] : [],
   }
   loadEditReviews(q) // โหลดเหตุผลผู้ตรวจ (ไม่ await — ไม่บล็อก UX)
+  activeTab.value = 'edit'   // แก้จากแท็บคลัง/ตรวจสอบ → เด้งมาแท็บฟอร์มให้เห็นข้อที่กำลังแก้
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -902,6 +923,12 @@ async function resolveReports(g, verdict) {
 .qz-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
 .qz-count { font-size: .66rem; color: rgba(0,0,0,.45); font-weight: 600; }
 .qz-denied, .qz-empty { text-align: center; color: rgba(0,0,0,.4); padding: 26px 0; font-size: .85rem; }
+
+/* ── แท็บงาน (in-component tabs) ── */
+.qz-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.qz-tab { flex: 1; border: 2px solid var(--ink); background: #fff; border-radius: 11px; padding: 9px 6px; font-family: inherit; font-size: .78rem; font-weight: 800; color: var(--ink); cursor: pointer; transition: transform .1s, box-shadow .1s; }
+.qz-tab.on { background: var(--primary); color: #fff; box-shadow: var(--pop); }
+.qz-tab:active { transform: translate(1px,1px); }
 
 .qz-import { background: #fff; border: 2px dashed var(--ink); border-radius: 16px; padding: 4px 14px; margin-bottom: 16px; }
 .qz-import[open] { padding-bottom: 14px; }
