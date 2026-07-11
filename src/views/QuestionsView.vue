@@ -237,6 +237,10 @@
         <button class="qz-mini" :disabled="batchBusy" @click="batchPublish(false)">ถอนเป็นร่าง</button>
         <button class="qz-mini qz-danger" :disabled="batchBusy" @click="batchDelete">ลบ</button>
       </div>
+      <div v-if="selected.size" class="qz-batch-tag">
+        <ExamSetSelect v-model="batchSets" />
+        <button class="qz-mini" :disabled="batchBusy || !batchSets.length" @click="batchTag">เพิ่มชุดให้ {{ selected.size }} ข้อที่เลือก</button>
+      </div>
       <button
         v-if="filteredDraftIds.length"
         class="qz-btn qz-primary qz-pubfiltered" :disabled="batchBusy"
@@ -337,6 +341,7 @@ const reviewFilter = ref('')      // '' | pending | passed | conflict | failed |
 const visibleCount = ref(PAGE)
 const selected = ref(new Set())   // เก็บ id ที่เลือก (Vue 3 track Set ได้)
 const batchBusy = ref(false)
+const batchSets = ref([])   // ชุดที่จะ tag ให้ข้อที่เลือก
 const expandedId = ref(null)
 function toggleExpand(id) { expandedId.value = expandedId.value === id ? null : id }
 
@@ -396,6 +401,19 @@ async function batchPublish(value) {
     await commitInChunks(ids, (b, ref) => b.update(ref, { isPublished: value, updatedAt: serverTimestamp() }))
     await afterBatch(`${value ? 'เผยแพร่' : 'ถอนเป็นร่าง'} ${ids.length} ข้อแล้ว`)
   } catch (e) { console.error('[batch publish]', e); toast('ทำไม่สำเร็จ', 'error') }
+  finally { batchBusy.value = false }
+}
+
+// batch-tag: arrayUnion ชุดเข้าทุกข้อที่เลือก — ไม่แตะ review keys → ไม่ล้างผลตรวจ
+async function batchTag() {
+  const ids = [...selected.value]
+  if (!ids.length || !batchSets.value.length || batchBusy.value) return
+  batchBusy.value = true
+  try {
+    await commitInChunks(ids, (b, ref) => b.update(ref, { examSets: arrayUnion(...batchSets.value), updatedAt: serverTimestamp() }))
+    batchSets.value = []
+    await afterBatch(`เพิ่มชุดให้ ${ids.length} ข้อแล้ว`)
+  } catch (e) { console.error('[batch tag]', e); toast('เพิ่มชุดไม่สำเร็จ', 'error') }
   finally { batchBusy.value = false }
 }
 
@@ -924,6 +942,7 @@ async function resolveReports(g, verdict) {
 .qz-selall { display: flex; align-items: center; gap: 7px; font-size: .74rem; font-weight: 700; color: rgba(0,0,0,.6); cursor: pointer; }
 .qz-selall input { width: 16px; height: 16px; accent-color: var(--primary); }
 .qz-batch-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; background: #f8fafc; border-radius: 10px; padding: 8px 10px; }
+.qz-batch-tag { display: flex; flex-direction: column; gap: 7px; margin: 8px 0 10px; padding: 9px 10px; background: #f8fafc; border-radius: 10px; }
 .qz-selcount { font-size: .72rem; font-weight: 800; color: var(--ink); }
 .qz-pubfiltered { width: 100%; margin-bottom: 12px; }
 .qz-more { width: 100%; margin-top: 10px; }
