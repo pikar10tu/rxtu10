@@ -17,13 +17,24 @@
           <Emoji char="ℹ️" />
           <span>ข้อสอบชุดนี้นำเข้าจากคลังเก่า ยังไม่ผ่านการตรวจ อาจมีบางข้อคลาดเคลื่อน — กำลังเปิดรับทีมวิชาการมาช่วยตรวจสอบความถูกต้องอยู่นะ</span>
         </div>
-        <div class="qv-info">มีข้อสอบให้ทำ <b>{{ publishedTotal }}</b> ข้อ</div>
+        <div class="qv-info">มีข้อสอบให้ทำ <b>{{ activeCount }}</b> ข้อ</div>
 
         <template v-if="domainChips.length">
           <div class="qv-label">หมวด</div>
           <div class="qv-chips">
-            <button class="qv-chip" :class="{ on: dom === '__all' }" @click="dom = '__all'">ทั้งหมด</button>
-            <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="dom = d.key">{{ d.label }}</button>
+            <button class="qv-chip" :class="{ on: dom === '__all' && !examSet }" @click="pickDomain('__all')">ทั้งหมด</button>
+            <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="pickDomain(d.key)">{{ d.label }}</button>
+          </div>
+        </template>
+
+        <template v-if="examSetChips.length">
+          <div class="qv-label"><Emoji char="📜" /> ข้อสอบย้อนหลัง</div>
+          <div class="qv-chips">
+            <button
+              v-for="s in examSetChips" :key="s.name"
+              class="qv-chip" :class="{ on: examSet === s.name }"
+              @click="pickExamSet(s.name)"
+            >{{ s.name }}<span v-if="s.year"> · {{ s.year }}</span> ({{ s.count }})</button>
           </div>
         </template>
 
@@ -152,6 +163,7 @@ import { quizSample } from '../utils/quizSample.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
+import { useExamSets } from '../composables/useExamSets.js'
 import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
@@ -180,6 +192,7 @@ async function load() {
     const m = snap.exists() ? snap.data() : { publishedTotal: 0, categories: [], domains: {} }
     publishedTotal.value = m.publishedTotal || 0
     metaDomains.value = m.domains || {}
+    metaExamSets.value = m.examSets || []
   } catch (e) {
     console.error('[quiz meta]', e)
     toast('โหลดข้อมูลข้อสอบไม่สำเร็จ', 'error')
@@ -190,11 +203,33 @@ async function load() {
 onMounted(() => {
   if (!authStore.isLoggedIn) return
   load()
+  loadExamSets()
   if (route.query.mode === 'zen') startZen()
   else if (route.query.view === 'history') openHistory()
 })
 
 const dom = ref('__all')
+const examSet = ref(null)                       // ชื่อชุดที่เลือก (null = ไม่เลือก) — สลับกับ dom
+const metaExamSets = ref([])                    // [{ name, count }] จาก meta (published)
+const { sets: examSetConfig, loadExamSets } = useExamSets()  // ปีของแต่ละชุด (config/examSets)
+
+// ชิปชุด: เฉพาะชุดที่มีข้อ published (count>0) + ผสมปีจาก config · เรียงปีใหม่→เก่า แล้วชื่อ
+const examSetChips = computed(() => {
+  const yearOf = Object.fromEntries(examSetConfig.value.map(s => [s.name, s.year]))
+  return (metaExamSets.value || [])
+    .filter(s => s.count > 0)
+    .map(s => ({ name: s.name, count: s.count, year: yearOf[s.name] ?? null }))
+    .sort((a, b) => (b.year || 0) - (a.year || 0) || a.name.localeCompare(b.name, 'th'))
+})
+// จำนวนข้อที่ทำได้ตามตัวเลือกปัจจุบัน (ชุดที่เลือก หรือ ทั้งคลัง)
+const activeCount = computed(() =>
+  examSet.value ? (examSetChips.value.find(s => s.name === examSet.value)?.count || 0) : publishedTotal.value)
+
+// เลือกหมวด → ล้างชุด (mutually exclusive)
+function pickDomain(key) { dom.value = key; examSet.value = null }
+// เลือกชุด → toggle + ล้างหมวด
+function pickExamSet(name) { examSet.value = examSet.value === name ? null : name; if (examSet.value) dom.value = '__all' }
+
 // chips เฉพาะ domain ที่มีข้ออย่างน้อย 1 ข้อ
 const domainChips = computed(() => DOMAINS.filter(d => (metaDomains.value[d.key] || 0) > 0))
 
@@ -304,7 +339,9 @@ const starting = ref(false)
 async function fetchQuestions(n) {
   const R = Math.random()
   const base = [where('isPublished', '==', true)]
-  if (dom.value !== '__all') base.push(where('domain', '==', dom.value))
+  // ชุดย้อนหลังมาก่อน (สลับกับหมวด) — ใช้ composite index isPublished+examSets(CONTAINS)+rand
+  if (examSet.value) base.push(where('examSets', 'array-contains', examSet.value))
+  else if (dom.value !== '__all') base.push(where('domain', '==', dom.value))
   const col = collection(db, 'questions')
   const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(n)))
   usage.track(firstSnap.size)
@@ -338,6 +375,7 @@ async function startZen() {
   starting.value = true
   variant.value = 'zen'
   dom.value = '__all'
+  examSet.value = null
   try {
     const picks = await fetchQuestions(ZEN_BATCH)
     quiz.value = shuffle(picks).map(shuffleChoices)
@@ -423,6 +461,7 @@ async function finish() {
       correct: correct.value,
       pct: pct.value,
       domain: dom.value === '__all' ? null : dom.value,
+      examSet: examSet.value || null,
       category: null,
       domainStats,
       ts: serverTimestamp(),
