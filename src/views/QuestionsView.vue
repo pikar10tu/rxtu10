@@ -559,7 +559,13 @@ async function runImport() {
   if (!rawRows.length) { toast('ไม่มีข้อที่นำเข้าได้', 'error'); return }
   importing.value = true
   try {
+    await loadExamSets()   // FIX: กัน race — โหลด config/examSets ให้ครบก่อนอ่าน known (ไม่งั้น strip แท็กเงียบ)
     const known = examSetOptions.value.map(s => s.name)
+    // เตือนชื่อชุดที่ผู้ใช้ขอแต่ไม่อยู่ใน config (ถูกตัดทิ้งเพื่อกัน fragmentation)
+    const knownSet = new Set(known)
+    const requested = new Set([...fileSets.value, ...rawRows.flatMap(r => Array.isArray(r.examSets) ? r.examSets : [])])
+    const dropped = [...requested].filter(s => s && !knownSet.has(s))
+    if (dropped.length) console.warn('[questions import] ชื่อชุดไม่อยู่ใน config ถูกตัดทิ้ง:', dropped)
     // 1) stamp ชุดทั้งไฟล์ให้ข้อที่ยังไม่มีชุด → 2) คัดเฉพาะชื่อชุดที่รู้จัก (กัน fragmentation)
     const stamped = stampFileSets(rawRows, keepKnownSets(fileSets.value, known))
     const rows = stamped.map(r => ({ ...r, examSets: keepKnownSets(r.examSets, known) }))
