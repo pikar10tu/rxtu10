@@ -705,7 +705,7 @@ async function save() {
         Object.assign(payload, REVIEW_RESET, { reviewVerdicts: deleteField(), retired: deleteField() })
       }
       await updateDoc(doc(db, 'questions', d.id), payload)
-      toast('บันทึกการแก้ไขแล้ว', 'success')
+      toast(payload.isPublished && payload.examSets.length ? 'บันทึกแล้ว · กด 🔄 คำนวณ meta ใหม่ ให้ชุดขึ้นในควิซ' : 'บันทึกการแก้ไขแล้ว', 'success')
     } else {
       await addDoc(collection(db, 'questions'), {
         ...payload,
@@ -715,7 +715,7 @@ async function save() {
         createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
         createdAt: serverTimestamp(),
       })
-      toast('เพิ่มข้อสอบแล้ว', 'success')
+      toast(payload.isPublished && payload.examSets.length ? 'เพิ่มข้อสอบแล้ว · กด 🔄 คำนวณ meta ใหม่ ให้ชุดขึ้นในควิซ' : 'เพิ่มข้อสอบแล้ว', 'success')
     }
     resetDraft()
     await load()
