@@ -49,7 +49,7 @@
           {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำข้อสอบ (${quizCount} ข้อ)` }}
         </button>
         <button class="qv-history-btn" @click="openHistory"><Emoji char="📊" /> ประวัติของฉัน</button>
-        <div class="qv-hint">ทำข้อสอบได้เหรียญ +{{ QUIZ_COIN_PER_CORRECT }}/ข้อที่ถูก · เพดานตามเลเวลบ้าน (ขั้นต่ำ {{ QUIZ_DAILY_CAP_FLOOR.toLocaleString() }}<Emoji char="🪙" />/วัน)</div>
+        <div class="qv-hint">ทำข้อสอบได้เหรียญ +{{ QUIZ_COIN_PER_CORRECT }}/ข้อที่ถูก · ทำมากได้มาก ไม่จำกัดต่อวัน</div>
       </template>
     </template>
 
@@ -112,7 +112,7 @@
         <div class="qv-result-score">{{ correct }}<span>/{{ sessionTotal }}</span></div>
         <div class="qv-result-pct">{{ pct }}%</div>
         <div v-if="coinsEarned" class="qv-result-coins">+{{ coinsEarned.toLocaleString() }} <Emoji char="🪙" /></div>
-        <div v-else class="qv-result-nocoins">วันนี้รับเหรียญครบเพดานแล้ว</div>
+        <div v-else class="qv-result-nocoins">รอบนี้ยังไม่ได้เหรียญ — ตอบถูกได้เลย!</div>
         <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
       </div>
     </template>
@@ -167,8 +167,7 @@ import { useExamSets } from '../composables/useExamSets.js'
 import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
-import { quizDailyCap, quizGrant } from '../utils/quizReward.js'
-import { QUIZ_COIN_PER_CORRECT, QUIZ_DAILY_CAP_FLOOR } from '../data/index.js'
+import { QUIZ_COIN_PER_CORRECT } from '../data/index.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -433,12 +432,9 @@ function backToHome() { variant.value = 'normal'; mode.value = 'home' }
 async function finish() {
   mode.value = 'result'
 
-  // daily-capped coin reward (trust-based, anti-runaway-farm)
+  // เหรียญข้อสอบ — ไม่มีเพดานรายวันแล้ว ทำมากได้มาก (rate ต่อข้อที่ถูก)
   const today = new Date().toISOString().slice(0, 10)
-  const earnedToday = authStore.userData?.quizCoinDate === today ? (authStore.userData?.quizCoinsToday || 0) : 0
-  const level = authStore.userData?.residence?.level || 1
-  const cap = quizDailyCap(level, QUIZ_DAILY_CAP_FLOOR)
-  const grant = quizGrant(correct.value, earnedToday, cap, QUIZ_COIN_PER_CORRECT)
+  const grant = correct.value * QUIZ_COIN_PER_CORRECT
   coinsEarned.value = grant
 
   if (!authStore.currentUser) return
@@ -489,13 +485,13 @@ async function finish() {
   await authStore.patchUser(
     {
       coins: (authStore.userData?.coins || 0) + grant,
-      quizHigh: newHigh, quizCoinDate: today, quizCoinsToday: earnedToday + grant,
+      quizHigh: newHigh,
       quizDoneTotal: (authStore.userData?.quizDoneTotal || 0) + answered.value,
       dailyQuest: dq,
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
-      quizHigh: newHigh, quizCoinDate: today, quizCoinsToday: earnedToday + grant,
+      quizHigh: newHigh,
       quizDoneTotal: increment(answered.value),
       dailyQuest: dq,
     },
