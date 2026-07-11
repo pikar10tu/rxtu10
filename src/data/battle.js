@@ -1,7 +1,7 @@
 // ════════════════════════════════════════════════════════════
 //  Battle combat constants — พอร์ตจาก scripts/battle-sim.mjs (จูนแล้ว)
-//  ⚠️ ชุดเลขนี้ "flatter" กว่า BASE_STATS/STAT_MULTI ใน data/index.js
-//     (เดิมใช้แค่ petStats() แสดงผล) — battle ใช้ชุดนี้
+//  ⚠️ ชุดเลขนี้ตั้งใจ "flatter" กว่ารายได้ idle (petUtils) เพื่อกัน snowball ในสนามสู้
+//     (ดู docs/pet-system-overhaul-audit — P1 จะรวมเป็น petPower ตัวเดียว)
 // ════════════════════════════════════════════════════════════
 import { elementBeats } from './index.js'
 

@@ -15,8 +15,6 @@ export const USER_DEFAULTS = {
   customPhoto: null,
   coins: 0,
   pets: [],
-  eggs: [],
-  activePet: null,
   activePets: [null, null, null],
   pvpVictories: 0,
   studentId: null,
@@ -109,7 +107,6 @@ export function normalizeUserData(data) {
 
   // arrays must be arrays
   d.pets       = Array.isArray(d.pets) ? d.pets : []
-  d.eggs       = Array.isArray(d.eggs) ? d.eggs : []
   d.tags       = Array.isArray(d.tags) ? d.tags : []
   // ทีม 3 ตัว: ยาว 3 เสมอ (pad null / ตัดส่วนเกิน)
   const TEAM_SIZE = 3

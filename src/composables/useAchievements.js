@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAchievementBalloon } from './useAchievementBalloon.js'
 import { MILESTONES, getAchievement } from '../data/achievements.js'
-import { PETS } from '../data/pets.js'
+import { PETS } from '../data/index.js'
 import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
 import {
   computeProgress, checkMilestones, achievementDocId, achievementTitle, buildAchievementNews,
