@@ -4,7 +4,7 @@
   <div v-if="pet" class="pd-ov" @click.self="$emit('close')">
     <div class="pd-box">
       <div class="pd-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
-        <button class="pd-x" @click="$emit('close')">✕</button>
+        <button class="pd-x" aria-label="ปิด" @click="$emit('close')">✕</button>
         <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
         <div class="pd-name">{{ pet.name }}</div>
         <div class="pd-tags">
@@ -55,6 +55,7 @@ import Emoji from '../shared/Emoji.vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
 import { RARITY, GRADE_LABELS, getPetDef, ELEMENTS, EL_NAME } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
@@ -66,6 +67,7 @@ defineEmits(['close'])
 
 const auth = useAuthStore()
 const { toast } = useToast()
+const { confirm } = useConfirm()
 const busy = ref(false)
 
 const pets = computed(() => auth.userData?.pets || [])
@@ -135,6 +137,7 @@ async function evolve() {
   if (busy.value || !pet.value || !upCost.value) return
   const p = pet.value
   if (!canUp.value) { toast('copies หรือเหรียญของคุณไม่พอ', 'info'); return }
+  if (!(await confirm(`วิวัฒน์ ${p.name || 'เพ็ท'} เป็นเกรด ${GRADE_LABELS[(p.grade || 0) + 1]}?\nใช้ ${upCost.value.copies} copies + ${upCost.value.coins.toLocaleString()} เหรียญ`))) return
   const newPets = pets.value.map(x => x.id === p.id
     ? { ...x, grade: (x.grade || 0) + 1, copies: (x.copies || 0) - upCost.value.copies } : x)
   busy.value = true

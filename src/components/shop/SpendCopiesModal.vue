@@ -19,6 +19,7 @@
               <button class="sc-pm" :aria-label="`ลด ${p.name}`" :disabled="(alloc[p.id] || 0) <= 0" @click="setN(p, (alloc[p.id] || 0) - 1)">−</button>
               <span class="sc-n">{{ alloc[p.id] || 0 }}</span>
               <button class="sc-pm" :aria-label="`เพิ่ม ${p.name}`" :disabled="(alloc[p.id] || 0) >= p.copies" @click="setN(p, (alloc[p.id] || 0) + 1)">+</button>
+              <button class="sc-max" :aria-label="`ใส่ ${p.name} สูงสุด`" :disabled="(alloc[p.id] || 0) >= p.copies" @click="setN(p, p.copies)">สูงสุด</button>
             </div>
           </div>
         </div>
@@ -94,7 +95,10 @@ function confirm() {
 .sc-name { flex: 1; min-width: 0; font-size: .8rem; font-weight: 700; }
 .sc-name small { color: rgba(0,0,0,.45); font-weight: 600; }
 .sc-step { display: flex; align-items: center; gap: 8px; }
-.sc-pm { width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font-weight: 800; cursor: pointer; }
+.sc-pm { width: 40px; height: 40px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
+.sc-pm:disabled { opacity: .35; cursor: default; }
+.sc-max { min-height: 40px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
+.sc-max:disabled { opacity: .35; cursor: default; }
 .sc-pm:disabled { opacity: .35; cursor: default; }
 .sc-n { min-width: 18px; text-align: center; font-weight: 800; }
 .sc-warn { font-size: .66rem; color: #dc2626; text-align: center; margin-top: 8px; }

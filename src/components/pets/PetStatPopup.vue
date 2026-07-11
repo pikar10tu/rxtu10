@@ -4,7 +4,7 @@
   <div v-if="pet" class="ps-ov" @click.self="$emit('close')">
     <div class="ps-box">
       <div class="ps-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
-        <button class="ps-x" @click="$emit('close')">✕</button>
+        <button class="ps-x" aria-label="ปิด" @click="$emit('close')">✕</button>
         <div class="ps-emoji"><Emoji :char="pet.emoji" /></div>
         <div class="ps-name">{{ pet.name }}</div>
         <div class="ps-tags">

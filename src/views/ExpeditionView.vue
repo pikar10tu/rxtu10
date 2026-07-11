@@ -95,6 +95,7 @@ import { RouterLink } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useExpedition } from '../composables/useExpedition.js'
+import { useToast } from '../composables/useToast.js'
 import { expeditionState } from '../utils/expedition.js'
 import { MISSIONS, DURATIONS, REWARD_TYPES, EXPEDITION_PARTY_SIZE } from '../data/expeditions.js'
 import { ELEMENTS, getPetDef } from '../data/index.js'
@@ -102,6 +103,7 @@ import PetThumb from '../components/shared/PetThumb.vue'
 
 const authStore = useAuthStore()
 const { exp, eligiblePets, mission, send, claim } = useExpedition()
+const { toast } = useToast()
 const PARTY_SIZE = EXPEDITION_PARTY_SIZE
 
 // ticker 1 วิ สำหรับ countdown
@@ -160,7 +162,7 @@ const remainText = computed(() => {
 async function onSend() {
   if (busy.value) return
   busy.value = true
-  try { if (await send(picked.value, missionId.value, durationId.value)) picked.value = [] }
+  try { if (await send(picked.value, missionId.value, durationId.value)) { picked.value = []; toast('ส่งคณะออกเดินทางแล้ว 🚀', 'success') } }
   finally { busy.value = false }
 }
 
