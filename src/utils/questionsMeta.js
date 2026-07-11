@@ -10,5 +10,15 @@ export function buildMeta(questions) {
   for (const q of pub) {
     if (q.domain in domains) domains[q.domain]++
   }
-  return { publishedTotal: pub.length, categories: cats, domains }
+  // นับชุดข้อสอบย้อนหลัง (published เท่านั้น) — 1 ข้ออยู่หลายชุดนับทุกชุด
+  const examCounts = {}
+  for (const q of pub) {
+    for (const name of (Array.isArray(q.examSets) ? q.examSets : [])) {
+      if (name) examCounts[name] = (examCounts[name] || 0) + 1
+    }
+  }
+  const examSets = Object.entries(examCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'th'))
+  return { publishedTotal: pub.length, categories: cats, domains, examSets }
 }
