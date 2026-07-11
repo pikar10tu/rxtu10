@@ -99,7 +99,6 @@ function confirm() {
 .sc-pm:disabled { opacity: .35; cursor: default; }
 .sc-max { min-height: 40px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
 .sc-max:disabled { opacity: .35; cursor: default; }
-.sc-pm:disabled { opacity: .35; cursor: default; }
 .sc-n { min-width: 18px; text-align: center; font-weight: 800; }
 .sc-warn { font-size: .66rem; color: #dc2626; text-align: center; margin-top: 8px; }
 .sc-actions { display: flex; gap: 8px; margin-top: 14px; }

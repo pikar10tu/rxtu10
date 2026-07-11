@@ -126,8 +126,6 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-emoji { font-size: 1.8rem; line-height: 1; }
 .pt-cell-name { font-size: .56rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pt-cell-stars { font-size: .62rem; color: #f59e0b; letter-spacing: -1px; line-height: 1; }
-.pt-cell-grade { position: absolute; top: -5px; left: -5px; background: #1e293b; color: #fff; font-size: .54rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; border: 2px solid #fff; }
-.pt-cell-pot { position: absolute; top: -5px; right: -5px; background: #7c3aed; color: #fff; font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 999px; border: 2px solid #fff; }
 .pt-cell-star { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .54rem; font-weight: 800; color: rgba(0,0,0,.4); }
 .pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }

@@ -72,10 +72,10 @@ single-file component + scoped style · สีธีมหลัก indigo (#4f4
 ## เศรษฐกิจ (ตัวเลขทั้งหมด tunable)
 
 - รายได้ idle = บ้าน (`data/residence.js` ladder 12 ขั้น) + เพ็ทในคลัง (`utils/petUtils.js`
-  RARITY_DAILY_BASE + GRADE_MULTI_V2 — **ตัวจริง**; RARITY.dailyBase/GRADE_MULTI ใน data/index.js คือ legacy)
+  RARITY_DAILY_BASE + GRADE_MULTI_V2 — ตัวจริงตัวเดียว; ซาก legacy ใน data/index.js ถูกลบแล้ว 12 ก.ค. ดู [[pet-overhaul]])
   สะสมสูงสุด 24 ชม. กดเก็บที่ Home (useDaily)
-- ฟาร์ม `data/crops.js` (ปลดล็อกตามเลเวลบ้าน) · กาชา `data/shop.js` · ศักยภาพ `data/potential.js`
-- เหรียญจากการเรียน: Quiz 10/ข้อ cap 300/วัน · Study 5/ใบ cap 150/วัน (studyCoinDate/studyCoinsToday)
+- ฟาร์ม `data/crops.js` (ปลดล็อกตามเลเวลบ้าน) · กาชา `data/shop.js` · ศักยภาพ `data/potential.js` (ยังไม่เปิด — 6/7 affix ยังหมัน)
+- เหรียญจากการเรียน: Quiz 100/ข้อ **ไม่มี cap แล้ว** (11 ก.ค. ทำมากได้มาก) · Study 5/ใบ cap 150/วัน (studyCoinDate/studyCoinsToday)
 - ⚠️ สมดุลปัจจุบันเพี้ยน: ฟาร์มพืชยาว >> รายได้บ้าน, รายได้จากการเรียน ~1% — ตารางวิเคราะห์+ข้อเสนอใน ROADMAP.md
 
 ## กับดักที่เคยเจอแล้ว (อย่าทำซ้ำ)

@@ -176,9 +176,4 @@ async function evolve() {
 .pd-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .pd-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
 .pd-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pd-slots { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-.pd-slot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; border-radius: 10px; border: 2px dashed var(--ink); }
-.pd-slot.filled { border-style: solid; border-color: var(--ink); background: var(--primary-light); }
-.pd-slot-aff { font-size: .78rem; font-weight: 800; color: var(--primary); }
-.pd-slot-empty { font-size: .7rem; color: rgba(0,0,0,.35); }
 </style>
