@@ -27,6 +27,15 @@
       ]
     },
     {
+      "collectionGroup": "questions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "examSets", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "rand", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "questionReports",
       "queryScope": "COLLECTION",
       "fields": [
