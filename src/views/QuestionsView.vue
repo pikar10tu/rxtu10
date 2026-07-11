@@ -277,6 +277,18 @@
               </li>
             </ul>
             <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
+            <div class="qz-audit">
+              <div class="qz-audit-row"><b>เพิ่มโดย:</b> {{ q.createdByName || 'ไม่ระบุ' }}<span v-if="q.source === 'import'"> · นำเข้า</span> · {{ fmtTime(q.createdAt) || '—' }}</div>
+              <div class="qz-audit-row"><b>สถานะตรวจ:</b> {{ REVIEW_STATUS_LABEL[reviewStatusKey(q)] }}</div>
+              <div v-if="detailReviewsLoading" class="qz-audit-row">กำลังโหลดผลตรวจ…</div>
+              <template v-else-if="detailReviews.length">
+                <div class="qz-audit-head">ผลตรวจรอบปัจจุบัน ({{ detailReviews.length }})</div>
+                <div v-for="r in detailReviews" :key="r.id" class="qz-audit-rev">
+                  <b>{{ r.reviewerName || 'ไม่ระบุ' }}</b> — {{ VERDICT_LABEL[r.verdict] || r.verdict }}
+                  <span v-if="r.reason" class="qz-audit-reason">· {{ r.reason }}</span>
+                </div>
+              </template>
+            </div>
             <QuestionComments :questionId="q.id" />
             <div class="qz-detail-actions">
               <button class="qz-mini" @click="edit(q)">แก้ไข</button>
@@ -343,7 +355,23 @@ const selected = ref(new Set())   // เก็บ id ที่เลือก (V
 const batchBusy = ref(false)
 const batchSets = ref([])   // ชุดที่จะ tag ให้ข้อที่เลือก
 const expandedId = ref(null)
-function toggleExpand(id) { expandedId.value = expandedId.value === id ? null : id }
+const detailReviews = ref([])          // reviews ของข้อที่กางอยู่ (รอบปัจจุบัน)
+const detailReviewsLoading = ref(false)
+async function toggleExpand(id) {
+  if (expandedId.value === id) { expandedId.value = null; return }
+  expandedId.value = id
+  detailReviews.value = []
+  const q = list.value.find(x => x.id === id)
+  if (!q || !(q.reviewedBy?.length)) return
+  detailReviewsLoading.value = true
+  try {
+    const snap = await getDocs(collection(db, 'questions', id, 'reviews'))
+    usage.track(snap.size)
+    if (expandedId.value !== id) return   // FIX (fable): กางข้ออื่นไปแล้วระหว่าง await — ทิ้งผลเก่า
+    detailReviews.value = snap.docs.filter(d => (q.reviewedBy || []).includes(d.id)).map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[detail reviews]', e) }
+  finally { detailReviewsLoading.value = false }
+}
 
 const categories = computed(() => distinctCategories(list.value))
 const filtered = computed(() => {
@@ -1003,4 +1031,11 @@ async function resolveReports(g, verdict) {
 
 .qz-import-sets { display: flex; flex-direction: column; gap: 5px; }
 .qz-import-sets-label { font-size: .7rem; font-weight: 700; color: #64748b; }
+
+/* ── ประวัติข้อนี้ (audit, read-only) ── */
+.qz-audit { margin-top: 10px; padding: 9px 11px; border: 1px dashed var(--border); border-radius: 10px; background: #fafafa; font-size: .72rem; color: rgba(0,0,0,.6); line-height: 1.55; }
+.qz-audit-row b { color: rgba(0,0,0,.75); font-weight: 800; }
+.qz-audit-head { font-weight: 800; color: #c2410c; margin-top: 5px; }
+.qz-audit-rev { margin-top: 2px; }
+.qz-audit-reason { color: rgba(0,0,0,.5); }
 </style>
