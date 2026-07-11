@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="pt-head">
-      <button class="pt-back" @click="$router.back()">‹</button>
+      <button class="pt-back" aria-label="กลับ" @click="$router.push('/play/pets')">‹</button>
       <span><Emoji char="🐾" /> สัตว์เลี้ยง</span>
       <HelpButton topic="pets" style="margin-left:auto" />
     </div>
@@ -13,7 +13,7 @@
           <button class="pt-team-edit" @click="pickOpen = true">จัดทีม</button>
         </div>
         <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
-          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" @click="id && (sel = id)">
+          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" @click="id ? sel = id : pickOpen = true">
             <PetThumb v-if="id" :pet="teamPetOf(id)" />
             <span v-else class="pt-team-empty">+</span>
           </div>
@@ -25,9 +25,12 @@
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
-      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์ · ใส่ศักยภาพ <Emoji char="⚗️" /></div>
+      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์</div>
 
-      <div v-if="!sorted.length" class="pt-empty">ยังไม่มีสัตว์เลี้ยง — ไปที่ Shop แล้วกดอัญเชิญก่อนนะ <Emoji char="🥚" /></div>
+      <div v-if="!sorted.length" class="pt-empty">
+        ยังไม่มีสัตว์เลี้ยง — ไปกดอัญเชิญตัวแรกกันเถอะ <Emoji char="🥚" />
+        <RouterLink to="/shop" class="pt-empty-cta">ไปอัญเชิญเลย →</RouterLink>
+      </div>
 
       <div v-else class="pt-grid">
         <button
@@ -93,7 +96,7 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 
 <style scoped>
 .pt-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-bottom: 14px; }
-.pt-back { border: 2px solid var(--ink); background: #fff; width: 32px; height: 32px; border-radius: 10px; font-size: 1.2rem; cursor: pointer; line-height: 1; box-shadow: var(--pop); }
+.pt-back { border: 2px solid var(--ink); background: #fff; width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; cursor: pointer; line-height: 1; box-shadow: var(--pop); }
 .pt-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pt-team { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px; margin-bottom: 10px; }
 .pt-team-head { display: flex; align-items: center; justify-content: space-between; font-size: .8rem; font-weight: 800; margin-bottom: 8px; }
@@ -109,7 +112,9 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-summary b { font-size: 1.05rem; font-weight: 800; }
 .pt-summary small { display: block; font-size: .58rem; color: rgba(0,0,0,.45); }
 .pt-hint { font-size: .66rem; color: rgba(0,0,0,.5); margin-bottom: 12px; }
-.pt-empty { text-align: center; color: rgba(0,0,0,.45); padding: 30px 0; font-size: .85rem; }
+.pt-empty { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; color: rgba(0,0,0,.45); padding: 30px 16px; font-size: .85rem; }
+.pt-empty-cta { border: 2px solid var(--ink); background: var(--primary); color: #fff; border-radius: 12px; padding: 11px 20px; font-weight: 800; font-size: .85rem; text-decoration: none; box-shadow: var(--pop); }
+.pt-empty-cta:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .pt-cell {
   position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 14px;

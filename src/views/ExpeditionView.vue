@@ -6,7 +6,7 @@
   <div class="tab-content">
     <div class="page-title ex-head">
       <span><Emoji char="🗺️" /> ส่งผจญภัย</span>
-      <RouterLink to="/play" class="ex-back">‹ กลับ</RouterLink>
+      <RouterLink to="/play/pets" class="ex-back">‹ กลับ</RouterLink>
     </div>
 
     <template v-if="authStore.isLoggedIn">

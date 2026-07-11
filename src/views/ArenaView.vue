@@ -6,7 +6,7 @@
   <div class="tab-content">
     <div class="page-title ar-head">
       <span><Emoji char="⚔️" /> สนามประลอง</span>
-      <RouterLink to="/play" class="ar-back">‹ กลับ</RouterLink>
+      <RouterLink to="/play/pets" class="ar-back">‹ กลับ</RouterLink>
     </div>
 
     <template v-if="authStore.isLoggedIn">

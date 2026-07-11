@@ -4,7 +4,7 @@
       <span><Emoji char="🏯" /> หอคอย</span>
       <span class="tw-head-r">
         <HelpButton topic="tower" />
-        <RouterLink to="/play" class="tw-back">‹ กลับ</RouterLink>
+        <RouterLink to="/play/pets" class="tw-back">‹ กลับ</RouterLink>
       </span>
     </div>
 

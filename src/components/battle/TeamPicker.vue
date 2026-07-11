@@ -30,7 +30,10 @@
         <span class="tp-name">{{ defOf(p.id).name }}</span>
         <PetStatLine :pet="p" />
       </button>
-      <div v-if="!owned.length" class="tp-none">ยังไม่มีเพ็ท — ไปเปิดกาชาที่ร้านค้าก่อนนะ</div>
+      <div v-if="!owned.length" class="tp-none">
+        ยังไม่มีเพ็ท — ไปอัญเชิญตัวแรกก่อนนะ
+        <RouterLink to="/shop" class="tp-none-cta">ไปอัญเชิญเลย →</RouterLink>
+      </div>
     </div>
 
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
@@ -110,5 +113,6 @@ function toggle(id) {
 .tp-away { position: absolute; top: 2px; right: 3px; font-size: .7rem; line-height: 1; }
 .tp-el { position: absolute; top: 2px; left: 3px; font-size: .72rem; line-height: 1; }
 .tp-grade { position: absolute; top: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .52rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; border: 2px solid #fff; }
-.tp-none { grid-column: 1 / -1; text-align: center; font-size: .76rem; color: rgba(0,0,0,.4); padding: 16px 0; }
+.tp-none { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: .76rem; color: rgba(0,0,0,.4); padding: 16px 0; }
+.tp-none-cta { border: 2px solid var(--ink); background: var(--primary); color: #fff; border-radius: 11px; padding: 9px 18px; font-weight: 800; font-size: .8rem; text-decoration: none; box-shadow: var(--pop); }
 </style>
