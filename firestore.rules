@@ -134,6 +134,13 @@ service cloud.firestore {
       allow write: if canEditQuestions();
     }
 
+    // ── Questions meta — สรุปคลัง (config/questionsMeta) ให้ quiz home อ่าน 1 read ──
+    //  read: public ผ่าน match /config/{doc} · write: วิชาการ/อาจารย์ กด "คำนวณ meta ใหม่"
+    //  (recompute จากทั้งคลัง — trust-based, worst case ตัวเลขเพี้ยน ไม่ใช่ data loss)
+    match /config/questionsMeta {
+      allow write: if canEditQuestions();
+    }
+
     // ── Cheat logs — anyone may log themselves; only admin reads ──
     match /cheatLogs/{id} {
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
