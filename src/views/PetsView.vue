@@ -128,6 +128,6 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-name { font-size: .56rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .54rem; font-weight: 800; color: rgba(0,0,0,.4); }
 .pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }
-.pt-cell-grade { position: absolute; bottom: -5px; left: -5px; background: #1e293b; color: #fff; font-size: .56rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; line-height: 1.3; }
+.pt-cell-grade { position: absolute; bottom: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .56rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; line-height: 1.3; }
 .pt-cell-team { position: absolute; top: -5px; right: -5px; background: var(--primary); color: #fff; font-size: .52rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; }
 </style>
