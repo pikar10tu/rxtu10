@@ -8,6 +8,8 @@
 //  field, and one-time migrations have a single home.
 // ════════════════════════════════════════════════════════════
 
+import { getPetDef } from './index.js'
+
 // NEUTRAL defaults for an existing account that happens to be missing a
 // field. NOTE: coins defaults to 0 here (safe) — the 2000 welcome bonus is
 // applied only when SEEDING a brand-new account (see newUserDoc).
@@ -78,6 +80,26 @@ export const WELCOME_GIFT_TICKETS = 50
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v)
 
+// เก็บ instance แบบ slim — identity มาจาก catalog ตอนอ่าน (hydratePet)
+export function slimPet(p) {
+  return { id: p?.id, grade: p?.grade || 0, copies: p?.copies || 0 }
+}
+
+// เติม name/emoji/rarity/element จาก catalog (catalog เป็นเจ้าของ = แก้ desync)
+// รับได้ทั้ง slim/fat/def หาย (fallback placeholder ไม่ให้ view พัง)
+export function hydratePet(p) {
+  const def = getPetDef(p?.id) || {}
+  return {
+    id: p?.id,
+    grade: p?.grade || 0,
+    copies: p?.copies || 0,
+    name:    def.name    ?? p?.name    ?? '?',
+    emoji:   def.emoji   ?? p?.emoji   ?? '❓',
+    rarity:  def.rarity  ?? p?.rarity  ?? 'common',
+    element: def.element ?? p?.element ?? 'scissors',
+  }
+}
+
 /** Build the Firestore doc for a brand-new account (welcome bonus + identity). */
 export function newUserDoc(user, createdAt) {
   return {
@@ -107,6 +129,10 @@ export function normalizeUserData(data) {
 
   // arrays must be arrays
   d.pets       = Array.isArray(d.pets) ? d.pets : []
+  // ⚠️ FIX B1 (fable): hydrate เฉพาะ doc ที่ migrate V2 แล้ว — doc ยังไม่ migrate ต้องอ่าน "ดิบ"
+  //    เพราะ migratePets (auth.js) อ่าน p.rarity (refund rarity-nerf) + p.instId (map activePets) ที่ hydrate จะทับ/ตัดทิ้ง
+  //    FIX F1: filter entry null/ไม่มี id ทิ้ง กัน {id:undefined} → updateDoc throw (config ไม่ ignoreUndefined)
+  if (d.petsMigratedV2 === true) d.pets = d.pets.filter(p => p && p.id).map(hydratePet)
   d.tags       = Array.isArray(d.tags) ? d.tags : []
   // ทีม 3 ตัว: ยาว 3 เสมอ (pad null / ตัดส่วนเกิน)
   const TEAM_SIZE = 3
