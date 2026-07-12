@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore'
 import { auth, db, provider, ADMIN_EMAIL, SNAPSHOT_DELAY, CONSENT_VERSION } from '../firebase/config.js'
 import { incomeBonusFromTags, effectiveTags } from '../data/tags.js'
-import { newUserDoc, normalizeUserData } from '../data/userSchema.js'
+import { newUserDoc, normalizeUserData, slimPet } from '../data/userSchema.js'
 import { buildWelcomeGiftMail } from '../utils/mailbox.js'
 import { useToast } from '../composables/useToast.js'
 import { useUsageStore } from './usage.js'
@@ -117,7 +117,11 @@ export const useAuthStore = defineStore('auth', () => {
         blockSnapshot()
         setUserDataOptimistic(optimistic)
         try {
-            await updateDoc(doc(db, 'users', currentUser.value.uid), server ?? optimistic)
+            const payload = server ?? optimistic
+            // slim เฉพาะที่เขียนลง Firestore — pets เก็บแค่ {id,grade,copies}, identity มาจาก catalog ตอนอ่าน (normalizeUserData)
+            // FIX F1 (fable): filter entry ไม่มี id ทิ้ง กัน {id:undefined} → updateDoc throw "Unsupported field value: undefined"
+            const toWrite = Array.isArray(payload.pets) ? { ...payload, pets: payload.pets.filter(p => p && p.id).map(slimPet) } : payload
+            await updateDoc(doc(db, 'users', currentUser.value.uid), toWrite)
             useUsageStore().track(0, 1) // เส้นทางเขียนหลักของแอป — นับเข้าตัวประมาณการ
             return true
         } catch (e) {
