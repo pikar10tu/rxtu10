@@ -110,7 +110,7 @@
         <div class="br-card-emoji"><Emoji :char="insp.def.emoji" /></div>
         <div class="br-card-name">{{ insp.def.name }}</div>
         <div class="br-card-row"><span>ธาตุ</span><b><Emoji :char="insp.elEmoji" /> {{ insp.elName }}</b></div>
-        <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ insp.grade }}</b></div>
+        <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ GRADE_LABELS[Math.min(5, Math.max(0, insp.grade || 0))] }}</b></div>
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
         <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
         <div class="br-card-pass"><span>Passive</span><b>{{ insp.passive ? insp.passive.name : 'เร็วๆ นี้' }}</b></div>
@@ -124,7 +124,7 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS, EL_NAME } from '../../data/index.js'
+import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { computeBattleSummary } from '../../utils/battleSummary.js'

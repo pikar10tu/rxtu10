@@ -38,12 +38,12 @@
           class="pt-cell" :style="{ borderColor: rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
-          <span v-if="activeSet.has(p.id)" class="pt-cell-star"><Emoji char="⭐" /></span>
+          <span v-if="activeSet.has(p.id)" class="pt-cell-team">ทีม</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
           <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.emoji || '✊'" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
-          <span v-if="p.grade > 0" class="pt-cell-stars">{{ '★'.repeat(Math.min(p.grade, 5)) }}</span>
+          <span v-if="clampGrade(p.grade) > 0" class="pt-cell-grade">{{ GRADE_LABELS[clampGrade(p.grade)] }}</span>
         </button>
       </div>
     </template>
@@ -59,8 +59,9 @@ import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
-import { RARITY, PETS, ELEMENTS } from '../data/index.js'
+import { RARITY, PETS, ELEMENTS, GRADE_LABELS } from '../data/index.js'
 import { petDailyCoins } from '../utils/petUtils.js'
+import { clampGrade } from '../data/petPower.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
@@ -125,8 +126,8 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pt-cell-emoji { font-size: 1.8rem; line-height: 1; }
 .pt-cell-name { font-size: .56rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.pt-cell-stars { font-size: .62rem; color: #f59e0b; letter-spacing: -1px; line-height: 1; }
-.pt-cell-star { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .54rem; font-weight: 800; color: rgba(0,0,0,.4); }
 .pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }
+.pt-cell-grade { position: absolute; bottom: -5px; left: -5px; background: #1e293b; color: #fff; font-size: .56rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; line-height: 1.3; }
+.pt-cell-team { position: absolute; top: -5px; right: -5px; background: var(--primary); color: #fff; font-size: .52rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; }
 </style>

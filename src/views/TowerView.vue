@@ -78,7 +78,7 @@
         <div class="tw-scout-emoji"><Emoji :char="defOf(scout.id).emoji" /></div>
         <div class="tw-scout-name">{{ defOf(scout.id).name }}</div>
         <div class="tw-scout-row"><span>ธาตุ</span><b><Emoji :char="elEmoji(scout)" /> {{ elName(scout) }}</b></div>
-        <div class="tw-scout-row"><span>ระดับ</span><b>{{ rarityLabel(scout) }} · เกรด {{ scout.grade || 0 }}</b></div>
+        <div class="tw-scout-row"><span>ระดับ</span><b>{{ rarityLabel(scout) }} · เกรด {{ GRADE_LABELS[Math.min(5, Math.max(0, scout.grade || 0))] }}</b></div>
         <div class="tw-scout-row"><span>พลังโจมตี</span><b>{{ scoutStat.atk }}</b></div>
         <div class="tw-scout-row"><span>พลังชีวิต</span><b>{{ scoutStat.hp }}</b></div>
         <button class="tw-scout-x" @click="scout = null">ปิด</button>
@@ -94,7 +94,7 @@ import { RouterLink } from 'vue-router'
 import { ref, computed } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useTower } from '../composables/useTower.js'
-import { getPetDef, ELEMENTS, RARITY, EL_NAME } from '../data/index.js'
+import { getPetDef, ELEMENTS, RARITY, EL_NAME, GRADE_LABELS } from '../data/index.js'
 import { floorZone, TOWER_BONUS_FLOORS } from '../data/towerFloors.js'
 import { buildCombatant } from '../data/battle.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
