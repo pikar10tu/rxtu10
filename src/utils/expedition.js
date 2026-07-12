@@ -2,16 +2,14 @@
 // Expedition — pure logic: คุณภาพสาย + รางวัล (deterministic) + สถานะ
 // party = [{id, rarity, element, grade}] (สแนปช็อตตอนส่ง — รูปเดียวกับ battle unit จาก resolveBattleTeam)
 import {
-  RARITY_WEIGHT, GRADE_K, POWER_K, ELEMENT_K,
+  POWER_K, ELEMENT_K,
   TICKET_POWER_K, TICKET_EL_K, TICKET_CHANCE_MAX,
 } from '../data/expeditions.js'
+import { expWeight } from '../data/petPower.js'
 
 /** น้ำหนักคุณภาพรวมของสาย (rarity × เกรด) */
 export function partyPower(party) {
-  return (party || []).reduce((sum, p) => {
-    const w = RARITY_WEIGHT[p?.rarity] || RARITY_WEIGHT.common
-    return sum + w * (1 + (p?.grade || 0) * GRADE_K)
-  }, 0)
+  return (party || []).reduce((sum, p) => sum + expWeight(p), 0)
 }
 
 /** จำนวนตัวที่ธาตุตรงมิชชัน (0..3) */

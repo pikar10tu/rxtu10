@@ -18,9 +18,8 @@ export const MISSIONS = [
   { id: 'peak',   name: 'ยอดเขาเมฆา',    element: 'paper',    emoji: '⛰️', flavor: 'ปีนเขาสูงเก็บผลึกพลัง' },
 ]
 
-// คุณภาพเพ็ท → น้ำหนัก (rarity) · เกรด I-V (เก็บเป็น 0..5) เพิ่มทีละ GRADE_K
-export const RARITY_WEIGHT = { common: 1, rare: 2, epic: 4, legendary: 7 }
-export const GRADE_K = 0.15        // +15%/เกรด ต่อน้ำหนัก rarity
+// น้ำหนักคุณภาพ (rarity+เกรด) ย้ายไป data/petPower.js (แหล่งพลังเดียว) — re-export ชื่อเดิม
+export { RARITY_WEIGHT, EXP_GRADE_K as GRADE_K } from './petPower.js'
 export const POWER_K = 0.18        // partyPower → ตัวคูณเหรียญ (สูง = คุณภาพสายมีผลชัด)
 export const ELEMENT_K = 0.12      // ต่อ 1 ตัวที่ธาตุตรง → +12% (โบนัสเสริม ไม่ครอบงำ)
 export const TICKET_POWER_K = 0.006 // partyPower → +โอกาสตั๋ว (ต่ำ = กันเพดานตั๋ว whale + เลี่ยง short-spam)
