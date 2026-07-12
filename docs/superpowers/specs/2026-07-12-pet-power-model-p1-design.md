@@ -39,7 +39,7 @@ export const EXP_GRADE_K = 0.15
 // accessor เดียวให้ consumer เรียก (ตรรกะ = ของเดิมเป๊ะ)
 export function combatStats(pet) { /* = buildCombatant เดิม */ }
 export function petDailyCoins(pet) { /* = petDailyCoins เดิม รวม potential dailyCoins% */ }
-export function expWeight(pet) { /* = RARITY_WEIGHT[r] * (1 + EXP_GRADE_K * clampGrade(g)) */ }
+export function expWeight(pet) { /* = RARITY_WEIGHT[r] * (1 + EXP_GRADE_K * (grade||0)) — ไม่ clamp เพื่อ match partyPower เดิมเป๊ะ */ }
 ```
 
 **Back-compat (เลี่ยงแก้ consumer/เทส):**
