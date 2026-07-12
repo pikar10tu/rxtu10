@@ -39,19 +39,12 @@ export function combatStats(pet) {
   return { id: pet?.id || null, element: pet?.element || 'scissors', atk, maxHp, hp: maxHp }
 }
 
-/** รายได้/วันต่อ 1 ตัว (= petDailyCoins เดิม รวม potential dailyCoins%) */
+/** รายได้/วันต่อ 1 ตัว (rarity × grade) — ระบบ potential ถูกถอดออก (P2) */
 export function petDailyCoins(pet) {
   if (!pet) return 0
   const base = RARITY_DAILY_BASE[pet.rarity] ?? RARITY_DAILY_BASE.common
   const g = clampGrade(pet.grade)
-  let coins = base * GRADE_MULTI_V2[g]
-  if (Array.isArray(pet.potential)) {
-    const bonus = pet.potential
-      .filter(a => a?.stat === 'dailyCoins')
-      .reduce((s, a) => s + (a.value || 0), 0)
-    if (bonus) coins *= 1 + bonus / 100
-  }
-  return Math.round(coins)
+  return Math.round(base * GRADE_MULTI_V2[g])
 }
 
 /** น้ำหนักคุณภาพ expedition ต่อ 1 ตัว (= term ใน partyPower เดิม — ไม่ clamp) */

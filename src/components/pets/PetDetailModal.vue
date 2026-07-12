@@ -26,7 +26,7 @@
         <div class="pd-stat"><span><Emoji char="💰" /></span><b>{{ income }}</b><small>/วัน</small></div>
       </div>
 
-      <!-- 3 แกนพลัง: ความหายาก / เกรด+วิวัฒน์ / ศักยภาพ (เร็วๆ นี้) -->
+      <!-- แกนพลัง: ความหายาก / เกรด+วิวัฒน์ (ศักยภาพถอดออก P2 — pet build depth ไปที่ passive P3) -->
       <div class="pd-axes">
         <div class="pd-axis">
           <span class="pd-axis-k">ความหายาก</span>
@@ -43,10 +43,6 @@
         <!-- FIX (fable): คงข้อมูล cost/copies เดิมไว้ (spec Part 3 สั่งคง progress copies) -->
         <div v-if="gradeNow < MAX_GRADE && upCost" class="pd-axis-cost">
           ใช้ {{ upCost.copies }} copies + {{ upCost.coins.toLocaleString() }} เหรียญ · มี {{ pet.copies || 0 }} copies
-        </div>
-        <div class="pd-axis pd-axis-soon">
-          <span class="pd-axis-k">ศักยภาพ</span>
-          <span class="pd-axis-v pd-soon-txt"><Emoji char="🔒" /> เร็วๆ นี้</span>
         </div>
       </div>
 
@@ -194,8 +190,6 @@ async function evolve() {
 .pd-axis-v { display: inline-flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 800; }
 .pd-rarity { color: #fff; padding: 2px 12px; border-radius: 999px; font-size: .74rem; }
 .pd-grade-badge { background: #1e293b; color: #fff; min-width: 26px; text-align: center; padding: 2px 8px; border-radius: 8px; }
-.pd-axis-soon { opacity: .7; border-style: dashed; }
-.pd-soon-txt { color: rgba(0,0,0,.45); font-weight: 700; }
 .pd-max { font-size: .72rem; color: #15803d; font-weight: 800; }
 .pd-axis-cost { font-size: .68rem; color: rgba(0,0,0,.55); text-align: right; margin: -4px 4px 0; }
 </style>

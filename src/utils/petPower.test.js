@@ -30,10 +30,6 @@ test('petDailyCoins: legendary g5 = 175×12 = 2100', () => {
 test('petDailyCoins: common g0 = 15', () => {
   assert.equal(petDailyCoins({ rarity: 'common', grade: 0 }), 15)
 })
-test('petDailyCoins: potential dailyCoins% เพิ่มตามเดิม', () => {
-  // 85×3.5 = 297.5 → ×1.10 = 327.25 → round 327
-  assert.equal(petDailyCoins({ rarity: 'epic', grade: 2, potential: [{ stat: 'dailyCoins', value: 10 }] }), 327)
-})
 test('petDailyCoins: null → 0', () => { assert.equal(petDailyCoins(null), 0) })
 
 test('expWeight: legendary g5 = 7×(1+0.15×5) = 12.25 (ไม่ clamp)', () => {
