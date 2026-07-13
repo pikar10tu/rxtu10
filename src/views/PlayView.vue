@@ -24,10 +24,17 @@
         </RouterLink>
       </div>
 
-      <!-- ── มินิเกม (เร็วๆ นี้) ── -->
+      <!-- ── มินิเกม (จาก registry data/minigames.js) ── -->
       <SectionTitle><Emoji char="🎮" /> มินิเกม</SectionTitle>
       <div class="soon-grid">
-        <SoonCard emoji="🍬" label="เภสัช Crush" />
+        <template v-for="g in games" :key="g.key">
+          <RouterLink v-if="g.status === 'live'" :to="g.route" class="mg-card">
+            <span class="mg-emoji"><Emoji :char="g.emoji" /></span>
+            <span class="mg-name">{{ g.name }}</span>
+            <span class="mg-best">สถิติ {{ bestOf(g.key).toLocaleString() }}</span>
+          </RouterLink>
+          <SoonCard v-else :emoji="g.emoji" :label="g.name" />
+        </template>
       </div>
     </template>
     <div v-else class="play-login">เข้าสู่ระบบเพื่อเล่น</div>
@@ -45,10 +52,14 @@ import { expeditionState } from '../utils/expedition.js'
 import NewsBoard from '../components/home/NewsBoard.vue'
 import SectionTitle from '../components/shared/SectionTitle.vue'
 import SoonCard from '../components/shared/SoonCard.vue'
+import { MINIGAMES } from '../data/minigames.js'
 
 const authStore = useAuthStore()
 const farm = useFarm()
 const { exp } = useExpedition()
+
+const games = MINIGAMES
+const bestOf = (key) => authStore.userData?.minigames?.[key]?.best || 0
 
 // coarse tick (5s) ให้ badge การ์ดสด
 const now = ref(Date.now())
@@ -77,6 +88,14 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .hero-badge.plant { color: #b45309; background: rgba(251,191,36,.22); }
 
 .soon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.mg-card { all: unset; cursor: pointer; box-sizing: border-box; border: 2px solid var(--ink);
+  border-radius: 16px; box-shadow: var(--pop); padding: 16px 12px; display: flex; flex-direction: column;
+  align-items: center; gap: 4px; text-align: center; background: linear-gradient(160deg,#fef3c7,#fde68a); }
+.mg-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.mg-emoji { font-size: 2rem; }
+.mg-name { font-weight: 800; font-size: .9rem; }
+.mg-best { font-size: .62rem; color: rgba(0,0,0,.5); font-weight: 600; }
 
 .play-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
 </style>
