@@ -85,6 +85,7 @@ export const useMembersStore = defineStore('members', () => {
                     pvpVictories: n.pvpVictories,
                     towerBest: n.towerBest,
                     pvp: n.pvp,
+                    minigames: n.minigames,
                     quizHigh: n.quizHigh,
                     drugHigh: n.drugHigh,
                     googlePhoto: n.googlePhoto,
