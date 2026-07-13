@@ -87,7 +87,7 @@ export function useCapsuleRush(canvasRef, { onGameOver }) {
   // pause ตอนสลับแอป — กลับมาแล้วต่อ lastT ใหม่ (ไม่ให้ dt พุ่ง)
   function onVisibility() {
     if (document.hidden) { cancelAnimationFrame(raf) }
-    else if (running.value) { lastT = performance.now(); raf = requestAnimationFrame(loop) }
+    else if (running.value) { cancelAnimationFrame(raf); lastT = performance.now(); raf = requestAnimationFrame(loop) }
   }
   document.addEventListener('visibilitychange', onVisibility)
   const dispose = () => document.removeEventListener('visibilitychange', onVisibility)
