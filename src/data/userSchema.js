@@ -65,6 +65,7 @@ export const USER_DEFAULTS = {
   pvpAttacksUsed: 0,     // จำนวนบุกที่ใช้ไปวันนี้ (รวมคน+บอท)
   // ── Expedition (ส่งผจญภัย) ──
   expedition: null,   // { petIds:[3], party:[{id,rarity,element,grade}], missionId, durationId, startedAt, endsAt } | null (1 สายต่อครั้ง)
+  minigames: {},   // { [key]: { best, plays } } — คะแนนมินิเกม (ดู data/minigames.js)
   petsMigratedV2: false,                      // one-time: เพ็ทเก่า → species-based model ใหม่ (เกรด I-V)
   // ── onboarding / identity (first-run) ──
   consent: { accepted: false, version: null, at: null },  // PDPA
@@ -148,6 +149,7 @@ export function normalizeUserData(data) {
   d.pvp        = { ...USER_DEFAULTS.pvp,        ...(isObj(data.pvp)        ? data.pvp        : {}) }
   d.expedition = isObj(data.expedition) ? data.expedition : null
   d.likedBy   = isObj(data.likedBy) ? data.likedBy : {}
+  d.minigames = isObj(data.minigames) ? { ...data.minigames } : {}
 
   return d
 }
