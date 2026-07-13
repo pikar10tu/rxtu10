@@ -800,7 +800,7 @@ import { increment } from 'firebase/firestore'
 import MinigameShell from '../components/minigame/MinigameShell.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { useCapsuleRush } from '../composables/useCapsuleRush.js'
-import { getMinigame, MINIGAMES } from '../data/minigames.js'
+import { getMinigame } from '../data/minigames.js'
 import { grantCoins } from '../utils/minigameCore.js'
 import { fluentFile } from '../utils/emoji.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -873,8 +873,6 @@ async function saveResult() {
 }
 
 onBeforeUnmount(() => { stop(); dispose() })
-// เงียบ ESLint: MINIGAMES ใช้ที่อื่นได้ ถ้าไม่ใช้ให้ลบ import
-void MINIGAMES
 </script>
 
 <style scoped>
