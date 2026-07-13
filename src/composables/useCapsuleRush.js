@@ -68,6 +68,7 @@ export function useCapsuleRush(canvasRef, { onGameOver }) {
   }
 
   function start(spriteImg) {
+    cancelAnimationFrame(raf)   // กัน double-loop ถ้า start ถูกเรียกซ้อน (double-tap)
     sprite = spriteImg || null
     reset()
     running.value = true
