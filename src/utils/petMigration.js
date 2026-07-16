@@ -1,5 +1,5 @@
 // petMigration — pure: รวม/รีสกิล/คืนเหรียญ เพ็ทเดิม → โมเดล species-based ใหม่ (เกรด I-V)
-const REFUND = { common: 500, rare: 2500, epic: 8000, legendary: 25000 }
+const REFUND = { common: 200, rare: 1000, epic: 3000, legendary: 8000 }
 const scaleGrade = (g) => Math.min(5, Math.max(0, Math.round((g || 0) * 5 / 12)))
 const refundOf = (rarity, grade) => Math.round((REFUND[rarity] || 0) * (1 + (grade || 0) * 0.1))
 

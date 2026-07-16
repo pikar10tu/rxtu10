@@ -30,13 +30,13 @@ test('ตัดตัวที่ไม่อยู่ใน catalog → refund 
   const old = [{ id:'frog', grade:0, rarity:'common', instId:'x' }]   // ไม่อยู่ใน catalog
   const r = migratePets(old, [], ids, defOf)
   assert.equal(r.pets.length, 0)
-  assert.equal(r.refundCoins, 500)  // common 500 × 1.0
+  assert.equal(r.refundCoins, 200)  // common 200 × 1.0
 })
 
 test('rarity nerf (butterfly rare→common) → คืนส่วนต่าง', () => {
   const old = [{ id:'butterfly', grade:0, rarity:'rare', instId:'x' }]  // เดิม rare, catalog common
   const r = migratePets(old, [], ids, defOf)
-  assert.equal(r.refundCoins, 2500 - 500)  // rare - common
+  assert.equal(r.refundCoins, 1000 - 200)  // rare - common
   assert.equal(r.pets.find(p => p.id === 'butterfly').rarity, 'common') // refresh
 })
 
