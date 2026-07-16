@@ -110,7 +110,7 @@ const ZONES = [
   { name: 'หอเวทเก่า',       art: '🔮', color: '#60a5fa', from: 21, to: 40 },
   { name: 'ปราการอสูร',      art: '👹', color: '#c084fc', from: 41, to: 55 },
   { name: 'ยอดหอคอยมังกร',  art: '🐉', color: '#fbbf24', from: 56, to: 69 },
-  { name: 'บัลลังก์ราชันย์',  art: '👑', color: '#f43f5e', from: 70, to: 100 },
+  { name: 'บัลลังก์ราชันย์',  art: '👑', color: '#5b21b6', from: 70, to: 100, royal: true },
 ]
 export function floorZone(floor) {
   const f = clamp(Math.floor(floor) || 1, 1, TOWER_MAX)

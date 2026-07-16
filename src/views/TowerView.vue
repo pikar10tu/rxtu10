@@ -9,9 +9,27 @@
     </div>
 
     <template v-if="authStore.isLoggedIn">
-      <!-- แถบไต่ชั้น -->
+      <!-- แถบไต่ชั้น v2: full-tower track + window 6 ชั้นเดิม -->
       <div class="tw-climb">
-        <div class="tw-climb-best">สูงสุด {{ best }} · ↑ {{ TOWER_MAX }}</div>
+        <div class="tw-climb-head">
+          <span><span class="tw-climb-floor">ชั้น {{ floor }}</span><span class="tw-climb-of"> / {{ TOWER_MAX }}</span></span>
+          <span class="tw-climb-best">สูงสุด {{ best }}</span>
+        </div>
+        <div class="tw-track-wrap" role="img" :aria-label="`ความคืบหน้าหอคอย ชั้นสูงสุด ${best} จาก ${TOWER_MAX}`">
+          <span v-for="p in TOWER_BONUS_FLOORS" :key="'pin' + p" class="tw-pin" :style="{ left: p + '%' }"><Emoji char="🪙" /></span>
+          <div class="tw-track">
+            <div class="tw-track-fill" :style="{ width: best + '%', '--pct': trackPct }">
+              <div class="tw-track-fill-inner"></div>
+            </div>
+          </div>
+          <span class="tw-track-crown"><Emoji char="👑" /></span>
+          <span class="tw-me" :style="{ left: best + '%' }">▲</span>
+        </div>
+        <div class="tw-track-scale">
+          <span class="tw-scale-1">1</span>
+          <span class="tw-scale-70">70</span>
+          <span class="tw-scale-100">{{ TOWER_MAX }}</span>
+        </div>
         <div class="tw-climb-row">
           <div v-for="n in climbFloors" :key="n" class="tw-chip"
                :class="{ cleared: n <= best, current: n === floor, locked: n > floor, milestone: isMilestone(n) }">
@@ -26,14 +44,18 @@
 
       <!-- การ์ดชั้นปัจจุบัน -->
       <div class="tw-card">
-        <div class="tw-zone" :style="{ background: `linear-gradient(135deg, ${zone.color}, ${zone.color}bb)` }">
+        <div class="tw-zone" :class="{ 'tw-zone-royal': zone.royal }" :style="{ background: zoneBg }">
           <div class="tw-zone-art"><Emoji :char="zone.art" /></div>
           <div class="tw-zone-txt">
             <div class="tw-zone-name">{{ zone.name }}</div>
             <div class="tw-zone-floor">ชั้น {{ floor }} <span class="tw-zone-best">· สูงสุด {{ best }}</span></div>
           </div>
         </div>
-        <div class="tw-bonus"><Emoji char="🪙" /> โบนัสรายได้ตอนนี้ +{{ bonus.toLocaleString() }}/วัน</div>
+        <div v-if="zone.royal" class="tw-max-cue">
+          <div class="tw-max-cue-l1">พลังบอทช่วงนี้ตันแล้ว (เกรด V ทุกตัว)</div>
+          <div class="tw-max-cue-l2">แพ้ชนะวัดที่ธาตุกับการจัดทีม — ✊ ข่ม ✌️ · ✌️ ข่ม ✋ · ✋ ข่ม ✊</div>
+        </div>
+        <div class="tw-bonus"><Emoji char="🪙" /> โบนัสรายได้ตอนนี้ +{{ bonus.toLocaleString() }}/วัน<span v-if="best >= BONUS_CAP_FLOOR" class="tw-bonus-cap"> (เต็มเพดานแล้ว)</span></div>
 
         <div class="tw-row">
           <span class="tw-label">ศัตรู</span>
@@ -64,6 +86,25 @@
         </div>
         <div v-if="floor >= TOWER_MAX && best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตหอคอยครบแล้ว!</div>
       </div>
+
+      <!-- การ์ดเทียบเพื่อน — social hook รอง, best-effort ไม่มีข้อมูล = ซ่อนทั้งใบ -->
+      <div v-if="rivals" class="tw-rival">
+        <div class="tw-rival-head">
+          <span><Emoji char="🏁" /> เพื่อนร่วมไต่</span>
+          <span class="tw-rival-rank">
+            <template v-if="rivals.myRank === 1">คุณอยู่อันดับ 1 จาก {{ rivals.total }} <Emoji char="🎉" /></template>
+            <template v-else>คุณอยู่อันดับ {{ rivals.myRank }} จาก {{ rivals.total }}</template>
+          </span>
+        </div>
+        <ol class="tw-rival-list">
+          <li v-for="(u, i) in rivals.top" :key="i" class="tw-rival-row" :class="{ 'tw-rival-me': u.isMe }">
+            <span class="tw-rival-medal">{{ medal(i) }}</span>
+            <span class="tw-rival-name">{{ u.nickname }}<span v-if="u.isMe" class="tw-rival-badge">คุณ</span></span>
+            <span class="tw-rival-floor">ชั้น {{ u.floor }}</span>
+          </li>
+        </ol>
+        <div v-if="rivals.chaseName" class="tw-rival-chase"><Emoji char="🔥" /> ตามหลัง {{ rivals.chaseName }} อยู่ {{ rivals.chaseGap }} ชั้น!</div>
+      </div>
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
@@ -91,11 +132,13 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
+import { useMembersStore } from '../stores/members.js'
 import { useTower } from '../composables/useTower.js'
+import { towerRanking } from '../utils/towerRivals.js'
 import { getPetDef, ELEMENTS, RARITY, EL_NAME, GRADE_LABELS } from '../data/index.js'
-import { floorZone, TOWER_BONUS_FLOORS } from '../data/towerFloors.js'
+import { floorZone, TOWER_BONUS_FLOORS, BONUS_CAP_FLOOR } from '../data/towerFloors.js'
 import { buildCombatant } from '../data/battle.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
@@ -104,8 +147,23 @@ import PetThumb from '../components/shared/PetThumb.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 
 const authStore = useAuthStore()
+const membersStore = useMembersStore()
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX } = useTower()
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?' }
+
+onMounted(() => { membersStore.loadFbUsers().catch(() => {}) })  // best-effort, ใช้ cache ถ้ามี
+
+// แถบเทียบเพื่อน — best-effort ทั้งชุด: ไม่มีข้อมูล/total 0 → คืน null (การ์ดซ่อนทั้งใบ)
+const rivals = computed(() => {
+  const others = Object.values(membersStore.fbUsers || {})
+    .map(u => ({ uid: u.uid, nickname: u.nickname, towerBest: u.towerBest || 0 }))
+  if (!others.length) return null
+  const u = authStore.userData || {}
+  const me = { uid: authStore.currentUser?.uid || 'me', nickname: u.nickname || 'ฉัน', towerBest: best.value }
+  const r = towerRanking(others, me)
+  return r.total > 0 ? r : null
+})
+const medal = (i) => (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`)
 
 const pickOpen = ref(false)
 const replay = ref(null)
@@ -114,6 +172,11 @@ const detailId = ref(null)
 const scout = ref(null)
 
 const zone = computed(() => floorZone(floor.value))
+// track fill % (min 1 กัน div-by-zero ใน --pct เวลา best=0 — ตัว fill ก็กว้าง 0% อยู่แล้วเลยไม่มีผลภาพ)
+const trackPct = computed(() => Math.max(best.value, 1))
+const zoneBg = computed(() => zone.value.royal
+  ? 'linear-gradient(135deg, var(--ink) 0%, #5b21b6 100%)'
+  : `linear-gradient(135deg, ${zone.value.color}, ${zone.value.color}bb)`)
 const isMilestone = (n) => TOWER_BONUS_FLOORS.includes(n)
 const climbFloors = computed(() => {
   const start = Math.max(1, Math.min(TOWER_MAX - 5, floor.value - 1))
@@ -144,14 +207,47 @@ async function onFight() {
 .tw-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
 
 .tw-climb { background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 10px 12px; box-shadow: var(--pop); margin-bottom: 12px; }
-.tw-climb-best { font-size: .68rem; font-weight: 800; color: rgba(0,0,0,.5); margin-bottom: 6px; }
-.tw-climb-row { display: flex; gap: 6px; }
+.tw-climb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.tw-climb-floor { font-weight: 800; font-size: .9rem; color: var(--ink); }
+.tw-climb-of { font-weight: 700; font-size: .78rem; color: var(--muted); }
+.tw-climb-best { font-size: .72rem; font-weight: 700; color: var(--muted); }
+
+.tw-track-wrap { position: relative; padding-top: 14px; }
+.tw-pin { position: absolute; top: 0; transform: translateX(-50%); font-size: .66rem; line-height: 1; }
+.tw-track {
+  height: 14px; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; position: relative;
+  background: linear-gradient(90deg,
+    #84cc1640 0%, #84cc1640 20%,
+    #60a5fa40 20%, #60a5fa40 40%,
+    #c084fc40 40%, #c084fc40 55%,
+    #fbbf2440 55%, #fbbf2440 69%,
+    #5b21b640 69%, #5b21b640 100%);
+}
+.tw-track-fill { position: absolute; inset: 0; overflow: hidden; }
+.tw-track-fill-inner {
+  height: 100%;
+  width: calc(100% * 100 / var(--pct));
+  background: linear-gradient(90deg,
+    #84cc16 0%, #84cc16 20%,
+    #60a5fa 20%, #60a5fa 40%,
+    #c084fc 40%, #c084fc 55%,
+    #fbbf24 55%, #fbbf24 69%,
+    #5b21b6 69%, #5b21b6 100%);
+}
+.tw-track-crown { position: absolute; top: 0; right: -2px; font-size: .7rem; line-height: 1; }
+.tw-me { position: absolute; top: 100%; margin-top: 2px; transform: translateX(-50%); font-size: .55rem; line-height: 1; color: var(--ink); }
+.tw-track-scale { position: relative; height: 12px; margin-top: 13px; font-size: .62rem; font-weight: 700; color: var(--muted); }
+.tw-scale-1 { position: absolute; left: 0; }
+.tw-scale-70 { position: absolute; left: 70%; transform: translateX(-50%); color: #b45309; }
+.tw-scale-100 { position: absolute; right: 0; }
+
+.tw-climb-row { display: flex; gap: 6px; margin-top: 8px; }
 .tw-chip { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border-radius: 10px; background: #f1f5f9; font-size: .9rem; position: relative; }
-.tw-chip-n { font-size: .64rem; font-weight: 800; color: rgba(0,0,0,.55); }
+.tw-chip-n { font-size: .64rem; font-weight: 800; color: var(--muted); }
 .tw-chip.cleared { background: #dcfce7; }
 .tw-chip.current { background: var(--gold); box-shadow: 0 0 0 2px var(--ink); }
 .tw-chip.locked { opacity: .55; }
-.tw-chip.milestone { outline: 2px dashed #f59e0b; outline-offset: -2px; }
+.tw-chip.milestone { outline: 2px dashed var(--gold); outline-offset: -2px; }
 .tw-chip-coin { position: absolute; top: -7px; right: -3px; font-size: .6rem; }
 
 .tw-card { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
@@ -160,22 +256,42 @@ async function onFight() {
 .tw-zone-name { font-family: var(--font-display); font-size: 1.3rem; line-height: 1; }
 .tw-zone-floor { font-size: .78rem; font-weight: 700; margin-top: 3px; }
 .tw-zone-best { opacity: .8; font-weight: 600; }
+.tw-zone-royal { border-bottom: 2px solid var(--gold); }
+.tw-zone-royal .tw-zone-name { color: var(--gold); }
+.tw-zone-royal .tw-zone-art { filter: drop-shadow(0 0 6px rgba(255,176,32,.7)); }
+.tw-max-cue { margin: 10px 16px 0; padding: 8px 10px; border-radius: 10px; background: var(--primary-light); border: 1.5px dashed var(--primary); font-size: .74rem; font-weight: 700; color: var(--ink); line-height: 1.45; }
+.tw-max-cue-l1 { font-weight: 800; }
+.tw-max-cue-l2 { font-weight: 600; }
 .tw-bonus { font-size: .76rem; color: #b45309; font-weight: 700; padding: 10px 16px 0; }
+.tw-bonus-cap { font-weight: 600; color: var(--muted); }
 .tw-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
-.tw-label { font-size: .68rem; color: rgba(0,0,0,.45); width: 48px; flex-shrink: 0; }
+.tw-label { font-size: .68rem; color: var(--muted); width: 48px; flex-shrink: 0; }
 .tw-team { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
 .tw-mon { border: none; background: none; padding: 0; cursor: pointer; width: 54px; }
 .tw-mon:active { transform: scale(.92); }
-.tw-empty { font-size: .76rem; color: rgba(0,0,0,.35); }
-.tw-vs { text-align: center; font-weight: 800; font-size: .72rem; color: rgba(0,0,0,.3); display: flex; align-items: center; justify-content: center; gap: 4px; }
+.tw-empty { font-size: .76rem; color: var(--muted); }
+.tw-vs { text-align: center; font-weight: 800; font-size: .72rem; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 4px; }
 .tw-actions { display: flex; gap: 8px; padding: 6px 16px 16px; }
-.tw-edit { border: 2px solid var(--ink); background: #fff; border-radius: 12px; padding: 12px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); display: flex; align-items: center; gap: 4px; }
+.tw-edit { border: 2px solid var(--ink); background: #fff; border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); display: flex; align-items: center; gap: 4px; }
 .tw-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.tw-fight { flex: 1; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.tw-fight { flex: 1; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .tw-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .tw-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }
-.tw-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
+.tw-login { text-align: center; color: var(--muted); padding: 30px 0; font-size: .85rem; }
+
+.tw-rival { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
+.tw-rival-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+.tw-rival-head > span:first-child { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); flex-shrink: 0; }
+.tw-rival-rank { font-size: .72rem; font-weight: 700; color: var(--muted); text-align: right; }
+.tw-rival-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.tw-rival-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 10px; }
+.tw-rival-row.tw-rival-me { background: var(--primary-light); outline: 1.5px solid var(--primary); }
+.tw-rival-medal { font-size: 1rem; flex-shrink: 0; }
+.tw-rival-name { font-size: .84rem; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.tw-rival-badge { display: inline-block; font-size: .6rem; font-weight: 800; color: #fff; background: var(--primary); padding: 1px 6px; border-radius: 999px; margin-left: 5px; vertical-align: middle; }
+.tw-rival-floor { font-size: .8rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.tw-rival-chase { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: #ffeef1; border: 1.5px solid var(--accent); font-size: .76rem; font-weight: 700; color: var(--ink); }
 
 .tw-scout { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .tw-scout-box { background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 18px; padding: 16px 18px; width: 240px; display: flex; flex-direction: column; gap: 7px; max-height: 88vh; overflow-y: auto; }
