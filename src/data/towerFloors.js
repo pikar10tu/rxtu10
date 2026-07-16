@@ -26,19 +26,28 @@ export function botCount(f) {
   return f === 1 ? 1 : f === 2 ? 2 : BATTLE_SLOTS
 }
 
+// tier (rarity) boundaries — ชั้นสูงสุดของแต่ละ tier (เกิน epic = legendary)
+const TIER_MAX_FLOOR = { common: 20, rare: 40, epic: 55 }
+
+// grade ramp: 0 ถึง GRADE_ZERO_FLOOR · ไต่ 1→4 ช่วง GRADE_RAMP_START–(GRADE_V_FLOOR-1) · V(5) ที่ GRADE_V_FLOOR ขึ้นไป
+const GRADE_ZERO_FLOOR = 20                     // ≤ นี้ = เกรด 0
+const GRADE_RAMP_START = GRADE_ZERO_FLOOR + 1   // ชั้นแรกที่เริ่มไต่เกรด
+const GRADE_V_FLOOR = 70                        // ≥ นี้ = เกรด 5 (V)
+const GRADE_RAMP_DIV = 12.25                    // ตัวหารช่วงไต่ 21–69
+
 /** tier (rarity index) ตามชั้น: common 1–20 · rare 21–40 · epic 41–55 · legendary 56–100 */
 function tierOf(f) {
-  if (f <= 20) return 0
-  if (f <= 40) return 1
-  if (f <= 55) return 2
+  if (f <= TIER_MAX_FLOOR.common) return 0
+  if (f <= TIER_MAX_FLOOR.rare) return 1
+  if (f <= TIER_MAX_FLOOR.epic) return 2
   return 3
 }
 
 /** เกรดบอท: 0 ถึงชั้น 20 · ไต่ 1→4 ช่วง 21–69 · V(5) ที่ชั้น 70+ */
 export function botGrade(f) {
-  if (f <= 20) return 0
-  if (f >= 70) return 5
-  return clamp(1 + Math.floor((f - 21) / 12.25), 1, 4)
+  if (f <= GRADE_ZERO_FLOOR) return 0
+  if (f >= GRADE_V_FLOOR) return 5
+  return clamp(1 + Math.floor((f - GRADE_RAMP_START) / GRADE_RAMP_DIV), 1, 4)
 }
 
 /** ธาตุของบอทแต่ละสล็อต (ชั้น <70 = ครบ 3 ธาตุ · 70+ แทนที่ใน Task 2) */
