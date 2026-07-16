@@ -89,3 +89,17 @@ test('floorZone: clamp นอกช่วง', () => {
 test('TOWER_BONUS_FLOORS = หมุดเหรียญถึงชั้น 70 เท่านั้น', () => {
   assert.deepEqual(TOWER_BONUS_FLOORS, [20, 40, 60, 70])
 })
+
+test('ธาตุชั้น <70 = ครบ 3 ธาตุ (ไม่ซ้ำ)', () => {
+  const els = getFloorTeam(50).map(p => p.element)
+  assert.equal(new Set(els).size, 3)
+})
+
+test('ธาตุชั้น 70+ = เอน (มีธาตุซ้ำ ไม่ครบ 3) + deterministic', () => {
+  for (const f of [70, 71, 72, 85, 100]) {
+    const els = getFloorTeam(f).map(p => p.element)
+    assert.equal(els.length, 3)
+    assert.ok(new Set(els).size < 3, `ชั้น ${f} ควรมีธาตุซ้ำ (เอน) ได้ ${els}`)
+    assert.deepEqual(getFloorTeam(f).map(p => p.element), els)  // deterministic
+  }
+})

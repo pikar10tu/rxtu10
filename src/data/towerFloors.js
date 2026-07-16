@@ -50,9 +50,22 @@ export function botGrade(f) {
   return clamp(1 + Math.floor((f - GRADE_RAMP_START) / GRADE_RAMP_DIV), 1, 4)
 }
 
-/** ธาตุของบอทแต่ละสล็อต (ชั้น <70 = ครบ 3 ธาตุ · 70+ แทนที่ใน Task 2) */
+/** ธาตุของบอทแต่ละสล็อต
+ *  - ชั้น <GRADE_V_FLOOR (หรือ <3 ตัว): ครบ 3 ธาตุ (ธาตุหักล้าง — วัดพลัง/ดวง)
+ *  - ชั้น 70–100: เอน theme → "เคาน์เตอร์" (ELS[(t+2)%3]) คือคำตอบเสมอ + สลับ composition รายชั้น
+ *    RPS: ELS[k] ชนะ ELS[(k+1)%3] แพ้ ELS[(k+2)%3] · mirror = neutral
+ */
 function floorElements(f, count) {
-  return Array.from({ length: count }, (_, i) => ELS[(f + i) % 3])
+  if (f < GRADE_V_FLOOR || count < 3) {
+    return Array.from({ length: count }, (_, i) => ELS[(f + i) % 3])
+  }
+  const t = f % 3
+  const theme   = ELS[t]
+  const counter = ELS[(t + 2) % 3]    // ธาตุที่ชนะ theme (= คำตอบผู้เล่น เสมอ)
+  const variant = Math.floor(f / 3) % 2
+  return variant === 0
+    ? [theme, theme, theme]           // ธาตุเดียวล้วน → เคาน์เตอร์กวาด
+    : [theme, theme, counter]         // 2 theme + 1 counter → เคาน์เตอร์ยังได้เปรียบ (สล็อต 3 = mirror ปลอดภัย)
 }
 
 /** ชั้น → ทีมบอท (rarity/เกรด/จำนวน/ธาตุ ตามชั้น) */
