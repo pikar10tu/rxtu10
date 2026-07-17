@@ -131,9 +131,10 @@ const BASE_URL = import.meta.env.BASE_URL
 
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
 // windup (telegraph) ย้ายไป fx.ring แล้ว (duration hardcode ใน battleFx.js) — ไม่อ่าน windupMs ที่นี่แล้ว
-// lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
+// melee lunge (fx.cardLunge/fx.dash) duration hardcode ใน battleFx.js แล้วเหมือนกัน — ไม่มี lungeMs ที่นี่แล้ว
+// resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
 // pop/callout/koPuff durations ย้ายไป fx pool (battleFx.js) แล้ว — คงที่ไม่หารด้วย speed เหมือนเดิม
-const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], lungeMs: 250, hitStopMs: 130, resultDelayMs: 500,
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], hitStopMs: 130, resultDelayMs: 500,
   liteMotionMs: 90 }   // โหมดลื่น: motion ข้าม/สั้นลง (windup ผ่าน fx.ring เหมือนกันทุกโหมดแล้ว)
 
 // โหมดลดเอฟเฟกต์ (lite) — ตัด GPU layer + อนิเมชันที่ repaint หนัก ให้ลื่นบนเครื่องเบา/iOS Safari
@@ -274,24 +275,17 @@ function defForUid(uid) {
   const arr = uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam
   return getPetDef(arr?.[i]?.id) || { emoji: '❓' }
 }
+// meleeMode (Phase 2b-2): 'card' (ดีฟอลต์) = การ์ดจริงพุ่งชน (fx.cardLunge) · 'dash' = สไปรต์แยกพุ่งฟาดแล้วจาง (fx.dash) — สลับผ่าน ?melee=dash
+const meleeMode = new URLSearchParams(location.search).get('melee') === 'dash' ? 'dash' : 'card'
 function playMotion(e) {
   if (lite.value) {   // โหมดลื่น: ไม่พุ่ง/ไม่ยิง — หน่วงสั้นๆ ให้จังหวะอ่านออก แล้วเข้า impact เลย (ไม่มี transform = ไม่สร้าง layer)
     return wait(REPLAY_CFG.liteMotionMs / speed.value)
   }
   const def = defForUid(e.attacker)
   if (atkStyleOf(def) === 'ranged') return fx?.projectile(e.attacker, e.target, projectileOf(def)) ?? Promise.resolve()
-  // melee: พุ่งสุดตัวถึงศูนย์กลางเป้า (Hearthstone-style ชนทับ) แล้วเด้งกลับ — z-index สูงกันโดนการ์ดอื่นบัง
-  const a = fx?.centerOf(e.attacker), t = fx?.centerOf(e.target), el = els[e.attacker]
-  if (a && t && el) {
-    el.style.zIndex = '7'                        // เหนือ fx-layer (6) และ acting (3)
-    el.style.transition = `transform ${REPLAY_CFG.lungeMs / speed.value}ms cubic-bezier(.2, .7, .3, 1.1)`
-    el.style.transform = `translate(${t.x - a.x}px, ${t.y - a.y}px) scale(1.18)`
-    return wait(REPLAY_CFG.lungeMs / speed.value).then(() => {
-      el.style.transform = ''                    // เด้งกลับที่เดิม (คืน style เสมอ — reset()/skipToEnd() เคลียร์ el ทุกตัวซ้ำอีกชั้นอยู่แล้ว กันการ์ดค้างผิดที่แม้โดน skip)
-      wait(REPLAY_CFG.lungeMs / speed.value).then(() => { el.style.transition = ''; el.style.zIndex = '' })
-    })
-  }
-  return Promise.resolve()
+  if (meleeMode === 'dash') return fx?.dash(e.attacker, e.target, def.emoji) ?? Promise.resolve()
+  // melee ดีฟอลต์: การ์ดจริงพุ่งชนแล้วเด้งกลับ (Hearthstone-style) — fx.cardLunge จัดการ zIndex/transform/cleanup เองหมด
+  return fx?.cardLunge(els[e.attacker], e.attacker, e.target) ?? Promise.resolve()
 }
 
 // ── event dispatch — เพิ่ม handler ใหม่ที่นี่ (passive/heal/…) ──
@@ -357,7 +351,7 @@ function skipToEnd() {
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()   // ตัด wait() ที่ค้างอยู่ทั้งหมด กันโดนโผล่มาแตะ state หลัง log จบไปแล้ว
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge ค้างกลางทาง
   clearHighlights()                                         // ล้างคลาส windup/acting/flash ค้าง
-  fx?.cancelAll()                                           // ตัด pop/callout/koPuff/projectile ค้างจาก fx pool
+  fx?.cancelAll()                                           // ตัด pop/callout/koPuff/projectile/cardLunge/dash ค้างจาก fx pool (cardLunge เก็บ anim ใน anims set → cancel() ที่นี่ trigger cleanup zIndex/transform ในตัวเอง)
   const end = log.value[log.value.length - 1]
   const finalHp = {}; Object.keys(maxHp).forEach(uid => finalHp[uid] = 100)
   for (const ev of log.value) if (ev.t === 'attack') finalHp[ev.target] = Math.max(0, Math.round((ev.targetHpAfter / (maxHp[ev.target] || 1)) * 100))
@@ -457,9 +451,10 @@ onUnmounted(() => {
 .me-label { margin-top: 2px; }
 
 .br-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-/* ไม่ตั้ง will-change ถาวร — browser promote เฉพาะตอน lunge (transition transform กำลังรัน) แล้ว release เอง
+/* ไม่ตั้ง will-change ถาวร — melee lunge (Phase 2b-2) วิ่งผ่าน fx.cardLunge (WAAPI el.animate ตรง ไม่ใช่ CSS transition)
+   browser promote เฉพาะช่วง animation รัน แล้ว release เอง (fill:none คืน layer ทันทีที่จบ) — ไม่มี transition: transform บน .br-unit แล้ว
    เดิม promote ถาวรทั้ง 8 การ์ด = layer เปล่าค้างตลอด → WebKit thrash */
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: transform .1s, border-color .15s; cursor: pointer; }
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: border-color .15s; cursor: pointer; }
 .br-unit.foe { border-color: rgba(248,113,113,.35); }
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
