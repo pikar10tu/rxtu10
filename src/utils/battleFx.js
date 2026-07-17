@@ -55,7 +55,7 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [] }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [] }
   let popIdx = 0, callIdx = 0, puffIdx = 0
 
   function buildPools() {
@@ -65,6 +65,8 @@ export function createBattleFx() {
     pool.ring = [mkEl('brfx-ring')]
     pool.burst = [mkImg('brfx-burst'), mkImg('brfx-burst')]
     pool.burst.forEach(e => imgSrc(e, '💥'))
+    pool.proj = [mkImg('brfx-proj'), mkImg('brfx-proj')]
+    pool.dash = [mkImg('brfx-dash')]
     hideAllPools()
   }
   function hideAllPools() {
@@ -141,5 +143,39 @@ export function createBattleFx() {
     ], { duration: 280, easing: 'ease-out', fill: 'forwards' }).then(() => { el.style.opacity = '0' })
   }
 
-  return { attach, reset, cancelAll, setRate, destroy, centerOf, invalidateCenters, pop, callout, koPuff, ring, burst }
+  let projIdx = 0
+  function projectile(fromUid, toUid, char) {
+    const a = centerOf(fromUid), b = centerOf(toUid); if (!a || !b) return Promise.resolve()
+    const el = pool.proj[projIdx = (projIdx + 1) % pool.proj.length]
+    el.getAnimations?.().forEach(x => x.cancel()); imgSrc(el, char); el.style.opacity = '1'
+    return run(el, [
+      { transform: `translate(${a.x}px, ${a.y}px) translateZ(0)` },
+      { transform: `translate(${b.x}px, ${b.y}px) translateZ(0)` },
+    ], { duration: 280, easing: 'linear', fill: 'forwards' }).then(() => { el.style.opacity = '0' })
+  }
+  function dash(fromUid, toUid, char) {        // plan B melee: sprite เพ็ทพุ่งเข้าฟาดแล้ว fade
+    const a = centerOf(fromUid), b = centerOf(toUid); if (!a || !b) return Promise.resolve()
+    const el = pool.dash[0]
+    el.getAnimations?.().forEach(x => x.cancel()); imgSrc(el, char); el.style.opacity = '1'
+    return run(el, [
+      { transform: `translate(${a.x}px, ${a.y}px) scale(1) translateZ(0)`, opacity: .9 },
+      { transform: `translate(${b.x}px, ${b.y}px) scale(1.3) translateZ(0)`, opacity: 1, offset: .7 },
+      { transform: `translate(${b.x}px, ${b.y}px) scale(.9) translateZ(0)`, opacity: 0 },
+    ], { duration: 250, easing: 'cubic-bezier(.2,.7,.3,1.1)', fill: 'forwards' }).then(() => { el.style.opacity = '0' })
+  }
+  // melee ข้อยกเว้น: การ์ดจริงพุ่ง out-and-back = 1 animation (fill:none) · z-index set นอก keyframes
+  function cardLunge(el, fromUid, toUid) {
+    const a = centerOf(fromUid), b = centerOf(toUid); if (!el || !a || !b) return Promise.resolve()
+    const dx = (b.x - a.x).toFixed(1), dy = (b.y - a.y).toFixed(1)
+    el.style.zIndex = '7'                         // ยกบนสุด (static ก่อนเริ่ม ไม่อยู่ใน keyframes)
+    const anim = el.animate([
+      { transform: 'translate(0,0) scale(1)' },
+      { transform: `translate(${dx}px, ${dy}px) scale(1.18)`, offset: .5 },
+      { transform: 'translate(0,0) scale(1)' },
+    ], { duration: 500 / rate, easing: 'ease-in-out', fill: 'none' })
+    anims.add(anim)
+    return anim.finished.catch(() => {}).finally(() => { anims.delete(anim); el.style.zIndex = ''; el.style.transform = '' })
+  }
+
+  return { attach, reset, cancelAll, setRate, destroy, centerOf, invalidateCenters, pop, callout, koPuff, ring, burst, projectile, dash, cardLunge }
 }

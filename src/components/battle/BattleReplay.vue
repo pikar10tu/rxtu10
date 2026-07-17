@@ -638,3 +638,23 @@ onUnmounted(() => {
   bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 424; display: flex; gap: 8px; }
 .br-peek-btn { background: #4f46e5; border-color: #fff; box-shadow: 0 6px 20px rgba(0, 0, 0, .45); }
 </style>
+
+<style>
+/* FX pool styles — ไม่ scoped (element สร้าง imperative ไม่มี data-v-*) · namespace .brfx-* กันชน global */
+.br-fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+.brfx { position: absolute; left: 0; top: 0; will-change: transform; }
+.brfx-pop { font-weight: 900; font-size: 1.5rem; color: #fecaca; -webkit-text-stroke: 3px rgba(15,23,42,.85); paint-order: stroke fill; white-space: nowrap; }
+.brfx-pop.crit { color: #fbbf24; font-size: 2rem; }
+.brfx-pop.super { color: #fca5a5; }
+.brfx-pop.weak { color: #cbd5e1; font-size: 1.1rem; }
+.brfx-call { font-weight: 800; font-size: .6rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; }
+.brfx-call.super { background: #ef4444; color: #fff; }
+.brfx-call.weak { background: rgba(203,213,225,.95); color: #334155; }
+.brfx-puff { width: 1.2rem; height: 1.2rem; }
+.brfx-burst { width: 2rem; height: 2rem; }
+.brfx-proj { width: 1.4rem; height: 1.4rem; }
+.brfx-dash { width: 2rem; height: 2rem; }
+.brfx-ring { width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 18px; }
+.brfx-ring.windup { box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253,230,138,.55); }
+.brfx-ring.acting { box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
+</style>
