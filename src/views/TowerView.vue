@@ -88,11 +88,12 @@
       </div>
 
       <!-- การ์ดเทียบเพื่อน — social hook รอง, best-effort ไม่มีข้อมูล = ซ่อนทั้งใบ -->
-      <div v-if="rivals" class="tw-rival">
+      <div v-if="rivals && rivals.total > 0 && !(rivals.total === 1 && rivals.myRank === 1)" class="tw-rival">
         <div class="tw-rival-head">
           <span><Emoji char="🏁" /> เพื่อนร่วมไต่</span>
           <span class="tw-rival-rank">
-            <template v-if="rivals.myRank === 1">คุณอยู่อันดับ 1 จาก {{ rivals.total }} <Emoji char="🎉" /></template>
+            <template v-if="rivals.myRank === null">ยังไม่ติดอันดับ — เริ่มไต่เลย!</template>
+            <template v-else-if="rivals.myRank === 1">คุณอยู่อันดับ 1 จาก {{ rivals.total }} <Emoji char="🎉" /></template>
             <template v-else>คุณอยู่อันดับ {{ rivals.myRank }} จาก {{ rivals.total }}</template>
           </span>
         </div>
