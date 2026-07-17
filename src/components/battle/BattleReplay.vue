@@ -6,7 +6,7 @@
   <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z420 สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
-  <div v-if="data" class="br-ov" :class="'br-theme-' + theme">
+  <div v-if="data" class="br-ov" :class="['br-theme-' + theme, { 'br-lite': lite }]">
     <div class="br-box" :class="{ hitstop: hitStop }">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
@@ -62,6 +62,7 @@
       <div class="br-ctrl" v-if="!done">
         <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
         <button class="br-btn sm" @click="cycleSpeed">เร็ว ×{{ speed }}</button>
+        <button class="br-btn sm" @click="toggleLite"><Emoji :char="lite ? '✨' : '🚀'" /> {{ lite ? 'เอฟเฟกต์เต็ม' : 'โหมดลื่น' }}</button>
         <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
       </div>
     </div>
@@ -141,7 +142,17 @@ defineEmits(['close'])
 // windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · popMs = เลขดาเมจค้างบนจอ
 // resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
 // popMs คงที่เหมือนกัน (ตรงกับ CSS br-pop-rise .9s) — อ่านเลขทันแม้เร่ง ×4 อย่าหารด้วย speed
-const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, projMs: 280, hitStopMs: 130, popMs: 900, resultDelayMs: 500 }
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, projMs: 280, hitStopMs: 130, popMs: 900, resultDelayMs: 500,
+  liteWindupMs: 90, liteMotionMs: 90 }   // โหมดลื่น: จังหวะสั้นลง ไม่มีการเคลื่อนไหว (แค่ไฮไลต์ + อัปเดตเลข)
+
+// โหมดลดเอฟเฟกต์ (lite) — ตัด GPU layer + อนิเมชันที่ repaint หนัก ให้ลื่นบนเครื่องเบา/iOS Safari
+// ดีฟอลต์: เปิดบน touch/มือถือ (coarse pointer) · จำค่าที่ผู้ใช้เลือกไว้ใน localStorage
+const LITE_KEY = 'br-lite'
+function initLite() {
+  try { const s = localStorage.getItem(LITE_KEY); if (s !== null) return s === '1' } catch {}
+  try { return window.matchMedia('(pointer: coarse)').matches } catch {}
+  return false
+}
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
 const elEmoji = (p) => ELEMENTS[p?.element]?.emoji || '✊'
@@ -150,6 +161,13 @@ const idx = ref(0)
 const round = ref(1)
 const paused = ref(false)
 const speed = ref(1)
+const lite = ref(initLite())
+function toggleLite() {
+  lite.value = !lite.value
+  try { localStorage.setItem(LITE_KEY, lite.value ? '1' : '0') } catch {}
+  // เคลียร์ transform ค้างตอนสลับกลางไฟต์ (กันการ์ดค้างผิดที่)
+  Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })
+}
 const hp = ref({})
 const pops = ref({})
 const flashing = ref(null)
@@ -265,6 +283,10 @@ function defForUid(uid) {
 }
 function playMotion(e, onImpact) {
   const g = gen
+  if (lite.value) {   // โหมดลื่น: ไม่พุ่ง/ไม่ยิง — หน่วงสั้นๆ ให้จังหวะอ่านออก แล้วเข้า impact เลย (ไม่มี transform = ไม่สร้าง layer)
+    setTimeout(() => { if (g === gen) onImpact() }, REPLAY_CFG.liteMotionMs / speed.value)
+    return
+  }
   const def = defForUid(e.attacker)
   if (atkStyleOf(def) === 'ranged') {
     const a = centerOf(e.attacker), t = centerOf(e.target)
@@ -316,7 +338,7 @@ function applyAttack(e) {
         callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
         setTimeout(() => { if (g !== gen) return; if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
       }
-      if (e.crit) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }
+      if (e.crit && !lite.value) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }   // lite: ไม่ scale ทั้งสนาม
     })
   })
 }
@@ -324,17 +346,21 @@ function applyAttack(e) {
 // telegraph: ลอยขึ้น + เรืองแสง + เอนถอยหลัง (ทิศตรงข้ามเป้า) ค้าง windupMs แล้วค่อยเข้าเฟส motion
 function startWindup(e, onDone) {
   winding.value = e.attacker
-  const el = els[e.attacker], a = centerOf(e.attacker), t = centerOf(e.target)
-  if (el && a && t) {
-    const dx = t.x - a.x, dy = t.y - a.y, len = Math.hypot(dx, dy) || 1
-    el.style.setProperty('--wx', (-dx / len * 7).toFixed(1) + 'px')   // เอนถอย ~7px หนีเป้า
-    el.style.setProperty('--wy', (-dy / len * 7 - 4).toFixed(1) + 'px') // + ลอยขึ้นอีก 4px
+  if (!lite.value) {   // lite: ข้ามการเอน/ลอย (ไม่ set transform) เหลือแค่ไฮไลต์ขอบ + จังหวะสั้น
+    const el = els[e.attacker], a = centerOf(e.attacker), t = centerOf(e.target)
+    if (el && a && t) {
+      const dx = t.x - a.x, dy = t.y - a.y, len = Math.hypot(dx, dy) || 1
+      el.style.setProperty('--wx', (-dx / len * 7).toFixed(1) + 'px')   // เอนถอย ~7px หนีเป้า
+      el.style.setProperty('--wy', (-dy / len * 7 - 4).toFixed(1) + 'px') // + ลอยขึ้นอีก 4px
+    }
   }
-  windupTimer = setTimeout(() => { winding.value = null; onDone() }, REPLAY_CFG.windupMs / speed.value)
+  const ms = lite.value ? REPLAY_CFG.liteWindupMs : REPLAY_CFG.windupMs
+  windupTimer = setTimeout(() => { winding.value = null; onDone() }, ms / speed.value)
 }
 
 // motion ms ของ event attack (ranged = projectile, melee = lunge) — ใช้คำนวณคิวจังหวะ
 function motionMsOf(e) {
+  if (lite.value) return REPLAY_CFG.liteMotionMs
   return atkStyleOf(defForUid(e.attacker)) === 'ranged' ? REPLAY_CFG.projMs : REPLAY_CFG.lungeMs
 }
 
@@ -348,8 +374,9 @@ function step() {
   idx.value++
   const noDelay = e.t === 'round'               // round marker ไม่หน่วงเวลา
   // attack กินเวลาเพิ่ม: windup + motion (impact เกิดตอนจบ motion) + hit-stop ตอน crit — แล้วค่อยคั่น baseDelay
+  const windupMs = lite.value ? REPLAY_CFG.liteWindupMs : REPLAY_CFG.windupMs
   const extra = e.t === 'attack'
-    ? (REPLAY_CFG.windupMs + motionMsOf(e) + (e.crit ? REPLAY_CFG.hitStopMs : 0)) / speed.value
+    ? (windupMs + motionMsOf(e) + (e.crit && !lite.value ? REPLAY_CFG.hitStopMs : 0)) / speed.value
     : 0
   if (idx.value < log.value.length) timer = setTimeout(step, noDelay ? 0 : delay.value + extra)
   else { acting.value = null; flashing.value = null }
@@ -541,6 +568,21 @@ onUnmounted(() => {
 .br-proj-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
 .br-proj { position: absolute; left: 0; top: 0; font-size: 1.4rem; transform: translate(var(--x0), var(--y0)); animation: br-fly linear forwards; will-change: transform; }
 @keyframes br-fly { from { transform: translate(var(--x0), var(--y0)) } to { transform: translate(var(--x1), var(--y1)) } }
+
+/* ══ โหมดลื่น (lite) — ตัด GPU layer ถาวรทั้งหมด + อนิเมชันที่ repaint หนัก ══
+   พิสูจน์/แก้สมมติฐาน over-promotion: เหลือ layer เท่าที่จำเป็น, อัปเดตเลข/สถานะทันที ยังอ่านออกครบ */
+.br-lite .br-unit, .br-lite .br-hp-fill, .br-lite .br-box,
+.br-lite .br-pop, .br-lite .br-proj, .br-lite .br-call { will-change: auto; }
+.br-lite .br-box.hitstop { animation: none; }               /* ไม่ scale ทั้งสนาม */
+.br-lite .br-hp-fill { transition: none; }                  /* เลือดเปลี่ยนทันที */
+.br-lite .br-unit { transition: border-color .1s; will-change: auto; }
+.br-lite .br-unit.acting, .br-lite .br-unit.windup { transform: none; }   /* ไม่ลอย/ไม่ขยาย */
+.br-lite .br-unit.acting { border-color: #fde68a; }         /* ไฮไลต์ผู้โจมตี = แค่ขอบเหลือง (ถูก) */
+.br-lite .br-unit.flash { animation: none; border-color: #f87171; }       /* โดนตี = ขอบแดง ไม่เขย่า */
+.br-lite .br-unit::after { display: none; }                 /* ตัด glow layer ทิ้ง */
+.br-lite .br-pop { animation: none; -webkit-text-stroke-width: 2px; }      /* เลขโผล่นิ่ง (JS ลบเองตาม popMs) */
+.br-lite .br-call { animation: none; }
+.br-lite .br-proj { display: none; }
 
 .br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
 
