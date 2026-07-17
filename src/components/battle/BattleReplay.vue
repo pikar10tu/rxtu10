@@ -17,7 +17,7 @@
       <div class="br-side foe-label"><i class="dot foe"></i> ศัตรู</div>
       <div class="br-team">
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
-             class="br-unit foe" :class="unitClass('B'+i)" @click="inspect('B'+i)">
+             class="br-unit foe" @click="inspect('B'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp">
@@ -32,7 +32,7 @@
 
       <div class="br-team">
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
-             class="br-unit me" :class="unitClass('A'+i)" @click="inspect('A'+i)">
+             class="br-unit me" @click="inspect('A'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp">
@@ -178,6 +178,8 @@ function setEl(uid, el) { if (el) els[uid] = el }
 // ตัด Vue reactivity ออกจาก path ที่วิ่งทุกหมัด — toggle class ตรงถูกกว่า set ref แล้วรอ re-render
 function highlight(uid, cls, on = true) { const el = els[uid]; if (el) el.classList[on ? 'add' : 'remove'](cls) }
 function clearHighlights() { Object.values(els).forEach(el => el && el.classList.remove('windup', 'acting', 'flash')) }
+// dead ก็ imperative classList เหมือนกัน (ไม่ใช่ reactive :class แล้ว) — กัน Vue re-render เขียนทับ flash/acting/windup ตอน hp เปลี่ยน (Task 9 finding #1)
+function setDead(uid) { highlight(uid, 'dead', (hp.value[uid] ?? 100) <= 0) }
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
 const fxLayerEl = ref(null)      // ref บน .br-fx-layer
@@ -242,6 +244,7 @@ function reset() {
   idx.value = 0; round.value = 1
   paused.value = false; inspectUid.value = null
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
+  Object.keys(maxHp).forEach(setDead)                                       // ทุกตัว hp=100 → setDead ถอด class dead ค้างจากไฟต์ก่อน
   // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
   nextTick(() => { ensureFx(); fx?.reset() })                              // reset() ภายใน fx = invalidateCenters + cancelAll (ยกเลิก pop/callout/projectile ค้าง)
   runIntro()
@@ -306,6 +309,7 @@ function applyImpact(e, g) {
   fx?.burst(e.target)
   setTimeout(() => { if (g === gen) highlight(e.target, 'flash', false) }, 250)   // gen-guard กันไปถอด flash ของไฟต์ใหม่หลัง reset/skip
   hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
+  setDead(e.target)                                                // hp เปลี่ยน → sync dead แบบ imperative (ไม่ผ่าน reactive :class)
   fx?.pop(e.target, { dmg: e.dmg, crit: e.crit, eff: e.eff })
   if (e.eff === 'super' || e.eff === 'weak') fx?.callout(e.target, e.eff)
   if (e.targetHpAfter <= 0) fx?.koPuff(e.target)
@@ -316,7 +320,7 @@ function applyImpact(e, g) {
 async function applyAttack(e) {
   const g = gen
   highlight(e.attacker, 'windup')
-  await fx.ring(e.attacker, 'windup'); if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
+  await (fx?.ring(e.attacker, 'windup') ?? Promise.resolve()); if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
   highlight(e.attacker, 'windup', false); highlight(e.attacker, 'acting')
   await playMotion(e); if (g !== gen) return            // โดน reset/skip ระหว่างพุ่ง/ยิง
   applyImpact(e, g)
@@ -358,6 +362,7 @@ function skipToEnd() {
   const finalHp = {}; Object.keys(maxHp).forEach(uid => finalHp[uid] = 100)
   for (const ev of log.value) if (ev.t === 'attack') finalHp[ev.target] = Math.max(0, Math.round((ev.targetHpAfter / (maxHp[ev.target] || 1)) * 100))
   hp.value = finalHp
+  Object.keys(maxHp).forEach(setDead)                       // sync dead ให้ครบทุกตัวตาม hp สุดท้าย (bulk skip ไม่ได้ผ่าน applyImpact ทีละหมัด)
   round.value = end?.rounds || round.value
   idx.value = log.value.length
   clearTimeout(resultTimer); resultReady.value = true; resultOpen.value = true   // ข้าม = เปิดสรุปทันที
@@ -365,9 +370,6 @@ function skipToEnd() {
 function inspect(uid) { paused.value = true; clearTimeout(timer); inspectUid.value = uid }
 
 function hpPct(uid) { return hp.value[uid] ?? 100 }
-function unitClass(uid) {
-  return { dead: (hp.value[uid] ?? 100) <= 0 }
-}
 
 // ── inspect helpers ──
 function rarityLabel(r) { return RARITY[r]?.label || r }
