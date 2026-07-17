@@ -104,7 +104,7 @@
             <span class="tw-rival-floor">ชั้น {{ u.floor }}</span>
           </li>
         </ol>
-        <div v-if="rivals.chaseName" class="tw-rival-chase"><Emoji char="🔥" /> ตามหลัง {{ rivals.chaseName }} อยู่ {{ rivals.chaseGap }} ชั้น!</div>
+        <div v-if="rivals.chaseName && rivals.chaseGap > 0" class="tw-rival-chase"><Emoji char="🔥" /> ตามหลัง {{ rivals.chaseName }} อยู่ {{ rivals.chaseGap }} ชั้น!</div>
       </div>
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
