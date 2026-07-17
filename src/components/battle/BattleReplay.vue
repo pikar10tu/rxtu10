@@ -12,6 +12,7 @@
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
       </div>
       <div class="br-round" v-if="!done">รอบ {{ round }}</div>
+      <div v-if="showFps" class="br-fps" :class="{ bad: fpsWorst > 33, warn: fpsWorst > 16 && fpsWorst <= 33 }">{{ fpsWorst }}ms</div>
 
       <div class="br-side foe-label"><i class="dot foe"></i> ศัตรู</div>
       <div class="br-team">
@@ -211,6 +212,7 @@ function preloadProjectiles(d) {
 }
 function reset() {
   gen++                                                                     // ยกเลิก callback ค้างทุกตัว
+  invalidateCenters()                                                       // ไฟต์ใหม่/ทีมใหม่ = วัดตำแหน่งใหม่
   clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer)
   clearTimeout(resultTimer); resultOpen.value = false; resultReady.value = false
   introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
@@ -239,11 +241,22 @@ function skipIntro() {
 }
 
 // ── ตำแหน่ง/การเคลื่อนไหว ──
+// cache ตำแหน่งศูนย์กลาง unit (สัมพัทธ์กับ .br-box) — grid นิ่งทั้งไฟต์ ไม่ต้องวัดซ้ำ
+// เดิม centerOf เรียก getBoundingClientRect ~8 ครั้ง/หมัด (windup 2 + motion 2 × 2 rect) สลับอ่าน/เขียน style
+// = forced sync reflow ทุกหมัด → hitch ต่อหมัด (หนักบน Safari/WebKit). cache = วัดครั้งเดียวต่อ unit ต่อไฟต์
+let centers = {}        // uid → {x,y}
+let boxRect = null      // rect ของ .br-box (จุดอ้างอิงร่วม)
+function invalidateCenters() { centers = {}; boxRect = null }
 function centerOf(uid) {
+  const cached = centers[uid]
+  if (cached) return cached
   const el = els[uid]; const box = el?.closest('.br-box')
   if (!box || !el) return null
-  const b = box.getBoundingClientRect(), r = el.getBoundingClientRect()
-  return { x: r.left - b.left + r.width / 2, y: r.top - b.top + r.height / 2 }
+  if (!boxRect) boxRect = box.getBoundingClientRect()
+  const r = el.getBoundingClientRect()
+  const c = { x: r.left - boxRect.left + r.width / 2, y: r.top - boxRect.top + r.height / 2 }
+  centers[uid] = c
+  return c
 }
 function defForUid(uid) {
   const i = parseInt(uid.slice(1), 10)
@@ -397,7 +410,32 @@ watch(done, (v) => {
   if (!v || resultReady.value) return
   resultTimer = setTimeout(() => { resultReady.value = true; resultOpen.value = true }, REPLAY_CFG.resultDelayMs)
 }, { immediate: true })
-onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer); clearTimeout(resultTimer) })
+// layout เปลี่ยน (หมุนจอ/ปรับขนาด) = center ที่ cache ไว้ใช้ไม่ได้ ต้องวัดใหม่
+function onResize() { invalidateCenters() }
+window.addEventListener('resize', onResize)
+window.addEventListener('orientationchange', onResize)
+
+// ── FPS/frame-time meter (เก็บหลักฐานจริงจาก Safari) — เปิดด้วย ?fps=1 ท้าย URL ก่อน # ──
+// โชว์ frame time แย่สุดใน ~1 วิ (ms) มุมจอ: >16ms = หลุด 60fps, >33ms = ต่ำกว่า 30fps (กระตุกชัด)
+const showFps = ref(new URLSearchParams(location.search).has('fps'))
+const fpsWorst = ref(0)
+let fpsRaf = 0, fpsLast = 0, fpsMax = 0, fpsWindowStart = 0
+function fpsLoop(now) {
+  if (fpsLast) {
+    const dt = now - fpsLast
+    if (dt > fpsMax) fpsMax = dt
+    if (now - fpsWindowStart > 1000) { fpsWorst.value = Math.round(fpsMax); fpsMax = 0; fpsWindowStart = now }
+  } else { fpsWindowStart = now }
+  fpsLast = now
+  fpsRaf = requestAnimationFrame(fpsLoop)
+}
+if (showFps.value) fpsRaf = requestAnimationFrame(fpsLoop)
+
+onUnmounted(() => {
+  clearTimeout(timer); clearTimeout(introTimer); clearTimeout(windupTimer); clearTimeout(resultTimer)
+  window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize)
+  if (fpsRaf) cancelAnimationFrame(fpsRaf)
+})
 </script>
 
 <style scoped>
@@ -420,6 +458,12 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .br-box.hitstop { animation: br-hitstop .12s; }
 @keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
 .br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
+
+/* FPS meter (?fps=1) — เขียว=ลื่น เหลือง=หลุด 60fps แดง=ต่ำกว่า 30fps (กระตุกชัด) */
+.br-fps { position: absolute; top: 2px; right: 4px; z-index: 11; font-size: .7rem; font-weight: 800; font-variant-numeric: tabular-nums;
+  color: #34d399; background: rgba(0,0,0,.55); border-radius: 7px; padding: 2px 6px; pointer-events: none; }
+.br-fps.warn { color: #fbbf24; }
+.br-fps.bad { color: #f87171; }
 
 .br-side { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; color: rgba(255,255,255,.8); padding: 0 2px; }
 .br-side .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
@@ -459,10 +503,13 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
 .br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
 
-/* เลขดาเมจ: ใหญ่ + stroke เข้ม อ่านออกทุกพื้นหลัง + เด้งแล้วลอย 40px ค้าง .9 วิ */
+/* เลขดาเมจ: ใหญ่ + stroke เข้ม อ่านออกทุกพื้นหลัง + เด้งแล้วลอย 40px ค้าง .9 วิ
+   will-change: transform → promote เป็น layer: Safari rasterize ตัวอักษร (มี text-stroke) ครั้งเดียวแล้ว composite
+   ไม่งั้น transform animate บน stroked text = repaint ทุกเฟรมตลอด .9s (jank หลักบน WebKit) · ลด stroke 4→3px ลด raster cost */
 .br-pop { position: absolute; top: 0; font-weight: 900; font-size: 1.5rem; color: #fecaca; z-index: 6;
-  -webkit-text-stroke: 4px rgba(15, 23, 42, .85); paint-order: stroke fill;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, .7); animation: br-pop-rise .9s ease-out forwards; pointer-events: none; }
+  -webkit-text-stroke: 3px rgba(15, 23, 42, .85); paint-order: stroke fill;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .7); animation: br-pop-rise .9s ease-out forwards; pointer-events: none;
+  will-change: transform; }
 .br-pop.crit { color: #fbbf24; font-size: 2rem; }
 .br-pop.super { color: #fca5a5; }
 .br-pop.weak { color: #cbd5e1; font-size: 1.1rem; }
@@ -474,7 +521,7 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 }
 @keyframes br-rise { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-24px); opacity: 0 } }
 
-.br-call { position: absolute; top: -16px; display: inline-flex; align-items: center; gap: 2px; font-weight: 800; font-size: .6rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; animation: br-rise .75s ease-out forwards; pointer-events: none; z-index: 4; }
+.br-call { position: absolute; top: -16px; display: inline-flex; align-items: center; gap: 2px; font-weight: 800; font-size: .6rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; animation: br-rise .75s ease-out forwards; pointer-events: none; z-index: 4; will-change: transform; }
 .br-call.super { background: #ef4444; color: #fff; }
 .br-call.weak { background: rgba(203,213,225,.95); color: #334155; }
 
@@ -482,7 +529,7 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 @keyframes br-puff { from { transform: translateY(0) scale(.6); opacity: 1 } to { transform: translateY(-16px) scale(1.25); opacity: 0 } }
 
 .br-proj-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.br-proj { position: absolute; left: 0; top: 0; font-size: 1.4rem; transform: translate(var(--x0), var(--y0)); animation: br-fly linear forwards; }
+.br-proj { position: absolute; left: 0; top: 0; font-size: 1.4rem; transform: translate(var(--x0), var(--y0)); animation: br-fly linear forwards; will-change: transform; }
 @keyframes br-fly { from { transform: translate(var(--x0), var(--y0)) } to { transform: translate(var(--x1), var(--y1)) } }
 
 .br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
