@@ -7,7 +7,7 @@
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
   <div v-if="data" class="br-ov" :class="['br-theme-' + theme, { 'br-lite': lite }]">
-    <div class="br-box" :class="{ hitstop: hitStop }">
+    <div class="br-box">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
       </div>
@@ -175,7 +175,6 @@ const acting = ref(null)
 const inspectUid = ref(null)
 const projectiles = ref([])      // [{k, emoji, x0,y0,x1,y1}]
 const callouts = ref({})         // uid → {k, text, icon, kind}
-const hitStop = ref(false)
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
 const resultOpen = ref(false)    // modal สรุปโชว์อยู่
 const resultReady = ref(false)   // จบไฟต์+ผ่านจังหวะรอแล้ว — ใช้โชว์ปุ่มลอย "ดูสรุป" ตอน peek
@@ -236,7 +235,7 @@ function reset() {
   introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge/windup ค้างจากไฟต์ก่อน (component ถูก mount ค้างไว้ ใช้ซ้ำ)
   idx.value = 0; round.value = 1; pops.value = {}; flashing.value = null; acting.value = null
-  paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}; hitStop.value = false
+  paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
   runIntro()
   // log ว่าง = done ค้าง true ตั้งแต่แรก → watch(done) ไม่ยิงซ้ำ ต้องเปิดสรุปเองไม่งั้น overlay ไม่มีทางออก
@@ -338,7 +337,7 @@ function applyAttack(e) {
         callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
         setTimeout(() => { if (g !== gen) return; if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
       }
-      if (e.crit && !lite.value) { hitStop.value = true; setTimeout(() => hitStop.value = false, REPLAY_CFG.hitStopMs / speed.value) }   // lite: ไม่ scale ทั้งสนาม
+      // crit ไม่มี visual scale แล้ว (ตัด full-screen re-raster) — จังหวะ freeze คง extra delay ใน step() ไว้ (hitStopMs)
     })
   })
 }
@@ -481,11 +480,9 @@ onUnmounted(() => {
     linear-gradient(180deg, #3b2f1a 0%, #2a1f12 60%, #17100a 100%),
     repeating-linear-gradient(90deg, rgba(255,220,150,.05) 0 2px, transparent 2px 46px);
 }
-/* will-change: promote .br-box ถาวร → hitstop scale ตอน crit = composite ล้วน
-   เดิม scale ทั้ง box สร้าง layer เต็มจอกลาง crit + rasterize เนื้อที่ไม่ใช่ layer (hp/ticks/stats/ป้าย) @DPR3 ทุก crit = hitch ก้อนใหญ่ */
-.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; will-change: transform; }
-.br-box.hitstop { animation: br-hitstop .12s; }
-@keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
+.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+/* hitstop เดิม scale ทั้ง box = re-raster เต็มจอ @DPR3 ทุก crit (แพงสุด คุ้มน้อยสุด แค่เด้ง 1.2%) → ตัดทิ้ง
+   crit ยังสื่อผ่านเลขใหญ่/ทอง + จังหวะ freeze (extra delay ใน step) ที่ยังอยู่ */
 .br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
 
 /* FPS meter (?fps=1) — เขียว=ลื่น เหลือง=หลุด 60fps แดง=ต่ำกว่า 30fps (กระตุกชัด) */
@@ -501,8 +498,9 @@ onUnmounted(() => {
 .me-label { margin-top: 2px; }
 
 .br-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-/* transition ตัด box-shadow (repaint ต่อเฟรม) เหลือ transform+border · will-change: ยกเป็น layer → lunge + เงา composite (ไม่ re-rasterize เงาเบลอตอนพุ่ง) */
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: transform .1s, border-color .15s; cursor: pointer; will-change: transform; }
+/* ไม่ตั้ง will-change ถาวร — browser promote เฉพาะตอน lunge (transition transform กำลังรัน) แล้ว release เอง
+   เดิม promote ถาวรทั้ง 8 การ์ด = layer เปล่าค้างตลอด → WebKit thrash */
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: transform .1s, border-color .15s; cursor: pointer; }
 .br-unit.foe { border-color: rgba(248,113,113,.35); }
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
@@ -514,10 +512,9 @@ onUnmounted(() => {
 .br-unit.windup { transform: translate(var(--wx, 0px), var(--wy, -6px)) scale(1.08); z-index: 3; }
 .br-unit.flash { animation: br-shake .25s; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
-/* ชั้นเงา/เรืองแสงแยก layer (will-change: opacity) — เงาอยู่ข้างนอก element โปร่งใส ไม่บังหน้าเพ็ท
-   toggle เปลี่ยนแค่ opacity + raster เฉพาะเงา (เล็ก) ไม่แตะ layer เนื้อการ์ด */
+/* ชั้นเงา/เรืองแสง — เงาอยู่ข้างนอก element โปร่งใส ไม่บังหน้าเพ็ท · promote เฉพาะตอน opacity transition รัน (ไม่ตั้ง will-change ถาวร) */
 .br-unit::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; pointer-events: none;
-  opacity: 0; transition: opacity .12s; will-change: opacity; }
+  opacity: 0; transition: opacity .12s; }
 .br-unit.acting::after { opacity: 1; box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
 .br-unit.windup::after { opacity: 1; box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
 .br-unit.flash::after  { opacity: 1; box-shadow: 0 0 0 3px #f87171; }
@@ -530,8 +527,8 @@ onUnmounted(() => {
 }
 
 .br-hp { position: relative; width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
-/* เลือด: scaleX (composite) แทน transition width (layout ทุกเฟรม) — origin ซ้าย, will-change ให้ GPU */
-.br-hp-fill { width: 100%; height: 100%; background: #ef4444; border-radius: 999px; transform-origin: left center; transition: transform .2s ease-out; will-change: transform; }
+/* เลือด: scaleX (composite) แทน transition width (layout ทุกเฟรม) — origin ซ้าย · promote เฉพาะตอน transition รัน (ไม่ตั้ง will-change ถาวร) */
+.br-hp-fill { width: 100%; height: 100%; background: #ef4444; border-radius: 999px; transform-origin: left center; transition: transform .2s ease-out; }
 .br-hp-fill.mine { background: #34d399; }
 .br-tick { position: absolute; top: 0; width: 1px; height: 100%; background: rgba(255,255,255,.55); }
 .br-stats { display: flex; justify-content: space-between; align-items: center; gap: 3px; width: 88%; margin-top: 3px; }
@@ -571,11 +568,9 @@ onUnmounted(() => {
 
 /* ══ โหมดลื่น (lite) — ตัด GPU layer ถาวรทั้งหมด + อนิเมชันที่ repaint หนัก ══
    พิสูจน์/แก้สมมติฐาน over-promotion: เหลือ layer เท่าที่จำเป็น, อัปเดตเลข/สถานะทันที ยังอ่านออกครบ */
-.br-lite .br-unit, .br-lite .br-hp-fill, .br-lite .br-box,
-.br-lite .br-pop, .br-lite .br-proj, .br-lite .br-call { will-change: auto; }
-.br-lite .br-box.hitstop { animation: none; }               /* ไม่ scale ทั้งสนาม */
+.br-lite .br-pop, .br-lite .br-proj, .br-lite .br-call { will-change: auto; }   /* ตัด layer ของ ephemeral ที่เหลือ (unit/hp-fill/box ไม่ตั้ง will-change แล้ว) */
 .br-lite .br-hp-fill { transition: none; }                  /* เลือดเปลี่ยนทันที */
-.br-lite .br-unit { transition: border-color .1s; will-change: auto; }
+.br-lite .br-unit { transition: border-color .1s; }
 .br-lite .br-unit.acting, .br-lite .br-unit.windup { transform: none; }   /* ไม่ลอย/ไม่ขยาย */
 .br-lite .br-unit.acting { border-color: #fde68a; }         /* ไฮไลต์ผู้โจมตี = แค่ขอบเหลือง (ถูก) */
 .br-lite .br-unit.flash { animation: none; border-color: #f87171; }       /* โดนตี = ขอบแดง ไม่เขย่า */
