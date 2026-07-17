@@ -7,7 +7,7 @@
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
   <div v-if="data" class="br-ov" :class="['br-theme-' + theme, { 'br-lite': lite }]">
-    <div class="br-box">
+    <div class="br-box" ref="boxRef">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
       </div>
@@ -25,11 +25,6 @@
             <span v-for="(t, ti) in ticksFor('B'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
           <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe">{{ curHp('B'+i) }}</span></div>
-          <span v-for="pop in popsFor('B'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)" :style="{ marginLeft: pop.x + 'px' }">-{{ pop.dmg }}</span>
-          <span v-if="callouts['B'+i]" class="br-call" :class="callouts['B'+i].kind">
-            {{ callouts['B'+i].text }}<Emoji :char="callouts['B'+i].icon" />
-          </span>
-          <span v-if="(hp['B'+i] ?? 100) <= 0" class="br-puff"><Emoji char="💀" /></span>
         </div>
       </div>
 
@@ -45,19 +40,12 @@
             <span v-for="(t, ti) in ticksFor('A'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
           <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me">{{ curHp('A'+i) }}</span></div>
-          <span v-for="pop in popsFor('A'+i)" :key="pop.k" class="br-pop" :class="popClass(pop)" :style="{ marginLeft: pop.x + 'px' }">-{{ pop.dmg }}</span>
-          <span v-if="callouts['A'+i]" class="br-call" :class="callouts['A'+i].kind">
-            {{ callouts['A'+i].text }}<Emoji :char="callouts['A'+i].icon" />
-          </span>
-          <span v-if="(hp['A'+i] ?? 100) <= 0" class="br-puff"><Emoji char="💀" /></span>
         </div>
       </div>
       <div class="br-side me-label"><i class="dot me"></i> ทีมคุณ</div>
 
-      <!-- projectile layer (ranged) — พิกัดสัมพัทธ์กับ .br-box -->
-      <div class="br-proj-layer">
-        <span v-for="pj in projectiles" :key="pj.k" class="br-proj" :style="projStyle(pj)"><Emoji :char="pj.emoji" /></span>
-      </div>
+      <!-- fx pool layer (pops/callouts/koPuff/projectile) — พิกัดสัมพัทธ์กับ .br-box -->
+      <div class="br-fx-layer" ref="fxLayerEl"></div>
 
       <div class="br-ctrl" v-if="!done">
         <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
@@ -125,12 +113,13 @@
 
 <script setup>
 import Emoji from '../shared/Emoji.vue'
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { computeBattleSummary } from '../../utils/battleSummary.js'
 import { fluentFile } from '../../utils/emoji.js'
+import { createBattleFx } from '../../utils/battleFx.js'
 
 const props = defineProps({
   data: { type: Object, default: null },
@@ -141,10 +130,10 @@ defineEmits(['close'])
 const BASE_URL = import.meta.env.BASE_URL
 
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
-// windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · popMs = เลขดาเมจค้างบนจอ
+// windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว)
 // resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
-// popMs คงที่เหมือนกัน (ตรงกับ CSS br-pop-rise .9s) — อ่านเลขทันแม้เร่ง ×4 อย่าหารด้วย speed
-const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, projMs: 280, hitStopMs: 130, popMs: 900, resultDelayMs: 500,
+// pop/callout/koPuff durations ย้ายไป fx pool (battleFx.js) แล้ว — คงที่ไม่หารด้วย speed เหมือนเดิม
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, hitStopMs: 130, resultDelayMs: 500,
   liteWindupMs: 90, liteMotionMs: 90 }   // โหมดลื่น: จังหวะสั้นลง ไม่มีการเคลื่อนไหว (แค่ไฮไลต์ + อัปเดตเลข)
 
 // โหมดลดเอฟเฟกต์ (lite) — ตัด GPU layer + อนิเมชันที่ repaint หนัก ให้ลื่นบนเครื่องเบา/iOS Safari
@@ -171,12 +160,9 @@ function toggleLite() {
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })
 }
 const hp = ref({})
-const pops = ref({})
 const flashing = ref(null)
 const acting = ref(null)
 const inspectUid = ref(null)
-const projectiles = ref([])      // [{k, emoji, x0,y0,x1,y1}]
-const callouts = ref({})         // uid → {k, text, icon, kind}
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
 const resultOpen = ref(false)    // modal สรุปโชว์อยู่
 const resultReady = ref(false)   // จบไฟต์+ผ่านจังหวะรอแล้ว — ใช้โชว์ปุ่มลอย "ดูสรุป" ตอน peek
@@ -184,12 +170,23 @@ let resultTimer = null
 let introTimer = null
 const winding = ref(null)        // uid ที่กำลังเงื้อ (telegraph) — โชว์คลาส .windup
 let gen = 0                      // generation guard — reset/skip เพิ่มค่า เพื่อให้ promise chain ค้างจาก wait() รู้ตัวว่าโดนยกเลิก
-let timer = null, popKey = 0, projKey = 0, calloutKey = 0
+let timer = null
 const pendingTimers = new Set()  // เก็บ timer id จาก wait() ทั้งหมด — clear ตอน reset/skip/unmount กัน promise chain ค้างมาเขียน state เก่าทับ
 function wait(ms) { return new Promise(r => { const t = setTimeout(r, ms); pendingTimers.add(t) }) }
 let maxHp = {}, unitAtk = {}     // uid → maxHp / atk (static ต่อ unit จาก buildCombatant)
 const els = {}                   // uid → DOM el (วัดตำแหน่ง melee/ranged)
 function setEl(uid, el) { if (el) els[uid] = el }
+
+// ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
+const fxLayerEl = ref(null)      // ref บน .br-fx-layer
+const boxRef = ref(null)         // ref บน .br-box (จุดอ้างอิงพิกัด)
+let fx = null
+function ensureFx() {
+  if (fx || !boxRef.value || !fxLayerEl.value) return
+  fx = createBattleFx()
+  fx.attach({ boxEl: boxRef.value, layerEl: fxLayerEl.value, getEl: uid => els[uid] || null })
+  fx.setRate(speed.value)
+}
 
 // ── การ์ดสไตล์ Hearthstone: ATK/HP เป็นเลข + หลอดเลือดขีดทุก 50 HP ──
 function atkOf(uid) { return unitAtk[uid] ?? 0 }
@@ -234,15 +231,16 @@ function preloadCombat(d) {
 }
 function reset() {
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
-  invalidateCenters()                                                       // ไฟต์ใหม่/ทีมใหม่ = วัดตำแหน่งใหม่
   clearTimeout(timer); clearTimeout(introTimer)
   clearTimeout(resultTimer); resultOpen.value = false; resultReady.value = false
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()                // ตัด wait() ที่ค้างอยู่ทั้งหมด (windup/motion/hitstop)
   introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge/windup ค้างจากไฟต์ก่อน (component ถูก mount ค้างไว้ ใช้ซ้ำ)
-  idx.value = 0; round.value = 1; pops.value = {}; flashing.value = null; acting.value = null
-  paused.value = false; inspectUid.value = null; projectiles.value = []; callouts.value = {}
+  idx.value = 0; round.value = 1; flashing.value = null; acting.value = null
+  paused.value = false; inspectUid.value = null
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
+  // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
+  nextTick(() => { ensureFx(); fx?.reset() })                              // reset() ภายใน fx = invalidateCenters + cancelAll (ยกเลิก pop/callout/projectile ค้าง)
   runIntro()
   // log ว่าง = done ค้าง true ตั้งแต่แรก → watch(done) ไม่ยิงซ้ำ ต้องเปิดสรุปเองไม่งั้น overlay ไม่มีทางออก
   if (done.value) { resultReady.value = true; resultOpen.value = true }
@@ -264,23 +262,7 @@ function skipIntro() {
 }
 
 // ── ตำแหน่ง/การเคลื่อนไหว ──
-// cache ตำแหน่งศูนย์กลาง unit (สัมพัทธ์กับ .br-box) — grid นิ่งทั้งไฟต์ ไม่ต้องวัดซ้ำ
-// เดิม centerOf เรียก getBoundingClientRect ~8 ครั้ง/หมัด (windup 2 + motion 2 × 2 rect) สลับอ่าน/เขียน style
-// = forced sync reflow ทุกหมัด → hitch ต่อหมัด (หนักบน Safari/WebKit). cache = วัดครั้งเดียวต่อ unit ต่อไฟต์
-let centers = {}        // uid → {x,y}
-let boxRect = null      // rect ของ .br-box (จุดอ้างอิงร่วม)
-function invalidateCenters() { centers = {}; boxRect = null }
-function centerOf(uid) {
-  const cached = centers[uid]
-  if (cached) return cached
-  const el = els[uid]; const box = el?.closest('.br-box')
-  if (!box || !el) return null
-  if (!boxRect) boxRect = box.getBoundingClientRect()
-  const r = el.getBoundingClientRect()
-  const c = { x: r.left - boxRect.left + r.width / 2, y: r.top - boxRect.top + r.height / 2 }
-  centers[uid] = c
-  return c
-}
+// centers cache ย้ายไป fx pool (battleFx.js createBattleFx().centerOf) — ใช้ fx.centerOf(uid) แทน
 function defForUid(uid) {
   const i = parseInt(uid.slice(1), 10)
   const arr = uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam
@@ -291,20 +273,11 @@ function playMotion(e) {
     return wait(REPLAY_CFG.liteMotionMs / speed.value)
   }
   const def = defForUid(e.attacker)
-  if (atkStyleOf(def) === 'ranged') {
-    const a = centerOf(e.attacker), t = centerOf(e.target)
-    if (a && t) {
-      const k = projKey++
-      projectiles.value = [...projectiles.value, { k, emoji: projectileOf(def), x0: a.x, y0: a.y, x1: t.x, y1: t.y }]
-      return wait(REPLAY_CFG.projMs / speed.value).then(() => {
-        projectiles.value = projectiles.value.filter(p => p.k !== k)
-      })
-    }
-  }
+  if (atkStyleOf(def) === 'ranged') return fx?.projectile(e.attacker, e.target, projectileOf(def)) ?? Promise.resolve()
   // melee: พุ่งสุดตัวถึงศูนย์กลางเป้า (Hearthstone-style ชนทับ) แล้วเด้งกลับ — z-index สูงกันโดนการ์ดอื่นบัง
-  const a = centerOf(e.attacker), t = centerOf(e.target), el = els[e.attacker]
+  const a = fx?.centerOf(e.attacker), t = fx?.centerOf(e.target), el = els[e.attacker]
   if (a && t && el) {
-    el.style.zIndex = '7'                        // เหนือ proj-layer (5) และ acting (3)
+    el.style.zIndex = '7'                        // เหนือ fx-layer (6) และ acting (3)
     el.style.transition = `transform ${REPLAY_CFG.lungeMs / speed.value}ms cubic-bezier(.2, .7, .3, 1.1)`
     el.style.transform = `translate(${t.x - a.x}px, ${t.y - a.y}px) scale(1.18)`
     return wait(REPLAY_CFG.lungeMs / speed.value).then(() => {
@@ -328,7 +301,7 @@ const windMs = () => (lite.value ? REPLAY_CFG.liteWindupMs : REPLAY_CFG.windupMs
 // telegraph: ลอยขึ้น + เรืองแสง + เอนถอยหลัง (ทิศตรงข้ามเป้า) — ตั้ง --wx/--wy ให้ CSS .windup ใช้ (lite ข้าม ไม่ set transform)
 function setWindupVars(e) {
   if (lite.value) return   // lite: ข้ามการเอน/ลอย เหลือแค่ไฮไลต์ขอบ + จังหวะสั้น
-  const el = els[e.attacker], a = centerOf(e.attacker), t = centerOf(e.target)
+  const el = els[e.attacker], a = fx?.centerOf(e.attacker), t = fx?.centerOf(e.target)
   if (el && a && t) {
     const dx = t.x - a.x, dy = t.y - a.y, len = Math.hypot(dx, dy) || 1
     el.style.setProperty('--wx', (-dx / len * 7).toFixed(1) + 'px')   // เอนถอย ~7px หนีเป้า
@@ -336,21 +309,15 @@ function setWindupVars(e) {
   }
 }
 
-// impact: hp/pop/callout ตอนโดนตี (เกิดตอนจบ motion) — รับ g เช็ค gen กัน reset/skip ระหว่างพุ่ง/ยิงมาเขียน state เก่าทับ
+// impact: hp/pop/callout/koPuff ตอนโดนตี (เกิดตอนจบ motion) — รับ g เช็ค gen กัน reset/skip ระหว่างพุ่ง/ยิงมาเขียน state เก่าทับ
+// pop/callout/koPuff เป็น fire-and-forget ผ่าน fx pool (plain DOM/WAAPI นอก Vue reactivity)
 function applyImpact(e, g) {
   if (g !== gen) return
   flashing.value = e.target
   hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
-  const k = popKey++
-  const x = Math.round(Math.random() * 28 - 14)   // offset แนวนอนสุ่ม ±14px กันเลขหลายป็อปซ้อนทับ
-  pops.value = { ...pops.value, [e.target]: [...(pops.value[e.target] || []), { k, dmg: e.dmg, crit: e.crit, eff: e.eff, x }] }
-  setTimeout(() => { if (g !== gen) return; pops.value = { ...pops.value, [e.target]: (pops.value[e.target] || []).filter(p => p.k !== k) } }, REPLAY_CFG.popMs)
-  if (e.eff === 'super' || e.eff === 'weak') {
-    const ck = calloutKey++
-    const cal = e.eff === 'super' ? { text: 'แพ้ทาง! ', icon: '⚡' } : { text: 'ต้านทาน ', icon: '🛡️' }
-    callouts.value = { ...callouts.value, [e.target]: { k: ck, ...cal, kind: e.eff } }
-    setTimeout(() => { if (g !== gen) return; if (callouts.value[e.target]?.k === ck) { const c = { ...callouts.value }; delete c[e.target]; callouts.value = c } }, 750)
-  }
+  fx?.pop(e.target, { dmg: e.dmg, crit: e.crit, eff: e.eff })
+  if (e.eff === 'super' || e.eff === 'weak') fx?.callout(e.target, e.eff)
+  if (e.targetHpAfter <= 0) fx?.koPuff(e.target)
   // crit ไม่มี visual scale แล้ว (ตัด full-screen re-raster) — จังหวะ freeze คง extra wait ท้าย applyAttack ไว้ (hitStopMs)
 }
 
@@ -387,16 +354,18 @@ function togglePause() {
 function cycleSpeed() {
   const s = REPLAY_CFG.speeds
   speed.value = s[(s.indexOf(speed.value) + 1) % s.length]
+  fx?.setRate(speed.value)   // projectile WAAPI duration (run() ใน battleFx.js) หารตาม rate — คงพฤติกรรมเร่งความเร็วเดิม
 }
 function skipToEnd() {
   gen++                                                    // ตัด promise chain windup/lunge/impact ที่ค้างอยู่ (gen guard ใน applyAttack/step)
   clearTimeout(timer); winding.value = null
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()   // ตัด wait() ที่ค้างอยู่ทั้งหมด กันโดนโผล่มาแตะ state หลัง log จบไปแล้ว
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge ค้างกลางทาง
+  fx?.cancelAll()                                           // ตัด pop/callout/koPuff/projectile ค้างจาก fx pool
   const end = log.value[log.value.length - 1]
   const finalHp = {}; Object.keys(maxHp).forEach(uid => finalHp[uid] = 100)
   for (const ev of log.value) if (ev.t === 'attack') finalHp[ev.target] = Math.max(0, Math.round((ev.targetHpAfter / (maxHp[ev.target] || 1)) * 100))
-  hp.value = finalHp; pops.value = {}; callouts.value = {}; projectiles.value = []; acting.value = null; flashing.value = null
+  hp.value = finalHp; acting.value = null; flashing.value = null
   round.value = end?.rounds || round.value
   idx.value = log.value.length
   clearTimeout(resultTimer); resultReady.value = true; resultOpen.value = true   // ข้าม = เปิดสรุปทันที
@@ -404,17 +373,11 @@ function skipToEnd() {
 function inspect(uid) { paused.value = true; clearTimeout(timer); inspectUid.value = uid }
 
 function hpPct(uid) { return hp.value[uid] ?? 100 }
-function popsFor(uid) { return pops.value[uid] || [] }
-function popClass(pop) { return { crit: pop.crit, super: pop.eff === 'super', weak: pop.eff === 'weak' } }
 function unitClass(uid) {
   return { acting: acting.value === uid, windup: winding.value === uid, flash: flashing.value === uid, dead: (hp.value[uid] ?? 100) <= 0 }
 }
 
 // ── inspect helpers ──
-function projStyle(pj) {
-  return { '--x0': pj.x0 + 'px', '--y0': pj.y0 + 'px', '--x1': pj.x1 + 'px', '--y1': pj.y1 + 'px',
-           animationDuration: (REPLAY_CFG.projMs / speed.value) + 'ms' }
-}
 function rarityLabel(r) { return RARITY[r]?.label || r }
 const insp = computed(() => {
   const uid = inspectUid.value; if (!uid) return null
@@ -436,8 +399,8 @@ watch(done, (v) => {
   if (!v || resultReady.value) return
   resultTimer = setTimeout(() => { resultReady.value = true; resultOpen.value = true }, REPLAY_CFG.resultDelayMs)
 }, { immediate: true })
-// layout เปลี่ยน (หมุนจอ/ปรับขนาด) = center ที่ cache ไว้ใช้ไม่ได้ ต้องวัดใหม่
-function onResize() { invalidateCenters() }
+// layout เปลี่ยน (หมุนจอ/ปรับขนาด) = center ที่ cache ไว้ใน fx ใช้ไม่ได้ ต้องวัดใหม่
+function onResize() { fx?.invalidateCenters() }
 window.addEventListener('resize', onResize)
 window.addEventListener('orientationchange', onResize)
 
@@ -462,6 +425,7 @@ onUnmounted(() => {
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()
   window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize)
   if (fpsRaf) cancelAnimationFrame(fpsRaf)
+  fx?.destroy(); fx = null
 })
 </script>
 
@@ -538,47 +502,17 @@ onUnmounted(() => {
 .br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
 .br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
 
-/* เลขดาเมจ: ใหญ่ + stroke เข้ม อ่านออกทุกพื้นหลัง + เด้งแล้วลอย 40px ค้าง .9 วิ
-   will-change: transform → promote เป็น layer: Safari rasterize ตัวอักษร (มี text-stroke) ครั้งเดียวแล้ว composite
-   ไม่งั้น transform animate บน stroked text = repaint ทุกเฟรมตลอด .9s (jank หลักบน WebKit) · ลด stroke 4→3px ลด raster cost */
-.br-pop { position: absolute; top: 0; font-weight: 900; font-size: 1.5rem; color: #fecaca; z-index: 6;
-  -webkit-text-stroke: 3px rgba(15, 23, 42, .85); paint-order: stroke fill;
-  animation: br-pop-rise .9s ease-out forwards; pointer-events: none;
-  will-change: transform; }
-.br-pop.crit { color: #fbbf24; font-size: 2rem; }
-.br-pop.super { color: #fca5a5; }
-.br-pop.weak { color: #cbd5e1; font-size: 1.1rem; }
-@keyframes br-pop-rise {
-  0% { transform: translateY(0) scale(.6); opacity: 0 }
-  18% { transform: translateY(-6px) scale(1.15); opacity: 1 }
-  35% { transform: translateY(-12px) scale(1); opacity: 1 }
-  100% { transform: translateY(-40px) scale(1); opacity: 0 }
-}
-@keyframes br-rise { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-24px); opacity: 0 } }
-
-.br-call { position: absolute; top: -16px; display: inline-flex; align-items: center; gap: 2px; font-weight: 800; font-size: .6rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; animation: br-rise .75s ease-out forwards; pointer-events: none; z-index: 4; will-change: transform; }
-.br-call.super { background: #ef4444; color: #fff; }
-.br-call.weak { background: rgba(203,213,225,.95); color: #334155; }
-
-.br-puff { position: absolute; font-size: 1.2rem; animation: br-puff .5s ease-out forwards; pointer-events: none; }
-@keyframes br-puff { from { transform: translateY(0) scale(.6); opacity: 1 } to { transform: translateY(-16px) scale(1.25); opacity: 0 } }
-
-.br-proj-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.br-proj { position: absolute; left: 0; top: 0; font-size: 1.4rem; transform: translate(var(--x0), var(--y0)); animation: br-fly linear forwards; will-change: transform; }
-@keyframes br-fly { from { transform: translate(var(--x0), var(--y0)) } to { transform: translate(var(--x1), var(--y1)) } }
+/* pop/call/puff/proj (เลขดาเมจ, callout ธาตุ, 💀, projectile) ย้ายไป fx pool (.brfx- ท้ายไฟล์ ไม่ scoped) แล้ว —
+   CSS เดิม (br-pop, br-call, br-puff, br-proj และตัวแปรย่อย) + keyframes br-pop-rise, br-rise, br-fly ตัดทิ้ง (ไม่มี markup ใช้แล้ว) */
 
 /* ══ โหมดลื่น (lite) — ตัด GPU layer ถาวรทั้งหมด + อนิเมชันที่ repaint หนัก ══
    พิสูจน์/แก้สมมติฐาน over-promotion: เหลือ layer เท่าที่จำเป็น, อัปเดตเลข/สถานะทันที ยังอ่านออกครบ */
-.br-lite .br-pop, .br-lite .br-proj, .br-lite .br-call { will-change: auto; }   /* ตัด layer ของ ephemeral ที่เหลือ (unit/hp-fill/box ไม่ตั้ง will-change แล้ว) */
 .br-lite .br-hp-fill { transition: none; }                  /* เลือดเปลี่ยนทันที */
 .br-lite .br-unit { transition: border-color .1s; }
 .br-lite .br-unit.acting, .br-lite .br-unit.windup { transform: none; }   /* ไม่ลอย/ไม่ขยาย */
 .br-lite .br-unit.acting { border-color: #fde68a; }         /* ไฮไลต์ผู้โจมตี = แค่ขอบเหลือง (ถูก) */
 .br-lite .br-unit.flash { animation: none; border-color: #f87171; }       /* โดนตี = ขอบแดง ไม่เขย่า */
 .br-lite .br-unit::after { display: none; }                 /* ตัด glow layer ทิ้ง */
-.br-lite .br-pop { animation: none; -webkit-text-stroke-width: 2px; }      /* เลขโผล่นิ่ง (JS ลบเองตาม popMs) */
-.br-lite .br-call { animation: none; }
-.br-lite .br-proj { display: none; }
 
 .br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
 
