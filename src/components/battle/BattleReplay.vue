@@ -20,7 +20,7 @@
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp">
-            <div class="br-hp-fill" :style="{ width: hpPct('B'+i) + '%' }"></div>
+            <div class="br-hp-fill" :style="{ transform: 'scaleX(' + hpPct('B'+i) / 100 + ')' }"></div>
             <span v-for="(t, ti) in ticksFor('B'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
           <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe">{{ curHp('B'+i) }}</span></div>
@@ -40,7 +40,7 @@
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp">
-            <div class="br-hp-fill mine" :style="{ width: hpPct('A'+i) + '%' }"></div>
+            <div class="br-hp-fill mine" :style="{ transform: 'scaleX(' + hpPct('A'+i) / 100 + ')' }"></div>
             <span v-for="(t, ti) in ticksFor('A'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
           <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me">{{ curHp('A'+i) }}</span></div>
@@ -428,7 +428,8 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
 .me-label { margin-top: 2px; }
 
 .br-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: transform .1s, box-shadow .15s, border-color .15s; cursor: pointer; }
+/* transition ตัด box-shadow (repaint ต่อเฟรม) เหลือ transform+border · will-change: ยกเป็น layer → lunge + เงา composite (ไม่ re-rasterize เงาเบลอตอนพุ่ง) */
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: transform .1s, border-color .15s; cursor: pointer; will-change: transform; }
 .br-unit.foe { border-color: rgba(248,113,113,.35); }
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
@@ -439,16 +440,17 @@ onUnmounted(() => { clearTimeout(timer); clearTimeout(introTimer); clearTimeout(
   box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
 .br-unit.flash { animation: br-shake .25s; box-shadow: 0 0 0 3px #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
+/* shake = transform ล้วน (composite) — ตัด filter brightness/saturate ที่ repaint ทุกเฟรม · ป้ายโดนตียังสื่อผ่านเขย่า+วงแดง */
 @keyframes br-shake {
-  0%, 100% { transform: translateX(0); filter: none }
-  15% { filter: brightness(2.2) saturate(.4) }
-  25% { transform: translateX(-7px); filter: brightness(1.6) }
+  0%, 100% { transform: translateX(0) }
+  25% { transform: translateX(-7px) }
   50% { transform: translateX(6px) }
   75% { transform: translateX(-5px) }
 }
 
 .br-hp { position: relative; width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
-.br-hp-fill { height: 100%; background: #ef4444; border-radius: 999px; transition: width .2s ease-out; }
+/* เลือด: scaleX (composite) แทน transition width (layout ทุกเฟรม) — origin ซ้าย, will-change ให้ GPU */
+.br-hp-fill { width: 100%; height: 100%; background: #ef4444; border-radius: 999px; transform-origin: left center; transition: transform .2s ease-out; will-change: transform; }
 .br-hp-fill.mine { background: #34d399; }
 .br-tick { position: absolute; top: 0; width: 1px; height: 100%; background: rgba(255,255,255,.55); }
 .br-stats { display: flex; justify-content: space-between; align-items: center; gap: 3px; width: 88%; margin-top: 3px; }
