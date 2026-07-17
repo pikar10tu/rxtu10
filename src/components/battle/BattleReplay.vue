@@ -454,7 +454,9 @@ onUnmounted(() => {
     linear-gradient(180deg, #3b2f1a 0%, #2a1f12 60%, #17100a 100%),
     repeating-linear-gradient(90deg, rgba(255,220,150,.05) 0 2px, transparent 2px 46px);
 }
-.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+/* will-change: promote .br-box ถาวร → hitstop scale ตอน crit = composite ล้วน
+   เดิม scale ทั้ง box สร้าง layer เต็มจอกลาง crit + rasterize เนื้อที่ไม่ใช่ layer (hp/ticks/stats/ป้าย) @DPR3 ทุก crit = hitch ก้อนใหญ่ */
+.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; will-change: transform; }
 .br-box.hitstop { animation: br-hitstop .12s; }
 @keyframes br-hitstop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.012) } }
 .br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
@@ -478,12 +480,20 @@ onUnmounted(() => {
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
 .br-el { position: absolute; top: 3px; left: 3px; font-size: .8rem; background: rgba(0,0,0,.45); border-radius: 8px; padding: 1px 3px; line-height: 1; }
-.br-unit.acting { transform: translateY(-4px) scale(1.14); z-index: 3; box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
+/* glow/ring ย้ายไป ::after (layer แยก) → toggle state ไม่ re-raster เนื้อการ์ด (emoji+text @3x) ที่เป็น layer
+   เดิม box-shadow บน .br-unit เปลี่ยนทุก state = re-raster ทั้งใบ ~4-6 ครั้ง/หมัด (WebKit แพงเรื่อง raster เงาเบลอ) */
+.br-unit.acting { transform: translateY(-4px) scale(1.14); z-index: 3; }
 /* telegraph: เงื้อก่อนตี — ลอย+เอนถอยหลัง (--wx/--wy ตั้ง inline จาก startWindup) + เรืองแสงเหลือง */
-.br-unit.windup { transform: translate(var(--wx, 0px), var(--wy, -6px)) scale(1.08); z-index: 3;
-  box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
-.br-unit.flash { animation: br-shake .25s; box-shadow: 0 0 0 3px #f87171; }
+.br-unit.windup { transform: translate(var(--wx, 0px), var(--wy, -6px)) scale(1.08); z-index: 3; }
+.br-unit.flash { animation: br-shake .25s; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
+/* ชั้นเงา/เรืองแสงแยก layer (will-change: opacity) — เงาอยู่ข้างนอก element โปร่งใส ไม่บังหน้าเพ็ท
+   toggle เปลี่ยนแค่ opacity + raster เฉพาะเงา (เล็ก) ไม่แตะ layer เนื้อการ์ด */
+.br-unit::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; pointer-events: none;
+  opacity: 0; transition: opacity .12s; will-change: opacity; }
+.br-unit.acting::after { opacity: 1; box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
+.br-unit.windup::after { opacity: 1; box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
+.br-unit.flash::after  { opacity: 1; box-shadow: 0 0 0 3px #f87171; }
 /* shake = transform ล้วน (composite) — ตัด filter brightness/saturate ที่ repaint ทุกเฟรม · ป้ายโดนตียังสื่อผ่านเขย่า+วงแดง */
 @keyframes br-shake {
   0%, 100% { transform: translateX(0) }
