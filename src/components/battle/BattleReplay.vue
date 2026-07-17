@@ -135,13 +135,15 @@ const BASE_URL = import.meta.env.BASE_URL
 // resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
 // pop/callout/koPuff durations ย้ายไป fx pool (battleFx.js) แล้ว — คงที่ไม่หารด้วย speed เหมือนเดิม
 const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], hitStopMs: 130, resultDelayMs: 500,
-  liteMotionMs: 90 }   // โหมดลื่น: motion ข้าม/สั้นลง (windup ผ่าน fx.ring เหมือนกันทุกโหมดแล้ว)
+  liteMotionMs: 90, liteWindupMs: 90 }   // โหมดลื่น: windup/motion ข้าม fx (ring/lunge/dash/projectile/burst) หน่วงสั้นแทน ไม่มี transform = ไม่สร้าง layer
 
 // โหมดลดเอฟเฟกต์ (lite) — ตัด GPU layer + อนิเมชันที่ repaint หนัก ให้ลื่นบนเครื่องเบา/iOS Safari
 // ดีฟอลต์: เปิดบน touch/มือถือ (coarse pointer) · จำค่าที่ผู้ใช้เลือกไว้ใน localStorage
+// precedence: ผู้ใช้เลือกไว้เอง (localStorage) > prefers-reduced-motion (OS a11y) > pointer:coarse (มือถือ)
 const LITE_KEY = 'br-lite'
 function initLite() {
   try { const s = localStorage.getItem(LITE_KEY); if (s !== null) return s === '1' } catch {}
+  try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true } catch {}
   try { return window.matchMedia('(pointer: coarse)').matches } catch {}
   return false
 }
@@ -300,10 +302,11 @@ const handlers = {
 function applyImpact(e, g) {
   if (g !== gen) return
   highlight(e.target, 'flash')
-  fx?.burst(e.target)
+  if (!lite.value) fx?.burst(e.target)                             // 💥 = motion decoration เท่านั้น → gate ด้วย lite (spec §5)
   setTimeout(() => { if (g === gen) highlight(e.target, 'flash', false) }, 250)   // gen-guard กันไปถอด flash ของไฟต์ใหม่หลัง reset/skip
   hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
   setDead(e.target)                                                // hp เปลี่ยน → sync dead แบบ imperative (ไม่ผ่าน reactive :class)
+  // pop/callout/koPuff = information (เลขดาเมจ/แพ้ทาง/💀) ไม่ใช่ decoration — เรียกเสมอทุกโหมด ห้าม gate ด้วย lite
   fx?.pop(e.target, { dmg: e.dmg, crit: e.crit, eff: e.eff })
   if (e.eff === 'super' || e.eff === 'weak') fx?.callout(e.target, e.eff)
   if (e.targetHpAfter <= 0) fx?.koPuff(e.target)
@@ -314,7 +317,9 @@ function applyImpact(e, g) {
 async function applyAttack(e) {
   const g = gen
   highlight(e.attacker, 'windup')
-  await (fx?.ring(e.attacker, 'windup') ?? Promise.resolve()); if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
+  if (lite.value) { await wait(REPLAY_CFG.liteWindupMs / speed.value) }        // โหมดลื่น: ไม่มี ring (fx motion) หน่วงสั้นแทนให้จังหวะอ่านออก
+  else { await (fx?.ring(e.attacker, 'windup') ?? Promise.resolve()) }
+  if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
   highlight(e.attacker, 'windup', false); highlight(e.attacker, 'acting')
   await playMotion(e); if (g !== gen) return            // โดน reset/skip ระหว่างพุ่ง/ยิง
   applyImpact(e, g)
