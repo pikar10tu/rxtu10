@@ -138,6 +138,8 @@ const props = defineProps({
 })
 defineEmits(['close'])
 
+const BASE_URL = import.meta.env.BASE_URL
+
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
 // windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · popMs = เลขดาเมจค้างบนจอ
 // resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
@@ -212,19 +214,21 @@ function buildMax(d) {
   ;(d?.playerTeam || []).forEach((p, i) => add(p, 'A' + i))
 }
 
-// อุ่น cache รูป projectile ของ pet ranged ทั้งสองฝั่งก่อนเริ่มเล่น (intro หน่วง ~1.1 วิ ให้รูปโหลดทัน)
-// ไม่งั้นการยิงครั้งแรกของแต่ละอีโมจิ = รูปยังโหลดไม่เสร็จภายในเวลาบิน 280ms → projectile มองไม่เห็น
+// อุ่น cache+decode asset combat ทั้งหมดก่อนเริ่มเล่น (intro หน่วง ~1.1s) — dash/pop/projectile swap src กลางไฟต์
+// ไม่งั้น decoding="sync" ครั้งแรกของแต่ละรูป = บล็อกเฟรม
 const preloadedImgs = []
-function preloadProjectiles(d) {
-  const seen = new Set()
+function preloadCombat(d) {
+  const chars = new Set(['⚡', '🛡️', '💀', '💥'])
   for (const p of [...(d?.playerTeam || []), ...(d?.botTeam || [])]) {
-    const def = getPetDef(p?.id)
-    if (!def || atkStyleOf(def) !== 'ranged') continue
-    const f = fluentFile(projectileOf(def))
-    if (!f || seen.has(f)) continue
-    seen.add(f)
-    const img = new Image(); img.src = import.meta.env.BASE_URL + f   // ตั้ง src = เบราว์เซอร์ fetch+cache ทันที
-    preloadedImgs.push(img)                                          // กัน GC จนโหลดเสร็จ
+    const def = getPetDef(p?.id); if (!def) continue
+    if (def.emoji) chars.add(def.emoji)                                  // หน้าเพ็ท (dash sprite)
+    if (atkStyleOf(def) === 'ranged') chars.add(projectileOf(def))       // projectile
+  }
+  for (const c of chars) {
+    const f = fluentFile(c); if (!f) continue
+    const img = new Image(); img.decoding = 'sync'; img.src = BASE_URL + f
+    if (img.decode) img.decode().catch(() => {})                         // force decode ล่วงหน้า
+    preloadedImgs.push(img)
   }
 }
 function reset() {
@@ -430,7 +434,7 @@ const insp = computed(() => {
   }
 })
 
-watch(() => props.data, (d) => { if (d) { buildMax(d); preloadProjectiles(d); reset() } }, { immediate: true })
+watch(() => props.data, (d) => { if (d) { buildMax(d); preloadCombat(d); reset() } }, { immediate: true })
 // ตีจบ → เว้น ~0.5 วิ ให้เห็นสนามจบ แล้วเปิด modal สรุป (skipToEnd เปิดทันทีเอง — เช็ก resultReady กันตั้งซ้ำ)
 watch(done, (v) => {
   if (!v || resultReady.value) return
@@ -542,7 +546,7 @@ onUnmounted(() => {
    ไม่งั้น transform animate บน stroked text = repaint ทุกเฟรมตลอด .9s (jank หลักบน WebKit) · ลด stroke 4→3px ลด raster cost */
 .br-pop { position: absolute; top: 0; font-weight: 900; font-size: 1.5rem; color: #fecaca; z-index: 6;
   -webkit-text-stroke: 3px rgba(15, 23, 42, .85); paint-order: stroke fill;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, .7); animation: br-pop-rise .9s ease-out forwards; pointer-events: none;
+  animation: br-pop-rise .9s ease-out forwards; pointer-events: none;
   will-change: transform; }
 .br-pop.crit { color: #fbbf24; font-size: 2rem; }
 .br-pop.super { color: #fca5a5; }
