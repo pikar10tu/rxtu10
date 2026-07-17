@@ -130,11 +130,11 @@ defineEmits(['close'])
 const BASE_URL = import.meta.env.BASE_URL
 
 // baseDelay = ระยะห่างต่อจังหวะที่ ×1 (มากกว่าเวลาเคลื่อนไหวเสมอ กันทับกัน) — กดเร่ง ×2/×4 ได้
-// windupMs = เงื้อก่อนตี (telegraph) · lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว)
-// resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
+// windup (telegraph) ย้ายไป fx.ring แล้ว (duration hardcode ใน battleFx.js) — ไม่อ่าน windupMs ที่นี่แล้ว
+// lungeMs = พุ่งขาไป (เด้งกลับอีกเท่าตัว) · resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
 // pop/callout/koPuff durations ย้ายไป fx pool (battleFx.js) แล้ว — คงที่ไม่หารด้วย speed เหมือนเดิม
-const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], windupMs: 250, lungeMs: 250, hitStopMs: 130, resultDelayMs: 500,
-  liteWindupMs: 90, liteMotionMs: 90 }   // โหมดลื่น: จังหวะสั้นลง ไม่มีการเคลื่อนไหว (แค่ไฮไลต์ + อัปเดตเลข)
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], lungeMs: 250, hitStopMs: 130, resultDelayMs: 500,
+  liteMotionMs: 90 }   // โหมดลื่น: motion ข้าม/สั้นลง (windup ผ่าน fx.ring เหมือนกันทุกโหมดแล้ว)
 
 // โหมดลดเอฟเฟกต์ (lite) — ตัด GPU layer + อนิเมชันที่ repaint หนัก ให้ลื่นบนเครื่องเบา/iOS Safari
 // ดีฟอลต์: เปิดบน touch/มือถือ (coarse pointer) · จำค่าที่ผู้ใช้เลือกไว้ใน localStorage
@@ -160,15 +160,12 @@ function toggleLite() {
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })
 }
 const hp = ref({})
-const flashing = ref(null)
-const acting = ref(null)
 const inspectUid = ref(null)
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
 const resultOpen = ref(false)    // modal สรุปโชว์อยู่
 const resultReady = ref(false)   // จบไฟต์+ผ่านจังหวะรอแล้ว — ใช้โชว์ปุ่มลอย "ดูสรุป" ตอน peek
 let resultTimer = null
 let introTimer = null
-const winding = ref(null)        // uid ที่กำลังเงื้อ (telegraph) — โชว์คลาส .windup
 let gen = 0                      // generation guard — reset/skip เพิ่มค่า เพื่อให้ promise chain ค้างจาก wait() รู้ตัวว่าโดนยกเลิก
 let timer = null
 const pendingTimers = new Set()  // เก็บ timer id จาก wait() ทั้งหมด — clear ตอน reset/skip/unmount กัน promise chain ค้างมาเขียน state เก่าทับ
@@ -176,6 +173,11 @@ function wait(ms) { return new Promise(r => { const t = setTimeout(r, ms); pendi
 let maxHp = {}, unitAtk = {}     // uid → maxHp / atk (static ต่อ unit จาก buildCombatant)
 const els = {}                   // uid → DOM el (วัดตำแหน่ง melee/ranged)
 function setEl(uid, el) { if (el) els[uid] = el }
+
+// ── ไฮไลต์ (Phase 2b): classList ตรงบน els[uid] แทน reactive ref (acting/winding/flashing) ──
+// ตัด Vue reactivity ออกจาก path ที่วิ่งทุกหมัด — toggle class ตรงถูกกว่า set ref แล้วรอ re-render
+function highlight(uid, cls, on = true) { const el = els[uid]; if (el) el.classList[on ? 'add' : 'remove'](cls) }
+function clearHighlights() { Object.values(els).forEach(el => el && el.classList.remove('windup', 'acting', 'flash')) }
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
 const fxLayerEl = ref(null)      // ref บน .br-fx-layer
@@ -234,9 +236,10 @@ function reset() {
   clearTimeout(timer); clearTimeout(introTimer)
   clearTimeout(resultTimer); resultOpen.value = false; resultReady.value = false
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()                // ตัด wait() ที่ค้างอยู่ทั้งหมด (windup/motion/hitstop)
-  introPhase.value = null; winding.value = null                             // กันค้างตอน replay ใหม่
-  Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge/windup ค้างจากไฟต์ก่อน (component ถูก mount ค้างไว้ ใช้ซ้ำ)
-  idx.value = 0; round.value = 1; flashing.value = null; acting.value = null
+  introPhase.value = null                                                   // กันค้างตอน replay ใหม่
+  Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge ค้างจากไฟต์ก่อน (component ถูก mount ค้างไว้ ใช้ซ้ำ)
+  clearHighlights()                                                         // ล้างคลาส windup/acting/flash ค้าง
+  idx.value = 0; round.value = 1
   paused.value = false; inspectUid.value = null
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
   // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
@@ -292,28 +295,16 @@ function playMotion(e) {
 const handlers = {
   round(e) { round.value = e.n },
   attack(e) { return applyAttack(e) },
-  end() { acting.value = null; flashing.value = null },
-}
-
-// windup ms ของ event attack (ตาม lite/speed) — ใช้ทั้งใน applyAttack (wait จริง) และเดิม step() เคยใช้คิวจังหวะ
-const windMs = () => (lite.value ? REPLAY_CFG.liteWindupMs : REPLAY_CFG.windupMs) / speed.value
-
-// telegraph: ลอยขึ้น + เรืองแสง + เอนถอยหลัง (ทิศตรงข้ามเป้า) — ตั้ง --wx/--wy ให้ CSS .windup ใช้ (lite ข้าม ไม่ set transform)
-function setWindupVars(e) {
-  if (lite.value) return   // lite: ข้ามการเอน/ลอย เหลือแค่ไฮไลต์ขอบ + จังหวะสั้น
-  const el = els[e.attacker], a = fx?.centerOf(e.attacker), t = fx?.centerOf(e.target)
-  if (el && a && t) {
-    const dx = t.x - a.x, dy = t.y - a.y, len = Math.hypot(dx, dy) || 1
-    el.style.setProperty('--wx', (-dx / len * 7).toFixed(1) + 'px')   // เอนถอย ~7px หนีเป้า
-    el.style.setProperty('--wy', (-dy / len * 7 - 4).toFixed(1) + 'px') // + ลอยขึ้นอีก 4px
-  }
+  end() { clearHighlights() },
 }
 
 // impact: hp/pop/callout/koPuff ตอนโดนตี (เกิดตอนจบ motion) — รับ g เช็ค gen กัน reset/skip ระหว่างพุ่ง/ยิงมาเขียน state เก่าทับ
 // pop/callout/koPuff เป็น fire-and-forget ผ่าน fx pool (plain DOM/WAAPI นอก Vue reactivity)
 function applyImpact(e, g) {
   if (g !== gen) return
-  flashing.value = e.target
+  highlight(e.target, 'flash')
+  fx?.burst(e.target)
+  setTimeout(() => { if (g === gen) highlight(e.target, 'flash', false) }, 250)   // gen-guard กันไปถอด flash ของไฟต์ใหม่หลัง reset/skip
   hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
   fx?.pop(e.target, { dmg: e.dmg, crit: e.crit, eff: e.eff })
   if (e.eff === 'super' || e.eff === 'weak') fx?.callout(e.target, e.eff)
@@ -324,19 +315,19 @@ function applyImpact(e, g) {
 // windup → motion → impact ทีละสเต็ป (await จริง แทนคิว callback ซ้อน 3 ชั้น) — gen guard คั่นทุกจุดกัน reset/skip ระหว่างทาง
 async function applyAttack(e) {
   const g = gen
-  winding.value = e.attacker
-  setWindupVars(e)
-  await wait(windMs()); if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
-  winding.value = null; acting.value = e.attacker
+  highlight(e.attacker, 'windup')
+  await fx.ring(e.attacker, 'windup'); if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
+  highlight(e.attacker, 'windup', false); highlight(e.attacker, 'acting')
   await playMotion(e); if (g !== gen) return            // โดน reset/skip ระหว่างพุ่ง/ยิง
   applyImpact(e, g)
+  highlight(e.attacker, 'acting', false)
   if (e.crit && !lite.value) await wait(REPLAY_CFG.hitStopMs / speed.value)
 }
 
 async function step() {
   clearTimeout(timer)
   if (paused.value) return
-  if (idx.value >= log.value.length) { acting.value = null; flashing.value = null; return }
+  if (idx.value >= log.value.length) { clearHighlights(); return }
   const g = gen
   const e = log.value[idx.value]
   const h = handlers[e.t]
@@ -344,7 +335,7 @@ async function step() {
   if (g !== gen) return                         // โดน reset/skip ระหว่างรอ handler
   idx.value++
   if (idx.value < log.value.length) timer = setTimeout(step, e.t === 'round' ? 0 : delay.value)   // round marker ไม่หน่วงเวลา
-  else { acting.value = null; flashing.value = null }
+  else clearHighlights()
 }
 
 function togglePause() {
@@ -358,14 +349,15 @@ function cycleSpeed() {
 }
 function skipToEnd() {
   gen++                                                    // ตัด promise chain windup/lunge/impact ที่ค้างอยู่ (gen guard ใน applyAttack/step)
-  clearTimeout(timer); winding.value = null
+  clearTimeout(timer)
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()   // ตัด wait() ที่ค้างอยู่ทั้งหมด กันโดนโผล่มาแตะ state หลัง log จบไปแล้ว
   Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })  // ล้าง lunge ค้างกลางทาง
+  clearHighlights()                                         // ล้างคลาส windup/acting/flash ค้าง
   fx?.cancelAll()                                           // ตัด pop/callout/koPuff/projectile ค้างจาก fx pool
   const end = log.value[log.value.length - 1]
   const finalHp = {}; Object.keys(maxHp).forEach(uid => finalHp[uid] = 100)
   for (const ev of log.value) if (ev.t === 'attack') finalHp[ev.target] = Math.max(0, Math.round((ev.targetHpAfter / (maxHp[ev.target] || 1)) * 100))
-  hp.value = finalHp; acting.value = null; flashing.value = null
+  hp.value = finalHp
   round.value = end?.rounds || round.value
   idx.value = log.value.length
   clearTimeout(resultTimer); resultReady.value = true; resultOpen.value = true   // ข้าม = เปิดสรุปทันที
@@ -374,7 +366,7 @@ function inspect(uid) { paused.value = true; clearTimeout(timer); inspectUid.val
 
 function hpPct(uid) { return hp.value[uid] ?? 100 }
 function unitClass(uid) {
-  return { acting: acting.value === uid, windup: winding.value === uid, flash: flashing.value === uid, dead: (hp.value[uid] ?? 100) <= 0 }
+  return { dead: (hp.value[uid] ?? 100) <= 0 }
 }
 
 // ── inspect helpers ──
@@ -470,26 +462,11 @@ onUnmounted(() => {
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
 .br-el { position: absolute; top: 3px; left: 3px; font-size: .8rem; background: rgba(0,0,0,.45); border-radius: 8px; padding: 1px 3px; line-height: 1; }
-/* glow/ring ย้ายไป ::after (layer แยก) → toggle state ไม่ re-raster เนื้อการ์ด (emoji+text @3x) ที่เป็น layer
-   เดิม box-shadow บน .br-unit เปลี่ยนทุก state = re-raster ทั้งใบ ~4-6 ครั้ง/หมัด (WebKit แพงเรื่อง raster เงาเบลอ) */
-.br-unit.acting { transform: translateY(-4px) scale(1.14); z-index: 3; }
-/* telegraph: เงื้อก่อนตี — ลอย+เอนถอยหลัง (--wx/--wy ตั้ง inline จาก setWindupVars) + เรืองแสงเหลือง */
-.br-unit.windup { transform: translate(var(--wx, 0px), var(--wy, -6px)) scale(1.08); z-index: 3; }
-.br-unit.flash { animation: br-shake .25s; }
+/* Phase 2b: ตัด card lift/shake/glow (::after) ทิ้ง — ไฮไลต์เหลือแค่ border-color (ถูก, ไม่ re-raster)
+   windup/acting เดิม telegraph ย้ายไป fx.ring (brfx-ring, plain DOM/WAAPI นอก Vue reactivity) แล้ว */
+.br-unit.acting, .br-unit.windup { border-color: #fde68a; }
+.br-unit.flash { border-color: #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
-/* ชั้นเงา/เรืองแสง — เงาอยู่ข้างนอก element โปร่งใส ไม่บังหน้าเพ็ท · promote เฉพาะตอน opacity transition รัน (ไม่ตั้ง will-change ถาวร) */
-.br-unit::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; pointer-events: none;
-  opacity: 0; transition: opacity .12s; }
-.br-unit.acting::after { opacity: 1; box-shadow: 0 0 0 3px #fde68a, 0 6px 16px rgba(0,0,0,.4); }
-.br-unit.windup::after { opacity: 1; box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253, 230, 138, .55); }
-.br-unit.flash::after  { opacity: 1; box-shadow: 0 0 0 3px #f87171; }
-/* shake = transform ล้วน (composite) — ตัด filter brightness/saturate ที่ repaint ทุกเฟรม · ป้ายโดนตียังสื่อผ่านเขย่า+วงแดง */
-@keyframes br-shake {
-  0%, 100% { transform: translateX(0) }
-  25% { transform: translateX(-7px) }
-  50% { transform: translateX(6px) }
-  75% { transform: translateX(-5px) }
-}
 
 .br-hp { position: relative; width: 84%; height: 7px; background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
 /* เลือด: scaleX (composite) แทน transition width (layout ทุกเฟรม) — origin ซ้าย · promote เฉพาะตอน transition รัน (ไม่ตั้ง will-change ถาวร) */
@@ -509,10 +486,7 @@ onUnmounted(() => {
    พิสูจน์/แก้สมมติฐาน over-promotion: เหลือ layer เท่าที่จำเป็น, อัปเดตเลข/สถานะทันที ยังอ่านออกครบ */
 .br-lite .br-hp-fill { transition: none; }                  /* เลือดเปลี่ยนทันที */
 .br-lite .br-unit { transition: border-color .1s; }
-.br-lite .br-unit.acting, .br-lite .br-unit.windup { transform: none; }   /* ไม่ลอย/ไม่ขยาย */
-.br-lite .br-unit.acting { border-color: #fde68a; }         /* ไฮไลต์ผู้โจมตี = แค่ขอบเหลือง (ถูก) */
-.br-lite .br-unit.flash { animation: none; border-color: #f87171; }       /* โดนตี = ขอบแดง ไม่เขย่า */
-.br-lite .br-unit::after { display: none; }                 /* ตัด glow layer ทิ้ง */
+/* acting/windup/flash = border-color ล้วนอยู่แล้ว (Phase 2b) — lite ไม่ต้อง override เพิ่ม */
 
 .br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
 
