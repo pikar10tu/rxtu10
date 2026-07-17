@@ -48,9 +48,70 @@ export function createBattleFx() {
     if (layer) layer.innerHTML = ''
   }
 
-  // pools + effect methods เติมใน task ถัดไป
-  function buildPools() {}
-  function hideAllPools() {}
+  // ── pool infra ──
+  function mkEl(cls) { const e = document.createElement('div'); e.className = 'brfx ' + cls; layer.appendChild(e); return e }
+  function mkImg(cls) { const e = document.createElement('img'); e.className = 'brfx ' + cls; e.setAttribute('aria-hidden', 'true'); e.loading = 'eager'; e.decoding = 'sync'; layer.appendChild(e); return e }
+  function imgSrc(el, char) { const f = fluentFile(char); el.src = f ? BASE + f : '' }
+  // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
+  function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  return { attach, reset, cancelAll, setRate, destroy, centerOf, invalidateCenters }
+  const pool = { pop: [], call: [], puff: [] }
+  let popIdx = 0, callIdx = 0, puffIdx = 0
+
+  function buildPools() {
+    for (let i = 0; i < 4; i++) pool.pop.push(mkEl('brfx-pop'))
+    for (let i = 0; i < 2; i++) pool.call.push(mkEl('brfx-call'))
+    for (let i = 0; i < 2; i++) { const e = mkImg('brfx-puff'); imgSrc(e, '💀'); pool.puff.push(e) }
+    hideAllPools()
+  }
+  function hideAllPools() {
+    for (const arr of Object.values(pool)) for (const e of arr) { e.style.opacity = '0'; e.getAnimations?.().forEach(a => a.cancel()) }
+  }
+
+  // ── effect methods (pooled ephemeral, imperative fire-and-forget) ──
+  function pop(uid, { dmg, crit, eff }) {
+    const el = pool.pop[popIdx = (popIdx + 1) % pool.pop.length]
+    el.getAnimations?.().forEach(a => a.cancel())
+    el.textContent = '-' + dmg
+    el.className = 'brfx brfx-pop' + (crit ? ' crit' : eff === 'super' ? ' super' : eff === 'weak' ? ' weak' : '')
+    const dx = Math.round(Math.random() * 28 - 14)          // offset สุ่ม bake ใน translate (ไม่ใช้ margin)
+    const base = baseXform(uid, dx, -6); if (!base) return
+    el.style.opacity = '1'
+    // popMs คงที่ไม่หารด้วย rate (อ่านเลขทันแม้ ×4) — จึงเรียก animate ตรง ไม่ผ่าน run() ที่หาร rate
+    const a = el.animate([
+      { transform: base + ' translateY(0) scale(.6)', opacity: 0, offset: 0 },
+      { transform: base + ' translateY(-6px) scale(1.15)', opacity: 1, offset: .18 },
+      { transform: base + ' translateY(-12px) scale(1)', opacity: 1, offset: .35 },
+      { transform: base + ' translateY(-40px) scale(1)', opacity: 0, offset: 1 },
+    ], { duration: 900, easing: 'ease-out', fill: 'forwards' })
+    a.finished.catch(() => {}).then(() => { if (el.textContent === '-' + dmg) el.style.opacity = '0' })
+  }
+
+  function callout(uid, kind) {              // kind: 'super' | 'weak'
+    const el = pool.call[callIdx = (callIdx + 1) % pool.call.length]
+    el.getAnimations?.().forEach(a => a.cancel())
+    el.className = 'brfx brfx-call ' + kind
+    el.textContent = kind === 'super' ? 'แพ้ทาง! ⚡' : 'ต้านทาน 🛡️'
+    const base = baseXform(uid, 0, -16); if (!base) return
+    el.style.opacity = '1'
+    const a = el.animate([
+      { transform: base + ' translateY(0)', opacity: 1 },
+      { transform: base + ' translateY(-24px)', opacity: 0 },
+    ], { duration: 750, easing: 'ease-out', fill: 'forwards' })
+    a.finished.catch(() => {}).then(() => { el.style.opacity = '0' })
+  }
+
+  function koPuff(uid) {
+    const el = pool.puff[puffIdx = (puffIdx + 1) % pool.puff.length]
+    el.getAnimations?.().forEach(a => a.cancel())
+    const base = baseXform(uid, 0, 0); if (!base) return
+    el.style.opacity = '1'
+    const a = el.animate([
+      { transform: base + ' translateY(0) scale(.6)', opacity: 1 },
+      { transform: base + ' translateY(-16px) scale(1.25)', opacity: 0 },
+    ], { duration: 500, easing: 'ease-out', fill: 'forwards' })
+    a.finished.catch(() => {}).then(() => { el.style.opacity = '0' })
+  }
+
+  return { attach, reset, cancelAll, setRate, destroy, centerOf, invalidateCenters, pop, callout, koPuff }
 }
