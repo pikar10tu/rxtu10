@@ -55,13 +55,16 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [] }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [] }
   let popIdx = 0, callIdx = 0, puffIdx = 0
 
   function buildPools() {
     for (let i = 0; i < 4; i++) pool.pop.push(mkEl('brfx-pop'))
     for (let i = 0; i < 2; i++) pool.call.push(mkEl('brfx-call'))
     for (let i = 0; i < 2; i++) { const e = mkImg('brfx-puff'); imgSrc(e, '💀'); pool.puff.push(e) }
+    pool.ring = [mkEl('brfx-ring')]
+    pool.burst = [mkImg('brfx-burst'), mkImg('brfx-burst')]
+    pool.burst.forEach(e => imgSrc(e, '💥'))
     hideAllPools()
   }
   function hideAllPools() {
@@ -113,5 +116,30 @@ export function createBattleFx() {
     a.finished.catch(() => {}).then(() => { el.style.opacity = '0' })
   }
 
-  return { attach, reset, cancelAll, setRate, destroy, centerOf, invalidateCenters, pop, callout, koPuff }
+  let burstIdx = 0
+  function ring(uid, phase) {
+    const el = pool.ring[0]
+    el.getAnimations?.().forEach(a => a.cancel())
+    el.className = 'brfx brfx-ring ' + phase
+    const base = baseXform(uid, 0, 0); if (!base) return Promise.resolve()
+    el.style.transform = base
+    return run(el, [
+      { transform: base + ' scale(.85)', opacity: 0 },
+      { transform: base + ' scale(1.05)', opacity: 1, offset: .4 },
+      { transform: base + ' scale(1)', opacity: phase === 'windup' ? .9 : 1 },
+    ], { duration: phase === 'windup' ? 250 : 120, easing: 'ease-out', fill: 'forwards' })
+      .then(() => { if (phase === 'acting') { el.style.opacity = '0' } })
+  }
+  function burst(uid) {
+    const el = pool.burst[burstIdx = (burstIdx + 1) % pool.burst.length]
+    el.getAnimations?.().forEach(a => a.cancel())
+    const base = baseXform(uid, 0, 0); if (!base) return Promise.resolve()
+    el.style.opacity = '1'
+    return run(el, [
+      { transform: base + ' scale(.4)', opacity: 1 },
+      { transform: base + ' scale(1.4)', opacity: 0 },
+    ], { duration: 280, easing: 'ease-out', fill: 'forwards' }).then(() => { el.style.opacity = '0' })
+  }
+
+  return { attach, reset, cancelAll, setRate, destroy, centerOf, invalidateCenters, pop, callout, koPuff, ring, burst }
 }
