@@ -9,16 +9,6 @@
       <RouterLink to="/play/pets" class="ar-back">‹ กลับ</RouterLink>
     </div>
 
-    <!-- DEV ONLY: fx harness — ดู Layers inspector บน iPhone -->
-    <div v-if="isDev" class="fxh-wrap">
-      <div ref="fxhBox" class="fxh-box">
-        <div class="fxh-card" ref="fxhA"></div>
-        <div class="fxh-card" ref="fxhB"></div>
-        <div class="br-fx-layer" ref="fxhLayer"></div>
-      </div>
-      <button @click="fxhStart">▶ fx loop</button>
-    </div>
-
     <template v-if="authStore.isLoggedIn">
       <!-- สรุปแต้ม -->
       <div class="ar-card ar-me">
@@ -60,7 +50,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
@@ -69,7 +59,6 @@ import { resolveBattleTeam } from '../utils/petTeam.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
-import { createBattleFx } from '../utils/battleFx.js'
 
 const authStore = useAuthStore()
 const members = useMembersStore()
@@ -98,26 +87,6 @@ async function onFight(opp) {
 }
 
 onMounted(() => { members.loadFbUsers() })
-
-// DEV ONLY: fx harness — ดู Layers inspector บน iPhone (ไม่โผล่ใน production)
-const isDev = import.meta.env.DEV
-const fxhBox = ref(null), fxhLayer = ref(null), fxhA = ref(null), fxhB = ref(null)
-let fxh = null, fxhTimer = null
-function fxhStart() {
-  if (!fxh) {
-    fxh = createBattleFx()
-    fxh.attach({ boxEl: fxhBox.value, layerEl: fxhLayer.value, getEl: u => u === 'A0' ? fxhA.value : fxhB.value })
-  }
-  let i = 0
-  clearInterval(fxhTimer)
-  fxhTimer = setInterval(() => {
-    fxh.invalidateCenters()
-    fxh.ring('A0', 'windup'); setTimeout(() => fxh.cardLunge(fxhA.value, 'A0', 'B0'), 250)
-    setTimeout(() => { fxh.pop('B0', { dmg: 123, crit: i % 2 === 0 }); fxh.burst('B0'); fxh.callout('B0', 'super') }, 500)
-    i++
-  }, 900)
-}
-onUnmounted(() => { clearInterval(fxhTimer); fxh?.destroy() })
 </script>
 
 <style scoped>
@@ -141,11 +110,4 @@ onUnmounted(() => { clearInterval(fxhTimer); fxh?.destroy() })
 .ar-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ar-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .ar-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
-
-/* DEV ONLY: fx harness */
-.fxh-wrap { text-align: center; margin-bottom: 12px; }
-.fxh-box { position: relative; width: 200px; height: 120px; margin: 20px auto; }
-.fxh-card { position: absolute; width: 70px; height: 70px; border: 2px solid #4f46e5; border-radius: 16px; }
-.fxh-card:first-child { left: 10px; top: 25px; }
-.fxh-card:nth-child(2) { right: 10px; top: 25px; }
 </style>

@@ -6,7 +6,7 @@
   <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z420 สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
-  <div v-if="data" class="br-ov" :class="['br-theme-' + theme, { 'br-lite': lite }]">
+  <div v-if="data" class="br-ov" :class="'br-theme-' + theme">
     <div class="br-box" ref="boxRef">
       <div v-if="introPhase" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
@@ -50,7 +50,6 @@
       <div class="br-ctrl" v-if="!done">
         <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
         <button class="br-btn sm" @click="cycleSpeed">เร็ว ×{{ speed }}</button>
-        <button class="br-btn sm" @click="toggleLite"><Emoji :char="lite ? '✨' : '🚀'" /> {{ lite ? 'เอฟเฟกต์เต็ม' : 'โหมดลื่น' }}</button>
         <button class="br-btn sm" @click="skipToEnd">ข้ามไปผล</button>
       </div>
     </div>
@@ -134,19 +133,7 @@ const BASE_URL = import.meta.env.BASE_URL
 // melee lunge (fx.cardLunge/fx.dash) duration hardcode ใน battleFx.js แล้วเหมือนกัน — ไม่มี lungeMs ที่นี่แล้ว
 // resultDelayMs = เว้นจังหวะให้เห็นสนามจบก่อนเปิด modal สรุป (คงที่ ไม่หารด้วย speed)
 // pop/callout/koPuff durations ย้ายไป fx pool (battleFx.js) แล้ว — คงที่ไม่หารด้วย speed เหมือนเดิม
-const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], hitStopMs: 130, resultDelayMs: 500,
-  liteMotionMs: 90, liteWindupMs: 90 }   // โหมดลื่น: windup/motion ข้าม fx (ring/lunge/dash/projectile/burst) หน่วงสั้นแทน ไม่มี transform = ไม่สร้าง layer
-
-// โหมดลดเอฟเฟกต์ (lite) — ตัด GPU layer + อนิเมชันที่ repaint หนัก ให้ลื่นบนเครื่องเบา/iOS Safari
-// ดีฟอลต์: เปิดบน touch/มือถือ (coarse pointer) · จำค่าที่ผู้ใช้เลือกไว้ใน localStorage
-// precedence: ผู้ใช้เลือกไว้เอง (localStorage) > prefers-reduced-motion (OS a11y) > pointer:coarse (มือถือ)
-const LITE_KEY = 'br-lite'
-function initLite() {
-  try { const s = localStorage.getItem(LITE_KEY); if (s !== null) return s === '1' } catch {}
-  try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true } catch {}
-  try { return window.matchMedia('(pointer: coarse)').matches } catch {}
-  return false
-}
+const REPLAY_CFG = { baseDelay: 380, speeds: [1, 2, 4], hitStopMs: 130, resultDelayMs: 500 }
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
 const elEmoji = (p) => ELEMENTS[p?.element]?.emoji || '✊'
@@ -155,13 +142,6 @@ const idx = ref(0)
 const round = ref(1)
 const paused = ref(false)
 const speed = ref(1)
-const lite = ref(initLite())
-function toggleLite() {
-  lite.value = !lite.value
-  try { localStorage.setItem(LITE_KEY, lite.value ? '1' : '0') } catch {}
-  // เคลียร์ transform ค้างตอนสลับกลางไฟต์ (กันการ์ดค้างผิดที่)
-  Object.values(els).forEach(el => { if (el) { el.style.transform = ''; el.style.transition = ''; el.style.zIndex = '' } })
-}
 const hp = ref({})
 const inspectUid = ref(null)
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
@@ -280,9 +260,6 @@ function defForUid(uid) {
 // meleeMode (Phase 2b-2): 'card' (ดีฟอลต์) = การ์ดจริงพุ่งชน (fx.cardLunge) · 'dash' = สไปรต์แยกพุ่งฟาดแล้วจาง (fx.dash) — สลับผ่าน ?melee=dash
 const meleeMode = new URLSearchParams(location.search).get('melee') === 'dash' ? 'dash' : 'card'
 function playMotion(e) {
-  if (lite.value) {   // โหมดลื่น: ไม่พุ่ง/ไม่ยิง — หน่วงสั้นๆ ให้จังหวะอ่านออก แล้วเข้า impact เลย (ไม่มี transform = ไม่สร้าง layer)
-    return wait(REPLAY_CFG.liteMotionMs / speed.value)
-  }
   const def = defForUid(e.attacker)
   if (atkStyleOf(def) === 'ranged') return fx?.projectile(e.attacker, e.target, projectileOf(def)) ?? Promise.resolve()
   if (meleeMode === 'dash') return fx?.dash(e.attacker, e.target, def.emoji) ?? Promise.resolve()
@@ -302,11 +279,11 @@ const handlers = {
 function applyImpact(e, g) {
   if (g !== gen) return
   highlight(e.target, 'flash')
-  if (!lite.value) fx?.burst(e.target)                             // 💥 = motion decoration เท่านั้น → gate ด้วย lite (spec §5)
+  fx?.burst(e.target)                                               // 💥 = motion decoration
   setTimeout(() => { if (g === gen) highlight(e.target, 'flash', false) }, 250)   // gen-guard กันไปถอด flash ของไฟต์ใหม่หลัง reset/skip
   hp.value = { ...hp.value, [e.target]: Math.max(0, Math.round((e.targetHpAfter / (maxHp[e.target] || 1)) * 100)) }
   setDead(e.target)                                                // hp เปลี่ยน → sync dead แบบ imperative (ไม่ผ่าน reactive :class)
-  // pop/callout/koPuff = information (เลขดาเมจ/แพ้ทาง/💀) ไม่ใช่ decoration — เรียกเสมอทุกโหมด ห้าม gate ด้วย lite
+  // pop/callout/koPuff = information (เลขดาเมจ/แพ้ทาง/💀) ไม่ใช่ decoration — เรียกเสมอ
   fx?.pop(e.target, { dmg: e.dmg, crit: e.crit, eff: e.eff })
   if (e.eff === 'super' || e.eff === 'weak') fx?.callout(e.target, e.eff)
   if (e.targetHpAfter <= 0) fx?.koPuff(e.target)
@@ -317,14 +294,13 @@ function applyImpact(e, g) {
 async function applyAttack(e) {
   const g = gen
   highlight(e.attacker, 'windup')
-  if (lite.value) { await wait(REPLAY_CFG.liteWindupMs / speed.value) }        // โหมดลื่น: ไม่มี ring (fx motion) หน่วงสั้นแทนให้จังหวะอ่านออก
-  else { await (fx?.ring(e.attacker, 'windup') ?? Promise.resolve()) }
+  await (fx?.ring(e.attacker, 'windup') ?? Promise.resolve())
   if (g !== gen) return          // โดน reset/skip ระหว่างเงื้อ
   highlight(e.attacker, 'windup', false); highlight(e.attacker, 'acting')
   await playMotion(e); if (g !== gen) return            // โดน reset/skip ระหว่างพุ่ง/ยิง
   applyImpact(e, g)
   highlight(e.attacker, 'acting', false)
-  if (e.crit && !lite.value) await wait(REPLAY_CFG.hitStopMs / speed.value)
+  if (e.crit) await wait(REPLAY_CFG.hitStopMs / speed.value)
 }
 
 async function step() {
@@ -483,12 +459,6 @@ onUnmounted(() => {
 
 /* pop/call/puff/proj (เลขดาเมจ, callout ธาตุ, 💀, projectile) ย้ายไป fx pool (.brfx- ท้ายไฟล์ ไม่ scoped) แล้ว —
    CSS เดิม (br-pop, br-call, br-puff, br-proj และตัวแปรย่อย) + keyframes br-pop-rise, br-rise, br-fly ตัดทิ้ง (ไม่มี markup ใช้แล้ว) */
-
-/* ══ โหมดลื่น (lite) — ตัด GPU layer ถาวรทั้งหมด + อนิเมชันที่ repaint หนัก ══
-   พิสูจน์/แก้สมมติฐาน over-promotion: เหลือ layer เท่าที่จำเป็น, อัปเดตเลข/สถานะทันที ยังอ่านออกครบ */
-.br-lite .br-hp-fill { transition: none; }                  /* เลือดเปลี่ยนทันที */
-.br-lite .br-unit { transition: border-color .1s; }
-/* acting/windup/flash = border-color ล้วนอยู่แล้ว (Phase 2b) — lite ไม่ต้อง override เพิ่ม */
 
 .br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
 
