@@ -168,11 +168,15 @@ function setDead(uid) { highlight(uid, 'dead', (hp.value[uid] ?? 100) <= 0) }
 const fxLayerEl = ref(null)      // ref บน .br-fx-layer
 const boxRef = ref(null)         // ref บน .br-box (จุดอ้างอิงพิกัด)
 let fx = null
+let attachedLayer = null           // .br-fx-layer element ที่ fx ผูกอยู่ตอนนี้ — เทียบกันจับ layer remount (overlay v-if สร้าง DOM ใหม่ทุกไฟต์)
 function ensureFx() {
-  if (fx || !boxRef.value || !fxLayerEl.value) return
+  if (!boxRef.value || !fxLayerEl.value) return
+  if (fx && attachedLayer === fxLayerEl.value) return    // attach แล้วกับ layer ปัจจุบัน — ข้าม
+  if (fx) fx.destroy()                                    // layer เปลี่ยน (ไฟต์ใหม่ remount .br-fx-layer) → ทิ้งของเก่า (listener/pool) ก่อนสร้างใหม่
   fx = createBattleFx()
   fx.attach({ boxEl: boxRef.value, layerEl: fxLayerEl.value, getEl: uid => els[uid] || null })
   fx.setRate(speed.value)
+  attachedLayer = fxLayerEl.value
 }
 
 // ── การ์ดสไตล์ Hearthstone: ATK/HP เป็นเลข + หลอดเลือดขีดทุก 50 HP ──
@@ -189,7 +193,6 @@ const done = computed(() => idx.value >= log.value.length)
 const summary = computed(() => done.value
   ? computeBattleSummary(log.value, props.data?.playerTeam || [], props.data?.botTeam || [])
   : null)
-function uname(uid) { return defForUid(uid)?.name || '?' }
 const delay = computed(() => REPLAY_CFG.baseDelay / speed.value)
 
 function buildMax(d) {
@@ -394,7 +397,7 @@ onUnmounted(() => {
   pendingTimers.forEach(clearTimeout); pendingTimers.clear()
   window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize)
   if (fpsRaf) cancelAnimationFrame(fpsRaf)
-  fx?.destroy(); fx = null
+  fx?.destroy(); fx = null; attachedLayer = null
 })
 </script>
 
