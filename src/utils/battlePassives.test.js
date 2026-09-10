@@ -1842,3 +1842,60 @@ test('🦍 กอริลลา: หมัดที่ถูกดึงมา�
   for (let i = 0; i < 20; i++) runOnHit(gori, 100, att, [gori], () => 0.99, false)
   assert.equal(psOf(gori).rage, 22)                 // ไม่มีเพดาน (user ยืนยัน)
 })
+
+test('🐗 หมูป่า: ดาเมจบวกตาม % เลือดที่หายไปแบบ 1:1', () => {
+  const foe = u('blank', { uid: 'B0', side: 'B', maxHp: 1000, hp: 1000 })
+  const mult = (hp) => {
+    const boar = u('boar', { uid: 'A0', hp, maxHp: 100, atk: 10 })
+    return Math.round(runOnAttack(boar, foe, [foe], () => 0.5).atkMult * 100) / 100
+  }
+  assert.equal(mult(100), 1)      // เลือดเต็ม = ไม่ได้อะไร
+  assert.equal(mult(40), 1.6)     // หาย 60% = +60%
+  assert.equal(mult(10), 1.9)     // หาย 90% = +90%
+})
+
+test('🐗 หมูป่า: เลือดเต็ม = ไม่มี event ให้จอเล่า', () => {
+  const boar = u('boar', { uid: 'A0', hp: 100, maxHp: 100, atk: 10 })
+  const foe  = u('blank', { uid: 'B0', side: 'B', maxHp: 1000, hp: 1000 })
+  assert.equal(runOnAttack(boar, foe, [foe], () => 0.5).events.length, 0)
+})
+
+test('🦡 แบดเจอร์: เป้าเลือดสูงสุดมากกว่าเรา = แรงขึ้นเท่ากันเสมอ', () => {
+  const badger = u('badger', { uid: 'A0', maxHp: 500, hp: 500, atk: 10 })
+  const foe = (maxHp) => u('blank', { uid: 'B0', side: 'B', maxHp, hp: maxHp })
+  const mult = (maxHp) => Math.round(runOnAttack(badger, foe(maxHp), [foe(maxHp)], () => 0.5).atkMult * 100) / 100
+  assert.equal(mult(499), 1)
+  assert.equal(mult(500), 1)
+  assert.equal(mult(501), 1.25)
+  assert.equal(mult(5000), 1.25)
+})
+
+test('🦡 แบดเจอร์: ทะเบียนต้องไม่มีคีย์ max หลงเหลือ (สัญญาเปลี่ยนแล้วตั้งแต่ 10 ก.ย.)', () => {
+  const part = partsOf(PET_PASSIVES.badger)[0]
+  assert.equal(part.value.max, undefined)
+  assert.equal(part.step.max, undefined)
+})
+
+test('🦇 ค้างคาว: ทั้งทีมดูดเลือดตามดาเมจที่ตัวเองทำได้ (รวมค้างคาวเอง)', () => {
+  const team = [
+    u('bat',   { uid: 'A0', maxHp: 1000, hp: 500 }),
+    u('blank', { uid: 'A1', maxHp: 1000, hp: 500 }),
+  ]
+  applyAuras(team, [])
+  assert.equal(team[0].lifestealPct, 8)
+  assert.equal(team[1].lifestealPct, 8)
+
+  const out = runOnDealt(team[1], team, 100)
+  assert.equal(team[1].hp, 508)                     // 8% ของดาเมจ 100
+  const e = out.events.find(x => x.effect === 'teamLifesteal')
+  assert.ok(e && e.fxKind === 'heal')
+  assert.deepEqual(e.targets, ['A1'])
+})
+
+test('🦇 ค้างคาว: เลือดเต็มแล้วไม่ล้นหลอด และไม่มี event หลอกตา', () => {
+  const team = [u('bat', { uid: 'A0', maxHp: 1000, hp: 1000 })]
+  applyAuras(team, [])
+  const out = runOnDealt(team[0], team, 100)
+  assert.equal(team[0].hp, 1000)
+  assert.equal(out.events.filter(e => e.effect === 'teamLifesteal').length, 0)
+})
