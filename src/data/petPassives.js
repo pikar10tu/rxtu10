@@ -345,7 +345,7 @@ export const STATUS_TEXT = {
   // ── P2 ──
   elementTrinity: 'ทีมครบสายจึงแรงขึ้น', teamLifesteal: 'ตีแล้วดูดเลือด',
   teamDamageReduction: 'ทั้งทีมลดดาเมจที่ได้รับ', atkOnHit: 'ยิ่งโดนตียิ่งแรง',
-  berserk: 'ยิ่งเลือดหายยิ่งแรง', giantSlayer: 'ยิ่งเป้าตัวใหญ่ยิ่งแรง',
+  berserk: 'ยิ่งเลือดหายยิ่งแรง', giantSlayer: 'ตีเป้าตัวใหญ่กว่าแรงขึ้น',
   healOnAttack: 'ตีแล้วฟื้นเลือดเพื่อน', stealStats: 'ขโมยพลังจากศัตรู',
   // ── P2b ──
   infect: 'ติดเชื้อ ยิ่งโดนตียิ่งเจ็บ', taunt: 'บังคับให้ศัตรูตีตัวเอง', armorStack: 'มีเกราะกันหมัดเต็มใบ',

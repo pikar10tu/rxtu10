@@ -55,7 +55,7 @@ const STAT_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'stackAtk',
  *     - `fxKind: 'buff'` → **targets = ตัวที่ได้บัฟ (ไม่ใช่เป้าที่ไปตี)** ·
  *       amount = "เลขของบัฟนั้น": `stackAtk`/`atkOnHit` = จำนวนชั้นสะสม (battleBuffs.liveBuffs อ่านเป็นชั้น)
  *       ส่วนตัวที่ไม่ได้สะสมชั้น (`berserk`/`giantSlayer`) = **% ดาเมจที่เพิ่มได้จริงรอบนี้** (ปัดจำนวนเต็ม)
- *       ⚠️ giantSlayer ห้ามส่งเป็น "จำนวนขั้น" เพราะมันมีเพดาน `max` ⇒ ขั้นกับ % ไม่ตรงกันเมื่อชนเพดาน
+ *       ⚠️ `giantSlayer` ส่งเป็น % คงที่ของธรณีประตู (ไม่มีขั้น ไม่มีเพดานตั้งแต่ 10 ก.ย. 2026)
  *     - `fxKind: 'debuff'` (`infect` ทั้งตอนแปะชั้นและตอนย้ายเชื้อไปโฮสต์ใหม่) → targets = เป้าที่ติด ·
  *       amount = จำนวนชั้นสะสมของเป้านั้นหลังเหตุการณ์นี้ (`st.infect.n`) ไม่ใช่ดาเมจ
  *     - `fxKind: 'guard'` (`guardian` ของบากุ) → targets = เพื่อนที่ถูกรับแทน · amount = ดาเมจที่ผู้พิทักษ์กินไปแทน
@@ -380,15 +380,13 @@ export function runOnAttack(att, target, foes, rand) {
         break
       }
       case 'giantSlayer': {
-        // ขั้นละ 10% ที่ maxHp ของเป้าสูงกว่าเรา · เพดานที่ v.max
+        // ธรณีประตูเดียว: เป้ามี maxHp มากกว่าเรา → +pct% คงที่ (user เคาะ 10 ก.ย. 2026)
+        // 🔑 ของเดิมไต่ขั้นละ 10% + เพดาน `max` — เปลี่ยนเพราะอ่านบนการ์ดแล้วต้องเข้าใจทันที
+        //    และตัดคำถาม "ใหญ่กว่ากี่ % ถึงนับ" ออกจากหัวผู้เล่น · คีย์ `max` ถูกลบทั้งสัญญา
         if (!target) break
-        const steps = stepsOf10(target.maxHp / att.maxHp - 1)
-        if (steps > 0) {
-          const pct = Math.min(steps * v.pct, v.max)
-          res.atkMult *= 1 + pct / 100
-          // targets = ตัวที่ได้บัฟ (ผู้ตี) ไม่ใช่เป้าที่ไปตี — ดูกติกาใน docblock ของ ev()
-          res.events.push(ev(att, p, part, { targets: [att.uid], amount: Math.round(pct), fxKind: 'buff' }))
-        }
+        if (target.maxHp <= att.maxHp) break
+        res.atkMult *= 1 + v.pct / 100
+        res.events.push(ev(att, p, part, { targets: [att.uid], amount: Math.round(v.pct), fxKind: 'buff' }))
         break
       }
       // 🔴 healOnAttack ก็ hook: 'onAttack' ในข้อมูล แต่คำนวณใน runOnDealt (ข้างล่างนี้) — ดูคอมเมนต์ที่นั่น

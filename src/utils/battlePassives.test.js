@@ -340,36 +340,22 @@ test('berserk: เส้นพอดี 80%/90% ต้องไม่ตกข�
   } finally { delete PET_PASSIVES.__boar }
 })
 
-test('giantSlayer: เป้าตัวใหญ่กว่ายิ่งแรง แต่ชนเพดาน', () => {
+test('giantSlayer: เป้าใหญ่กว่าตัวเอง = +pct% คงที่ · ไม่ไต่ขั้น ไม่มีเพดาน', () => {
   PET_PASSIVES.__badger = {
     name: 'ทดสอบแบดเจอร์', icon: '🧪',
-    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 5, max: 50 }, step: { pct: 0, max: 0 } }],
-    desc: 'ล้มยักษ์ +{pct}%', short: 'ล้มยักษ์ +{pct}%',
-  }
-  try {
-    const me = { uid: 'A0', side: 'A', id: '__badger', hp: 100, maxHp: 100, atk: 10 }
-    const small = { uid: 'B0', side: 'B', id: 'blank', hp: 80, maxHp: 80, atk: 10 }
-    assert.equal(runOnAttack(me, small, [small], () => 0.5).atkMult, 1)      // เป้าเล็กกว่า = ไม่ได้อะไร
-    const big = { uid: 'B1', side: 'B', id: 'blank', hp: 130, maxHp: 130, atk: 10 }
-    assert.equal(Math.round(runOnAttack(me, big, [big], () => 0.5).atkMult * 100) / 100, 1.15)  // 3 ขั้น
-    const huge = { uid: 'B2', side: 'B', id: 'blank', hp: 500, maxHp: 500, atk: 10 }
-    assert.equal(Math.round(runOnAttack(me, huge, [huge], () => 0.5).atkMult * 100) / 100, 1.5) // ชนเพดาน
-  } finally { delete PET_PASSIVES.__badger }
-})
-
-test('giantSlayer: เส้นพอดี 1.2×/1.4× ต้องไม่ตกขั้นเพราะ float (maxHp มาจากตารางตัวคูณที่ลงตัว)', () => {
-  PET_PASSIVES.__badger = {
-    name: 'ทดสอบแบดเจอร์', icon: '🧪',
-    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 5, max: 50 }, step: { pct: 0, max: 0 } }],
+    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 25 }, step: { pct: 0 } }],
     desc: 'ล้มยักษ์ +{pct}%', short: 'ล้มยักษ์ +{pct}%',
   }
   try {
     const me = { uid: 'A0', side: 'A', id: '__badger', hp: 100, maxHp: 100, atk: 10 }
     const foe = (maxHp) => ({ uid: 'B0', side: 'B', id: 'blank', hp: maxHp, maxHp, atk: 10 })
     const mult = (maxHp) => Math.round(runOnAttack(me, foe(maxHp), [foe(maxHp)], () => 0.5).atkMult * 100) / 100
-    // 1.2× เป๊ะ = 2 ขั้น (ของเดิมได้ 1 ขั้น เพราะ (1.2-1)*10 = 1.9999999999999996)
-    assert.equal(mult(120), 1.1)
-    assert.equal(mult(140), 1.2)                                  // 1.4× เป๊ะ = 4 ขั้น
+    assert.equal(mult(80), 1)      // เล็กกว่า = ไม่ได้อะไร
+    assert.equal(mult(100), 1)     // เท่ากันเป๊ะ = ไม่ได้อะไร (ธรณีประตูคือ "มากกว่า" เท่านั้น)
+    assert.equal(mult(101), 1.25)  // ใหญ่กว่านิดเดียวก็ได้เต็ม
+    assert.equal(mult(500), 1.25)  // ใหญ่กว่ามากก็ยังเท่าเดิม ไม่ไต่ขั้น
+    // เป้าเล็กกว่า = ไม่มี event ให้จอเล่า
+    assert.equal(runOnAttack(me, foe(80), [foe(80)], () => 0.5).events.length, 0)
   } finally { delete PET_PASSIVES.__badger }
 })
 
@@ -381,7 +367,7 @@ test('berserk/giantSlayer: fxKind buff ใช้กติกาเดียว�
   }
   PET_PASSIVES.__badger = {
     name: 'ทดสอบแบดเจอร์', icon: '🧪',
-    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 5, max: 50 }, step: { pct: 0, max: 0 } }],
+    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 25 }, step: { pct: 0 } }],
     desc: 'ล้มยักษ์ +{pct}%', short: 'ล้มยักษ์ +{pct}%',
   }
   try {
@@ -394,7 +380,7 @@ test('berserk/giantSlayer: fxKind buff ใช้กติกาเดียว�
     const badger = { uid: 'A1', side: 'A', id: '__badger', hp: 100, maxHp: 100, atk: 10 }
     const e2 = runOnAttack(badger, huge, [huge], () => 0.5).events[0]
     assert.deepEqual(e2.targets, ['A1'])            // เดิมชี้ไปที่เหยื่อ = คนละกติกากับ berserk
-    assert.equal(e2.amount, 50)                     // ชนเพดาน 50% (ถ้าส่งเป็น "จำนวนขั้น" จะได้ 40 ซึ่งโกหก)
+    assert.equal(e2.amount, 25)                     // % คงที่ของธรณีประตู ไม่ใช่จำนวนขั้น
   } finally { delete PET_PASSIVES.__boar; delete PET_PASSIVES.__badger }
 })
 
