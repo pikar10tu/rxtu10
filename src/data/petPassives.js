@@ -39,9 +39,15 @@ export const PET_PASSIVES = {
   },
   trex: {
     name: 'สัญชาตญาณนักล่า', icon: '🦖',
-    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3 }, step: { pct: 4, max: 0 } }],
-    desc: 'ศัตรูล้ม 1 ตัว (ใครล้มก็ได้) พลังโจมตี +{pct}% ถาวร (สะสมได้ {max} ชั้น)',
-    short: 'ศัตรูล้ม 1 ตัว พลังโจมตี +{pct}% (สะสม {max} ชั้น)',
+    // `start` = ชั้นที่ได้ฟรีตอนเข้าไฟต์ (runSetup เป็นคนเติม) — user สั่ง 10 ก.ย. 2026 "จะได้เก่งสม legend"
+    // 🔴 จงใจอยู่บน part เดิม ไม่แตกเป็น part hook 'setup' ตัวที่สอง: เพ็ทที่ถือ stackAtk สอง part
+    //    คือกับดักของหนี้ §7.6 ข้อ 2 (ทุก part ใช้ st.atkStacks ก้อนเดียวกันแต่เพดานคนละเลข)
+    //    มีเทสใน petPassives.test.js กันไว้ว่าห้ามมีเพ็ทตัวไหนถือ stackAtk เกิน 1 part
+    // step.start = 0 — ชั้นแถมไม่สเกลตามเกรด (เกรดสูงได้ % ต่อชั้นแรงขึ้นผ่าน step.pct อยู่แล้ว)
+    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3, start: 1 },
+              step: { pct: 4, max: 0, start: 0 } }],
+    desc: 'เข้าไฟต์พร้อม {start} ชั้น · ศัตรูล้ม 1 ตัว (ใครล้มก็ได้) เพิ่มอีก 1 ชั้น · ชั้นละ +{pct}% สะสมรวม {max} ชั้น',
+    short: 'เริ่มไฟต์ {start} ชั้น · ศัตรูล้ม 1 ตัว +1 ชั้น · ชั้นละ +{pct}% (รวม {max})',
   },
   ouroboros: {
     name: 'วัฏจักรนิรันดร์', icon: '🐍',

@@ -1688,3 +1688,36 @@ test('runOnKill: หมัดที่ปิดไฟต์ก็ต้องไ
     assert.equal(stacks.length, 1, 'หมัดปิดเกมต้องได้ชั้น 1 ชั้น')
   } finally { delete PET_PASSIVES.__slayer }
 })
+
+// ── P2c-2: 🦖 ทีเร็กซ์เริ่มไฟต์ด้วย 1 ชั้น (user สั่ง 10 ก.ย. "จะได้เก่งสมเป็น legend") ──
+test('ทีเร็กซ์เข้าไฟต์ด้วย 1 ชั้นและแรงขึ้นทันที', () => {
+  const t = u('trex')
+  const base = t.atk
+  runSetup([t], [u('mouse', { uid: 'B0', side: 'B' })])
+  assert.equal(psOf(t).atkStacks, 1, 'ต้องได้ชั้นแรกฟรีตอนเข้าไฟต์')
+  assert.ok(Math.abs(t.atk / base - 1.12) < 1e-9, `atk ต้อง × 1.12 พอดี (ได้ ${t.atk / base})`)
+})
+
+test('ทีเร็กซ์ยังตันที่ 3 ชั้นเหมือนเดิม — ชั้นแถมไม่ขยับเพดาน', () => {
+  const t = u('trex')
+  const base = t.atk
+  const foe = u('mouse', { uid: 'B0', side: 'B' })
+  runSetup([t], [foe])
+  for (let i = 0; i < 5; i++) runOnAnyDeath(u('mouse', { uid: 'B9', side: 'B' }), [t], [foe], () => 0.5)
+  assert.equal(psOf(t).atkStacks, 3, 'เพดานยังเป็น 3 ชั้น')
+  assert.ok(Math.abs(t.atk / base - 1.12 ** 3) < 1e-9,
+    `ตัน 3 ชั้น = คูณทบ 1.12³ = +40.5% (ได้ ${(t.atk / base - 1) * 100}%)`)
+})
+
+test('setup ไม่ยิง event ให้ชั้นแถม — เป็นสเตตัสตั้งต้น ไม่ใช่โมเมนต์', () => {
+  assert.deepEqual(runSetup([u('trex')], [u('mouse', { uid: 'B0', side: 'B' })]), [],
+    'ถ้ายิง event จะได้ป้ายที่เลขบนจอไม่ขยับตาม (statsSnapshot หลัง aura แบกค่านี้ไปแล้ว)')
+})
+
+test('เพ็ทที่ไม่มี start ไม่ได้ชั้นแถม (ยามกันเผลอแจกทั้งเกม)', () => {
+  const o = u('ouroboros')
+  const base = o.atk
+  runSetup([o], [u('mouse', { uid: 'B0', side: 'B' })])
+  assert.equal(psOf(o).atkStacks || 0, 0)
+  assert.equal(o.atk, base)
+})

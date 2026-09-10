@@ -125,6 +125,24 @@ export function runSetup(team, foes) {
       e.statsAfter = statsSnapshot(team, foes)
       out.push(e)
     }
+
+    // ── ชั้นตั้งต้นของ stackAtk (🦖 ทีเร็กซ์) ──────────────────────────────
+    // 🔴 อ่านจาก part เดิมของเพ็ทไม่ว่ามันแขวนอยู่ hook ไหน — จงใจ **ไม่** ให้เพ็ทเพิ่ม part hook
+    //    'setup' ตัวที่สอง เพราะเพ็ทที่ถือ stackAtk สอง part คือกับดักของหนี้ §7.6 ข้อ 2:
+    //    ทุก part ใช้ st.atkStacks ก้อนเดียวกันแต่เพดานคนละเลข (onRound 4 · onAnyDeath 3 · onKill 3)
+    //    ⇒ แหล่งที่เพดานต่ำกว่าจะเงียบไปโดยไม่มี event บอก (มีเทสกันไว้ใน petPassives.test.js)
+    // 🔇 ไม่ยิง event โดยตั้งใจ: ชั้นนี้เป็นสเตตัสตั้งต้น ไม่ใช่โมเมนต์ระหว่างไฟต์ · statsSnapshot()
+    //    ที่เอนจินเก็บหลัง aura แบกค่านี้ไปให้การ์ดอยู่แล้ว ⇒ ยิง event จะได้ป้ายที่เลขบนจอไม่ขยับตาม
+    for (const part of (p && p.parts) || []) {
+      if (part.effect !== 'stackAtk') continue
+      const v = valOf(part, u)
+      const start = v.start || 0
+      if (start <= 0) continue
+      const st = psOf(u)
+      const n = Math.min(start, v.max)          // ชั้นแถมห้ามทะลุเพดานของ part ตัวเอง
+      st.atkStacks = (st.atkStacks || 0) + n
+      u.atk *= (1 + v.pct / 100) ** n
+    }
   }
   return out
 }
