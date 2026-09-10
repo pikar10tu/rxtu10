@@ -45,6 +45,25 @@
         </div>
       </section>
 
+      <!-- ───── ตู้อัญเชิญพิเศษ (config/app.gachaEvent) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="✨" /> ตู้อัญเชิญพิเศษ</span></div>
+        <div class="admin-hint">
+          เปิดตู้จำกัดเวลาที่มีเพ็ทรุ่นใหม่ 6 ตัว (ดัน 🦁 สิงโต · 👾 ไวรัส · 🦍 กอริลลา ก่อน) ·
+          <b>หมดเวลาแล้วตู้หายเอง และเพ็ทใหม่ไหลเข้าตู้ปกติทันทีโดยไม่ต้องกดอะไรอีก</b>
+        </div>
+        <div class="maint-toggle">
+          <span class="maint-state" :class="gachaEv.active ? 'on' : 'off'">
+            {{ gachaEv.active ? `🟢 เปิดอยู่ · เหลือ ${gachaEvLeft}` : '⚪ ยังไม่มีอีเวนต์' }}
+          </span>
+          <div class="ev-btns">
+            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(7)">เริ่ม 7 วัน</button>
+            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(14)">เริ่ม 14 วัน</button>
+            <button v-if="gachaEv.active" class="btn-mini btn-gray" :disabled="savingEvent" @click="endGachaEvent">จบตอนนี้</button>
+          </div>
+        </div>
+      </section>
+
       <!-- ───── สนามประลอง (PvP open/close gate) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="⚔️" /> สนามประลอง (PvP)</span></div>
@@ -469,7 +488,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction } from 'firebase/firestore'
 import { buildRosterFromUsers } from '../utils/roster.js'
@@ -478,6 +497,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
+import { eventState, timeLeftText } from '../utils/gachaEvent.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
@@ -505,7 +525,7 @@ import { FX_PRESETS, PACE_PRESETS, FX_LABEL, PACE_LABEL, readPrefs, writePrefs }
 const authStore = useAuthStore()
 const members   = useMembersStore()
 const usage     = useUsageStore()
-const { maintenance, pvpOpen, expeditionOpen } = useAppConfig()   // arcadeOpen ไม่ได้ใช้แล้ว (ปุ่มมินิเกมถูกเอาออก)
+const { maintenance, pvpOpen, expeditionOpen, rawConfig } = useAppConfig()   // arcadeOpen ไม่ได้ใช้แล้ว (ปุ่มมินิเกมถูกเอาออก)
 const { toast } = useToast()
 const { confirm } = useConfirm()
 const { addTopics } = useTopics()
@@ -818,6 +838,50 @@ const barColor = (v, max) => {
   return s === 'danger' ? '#ef4444' : s === 'warn' ? '#f59e0b' : '#22c55e'
 }
 
+// ── ตู้อัญเชิญพิเศษ (config/app.gachaEvent) ──
+// 🔴 เขียน endsAt เป็นมิลลิวินาที (number) เท่านั้น — ห้าม serverTimestamp() เพราะ snapshot ที่ยังไม่ยืนยัน
+//    ส่งค่ากลับมาเป็น null แล้วอีเวนต์จะหายเงียบทั้งที่เพิ่งกดเปิด (CLAUDE.md ข้อ 10)
+// 🔴 "จบตอนนี้" = ตั้ง endsAt เป็นเวลาปัจจุบัน ไม่ใช่ธงปิดแยก ⇒ กติกา "ปิดด้วยนาฬิกา" ยังมีทางเดียว
+const savingEvent = ref(false)
+const evNowTick = ref(Date.now())
+// เดินนาฬิกาหยาบๆ พอให้บรรทัด "เหลืออีก…" ไม่ค้าง · ต้องเคลียร์ตอนออกจากหน้า ไม่งั้นค้างทุกครั้งที่เข้า-ออก
+let evClock = null
+onMounted(() => { evClock = setInterval(() => { evNowTick.value = Date.now() }, 30000) })
+onUnmounted(() => clearInterval(evClock))
+const gachaEv = computed(() => eventState(rawConfig.value?.gachaEvent, evNowTick.value))
+const gachaEvLeft = computed(() => timeLeftText(gachaEv.value.msLeft))
+
+async function writeGachaEvent(payload, okMsg) {
+  savingEvent.value = true
+  try {
+    await setDoc(doc(db, 'config', 'app'), { gachaEvent: payload }, { merge: true })
+    toast(okMsg, 'success')
+  } catch (e) {
+    console.error('[admin gachaEvent]', e)
+    toast('เปลี่ยนสถานะตู้ไม่สำเร็จ', 'error')
+  } finally {
+    savingEvent.value = false
+  }
+}
+async function startGachaEvent(days) {
+  const ok = await confirm(`เปิดตู้อัญเชิญพิเศษ ${days} วัน?
+• ทั้งชั้นปีเห็นทันที
+• เพ็ทใหม่ 6 ตัวหมุนได้เฉพาะตู้นี้
+• หมดเวลาแล้วไหลเข้าตู้ปกติเอง`)
+  if (!ok) return
+  await writeGachaEvent(
+    { name: 'อัญเชิญพิเศษ · King of the Jungle', endsAt: Date.now() + days * 86400000 },
+    `เปิดตู้พิเศษ ${days} วันแล้ว`,
+  )
+}
+async function endGachaEvent() {
+  const ok = await confirm(`จบตู้อัญเชิญพิเศษตอนนี้?
+• เพ็ทใหม่ 6 ตัวจะไหลเข้าตู้ปกติทันที
+• ย้อนกลับไม่ได้ (เปิดใหม่ได้ แต่ของจะอยู่ในตู้ปกติแล้ว)`)
+  if (!ok) return
+  await writeGachaEvent({ ...(rawConfig.value?.gachaEvent || {}), endsAt: Date.now() }, 'จบอีเวนต์แล้ว')
+}
+
 // ── maintenance toggle (config/app.maintenance) ──
 const savingMaint = ref(false)
 async function toggleMaintenance() {
@@ -1127,7 +1191,8 @@ async function saveEcon(m) {
   font-size: .95rem;
   margin-bottom: 4px;
 }
-.maint-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.maint-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ev-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 .maint-state { font-size: .8rem; font-weight: 700; }
 .maint-state.on  { color: #15803d; }
 .maint-state.off { color: #b45309; }
