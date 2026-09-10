@@ -74,13 +74,13 @@ export const PET_PASSIVES = {
     short: 'ฟื้นด้วยเลือด {pct}% + ตีสวน {counterPct}%',
   },
   whale: {
-    name: 'พรมหาสมุทร', icon: '💧',
+    name: 'อ้อมกอดเบลูก้า', icon: '💧',
     parts: [{ hook: 'aura', effect: 'teamHp', value: { pct: 10 }, step: { pct: 3 } }],
     desc: 'เลือดสูงสุดของทั้งทีม +{pct}%',
     short: 'เลือดสูงสุดทั้งทีม +{pct}%',
   },
   qilin: {
-    name: 'ปราการพิทักษ์', icon: '🛡️',
+    name: 'กลืนกินฝันร้าย', icon: '🛡️',
     parts: [
       { hook: 'onHit', effect: 'guardian', value: { pct: 50 }, step: { pct: 8 }, tag: 'guard' },
       { hook: 'onRound', effect: 'regenSelf', value: { pct: 3 }, step: { pct: 1 }, tag: 'regen' },
@@ -158,7 +158,7 @@ export const PET_PASSIVES = {
     short: 'ฟื้นเลือดตัวเอง {pct}% ทุกต้นรอบ',
   },
   genie: {
-    name: 'พรคุ้มครอง', icon: '🧞',
+    name: 'พรข้อสุดท้าย', icon: '🧞',
     parts: [{ hook: 'onDeath', effect: 'saveAlly', value: { times: 1 }, step: { times: 0 } }],
     desc: 'กันเพื่อนไม่ให้ตาย {times} ครั้ง (เหลือเลือด 1)',
     short: 'กันเพื่อนไม่ให้ตาย {times} ครั้ง (เหลือเลือด 1)',
@@ -238,7 +238,9 @@ export const PET_PASSIVES = {
   },
   hamster: {
     name: 'พลังกักตุน', icon: '🐹',
-    parts: [{ hook: 'onAttack', effect: 'atkWhenFull', value: { pct: 15 }, step: { pct: 5 } }],
+    // 🔴 200% = user เคาะเอง ("หมัดเปิดที่แรงมาก") · ส่งต่อให้ P4 ตรวจว่ามันไม่ได้ทำให้ "เปิดเกมแล้วจบเกม"
+    //    ตัวนี้เป็น common ที่ทุกคนมีจากตั๋วฟรี 50 ใบ ⇒ ถ้าแรงเกิน ตู้อัพเรทจะไม่มีใครหมุน (สเปกแม่ §8)
+    parts: [{ hook: 'onAttack', effect: 'atkWhenFull', value: { pct: 200 }, step: { pct: 60 } }],
     desc: 'ตอนเลือดเต็ม พลังโจมตี +{pct}%',
     short: 'ตอนเลือดเต็ม พลังโจมตี +{pct}%',
   },

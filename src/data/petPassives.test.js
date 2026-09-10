@@ -260,3 +260,55 @@ test('ยังไม่มีเพ็ทตัวไหนถือ stackAtk �
       `ใน battlePassives.js แล้วอัปเดต battleBuffs.js ที่อ่าน atkStacks ด้วย`)
   }
 })
+
+test('ชื่อพาสสีฟชุดใหม่ของ P3 ตรงตามที่ user เคาะ', () => {
+  assert.equal(PET_PASSIVES.whale.name, 'อ้อมกอดเบลูก้า')
+  assert.equal(PET_PASSIVES.qilin.name, 'กลืนกินฝันร้าย')
+  assert.equal(PET_PASSIVES.mouse.name, 'หัวขโมยตัวจิ๋ว')
+  assert.equal(PET_PASSIVES.genie.name, 'พรข้อสุดท้าย')
+})
+
+test('ชื่อพาสสีฟห้ามซ้ำกัน — battleBuffs.maxStacksOf ค้นทะเบียนด้วยชื่อ', () => {
+  const names = Object.values(PET_PASSIVES).map(p => p.name)
+  assert.equal(new Set(names).size, names.length)
+})
+
+test('🐹 แฮมสเตอร์: หมัดเปิดตอนเลือดเต็มแรงตามที่ user เคาะ', () => {
+  const part = partsOf(PET_PASSIVES.hamster)[0]
+  assert.equal(part.value.pct, 200)
+  assert.equal(passiveValueAt(part, 3).pct, 320)    // ขั้น 3 ≈ 1.6 เท่าของขั้น 1
+})
+
+test('ทุก effect ที่มีเพ็ทถือจริง ต้องมีป้าย + คำอธิบาย + อยู่ในกลุ่มป้ายสักกลุ่ม', () => {
+  // เทสความครบเดิมไล่จาก "รายชื่อ effect ที่เขียนไว้ในเทส" — ตัวนี้ไล่จาก "เพ็ทที่มีอยู่จริง" แทน
+  // ⇒ วันที่มีคนเพิ่มเพ็ทที่ถือ effect ใหม่แล้วลืมลงทะเบียนป้าย เทสนี้แดงเอง ไม่ต้องรอคนมาอัปเดตรายชื่อ
+  //
+  // ยกเว้นรายตัวพร้อมเหตุผล — ทั้งหมดคือ "เหตุการณ์ครั้งเดียว" ไม่ใช่สถานะที่ค้างอยู่บนการ์ด
+  // จึงใช้ไอคอนของพาสสีฟเจ้าของตอนเกิด event แทนป้ายถาวร (ดูคอมเมนต์ยาวใน STATUS_ICON)
+  const ONE_SHOT_NO_BADGE = new Set([
+    'aoeOpener',      // หมัดเปิดไฟต์ของบาฮามุท — ยิงครั้งเดียวก่อนรอบ 1
+    'killChain',      // ได้ตีต่อทันทีตอนน็อก
+    'multiStrike',    // ตีสองทีในบีตเดียว
+    'cleave',         // หมัดลูกในบีตเดียวกัน
+    'execute',        // ตัวคูณเฉพาะหมัดที่เป้าเลือดต่ำ
+    'atkWhenFull',    // ตัวคูณเฉพาะหมัดที่เลือดเต็ม
+    'berserk',        // ตัวคูณตามเลือดที่หายไป (เปลี่ยนทุกหมัด)
+    'giantSlayer',    // ตัวคูณเฉพาะหมัดที่เป้าตัวใหญ่กว่า
+    'targetLowest',   // เปลี่ยนเป้าของหมัดนั้น
+    'regenSelf',      // ฟื้นเลือดครั้งเดียวต่อรอบ
+    'healLowestAlly', // เหมือนกัน แต่ฟื้นให้เพื่อน
+    'healOnAttack',   // ฟื้นตามดาเมจของหมัดนั้น
+    'infect',         // ป้ายชั้นเชื้ออยู่ฝั่งเป้า (FOE_STATUS_EFFECTS) — เจ้าของไม่ได้ป้าย
+    'elementTrinity', // ป้ายมีอยู่ แต่ยังโกหกได้ (buffSources เป็น static) — P3b เป็นคนซ่อม
+  ])
+  const GROUPS = [TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS, SELF_STATUS_EFFECTS, FOE_STATUS_EFFECTS]
+  for (const [id, p] of Object.entries(PET_PASSIVES)) {
+    for (const part of partsOf(p)) {
+      const k = part.effect
+      if (ONE_SHOT_NO_BADGE.has(k)) continue
+      assert.ok(STATUS_ICON[k], `${id}: ${k} ไม่มีไอคอนป้าย`)
+      assert.ok(STATUS_TEXT[k], `${id}: ${k} ไม่มีคำอธิบายป้าย`)
+      assert.ok(GROUPS.some(g => g.has(k)), `${id}: ${k} ไม่อยู่ในกลุ่มป้ายไหนเลย`)
+    }
+  }
+})

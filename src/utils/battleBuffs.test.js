@@ -13,7 +13,7 @@ test('บัฟจากทีมตัวเอง: คุณวาฬในท
     const b = find(s[uid], 'teamHp')
     assert.ok(b, `${uid} ควรได้ teamHp`)
     assert.equal(b.ownerUid, 'A0')
-    assert.equal(b.skillName, 'พรมหาสมุทร')
+    assert.equal(b.skillName, 'อ้อมกอดเบลูก้า')
     assert.equal(b.ownerName, 'คุณวาฬ')
     assert.equal(b.buff, true)
     assert.equal(b.foeSide, false)
