@@ -10,7 +10,7 @@
 //    เพราะเปลี่ยน paint ขณะการ์ดมีอนิเมชัน = re-raster ทั้งใบ (ข้อบังคับ v3 ของ BattleReplay)
 import { getPetDef } from '../data/index.js'
 import {
-  STATUS_ICON, STATUS_TEXT, PET_PASSIVES, effectText,
+  STATUS_ICON, STATUS_TEXT, PET_PASSIVES, effectText, BADGE_PRIORITY,
   TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS, SELF_STATUS_EFFECTS,
   partsOf, partsAt, partWithEffect,
 } from '../data/petPassives.js'
@@ -145,7 +145,11 @@ export function liveBuffs(sources, beats, idx) {
 export function badgesOf(list, max) {
   const seen = new Set()
   const out = []
-  for (const b of list || []) {
+  // เรียงตามความสำคัญก่อนตัด — เสถียร: ความสำคัญเท่ากันให้ยึดลำดับเดิมของรายการ
+  // (ไม่งั้นป้ายสลับที่กันเองระหว่างการ์ด ทั้งที่ข้อมูลเหมือนกัน = อ่านยากโดยไม่จำเป็น)
+  const ranked = (list || []).map((b, i) => ({ b, i }))
+    .sort((x, y) => (BADGE_PRIORITY[x.b.effect] ?? 50) - (BADGE_PRIORITY[y.b.effect] ?? 50) || x.i - y.i)
+  for (const { b } of ranked) {
     if (!b.icon || seen.has(b.effect)) continue
     seen.add(b.effect)
     out.push({ key: b.effect, icon: b.icon, label: STATUS_TEXT[b.effect] || '', buff: b.buff })

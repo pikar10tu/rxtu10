@@ -428,5 +428,19 @@ export const SELF_STATUS_EFFECTS = new Set([
  *  ลงบนตัวเป้าโดยตรง (state จริงอยู่ที่ psOf(target).infect ไม่ใช่ค่าคงที่จาก part) ⇒ aurasOf() หาไม่เจอ
  *  P2c ต้องอ่านชั้นสแตคจาก state runtime นั้นเอง ไม่ใช่ผ่าน buffSources/aurasOf ของกลุ่มสองกลุ่มบน */
 export const FOE_STATUS_EFFECTS = new Set(['infect'])
-/** สูงสุดกี่ป้ายต่อการ์ด — วัดจากทีมสุ่ม 5,000 คู่: เฉลี่ย 1.09 · ชนเพดาน 3 แค่ 4.7% */
-export const STATUS_MAX = 3
+/** สูงสุดกี่ป้ายต่อการ์ด — วัดใหม่ 11 ก.ย. 2026 ด้วยคลัง 33 ตัว (`scripts/badge-load-sim.mjs`,
+ *  ทีมสุ่ม 5,000 คู่ = การ์ด 30,000 ใบ): เฉลี่ย 1.15 · เพดาน 3 ตัดป้ายทิ้ง 0.6% · เพดาน 4 ตัดทิ้ง 0.0%
+ *  ⇒ ขยับเป็น 4 · สเปกเดาว่าเพ็ทใหม่จะทำให้ชนเพดานบ่อยกว่าเดิมมาก แต่วัดแล้วไม่จริง
+ *     (ของใหม่ส่วนใหญ่เป็นผลของ *เจ้าตัวเอง* — berserk/giantSlayer/taunt — ไม่ใช่ออร่าที่แผ่ทั้งทีม) */
+export const STATUS_MAX = 4
+
+/** ป้ายไหนสำคัญกว่าเมื่อพื้นที่ไม่พอ — เลขน้อย = มาก่อน · ไม่อยู่ในนี้ = 50 (เรียงตามลำดับเดิม)
+ *  🔑 เกณฑ์: "อ่านแล้วเปลี่ยนความเข้าใจว่าไฟต์กำลังเป็นยังไง" มาก่อน "บัฟตัวเลขที่รู้ก็ทำอะไรไม่ได้"
+ *  ⚠️ ยังต้องมีแม้เพดานจะพอ เพราะป้ายชั้นเชื้อ (ชั้น FX) มาแย่งพื้นที่เดียวกันบนการ์ด */
+export const BADGE_PRIORITY = {
+  infect: 0, armorStack: 1, taunt: 2, guardian: 3, cheatDeath: 4, revive: 4, saveAlly: 4,
+  stackAtk: 10, atkOnHit: 10, berserk: 11, giantSlayer: 11, stealStats: 12,
+  elementTrinity: 20, enemyVuln: 21, teamDamageReduction: 22, dodge: 23, thorns: 23,
+  teamLifesteal: 30, healOnAttack: 30, teamHp: 31, teamAtk: 31, teamAtkElement: 31,
+  teamCrit: 32, duoRegen: 33,
+}

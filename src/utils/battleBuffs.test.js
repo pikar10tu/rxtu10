@@ -116,3 +116,25 @@ test('บัฟ: พาสสีฟ 2 ผลต้องได้ป้ายค
     delete PET_PASSIVES.__dual
   }
 })
+
+test('ป้ายบนการ์ด: เพดาน 4 และเรียงตามความสำคัญ (ของที่เปลี่ยนสถานการณ์มาก่อนบัฟเล็ก)', () => {
+  const list = [
+    { icon: '⚔️', effect: 'teamAtk', buff: true },
+    { icon: '🏰', effect: 'armorStack', buff: true },
+    { icon: '💥', effect: 'teamCrit', buff: true },
+    { icon: '📢', effect: 'taunt', buff: true },
+    { icon: '❤️', effect: 'teamHp', buff: true },
+  ]
+  assert.equal(STATUS_MAX, 4)
+  const out = badgesOf(list, STATUS_MAX).map(b => b.key)
+  assert.deepEqual(out.slice(0, 2), ['armorStack', 'taunt'])   // สองอันนี้ต้องรอดเสมอ
+  assert.equal(out.length, 4)
+})
+
+test('badgesOf: ความสำคัญเท่ากัน = ยึดลำดับเดิมของรายการ (เสถียร ไม่สลับมั่ว)', () => {
+  const list = [
+    { icon: '❤️', effect: 'teamHp', buff: true },
+    { icon: '⚔️', effect: 'teamAtk', buff: true },
+  ]
+  assert.deepEqual(badgesOf(list, 4).map(b => b.key), ['teamHp', 'teamAtk'])
+})
