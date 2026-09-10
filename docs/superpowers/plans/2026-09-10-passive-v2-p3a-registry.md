@@ -1,5 +1,10 @@
 # P3a — ทะเบียนเพ็ท 33 ตัว Implementation Plan
 
+> ## ✅ ลงมือครบแล้ว 10 ก.ย. 2026 — `109d564..` บน branch `passive-v2-p3`
+> เทส **1,150 ผ่าน · 0 ตก** · `death-audit` 0 ไฟต์ · build ผ่าน
+> สิ่งที่ต่างจากแผนตอนลงมือจริง บันทึกไว้ในกล่องสถานะของสเปก
+> (`docs/superpowers/specs/2026-09-10-passive-v2-p3-design.md` §1) — **อ่านที่นั่น ไม่ใช่ที่นี่**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** ใส่เพ็ทใหม่ 6 ตัวลงทะเบียน (ยังหมุนไม่ออก) · แจกกลไกใหม่ให้เพ็ทเดิมที่เหลือ 5 ตัว · เปลี่ยนชื่อพาสสีฟ 4 ตัว โดยเกมเดิมไม่พังและเพ็ทใหม่ต้องหลุดออกทางไหนไม่ได้เลย
