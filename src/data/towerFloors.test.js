@@ -118,3 +118,13 @@ test('ชั้น 70+: ธาตุเอนให้ "เคาน์เตอ
     els.forEach(e => assert.ok(e === theme || e === counter, `ชั้น ${f}: ธาตุ ${e} ต้องเป็น theme หรือ counter เท่านั้น`))
   }
 })
+
+test('ทีมบอททุกชั้นมาจาก wave 1 เท่านั้น — คลังโตแล้วผลสุ่มห้ามขยับ', async () => {
+  const { wave1Pets } = await import('../utils/petCatalog.js')
+  const ids = new Set(wave1Pets().map(p => p.id))
+  for (let f = 1; f <= TOWER_MAX; f++) {
+    for (const p of getFloorTeam(f)) {
+      assert.ok(ids.has(p.id), `ชั้น ${f} ได้ ${p.id} ซึ่งไม่ใช่ wave 1`)
+    }
+  }
+})

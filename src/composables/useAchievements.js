@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAchievementBalloon } from './useAchievementBalloon.js'
 import { MILESTONES, getAchievement } from '../data/achievements.js'
-import { PETS } from '../data/index.js'
+import { releasedPets } from '../utils/petCatalog.js'
 import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
 import {
   computeProgress, checkMilestones, achievementDocId, achievementTitle, buildAchievementNews,
@@ -15,7 +15,8 @@ const earned = new Set()       // achId/docId-base ที่ได้แล้�
 let announceOn = false         // backfill รอบแรกเงียบ → true หลังจากนั้น
 let _started = false
 
-const ctx = () => ({ allSpecies: PETS.length, maxResidence: MAX_RESIDENCE_LEVEL })
+// allSpecies = จำนวนที่ "หมุนได้จริง" ไม่ใช่ทั้งคลัง — ไม่งั้นเควสเก็บครบทำไม่ได้ทั้งชั้นปีตอนมีเพ็ทที่ยังไม่เปิด
+const ctx = () => ({ allSpecies: releasedPets().length, maxResidence: MAX_RESIDENCE_LEVEL })
 
 export function addEarned(achId) { earned.add(achId) }
 

@@ -72,11 +72,14 @@ import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import { PETS, RARITY } from '../../data/index.js'
+import { releasedPets } from '../../utils/petCatalog.js'
+import { useAppConfig } from '../../composables/useAppConfig.js'
 import { mergeRolls } from '../../utils/gachaMerge.js'
 import { FUSION_COST, REDEEM_COIN, nextRarity, rarityCopyTotal, applyCopySpend, fuseRoll, redeemValue } from '../../utils/lab.js'
 import SpendCopiesModal from './SpendCopiesModal.vue'
 
 const auth = useAuthStore()
+const { rawConfig } = useAppConfig()
 const { toast } = useToast()
 
 const RARITIES = ['common', 'rare', 'epic', 'legendary']
@@ -103,7 +106,7 @@ async function onConfirm(allocation) {
   try {
     const petsAfter = applyCopySpend(pets.value, allocation)
     if (mode === 'fusion') {
-      const id = fuseRoll(rarity, PETS)
+      const id = fuseRoll(rarity, releasedPets(rawConfig.value?.gachaEvent))
       if (!id) { toast('หลอมไม่สำเร็จ', 'error'); return }
       const { pets: finalPets, summary } = mergeRolls(petsAfter, [{ id }], PETS)
       const ok = await auth.patchUser({ pets: finalPets }, { pets: finalPets })

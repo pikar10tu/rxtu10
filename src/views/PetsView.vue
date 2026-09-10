@@ -21,7 +21,7 @@
       </div>
 
       <div class="pt-summary">
-        <div><b>{{ pets.length }}</b>/{{ PETS.length }} <small>ชนิด</small></div>
+        <div><b>{{ pets.length }}</b>/{{ catalog.length }} <small>ชนิด</small></div>
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
@@ -66,8 +66,13 @@ import { BATTLE_SLOTS } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
+import { releasedPets } from '../utils/petCatalog.js'
+import { useAppConfig } from '../composables/useAppConfig.js'
 
 const authStore = useAuthStore()
+const { rawConfig } = useAppConfig()
+// ตัวหารคือ "จำนวนที่หมุนได้จริง" ไม่ใช่ทั้งคลัง — defOf ยังอ่าน PETS เต็มเพราะต้องหาเพ็ทที่ถืออยู่ให้เจอเสมอ
+const catalog = computed(() => releasedPets(rawConfig.value?.gachaEvent))
 const sel = ref(null)
 const pickOpen = ref(false)
 

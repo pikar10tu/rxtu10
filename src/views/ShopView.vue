@@ -24,7 +24,7 @@
       <LabTab v-if="tab === 'lab'" />
       <template v-else>
       <div class="shop-storage">
-        <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ PETS.length }} ชนิด
+        <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ catalog.length }} ชนิด
       </div>
 
       <!-- banner -->
@@ -150,6 +150,8 @@ import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TE
 import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { prefersReducedMotion } from '../utils/motionPref.js'
+import { releasedPets } from '../utils/petCatalog.js'
+import { useAppConfig } from '../composables/useAppConfig.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -167,8 +169,12 @@ const pity    = computed(() => authStore.userData?.gachaPity || 0)
 const target  = computed(() => authStore.userData?.gachaTarget || null)
 const guaranteed = computed(() => !!authStore.userData?.gachaGuaranteed)
 
-const legendaries = PETS.filter((p) => p.rarity === 'legendary')
-const targetPet = computed(() => legendaries.find((p) => p.id === target.value) || null)
+const { rawConfig } = useAppConfig()
+// คลังที่ "แจกได้" ตอนนี้ — เพ็ทที่ยังไม่เปิดตัวต้องไม่โผล่ในกาชา/เป้าการันตี/ตัวหาร
+// ⚠️ ที่อ่าน identity ของ id ที่สุ่มมาแล้ว (mergeRolls · ชื่อในข่าว) ยังใช้ PETS เต็ม — ไม่ใช่การเลือกว่าจะแจกอะไร
+const catalog = computed(() => releasedPets(rawConfig.value?.gachaEvent))
+const legendaries = computed(() => catalog.value.filter((p) => p.rarity === 'legendary'))
+const targetPet = computed(() => legendaries.value.find((p) => p.id === target.value) || null)
 const pityLeft  = computed(() => Math.max(0, HARD_PITY - pity.value))
 const pay1  = computed(() => resolvePullPayment(1, tickets.value))
 const pay10 = computed(() => resolvePullPayment(10, tickets.value))
@@ -213,7 +219,7 @@ async function pull(n) {
   if (pay === 'coin' && coins.value < amount) { toast(`เหรียญไม่พอ! ต้องการ ${amount.toLocaleString()}`, 'error'); return }
 
   const state = { pity: pity.value, target: target.value, guaranteed: guaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
-  const { results, nextState } = rollMany(rolls, state, PETS)
+  const { results, nextState } = rollMany(rolls, state, catalog.value)
   const { pets: newPets, summary } = mergeRolls(pets.value, results, PETS)
   const today = new Date().toISOString().slice(0, 10)
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)

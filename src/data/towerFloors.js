@@ -2,7 +2,7 @@
 //  หอคอย PvE 100 ชั้น — ทีมบอทรายชั้น (สูตร deterministic) + โบนัสรายได้
 //  3 องก์: 1–20 ต้น(สนุก) · 21–69 กลาง/ปลายไต่ · 70–100 ตัน(วัดการจัดทีม)
 // ════════════════════════════════════════════════════════════
-import { PETS } from './index.js'
+import { wave1Pets } from '../utils/petCatalog.js'
 import { BATTLE_SLOTS } from './residence.js'
 
 export const TOWER_MAX = 100
@@ -79,8 +79,11 @@ export function getFloorTeam(floor) {
   const team = []
   for (let i = 0; i < count; i++) {
     const element = elements[i]
-    const pool = PETS.filter(p => p.rarity === rarity && p.element === element)
-    const fallback = PETS.filter(p => p.element === element)
+    // 🔴 ล็อก wave 1 ถาวร ไม่ใช่ releasedPets() — ดัชนีสุ่มอ่านจากความยาวคลัง
+    //    คลังโตขึ้นเมื่อไร ทีมบอท "ทุกชั้น" สลับตัวทันที ชั้นที่ผู้เล่นเคยผ่านจะกลายเป็นอีกโจทย์
+    const catalog = wave1Pets()
+    const pool = catalog.filter(p => p.rarity === rarity && p.element === element)
+    const fallback = catalog.filter(p => p.element === element)
     const src = pool.length ? pool : fallback
     const def = src[Math.floor(rand() * src.length)]
     team.push({ id: def.id, rarity: def.rarity, element: def.element, grade })
