@@ -1,5 +1,9 @@
 # P3b — ฝั่งจอที่บอกความจริง Implementation Plan
 
+> ## ✅ ลงมือครบแล้ว 11 ก.ย. 2026 — branch `passive-v2-p3`
+> เทส **1,160 ผ่าน · 0 ตก** · build ผ่าน · ที่ต่างจากแผนบันทึกไว้ในกล่องสถานะของสเปก
+> (`docs/superpowers/specs/2026-09-10-passive-v2-p3-design.md` §1) · 🔜 รอเทสจอจริง
+
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:executing-plans · steps ใช้ checkbox
 
 **Goal:** ทำให้สิ่งที่ผู้เล่นเห็นตรงกับสิ่งที่เกิดขึ้นจริงในไฟต์ (ชั้นเชื้อ · เกราะ · ความแค้น) และบอกผู้เล่นว่าเพ็ทตัวไหนเปลี่ยนกลไก + มีของใหม่กำลังมา
