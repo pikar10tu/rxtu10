@@ -431,12 +431,40 @@ test('grit ได้โมเมนต์เต็มเหมือนการ
     'grit = การกันตายชั้นที่ 2-3 ของแมว · จังหวะเป็น-ตายต้องได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ ' +
     '(กฎที่เขียนไว้เองตรงเซ็ตนี้) — พี่ของมันคือ cheatDeath ซึ่งอยู่ในเซ็ตแล้ว')
 
-  const beats = buildBeats([
-    atk({ dmg: 100, targetHpAfter: 0, dead: false }),
-    pas({ uid: 'B0', effect: 'grit', name: 'เก้าชีวิต', icon: '🐱', hpPct: 1 }),
-    { t: 'end', winner: 'A' },
-  ], MH)
-  const g = beats.find(b => b.effect === 'grit')
-  assert.equal(g.kind, 'skillMoment', 'ต้องได้ skillMoment ไม่ใช่ skillQuiet 0ms')
-  assert.ok(beatDuration(g) > 0, 'ต้องกินเวลาจริง ไม่ใช่ผ่านไปเงียบๆ')
+  // 🔴 ต้องกิน log จากไฟต์จริง — grit ยิงจาก runOnDeath ซึ่งอยู่ "ก่อน" ใบ attack ของหมัดแม่เสมอ
+  //    log เขียนมือที่วางไว้หลังหมัดแม่คือรูปที่เอนจินไม่มีวันผลิต (บทเรียนที่ P2c-1 จ่ายค่าเรียนไปแล้ว)
+  const r = simulateBattle([{ id: 'cat', rarity: 'epic', element: 'fist', grade: 0 }],
+                           [{ id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 }], 1)
+  const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
+  const bs = buildBeats(r.log, mh)
+
+  const gs = bs.filter(b => b.effect === 'grit')
+  assert.equal(gs.length, 2, 'แมวต้องกิน grit 2 ครั้ง (ทนต่ออีก 2 หมัดหลัง cheatDeath)')
+  for (const g of gs) {
+    assert.equal(g.kind, 'skillMoment', 'ต้องได้ skillMoment ไม่ใช่ skillQuiet 0ms')
+    assert.ok(beatDuration(g) > 0, 'ต้องกินเวลาจริง ไม่ใช่ผ่านไปเงียบๆ')
+  }
+})
+
+// ── P2c-2 หนี้ §7.6 ข้อ 5: ไฟต์จบแล้วต้องไม่มีอะไรเล่นต่อ ───────────────────
+// 🔴 ต้องกิน log จากไฟต์จริง — รูปนี้เอนจินเป็นคนผลิต (runOnKill ยิงหลังหมัดที่ปิดไฟต์เสมอ
+//    เพราะการฆ่าที่ปิดไฟต์ไม่เคยเข้าลูป while) log เขียนมือพิสูจน์ไม่ได้ว่าเกิดจริง
+test('passive หลังบีตปิดเกมต้องเงียบ 0ms (หนี้ §7.6 ข้อ 5)', () => {
+  // 🦄 กีรินถือ killChain — น็อกตัวสุดท้ายแล้ว runOnKill ยังยิง event ตามหลังหมัดที่ปิดไฟต์
+  const r = simulateBattle([{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }],
+                           [{ id: 'mouse', rarity: 'common', element: 'fist', grade: 0 }], 1)
+  const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
+  const bs = buildBeats(r.log, mh)
+
+  const at = bs.findIndex(b => b.kind === 'finish')
+  assert.ok(at >= 0, 'ต้องมีบีตปิดเกม')
+
+  let checked = 0
+  for (let i = at + 1; i < bs.length; i++) {
+    if (bs[i].t !== 'passive') continue
+    checked++
+    assert.equal(beatDuration(bs[i]), 0,
+      `passive '${bs[i].effect}' เล่นต่อ ${beatDuration(bs[i])}ms หลังไฟต์จบแล้ว — ไฟต์จบแล้วไม่มีอะไรเล่นต่อ`)
+  }
+  assert.ok(checked > 0, 'ไม่เจอ passive หลังบีตปิดเกมเลย — เทสนี้ไม่ได้ทดสอบอะไร (เปลี่ยนเพ็ท/ซีด)')
 })
