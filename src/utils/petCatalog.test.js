@@ -37,3 +37,33 @@ test('ลำดับในคลังไม่สลับ — ผลสุ่
   const ids = releasedPets(null).map(p => p.id)
   assert.deepEqual(ids, PETS.filter(p => p.wave !== 2).map(p => p.id))
 })
+
+const WAVE2 = ['lion', 'virus', 'gorilla', 'boar', 'badger', 'bat']
+
+test('เพ็ทรุ่น 2 อยู่ในคลัง 33 ตัว แต่แจกไม่ได้จนกว่าอีเวนต์จะหมดเวลา', () => {
+  assert.equal(PETS.length, 33)
+  const live = new Set(releasedPets(null).map(p => p.id))
+  for (const id of WAVE2) {
+    assert.ok(PETS.some(p => p.id === id), `${id} ไม่อยู่ในคลัง`)
+    assert.equal(live.has(id), false, `${id} หลุดออกมาแจกได้`)
+  }
+  assert.equal(releasedPets(null).length, 27)
+})
+
+test('สัดส่วนชั้น/สายของคลังเต็มตรงสเปก (11/11/11 · 12 legend · 9 epic)', () => {
+  const by = (k, v) => PETS.filter(p => p[k] === v).length
+  assert.equal(by('element', 'fist'), 11)
+  assert.equal(by('element', 'scissors'), 11)
+  assert.equal(by('element', 'paper'), 11)
+  assert.equal(by('rarity', 'legendary'), 12)
+  assert.equal(by('rarity', 'epic'), 9)
+  assert.equal(by('rarity', 'rare'), 6)
+  assert.equal(by('rarity', 'common'), 6)
+})
+
+test('เพ็ทรุ่น 2 ห้ามมี atkStyle/projectile (ทุกตัวเป็น melee หมดแล้ว)', () => {
+  for (const p of PETS.filter(p => p.wave === 2)) {
+    assert.equal(p.atkStyle, undefined, `${p.id} มี atkStyle`)
+    assert.equal(p.projectile, undefined, `${p.id} มี projectile`)
+  }
+})

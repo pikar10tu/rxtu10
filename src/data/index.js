@@ -41,6 +41,9 @@ export const PETS = [
   { id:"whale",     emoji:"🐳", name:"คุณวาฬ",    rarity:"legendary", element:"paper",    flavor:"เจ้าสมุทรผู้ใจดี โอบอุ้มทั้งทีมไว้ในอ้อมอก", atkStyle:"ranged", projectile:"💧" },
   { id:"qilin",     emoji:"🐘", name:"บากุ",      rarity:"legendary", element:"paper",    flavor:"ปีศาจกินฝันร้าย รวมถึงฝันว่าสอบตก" },
   { id:"mammoth",   emoji:"🦣", name:"แมมมอธ",    rarity:"legendary", element:"paper",    flavor:"ยักษ์ขนยาวแห่งยุคน้ำแข็ง เกราะหนาปราการ" },
+  { id:"lion",      emoji:"🦁", name:"สิงโต",     rarity:"legendary", element:"fist",     wave:2, flavor:"เจ้าป่าตัวจริงคุมได้ทั้งสามสาย เหมือนคุมยาครบสามมื้อ" },
+  { id:"virus",     emoji:"👾", name:"ไวรัส",     rarity:"legendary", element:"scissors", wave:2, flavor:"ตัวจิ๋วที่เคยทำทั้งชั้นปีเลื่อนสอบมาแล้ว" },
+  { id:"gorilla",   emoji:"🦍", name:"กอริลลา",   rarity:"legendary", element:"paper",    wave:2, flavor:"ตีอกดังลั่นให้ทุกคนหันมา แล้วยืนรับแทนเพื่อนทั้งกลุ่ม" },
   // ── EPIC ──
   { id:"dragon",    emoji:"🐲", name:"มังกร",     rarity:"epic", element:"fist",     flavor:"พ่นไฟ purify impurity แต่เผา reactor ไปด้วย", atkStyle:"ranged", projectile:"🔥" },
   { id:"cerberus",  emoji:"🐕", name:"เซอร์เบอรัส", rarity:"epic", element:"fist",   flavor:"หมา 3 หัวเฝ้า drug interaction เห่าทุกครั้งที่เจอ grapefruit" },
@@ -48,6 +51,9 @@ export const PETS = [
   { id:"fairy",     emoji:"🧚", name:"ภูต",       rarity:"epic", element:"scissors", flavor:"ภูตน้อยเจ้าเวทมนตร์ โปรยละอองเสริมพลังทั้งทีม", atkStyle:"ranged", projectile:"✨" },
   { id:"panda",     emoji:"🐼", name:"แพนด้า",    rarity:"epic", element:"paper",    flavor:"ตาดำคล้ำเพราะอดนอนติว ไม่ใช่ลายประจำสายพันธุ์" },
   { id:"genie",     emoji:"🧞", name:"จินนี่",    rarity:"epic", element:"paper",    flavor:"จินนี่จากตะเกียง ขอพรได้ แต่ใช้ไปกับการบ้านหมดแล้ว", atkStyle:"ranged", projectile:"✨" },
+  { id:"boar",      emoji:"🐗", name:"หมูป่า",     rarity:"epic", element:"fist",     wave:2, flavor:"ยิ่งเจ็บยิ่งพุ่ง เหมือนคืนก่อนสอบที่ยิ่งดึกยิ่งอ่านเร็ว" },
+  { id:"badger",    emoji:"🦡", name:"แบดเจอร์",   rarity:"epic", element:"scissors", wave:2, flavor:"ตัวเล็กแต่ไม่เคยถอย ยิ่งเป้าตัวใหญ่ยิ่งชอบ" },
+  { id:"bat",       emoji:"🦇", name:"ค้างคาว",    rarity:"epic", element:"paper",    wave:2, flavor:"ห้อยหัวอ่านชีทตอนตีสาม แบ่งเลือด (และชีท) ให้เพื่อนทั้งทีม" },
   // ── RARE ──
   { id:"wolf",      emoji:"🐺", name:"หมาป่า",    rarity:"rare", element:"fist",     flavor:"หอนเรียกก๊วนมาติว สุดท้ายนั่งเล่นเกมกันหมด" },
   { id:"shark",     emoji:"🦈", name:"ฉลาม",      rarity:"rare", element:"fist",     flavor:"ว่ายไม่หยุดเหมือน deadline ที่ไม่เคยหยุดวิ่งเข้ามา" },
