@@ -1737,3 +1737,33 @@ test('เพ็ทสอง part นับเป็นจังหวะเด�
   }
   assert.ok(checked > 0, 'ไม่เจอเพ็ทสอง part ยิงติดกันในไฟต์นี้เลย — เทสไม่ได้ทดสอบอะไร (เปลี่ยนซีด)')
 })
+
+test('🦁 สิงโต: ครบ 3 สายได้บัฟทั้งทีม · ขาดสายเดียวไม่ได้อะไรเลย', () => {
+  const mk = () => [
+    u('lion',  { uid: 'A0', element: 'fist',     atk: 100, maxHp: 1000, hp: 1000 }),
+    u('fox',   { uid: 'A1', element: 'scissors', atk: 100, maxHp: 1000, hp: 1000 }),
+    u('panda', { uid: 'A2', element: 'paper',    atk: 100, maxHp: 1000, hp: 1000 }),
+  ]
+  const full = mk()
+  applyAuras(full, [])
+  assert.equal(Math.round(full[0].atk), 112)
+  assert.equal(Math.round(full[1].maxHp), 1120)
+  assert.equal(full[1].hp, full[1].maxHp)          // เลือดเต็มหลอดใหม่
+
+  const missing = [mk()[0], mk()[1], u('hedgehog', { uid: 'A2', element: 'fist', atk: 100, maxHp: 1000, hp: 1000 })]
+  applyAuras(missing, [])
+  assert.equal(missing[0].atk, 100)
+  assert.equal(missing[2].maxHp, 1000)
+})
+
+test('🦁 สิงโต: บัฟไม่หายเมื่อเพื่อนต่างสายตายกลางไฟต์ (aura คิดครั้งเดียวตอนเริ่ม)', () => {
+  const team = [
+    u('lion',  { uid: 'A0', element: 'fist',     atk: 100, maxHp: 1000, hp: 1000 }),
+    u('fox',   { uid: 'A1', element: 'scissors', atk: 100, maxHp: 1000, hp: 1000 }),
+    u('panda', { uid: 'A2', element: 'paper',    atk: 100, maxHp: 1000, hp: 1000 }),
+  ]
+  applyAuras(team, [])
+  const atkAfterAura = team[0].atk
+  team[2].hp = 0                                    // เพื่อนสายพิทักษ์ตาย
+  assert.equal(team[0].atk, atkAfterAura)           // ตั้งใจ — เหมือน aura ตัวอื่นทั้งหมด
+})

@@ -88,6 +88,13 @@ export const PET_PASSIVES = {
     desc: 'รับดาเมจแทนเพื่อนที่เลือดน้อยสุด {guard.pct}% · ฟื้นเลือดตัวเอง {regen.pct}% ทุกต้นรอบ',
     short: 'รับแทน {guard.pct}% · ฟื้นเอง {regen.pct}%/รอบ',
   },
+  lion: {
+    name: 'อาณัติเจ้าป่า', icon: '👑',
+    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 12, hpPct: 12 },
+              step: { pct: 3, hpPct: 3 } }],
+    desc: 'ทีมมีครบทั้ง 3 สาย → ทั้งทีมพลังโจมตี +{pct}% และเลือดสูงสุด +{hpPct}%',
+    short: 'ครบ 3 สาย → ทั้งทีมแรง +{pct}% เลือด +{hpPct}%',
+  },
   mammoth: {
     name: 'เกราะปฐพี', icon: '🪨',
     parts: [{ hook: 'onHit', effect: 'damageReduction', value: { pct: 20 }, step: { pct: 5 } }],
