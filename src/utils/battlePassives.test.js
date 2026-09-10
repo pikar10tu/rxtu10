@@ -1797,3 +1797,37 @@ test('👾 ไวรัส: ดาเมจเชื้อไม่ถูกห�
   assert.ok(res.dmg < 100, 'หมัดหลักต้องถูกลดตามปกติ')
   assert.equal(Math.round(res.pierce), 8)           // 1 ชั้น × 8% — ไม่โดนลด 90% ด้วย
 })
+
+test('🦍 กอริลลา: ท้าชนดึงเป้ามาที่ตัวเอง และมาก่อน targetLowest ของกริฟฟิน', () => {
+  const gori = u('gorilla', { uid: 'B0', side: 'B', hp: 900, maxHp: 1000 })
+  const weak = u('blank',   { uid: 'B1', side: 'B', hp: 10,  maxHp: 1000 })
+  assert.equal(tauntTargetOf([gori, weak])?.uid, 'B0')
+
+  const griffin = u('simurgh', { uid: 'A0' })
+  const res = runOnAttack(griffin, weak, [gori, weak], () => 0.5)
+  assert.equal((res.target || weak).uid, 'B0', 'ถูกท้าชนอยู่ ห้ามไปเล็งตัวเลือดน้อย')
+})
+
+test('🦍 กอริลลา: กอริลลาสองตัวในทีมเดียว ตัวช่องซ้ายสุดชนะเสมอ (replay ต้องตรง)', () => {
+  const g0 = u('gorilla', { uid: 'B0', side: 'B' })
+  const g1 = u('gorilla', { uid: 'B1', side: 'B' })
+  assert.equal(tauntTargetOf([g0, g1]).uid, 'B0')
+  assert.equal(tauntTargetOf([g1, g0]).uid, 'B1')   // ลำดับในทีมคือคำตอบ ไม่ใช่การสุ่ม
+})
+
+test('🦍 กอริลลา: หมัดที่ถูกดึงมาเจ็บน้อยลง · โดนตีแล้วสะสมพลังไม่มีเพดาน', () => {
+  const gori = u('gorilla', { uid: 'B0', side: 'B', atk: 100, hp: 1000, maxHp: 1000 })
+  const att  = u('blank',   { uid: 'A0', atk: 100 })
+
+  const forced = runOnHit(gori, 100, att, [gori], () => 0.99, true)
+  assert.equal(Math.round(forced.dmg), 75)          // ลด 25% เฉพาะหมัดที่ถูกบังคับ
+  assert.equal(psOf(gori).rage, 1)
+  assert.equal(Math.round(gori.atk), 103)           // +3% ต่อครั้งที่โดน
+
+  const free = runOnHit(gori, 100, att, [gori], () => 0.99, false)
+  assert.equal(Math.round(free.dmg), 100)           // ไม่ได้ถูกดึงมา = ไม่ลด
+  assert.equal(psOf(gori).rage, 2)
+
+  for (let i = 0; i < 20; i++) runOnHit(gori, 100, att, [gori], () => 0.99, false)
+  assert.equal(psOf(gori).rage, 22)                 // ไม่มีเพดาน (user ยืนยัน)
+})

@@ -104,6 +104,17 @@ export const PET_PASSIVES = {
     desc: 'ไวรัสตีใคร เป้านั้นติดเชื้อ 1 ชั้น (สูงสุด {max} ชั้น) · ทีมเราตีเป้าที่ติดเชื้อ เจ็บเพิ่มชั้นละ {pct}% ของพลังโจมตีไวรัส ทะลุทุกการป้องกัน',
     short: 'ติดเชื้อสูงสุด {max} ชั้น · ชั้นละ {pct}% ทะลุเกราะ',
   },
+  gorilla: {
+    name: 'ตีอกท้าชน', icon: '🦍',
+    // สอง part คนละ hook ⇒ ไม่ชนกันในลูปเดียว · `tag` เพราะทั้งคู่ใช้คีย์ชื่อ pct
+    // ⚠️ atkOnHit ไม่มีเพดานโดยตั้งใจ (user เคาะในสเปกแม่) — ป้ายฝั่งจอห้ามพยายามวาด "x/max"
+    parts: [
+      { hook: 'onRound', effect: 'taunt',    value: { pct: 25 }, step: { pct: 5 }, tag: 'taunt' },
+      { hook: 'onHit',   effect: 'atkOnHit', value: { pct: 3 },  step: { pct: 1 }, tag: 'rage' },
+    ],
+    desc: 'ต้นรอบท้าชนให้ศัตรูตีมาที่ตัวเอง · หมัดที่ถูกดึงมาเจ็บน้อยลง {taunt.pct}% · ทุกครั้งที่โดนตี พลังโจมตี +{rage.pct}% ไม่มีเพดาน',
+    short: 'ท้าชน ลดหมัดที่ดึงมา {taunt.pct}% · โดนตี +{rage.pct}%',
+  },
   mammoth: {
     name: 'เกราะปฐพี', icon: '🪨',
     parts: [{ hook: 'onHit', effect: 'damageReduction', value: { pct: 20 }, step: { pct: 5 } }],
