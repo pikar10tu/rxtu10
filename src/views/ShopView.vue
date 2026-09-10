@@ -27,41 +27,22 @@
         <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ catalog.length }} ชนิด
       </div>
 
-      <!-- banner -->
-      <div class="banner">
-        <div class="banner-top">
-          <div class="banner-title"><Emoji char="🎰" /> อัญเชิญสัตว์เลี้ยง</div>
-          <div class="banner-pity">การันตี legendary อีก {{ pityLeft }} ครั้ง</div>
-        </div>
-
-        <button class="target-row" @click="pickerOpen = true">
-          <template v-if="targetPet">
-            <span class="target-emoji"><Emoji :char="targetPet.emoji" /></span>
-            <span class="target-text">เป้าหมาย: <b>{{ targetPet.name }}</b></span>
-          </template>
-          <span v-else class="target-text">เลือกเป้าหมาย legendary (ยังไม่เลือก = ตัวที่ยังไม่มีก่อน)</span>
-          <span class="target-edit">เปลี่ยน</span>
-        </button>
-        <div v-if="guaranteed && targetPet" class="banner-guar"><Emoji char="✅" /> รอบหน้าได้ {{ targetPet.name }} แน่นอน</div>
-
-        <div class="banner-rates">
-          <span v-for="r in rateList" :key="r.key" :style="{ color: r.color }">{{ r.label }} {{ r.pct }}%</span>
-        </div>
-
-        <div v-if="tickets > 0" class="ticket-note"><Emoji char="🎟️" /> ตั๋วอัญเชิญ: {{ tickets }} ใบ (ใช้ตั๋วก่อนอัตโนมัติ)</div>
-        <div class="pull-row">
-          <button class="pull-btn" :class="{ ok: pay1.pay === 'ticket' || coins >= PULL_COST }" :disabled="buying" @click="pull(1)">
-            สุ่ม 1<br>
-            <small v-if="pay1.pay === 'ticket'">{{ pay1.amount }}<Emoji char="🎟️" /></small>
-            <small v-else>{{ PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
-          </button>
-          <button class="pull-btn" :class="{ ok: pay10.pay === 'ticket' || coins >= TEN_PULL_COST }" :disabled="buying" @click="pull(10)">
-            สุ่ม 10<br>
-            <small v-if="pay10.pay === 'ticket'">{{ pay10.amount }}<Emoji char="🎟️" /></small>
-            <small v-else>{{ TEN_PULL_COST.toLocaleString() }}<Emoji char="🪙" /></small>
-          </button>
-        </div>
-      </div>
+      <!-- ตู้อีเวนต์อยู่บน ตู้ปกติอยู่ล่าง (แบบเกมกาชาทั่วไป — user เคาะ 11 ก.ย.)
+           ตู้อีเวนต์โผล่/หายเองตามนาฬิกา ไม่ต้องรีโหลดหน้า -->
+      <GachaBanner
+        v-if="ev.active"
+        :title="ev.name" icon="✨" event :time-left="evLeft" :featured="featuredPets"
+        :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
+        :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
+        @pull="(n) => pull(n, true)"
+      />
+      <GachaBanner
+        title="อัญเชิญประจำ" icon="🎰"
+        :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
+        :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
+        show-target :target-pet="targetPet" :guaranteed="guaranteed"
+        @pull="(n) => pull(n)" @open-target="pickerOpen = true"
+      />
       <div class="shop-note">สุ่ม 10 ได้ 11 ตัว · ได้ตัวเดิมซ้ำ → +1 ตัวซ้ำ (ใช้วิวัฒน์หรือหลอม)</div>
       </template>
     </template>
@@ -136,7 +117,7 @@
 
 <script setup>
 import { useEscapeKey } from '../composables/useEscapeKey.js'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import LabTab from '../components/shop/LabTab.vue'
@@ -151,6 +132,8 @@ import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { prefersReducedMotion } from '../utils/motionPref.js'
 import { releasedPets } from '../utils/petCatalog.js'
+import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent.js'
+import GachaBanner from '../components/shop/GachaBanner.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
 
 const authStore = useAuthStore()
@@ -172,7 +155,16 @@ const guaranteed = computed(() => !!authStore.userData?.gachaGuaranteed)
 const { rawConfig } = useAppConfig()
 // คลังที่ "แจกได้" ตอนนี้ — เพ็ทที่ยังไม่เปิดตัวต้องไม่โผล่ในกาชา/เป้าการันตี/ตัวหาร
 // ⚠️ ที่อ่าน identity ของ id ที่สุ่มมาแล้ว (mergeRolls · ชื่อในข่าว) ยังใช้ PETS เต็ม — ไม่ใช่การเลือกว่าจะแจกอะไร
-const catalog = computed(() => releasedPets(rawConfig.value?.gachaEvent))
+const catalog = computed(() => releasedPets(rawConfig.value?.gachaEvent, nowTick.value))
+// นาฬิกาเดินจริงทุกวินาที — ตู้อีเวนต์ต้องโผล่/หายเองตอนหมดเวลาโดยไม่ต้องรีโหลด
+// และ `catalog` ต้องอ่านเวลาเดียวกัน ไม่งั้นตู้หายแล้วแต่เพ็ทใหม่ยังไม่ไหลเข้าคลังปกติจนกว่าจะรีเฟรช
+const nowTick = ref(Date.now())
+let clockTimer = null
+onMounted(() => { clockTimer = setInterval(() => { nowTick.value = Date.now() }, 1000) })
+onUnmounted(() => clearInterval(clockTimer))
+const ev = computed(() => eventState(rawConfig.value?.gachaEvent, nowTick.value))
+const evLeft = computed(() => timeLeftText(ev.value.msLeft))
+const featuredPets = computed(() => ev.value.featured.map(id => PETS.find(p => p.id === id)).filter(Boolean))
 const legendaries = computed(() => catalog.value.filter((p) => p.rarity === 'legendary'))
 const targetPet = computed(() => legendaries.value.find((p) => p.id === target.value) || null)
 const pityLeft  = computed(() => Math.max(0, HARD_PITY - pity.value))
@@ -213,20 +205,31 @@ function onRevealBackdrop() {
 
 const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, pct: GACHA_RATES[k], color: RARITY[k]?.color, label: RARITY[k]?.label }))
 
-async function pull(n) {
+async function pull(n, isEvent = false) {
   if (buying.value) return
+  // กันเคสกดปุ่มตู้อีเวนต์พอดีวินาทีที่มันหมดเวลา — ถือว่าปิดแล้ว ไม่หมุนให้
+  if (isEvent && !ev.value.active) { toast('ตู้พิเศษปิดแล้ว', 'error'); return }
   const { rolls, pay, amount } = resolvePullPayment(n, tickets.value)
   if (pay === 'coin' && coins.value < amount) { toast(`เหรียญไม่พอ! ต้องการ ${amount.toLocaleString()}`, 'error'); return }
 
-  const state = { pity: pity.value, target: target.value, guaranteed: guaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
-  const { results, nextState } = rollMany(rolls, state, catalog.value)
+  // 🔴 ตู้อีเวนต์ห้ามแตะการันตี 50/50 ของตู้ปกติ (ผู้เล่นสะสมไว้กับตู้ปกติ) ⇒ ส่งเป้า/ธงเป็นค่าว่างเข้าไป
+  //    แล้วตอนเขียนกลับก็เขียนแค่ pity · pity ยังแชร์กระเป๋าเดียวตามสเปก §6 ข้อ 5
+  const state = isEvent
+    ? { pity: pity.value, target: null, guaranteed: false, ownedLegendaryIds: ownedLegendaryIds() }
+    : { pity: pity.value, target: target.value, guaranteed: guaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
+  // ตู้อีเวนต์ = คลังเต็ม 33 ตัว · legendary ดันตัวเด่นที่ยังไม่มีก่อน
+  const rollCatalog = isEvent ? PETS : catalog.value
+  const opts = isEvent ? { legendaryIds: eventLegendaryIds(ev.value.featured, ownedLegendaryIds(), PETS) } : {}
+  const { results, nextState } = rollMany(rolls, state, rollCatalog, undefined, opts)
   const { pets: newPets, summary } = mergeRolls(pets.value, results, PETS)
   const today = new Date().toISOString().slice(0, 10)
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
 
   buying.value = true
   // NOTE: gachaTarget ไม่เขียนที่นี่ — เป็นของ chooseTarget() (กัน stale-target write)
-  const base = { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed }
+  const base = isEvent
+    ? { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity }
+    : { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed }
   const optimistic = {
     ...base,
     ...(pay === 'ticket'
@@ -271,23 +274,6 @@ async function chooseTarget(id) {
 .shop-maint-title { font-size: 1.2rem; font-weight: 800; color: var(--ink); }
 .shop-maint-msg { font-size: .82rem; color: rgba(0,0,0,.55); max-width: 280px; line-height: 1.6; }
 
-.banner { background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 14px; box-shadow: var(--pop); }
-.banner-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.banner-title { font-weight: 800; font-size: .95rem; }
-.banner-pity { font-size: .7rem; color: #b45309; font-weight: 700; }
-.target-row { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; border: 2px dashed var(--ink); border-radius: 11px; padding: 8px 10px; background: var(--primary-light); font-family: inherit; font-size: .72rem; cursor: pointer; text-align: left; }
-.target-emoji { font-size: 1.4rem; }
-.target-text { flex: 1; min-width: 0; }
-.target-edit { font-weight: 800; color: var(--primary); font-size: .7rem; }
-.banner-guar { margin-top: 6px; font-size: .7rem; font-weight: 700; color: #059669; }
-.banner-rates { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: .7rem; font-weight: 700; }
-.ticket-note { font-size: .7rem; font-weight: 800; color: #b45309; margin-bottom: 8px; }
-.pull-row { display: flex; gap: 8px; }
-.pull-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .85rem; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
-.pull-btn small { font-size: .7rem; font-weight: 700; }
-.pull-btn.ok { background: var(--primary); box-shadow: var(--pop); }
-.pull-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pull-btn:disabled { opacity: .6; }
 .ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain; }
 .picker { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 80vh; overflow-y: auto; }
 .picker-head { font-weight: 800; margin-bottom: 12px; text-align: center; }
