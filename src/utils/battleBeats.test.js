@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   buildBeats, scaleTiming, beatDuration, totalDuration, weightOf, timingOf,
   BEAT, KO_MULT, FINISH_MULT, SKILL_PAUSE, OPEN_GROUP_MS, SHAPE, FF_SCALE, WEIGHT_CFG, OPENING_EFFECTS,
+  CLUTCH_EFFECTS,
 } from './battleBeats.js'
 // battleBeats.js ไม่ import อะไรโดยตั้งใจ — เทสจึงเป็นที่เดียวที่เอาสองฝั่งมาชนกันได้
 import { PET_PASSIVES, partsOf, TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS } from '../data/petPassives.js'
@@ -422,4 +423,20 @@ test('OPENING_EFFECTS: hook setup ต้องอยู่ด้วย — เ�
   // hook `setup` ยังไม่มีทะเบียนรวมแบบ TEAM_AURA_EFFECTS (มี effect เดียวคือ stealStats) และยังไม่มีเพ็ทถือ
   // ⇒ เทสสองตัวข้างบนยังคลุมไม่ถึง · พอ P3 ให้ 🐭 ถือ stealStats จริง เทส "ทะเบียนเพ็ท" จะคลุมแทนเอง
   assert.ok(OPENING_EFFECTS.has('stealStats'))
+})
+
+// ── P2c-2 หนี้ §7.6 ข้อ 3: โมเมนต์ของ grit ──────────────────────────────
+test('grit ได้โมเมนต์เต็มเหมือนการกันตายใบอื่น (หนี้ §7.6 ข้อ 3)', () => {
+  assert.ok(CLUTCH_EFFECTS.has('grit'),
+    'grit = การกันตายชั้นที่ 2-3 ของแมว · จังหวะเป็น-ตายต้องได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ ' +
+    '(กฎที่เขียนไว้เองตรงเซ็ตนี้) — พี่ของมันคือ cheatDeath ซึ่งอยู่ในเซ็ตแล้ว')
+
+  const beats = buildBeats([
+    atk({ dmg: 100, targetHpAfter: 0, dead: false }),
+    pas({ uid: 'B0', effect: 'grit', name: 'เก้าชีวิต', icon: '🐱', hpPct: 1 }),
+    { t: 'end', winner: 'A' },
+  ], MH)
+  const g = beats.find(b => b.effect === 'grit')
+  assert.equal(g.kind, 'skillMoment', 'ต้องได้ skillMoment ไม่ใช่ skillQuiet 0ms')
+  assert.ok(beatDuration(g) > 0, 'ต้องกินเวลาจริง ไม่ใช่ผ่านไปเงียบๆ')
 })

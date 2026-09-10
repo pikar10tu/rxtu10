@@ -39,7 +39,10 @@ export const WEIGHT_CFG = { dmgFull: 0.30, dmgWeight: 0.70, crit: 0.18, super: 0
 export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMoment: 1, openGroup: 1 }
 
 /** จังหวะเป็น-ตาย — ได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ */
-export const CLUTCH_EFFECTS = new Set(['revive', 'cheatDeath', 'saveAlly'])
+// 'grit' = การกันตายชั้นที่ 2-3 ของแมว — runtime state ที่เกิดจากการกิน cheatDeath มาก่อน
+// (ไม่มีวันเป็น part.effect · ดู battlePassives.runOnDeath) อยู่ในเซ็ตนี้ด้วยเหตุผลเดียวกับ cheatDeath
+// เป๊ะ: จังหวะเป็น-ตายได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ — เดิมได้ skillQuiet 0ms ซึ่งขัดกับกฎบรรทัดนี้เอง
+export const CLUTCH_EFFECTS = new Set(['revive', 'cheatDeath', 'saveAlly', 'grit'])
 
 /** effect ของ hook ที่ทำงาน "ก่อนไฟต์เริ่ม" (`setup` + `aura`) — ใช้ตัดกลุ่มยกแรก (ดู openCutOf)
  *  🔴 เพิ่ม effect ใหม่บน hook `aura`/`setup` เมื่อไหร่ ต้องมาเติมที่นี่ด้วยเสมอ — ไฟล์นี้ไม่ import อะไร
