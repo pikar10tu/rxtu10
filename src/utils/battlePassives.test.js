@@ -1803,9 +1803,20 @@ test('🦍 กอริลลา: ท้าชนดึงเป้ามาท�
   const weak = u('blank',   { uid: 'B1', side: 'B', hp: 10,  maxHp: 1000 })
   assert.equal(tauntTargetOf([gori, weak])?.uid, 'B0')
 
+  // ลำดับ taunt > targetLowest: กริฟฟินต้อง "ไม่เปลี่ยนเป้า" เมื่อมีตัวท้าชนอยู่
+  // (เอนจินเลือกเป้าด้วย tauntTargetOf ก่อนเรียก runOnAttack — ถ้ากริฟฟินยัง override
+  //  มันจะลากเป้ากลับไปที่ตัวเลือดน้อย แล้วกฎลำดับในสเปกจะไม่มีผลจริง)
+  // ลำดับ taunt > targetLowest: เอนจินเลือกเป้าด้วย tauntTargetOf ก่อนเรียก runOnAttack
+  // กริฟฟินต้อง "ไม่ลากเป้ากลับ" ไปที่ตัวเลือดน้อย ไม่งั้นกฎลำดับในสเปกจะไม่มีผลจริง
   const griffin = u('simurgh', { uid: 'A0' })
-  const res = runOnAttack(griffin, weak, [gori, weak], () => 0.5)
-  assert.equal((res.target || weak).uid, 'B0', 'ถูกท้าชนอยู่ ห้ามไปเล็งตัวเลือดน้อย')
+  const taunted = runOnAttack(griffin, gori, [gori, weak], () => 0.5)
+  assert.equal(taunted.target.uid, 'B0', 'ถูกท้าชนอยู่ ห้ามลากไปเล็งตัวเลือดน้อย')
+  assert.equal(taunted.events.length, 0, 'ห้ามมี event เล็งเป้าตอนถูกท้าชน')
+
+  // ไม่มีตัวท้าชนแล้ว กริฟฟินถึงจะลากไปที่ตัวเลือดน้อยตามปกติ
+  const plump = u('blank', { uid: 'B2', side: 'B', hp: 900, maxHp: 1000 })
+  const freeAim = runOnAttack(griffin, plump, [plump, weak], () => 0.5)
+  assert.equal(freeAim.target.uid, 'B1')
 })
 
 test('🦍 กอริลลา: กอริลลาสองตัวในทีมเดียว ตัวช่องซ้ายสุดชนะเสมอ (replay ต้องตรง)', () => {
