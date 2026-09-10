@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAchievementBalloon } from './useAchievementBalloon.js'
 import { MILESTONES, getAchievement } from '../data/achievements.js'
-import { releasedPets } from '../utils/petCatalog.js'
+import { obtainablePets } from '../utils/petCatalog.js'
 import { useAppConfig } from './useAppConfig.js'
 import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
 import {
@@ -17,10 +17,10 @@ let announceOn = false         // backfill รอบแรกเงียบ →
 let _started = false
 
 // allSpecies = จำนวนที่ "หมุนได้จริง" ไม่ใช่ทั้งคลัง — ไม่งั้นเควสเก็บครบทำไม่ได้ทั้งชั้นปีตอนมีเพ็ทที่ยังไม่เปิด
-// ⚠️ ต้องส่งคอนฟิกเข้าไปด้วย ไม่งั้นหลังอีเวนต์จบ (เพ็ทใหม่ไหลเข้าตู้ปกติแล้ว) ตัวหารจะค้างที่ 27
-//    แล้วเควส "เก็บครบทุกชนิด" จะติ๊กผ่านตั้งแต่ยังไม่ครบจริง
+// ⚠️ ต้องเป็น obtainablePets (ของที่หาได้จริงตอนนี้ รวมตู้อีเวนต์) ไม่ใช่คลังของตู้ปกติ
+//    ไม่งั้นพอเปิดอีเวนต์ ตัวหารค้างที่ 27 แล้วเควส "เก็บครบทุกชนิด" ติ๊กผ่านตั้งแต่ยังไม่ครบจริง
 const ctx = () => ({
-  allSpecies: releasedPets(useAppConfig().rawConfig.value?.gachaEvent).length,
+  allSpecies: obtainablePets(useAppConfig().rawConfig.value?.gachaEvent).length,
   maxResidence: MAX_RESIDENCE_LEVEL,
 })
 

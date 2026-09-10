@@ -57,23 +57,16 @@
         </button>
       </div>
 
-      <!-- เพ็ทที่ยังแจกไม่ได้ — โชว์เงาดำเพื่อให้รู้ว่ามีของใหม่มา แต่อ่านพาสสีฟได้ (ไม่งั้นไม่สร้างความอยาก)
-           กดไม่ได้โดยตั้งใจ: การ์ดที่กดแล้วเงียบทำให้คนคิดว่าแอปค้าง -->
-      <template v-if="upcoming.length">
+      <!-- เพ็ทที่ยังไม่ปลดล็อก — เงาดำ ชื่อเป็น ????? (user เคาะ 11 ก.ย.)
+           รวมทุกตัวที่ยังหาได้ ไม่ใช่แค่ตัวใหม่ · กดไม่ได้โดยตั้งใจ (การ์ดที่กดแล้วเงียบทำให้คนคิดว่าแอปค้าง) -->
+      <template v-if="locked.length">
         <div class="pt-soon-head">
-          <b>กำลังจะมา</b><small>ยังหมุนไม่ได้ตอนนี้</small>
+          <b>ยังไม่ปลดล็อก</b><small>{{ locked.length }} ชนิด</small>
         </div>
         <div class="pt-grid">
-          <div v-for="p in upcoming" :key="p.id" class="pt-cell soon">
-            <span class="pt-cell-el"><Emoji :char="ELEMENTS[p.element]?.emoji || '✊'" /></span>
+          <div v-for="p in locked" :key="p.id" class="pt-cell soon">
             <span class="pt-cell-emoji shade"><Emoji :char="p.emoji" /></span>
-            <span class="pt-cell-name">{{ passiveOf(p.id)?.name || '???' }}</span>
-            <span class="pt-cell-soon">เร็วๆ นี้</span>
-          </div>
-        </div>
-        <div class="pt-soon-list">
-          <div v-for="p in upcoming" :key="p.id" class="pt-soon-row">
-            <b>{{ passiveOf(p.id)?.name }}</b><span>{{ effectText(passiveOf(p.id)) }}</span>
+            <span class="pt-cell-name">?????</span>
           </div>
         </div>
       </template>
@@ -91,24 +84,25 @@ import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, PETS, ELEMENTS, GRADE_LABELS } from '../data/index.js'
-import { PET_PASSIVES, PASSIVE_V2_CHANGED, effectText } from '../data/petPassives.js'
+import { PET_PASSIVES, PASSIVE_V2_CHANGED } from '../data/petPassives.js'
 import { petDailyCoins } from '../utils/petUtils.js'
 import { clampGrade } from '../data/petPower.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
-import { releasedPets } from '../utils/petCatalog.js'
+import { obtainablePets } from '../utils/petCatalog.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 
 const authStore = useAuthStore()
 const { rawConfig } = useAppConfig()
 // ตัวหารคือ "จำนวนที่หมุนได้จริง" ไม่ใช่ทั้งคลัง — defOf ยังอ่าน PETS เต็มเพราะต้องหาเพ็ทที่ถืออยู่ให้เจอเสมอ
-const catalog = computed(() => releasedPets(rawConfig.value?.gachaEvent))
-// เพ็ทที่ยังแจกไม่ได้ = อยู่ในคลังเต็มแต่ไม่อยู่ในคลังที่แจกได้ (ด่านเดียวคือ utils/petCatalog.js)
-const upcoming = computed(() => {
-  const live = new Set(catalog.value.map(p => p.id))
-  return PETS.filter(p => !live.has(p.id))
+// ตัวหาร "x/y ชนิด" ต้องเป็น "หาได้จริงตอนนี้" ไม่ใช่ "ตู้ปกติมีอะไร" — เปิดอีเวนต์แล้วหาได้ 33
+const catalog = computed(() => obtainablePets(rawConfig.value?.gachaEvent))
+// ยังไม่ปลดล็อก = ของที่ยังหาได้ แต่ยังไม่มีในกรง
+const locked = computed(() => {
+  const own = new Set(pets.value.map(p => p.id))
+  return catalog.value.filter(p => !own.has(p.id))
 })
 const passiveOf = (id) => PET_PASSIVES[id] || null
 
@@ -197,11 +191,5 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-soon-head small { color: rgba(0,0,0,.45); font-size: .75rem; }
 .pt-cell.soon { background: #f1f5f9; border-color: rgba(0,0,0,.15); box-shadow: none; cursor: default; }
 .pt-cell-emoji.shade { filter: brightness(0); opacity: .38; }
-.pt-cell-soon { position: absolute; top: -5px; right: -5px; background: #64748b; color: #fff;
-  font-size: .62rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; }
-.pt-soon-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-.pt-soon-row { display: flex; gap: 6px; font-size: .75rem; line-height: 1.35; }
-.pt-soon-row b { color: rgba(0,0,0,.75); white-space: nowrap; }
-.pt-soon-row span { color: rgba(0,0,0,.5); }
 .pt-cell-team { position: absolute; top: -5px; right: -5px; background: var(--primary); color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; }
 </style>

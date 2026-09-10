@@ -26,3 +26,19 @@ export function releasedPets(gachaEvent = null, now = Date.now()) {
   if (ends !== null && now > ends) return PETS.slice()
   return wave1Pets()
 }
+
+/** เพ็ทที่ "ผู้เล่นหาได้จริงตอนนี้" — รวมของที่อยู่ในตู้อีเวนต์ด้วย
+ *  🔑 ต่างจาก releasedPets() ตรงที่อันนั้นตอบว่า "ตู้ปกติมีอะไร" ส่วนอันนี้ตอบว่า "ยังเก็บอะไรได้อีก"
+ *     ⇒ ใช้กับตัวหาร "x/y ชนิด" · รายการที่ยังไม่ปลดล็อก · และเควสเก็บครบ
+ *     ถ้าใช้ releasedPets() กับสามที่นั้น พอเปิดอีเวนต์ตัวหารจะค้างที่ 27 ทั้งที่หมุนได้ 33
+ *     แล้วเควส "เก็บครบทุกชนิด" จะติ๊กผ่านตั้งแต่ยังไม่ครบจริง
+ */
+export function obtainablePets(gachaEvent = null, now = Date.now()) {
+  return eventOpen(gachaEvent, now) ? PETS.slice() : releasedPets(gachaEvent, now)
+}
+
+/** ตู้อีเวนต์ยังเปิดอยู่ไหม — ตรรกะเดียวกับ gachaEvent.eventState() แต่เก็บไว้ที่นี่เพื่อไม่ให้สองไฟล์อ้างวนกัน */
+function eventOpen(gachaEvent, now) {
+  const ends = endsAtMs(gachaEvent)
+  return ends !== null && now <= ends
+}

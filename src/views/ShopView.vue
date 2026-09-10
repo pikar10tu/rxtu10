@@ -24,7 +24,7 @@
       <LabTab v-if="tab === 'lab'" />
       <template v-else>
       <div class="shop-storage">
-        <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ catalog.length }} ชนิด
+        <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ ownable.length }} ชนิด
       </div>
 
       <!-- ตู้อีเวนต์อยู่บน ตู้ปกติอยู่ล่าง (แบบเกมกาชาทั่วไป — user เคาะ 11 ก.ย.)
@@ -133,7 +133,7 @@ import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TE
 import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { prefersReducedMotion } from '../utils/motionPref.js'
-import { releasedPets } from '../utils/petCatalog.js'
+import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
 import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent.js'
 import GachaBanner from '../components/shop/GachaBanner.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
@@ -157,7 +157,10 @@ const guaranteed = computed(() => !!authStore.userData?.gachaGuaranteed)
 const { rawConfig } = useAppConfig()
 // คลังที่ "แจกได้" ตอนนี้ — เพ็ทที่ยังไม่เปิดตัวต้องไม่โผล่ในกาชา/เป้าการันตี/ตัวหาร
 // ⚠️ ที่อ่าน identity ของ id ที่สุ่มมาแล้ว (mergeRolls · ชื่อในข่าว) ยังใช้ PETS เต็ม — ไม่ใช่การเลือกว่าจะแจกอะไร
+// คลังของ "ตู้ปกติ" (ใช้ตอนสุ่มจากแบนเนอร์ล่าง)
 const catalog = computed(() => releasedPets(rawConfig.value?.gachaEvent, nowTick.value))
+// ตัวหาร "x/y ชนิด" = ของที่หาได้จริงตอนนี้ (รวมตู้อีเวนต์) ไม่ใช่คลังของตู้ปกติ
+const ownable = computed(() => obtainablePets(rawConfig.value?.gachaEvent, nowTick.value))
 // นาฬิกาเดินจริงทุกวินาที — ตู้อีเวนต์ต้องโผล่/หายเองตอนหมดเวลาโดยไม่ต้องรีโหลด
 // และ `catalog` ต้องอ่านเวลาเดียวกัน ไม่งั้นตู้หายแล้วแต่เพ็ทใหม่ยังไม่ไหลเข้าคลังปกติจนกว่าจะรีเฟรช
 const nowTick = ref(Date.now())

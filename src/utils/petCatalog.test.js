@@ -1,7 +1,7 @@
 // เทสด่านคลังเพ็ท — pure · รัน: node --test src/utils/petCatalog.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { wave1Pets, releasedPets } from './petCatalog.js'
+import { wave1Pets, releasedPets, obtainablePets } from './petCatalog.js'
 import { PETS } from '../data/index.js'
 
 test('ไม่มีอีเวนต์ = แจกได้แค่ wave 1 (ดีฟอลต์ปลอดภัย)', () => {
@@ -66,4 +66,15 @@ test('เพ็ทรุ่น 2 ห้ามมี atkStyle/projectile (ทุ�
     assert.equal(p.atkStyle, undefined, `${p.id} มี atkStyle`)
     assert.equal(p.projectile, undefined, `${p.id} มี projectile`)
   }
+})
+
+test('obtainablePets: ระหว่างอีเวนต์เปิด = หาได้ครบ 33 (ตู้พิเศษแจกเพ็ทรุ่น 2 อยู่)', () => {
+  const ev = { endsAt: 2000 }
+  assert.equal(obtainablePets(ev, 1000).length, 33)
+  assert.equal(releasedPets(ev, 1000).length, 27, 'ตู้ปกติยังเป็น 27 ตามเดิม')
+})
+
+test('obtainablePets: ไม่มีอีเวนต์ = เท่ากับคลังปกติ · หมดเวลาแล้ว = 33 เหมือนกัน', () => {
+  assert.equal(obtainablePets(null, 1000).length, 27)
+  assert.equal(obtainablePets({ endsAt: 1000 }, 5000).length, 33)
 })
