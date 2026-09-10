@@ -189,3 +189,19 @@ test('liveBuffs: ไม่ส่ง uid ก็ต้องไม่พัง (�
   const src = buffSources([{ id: 'virus', element: 'scissors' }], [{ id: 'cat', element: 'scissors' }])
   assert.ok(Array.isArray(liveBuffs(src.A0, [], -1)))
 })
+
+test('คู่หู 🐳🦭: ชื่อสกิลบนจอของทั้งสองใบเปลี่ยนเป็นชื่อร่วม "รางวัลคนเก่ง"', () => {
+  const both = buffSources([p('whale'), p('seal')], [p('mouse')])
+  assert.equal(find(both.A0, 'teamHp').skillName, 'รางวัลคนเก่ง', 'วาฬ (teamHp)')
+  assert.equal(find(both.A0, 'teamAtk').skillName, 'รางวัลคนเก่ง', 'แมวน้ำ (teamAtk)')
+  // ขาดคู่ = ชื่อจริงเหมือนเดิม
+  const solo = buffSources([p('seal'), p('turtle')], [p('mouse')])
+  assert.equal(find(solo.A0, 'teamAtk').skillName, 'ยอดนักซัพพอร์ต')
+})
+
+test('คู่หูอยู่ฝั่งศัตรู: ชื่อร่วมต้องอ่านจากทีมของเจ้าของสกิล ไม่ใช่ทีมที่ป้ายไปโผล่', () => {
+  // 🦉 ให้ดีบัฟข้ามฝั่ง — เอามาคู่กับ 🦭+🐳 ฝั่งศัตรูเพื่อยืนยันว่าเส้นทาง foe.theirs ส่ง teamIds ถูกฝั่ง
+  const s = buffSources([p('turtle')], [p('owl'), p('seal'), p('whale')])
+  assert.equal(find(s.A0, 'enemyVuln').skillName, PET_PASSIVES.owl.name, 'นกฮูกไม่ได้อยู่ในคู่ ชื่อต้องไม่เปลี่ยน')
+  assert.equal(find(s.B1, 'teamAtk').skillName, 'รางวัลคนเก่ง')
+})

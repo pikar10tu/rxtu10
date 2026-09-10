@@ -12,7 +12,7 @@ import { getPetDef } from '../data/index.js'
 import {
   STATUS_ICON, STATUS_TEXT, PET_PASSIVES, effectText, BADGE_PRIORITY,
   TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS, SELF_STATUS_EFFECTS,
-  partsOf, partsAt, partWithEffect,
+  partsOf, partsAt, partWithEffect, passiveTitle,
 } from '../data/petPassives.js'
 
 const passiveOf = (pet) => PET_PASSIVES[pet?.id] || null
@@ -21,8 +21,15 @@ const defOf = (pet) => getPetDef(pet?.id) || { name: '?', emoji: '❓' }
 /** effect ที่ "ใช้แล้วหมด" — เห็น event ของมันใน beat ที่ผ่านมา = หมดฤทธิ์ */
 const ONE_SHOT = new Set(['revive', 'cheatDeath', 'saveAlly'])
 
-/** เพดานสแต็กของสกิลนั้น — อ่านจากทะเบียน ไม่ใช่เลขพิมพ์มือ */
+/** เพดานสแต็กของสกิลนั้น — อ่านจากทะเบียน ไม่ใช่เลขพิมพ์มือ
+ *  🔑 หาจาก `petId` ก่อนเสมอ · ชื่อเป็นทางสำรอง เพราะ `skillName` เป็น "ชื่อบนจอ" ซึ่งเปลี่ยนได้
+ *     (คู่หู 🦭🐳 ใช้ชื่อร่วม 'รางวัลคนเก่ง') ⇒ ค้นด้วยชื่ออย่างเดียวจะพลาดเงียบๆ คืน 0 = "ไม่มีเพดาน" */
 function maxStacksOf(b) {
+  const own = PET_PASSIVES[b.petId]
+  if (own) {
+    const part = partWithEffect(own, b.effect)
+    if (part) return part.value?.max ?? 0
+  }
   for (const p of Object.values(PET_PASSIVES)) {
     if (p.name !== b.skillName) continue
     const part = partWithEffect(p, b.effect)
@@ -35,13 +42,15 @@ function makeBuff(effect, owner, ownerUid, opts) {
   const p = opts.passive
   const def = defOf(owner)
   return {
+    petId: owner?.id || '',
     // key ต้องพ่วง ownerUid — เพ็ทสองตัวในทีมเดียวให้ effect เดียวกันได้ (🦊 กับ 🐭 หลบเหมือนกัน)
     key: `${effect}:${ownerUid}`,
     effect,
     icon: STATUS_ICON[effect] || '',
     // foeSide = ป้ายอยู่บน "ตัวที่โดน" ⇒ ต้องใช้ข้อความมุมผู้รับ ไม่ใช่มุมเจ้าของสกิล
     label: opts.label ?? effectText(p, owner?.passiveLv, { onTarget: !!opts.foeSide, effect }),
-    skillName: opts.skillName ?? p?.name ?? '',
+    // ชื่อ "บนจอ" — คู่หูที่อยู่ทีมเดียวกันใช้ชื่อร่วม (ดู DUO_TITLES) · opts.teamIds = ทีมของ **เจ้าของสกิล**
+    skillName: opts.skillName ?? passiveTitle(p, owner?.id, opts.teamIds),
     skillIcon: opts.skillIcon ?? p?.icon ?? '',
     ownerUid,
     ownerName: def.name,
@@ -79,7 +88,7 @@ function aurasOf(team, side) {
       }
     }
   })
-  return { mine, theirs, duo }
+  return { mine, theirs, duo, ids }
 }
 
 /**
@@ -99,7 +108,7 @@ export function buffSources(playerTeam, botTeam) {
       const self = passiveOf(pet)
       for (const part of partsOf(self)) {
         if (!SELF_STATUS_EFFECTS.has(part.effect)) continue
-        const b = makeBuff(part.effect, pet, uid, { passive: self })
+        const b = makeBuff(part.effect, pet, uid, { passive: self, teamIds: own.ids })
         b.self = true
         list.push(b)
       }
@@ -107,6 +116,7 @@ export function buffSources(playerTeam, botTeam) {
       for (const a of [...own.mine, ...own.duo]) {
         const b = makeBuff(a.effect, a.owner, a.uid, {
           passive: a.passive,
+          teamIds: own.ids,
           // duoRegen ไม่ใช่ผลหลักของ passive นั้น (ผลหลักคือ teamAtk) จึงใช้คำกลางแทน effectText
           label: a.effect === 'duoRegen' ? STATUS_TEXT.duoRegen : undefined,
         })
@@ -115,8 +125,9 @@ export function buffSources(playerTeam, botTeam) {
       }
       // 3) ดีบัฟที่ศัตรูแผ่ใส่ — ป้ายไปอยู่ที่ "ปลายทางของผล" ไม่ใช่ที่เจ้าของสกิล
       //    (🦉 อยู่ทีมศัตรู แต่ 🎯 โผล่บนทีมเรา)
+      //    🔑 ชื่อร่วมของคู่หูต้องอ่านจากทีมของ "เจ้าของสกิล" (foe.ids) ไม่ใช่ทีมที่ป้ายไปโผล่
       for (const a of foe.theirs) {
-        list.push(makeBuff(a.effect, a.owner, a.uid, { passive: a.passive, buff: false, foeSide: true }))
+        list.push(makeBuff(a.effect, a.owner, a.uid, { passive: a.passive, teamIds: foe.ids, buff: false, foeSide: true }))
       }
       out[uid] = list
     })

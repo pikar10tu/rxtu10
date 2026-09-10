@@ -156,7 +156,7 @@
         <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ GRADE_LABELS[Math.min(5, Math.max(0, insp.grade || 0))] }}</b></div>
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
         <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
-        <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b>{{ insp.passive ? insp.passive.name : 'ตัวนี้ยังไม่มี' }}</b></div>
+        <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b>{{ insp.passive ? insp.passName : 'ตัวนี้ยังไม่มี' }}</b></div>
         <!-- เดิมโชว์แค่ชื่อ เปิดมาก็ยังไม่รู้อยู่ดีว่าสกิลทำอะไร — passiveText() เติมเลขจริงของขั้นให้แล้ว -->
         <div v-if="insp.passive" class="br-card-passdesc">{{ passiveText(insp.passive) }}</div>
 
@@ -194,7 +194,7 @@ import Emoji from '../shared/Emoji.vue'
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, sparkOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
-import { passiveText, STATUS_MAX } from '../../data/petPassives.js'
+import { passiveText, passiveTitle, STATUS_MAX } from '../../data/petPassives.js'
 import { buffSources, liveBuffs, badgesOf } from '../../utils/battleBuffs.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
@@ -485,10 +485,23 @@ const handlers = {
   passive(e) { return applyPassive(e) },
 }
 
-/** คำอธิบายสกิลของ event นี้ · ป้าย duo (รางวัลคนเก่ง) ไม่ใช่สกิลประจำตัวใคร → คืนค่าว่าง โชว์แค่ชื่อ */
+/** คำอธิบายสกิลของ event นี้ · ป้าย duo (รางวัลคนเก่ง) ไม่ใช่สกิลประจำตัวใคร → คืนค่าว่าง โชว์แค่ชื่อ
+ *  🔑 เทียบกับ `e.name` ซึ่งเป็น "ชื่อจริง" ที่ log แบกมา ไม่ใช่ชื่อบนจอ (skillTitle) — ชื่อร่วมของคู่หู
+ *     เป็นของฝั่งจอล้วน ถ้าเอามาเทียบตรงนี้ คำอธิบายของ 🦭 กับ 🐳 จะหายทันทีที่จับคู่ */
 function passiveDescOf(e) {
   const p = passiveOf(defForUid(e.uid))
   return p && p.name === e.name ? passiveText(p) : ''
+}
+
+// ── ชื่อสกิลบนจอ (ชื่อร่วมของคู่หู) ──────────────────────────
+// ทีมของแต่ละฝั่งคงที่ทั้งไฟต์ ⇒ คำนวณครั้งเดียวพอ · ตายแล้วยังนับ (ชื่อไม่ควรเปลี่ยนกลางไฟต์)
+const teamIds = computed(() => ({
+  A: new Set((props.data?.playerTeam || []).filter(Boolean).map(p => p.id)),
+  B: new Set((props.data?.botTeam || []).filter(Boolean).map(p => p.id)),
+}))
+/** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
+function skillTitle(e) {
+  return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
 }
 
 // ── ประกาศสกิล: "หยุดที่เหตุ ปล่อยผลไหลตาม" (จังหวะที่ user ออกแบบเอง 28 ส.ค.) ──
@@ -550,7 +563,7 @@ const openEvents = []             // event ยกแรกที่รอลง�
 const CHIP_OUT_MS = 300
 
 function showChip(uid, e) {
-  chipOn.value = { ...chipOn.value, [uid]: { name: e.name || 'ทักษะเฉพาะ', icon: e.icon || '✨', out: false } }
+  chipOn.value = { ...chipOn.value, [uid]: { name: skillTitle(e), icon: e.icon || '✨', out: false } }
 }
 function hideChip(uid) {
   const cur = chipOn.value[uid]; if (!cur) return
@@ -579,7 +592,7 @@ async function spotlightPassive(e, t, g) {
     '--spot-in': `${Math.round(t.windup * 0.57)}ms`,
     '--spot-out': `${Math.round(t.tail) || 1}ms`,
   }
-  spot.value = { icon: e.icon || '✨', name: e.name || 'ทักษะเฉพาะ', desc: passiveDescOf(e) }
+  spot.value = { icon: e.icon || '✨', name: skillTitle(e), desc: passiveDescOf(e) }
   spotOut.value = false
   highlight(e.uid, 'spotlit')
   await wait(t.windup + t.motion); if (g !== gen) return clearSpot(e.uid)
@@ -696,10 +709,23 @@ function applyImpact(beat, g, t) {
       break
   }
 
+  // ── ดาเมจเชื้อ 🦠 แยกเลขออกจากหมัดหลัก (user สั่ง 11 ก.ย. "ให้เห็นว่าสกิลมันแสดงผลแน่") ──
+  // เลือดที่หายจริงของหมัดนี้ = หมัดหลัก + เชื้อทุกชั้นรวมกัน (เอนจินหัก pierce ต่อจาก dmg ในหมัดเดียว)
+  // ⇒ เลขหลักต้อง **หัก** ส่วนของเชื้อออก ไม่งั้นผลรวมบนจอมากกว่าที่หลอดเลือดหายจริง ยิ่งชั้นเยอะยิ่งเพี้ยน
+  const infHits = Array.isArray(beat.pierceHits) ? beat.pierceHits : []
+  const infSum = infHits.reduce((s, n) => s + n, 0)
+  const mainDmg = Math.max(0, (beat.dmg || 0) - infSum)
+
   // ใบการตายเงียบ (หนาม/guardian/aoeOpener — ดู battleEngine.resolveSilentDeath) ไม่มีดาเมจของตัวเอง
   // โดยตั้งใจ (dmg: 0 คือค่าคงที่ที่หน้าสรุปพึ่งอยู่) ⇒ เด้ง "-0" ลอยบนจอจะเป็นขยะล้วน
   // ประกายน็อก + หลอดเลือดลง 0 + การ์ดจางเทา ยังทำงานครบตามปกติจาก beat.kill/targetHpAfter
-  if (!beat.silent) fx?.pop(beat.target, { dmg: beat.dmg, crit: beat.crit, eff: beat.eff, weight: w })
+  // เหตุผลเดียวกันกับหมัดที่ถูกหลบจนเหลือแต่เชื้อ (dodge ไม่กันเชื้อ) — เลขหลักเป็น 0 ก็ไม่ต้องเด้ง
+  if (!beat.silent && (mainDmg > 0 || !infSum)) fx?.pop(beat.target, { dmg: mainDmg, crit: beat.crit, eff: beat.eff, weight: w })
+  // เด้งไล่ทีละชั้น 90ms ให้ตาอ่านได้ว่า "3 ชั้น = 3 ก้อน" — later() ผูก pendingTimers จึงถูกล้างตอน reset เสมอ
+  // (เช็ค gen ซ้ำอีกชั้นกันไฟต์ใหม่ที่เริ่มก่อน timer ครบ)
+  infHits.forEach((n, k) => {
+    if (n > 0) later(() => { if (g === gen) fx?.pop(beat.target, { dmg: n, infect: true, weight: 0.12 }) }, 90 * (k + 1))
+  })
   if (beat.eff === 'super' || beat.eff === 'weak') fx?.callout(beat.target, beat.eff)
   if (beat.kill) fx?.dangerRing(beat.target, false)
   else {
@@ -852,6 +878,8 @@ const insp = computed(() => {
   return {
     def, grade: p.grade || 0, atk: Math.round(c.atk), hpMax: Math.round(c.maxHp),
     hpNow: Math.round(c.maxHp * (hp.value[uid] ?? 100) / 100), passive: passiveOf(def),
+    // ชื่อบนจอ — คู่หูที่อยู่ทีมเดียวกันใช้ชื่อร่วม (🦭+🐳 = "รางวัลคนเก่ง") · คำอธิบายยังเป็นของสกิลตัวเอง
+    passName: passiveTitle(passiveOf(def), p.id, teamIds.value[uid[0]] || null),
     elEmoji: ELEMENTS[def.element]?.emoji || '✊', elName: EL_NAME[def.element] || def.element,
   }
 })
@@ -1200,6 +1228,9 @@ onUnmounted(() => {
 .brfx-pop.weak { color: #cbd5e1; font-size: 1.1rem; }
 .brfx-pop.super { color: #fca5a5; }
 .brfx-pop.heal { color: #86efac; font-size: 1.15rem; }   /* ฟื้นเลือด — เขียวและเล็กกว่าดาเมจ ไม่แย่งสายตาหมัดจริง */
+/* ดาเมจเชื้อ 🦠 ชั้นละก้อน — ม่วงและเล็กที่สุด อ่านเป็น "ของแถมจากสกิล" ไม่ใช่หมัดอีกดอก
+   ⚠️ ขนาดจริงมาจาก inline font-size ใน fx.pop (weight) — ที่นี่คุมแค่สี/เส้นขอบ */
+.brfx-pop.infect { color: #d8b4fe; -webkit-text-stroke: 2px rgba(15,23,42,.9); }
 
 /* ชั้น = เจ้าของขนาด — นี่คือช่องทางหลักที่ผู้เล่นอ่านน้ำหนักของหมัดออกขณะดูเร็วๆ
    มาทีหลังด้วย specificity เท่ากัน (สองคลาสเท่ากับ .crit/.weak ด้านบน) จึงชนะเรื่องขนาดด้วยลำดับประกาศ

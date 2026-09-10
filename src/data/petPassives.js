@@ -324,6 +324,30 @@ export const partAt = (p, hook) => partsOf(p).find(x => x.hook === hook) || null
 /** part ที่ให้ผลนั้น */
 export const partWithEffect = (p, effect) => partsOf(p).find(x => x.effect === effect) || null
 
+// ── ชื่อร่วมของ "คู่หู" ───────────────────────────────────────
+/** คู่ที่จับกันแล้วชื่อสกิลบนจอของ **ทั้งสองใบ** เปลี่ยนเป็นชื่อร่วม (อีสเตอร์เอ้กของคนที่จับคู่เจอ —
+ *  economy-battle-master-plan §คู่หู) · ทั้งคู่ต้องอยู่ทีมเดียวกันจริงถึงจะเปลี่ยน
+ *  🔴 เป็นของ "ฝั่งจอ" ล้วน — log/เอนจินยังแบกชื่อจริงของแต่ละตัวเสมอ
+ *     (BattleReplay.passiveDescOf เทียบ `p.name === e.name` อยู่ · ถ้าเอาชื่อร่วมไปทับใน ev()
+ *      คำอธิบายสกิลจะหายทั้งคู่ทันที) */
+export const DUO_TITLES = [
+  { ids: ['seal', 'whale'], name: 'รางวัลคนเก่ง' },
+]
+
+/** ชื่อสกิลที่ควรพิมพ์บนจอของเพ็ท `petId` เมื่อทีมมีใครบ้าง
+ *  @param {object|string} passive  ทะเบียนพาสสีฟ หรือชื่อสกิลตรงๆ (log มีแต่ชื่อ ไม่มีตัวทะเบียน)
+ *  @param {string} petId
+ *  @param {Set<string>|string[]} teamIds  id ของเพ็ททุกตัวในทีมเดียวกับมัน */
+export function passiveTitle(passive, petId, teamIds) {
+  const name = typeof passive === 'string' ? passive : (passive?.name || '')
+  if (!petId || !teamIds) return name
+  const has = (id) => (teamIds instanceof Set ? teamIds.has(id) : (teamIds || []).includes(id))
+  for (const d of DUO_TITLES) {
+    if (d.ids.includes(petId) && d.ids.every(has)) return d.name
+  }
+  return name
+}
+
 /** ค่ารวมของทุก part สำหรับเติมข้อความ — คีย์ล้วน (part แรกที่มีคีย์นั้นชนะ)
  *  + คีย์แบบ `tag.key` สำหรับ part ที่คีย์ชนกัน (บากุมี pct สองตัว) */
 function mergedValues(p, level) {

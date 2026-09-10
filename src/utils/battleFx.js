@@ -108,7 +108,8 @@ export function createBattleFx() {
 
   function buildPools() {
     // พูล pop/call ใหญ่ขึ้นตามที่วัดจริง (pop พีค 6 ตัวใน 900ms · call ซ้อนได้จาก super/weak/survive/น็อก)
-    for (let i = 0; i < 10; i++) pool.pop.push(mkEl('brfx-pop'))
+    // 10 → 16: เลขเชื้อ 🦠 เด้งแยกชั้นละก้อน (สูงสุด 5) ทับกับเลขหมัดหลักของ cleave ที่ลง 3 เป้าพร้อมกัน
+    for (let i = 0; i < 16; i++) pool.pop.push(mkEl('brfx-pop'))
     for (let i = 0; i < 4; i++) pool.call.push(mkEl('brfx-call'))
     for (let i = 0; i < 2; i++) { const e = mkImg('brfx-puff'); imgSrc(e, '💀'); pool.puff.push(e) }
     pool.ring = [mkEl('brfx-ring')]
@@ -143,28 +144,34 @@ export function createBattleFx() {
 
   // เลขซ้อนบนการ์ดเดียวกัน (cleave/multiStrike ลงพร้อมกัน) — ซ้อน "ขึ้นเป็นชั้น" ไม่ใช่สุ่มกระจาย
   // ⚠️ ของเดิมใช้ Math.random()*28-14 สุ่มเยื้องซ้ายขวาทุกครั้ง = อ่านเป็น "มั่ว" ตรงๆ
-  const stackAt = new Map()       // uid → จำนวนเลขที่ยังลอยอยู่บนการ์ดนั้น
+  const stackAt = new Map()       // uid → จำนวนเลขที่ยังลอยอยู่บนการ์ดนั้น (เลขเชื้อใช้คีย์ `uid#infect` แยก)
   const STACK_STEP = 15, STACK_WRAP = 3
+  // เชื้อสูงสุด 5 ชั้น (petPassives.virus value.max) และเด้งพร้อมกันได้ทั้งชุด ⇒ บันไดต้องสูงพอทั้ง 5 ก้อน
+  // ถ้าใช้ WRAP 3 ร่วมกับเลขหมัดหลัก ชั้นที่ 4–5 จะทับชั้นที่ 1–2 ของตัวเอง
+  const INF_STEP = 15, INF_WRAP = 5
 
   /**
    * @param {Object} o { dmg, crit, eff, weight, kind, heal }
    *   weight 0..1 คุมขนาด/อายุ/ระยะลอยแบบต่อเนื่อง — ไม่มีขั้นบันไดตามชั้นอีกแล้ว
    */
   function pop(uid, o) {
-    const { dmg, crit, eff, heal } = o || {}
+    const { dmg, crit, eff, heal, infect } = o || {}
     const w = Math.max(0, Math.min(1, o?.weight ?? 0.4))
     const el = take('pop')
     el.getAnimations?.().forEach(a => a.cancel())
     el.textContent = (heal ? '+' : '-') + dmg
     el.className = 'brfx brfx-pop'
-      + (heal ? ' heal' : crit ? ' crit' : eff === 'super' ? ' super' : eff === 'weak' ? ' weak' : '')
+      + (infect ? ' infect' : heal ? ' heal' : crit ? ' crit' : eff === 'super' ? ' super' : eff === 'weak' ? ' weak' : '')
     // ขนาดต่อเนื่อง — CSS .tier-* 4 คลาสถูกลบแล้ว ขนาดมาจากที่นี่ที่เดียว
     el.style.fontSize = (0.86 + w * 1.0).toFixed(2) + 'rem'
 
-    const n = stackAt.get(uid) || 0
-    const dy = -6 - (n % STACK_WRAP) * STACK_STEP
-    const base = baseXform(uid, 0, dy); if (!base) return
-    stackAt.set(uid, n + 1)
+    // เลขเชื้อเดินบันไดของตัวเอง เยื้องไปทางขวา — ไม่งั้นมันแย่งช่องกับเลขหมัดหลักบนการ์ดใบเดียวกัน
+    // (3–5 ชั้น + หมัดหลัก = 4–6 ก้อนพร้อมกัน ซึ่งเกิน STACK_WRAP ของบันไดเดียว แล้วจะทับกันเอง)
+    const key = infect ? uid + '#infect' : uid
+    const n = stackAt.get(key) || 0
+    const dy = infect ? -4 - (n % INF_WRAP) * INF_STEP : -6 - (n % STACK_WRAP) * STACK_STEP
+    const base = baseXform(uid, infect ? 22 : 0, dy); if (!base) return
+    stackAt.set(key, n + 1)
 
     el.style.opacity = '1'
     // ไม่หารด้วย rate — อ่านเลขทันเสมอแม้กดค้างเร่ง (หลักการเดิม)
@@ -181,7 +188,7 @@ export function createBattleFx() {
     anims.add(a)
     a.finished.catch(() => {}).finally(() => {
       anims.delete(a); drop(el); el.style.opacity = '0'
-      stackAt.set(uid, Math.max(0, (stackAt.get(uid) || 1) - 1))
+      stackAt.set(key, Math.max(0, (stackAt.get(key) || 1) - 1))
     })
   }
 

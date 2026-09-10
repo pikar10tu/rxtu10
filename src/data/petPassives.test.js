@@ -5,6 +5,7 @@ import {
   PET_PASSIVES, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT, PASSIVE_V2_CHANGED,
   TEAM_AURA_EFFECTS, SELF_STATUS_EFFECTS, FOE_AURA_EFFECTS, FOE_STATUS_EFFECTS,
   partsOf, partsAt, partAt, partWithEffect, passiveValueAt, passiveText, effectText,
+  passiveTitle, DUO_TITLES,
 } from './petPassives.js'
 
 test('partsOf: รูปใหม่คืน parts ตรงๆ', () => {
@@ -316,4 +317,35 @@ test('ทุก effect ที่มีเพ็ทถือจริง ต้�
 test('รายชื่อเพ็ทที่กลไกเปลี่ยนในรอบ v2 ต้องมีตัวตนจริงทุก id (พิมพ์ผิด = แถบแจ้งเงียบไปเฉยๆ)', () => {
   for (const id of PASSIVE_V2_CHANGED) assert.ok(PET_PASSIVES[id], `${id} ไม่มีในทะเบียนพาสสีฟ`)
   assert.equal(new Set(PASSIVE_V2_CHANGED).size, PASSIVE_V2_CHANGED.length)
+})
+
+// ── ชื่อร่วมของคู่หู (อีสเตอร์เอ้ก 🦭+🐳 = "รางวัลคนเก่ง") ───────────────
+test('passiveTitle: อยู่ทีมเดียวกันครบคู่ → ชื่อบนจอของ "ทั้งสองใบ" เปลี่ยนเป็นชื่อร่วม', () => {
+  const team = new Set(['seal', 'whale', 'cat'])
+  assert.equal(passiveTitle(PET_PASSIVES.seal, 'seal', team), 'รางวัลคนเก่ง')
+  assert.equal(passiveTitle(PET_PASSIVES.whale, 'whale', team), 'รางวัลคนเก่ง')
+  // ตัวที่สามในทีมเดียวกันต้องไม่โดนหางเลข
+  assert.equal(passiveTitle(PET_PASSIVES.cat, 'cat', team), PET_PASSIVES.cat.name)
+})
+
+test('passiveTitle: ขาดคู่ = ชื่อจริงของตัวเอง (เงื่อนไขเดียวกับ duo ใน applyAuras)', () => {
+  assert.equal(passiveTitle(PET_PASSIVES.seal, 'seal', new Set(['seal', 'cat'])), 'ยอดนักซัพพอร์ต')
+  assert.equal(passiveTitle(PET_PASSIVES.whale, 'whale', new Set(['whale'])), PET_PASSIVES.whale.name)
+})
+
+test('passiveTitle: ไม่รู้ทีม = ชื่อจริงเสมอ · รับชื่อดิบจาก log ได้ (log ไม่มีตัวทะเบียน)', () => {
+  assert.equal(passiveTitle(PET_PASSIVES.seal, 'seal', null), 'ยอดนักซัพพอร์ต')
+  assert.equal(passiveTitle('ยอดนักซัพพอร์ต', 'seal', ['seal', 'whale']), 'รางวัลคนเก่ง')
+  assert.equal(passiveTitle(null, 'seal', ['seal', 'whale']), 'รางวัลคนเก่ง')
+})
+
+test('DUO_TITLES: ทุก id ต้องมีตัวตนจริง และเข้าคู่ตรงกับ duoWith ในทะเบียน', () => {
+  for (const d of DUO_TITLES) {
+    assert.ok(d.name, 'คู่หูต้องมีชื่อร่วม')
+    for (const id of d.ids) assert.ok(PET_PASSIVES[id], `${id} ไม่มีในทะเบียนพาสสีฟ`)
+    // ต้องมีอย่างน้อยหนึ่งใบในคู่ที่ประกาศ duoWith ชี้ไปหาอีกใบ — ไม่งั้นชื่อร่วมจะขึ้นทั้งที่ไม่มีผลอะไรเกิดขึ้นจริง
+    const linked = d.ids.some(id => partsOf(PET_PASSIVES[id])
+      .some(part => d.ids.includes(part.value?.duoWith)))
+    assert.ok(linked, `${d.ids.join('+')}: ไม่มี duoWith เชื่อมกันจริงในทะเบียน`)
+  }
 })

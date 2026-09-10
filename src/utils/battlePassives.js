@@ -464,7 +464,9 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
   // pierce = ดาเมจที่ "ไม่ผ่านสายลด" — เอนจินหักหลัง res.dmg · วันนี้มีแค่ infect (P2b) ที่ใส่ค่า
   // 🔴 ห้ามเอาไปใช้กับกลไกอื่นโดยไม่แก้สเปก: การทะลุเกราะคือเหตุผลที่ไวรัสมีอยู่
   //    ถ้าแจกให้ตัวอื่นด้วย มันจะกลายเป็นแค่ "ดาเมจเพิ่ม" อีกตัวหนึ่ง
-  const res = { dmg, dodged: false, thorns: 0, pierce: 0, reflect: 0, events: [] }
+  // pierceHits = ก้อน pierce แตกเป็น "ชั้นละก้อน" สำหรับฝั่งจอเท่านั้น (ผลรวมเท่ากับ Math.round(pierce) เป๊ะ)
+  // 🔴 ห้ามเอาไปคิดดาเมจจริง — เอนจินหักด้วย res.pierce ตัวเต็ม (ยังไม่ปัด) เหมือนเดิมทุกประการ
+  const res = { dmg, dodged: false, thorns: 0, pierce: 0, reflect: 0, pierceHits: [], events: [] }
 
   // 1) guardian ของ "เพื่อนในทีมเดียวกัน" — ต้องเช็คก่อนของตัว defender เอง
   // 🔑 ส่วนที่ผู้พิทักษ์รับไปถูกหักออกจากดาเมจ "ก่อน" teamDrPct และก่อน damageReduction ทุกตัว
@@ -603,11 +605,18 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
       //    เลยบังเอิญเท่ากัน แต่ถ้าวันหน้ามีกลไกอื่น += เข้ามาก่อนบล็อกนี้ในหมัดเดียวกัน amount จะโป้งทันที)
       const delta = pctOf(inf.from.atk, vv.pct) * inf.n
       res.pierce += delta
+      // ── แตกเป็นชั้นๆ ให้จอเด้งเลขทีละก้อน (user สั่ง 11 ก.ย. "ให้เห็นว่าสกิลมันแสดงผลแน่") ──
+      // ใช้ผลต่างของยอดสะสมที่ปัดแล้ว ⇒ ผลรวมของทุกชั้น = Math.round(delta) เป๊ะเสมอ ไม่ว่าจะกี่ชั้น
+      // (ถ้าปัดชั้นละก้อนตรงๆ ผลรวมบนจอจะเพี้ยนจากเลือดที่หายจริงได้ถึง n/2)
+      const each = delta / inf.n
+      const hits = []
+      for (let k = 1; k <= inf.n; k++) hits.push(Math.round(each * k) - Math.round(each * (k - 1)))
+      res.pierceHits = res.pierceHits.concat(hits)
       // 🔑 effect ตั้งชื่อแยกจากตอนแปะ ('infectBurst' ไม่ใช่ 'infect') แม้จะมาจาก part เดียวกัน —
       //    ดูเหตุผลเต็มในดอคบล็อกของ ev() ด้านบน: battleBeats.js กรุ๊ป event ด้วย uid:effect:nth
       //    ถ้าใช้ชื่อเดียวกับตอนแปะ หมัดที่ตีเป้าติดเชื้ออยู่แล้ว (กรณีปกติ) จะชนคีย์กันแล้วป้ายระเบิดหาย
       res.events.push(ev(inf.from, vp, vpart, { targets: [defender.uid],
-        amount: Math.round(delta), fxKind: 'damage', effect: 'infectBurst' }))
+        amount: Math.round(delta), stacks: inf.n, hits, fxKind: 'damage', effect: 'infectBurst' }))
     }
   }
 

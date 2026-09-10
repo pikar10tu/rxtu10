@@ -2054,3 +2054,63 @@ test('🦄 + 🦇 ในทีมเดียวกัน: สองผลนี
   assert.ok(kinds.includes('teamLifesteal'), 'ผลดูดเลือดของค้างคาวหาย')
   assert.equal(new Set(out.events.map(e => `${e.uid}:${e.effect}`)).size, out.events.length)
 })
+
+// ── เลขดาเมจเชื้อแยกชั้น (ของฝั่งจอ — user สั่ง 11 ก.ย. 2026) ─────────────
+test('👾 ไวรัส: pierceHits แตกชั้นละก้อน · จำนวนก้อน = จำนวนชั้น · ผลรวม = amount เป๊ะ', () => {
+  const virus = u('virus', { uid: 'A0', atk: 100 })
+  const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', atk: 10, maxHp: 4000, hp: 4000 })
+  for (let i = 0; i < 3; i++) runOnHit(foe, 50, virus, [foe], () => 0.99)
+  assert.equal(psOf(foe).infect.n, 3)
+
+  const res = runOnHit(foe, 50, virus, [foe], () => 0.99)
+  const burst = res.events.find(e => e.effect === 'infectBurst')
+  assert.equal(burst.stacks, 3)
+  assert.equal(burst.hits.length, 3, '3 ชั้น = 3 ก้อนบนจอ')
+  assert.deepEqual(res.pierceHits, burst.hits, 'เอนจินหยิบจาก res ไปแปะบนใบ attack — ต้องเป็นชุดเดียวกัน')
+  assert.equal(burst.hits.reduce((s, n) => s + n, 0), burst.amount,
+    'ผลรวมบนจอต้องเท่ากับดาเมจเชื้อจริง ไม่งั้นเลขหลัก+เลขย่อยจะไม่ตรงกับเลือดที่หาย')
+  assert.equal(burst.amount, Math.round(res.pierce))
+})
+
+test('👾 ไวรัส: ปัดเศษแบบสะสม — ทุกชั้นต้องรวมได้เท่ายอดเดิมแม้หารไม่ลงตัว', () => {
+  const virus = u('virus', { uid: 'A0', atk: 33, hp: 1000 })     // 10% ของ 33 = 3.3 ต่อชั้น
+  const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', atk: 10, maxHp: 9000, hp: 9000 })
+  for (let i = 0; i < 5; i++) runOnHit(foe, 10, virus, [foe], () => 0.99)
+  const res = runOnHit(foe, 10, virus, [foe], () => 0.99)
+  const burst = res.events.find(e => e.effect === 'infectBurst')
+  assert.equal(burst.hits.length, 5)
+  assert.equal(burst.hits.reduce((s, n) => s + n, 0), burst.amount)
+  assert.equal(burst.amount, Math.round(33 * 0.1 * 5))            // 16.5 → 17
+})
+
+test('👾 ไวรัส: ยังไม่ติดเชื้อ = ไม่มี pierceHits ให้ใบ attack แบก (จอไม่ต้องเด้งอะไรเลย)', () => {
+  const virus = u('virus', { uid: 'A0', atk: 100 })
+  const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', maxHp: 1000, hp: 1000 })
+  const first = runOnHit(foe, 50, virus, [foe], () => 0.99)       // หมัดที่แปะชั้นแรก ยังไม่ระเบิด
+  assert.deepEqual(first.pierceHits, [])
+})
+
+test('👾 ไวรัส: หลบได้ก็ยังติดเชื้อและระเบิด — ใบ attack แบก pierceHits ไปให้จอเด้งเลขย่อย', () => {
+  const virus = u('virus', { uid: 'A0', atk: 100 })
+  const foe   = u('fox', { uid: 'B0', side: 'B', element: 'paper', maxHp: 1000, hp: 1000 })
+  runOnHit(foe, 50, virus, [foe], () => 0.99)                     // ชั้นที่ 1 (rand สูง = ไม่หลบ)
+  const res = runOnHit(foe, 50, virus, [foe], () => 0)            // rand 0 = หลบแน่นอน
+  assert.equal(res.dodged, true)
+  assert.equal(res.dmg, 0, 'หมัดหลักไม่เข้า')
+  assert.equal(res.pierceHits.length, 1, 'แต่เชื้อยังระเบิด — จอต้องมีเลขย่อยให้เห็น')
+})
+
+test('👾 ไวรัส: log ของไฟต์จริงต้องมี pierceHits บนใบ attack และรวมแล้วไม่เกินดาเมจของหมัดนั้น', () => {
+  const A = [{ id: 'virus', rarity: 'legendary', element: 'fist', grade: 3 },
+             { id: 'wolf',  rarity: 'epic',      element: 'fist', grade: 2 }]
+  const B = [{ id: 'turtle', rarity: 'epic', element: 'paper', grade: 2 },
+             { id: 'panda',  rarity: 'epic', element: 'paper', grade: 2 }]
+  const { log } = simulateBattle(A, B, 4242)
+  const withHits = log.filter(e => e.t === 'attack' && Array.isArray(e.pierceHits))
+  assert.ok(withHits.length > 0, 'ไฟต์ที่มีไวรัสต้องมีหมัดที่แบกเลขเชื้อมาด้วย')
+  for (const e of withHits) {
+    assert.ok(e.pierceHits.length >= 1)
+    const sum = e.pierceHits.reduce((s, n) => s + n, 0)
+    assert.ok(sum <= e.dmg + 1, `เลขย่อยรวม ${sum} ต้องไม่เกินดาเมจของหมัดนั้น (${e.dmg})`)
+  }
+})

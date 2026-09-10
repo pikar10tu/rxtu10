@@ -119,6 +119,9 @@ export function simulateBattle(teamA, teamB, seed) {
       // 🔒 sub = หมัดลูกใน beat เดียวกัน (cleave/multiStrike) — battleBeats ให้ timing ZERO
       //    ถ้าไม่ตั้ง flag นี้ ทุกเป้ารองจะกลายเป็น "จังหวะหมัด" ใหม่ = ไฟต์ยืดทันที (กฎเหล็กพัง)
       ...(sub ? { sub: true } : {}),
+      // ดาเมจเชื้อที่ทะลุมาในหมัดนี้ แตกเป็นชั้นละก้อน — **ของฝั่งจอล้วน** (BattleReplay เด้งเลขย่อย
+      // แล้วหักออกจากเลขหลัก เพื่อให้ผลรวมบนจอ = เลือดที่หายจริง) · ไม่มีใครเอาไปคิดดาเมจต่อ
+      ...(hitRes.pierceHits?.length ? { pierceHits: hitRes.pierceHits } : {}),
       targetHpAfter: Math.max(0, Math.round(tg.hp)), dead,
     })
     // 🔴 สเปก §7.6: ตายเงียบ 2 ทางที่เหลือของ strike() นี้ — หนาม (att โดนสวนตอนบรรทัด 81) และ guardian
