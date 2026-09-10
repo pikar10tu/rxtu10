@@ -138,3 +138,16 @@ test('badgesOf: ความสำคัญเท่ากัน = ยึดล�
   ]
   assert.deepEqual(badgesOf(list, 4).map(b => b.key), ['teamHp', 'teamAtk'])
 })
+
+test('ป้ายอาณัติเจ้าป่าขึ้นเฉพาะทีมที่ครบ 3 สาย — ทีมขาดสายต้องไม่เห็น', () => {
+  const q = (id, element) => ({ id, element })
+  const full = buffSources([q('lion', 'fist'), q('fox', 'scissors'), q('panda', 'paper')], [q('cat', 'scissors')])
+  assert.ok(find(full.A0, 'elementTrinity'))
+  const missing = buffSources([q('lion', 'fist'), q('shark', 'fist'), q('wolf', 'fist')], [q('cat', 'scissors')])
+  assert.equal(!!find(missing.A0, 'elementTrinity'), false)
+})
+
+test('ทีมที่ไม่ได้ส่ง element มาด้วย ต้องยังตัดสินได้จากคลัง (ไม่ใช่เงียบแล้วซ่อนป้าย)', () => {
+  const full = buffSources([{ id: 'lion' }, { id: 'fox' }, { id: 'panda' }], [{ id: 'cat' }])
+  assert.ok(find(full.A0, 'elementTrinity'))
+})

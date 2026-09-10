@@ -53,14 +53,23 @@ function makeBuff(effect, owner, ownerUid, opts) {
 }
 
 /** aura ของทีมหนึ่ง แยกเป็น: ลงทีมตัวเอง / ลงทีมตรงข้าม / คู่หู */
+/** สายของทีม — pet object จากหน้าไฟต์มี element ติดมาอยู่แล้ว แต่ fallback ไปคลังไว้ด้วย
+ *  (ผู้เรียกบางทาง/เทสส่งมาแค่ id) · เดาไม่ได้เลย = ตกไป ไม่นับเป็นสาย */
+const elementsOf = (t) => new Set((t || []).filter(Boolean)
+  .map(p => p.element || getPetDef(p.id)?.element).filter(Boolean))
+
 function aurasOf(team, side) {
   const mine = [], theirs = [], duo = []
   const ids = new Set(team.filter(Boolean).map(p => p.id))
+  const elements = elementsOf(team)
   team.forEach((pet, i) => {
     const p = passiveOf(pet)
     if (!p) return
     const entry = { owner: pet, uid: side + i, passive: p }
     for (const part of partsAt(p, 'aura')) {
+      // elementTrinity ทำงานเมื่อทีมครบ 3 สายเท่านั้น (เงื่อนไขเดียวกับ applyAuras ในเอนจิน)
+      // ไม่เช็ค = ทีมที่ขาดสายเห็นป้ายทั้งที่ไม่ได้บัฟอะไรเลย → ป้ายโกหก (หนี้ §7.6 ข้อ 7)
+      if (part.effect === 'elementTrinity' && elements.size < 3) continue
       if (TEAM_AURA_EFFECTS.has(part.effect)) mine.push({ effect: part.effect, ...entry })
       else if (FOE_AURA_EFFECTS.has(part.effect)) theirs.push({ effect: part.effect, ...entry })
       // คู่หู 🐳🦭 — teamAtk ที่มี duoWith และเพื่อนคนนั้นอยู่ในทีมจริง ⇒ ทีมได้ regen เพิ่มอีกช่อง

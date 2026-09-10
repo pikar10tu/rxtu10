@@ -371,7 +371,7 @@ export const STATUS_ICON = {
   revive: '🧿', saveAlly: '🧿', cheatDeath: '🧿', stackAtk: '⬆️',
   duoRegen: '💧',
   // ── P2 ──
-  elementTrinity: '🔺', teamLifesteal: '🩸', teamDamageReduction: '🧱', atkOnHit: '💢',
+  elementTrinity: '🧩', teamLifesteal: '🩸', teamDamageReduction: '🧱', atkOnHit: '💢',
   berserk: '🔥', giantSlayer: '🗡️', healOnAttack: '💞', stealStats: '🫳',
   // ── P2b ──
   // ⚠️ ไม่ใช่ 💢 ของ atkOnHit — สองอันหน้าตาเดียวกันบนการ์ดเดียวอ่านไม่ออก (ดูเทสไอคอนไม่ซ้ำท้ายไฟล์)
