@@ -1767,3 +1767,33 @@ test('🦁 สิงโต: บัฟไม่หายเมื่อเพื�
   team[2].hp = 0                                    // เพื่อนสายพิทักษ์ตาย
   assert.equal(team[0].atk, atkAfterAura)           // ตั้งใจ — เหมือน aura ตัวอื่นทั้งหมด
 })
+
+test('👾 ไวรัส: ชั้นขึ้นจากหมัดไวรัสเท่านั้น · ชนเพดาน · เพื่อนตีก็ระเบิด · ทะลุทุกสายลด', () => {
+  const virus = u('virus', { uid: 'A0', atk: 100 })
+  const mate  = u('blank', { uid: 'A1', atk: 100 })
+  const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', atk: 10, maxHp: 1000, hp: 1000 })
+
+  // เพื่อนตีก่อน: ยังไม่มีเชื้อ ⇒ ไม่มีชั้น ไม่มีระเบิด
+  const first = runOnHit(foe, 50, mate, [foe], () => 0.99)
+  assert.equal(first.pierce, 0)
+  assert.equal(psOf(foe).infect, undefined)
+
+  for (let i = 0; i < 7; i++) runOnHit(foe, 50, virus, [foe], () => 0.99)
+  assert.equal(psOf(foe).infect.n, 5)               // เพดาน 5 ชั้น
+
+  const res = runOnHit(foe, 50, mate, [foe], () => 0.99)
+  assert.equal(Math.round(res.pierce), 40)          // 5 ชั้น × 8% ของ atk ไวรัส (100)
+  assert.equal(psOf(foe).infect.n, 5)               // เชื้อไม่หายตอนระเบิด
+  const burst = res.events.find(e => e.effect === 'infectBurst')
+  assert.ok(burst, 'ต้องมี event ระเบิดให้จอเล่า')
+  assert.deepEqual(burst.targets, ['B0'])
+})
+
+test('👾 ไวรัส: ดาเมจเชื้อไม่ถูกหักด้วยสายลดของเป้า (pierce แยกช่องจาก dmg)', () => {
+  const virus = u('virus', { uid: 'A0', atk: 100 })
+  const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', maxHp: 1000, hp: 1000, teamDrPct: 90 })
+  runOnHit(foe, 100, virus, [foe], () => 0.99)      // ชั้นที่ 1
+  const res = runOnHit(foe, 100, virus, [foe], () => 0.99)
+  assert.ok(res.dmg < 100, 'หมัดหลักต้องถูกลดตามปกติ')
+  assert.equal(Math.round(res.pierce), 8)           // 1 ชั้น × 8% — ไม่โดนลด 90% ด้วย
+})
