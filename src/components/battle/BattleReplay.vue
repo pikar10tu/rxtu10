@@ -175,6 +175,8 @@
               <Emoji :char="b.icon" /> {{ b.label }}
               <span v-if="b.spent" class="br-buff-tag">ใช้ไปแล้ว</span>
               <span v-else-if="b.maxStacks" class="br-buff-tag">{{ b.stacks }}/{{ b.maxStacks }} ชั้น</span>
+              <!-- ไม่มีเพดาน (ความแค้นกอริลลา · ชั้นเชื้อ) ⇒ บอกจำนวนเฉยๆ ห้ามวาด x/0 -->
+              <span v-else-if="b.stacks" class="br-buff-tag">{{ b.stacks }} ชั้น</span>
             </div>
           </div>
         </div>
@@ -852,7 +854,8 @@ const insp = computed(() => {
 const inspBuffs = computed(() => {
   const uid = inspectUid.value
   if (!uid) return []
-  return liveBuffs(buffMap.value[uid] || [], beats.value, idx.value)
+  // ส่ง uid ด้วย — สถานะที่ "ลงบนตัวนี้" (ชั้นเชื้อ) ไม่ได้อยู่ใน buffMap เพราะไม่ใช่ค่าคงที่ก่อนไฟต์
+  return liveBuffs(buffMap.value[uid] || [], beats.value, idx.value, uid)
 })
 
 // ── มาตรวัดเฟรม — เปิดด้วย ?fps=1 ท้าย URL หรือ data.fpsMeter (พาเนล Admin) ──

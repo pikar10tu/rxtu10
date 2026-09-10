@@ -151,3 +151,41 @@ test('ทีมที่ไม่ได้ส่ง element มาด้วย �
   const full = buffSources([{ id: 'lion' }, { id: 'fox' }, { id: 'panda' }], [{ id: 'cat' }])
   assert.ok(find(full.A0, 'elementTrinity'))
 })
+
+const pev = (o) => ({ t: 'passive', ...o })
+
+test('liveBuffs: เกราะบอกจำนวนชั้นที่เหลือจริง', () => {
+  const src = buffSources([{ id: 'mammoth', element: 'paper' }], [{ id: 'cat', element: 'scissors' }])
+  const beats = [pev({ effect: 'armorStack', uid: 'A0', armorLeft: 1 })]
+  const b = find(liveBuffs(src.A0, beats, 0, 'A0'), 'armorStack')
+  assert.equal(b.stacks, 1)
+})
+
+test('liveBuffs: ความแค้นของกอริลลานับชั้นจาก event และไม่มีเพดานให้โชว์', () => {
+  const src = buffSources([{ id: 'gorilla', element: 'paper' }], [{ id: 'cat', element: 'scissors' }])
+  const beats = [pev({ effect: 'atkOnHit', uid: 'A0', amount: 3 })]
+  const b = find(liveBuffs(src.A0, beats, 0, 'A0'), 'atkOnHit')
+  assert.equal(b.stacks, 3)
+  assert.equal(b.maxStacks, 0)          // 0 = ไม่มีเพดาน ⇒ UI ต้องไม่วาด "x/max"
+})
+
+test('liveBuffs: ชั้นเชื้อโผล่บนรายการของ "เป้า" แม้ไม่มีใน sources', () => {
+  const src = buffSources([{ id: 'virus', element: 'scissors' }], [{ id: 'cat', element: 'scissors' }])
+  const beats = [pev({ effect: 'infect', uid: 'A0', targets: ['B0'], amount: 2 })]
+  assert.equal(find(liveBuffs(src.B0, beats, 0, 'B0'), 'infect').stacks, 2)
+  assert.equal(!!find(liveBuffs(src.A0, beats, 0, 'A0'), 'infect'), false)
+})
+
+test('liveBuffs: เชื้อที่ย้ายมาจากศพก็ต้องขึ้นบนโฮสต์ใหม่', () => {
+  const src = buffSources([{ id: 'virus', element: 'scissors' }], [{ id: 'cat', element: 'scissors' }, { id: 'fox', element: 'scissors' }])
+  const beats = [
+    pev({ effect: 'infect', uid: 'A0', targets: ['B0'], amount: 3 }),
+    pev({ effect: 'infectSpread', uid: 'A0', targets: ['B1'], amount: 3 }),
+  ]
+  assert.equal(find(liveBuffs(src.B1, beats, 1, 'B1'), 'infect').stacks, 3)
+})
+
+test('liveBuffs: ไม่ส่ง uid ก็ต้องไม่พัง (ผู้เรียกเก่ายังอยู่ได้)', () => {
+  const src = buffSources([{ id: 'virus', element: 'scissors' }], [{ id: 'cat', element: 'scissors' }])
+  assert.ok(Array.isArray(liveBuffs(src.A0, [], -1)))
+})

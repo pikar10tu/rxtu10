@@ -128,17 +128,26 @@ export function buffSources(playerTeam, botTeam) {
  * เติมสถานะสดจาก beat ที่เล่นไปแล้ว (0..idx)
  * ⚠️ เรียกตอนไฟต์พักเท่านั้น — ดูหัวไฟล์
  */
-export function liveBuffs(sources, beats, idx) {
+export function liveBuffs(sources, beats, idx, uid = null) {
   const played = (beats || []).slice(0, Math.max(0, (idx ?? -1) + 1))
-  return (sources || []).map((b) => {
-    if (b.effect === 'stackAtk') {
+  const out = (sources || []).map((b) => {
+    if (b.effect === 'stackAtk' || b.effect === 'atkOnHit') {
       let stacks = 0
       for (const e of played) {
-        // amount ที่เอนจินส่งมา = จำนวนชั้นสะสม (psOf(killer).atkStacks) ไม่ใช่ % ต่อชั้น
+        // amount ที่เอนจินส่งมา = จำนวนชั้นสะสม (psOf(u).atkStacks / psOf(u).rage) ไม่ใช่ % ต่อชั้น
         // (กติกาของ amount/targets ต่อ fxKind อยู่ใน docblock ของ ev() ใน battlePassives.js)
-        if (e?.t === 'passive' && e.effect === 'stackAtk' && e.uid === b.ownerUid) stacks = e.amount || stacks
+        // ⚠️ atkOnHit ไม่มี value.max ⇒ maxStacksOf คืน 0 = "ไม่มีเพดาน" ⇒ UI ห้ามวาด "x/max"
+        if (e?.t === 'passive' && e.effect === b.effect && e.uid === b.ownerUid) stacks = e.amount || stacks
       }
       return { ...b, stacks, maxStacks: maxStacksOf(b) }
+    }
+    if (b.effect === 'armorStack') {
+      // เกราะนับ "ที่เหลือ" ไม่ใช่ "ที่ใช้ไป" — เอนจินส่ง armorLeft มาให้ตรงๆ (amount ของมันคือดาเมจสะท้อน)
+      let left = null
+      for (const e of played) {
+        if (e?.t === 'passive' && e.effect === 'armorStack' && e.uid === b.ownerUid) left = e.armorLeft
+      }
+      return left === null ? b : { ...b, stacks: left, maxStacks: maxStacksOf(b) }
     }
     if (ONE_SHOT.has(b.effect)) {
       // นับที่ "เจ้าของ" ไม่ใช่คนที่ถูกช่วย — genie กันเพื่อนตาย event ยิงจาก uid ของ genie
@@ -147,6 +156,29 @@ export function liveBuffs(sources, beats, idx) {
     }
     return b
   })
+
+  // เชื้อไม่ได้อยู่ใน sources (ไม่ใช่ค่าคงที่ก่อนไฟต์ — state จริงอยู่ที่ psOf(target).infect)
+  // ⇒ ต้องอ่านจาก event ที่ "ลงบนตัวนี้" · ต้องรับทั้ง infect (แปะ) และ infectSpread (ย้ายมาจากศพ)
+  //   ไม่งั้นโฮสต์ใหม่ที่รับเชื้อต่อจะไม่มีอะไรบอกเลยว่ากำลังติดเชื้ออยู่
+  if (uid) {
+    let n = 0, from = null
+    for (const e of played) {
+      if (e?.t !== 'passive') continue
+      if ((e.effect === 'infect' || e.effect === 'infectSpread') && (e.targets || []).includes(uid)) { n = e.amount || 0; from = e }
+    }
+    if (n > 0) {
+      // ที่มาอ่านจาก event ตรงๆ (`petId`/`name`/`icon` ที่ ev() แนบมาให้) ไม่ใช่เดาจากทะเบียน —
+      // ไวรัสที่แปะเชื้ออาจตายไปแล้ว แต่เชื้อยังทำงานต่อ ⇒ ต้องยังบอกได้ว่ามาจากใคร
+      const def = getPetDef(from?.petId) || { name: '?', emoji: '❓' }
+      out.push({
+        key: `infect:${uid}`, effect: 'infect', icon: STATUS_ICON.infect, label: STATUS_TEXT.infect,
+        skillName: from?.name || '', skillIcon: from?.icon || STATUS_ICON.infect,
+        ownerUid: from?.uid || '', ownerName: def.name, ownerEmoji: def.emoji,
+        self: false, buff: false, foeSide: true, stacks: n, maxStacks: 0,
+      })
+    }
+  }
+  return out
 }
 
 /** ย่อเป็นรูปที่ป้ายไอคอนเล็กบนการ์ดใช้ — ตัดที่มาทิ้ง + ตัดที่ max
