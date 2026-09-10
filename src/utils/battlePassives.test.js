@@ -464,9 +464,18 @@ test('runOnDealt: ผู้ตีที่ตายไปแล้ว (โดน
 })
 
 // ── onHit ───────────────────────────────────────────────────
-test('damageReduction (mammoth): ลดดาเมจที่ตัวเองรับ', () => {
-  const r = runOnHit(u('mammoth'), 100, u('cat'), [u('mammoth')], () => 0.5)
-  assert.equal(r.dmg, 80)
+test('damageReduction: ลดดาเมจที่ตัวเองรับ', () => {
+  // 🔴 10 ก.ย. 2026: ตั้งแต่ P3a ไม่มีเพ็ทตัวไหนถือ `damageReduction` แล้ว (🦣 ไปเป็นเกราะสะท้อน ·
+  //    🐢 ไปเป็นลดทั้งทีม) — เทสนี้จึงใช้เพ็ททดสอบเพื่อคุมสาขาในเอนจินไว้ ไม่ใช่ผูกกับเพ็ทตัวใดตัวหนึ่ง
+  PET_PASSIVES.__dr = {
+    name: 'ทดสอบลดดาเมจ', icon: '🧪',
+    parts: [{ hook: 'onHit', effect: 'damageReduction', value: { pct: 20 }, step: { pct: 0 } }],
+    desc: 'ลดดาเมจ {pct}%', short: 'ลดดาเมจ {pct}%',
+  }
+  try {
+    const me = u('__dr')
+    assert.equal(runOnHit(me, 100, u('cat'), [me], () => 0.5).dmg, 80)
+  } finally { delete PET_PASSIVES.__dr }
 })
 
 test('dodge (fox): หลบแล้วดาเมจเป็น 0', () => {
@@ -1898,4 +1907,45 @@ test('🦇 ค้างคาว: เลือดเต็มแล้วไม�
   const out = runOnDealt(team[0], team, 100)
   assert.equal(team[0].hp, 1000)
   assert.equal(out.events.filter(e => e.effect === 'teamLifesteal').length, 0)
+})
+
+test('🦣 แมมมอธ: เกราะกันหมัดทั้งดอกแล้วสะท้อน · หมดสแตคแล้วรับปกติ', () => {
+  const mam = u('mammoth', { uid: 'B0', side: 'B', element: 'paper', maxHp: 1000, hp: 1000 })
+  const att = u('blank',   { uid: 'A0', atk: 100 })
+
+  const a = runOnHit(mam, 100, att, [mam], () => 0.99)
+  assert.equal(a.dmg, 0)                            // กันทั้งหมัด ไม่ใช่โล่ที่มีค่าเลือด
+  assert.equal(Math.round(a.reflect), 80)           // สะท้อน 80% ของหมัดนั้น
+  assert.equal(a.events.find(e => e.effect === 'armorStack').armorLeft, 1)
+
+  const b = runOnHit(mam, 100, att, [mam], () => 0.99)
+  assert.equal(b.dmg, 0)
+  assert.equal(b.events.find(e => e.effect === 'armorStack').armorLeft, 0)
+
+  const c = runOnHit(mam, 100, att, [mam], () => 0.99)
+  assert.equal(c.dmg, 100)                          // สแตคหมด = รับเต็ม ไม่มีการเติมกลางไฟต์
+  assert.equal(c.reflect, 0)
+})
+
+test('🦣 แมมมอธ: หมัดที่ดาเมจเหลือ 0 อยู่แล้ว ห้ามกินสแตคเกราะฟรี', () => {
+  const mam = u('mammoth', { uid: 'B0', side: 'B', element: 'paper', maxHp: 1000, hp: 1000 })
+  const att = u('blank',   { uid: 'A0', atk: 100 })
+  runOnHit(mam, 0, att, [mam], () => 0.99)
+  const after = runOnHit(mam, 100, att, [mam], () => 0.99)
+  assert.equal(after.events.find(e => e.effect === 'armorStack').armorLeft, 1)  // ยังเหลือ 1 = ใบแรกไม่ได้กิน
+})
+
+test('🦣 แมมมอธ: เกราะที่โดนหมัดสวนของฟีนิกซ์ยังสะท้อนได้จริงในไฟต์จริง (ธง countering ไม่บล็อก)', () => {
+  // เกรดต่างกันมากโดยตั้งใจ — ต้องให้แมมมอธ "ฆ่าฟีนิกซ์ได้ตั้งแต่ยังไม่เสียสแตคเกราะ"
+  // ถ้าเกรดเท่ากัน ฟีนิกซ์จะทุบเกราะหมดสองชั้นก่อนตาย แล้วหมัดสวนจะไม่มีเกราะให้ชน = เทสไม่พิสูจน์อะไร
+  const phoenix = [{ id: 'phoenix', rarity: 'legendary', element: 'scissors', grade: 0 }]
+  const mammoth = [{ id: 'mammoth', rarity: 'legendary', element: 'paper', grade: 5 }]
+  let found = false
+  for (let seed = 1; seed <= 300 && !found; seed++) {
+    const log = simulateBattle(phoenix, mammoth, seed).log
+    const revive = log.findIndex(e => e?.t === 'passive' && e.effect === 'revive')
+    if (revive < 0) continue
+    found = log.slice(revive).some(e => e?.t === 'passive' && e.effect === 'armorStack' && e.amount > 0)
+  }
+  assert.ok(found, 'ไม่เจอไฟต์ที่เกราะสะท้อนหลังหมัดสวนเลย — ธง countering อาจบล็อกอยู่')
 })
