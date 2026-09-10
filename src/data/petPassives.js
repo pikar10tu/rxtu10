@@ -243,10 +243,11 @@ export const PET_PASSIVES = {
     short: 'ตอนเลือดเต็ม พลังโจมตี +{pct}%',
   },
   mouse: {
-    name: 'ปราดเปรียว', icon: '🐭',
-    parts: [{ hook: 'onHit', effect: 'dodge', value: { pct: 8 }, step: { pct: 2 } }],
-    desc: 'โอกาสหลบการโจมตี {pct}%',
-    short: 'โอกาสหลบ {pct}%',
+    name: 'หัวขโมยตัวจิ๋ว', icon: '🫳',
+    // 🔴 hook `setup` เท่านั้น — ห้ามขยับ maxHp กลางไฟต์เด็ดขาด (จะ re-compute แล้วพังทั้งไฟต์)
+    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 5 }, step: { pct: 1.5 } }],
+    desc: 'เริ่มไฟต์ ขโมยพลังโจมตีและเลือดสูงสุดจากศัตรูทุกตัว อย่างละ {pct}%',
+    short: 'เริ่มไฟต์ ขโมยพลัง+เลือด {pct}% จากศัตรูทุกตัว',
   },
   cat: {
     // 🔴 P2c-1 Task 5: สถานะหลายชั้นตัวแรกของเกม — รอดตายด้วย cheatDeath เหมือนเดิม 1 ครั้ง

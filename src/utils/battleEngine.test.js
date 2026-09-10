@@ -4,6 +4,10 @@ import { simulateBattle } from './battleEngine.js'
 import { buildCombatant } from '../data/battle.js'
 import { PET_PASSIVES } from '../data/petPassives.js'
 
+// 🔑 ตัวประกอบในเทสไฟต์จริงใช้ `id: 'blank'` (เพ็ทที่ไม่มีพาสสีฟ) โดยตั้งใจ — เดิมใช้ 🐭 หนู
+//    ซึ่ง P3a เปลี่ยนให้ขโมยสเตตัสตอนเริ่มไฟต์ ⇒ "ตัวประกอบ" กลายเป็นตัวแปรของไฟต์ทันที
+//    เพ็ทจริงทุกตัวมีพาสสีฟหมดแล้ว ⇒ ถ้าต้องการตัวที่ไม่ยุ่งกับอะไรเลย ต้องใช้ 'blank' เท่านั้น
+
 const mono = (rarity, element, grade, n = 4) =>
   Array.from({ length: n }, (_, i) => ({ id: `${element}${i}`, rarity, element, grade }))
 
@@ -126,7 +130,7 @@ test('statsAfter: ติดมากับ aura ที่เปลี่ยน�
 })
 
 test('statsAfter: stackAtk ส่ง atk ใหม่มาทุกชั้นที่สะสม', () => {
-  const weak = Array.from({ length: 3 }, () => ({ id: 'mouse', rarity: 'common', element: 'scissors', grade: 0 }))
+  const weak = Array.from({ length: 3 }, () => ({ id: 'blank', rarity: 'common', element: 'scissors', grade: 0 }))
   const r = simulateBattle(teamOf('trex'), weak, 3)
   const stacks = r.log.filter(e => e.t === 'passive' && e.effect === 'stackAtk')
   assert.ok(stacks.length >= 1, 'ควรมี stackAtk อย่างน้อย 1 ครั้ง')
@@ -140,7 +144,7 @@ test('statsAfter: stackAtk ส่ง atk ใหม่มาทุกชั้น
 test('statsAfter: ทุก event ของแมวที่ขยับ atk ต้องแบกสเตตัสใหม่มาด้วย (ไฟต์จริง)', () => {
   // แมวเกรด 0 ธาตุเสียเปรียบ เจอหนูเกรด 4 → โดนหมัดถึงตาย 3 ครั้งก่อนตายจริงในยกที่ 5
   const r = simulateBattle([{ id: 'cat', rarity: 'common', element: 'fist', grade: 0 }],
-                           [{ id: 'mouse', rarity: 'legendary', element: 'paper', grade: 4 }], 1)
+                           [{ id: 'blank', rarity: 'legendary', element: 'paper', grade: 4 }], 1)
   const evs = r.log.filter(e => e.t === 'passive' && (e.effect === 'cheatDeath' || e.effect === 'grit'))
   assert.deepEqual(evs.map(e => e.effect), ['cheatDeath', 'grit', 'grit'], 'ต้องรอดหมัดถึงตาย 3 ครั้งในไฟต์จริง')
   for (const e of evs) assert.ok(e.statsAfter, `${e.effect} ไม่มี statsAfter`)
@@ -231,7 +235,7 @@ test('aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอ
     { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
     { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
   ]
-  const B = [{ id: 'mouse', rarity: 'common', element: 'fist', grade: 0 }]
+  const B = [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }]
   const r = simulateBattle(A, B, 1)
 
   const opener = r.log.find(e => e.t === 'passive' && e.effect === 'aoeOpener')
@@ -355,7 +359,7 @@ test('หนึ่งการตาย = รันฮุคหนึ่งค�
     // A มี 2 ตัว (ca=2 > cb=1) เพื่อบังคับให้ A ออกตีก่อนแบบไม่พึ่ง rand() — T (index 0) ต้องเป็นผู้ตีก่อนเสมอ
     const A = [
       { id: '__thornsWitness', rarity: 'legendary', element: 'scissors', grade: 5 },
-      { id: 'mouse', rarity: 'common', element: 'scissors', grade: 0 },
+      { id: 'blank', rarity: 'common', element: 'scissors', grade: 0 },
     ]
     const B = [{ id: '__armorTest', rarity: 'common', element: 'scissors', grade: 0 }]
     const r = simulateBattle(A, B, 1)
@@ -419,7 +423,7 @@ test('ตายด้วย aoeOpener: มีใบบันทึกการ�
     { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
     { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
   ]
-  const B = [{ id: 'mouse', rarity: 'common', element: 'fist', grade: 0 }]
+  const B = [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }]
   const r = simulateBattle(A, B, 1)
 
   const silent = r.log.filter(e => e.silent)
@@ -491,7 +495,7 @@ test('ศพหนึ่งใบมีบันทึกการตายใ�
   try {
     const A = [
       { id: '__thornsWitness', rarity: 'legendary', element: 'scissors', grade: 5 },
-      { id: 'mouse', rarity: 'common', element: 'scissors', grade: 0 },
+      { id: 'blank', rarity: 'common', element: 'scissors', grade: 0 },
     ]
     const B = [{ id: '__armorTest', rarity: 'common', element: 'scissors', grade: 0 }]
     const r = simulateBattle(A, B, 1)

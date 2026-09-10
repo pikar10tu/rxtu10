@@ -452,7 +452,7 @@ test('grit ได้โมเมนต์เต็มเหมือนการ
 test('passive หลังบีตปิดเกมต้องเงียบ 0ms (หนี้ §7.6 ข้อ 5)', () => {
   // 🦄 กีรินถือ killChain — น็อกตัวสุดท้ายแล้ว runOnKill ยังยิง event ตามหลังหมัดที่ปิดไฟต์
   const r = simulateBattle([{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }],
-                           [{ id: 'mouse', rarity: 'common', element: 'fist', grade: 0 }], 1)
+                           [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }], 1)
   const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
   const bs = buildBeats(r.log, mh)
 

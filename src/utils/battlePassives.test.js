@@ -38,7 +38,8 @@ test('เพ็ททุกตัวในแค็ตตาล็อกมี p
 })
 
 test('passive ทุกอันมีฟิลด์ครบและ hook ที่รู้จัก', () => {
-  const HOOKS = ['aura', 'onStart', 'onRound', 'onAttack', 'onHit', 'onKill', 'onDeath', 'onAnyDeath']
+  // 'setup' เข้ามาตอน P3a (🐭 หนูเป็นเพ็ทจริงตัวแรกที่ใช้ — เอนจินรองรับตั้งแต่ P2a แล้ว)
+  const HOOKS = ['setup', 'aura', 'onStart', 'onRound', 'onAttack', 'onHit', 'onKill', 'onDeath', 'onAnyDeath']
   for (const [id, p] of Object.entries(PET_PASSIVES)) {
     assert.ok(p.name && p.icon && p.desc, `${id} ฟิลด์ไม่ครบ`)
     const parts = partsOf(p)
@@ -1986,4 +1987,38 @@ test('🐢 เต่า: ทั้งทีมลดดาเมจ · ตัว
   const att = u('blank', { uid: 'B0', side: 'B', atk: 100 })
   assert.equal(Math.round(runOnHit(team[0], 100, att, team, () => 0.99).dmg), 60)
   assert.equal(Math.round(runOnHit(team[1], 100, att, team, () => 0.99).dmg), 80)
+})
+
+test('🐭 หนู: ขโมยพลังและเลือดจากศัตรูทุกตัวตอนเริ่มไฟต์ · ศัตรูเสียจริง', () => {
+  const me   = [u('mouse', { uid: 'A0', atk: 100, maxHp: 1000, hp: 1000 })]
+  const foes = [
+    u('blank', { uid: 'B0', side: 'B', atk: 200, maxHp: 2000, hp: 2000 }),
+    u('blank', { uid: 'B1', side: 'B', atk: 100, maxHp: 1000, hp: 1000 }),
+  ]
+  runSetup(me, foes)
+  assert.equal(Math.round(foes[0].atk), 190)        // เสียไป 5%
+  assert.equal(Math.round(foes[1].maxHp), 950)
+  assert.equal(Math.round(me[0].atk), 115)          // ได้ 10 + 5
+  assert.equal(Math.round(me[0].maxHp), 1150)
+  assert.equal(me[0].hp, me[0].maxHp)               // ได้เลือดมาเต็มก้อนที่ขโมยได้
+})
+
+test('🐭 หนู: เลือดปัจจุบันของศัตรูห้ามล้นหลอดที่หดลง', () => {
+  const me   = [u('mouse', { uid: 'A0', atk: 100, maxHp: 1000, hp: 1000 })]
+  const foes = [u('blank', { uid: 'B0', side: 'B', atk: 100, maxHp: 1000, hp: 1000 })]
+  runSetup(me, foes)
+  assert.ok(foes[0].hp <= foes[0].maxHp)
+})
+
+test('🐭 หนู: ขโมยก่อนออร่าเสมอ — สิงโตคูณจากเลขหลังถูกขโมยแล้ว', () => {
+  // element ของยูนิตในเทสตั้งได้อิสระ (applyAuras อ่านจากตัวละคร ไม่ได้อ่านจากคลัง)
+  const A = [
+    u('mouse', { uid: 'A0', element: 'fist',     atk: 100, maxHp: 1000, hp: 1000 }),
+    u('fox',   { uid: 'A1', element: 'scissors', atk: 100, maxHp: 1000, hp: 1000 }),
+    u('lion',  { uid: 'A2', element: 'paper',    atk: 100, maxHp: 1000, hp: 1000 }),
+  ]
+  const B = [u('blank', { uid: 'B0', side: 'B', atk: 100, maxHp: 1000, hp: 1000 })]
+  runSetup(A, B)
+  applyAuras(A, B)
+  assert.equal(Math.round(A[0].atk), 118)           // (100 + 5) × 1.12
 })
