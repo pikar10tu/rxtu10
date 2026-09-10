@@ -367,3 +367,141 @@ test('หนึ่งการตาย = รันฮุคหนึ่งค�
     delete PET_PASSIVES.__armorTest
   }
 })
+
+// ══════════════════════════════════════════════════════════════════════════
+//  P2c-2 (10 ก.ย. 2026) — การตายเงียบต้องมี "ใบบันทึก" ใน log ไม่ใช่แค่รันฮุคได้
+//  สเปก: docs/superpowers/specs/2026-09-10-silent-death-logging-design.md
+//  เดิมฮุครันครบแล้ว (P2c-1) แต่ไม่มี event ⇒ battleSummary โชว์เพ็ทที่ตายแล้วว่ายังยืนอยู่
+//  · battleBeats ไม่เล่นอนิเมชันน็อก · ผู้ฆ่าไม่ได้เครดิต kills
+// ══════════════════════════════════════════════════════════════════════════
+
+/** ใบการตายเงียบต้องหน้าตาแบบนี้เป๊ะทุกใบ — dmg 0 คือค่าคงที่ที่หน้าสรุปพึ่งอยู่ */
+const assertSilentShape = (e, msg) => {
+  assert.equal(e.t, 'attack', `${msg}: ต้องเป็นชนิด attack (ผู้อ่าน log ทุกตัวรู้จักรูปนี้อยู่แล้ว)`)
+  assert.equal(e.dmg, 0, `${msg}: dmg ต้องเป็น 0 ไม่งั้นหน้าสรุปนับดาเมจพาสสีฟเข้าไปเงียบๆ`)
+  assert.equal(e.sub, true, `${msg}: ต้องเป็นหมัดลูก ไม่งั้นไฟต์ยาวขึ้น (กฎเหล็ก: ห้ามเพิ่ม beat)`)
+  assert.equal(e.dead, true, `${msg}: ต้องแบก dead ไม่งั้นไม่มีใครรู้ว่าตาย`)
+  assert.equal(e.targetHpAfter, 0, `${msg}: หลอดเลือดต้องลงถึง 0`)
+}
+
+test('ตายด้วยหนาม: มีใบบันทึกการตาย โดยผู้ฆ่าคือเจ้าของหนาม (สเปก §4)', () => {
+  PET_PASSIVES.__spikeTest = {
+    name: 'หนามทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onHit', effect: 'thorns', value: { pct: 500 }, step: { pct: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  try {
+    // ชุดเดียวกับเทส killChain ด้านบนเป๊ะ (ซีด 43) — กีรินฆ่า B0 สำเร็จแล้วโดนหนามสวนตายในหมัดเดียวกัน
+    const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]
+    const B = [
+      { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },
+      { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },
+    ]
+    const r = simulateBattle(A, B, 43)
+
+    const silent = r.log.filter(e => e.silent)
+    assert.equal(silent.length, 1, 'การตายของกีรินต้องมีใบบันทึกใบเดียว')
+    assertSilentShape(silent[0], 'ใบตายจากหนาม')
+    assert.equal(silent[0].target, 'A0', 'ผู้ตายคือกีริน')
+    assert.equal(silent[0].attacker, 'B0', 'ผู้ฆ่าคือเจ้าของหนามที่กีรินไปตี (สเปก §7.6: ใครสร้างดาเมจ คนนั้นคือผู้ฆ่า)')
+    assert.equal(silent[0].side, 'B', 'side ต้องเป็นฝั่งของผู้ฆ่า')
+
+    // ใบการตายต้องอยู่หลังใบ attack ของหมัดที่ทำให้ตาย (เหตุมาก่อนผล) และอยู่ในบีตเดียวกัน
+    const parent = r.log.findIndex(e => e.t === 'attack' && e.attacker === 'A0')
+    assert.ok(r.log.indexOf(silent[0]) > parent, 'ใบการตายต้องมาหลังหมัดแม่')
+  } finally {
+    delete PET_PASSIVES.__spikeTest
+  }
+})
+
+test('ตายด้วย aoeOpener: มีใบบันทึกการตาย โดยผู้ฆ่าคือบาฮามุท (สเปก §4)', () => {
+  const A = [
+    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
+    { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
+  ]
+  const B = [{ id: 'mouse', rarity: 'common', element: 'fist', grade: 0 }]
+  const r = simulateBattle(A, B, 1)
+
+  const silent = r.log.filter(e => e.silent)
+  assert.equal(silent.length, 1, 'หนูที่ตายก่อนรอบ 1 ต้องมีใบบันทึก')
+  assertSilentShape(silent[0], 'ใบตายจาก aoeOpener')
+  assert.equal(silent[0].target, 'B0')
+  assert.equal(silent[0].attacker, 'A0', 'ผู้ฆ่าคือบาฮามุท')
+
+  // เหตุ (หมัดเปิด) → ผล (ตาย) → ผลต่อเนื่อง (ทีเร็กซ์ได้ชั้น) ต้องเรียงตามนี้ใน log
+  const opener = r.log.findIndex(e => e.t === 'passive' && e.effect === 'aoeOpener')
+  const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A1')
+  const death = r.log.indexOf(silent[0])
+  assert.ok(opener < death && death < stack,
+    `ลำดับต้องเป็น aoeOpener(${opener}) → ตาย(${death}) → ทีเร็กซ์ได้ชั้น(${stack})`)
+})
+
+test('ตายด้วย guardian: ผู้พิทักษ์ที่ตายจริงมีใบบันทึก โดยผู้ฆ่าคือคนที่สวนหมัดมา (สเปก §4)', () => {
+  PET_PASSIVES.__catGuardian = {
+    name: 'แมวผู้พิทักษ์ทดสอบ', icon: '🧪',
+    parts: [
+      { hook: 'onHit', effect: 'guardian', value: { pct: 100 }, step: { pct: 0 } },
+      { hook: 'onDeath', effect: 'cheatDeath', value: { times: 1, grit: 0, atkPct: 0 }, step: { times: 0, grit: 0, atkPct: 0 } },
+    ],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  PET_PASSIVES.__weakTaunt = {
+    name: 'ล่อเป้าทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onRound', effect: 'taunt', value: { pct: 0 }, step: { pct: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  try {
+    const A = [
+      { id: '__catGuardian', rarity: 'common', element: 'fist', grade: 0 },
+      { id: '__weakTaunt', rarity: 'common', element: 'scissors', grade: 0 },
+    ]
+    const B = [{ id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 }]
+    const r = simulateBattle(A, B, 1)
+
+    const guardDeath = r.log.find(e => e.silent && e.target === 'A0')
+    assert.ok(guardDeath, 'ผู้พิทักษ์ที่ตายจริง (หลัง cheatDeath หมดโควตา) ต้องมีใบบันทึก')
+    assertSilentShape(guardDeath, 'ใบตายจาก guardian')
+    assert.equal(guardDeath.attacker, 'B0', 'ผู้ฆ่าคือคนที่สวนหมัดมา ไม่ใช่ผู้พิทักษ์เอง (บากุไม่ได้สร้างดาเมจ แค่ย้ายเข้าตัว)')
+
+    const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'B0')
+    assert.ok(r.log.indexOf(guardDeath) < stack, 'ตายก่อน ทีเร็กซ์ถึงได้ชั้น (เหตุมาก่อนผล)')
+  } finally {
+    delete PET_PASSIVES.__catGuardian
+    delete PET_PASSIVES.__weakTaunt
+  }
+})
+
+test('ศพหนึ่งใบมีบันทึกการตายใบเดียว — เส้นทางซ้อนต้องไม่แจกเครดิตการฆ่าสองคน (สเปก §4.3)', () => {
+  // เส้นทางเดียวกับเทส "หนึ่งการตาย = รันฮุคหนึ่งครั้ง" ด้านบนเป๊ะ:
+  // T ตี Y → เกราะ Y สะท้อนใส่ T (strike ชั้นใน) → หนามของ T สวน Y ตายกลางชั้นใน
+  // ⇒ ชั้นในประกาศการตายไปแล้ว (ผู้ฆ่า = T ผ่านหนาม) · ใบ attack ของ T ที่ชั้นนอกต้อง **ไม่** อ้าง dead ซ้ำ
+  PET_PASSIVES.__thornsWitness = {
+    name: 'หนามพยานทดสอบ', icon: '🧪',
+    parts: [
+      { hook: 'onHit', effect: 'thorns', value: { pct: 500 }, step: { pct: 0 } },
+      { hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3 }, step: { pct: 0, max: 0 } },
+    ],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  PET_PASSIVES.__armorTest = {
+    name: 'เกราะทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onHit', effect: 'armorStack', value: { count: 1, pct: 100 }, step: { count: 0, pct: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  try {
+    const A = [
+      { id: '__thornsWitness', rarity: 'legendary', element: 'scissors', grade: 5 },
+      { id: 'mouse', rarity: 'common', element: 'scissors', grade: 0 },
+    ]
+    const B = [{ id: '__armorTest', rarity: 'common', element: 'scissors', grade: 0 }]
+    const r = simulateBattle(A, B, 1)
+
+    const marks = r.log.filter(e => e.t === 'attack' && e.dead && e.target === 'B0')
+    assert.equal(marks.length, 1,
+      `ศพของ B0 ต้องมีใบบันทึกใบเดียว ไม่ใช่ ${marks.length} — สองใบ = battleSummary แจกเครดิต kills สองคนจากศพเดียว`)
+    assert.equal(marks[0].silent, true, 'ใบที่ประกาศต้องเป็นใบการตายเงียบของชั้นใน (หนามคือคนฆ่าจริง)')
+  } finally {
+    delete PET_PASSIVES.__thornsWitness
+    delete PET_PASSIVES.__armorTest
+  }
+})

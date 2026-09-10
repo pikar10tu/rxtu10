@@ -109,7 +109,9 @@ export function simulateBattle(teamA, teamB, seed) {
     //    (_deathDone ใน resolveSilentDeath) ทำงาน ไม่งั้นทีเร็กซ์ได้ 2 ชั้นจากศพเดียว (บั๊กเดิมของ P2c-1
     //    ที่เพิ่งแก้ไปแล้วครั้งหนึ่ง — คนละจุดแต่รูปแบบเดียวกัน)
     let dead = tg.hp <= 0
-    if (dead) dead = resolveSilentDeath(tg, att)
+    // announced: true — ใบ 'attack' ที่ push อยู่ข้างล่างนี้แบก dead ของเป้าหลักเองอยู่แล้ว
+    // ไม่ต้องมีใบการตายเงียบซ้อนอีกใบ (สเปก §4.1) · อีก 3 จุดที่เรียกใช้ค่าเริ่มต้น false ถูกต้องแล้ว
+    if (dead) dead = resolveSilentDeath(tg, att, { announced: true })
     log.push({
       t: 'attack', side: att.side, attacker: att.uid, target: tg.uid,
       dmg: Math.round(before - tg.hp), crit: !!tier?.crit, eff: tier?.eff || 'neutral',
@@ -142,11 +144,16 @@ export function simulateBattle(teamA, teamB, seed) {
    *     ของเป้าสวนตายกลางชั้นใน) ใช้ธง `ps._deathDone` กันรันฮุคซ้ำของ "การตายเดียวกัน" — ตั้งเฉพาะตอนตายจริง
    *     (ไม่ถูก prevent) และเคลียร์ทันทีที่เจอ unit.hp > 0 (ฟื้นจาก revive/cheatDeath/saveAlly) เพื่อให้การตาย
    *     "ครั้งใหม่" ของตัวเดียวกันทีหลังในไฟต์เดียวกันรันฮุคได้เต็มรอบอีกครั้ง ไม่ใช่ธงถาวรตลอดไฟต์ */
-  const resolveSilentDeath = (unit, killer) => {
+  const resolveSilentDeath = (unit, killer, { announced = false } = {}) => {
     if (!unit) return false
     if (unit.hp > 0) { psOf(unit)._deathDone = false; return false }
     const st = psOf(unit)
-    if (st._deathDone) return true   // การตายเดียวกันนี้รันฮุคไปแล้วจากเส้นทางอื่น (ดูดอคบล็อกด้านบน) — ไม่รันซ้ำ
+    // 🔴 P2c-2 (สเปก §4.3): คืน false ไม่ใช่ true — ค่าที่คืนแปลว่า "การเรียกครั้งนี้เป็นคนประกาศ
+    //    การตายหรือเปล่า" ไม่ใช่ "ตายหรือเปล่า" · เส้นทางอื่นประกาศไปแล้วพร้อมใบใน log ⇒ ใบของ
+    //    ผู้เรียกคนนี้ต้องไม่อ้างการฆ่าซ้ำ ไม่งั้น battleSummary แจกเครดิต kills ให้สองคนจากศพใบเดียว
+    //    และ hit() จะให้ killChain กับคนที่ไม่ได้ฆ่า
+    //    (ตอนยังไม่มีใบการตายเงียบ การคืน true ถูกต้อง เพราะใบของชั้นนอกเป็นบันทึกเดียวที่มี)
+    if (st._deathDone) return false
     const unitTeam = unit.side === 'A' ? A : B
     const killerTeam = killer.side === 'A' ? A : B
     const d = runOnDeath(unit, unitTeam, killer)
@@ -161,6 +168,21 @@ export function simulateBattle(teamA, teamB, seed) {
     }
     if (d.prevented) return false
     st._deathDone = true
+    // 💀 ใบบันทึกการตาย (P2c-2, สเปก §3–§4) — ยิงเฉพาะทางที่ไม่มีใบ attack ของตัวเองแบก dead อยู่แล้ว
+    //    ใช้รูปแบบเดียวกับหมัดปกติโดยตั้งใจ: ผู้อ่าน log ที่มีอยู่ (battleSummary/battleBeats) เข้าใจทันที
+    //    โดยไม่ต้องแก้ทีละที่ — "ผู้อ่านที่ลืมอัปเดต = พังเงียบ" คือตระกูลบั๊กที่กัดโปรเจกต์นี้มาหลายรอบ
+    //    🔒 dmg ต้องเป็น 0 เสมอ: battleSummary บวก e.dmg เข้า dmgDealt/dmgTaken ตรงๆ โดยไม่เช็ค silent
+    //       ⇒ ใส่ดาเมจจริงลงไปวันไหน เลขในหน้าสรุปจะขยับเงียบๆ ผิดจากที่ผู้ใช้เคาะ (มีเทสตรึงไว้)
+    //    🔒 sub: true ⇒ อยู่ในบีตเดียวกับหมัดที่ทำให้ตาย ไม่เพิ่มเวลาให้ไฟต์ (กฎเหล็ก)
+    //       ยกเว้นใบที่ปิดไฟต์ ซึ่ง battleBeats ยกเป็น 'finish' ให้เอง — ตั้งใจ ไม่ใช่เวลาที่งอกเพิ่ม
+    //    ต้องอยู่ "หลัง" runOnDeath (กันตายได้ = ไม่มีใบเลย) และ "ก่อน" runOnAnyDeath (เหตุมาก่อนผล)
+    if (!announced) {
+      log.push({
+        t: 'attack', side: killer.side, attacker: killer.uid, target: unit.uid,
+        dmg: 0, crit: false, eff: 'neutral', dodged: false,
+        sub: true, silent: true, targetHpAfter: 0, dead: true,
+      })
+    }
     for (const e of runOnAnyDeath(unit, killerTeam, unitTeam, rand)) log.push(e)
     return true
   }
