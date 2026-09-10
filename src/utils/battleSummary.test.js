@@ -43,3 +43,24 @@ test('ทีมว่าง → mvp null', () => {
   assert.equal(s.mvp.A, null)
   assert.equal(s.teamA.length, 0)
 })
+
+// ── P2c-2 (10 ก.ย. 2026): ใบการตายเงียบจาก battleEngine.resolveSilentDeath ──
+// สเปก: docs/superpowers/specs/2026-09-10-silent-death-logging-design.md §5
+// เทสตรึงพฤติกรรม (ไม่ใช่เทสขับการเปลี่ยนแปลง) — ไฟล์นี้ไม่ต้องแก้ตรรกะเลย
+// แต่ถ้าวันไหนมีคนใส่ดาเมจจริงลงใบ silent เลขในหน้าสรุปจะขยับเงียบๆ เทสนี้คือตัวจับ
+
+test('ใบการตายเงียบ: ขึ้น 💀 + ให้เครดิตการฆ่า แต่ไม่ขยับเลขดาเมจ', () => {
+  const lg = [
+    { t: 'attack', side: 'A', attacker: 'A0', target: 'B0', dmg: 100, dead: false, targetHpAfter: 50 },
+    // B0 สวนหนามฆ่า A0 — เอนจินยิงใบนี้ให้ โดยผู้ฆ่าคือเจ้าของหนาม
+    { t: 'attack', side: 'B', attacker: 'B0', target: 'A0', dmg: 0, dead: true, silent: true, sub: true, targetHpAfter: 0 },
+  ]
+  const s = computeBattleSummary(lg, [{ id: 'x' }], [{ id: 'z' }])
+  const a0 = s.teamA[0], b0 = s.teamB[0]
+  assert.equal(a0.dead, true, 'ตัวที่ตายเงียบต้องขึ้น 💀 ไม่ใช่ยืนสว่างอยู่')
+  assert.equal(b0.kills, 1, 'ผู้ฆ่าต้องได้เครดิตการฆ่า')
+  assert.equal(b0.dmgDealt, 0, 'ใบ silent ห้ามบวกดาเมจให้ผู้ฆ่า (ผู้ใช้เคาะ: เลขดาเมจคงเดิม)')
+  assert.equal(a0.dmgDealt, 100, 'ดาเมจของหมัดปกติต้องยังนับตามเดิม')
+  assert.equal(a0.dmgTaken, 0, 'ดาเมจหนามที่ฆ่า A0 ต้องไม่ถูกนับเป็นดาเมจที่ A0 รับ')
+  assert.equal(b0.dmgTaken, 100, 'เป้าของหมัดปกติยังนับดาเมจที่รับตามเดิม')
+})

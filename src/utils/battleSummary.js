@@ -11,6 +11,10 @@ export function computeBattleSummary(log, playerTeam, botTeam) {
   })
   mk('A', playerTeam); mk('B', botTeam)
 
+  // 🔒 ใบ `silent: true` (การตายจากหนาม/guardian/aoeOpener — ดู battleEngine.resolveSilentDeath)
+  //    ใช้รูปแบบเดียวกับหมัดปกติโดยตั้งใจ จึงไม่ต้องมีสาขาแยกที่นี่: `dead` ทำให้ขึ้น 💀 + แจกเครดิต
+  //    การฆ่าให้ถูกคน ส่วน `dmg: 0` ทำให้เลขดาเมจไม่ขยับ ตามที่ผู้ใช้เคาะไว้ (สเปก 2026-09-10 §2)
+  //    🔴 วันไหนมีคนใส่ดาเมจจริงลงใบ silent เลขในหน้าสรุปจะขยับเงียบๆ — มีเทสตรึงไว้ในไฟล์เทสแล้ว
   for (const e of log || []) {
     if (e.t !== 'attack') continue
     const a = units[e.attacker], t = units[e.target]
