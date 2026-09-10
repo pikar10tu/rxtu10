@@ -559,11 +559,20 @@ test('atkOnHit: หมัดที่ดาเมจผ่านเข้าม�
 })
 
 test('teamDamageReduction: หักเป็นทอดกับ damageReduction ของตัวเอง ไม่ใช่บวก %', () => {
-  const d = { uid: 'A0', side: 'A', id: 'turtle', hp: 100, maxHp: 100, atk: 10, teamDrPct: 20 }
-  const att = { uid: 'B0', side: 'B', id: 'blank', hp: 100, maxHp: 100, atk: 10 }
-  // 🐢 turtle มี damageReduction 12% ของตัวเองอยู่แล้ว ⇒ 100 × 0.8 × 0.88 = 70.4
-  const res = runOnHit(d, 100, att, [d], () => 0.5)
-  assert.equal(Math.round(res.dmg * 10) / 10, 70.4)
+  // เพ็ทสังเคราะห์ที่ถือ damageReduction 12% ของตัวเอง + ได้ teamDrPct 20% จากเพื่อน
+  // (ตั้งแต่ P3a ไม่มีเพ็ทจริงตัวไหนถือทั้งสองอย่างพร้อมกัน — กฎ "หักเป็นทอด" ยังต้องคุมไว้)
+  PET_PASSIVES.__dr2 = {
+    name: 'ทดสอบลดซ้อน', icon: '🧪',
+    parts: [{ hook: 'onHit', effect: 'damageReduction', value: { pct: 12 }, step: { pct: 0 } }],
+    desc: 'ลดดาเมจ {pct}%', short: 'ลดดาเมจ {pct}%',
+  }
+  try {
+    const d = { uid: 'A0', side: 'A', id: '__dr2', hp: 100, maxHp: 100, atk: 10, teamDrPct: 20 }
+    const att = { uid: 'B0', side: 'B', id: 'blank', hp: 100, maxHp: 100, atk: 10 }
+    // 100 × 0.8 × 0.88 = 70.4 (ไม่ใช่ 100 × (1 − 0.32) = 68)
+    const res = runOnHit(d, 100, att, [d], () => 0.5)
+    assert.equal(Math.round(res.dmg * 10) / 10, 70.4)
+  } finally { delete PET_PASSIVES.__dr2 }
 })
 
 // ── onDeath / onKill ────────────────────────────────────────
@@ -931,8 +940,14 @@ test('🔒 กฎเหล็ก: cleave/multiStrike ไม่เพิ่มจ
   const beats = buildBeats(log, {})
   const subs = log.filter(e => e.t === 'attack' && e.sub)
   assert.ok(subs.length > 0, 'ต้องมีหมัดลูกเกิดขึ้นจริงถึงจะเทสได้')
+  // 🔴 10 ก.ย. 2026: หมัดลูกที่ "ปิดไฟต์" ได้ kind 'finish' โดยตั้งใจ (กติกาที่ user เคาะไว้ตอน P2c —
+  //    คนดูต้องเห็นหมัดที่ปิดเกมจริง ไม่ใช่หมัดหลักที่ถูกกันจนดาเมจเป็น 0) · เดิมเทสนี้ไม่เคยเจอเคสนั้น
+  //    เพราะ seed 42 ไม่เคยจบด้วยหมัดลูก — พอ 🐢 เต่าเปลี่ยนเป็นลดดาเมจทั้งทีม ไฟต์เดียวกันก็จบด้วยหมัดลูก
+  //    กฎเหล็กคือ "จำนวน beat ไม่เพิ่ม" ไม่ใช่ "หมัดลูกห้ามกินเวลาเสมอ" ⇒ ยกเว้นได้ **ใบเดียว** เท่านั้น
+  let finishSubs = 0
   for (const [i, e] of log.entries()) {
     if (e.t === 'attack' && e.sub) {
+      if (beats[i].kind === 'finish') { finishSubs++; continue }
       // 28 ส.ค.: ฟิลด์เปลี่ยนจาก tier → kind (กฎเหล็กเหมือนเดิม) — และ kind ต้องมีค่าเสมอ
       // ไม่ใช่ null/undefined เพราะ renderer switch(kind) จะได้ไม่มีอะไรตกลง default โดยบังเอิญ
       assert.equal(beats[i].kind, 'sub', 'หมัดลูกต้องเป็น kind sub')
@@ -940,6 +955,7 @@ test('🔒 กฎเหล็ก: cleave/multiStrike ไม่เพิ่มจ
       assert.equal(beatDuration(beats[i]), 0, 'หมัดลูกต้องไม่กินเวลาทั้ง beat')
     }
   }
+  assert.ok(finishSubs <= 1, `มีหมัดลูกที่ถือเวลาปิดเกม ${finishSubs} ใบ — ต้องมีได้ไม่เกิน 1`)
 })
 
 test('ไฟต์จบเสมอ ไม่ค้างลูปแม้ทีมฟื้นเลือดชนกันเอง', () => {
@@ -1541,14 +1557,22 @@ test('infect ทะลุทุกเกราะจริง — ยิงผ�
   // ทีม A: ไวรัสล้วน (1 ตัว) · ทีม B: เต่า (damageReduction) — ทีมละตัวเดียว ⇒ A0 ตี B0 ทุกหมัดแน่นอน
   // ถ้าเชื้อถูกหักโดยสายลด ดาเมจที่ B เสียแต่ละหมัดจะน้อยกว่าที่คำนวณไว้อย่างเห็นได้ชัด
   const A = [{ id: '__virus', rarity: 'legendary', element: 'fist', grade: 3 }]
-  const B = [{ id: 'turtle', rarity: 'common', element: 'paper', grade: 3 }]
+  const B = [{ id: '__wall', rarity: 'common', element: 'paper', grade: 3 }]
+  // 🔴 10 ก.ย. 2026: เดิมฝั่งรับใช้ 🐢 เต่าจริง (damageReduction 12%) — พอ P3a ย้ายเต่าไปเป็นลดทั้งทีม
+  //    ความยาวไฟต์เปลี่ยน ตัวเลขที่บันทึกไว้ท้ายเทสจึงเพี้ยนทันที · เทสนี้ต้องการ "กำแพงลดดาเมจ" เฉยๆ
+  //    ไม่ได้ต้องการเต่า ⇒ ใช้เพ็ทสังเคราะห์ค่าเท่าเต่าเดิม แล้วเทสจะนิ่งต่อการจูนเพ็ทจริงตลอดไป
   const runWith = (pct) => {
     PET_PASSIVES.__virus = {
       name: 'ทดสอบเชื้อ', icon: '🧪',
       parts: [{ hook: 'onAttack', effect: 'infect', value: { pct, max: 5 }, step: { pct: 0, max: 0 } }],
       desc: 'เชื้อ {pct}% ต่อชั้น สูงสุด {max}', short: 'เชื้อ {pct}% ต่อชั้น',
     }
-    try { return simulateBattle(A, B, 12345) } finally { delete PET_PASSIVES.__virus }
+    PET_PASSIVES.__wall = {
+      name: 'ทดสอบกำแพง', icon: '🧪',
+      parts: [{ hook: 'onHit', effect: 'damageReduction', value: { pct: 12 }, step: { pct: 0 } }],
+      desc: 'ลดดาเมจ {pct}%', short: 'ลดดาเมจ {pct}%',
+    }
+    try { return simulateBattle(A, B, 12345) } finally { delete PET_PASSIVES.__virus; delete PET_PASSIVES.__wall }
   }
   const real = runWith(15)                     // ของจริง — pierce มีค่า
   const ctrl = runWith(0)                       // คุมกลุ่ม — โครงสร้างพาสสีฟเหมือนกันทุกจุด (แปะชั้นยังทำงาน,
@@ -1948,4 +1972,18 @@ test('🦣 แมมมอธ: เกราะที่โดนหมัดส�
     found = log.slice(revive).some(e => e?.t === 'passive' && e.effect === 'armorStack' && e.amount > 0)
   }
   assert.ok(found, 'ไม่เจอไฟต์ที่เกราะสะท้อนหลังหมัดสวนเลย — ธง countering อาจบล็อกอยู่')
+})
+
+test('🐢 เต่า: ทั้งทีมลดดาเมจ · ตัวเต่าเองได้สองเท่า', () => {
+  const team = [
+    u('turtle', { uid: 'A0', element: 'paper' }),
+    u('blank',  { uid: 'A1' }),
+  ]
+  applyAuras(team, [])
+  assert.equal(team[0].teamDrPct, 40)                // เจ้าของ 2 เท่า
+  assert.equal(team[1].teamDrPct, 20)
+
+  const att = u('blank', { uid: 'B0', side: 'B', atk: 100 })
+  assert.equal(Math.round(runOnHit(team[0], 100, att, team, () => 0.99).dmg), 60)
+  assert.equal(Math.round(runOnHit(team[1], 100, att, team, () => 0.99).dmg), 80)
 })
