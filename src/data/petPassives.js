@@ -90,7 +90,8 @@ export const PET_PASSIVES = {
   },
   lion: {
     name: 'อาณัติเจ้าป่า', icon: '👑',
-    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 12, hpPct: 12 },
+    // เลขรอบจูน 11 ก.ย.: วัดแยกได้ +47 เมื่อทีมครบ 3 สาย (สนามมาตรฐานวัดตัวนี้ไม่ได้เลย — ทีมเป็นสายเดียวกันหมด)
+    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 10, hpPct: 10 },
               step: { pct: 3, hpPct: 3 } }],
     desc: 'ทีมมีครบทั้ง 3 สาย → ทั้งทีมพลังโจมตี +{pct}% และเลือดสูงสุด +{hpPct}%',
     short: 'ครบ 3 สาย → ทั้งทีมแรง +{pct}% เลือด +{hpPct}%',
@@ -100,7 +101,7 @@ export const PET_PASSIVES = {
     // 🔴 ดาเมจเชื้อ "ทะลุทุกอย่าง" (ช่อง pierce) — เป็นสิทธิพิเศษของตัวนี้ตัวเดียว
     //    ถ้าวันหน้าแจกให้ตัวอื่น มันจะกลายเป็นแค่ "ดาเมจเพิ่ม" อีกอันหนึ่ง และไวรัสจะไม่มีเหตุผลที่จะมีอยู่
     // step.max = 0 — เพดานชั้นเป็นของที่โตแล้วพัง (7 ชั้น = +56% ต่อหมัดของทั้งทีม)
-    parts: [{ hook: 'onAttack', effect: 'infect', value: { pct: 8, max: 5 }, step: { pct: 2, max: 0 } }],
+    parts: [{ hook: 'onAttack', effect: 'infect', value: { pct: 10, max: 5 }, step: { pct: 3, max: 0 } }],
     desc: 'ไวรัสตีใคร เป้านั้นติดเชื้อ 1 ชั้น (สูงสุด {max} ชั้น) · ทีมเราตีเป้าที่ติดเชื้อ เจ็บเพิ่มชั้นละ {pct}% ของพลังโจมตีไวรัส ทะลุทุกการป้องกัน',
     short: 'ติดเชื้อสูงสุด {max} ชั้น · ชั้นละ {pct}% ทะลุเกราะ',
   },
@@ -119,8 +120,10 @@ export const PET_PASSIVES = {
     name: 'เกราะปฐพี', icon: '🪨',
     // step.count = 0 — จำนวนสแตคเป็นของที่โตแล้วพัง (เกราะ 4 ชั้น = กันฟรี 4 หมัดเต็ม)
     // สิ่งที่โตตามขั้นคือ % สะท้อนเท่านั้น · ไม่มีการเติมสแตคระหว่างไฟต์ (สเปกแม่ §4.3)
-    parts: [{ hook: 'onHit', effect: 'armorStack', value: { count: 2, pct: 80 },
-              step: { count: 0, pct: 10 } }],
+    // สะท้อน 50% (จูน 11 ก.ย. จาก 80%) — วัดแล้วตารางปะทะกันเองได้ 91.2% แรงกว่าอันดับสองแบบไม่เห็นฝุ่น
+    // กันหมัดเต็มสองครั้งคือความแรงหลักอยู่แล้ว · ถ้ายังเกินให้ลดจำนวนชั้นเป็น 1 ไม่ใช่ลด % ต่อ
+    parts: [{ hook: 'onHit', effect: 'armorStack', value: { count: 2, pct: 50 },
+              step: { count: 0, pct: 15 } }],
     desc: 'เข้าไฟต์พร้อมเกราะ {count} ชั้น · เกราะกันหมัดนั้นทั้งดอก แล้วสะท้อน {pct}% ใส่ศัตรูทุกตัว',
     short: 'เกราะ {count} ชั้น กันเต็มหมัด · สะท้อน {pct}%',
   },
@@ -173,13 +176,14 @@ export const PET_PASSIVES = {
   },
   badger: {
     name: 'ล้มยักษ์', icon: '🦡',
-    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 25 }, step: { pct: 6 } }],
+    // 30% รอบจูน 11 ก.ย. — ตัวแก้ทางที่ไม่ค่อยได้ทำงาน (ตารางเฉลี่ยมองไม่เห็นเลย) ต้องคุ้มเมื่อทำงานจริง
+    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 30 }, step: { pct: 8 } }],
     desc: 'ตีเป้าที่เลือดสูงสุดมากกว่าตัวเอง แรงขึ้น {pct}%',
     short: 'เป้าตัวใหญ่กว่า ตีแรงขึ้น {pct}%',
   },
   bat: {
     name: 'พันธะเลือด', icon: '🩸',
-    parts: [{ hook: 'aura', effect: 'teamLifesteal', value: { pct: 8 }, step: { pct: 3 } }],
+    parts: [{ hook: 'aura', effect: 'teamLifesteal', value: { pct: 10 }, step: { pct: 3 } }],
     desc: 'ทั้งทีมฟื้นเลือด {pct}% ของดาเมจที่ตัวเองทำได้',
     short: 'ทีมดูดเลือด {pct}% ของดาเมจที่ตีได้',
   },
@@ -247,7 +251,7 @@ export const PET_PASSIVES = {
   mouse: {
     name: 'หัวขโมยตัวจิ๋ว', icon: '🫳',
     // 🔴 hook `setup` เท่านั้น — ห้ามขยับ maxHp กลางไฟต์เด็ดขาด (จะ re-compute แล้วพังทั้งไฟต์)
-    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 5 }, step: { pct: 1.5 } }],
+    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 3 }, step: { pct: 1 } }],
     desc: 'เริ่มไฟต์ ขโมยพลังโจมตีและเลือดสูงสุดจากศัตรูทุกตัว อย่างละ {pct}%',
     short: 'เริ่มไฟต์ ขโมยพลัง+เลือด {pct}% จากศัตรูทุกตัว',
   },
@@ -277,7 +281,7 @@ export const PET_PASSIVES = {
     //    เลข common ต้องต่ำกว่าคู่เทียบ epic/legendary เสมอ · เลข 20% เป็นค่าที่ user เคาะเอง
     //    P3 ใส่ตามนั้นและให้ sim เป็นคนหั่น — ห้ามหั่นเงียบในเฟสนี้
     // "สองเท่า" ใน desc พิมพ์ตรงๆ ได้ เพราะเอนจินบวกให้เจ้าของรอบที่สองตายตัว ไม่ใช่ค่าที่จูนได้
-    parts: [{ hook: 'aura', effect: 'teamDamageReduction', value: { pct: 20 }, step: { pct: 4 } }],
+    parts: [{ hook: 'aura', effect: 'teamDamageReduction', value: { pct: 10 }, step: { pct: 3 } }],
     desc: 'ทั้งทีมรับดาเมจน้อยลง {pct}% · ตัวเต่าเองได้สองเท่า',
     short: 'ทีมรับดาเมจน้อยลง {pct}% · เต่าเองสองเท่า',
   },
