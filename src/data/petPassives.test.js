@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  PET_PASSIVES, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT,
+  PET_PASSIVES, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT, PASSIVE_V2_CHANGED,
   TEAM_AURA_EFFECTS, SELF_STATUS_EFFECTS, FOE_AURA_EFFECTS, FOE_STATUS_EFFECTS,
   partsOf, partsAt, partAt, partWithEffect, passiveValueAt, passiveText, effectText,
 } from './petPassives.js'
@@ -311,4 +311,9 @@ test('ทุก effect ที่มีเพ็ทถือจริง ต้�
       assert.ok(GROUPS.some(g => g.has(k)), `${id}: ${k} ไม่อยู่ในกลุ่มป้ายไหนเลย`)
     }
   }
+})
+
+test('รายชื่อเพ็ทที่กลไกเปลี่ยนในรอบ v2 ต้องมีตัวตนจริงทุก id (พิมพ์ผิด = แถบแจ้งเงียบไปเฉยๆ)', () => {
+  for (const id of PASSIVE_V2_CHANGED) assert.ok(PET_PASSIVES[id], `${id} ไม่มีในทะเบียนพาสสีฟ`)
+  assert.equal(new Set(PASSIVE_V2_CHANGED).size, PASSIVE_V2_CHANGED.length)
 })

@@ -27,6 +27,16 @@
       </div>
       <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์</div>
 
+      <!-- แจ้งครั้งเดียวว่าเพ็ทที่ถืออยู่เปลี่ยนกลไก — ไม่ใช้ป๊อปอัป ไม่ส่งจดหมาย (user เคาะ 10 ก.ย.)
+           ขึ้นเฉพาะคนที่มีเพ็ทในรายการจริง ⇒ คนที่ไม่ได้รับผลกระทบจะไม่โดนกวน -->
+      <div v-if="showPassiveNews" class="pt-news">
+        <div class="pt-news-txt">
+          <b>พาสสีฟอัปเดต</b>
+          <span>เพ็ทของคุณ {{ changedMine.length }} ตัวเปลี่ยนความสามารถ ({{ changedNames }}) — แตะการ์ดเพื่ออ่านของใหม่</span>
+        </div>
+        <button class="pt-news-x" @click="dismissPassiveNews">รับทราบ</button>
+      </div>
+
       <div v-if="!sorted.length" class="pt-empty">
         ยังไม่มีสัตว์เลี้ยง — ไปกดอัญเชิญตัวแรกกันเถอะ <Emoji char="🥚" />
         <RouterLink to="/shop" class="pt-empty-cta">ไปอัญเชิญเลย →</RouterLink>
@@ -81,7 +91,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, PETS, ELEMENTS, GRADE_LABELS } from '../data/index.js'
-import { PET_PASSIVES, effectText } from '../data/petPassives.js'
+import { PET_PASSIVES, PASSIVE_V2_CHANGED, effectText } from '../data/petPassives.js'
 import { petDailyCoins } from '../utils/petUtils.js'
 import { clampGrade } from '../data/petPower.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
@@ -101,6 +111,19 @@ const upcoming = computed(() => {
   return PETS.filter(p => !live.has(p.id))
 })
 const passiveOf = (id) => PET_PASSIVES[id] || null
+
+const changedMine = computed(() => {
+  const own = new Set(pets.value.map(p => p.id))
+  return PASSIVE_V2_CHANGED.filter(id => own.has(id))
+})
+const changedNames = computed(() => {
+  const names = changedMine.value.slice(0, 3).map(id => defOf(id).name).filter(Boolean)
+  return changedMine.value.length > 3 ? `${names.join(' · ')} และอื่นๆ` : names.join(' · ')
+})
+const showPassiveNews = computed(() => !authStore.userData?.passiveV2Seen && changedMine.value.length > 0)
+async function dismissPassiveNews() {
+  await authStore.patchUser({ passiveV2Seen: true }, { passiveV2Seen: true })
+}
 const sel = ref(null)
 const pickOpen = ref(false)
 
@@ -162,6 +185,13 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .7rem; font-weight: 800; color: rgba(0,0,0,.4); }
 .pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }
 .pt-cell-grade { position: absolute; bottom: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; line-height: 1.3; }
+.pt-news { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; padding: 10px 12px;
+  background: #eef2ff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); }
+.pt-news-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pt-news-txt b { font-size: .85rem; }
+.pt-news-txt span { font-size: .75rem; color: rgba(0,0,0,.6); line-height: 1.35; }
+.pt-news-x { flex: none; align-self: center; background: var(--ink); color: #fff; border: 0;
+  border-radius: 999px; padding: 6px 12px; font: 700 .75rem inherit; font-family: inherit; cursor: pointer; }
 .pt-soon-head { display: flex; align-items: baseline; gap: 8px; margin: 18px 0 8px; }
 .pt-soon-head b { font-size: .95rem; }
 .pt-soon-head small { color: rgba(0,0,0,.45); font-size: .75rem; }
