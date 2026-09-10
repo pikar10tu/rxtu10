@@ -53,6 +53,7 @@ export function createBattleFx() {
     for (const a of anims) a.cancel()          // reject → run() กลืนแล้ว
     anims.clear()
     dangerOn.clear()                           // สถานะค้าง ต้องล้างด้วย ไม่งั้นไฟต์ใหม่จะ reuse element ไม่ได้
+    markOn.clear()                             // เหตุผลเดียวกัน — ป้ายชั้นเชื้อของไฟต์ก่อนต้องไม่ค้างมา
     stackAt.clear()
     hideAllPools()
   }
@@ -71,9 +72,10 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], jab: [], danger: [], sweep: [] }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], jab: [], danger: [], sweep: [], mark: [] }
   const idx = { pop: 0, call: 0, puff: 0, jab: 0, sweep: 0, burst: 0, proj: 0 }
   const dangerOn = new Map()      // uid → element ที่กำลังเต้นอยู่
+  const markOn = new Map()        // uid → element ป้ายสถานะค้าง (ชั้นเชื้อ)
 
   // ── เลือกช่องในพูลแบบ "ไม่แย่งของที่ยังวิ่งอยู่" ──
   // ⚠️ ของเดิมเป็น round-robin ล้วน · พูล pop มี 4 ช่อง แต่วัดจาก log จริงได้ว่ามีเลขลอย
@@ -118,6 +120,16 @@ export function createBattleFx() {
     pool.jab.forEach(e => imgSrc(e, '💥'))
     for (let i = 0; i < 8; i++) pool.danger.push(mkEl('brfx-danger'))   // สูงสุด 8 ตัวต่อไฟต์ (4v4)
     for (let i = 0; i < 3; i++) pool.sweep.push(mkImg('brfx-sweep'))    // cleave มากสุด 3 เป้า
+    // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
+    // ⚠️ ห้ามสร้าง element ใหม่ตอนเลขเปลี่ยนกลางไฟต์ — พูลมีไว้เพื่อไม่ให้มี DOM เกิดใหม่ระหว่างเล่น
+    for (let i = 0; i < 6; i++) {
+      const e = mkEl('brfx-mark')
+      const ico = document.createElement('img')
+      ico.className = 'brfx-mark-ico'; ico.setAttribute('aria-hidden', 'true')
+      const num = document.createElement('span'); num.className = 'brfx-mark-n'
+      e.appendChild(ico); e.appendChild(num)
+      pool.mark.push(e)
+    }
     hideAllPools()
   }
   function hideAllPools() {
@@ -339,6 +351,30 @@ export function createBattleFx() {
   }
 
   // ── โซนอันตราย: วงแหวนเต้นค้างบน FX pool (ห้ามทำบนการ์ด = layer ค้างถาวร ตามข้อบังคับ v3) ──
+  /** ป้ายสถานะค้างบนการ์ด (วันนี้มีแค่ชั้นเชื้อ) — n = 0/ไม่ส่ง ⇒ เอาป้ายออก
+   *  🔒 อยู่ชั้น FX ไม่ใช่ DOM ของการ์ด: การ์ดเป็น static ตลอดไฟต์ตามสถาปัตยกรรม v3
+   *     ถ้าเอาตัวเลขนี้ไปไว้ในการ์ด การ์ดจะ re-raster ทุกครั้งที่ชั้นเปลี่ยน = อาการกระตุกเดิมกลับมา */
+  function stateMark(uid, char, n) {
+    const cur = markOn.get(uid)
+    if (!n) {
+      if (cur) { cur.style.opacity = '0'; markOn.delete(uid) }
+      return
+    }
+    const el = cur || pool.mark.find(e => !Array.from(markOn.values()).includes(e))
+    if (!el) return
+    const base = baseXform(uid, 0, -30); if (!base) return
+    el.style.transform = base
+    el.style.opacity = '1'
+    const ico = el.firstChild
+    if (ico && ico.dataset.char !== char) { imgSrc(ico, char); ico.dataset.char = char }
+    el.lastChild.textContent = String(n)
+    markOn.set(uid, el)
+  }
+  function stateMarkClearAll() {
+    for (const el of markOn.values()) el.style.opacity = '0'
+    markOn.clear()
+  }
+
   function dangerRing(uid, on) {
     if (on) {
       if (dangerOn.has(uid)) return
@@ -414,5 +450,6 @@ export function createBattleFx() {
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,
     jab, lunge, squashTarget, targetReacts, shake, ko, dangerRing, dangerClearAll,
+    stateMark, stateMarkClearAll,
   }
 }

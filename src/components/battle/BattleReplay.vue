@@ -610,6 +610,12 @@ function firePassiveFx(e) {
     fx?.pop(on[0], { dmg: e.amount, heal: true, weight: 0.45 })
   }
 
+  // ชั้นเชื้อ — ป้ายค้างบนการ์ด "เป้า" อยู่ชั้น FX ไม่ใช่ในการ์ด (การ์ดต้อง static ตลอดไฟต์)
+  // event ทั้งตอนแปะและตอนย้ายเชื้อส่ง amount = ชั้นสะสมของเป้าหลังเหตุการณ์นั้น
+  if (e.effect === 'infect' || e.effect === 'infectSpread') {
+    for (const t of on) fx?.stateMark(t, '🦠', e.amount || 0)
+  }
+
   switch (e.fxKind) {
     case 'damage':  fx?.sweep(on, e.icon, 60); break        // bahamut สาดไฟใส่ทุกตัว
     case 'cleave':  fx?.sweep(on, e.icon, 45); break        // เขี้ยว/เปลวไฟลงหลายใบในจังหวะเดียว
@@ -718,7 +724,8 @@ function applyImpact(beat, g, t) {
     // ⚠️ rAF หยุดสนิทเมื่อแท็บถูกพับไปหลัง แต่ setTimeout ยังเดิน → กลับมาแล้วเฟรมนี้อาจมาช้าไปหลาย beat
     if (idx.value !== myIdx) { flashOff(); return }
     let targetAnim = null                       // null = ไม่มีอนิเมชันจริง (preset ปิด/ไม่มี el)
-    if (beat.kill) targetAnim = fx?.ko(beat.target, tgtEl, Math.min(KO_MS, cardMs))
+    // ตายแล้วป้ายสถานะค้างต้องหายไปกับการ์ด (เชื้อที่เหลือถูกโยนไปโฮสต์ใหม่ผ่าน event ของตัวเองอยู่แล้ว)
+    if (beat.kill) { fx?.stateMark(beat.target, '🦠', 0); targetAnim = fx?.ko(beat.target, tgtEl, Math.min(KO_MS, cardMs)) }
     else targetAnim = fx?.squashTarget(tgtEl, beat.kind, w, Math.min(SQUASH_MS, cardMs), beat.attacker, beat.target)
     if (targetAnim) targetAnim.then(flashOff)
     else later(flashOff, Math.min(FLASH_MS, Math.max(cardMs, 120)))
@@ -1208,4 +1215,13 @@ onUnmounted(() => {
   width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 18px;
   box-shadow: 0 0 0 3px #ef4444, 0 0 16px 3px rgba(239, 68, 68, .5);
 }
+/* ป้ายสถานะค้าง (ชั้นเชื้อ) — พื้นเข้ม ตัวอักษรสว่าง (อย่าก๊อปสีจากการ์ดพื้นอ่อน) */
+.brfx-mark {
+  display: flex; align-items: center; gap: 2px;
+  padding: 1px 5px 1px 3px; margin: -10px 0 0 -18px;
+  border-radius: 999px; background: rgba(15, 23, 42, .88);
+  border: 1px solid rgba(148, 163, 184, .45);
+  font: 700 11px/1 system-ui, sans-serif; color: #fca5a5;
+}
+.brfx-mark-ico { width: 13px; height: 13px; display: block; }
 </style>
