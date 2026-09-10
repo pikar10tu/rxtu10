@@ -14,7 +14,7 @@ export const DRUGS = [
   { n: 'Amoxicillin', a: 'Antibiotic (Penicillin)', ind: 'ติดเชื้อแบคทีเรีย: ทางเดินหายใจ หู ไซนัส ทางเดินปัสสาวะ', dose: '500 mg ทุก 8 ชม. หรือ 875 mg ทุก 12 ชม.' },
   { n: 'Cetirizine', a: 'Antihistamine Gen 2', ind: 'ภูมิแพ้จมูก ลมพิษ คันตา/จมูก (ง่วงน้อย)', dose: '10 mg วันละครั้ง' },
   { n: 'Omeprazole', a: 'Proton Pump Inhibitor (PPI)', ind: 'กรดไหลย้อน แผลในกระเพาะ/ลำไส้เล็ก', dose: '20–40 mg วันละครั้ง ก่อนอาหารเช้า 30–60 นาที' },
-  { n: 'Simvastatin', a: 'HMG-CoA Reductase Inhibitor (Statin)', ind: 'ลดไขมัน LDL ป้องกันโรคหัวใจ-หลอดเลือด', dose: '10–40 mg วันละครั้ง ตอนเย็น' },
+  { n: 'Simvastatin', a: 'HMG-CoA Reductase Inhibitor (Statin)', ind: 'ลดไขมัน LDL ป้องกันโรคหัวใจ-หลอดเลือด', dose: '10–40 mg วันละครั้ง ก่อนนอน' },
   { n: 'Metformin', a: 'Biguanide (เบาหวาน)', ind: 'เบาหวานชนิดที่ 2 (ยาตัวแรก)', dose: '500–1000 mg วันละ 1–2 ครั้ง พร้อมอาหาร (สูงสุด 2 g/วัน)' },
   { n: 'Amlodipine', a: 'Calcium Channel Blocker (CCB)', ind: 'ความดันโลหิตสูง โรคหลอดเลือดหัวใจตีบ (angina)', dose: '5–10 mg วันละครั้ง' },
   { n: 'Ibuprofen', a: 'NSAIDs (COX-1/2 inhibitor)', ind: 'ปวด อักเสบ ลดไข้ ปวดประจำเดือน', dose: '200–400 mg ทุก 4–6 ชม. พร้อมอาหาร (OTC สูงสุด 1200 mg/วัน)' },
