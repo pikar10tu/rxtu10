@@ -85,10 +85,12 @@
 
     <!-- reveal: anticipate (ลุ้น) → show (เผย) -->
     <Teleport to="body">
-      <div v-if="reveal" class="rv-ov" :class="[`r-${reveal.best}`, reveal.phase]" @click.self="onRevealBackdrop">
+      <div v-if="reveal" class="rv-ov"
+        :class="[`r-${reveal.phase === 'anticipate' ? TIERS[climb] : reveal.best}`, reveal.phase]"
+        @click.self="onRevealBackdrop">
         <!-- จังหวะลุ้น: ลูกแก้วเรืองแสงสี rarity สูงสุด -->
         <div v-if="reveal.phase === 'anticipate'" class="anti" role="button" tabindex="0"
-          aria-label="ข้ามการอัญเชิญ" :style="{ '--glow': rarityColor(reveal.best) }"
+          aria-label="ข้ามการอัญเชิญ" :class="`c${climb}`" :style="{ '--glow': rarityColor(TIERS[climb]) }"
           @click="skipReveal" @keydown.enter.prevent="skipReveal" @keydown.space.prevent="skipReveal">
           <div class="orb"><span class="orb-core"></span></div>
           <div class="anti-txt">กำลังอัญเชิญ…</div>
@@ -183,18 +185,30 @@ const ownedLegendaryIds = () => pets.value.filter((p) => p.rarity === 'legendary
 
 // reveal animation: จังหวะ "ลุ้น" (anticipate, สีลูกแก้ว = rarity สูงสุด) → "เผย" (show)
 const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
+const TIERS = ['common', 'rare', 'epic', 'legendary']
 const reduceMotion = () => prefersReducedMotion()
-let revealTimer = null
+// 🔴 ของเดิมเรืองแสงสีของผลจริงตั้งแต่วินาทีแรก ⇒ 1.3 วิที่ควรลุ้น บอกคำตอบไปแล้ว (สเปกแม่ §6)
+//    ใหม่: ไต่สีทีละขั้น ขาว→ฟ้า→ม่วง→ทอง แล้วหยุดที่ขั้นของผลจริง · ขั้นสูงกว่าใช้เวลาสั้นลง = เร่งจังหวะ
+//    🔒 งบเวลารวมเท่าเดิม 1,300ms ห้ามยืด · ไม่แตะตรรกะสุ่มเลย อ่านผลที่สุ่มเสร็จแล้วอย่างเดียว
+const ANTICIPATE_MS = 1300
+const climb = ref(0)                    // ขั้นสีที่ลูกแก้วไต่ถึงตอนนี้ (0..RANK[best])
+const revealTimers = []
+function clearRevealTimers() { while (revealTimers.length) clearTimeout(revealTimers.pop()) }
 function showReveal(summary, multi) {
   const best = summary.reduce((b, s) => (RANK[s.rarity] > RANK[b] ? s.rarity : b), 'common')
-  clearTimeout(revealTimer)
+  clearRevealTimers()
+  climb.value = 0
   reveal.value = { summary, multi, best, phase: reduceMotion() ? 'show' : 'anticipate' }
-  if (reveal.value.phase === 'anticipate') {
-    revealTimer = setTimeout(() => { if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }, 1300)
-  }
+  if (reveal.value.phase !== 'anticipate') return
+  const steps = RANK[best]
+  // แบ่งเวลาแบบเร่งขึ้น: ขั้นแรกอยู่นานสุด ขั้นท้ายวูบเดียวก่อนแตกเป็นผล
+  const marks = []
+  for (let i = 1; i <= steps; i++) marks.push(Math.round(ANTICIPATE_MS * (0.35 + 0.5 * (i / (steps + 1)))))
+  marks.forEach((ms, i) => revealTimers.push(setTimeout(() => { climb.value = i + 1 }, ms)))
+  revealTimers.push(setTimeout(() => { if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }, ANTICIPATE_MS))
 }
-function skipReveal() { clearTimeout(revealTimer); if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }
-function closeReveal() { clearTimeout(revealTimer); reveal.value = null }
+function skipReveal() { clearRevealTimers(); if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }
+function closeReveal() { clearRevealTimers(); reveal.value = null }
 // แตะที่ว่างระหว่าง "ลุ้น" = ข้ามไปดูผล ไม่ใช่ปิดจอทิ้ง
 // (เดิมผูก closeReveal ตรงๆ ⇒ แตะพลาดนอกลูกแก้ว = เหรียญหักแล้วแต่ไม่มีทางรู้ว่าได้อะไร)
 function onRevealBackdrop() {
@@ -312,6 +326,11 @@ async function chooseTarget(id) {
 .orb-core { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 0 20px #fff; animation: orb-core .62s ease-in-out infinite alternate; }
 .anti-txt { color: #fff; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; letter-spacing: .03em; text-shadow: 0 0 16px var(--glow); }
 .anti-skip { color: rgba(255,255,255,.5); font-size: .7rem; }
+/* ยิ่งไต่สูงยิ่งเร่ง — "จังหวะ" เป็นตัวบอกว่ากำลังจะดี โดยที่สียังไม่เฉลยว่าได้อะไร
+   (สีเปลี่ยนผ่าน --glow ที่ผูกกับขั้นการไต่อยู่แล้ว · ไม่แตะเวลารวม 1.3 วิ) */
+.anti.c2 .orb, .anti.c2 .orb-core { animation-duration: .46s; }
+.anti.c3 .orb, .anti.c3 .orb-core { animation-duration: .3s; }
+.anti.c3 .anti-txt { letter-spacing: .14em; }
 
 .rv-box { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; overflow: hidden; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
 .rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 40px 4px rgba(245,158,11,.5), var(--pop-lg); }
