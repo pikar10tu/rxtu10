@@ -45,9 +45,11 @@ export const rarityPool = (catalog, rarity) => catalog.filter((p) => p.rarity ==
 
 const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
 
-/** สุ่ม 1 ครั้งพร้อม carry state (pity/guaranteed/owned) */
-export function rollOne(state, catalog, rng = Math.random) {
-  const legendaryIds = rarityPool(catalog, 'legendary')
+/** สุ่ม 1 ครั้งพร้อม carry state (pity/guaranteed/owned)
+ *  `opts.legendaryIds` = คลัง legendary ของ "ตู้นี้" — ตู้อีเวนต์ส่งรายชื่อตัวเด่นที่ยังไม่มีเข้ามา (P5)
+ *  ไม่ส่ง/ส่งลิสต์ว่าง = อ่านจาก catalog เหมือนเดิมเป๊ะ (ตู้ปกติต้องไม่เปลี่ยนพฤติกรรมแม้แต่นิดเดียว) */
+export function rollOne(state, catalog, rng = Math.random, opts = {}) {
+  const legendaryIds = opts.legendaryIds?.length ? opts.legendaryIds : rarityPool(catalog, 'legendary')
   const rarity = rollRarity(state.pity, rng)
   if (rarity === 'legendary') {
     const pick = pickLegendary({
@@ -64,11 +66,11 @@ export function rollOne(state, catalog, rng = Math.random) {
 }
 
 /** สุ่ม n ครั้ง (carry state) + การันตี ≥1 epic ต่อ 10-pull */
-export function rollMany(n, state, catalog, rng = Math.random) {
+export function rollMany(n, state, catalog, rng = Math.random, opts = {}) {
   let cur = { pity: state.pity, target: state.target, guaranteed: state.guaranteed, ownedLegendaryIds: [...(state.ownedLegendaryIds || [])] }
   const results = []
   for (let i = 0; i < n; i++) {
-    const r = rollOne(cur, catalog, rng)
+    const r = rollOne(cur, catalog, rng, opts)
     results.push({ rarity: r.rarity, id: r.id, won: r.won })
     cur = { pity: r.nextPity, target: cur.target, guaranteed: r.nextGuaranteed, ownedLegendaryIds: r.nextOwned }
   }

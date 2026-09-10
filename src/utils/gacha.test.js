@@ -114,3 +114,30 @@ test('resolvePullPayment ×10: ตั๋ว≥10 จ่าย 10 ตั๋ว (1
   assert.deepEqual(resolvePullPayment(10, 10), { rolls: TEN_PULL_N, pay: 'ticket', amount: 10 })
   assert.deepEqual(resolvePullPayment(10, 9),  { rolls: TEN_PULL_N, pay: 'coin', amount: TEN_PULL_COST })
 })
+
+// ── คลัง legendary เฉพาะกิจ (ตู้อีเวนต์ของ P5) ──
+test('rollOne: ส่ง legendaryIds เฉพาะกิจ = legendary ออกจากกองนั้นเท่านั้น', () => {
+  const state = { pity: HARD_PITY - 1, target: null, guaranteed: false, ownedLegendaryIds: [] }
+  const r = rollOne(state, CAT, () => 0, { legendaryIds: ['L2'] })
+  assert.equal(r.rarity, 'legendary')
+  assert.equal(r.id, 'L2')
+})
+
+test('rollOne: ไม่ส่ง opts = พฤติกรรมเดิมเป๊ะ (อ่าน legendary จาก catalog)', () => {
+  const state = { pity: HARD_PITY - 1, target: null, guaranteed: false, ownedLegendaryIds: [] }
+  const r = rollOne(state, CAT, () => 0)
+  assert.equal(r.rarity, 'legendary')
+  assert.ok(['L1', 'L2'].includes(r.id))
+})
+
+test('rollMany: ส่ง legendaryIds ต่อทอดถึงทุกใบในชุด', () => {
+  const state = { pity: HARD_PITY - 1, target: null, guaranteed: false, ownedLegendaryIds: [] }
+  const { results } = rollMany(11, state, CAT, () => 0, { legendaryIds: ['L2'] })
+  for (const r of results.filter(x => x.rarity === 'legendary')) assert.equal(r.id, 'L2')
+})
+
+test('rollOne: legendaryIds ว่าง = ตกกลับไปใช้คลังของ catalog (ไม่ใช่แจกของว่าง)', () => {
+  const state = { pity: HARD_PITY - 1, target: null, guaranteed: false, ownedLegendaryIds: [] }
+  const r = rollOne(state, CAT, () => 0, { legendaryIds: [] })
+  assert.ok(['L1', 'L2'].includes(r.id))
+})
