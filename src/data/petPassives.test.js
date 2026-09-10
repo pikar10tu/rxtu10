@@ -245,3 +245,18 @@ test('ไอคอนป้ายต้องไม่ซ้ำกัน (ป้
     assert.equal(icons.size, 1, `กลุ่ม [${group.join(', ')}] ควรใช้ไอคอนเดียวกันจริง แต่ไม่ใช่ (${[...icons]})`)
   }
 })
+
+// ── P2c-2 หนี้ §7.6 ข้อ 2: เพดาน atkStacks ไม่ตรงกัน 3 แหล่ง ────────────────
+// ตัดสินใจ (สเปก 2026-09-10 §7): **ยังไม่แยก state** เพราะวันนี้ไม่มีเพ็ทตัวไหนถือสองแหล่ง
+// การรื้อ st.atkStacks กระทบ buffSources/liveBuffs/ช่อง amount ในทุก event โดยยังไม่มีใครได้ประโยชน์
+// แทนที่ด้วยยามตัวนี้ — เปลี่ยน "พังเงียบตอน P3" เป็น "พังดังตอนเขียนโค้ด"
+test('ยังไม่มีเพ็ทตัวไหนถือ stackAtk เกิน 1 part (หนี้ §7.6 ข้อ 2)', () => {
+  for (const [id, p] of Object.entries(PET_PASSIVES)) {
+    const n = partsOf(p).filter(x => x.effect === 'stackAtk').length
+    assert.ok(n <= 1,
+      `${id} ถือ stackAtk ${n} part — ทุก part ใช้ st.atkStacks ก้อนเดียวกันแต่เพดานคนละเลข ` +
+      `(onRound max 4 · onAnyDeath max 3 · onKill max 3) ⇒ แหล่งที่เพดานต่ำกว่าจะเงียบไปโดยไม่มี event บอก ` +
+      `ก่อนปล่อยเพ็ทตัวนี้ ต้องแยก state ต่อ part ก่อน: แก้ runOnRound/runOnAnyDeath/runOnKill ` +
+      `ใน battlePassives.js แล้วอัปเดต battleBuffs.js ที่อ่าน atkStacks ด้วย`)
+  }
+})

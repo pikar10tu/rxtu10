@@ -1721,3 +1721,33 @@ test('เพ็ทที่ไม่มี start ไม่ได้ชั้น�
   assert.equal(psOf(o).atkStacks || 0, 0)
   assert.equal(o.atk, base)
 })
+
+// ── P2c-2 หนี้ §7.6 ข้อ 8: ช่องว่างเทสที่รู้ตัว ─────────────────────────────
+test('อูโรโบรอสตันที่ 4 ชั้น ไม่ไต่ต่อไม่รู้จบ (หนี้ §7.6 ข้อ 8)', () => {
+  const o = u('ouroboros')
+  const base = o.atk
+  for (let i = 0; i < 10; i++) runOnRound([o])
+  assert.equal(psOf(o).atkStacks, 4, 'เพดาน 4 ชั้นตาม value.max ของ part rage')
+  assert.ok(Math.abs(o.atk / base - 1.05 ** 4) < 1e-9,
+    `atk ขึ้นแค่ 4 ชั้น (ได้ ${o.atk / base} ต้องได้ ${1.05 ** 4})`)
+})
+
+test('เพ็ทสอง part นับเป็นจังหวะเดียว — part แรกต้องเงียบ (หนี้ §7.6 ข้อ 8)', () => {
+  // 🐍 อูโรโบรอสเป็นเพ็ทหลาย part ตัวแรกของเกม (regenSelf + stackAtk ทุกต้นรอบ)
+  // เดิมกฎนี้ตรวจด้วยสคริปต์ inline ตอนพัฒนา — ย้ายมาเป็นเทสถาวรตามหนี้ที่บันทึกไว้
+  const r = simulateBattle([{ id: 'ouroboros', rarity: 'legendary', element: 'fist', grade: 3 }],
+                           [{ id: 'mouse', rarity: 'common', element: 'fist', grade: 0 }], 3)
+  const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
+  const bs = buildBeats(r.log, mh)
+
+  let checked = 0
+  for (let i = 0; i < bs.length - 1; i++) {
+    const a = bs[i], b = bs[i + 1]
+    if (a.t !== 'passive' || b.t !== 'passive') continue
+    if (a.uid !== b.uid || a.effect === b.effect) continue   // ใบซ้ำของ effect เดียวกันคนละเรื่อง
+    checked++
+    assert.equal(beatDuration(a), 0,
+      `part แรกของเพ็ทตัวเดียวต้องเงียบ ไม่งั้นได้ ${beatDuration(a)}ms × จำนวน part (ใบสุดท้ายถือเวลาหยุด)`)
+  }
+  assert.ok(checked > 0, 'ไม่เจอเพ็ทสอง part ยิงติดกันในไฟต์นี้เลย — เทสไม่ได้ทดสอบอะไร (เปลี่ยนซีด)')
+})
