@@ -688,7 +688,10 @@ function applyImpact(beat, g, t) {
       break
   }
 
-  fx?.pop(beat.target, { dmg: beat.dmg, crit: beat.crit, eff: beat.eff, weight: w })
+  // ใบการตายเงียบ (หนาม/guardian/aoeOpener — ดู battleEngine.resolveSilentDeath) ไม่มีดาเมจของตัวเอง
+  // โดยตั้งใจ (dmg: 0 คือค่าคงที่ที่หน้าสรุปพึ่งอยู่) ⇒ เด้ง "-0" ลอยบนจอจะเป็นขยะล้วน
+  // ประกายน็อก + หลอดเลือดลง 0 + การ์ดจางเทา ยังทำงานครบตามปกติจาก beat.kill/targetHpAfter
+  if (!beat.silent) fx?.pop(beat.target, { dmg: beat.dmg, crit: beat.crit, eff: beat.eff, weight: w })
   if (beat.eff === 'super' || beat.eff === 'weak') fx?.callout(beat.target, beat.eff)
   if (beat.kill) fx?.dangerRing(beat.target, false)
   else {
