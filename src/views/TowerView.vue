@@ -25,7 +25,15 @@
           <div class="tw-max-cue-l1">พลังบอทช่วงนี้ตันแล้ว (เกรด V ทุกตัว)</div>
           <div class="tw-max-cue-l2">แพ้ชนะวัดที่สายกับการจัดทีม — ✊ ข่ม ✌️ · ✌️ ข่ม ✋ · ✋ ข่ม ✊</div>
         </div>
-        <div class="tw-bonus"><Emoji char="🪙" /> โบนัสรายได้ตอนนี้ +{{ bonus.toLocaleString() }}/วัน<span v-if="best >= BONUS_CAP_FLOOR" class="tw-bonus-cap"> (เต็มเพดานแล้ว)</span></div>
+        <!-- รายได้ 2 บรรทัด: ยอดรวมที่มีอยู่ (ไม่มี +) แล้วค่อยบอกส่วนต่างของชั้นถัดไป
+             เดิมบรรทัดเดียวเขียน "+7,615/วัน" ทั้งที่เป็นยอดรวม → คนอ่านว่าไต่ชั้นเดียวได้เจ็ดพัน -->
+        <div class="tw-bonus">
+          <div class="tw-bonus-now"><Emoji char="🪙" /> หอคอยให้รายได้ {{ bonus.toLocaleString() }}/วัน</div>
+          <div v-if="nextGain > 0" class="tw-bonus-next">
+            ชนะชั้น {{ floor }} → {{ (bonus + nextGain).toLocaleString() }}/วัน <b>(+{{ nextGain.toLocaleString() }})</b>
+          </div>
+          <div v-else class="tw-bonus-cap">{{ best >= TOWER_MAX ? 'เพดานรายได้เต็มแล้ว · สูงสุดของหอคอย' : 'เพดานรายได้เต็มแล้ว · ไต่ต่อเพื่ออันดับ' }}</div>
+        </div>
 
         <div class="tw-row">
           <span class="tw-label">ศัตรู</span>
@@ -51,7 +59,7 @@
         <div class="tw-actions">
           <button class="tw-edit" @click="pickOpen = true"><Emoji char="🛡️" /> จัดทีม</button>
           <button class="tw-fight" :disabled="busy || !team.length" @click="onFight">
-            <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : `สู้ชั้น ${floor}` }}
+            <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
           </button>
         </div>
         <div v-if="floor >= TOWER_MAX && best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตหอคอยครบแล้ว!</div>
@@ -107,7 +115,7 @@ import { useTower } from '../composables/useTower.js'
 import { towerRanking, TOP_COUNT } from '../utils/towerRivals.js'
 import { buildFloorCrowd } from '../utils/towerCrowd.js'
 import { getPetDef } from '../data/index.js'
-import { floorZone, BONUS_CAP_FLOOR } from '../data/towerFloors.js'
+import { floorZone, towerBonusGain, BONUS_CAP_FLOOR } from '../data/towerFloors.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
@@ -183,6 +191,12 @@ function releasePath() {
   displayBest.value  = best.value
 }
 
+// ส่วนต่างที่จะได้ถ้าชนะชั้นปัจจุบัน — 0 = เลยเพดานแล้ว (ห้ามโชว์ "+0/วัน" จะดูเหมือนบั๊ก)
+const nextGain = computed(() => towerBonusGain(floor.value, best.value))
+const fightLabel = computed(() => nextGain.value > 0
+  ? `สู้ชั้น ${floor.value} · +${nextGain.value.toLocaleString()}/วัน`
+  : `สู้ชั้น ${floor.value}`)
+
 const zone = computed(() => floorZone(floor.value))
 const zoneBg = computed(() => zone.value.royal
   ? 'linear-gradient(135deg, var(--ink) 0%, #5b21b6 100%)'
@@ -192,10 +206,24 @@ async function onFight() {
   if (busy.value) return
   busy.value = true
   holdPath.value = true          // ต้องตั้งก่อน await — patchUser ข้างใน fight() ขยับ floor ทันที
+  // ⚠️ ต้องหยิบก่อน await — patchUser ใน fight() ขยับ best แบบ synchronous (CLAUDE.md ข้อ 9)
+  //    อ่านทีหลังจะได้โบนัส "หลังชนะ" ทั้งคู่ = ส่วนต่างกลายเป็น 0 ทุกครั้ง
+  const bonusBefore = bonus.value
+  const gainOfFight = nextGain.value
+  const atCap = best.value >= BONUS_CAP_FLOOR
   try {
     const r = await fight()
     // แพ้แล้วต้องมีทางไปต่อ — ปุ่มเลือกตามเหรียญ/ตั๋วที่มีอยู่จริง ณ ตอนนี้
-    if (r) replay.value = { ...r, loseTip: buildLoseTip('tower', authStore.userData) }
+    if (r) replay.value = {
+      ...r,
+      loseTip: buildLoseTip('tower', authStore.userData),
+      // รางวัลเดียวของหอคอยคือรายได้/วัน — จอชนะต้องพูดเรื่องเงิน ไม่ใช่แค่ "ขึ้นชั้น"
+      rewardText: gainOfFight > 0
+        ? `รายได้รายวัน ${bonusBefore.toLocaleString()} → ${(bonusBefore + gainOfFight).toLocaleString()} (+${gainOfFight.toLocaleString()}/วัน)`
+        // gain 0 ได้ 2 ทาง: เลยเพดานจริง หรือ best สูงกว่าชั้นที่สู้ (แอดมินรีเซตชั้น)
+        // ทางหลังยังไม่เต็มเพดาน — ห้ามเขียนว่าเต็ม และห้ามอ้างโบนัสของชั้นที่เพิ่งสู้ (ต่ำกว่าของจริง)
+        : `ขึ้นชั้น ${Math.min(TOWER_MAX, r.cleared + 1)} · รายได้รายวันเท่าเดิม ${bonusBefore.toLocaleString()}/วัน${atCap ? ' (เต็มเพดานแล้ว)' : ''}`,
+    }
     else releasePath()           // fight() คืน null (ยังไม่ได้จัดทีม) → ปล่อยเลย
   } catch (e) {
     releasePath()
@@ -234,8 +262,11 @@ function onSheetFight() {
 .tw-max-cue { margin: 10px 16px 0; padding: 8px 10px; border-radius: 10px; background: var(--primary-light); border: 1.5px dashed var(--primary); font-size: .74rem; font-weight: 700; color: var(--ink); line-height: 1.45; }
 .tw-max-cue-l1 { font-weight: 800; }
 .tw-max-cue-l2 { font-weight: 600; }
-.tw-bonus { font-size: .76rem; color: #b45309; font-weight: 700; padding: 10px 16px 0; }
-.tw-bonus-cap { font-weight: 600; color: var(--muted); }
+.tw-bonus { padding: 10px 16px 0; line-height: 1.5; }
+.tw-bonus-now { font-size: .76rem; color: #b45309; font-weight: 700; }
+.tw-bonus-next { font-size: .74rem; color: var(--ink); font-weight: 600; }
+.tw-bonus-next b { color: #15803d; font-weight: 800; }
+.tw-bonus-cap { font-size: .74rem; font-weight: 600; color: var(--muted); }
 .tw-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
 .tw-label { font-size: .7rem; color: var(--muted); width: 48px; flex-shrink: 0; }
 .tw-team { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }

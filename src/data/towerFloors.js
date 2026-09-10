@@ -107,6 +107,16 @@ export function getTowerBonus(bestFloor) {
   return Math.round(raw / 5) * 5
 }
 
+/** ส่วนต่างโบนัส/วัน ที่จะได้เพิ่ม "ถ้าชนะชั้น floor" — 0 = ไม่เพิ่มแล้ว (เลยเพดาน)
+ *  ⚠️ เป็นแหล่งเดียวของตัวเลข "+X/วัน" ทุกจอ — ห้ามลบ getTowerBonus(a)−getTowerBonus(b) เองที่อื่น
+ *  max(0,…) กันติดลบตอนแอดมินกด "รีเซตชั้นหอคอย" (ชั้นปัจจุบันต่ำกว่า best ได้)
+ */
+export function towerBonusGain(floor, best) {
+  const b = Math.max(0, Math.floor(best) || 0)
+  const f = Math.max(b, Math.floor(floor) || 0)
+  return Math.max(0, getTowerBonus(f) - getTowerBonus(b))
+}
+
 // floor → โซนแฟนซี (UI) — 5 โซน · โซนที่ 5 = ช่วงตัน "วัดฝีมือ"
 const ZONES = [
   { name: 'ลานประลอง',      art: '🛡️', color: '#84cc16', from: 1,  to: 20 },

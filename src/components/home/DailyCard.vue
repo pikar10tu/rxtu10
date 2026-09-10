@@ -28,7 +28,13 @@
     <div class="dc-breakdown">
       <div class="dc-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
       <div class="dc-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
-      <div v-if="towerBonus" class="dc-row"><span><Emoji char="🏯" /> หอคอย</span><b>+{{ towerBonus.toLocaleString() }}/วัน</b></div>
+      <!-- แถวหอคอยต้องโผล่ "เสมอ" — เดิม v-if="towerBonus" ซ่อนแถวนี้จากคนที่ยังไม่เคยไต่
+           คือซ่อนป้ายชี้ทางจากคนที่ต้องการมันที่สุด (เพื่อนหลายคนไม่รู้ว่าหอคอยให้รายได้รายวัน) -->
+      <div v-if="towerBonus" class="dc-row"><span><Emoji char="🏯" /> หอคอย</span><b>{{ towerBonus.toLocaleString() }}/วัน</b></div>
+      <RouterLink v-else to="/tower" class="dc-row dc-cta">
+        <span><Emoji char="🏯" /> หอคอย · ยังไม่ได้ไต่</span>
+        <b>ถึงชั้น {{ TOWER_HINT_FLOOR }} = +{{ towerHintBonus.toLocaleString() }}/วัน ›</b>
+      </RouterLink>
       <div v-if="bonusPct" class="dc-row dc-bonus"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
       <div v-if="buffActive" class="dc-row dc-bonus"><span><Emoji char="⚡" /> โบนัสเควสต์รายวัน</span><b>+50%</b></div>
       <div class="dc-row dc-total"><span>รวมเต็ม (24 ชม.)</span><b>{{ ratePerDay.toLocaleString() }}<Emoji char="🪙" /></b></div>
@@ -39,12 +45,18 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
+import { getTowerBonus } from '../../data/towerFloors.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useDaily } from '../../composables/useDaily.js'
 
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
 const { baseIncome, petIncome, towerBonus, bonusPct, buffActive, ratePerDay, ratePerHour, accrued, fillPct, isFull, remainingMs, claim } = useDaily()
+
+// เป้าหมายที่ยกมาล่อคนยังไม่เคยไต่ — ชั้น 10 ไปถึงได้ในวันเดียวและตัวเลขใหญ่พอให้สนใจ
+const TOWER_HINT_FLOOR = 10
+const towerHintBonus = getTowerBonus(TOWER_HINT_FLOOR)
 
 const fmtRemain = computed(() => {
   const s = Math.ceil(remainingMs.value / 1000)
@@ -85,6 +97,9 @@ const fmtRemain = computed(() => {
 .dc-row { display: flex; justify-content: space-between; align-items: center; font-size: .74rem; color: rgba(0,0,0,.6); padding: 3px 0; }
 .dc-row b { color: #059669; }
 .dc-bonus b { color: #ec4899; }
+.dc-cta { text-decoration: none; }
+.dc-cta b { color: #b45309; }
+.dc-cta:active { opacity: .6; }
 .dc-total { border-top: 1px dashed rgba(0,0,0,.12); margin-top: 4px; padding-top: 6px; font-weight: 800; color: rgba(0,0,0,.8); }
 .dc-total b { color: #b45309; }
 </style>

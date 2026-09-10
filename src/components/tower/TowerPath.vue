@@ -67,7 +67,8 @@
              :style="{ transform: `translate3d(0, ${(max - burstFloor) * ROW_H}px, 0)` }"
              aria-hidden="true">
           <span class="tp-ring"></span>
-          <span class="tp-gain">+{{ burstBonus.toLocaleString() }}/วัน</span>
+          <!-- ยอดรวมหลังผ่านหมุด ไม่ใช่ส่วนเพิ่ม → ไม่มี + นำหน้า -->
+          <span class="tp-gain">{{ burstBonus.toLocaleString() }}/วัน</span>
         </div>
       </div>
     </div>

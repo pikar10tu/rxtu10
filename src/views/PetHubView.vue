@@ -22,7 +22,7 @@
       <RouterLink to="/tower" class="game-card">
         <span class="gc-emoji"><Emoji char="🏯" /></span>
         <span class="gc-name">ปีนหอคอย</span>
-        <span class="gc-badge grow">ไต่ชั้น · ปลดโบนัส</span>
+        <span class="gc-badge grow">ไต่ชั้น · เพิ่มรายได้รายวัน</span>
       </RouterLink>
 
       <RouterLink v-if="pvpOpen || authStore.isAdmin" to="/arena" class="game-card">

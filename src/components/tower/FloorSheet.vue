@@ -9,7 +9,8 @@
                @update:open="$emit('close')">
     <div class="fs">
       <div class="fs-bonus">
-        <Emoji char="🪙" /> พิชิตถึงชั้นนี้ = โบนัสรายได้ +{{ bonus.toLocaleString() }}/วัน
+        <!-- ยอด "รวม" ไม่ใช่ส่วนเพิ่ม — ห้ามใส่ + นำหน้า (คนอ่านว่าไต่ชั้นเดียวได้เท่านี้) -->
+        <Emoji char="🪙" /> พิชิตถึงชั้นนี้ = รายได้รวม {{ bonus.toLocaleString() }}/วัน
       </div>
 
       <div class="fs-sec">ศัตรูที่รออยู่</div>

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { getFloorTeam, getTowerBonus, TOWER_MAX, floorZone, botCount, botGrade, TOWER_BONUS_FLOORS, BONUS_CAP_FLOOR } from './towerFloors.js'
+import { getFloorTeam, getTowerBonus, towerBonusGain, TOWER_MAX, floorZone, botCount, botGrade, TOWER_BONUS_FLOORS, BONUS_CAP_FLOOR, TOWER_BONUS_MIN } from './towerFloors.js'
 
 test('TOWER_MAX = 100', () => { assert.equal(TOWER_MAX, 100) })
 
@@ -127,4 +127,35 @@ test('ทีมบอททุกชั้นมาจาก wave 1 เท่า
       assert.ok(ids.has(p.id), `ชั้น ${f} ได้ ${p.id} ซึ่งไม่ใช่ wave 1`)
     }
   }
+})
+
+// ── towerBonusGain: ตัวเลข "+X/วัน" ที่โชว์บนปุ่มสู้/การ์ดชั้น/จอชนะ ──────────
+test('towerBonusGain: ส่วนต่างของชั้นถัดไป = โบนัสหลังชนะ − โบนัสตอนนี้', () => {
+  for (const [floor, best] of [[1, 0], [10, 9], [40, 39], [BONUS_CAP_FLOOR, BONUS_CAP_FLOOR - 1]]) {
+    assert.equal(towerBonusGain(floor, best), getTowerBonus(floor) - getTowerBonus(best))
+  }
+  assert.equal(towerBonusGain(1, 0), TOWER_BONUS_MIN)   // ชั้นแรกได้เท่าโบนัสขั้นต่ำพอดี
+})
+
+test('towerBonusGain: เลยเพดานแล้วได้ 0 — จอต้องไม่โชว์ "+0/วัน"', () => {
+  for (let f = BONUS_CAP_FLOOR + 1; f <= TOWER_MAX; f++) {
+    assert.equal(towerBonusGain(f, f - 1), 0, `ชั้น ${f} ต้องไม่เพิ่มโบนัสแล้ว`)
+  }
+})
+
+test('towerBonusGain: best สูงกว่าชั้นปัจจุบัน (แอดมินรีเซตชั้น) = 0 ไม่ติดลบ', () => {
+  assert.equal(towerBonusGain(1, 50), 0)
+  assert.equal(towerBonusGain(30, 60), 0)
+})
+
+test('towerBonusGain: ค่าขยะ/ว่าง ไม่พัง', () => {
+  assert.equal(towerBonusGain(undefined, undefined), 0)
+  assert.equal(towerBonusGain(null, null), 0)
+  assert.equal(towerBonusGain(-5, -5), 0)
+})
+
+test('towerBonusGain: ไต่ทีละชั้นจาก 0 ถึงเพดาน รวมแล้วเท่าโบนัสสูงสุดพอดี', () => {
+  let sum = 0
+  for (let f = 1; f <= TOWER_MAX; f++) sum += towerBonusGain(f, f - 1)
+  assert.equal(sum, getTowerBonus(BONUS_CAP_FLOOR))
 })
