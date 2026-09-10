@@ -233,10 +233,11 @@ test('บากุ: มี 2 part (รับแทน + ฟื้นเลือ
   assert.ok(guard.hp > 100, 'ต้องฟื้นเลือดจริง')
 })
 
-test('healLowestAlly (unicorn): ฟื้นให้เพื่อนที่พร่องสุด ไม่ใช่ตัวเอง', () => {
-  const uni = u('unicorn', { hp: 100 })
+test('healLowestAlly (butterfly): ฟื้นให้เพื่อนที่พร่องสุด ไม่ใช่ตัวเอง', () => {
+  // 🔴 10 ก.ย. 2026: 🦄 ยูนิคอร์นย้ายไป healOnAttack แล้ว — ตัวที่ยังถือ healLowestAlly คือ 🦋 ผีเสื้อ
+  const uni = u('butterfly', { hp: 100 })
   const hurt = u('cat', { uid: 'A1', hp: 200 })
-  const ok = u('mouse', { uid: 'A2' })
+  const ok = u('blank', { uid: 'A2' })
   const evs = runOnRound([uni, hurt, ok])
   assert.equal(evs[0].targets[0], 'A1')
   assert.ok(hurt.hp > 200)
@@ -2021,4 +2022,35 @@ test('🐭 หนู: ขโมยก่อนออร่าเสมอ — �
   runSetup(A, B)
   applyAuras(A, B)
   assert.equal(Math.round(A[0].atk), 118)           // (100 + 5) × 1.12
+})
+
+test('🦄 ยูนิคอร์น: ตีแล้วฟื้นเพื่อนที่บอบช้ำสุดตามดาเมจจริง (ไม่ใช่ต้นรอบอีกแล้ว)', () => {
+  const uni  = u('unicorn', { uid: 'A0', maxHp: 1000, hp: 1000 })
+  const hurt = u('blank',   { uid: 'A1', maxHp: 1000, hp: 300 })
+  const ok   = u('blank',   { uid: 'A2', maxHp: 1000, hp: 900 })
+  const out = runOnDealt(uni, [uni, hurt, ok], 100)
+  assert.equal(hurt.hp, 320)                        // 20% ของดาเมจ 100
+  assert.equal(ok.hp, 900)
+  const e = out.events.find(x => x.effect === 'healOnAttack')
+  assert.ok(e && e.fxKind === 'heal')
+  assert.deepEqual(e.targets, ['A1'])
+
+  // ไม่ทำงานที่ต้นรอบอีกแล้ว
+  assert.equal(runOnRound([uni, hurt, ok]).filter(x => x.effect === 'healLowestAlly').length, 0)
+})
+
+test('🦄 + 🦇 ในทีมเดียวกัน: สองผลนี้ต้องได้ event ของตัวเองครบ ไม่มีใบไหนถูกกลืน', () => {
+  // สเปก §9 ข้อ 8 — หนี้ P2 §7.4 ข้อ 7 เตือนว่าถ้าสองผลนี้ยิงบน uid เดียวกันติดกัน กฎจังหวะจะปิดเสียงใบแรก
+  // วันนี้เป็นคนละเพ็ท (uid ต่างกัน) จึงยังไม่ชน — เทสนี้คือตัวที่จะแดงทันทีถ้าวันหน้ามีเพ็ทถือทั้งคู่
+  // ยูนิคอร์นต้องเลือดพร่องด้วย ไม่งั้นก้อนดูดเลือดของตัวเองฟื้นไม่ได้ = ไม่มี event (ถูกแล้ว ไม่ใช่บั๊ก)
+  const uni  = u('unicorn', { uid: 'A0', maxHp: 1000, hp: 800 })
+  const bat  = u('bat',     { uid: 'A1', maxHp: 1000, hp: 500 })
+  const hurt = u('blank',   { uid: 'A2', maxHp: 1000, hp: 300 })
+  const team = [uni, bat, hurt]
+  applyAuras(team, [])
+  const out = runOnDealt(uni, team, 100)
+  const kinds = out.events.map(e => e.effect)
+  assert.ok(kinds.includes('healOnAttack'), 'ผลของยูนิคอร์นหาย')
+  assert.ok(kinds.includes('teamLifesteal'), 'ผลดูดเลือดของค้างคาวหาย')
+  assert.equal(new Set(out.events.map(e => `${e.uid}:${e.effect}`)).size, out.events.length)
 })

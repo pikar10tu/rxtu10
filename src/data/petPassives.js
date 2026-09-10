@@ -141,9 +141,9 @@ export const PET_PASSIVES = {
   },
   unicorn: {
     name: 'เขาศักดิ์สิทธิ์', icon: '✨',
-    parts: [{ hook: 'onRound', effect: 'healLowestAlly', value: { pct: 5 }, step: { pct: 2 } }],
-    desc: 'ฟื้นเลือดเพื่อนที่บอบช้ำที่สุด {pct}% ทุกต้นรอบ',
-    short: 'ฟื้นเลือดเพื่อนที่บอบช้ำสุด {pct}% ทุกต้นรอบ',
+    parts: [{ hook: 'onAttack', effect: 'healOnAttack', value: { pct: 20 }, step: { pct: 6 } }],
+    desc: 'ทุกครั้งที่ตี ฟื้นเลือดเพื่อนที่บอบช้ำสุด {pct}% ของดาเมจที่ทำได้',
+    short: 'ตีแล้วฟื้นเพื่อนบอบช้ำสุด {pct}% ของดาเมจ',
   },
   fairy: {
     name: 'ละอองเวทมนตร์', icon: '✨',
