@@ -32,14 +32,33 @@
           <span v-if="currentStatus === 'conflict'" class="rv-conflict-badge">⚠️ ขัดแย้ง — คุณคือผู้ตัดสิน</span>
         </div>
 
-        <div class="rv-q">{{ current.question }}</div>
-        <ul class="rv-choices">
-          <li v-for="(c, i) in current.choices" :key="i" :class="{ correct: i === current.answer }">
-            <span class="rv-c-letter">{{ LETTERS[i] }}</span><span class="rv-c-text">{{ c }}</span>
-            <span v-if="i === current.answer" class="rv-c-mark">✓ เฉลย</span>
-          </li>
-        </ul>
-        <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
+        <template v-if="!editing">
+          <div class="rv-q">{{ current.question }}</div>
+          <ul class="rv-choices">
+            <li v-for="(c, i) in current.choices" :key="i" :class="{ correct: i === current.answer }">
+              <span class="rv-c-letter">{{ LETTERS[i] }}</span><span class="rv-c-text">{{ c }}</span>
+              <span v-if="i === current.answer" class="rv-c-mark">✓ เฉลย</span>
+            </li>
+          </ul>
+          <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
+          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ปุ่ม "แก้ข้อนี้"</div>
+          <button class="rv-mini rv-edit-btn" @click="openEdit">✏️ แก้ข้อนี้</button>
+        </template>
+
+        <div v-else class="rv-editbox">
+          <QuestionEditor v-model="editDraft" compact />
+          <div class="rv-edit-hint" :class="editRequeues ? 'requeue' : 'stay'">
+            <template v-if="editRequeues">🔄 บันทึกแล้วข้อนี้ไปเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้</template>
+            <template v-else-if="editTouched">✅ บันทึกแล้วตรวจต่อได้เลย ผลตรวจเดิมยังอยู่</template>
+            <template v-else>ยังไม่ได้แก้อะไร</template>
+          </div>
+          <div class="rv-actions">
+            <button class="rv-btn rv-gray" :disabled="savingEdit" @click="closeEdit">ยกเลิก</button>
+            <button class="rv-btn rv-primary" :disabled="!canSaveEdit || savingEdit" @click="saveEdit">
+              {{ savingEdit ? 'กำลังบันทึก…' : 'บันทึกการแก้' }}
+            </button>
+          </div>
+        </div>
 
         <!-- รีวิวเดิม 2 ฉบับ (โชว์เฉพาะข้อ conflict ให้คนที่ 3 ตัดสิน — ข้ออื่นซ่อนกันอคติ) -->
         <div v-if="currentStatus === 'conflict' && priorReviews.length" class="rv-priors">
@@ -55,7 +74,7 @@
         </div>
 
         <!-- ── ฟอร์มตรวจ ── -->
-        <div class="rv-form">
+        <div v-if="!editing" class="rv-form">
           <div class="rv-verdicts">
             <button
               v-for="v in VERDICTS" :key="v.key"
@@ -199,20 +218,22 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, getDocs, getDoc, doc, updateDoc, runTransaction, arrayUnion, increment, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, updateDoc, setDoc, runTransaction, arrayUnion, increment, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { domainLabel } from '../data/domains.js'
-import { computeStatus, nextReviewQueue, needsReviewBy, buildLeaderboard, VERDICT_LABEL, pickRandom, REVIEW_RESET } from '../utils/questionReview.js'
+import { computeStatus, nextReviewQueue, needsReviewBy, buildLeaderboard, VERDICT_LABEL, pickRandom, REVIEW_RESET, verdictContentChanged, sideContentChanged } from '../utils/questionReview.js'
 import { triageBuckets, triageSummary, BUCKET_KEYS, BUCKET_META } from '../utils/questionTriage.js'
 import { getCategories } from '../utils/questionCategories.js'
 import { pleFields, plePatch } from '../utils/pleMapping.js'
 import { isPleGroupKey } from '../data/plecc.js'
 import { quizSample } from '../utils/quizSample.js'
 import TopicSelect from '../components/questions/TopicSelect.vue'
+import QuestionEditor from '../components/questions/QuestionEditor.vue'
+import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 
 const authStore = useAuthStore()
@@ -263,6 +284,88 @@ function pickNext() {
   currentId.value = q ? q.id : null
 }
 const currentStatus = computed(() => current.value ? computeStatus(current.value) : null)
+
+// ── ฟอร์มแก้ข้อในหน้าตรวจ ──
+//  คนตรวจเจอข้อผิดแล้วแก้ได้เลย ไม่ต้องเดินไปคลัง — นี่คือชิ้นส่วนที่ทำให้ลูป "ตก→แก้→ตรวจใหม่" ครบ
+//  แก้ชั้นตัดสิน (โจทย์/ตัวเลือก/เฉลย) → ข้อวนเข้าคิวให้คนอื่นตรวจ คนแก้ตรวจเองไม่ได้ (lastFixBy)
+//  แก้ชั้นประกอบ (คำอธิบาย/หมายเหตุ) → อยู่ข้อเดิม ส่งผลตรวจต่อได้เลย
+const editing = ref(false)
+const editDraft = ref(null)
+const savingEdit = ref(false)
+
+const editPayload = computed(() => (editing.value && editDraft.value) ? draftPayload(editDraft.value) : null)
+// แก้แบบนี้แล้วข้อจะวนเข้าคิวไหม — ใช้ทั้งตัดสินเส้นทางเขียนและขึ้นป้ายเตือนก่อนกด
+const editRequeues = computed(() => !!editPayload.value && verdictContentChanged(current.value, editPayload.value))
+const editTouched = computed(() =>
+  !!editPayload.value && (editRequeues.value || sideContentChanged(current.value, editPayload.value)))
+const canSaveEdit = computed(() => !!editPayload.value && draftValid(editDraft.value) && editTouched.value)
+
+function openEdit() {
+  if (!current.value) return
+  editDraft.value = draftFrom(current.value)
+  editing.value = true
+}
+function closeEdit() { editing.value = false; editDraft.value = null }
+
+async function saveEdit() {
+  if (!canSaveEdit.value || savingEdit.value || !current.value || !myUid.value) return
+  const q = current.value
+  const uid = myUid.value
+  const u = authStore.userData || {}
+  const fixerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)
+  const payload = editPayload.value
+  const requeue = editRequeues.value
+  if (!(await confirm(requeue
+    ? 'บันทึกการแก้?\nข้อนี้จะกลับเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้'
+    : 'บันทึกคำอธิบาย / หมายเหตุ?\nผลตรวจเดิมยังอยู่ ตรวจต่อได้เลย'))) return
+  savingEdit.value = true
+  const oldStatus = computeStatus(q)
+  try {
+    if (requeue) {
+      // rules ผ่านทาง isReviewReset() — ไม่มี hasOnly จึงเขียนเนื้อหาไปพร้อมกับการล้างผลตรวจได้
+      await updateDoc(doc(db, 'questions', q.id), {
+        ...payload,
+        ...REVIEW_RESET,
+        reviewVerdicts: deleteField(),
+        retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
+        lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+      usage.track(0, 1)
+      // ⚠️ ห้ามเขียนตอน oldStatus === 'pending' — key ซ้ำในก้อนเดียว ตัวหลังทับตัวแรก ตัวเลขเฟ้อ
+      if (oldStatus !== 'pending') {
+        try {
+          await setDoc(doc(db, 'reviewMeta', 'main'),
+            { progress: { [oldStatus]: increment(-1), pending: increment(1) } }, { merge: true })
+          usage.track(0, 1)
+        } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
+      }
+      meta.value = { ...meta.value, progress: bumpedProgress(oldStatus, 'pending') }
+      patchTriageRow(q.id, {
+        ...payload, ...REVIEW_RESET, retired: false,
+        lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
+      })
+      closeEdit()
+      toast('บันทึกแล้ว — ส่งข้อนี้ให้คนอื่นตรวจต่อ', 'success')
+      pickNext()
+    } else {
+      await updateDoc(doc(db, 'questions', q.id), {
+        explanation: payload.explanation,
+        reviewNote: payload.reviewNote,
+        updatedAt: serverTimestamp(),
+      })
+      usage.track(0, 1)
+      // 🔑 ต้อง patch local ด้วย — submit() เทียบ baseNote จาก q.reviewNote ที่โหลดมาตอนเปิดข้อ
+      //    ถ้าไม่ patch หมายเหตุที่เพิ่งบันทึกจะโดนค่าเก่าเขียนทับตอนกดส่งผลตรวจ
+      patchTriageRow(q.id, { explanation: payload.explanation, reviewNote: payload.reviewNote })
+      note.value = payload.reviewNote || ''
+      hadNote.value = !!payload.reviewNote
+      closeEdit()
+      toast('บันทึกแล้ว — ตรวจต่อได้เลย', 'success')
+    }
+  } catch (e) { console.error('[review edit]', e); toast('บันทึกไม่สำเร็จ', 'error') }
+  finally { savingEdit.value = false }
+}
 
 // ความคืบหน้าทั้งคลัง — มาจากตัวนับใน reviewMeta (ไม่เปลือง read)
 // conflict เป็นเลขสดจากคิวที่โหลดมาจริงได้ก็จริง แต่ใช้ค่าจาก meta ให้เป็นชุดเดียวกันทั้งแถบ
@@ -415,16 +518,22 @@ async function load() {
   finally { loading.value = false }
 }
 
-// เปลี่ยนข้อปัจจุบัน → ล้างฟอร์ม + โหลดรีวิวเดิมถ้าเป็นข้อ conflict (ให้คนที่ 3 เห็น)
-watch(current, async (q) => {
+// เปลี่ยน "ข้อ" → ล้างฟอร์ม + โหลดรีวิวเดิมถ้าเป็นข้อ conflict (ให้คนที่ 3 เห็น)
+// ⚠️ ผูกกับ currentId ไม่ใช่ current — current เป็น computed ที่ .find() ในอาเรย์ list
+//    พอแก้แถวใน list (เช่นบันทึกคำอธิบาย) มันคืน object ใบใหม่ทั้งที่ยังเป็นข้อเดิม
+//    ⇒ ถ้า watch ตัว current จะล้าง verdict/เหตุผลที่คนตรวจกรอกค้างไว้ แล้วยิงอ่าน subcollection ซ้ำฟรี
+watch(currentId, async (id) => {
+  closeEdit()
   verdict.value = null; reason.value = ''; refText.value = ''; priorReviews.value = []
+  const q = current.value
   ple.value = pleFields(q)
   note.value = q?.reviewNote || ''
   hadNote.value = !!q?.reviewNote
-  if (q && currentStatus.value === 'conflict') {
+  if (!q) return
+  if (computeStatus(q) === 'conflict') {
     try {
       const snap = await getDocs(collection(db, 'questions', q.id, 'reviews'))
-      if (current.value?.id !== q.id) return   // เลื่อนข้อไปแล้วระหว่างรอเน็ต — ทิ้งผลชุดนี้ กันโชว์รีวิวผิดข้อ
+      if (currentId.value !== id) return   // เลื่อนข้อไปแล้วระหว่างรอเน็ต — ทิ้งผลชุดนี้
       usage.track(snap.size)
       // กรองเฉพาะรีวิวของรอบปัจจุบัน — subdoc รอบก่อน reset (แก้เนื้อหาแล้ว) ยังค้างอยู่
       priorReviews.value = snap.docs.filter(d => (q.reviewedBy || []).includes(d.id))
@@ -716,6 +825,12 @@ async function submitAmend() {
 .rv-c-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .rv-c-mark { flex-shrink: 0; font-size: .7rem; font-weight: 800; color: #15803d; }
 .rv-exp { margin-top: 9px; font-size: .74rem; color: #b45309; background: #fffbeb; border-radius: 8px; padding: 8px 10px; line-height: 1.45; }
+.rv-exp-none { color: #94a3b8; font-style: italic; }
+.rv-edit-btn { margin-top: 10px; }
+.rv-editbox { margin-top: 4px; }
+.rv-edit-hint { margin-top: 12px; border-radius: 10px; padding: 9px 11px; font-size: .74rem; font-weight: 700; line-height: 1.5; }
+.rv-edit-hint.requeue { background: rgba(245,158,11,.13); color: #92400e; }
+.rv-edit-hint.stay { background: rgba(34,197,94,.13); color: #166534; }
 
 .rv-priors { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 11px; }
 .rv-priors-head { font-size: .7rem; font-weight: 800; color: #c2410c; margin-bottom: 7px; }
