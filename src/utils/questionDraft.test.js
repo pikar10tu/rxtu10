@@ -10,7 +10,7 @@ test('draftFrom(null) = ข้อใหม่ ได้ช่องว่าง 
   assert.equal(d.question, '')
   assert.deepEqual(d.choices, ['', '', '', ''])
   assert.equal(d.answer, 0)
-  assert.deepEqual(d.ple, { group: null, sub: null })
+  assert.deepEqual(d.ple, { group: null, sub: null, inferred: false })
   assert.equal(d.explanation, '')
   assert.equal(d.reviewNote, '')
   assert.equal(d.isPublished, false)
@@ -34,6 +34,13 @@ test('draftFrom ก๊อปช่องที่ฟอร์มย่อซ่�
   assert.equal(d.domain, 'pharm')
   assert.equal(d.isPublished, true)
   assert.deepEqual(d.examSets, ['s1'])
+  assert.equal(d.ple.group, 'cvs')
+})
+
+test('draftFrom ส่ง ple ทั้งก้อนจาก pleFields — รวมป้าย inferred ที่ TopicSelect ใช้โชว์ "เดาให้"', () => {
+  // ข้อที่ไม่มี pleGroup แต่เดากลุ่มได้จาก categories → pleFields ติดธง inferred มาให้
+  const d = draftFrom({ id: 'q1', question: 'Q', choices: ['a', 'b'], answer: 0, categories: ['โรคหัวใจและหลอดเลือด'] })
+  assert.equal(d.ple.inferred, true)
   assert.equal(d.ple.group, 'cvs')
 })
 

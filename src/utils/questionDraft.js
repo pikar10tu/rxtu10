@@ -17,14 +17,13 @@ import { qhash } from './qhash.js'
 // ก๊อป array ใหม่เสมอ — แก้ในฟอร์มต้องไม่ไปกลายพันธุ์แถวที่ค้างอยู่ใน list ของ view
 export function draftFrom(question) {
   const q = question || {}
-  const { group, sub } = pleFields(q)
   return {
     id: q.id ?? null,
     question: q.question || '',
     // ข้อที่มีตัวเลือกน้อยกว่า 2 คือข้อเสียอยู่แล้ว — ให้ช่องว่าง 4 ช่องเหมือนข้อใหม่
     choices: (Array.isArray(q.choices) && q.choices.length >= 2) ? [...q.choices] : ['', '', '', ''],
     answer: q.answer || 0,
-    ple: { group, sub },
+    ple: pleFields(q),
     reviewNote: q.reviewNote || '',
     explanation: q.explanation || '',
     isPublished: !!q.isPublished,
