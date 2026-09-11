@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/questionReview.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { computeStatus, needsReviewBy, reviewContentChanged, REVIEW_RESET, tallyReviewCounts, nextReviewQueue, buildLeaderboard, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL, pickRandom } from './questionReview.js'
+import { computeStatus, needsReviewBy, verdictContentChanged, sideContentChanged, REVIEW_RESET, tallyReviewCounts, nextReviewQueue, buildLeaderboard, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL, pickRandom } from './questionReview.js'
 
 // ── computeStatus (นับจาก reviewPass/reviewFail บน doc) — เกณฑ์ 1 คน/ข้อ ──
 test('ยังไม่มีเสียง → pending', () => {
@@ -71,30 +71,58 @@ test('conflict ที่คนที่ 3 ตัดสินแล้ว → ไ
   assert.equal(needsReviewBy(q, 'me'), false)
 })
 
-// ── reviewContentChanged + REVIEW_RESET ──
-test('โจทย์/ตัวเลือก/เฉลย/คำอธิบายเหมือนเดิม → ไม่เปลี่ยน (toggle publish ไม่นับ)', () => {
+// ── verdictContentChanged / sideContentChanged + REVIEW_RESET ──
+// เนื้อหาข้อสอบมี 2 ชั้น: ชั้นตัดสินถูก/ผิด (โจทย์/ตัวเลือก/เฉลย) กับชั้นประกอบ (คำอธิบาย/หมายเหตุ)
+// แก้ชั้นบน = ผลตรวจเดิมใช้ไม่ได้ ต้องล้าง · แก้ชั้นล่าง = ผลตรวจเดิมยังใช้ได้
+test('verdictContentChanged: แก้คำอธิบายไม่นับ — ผลตรวจเดิมยังใช้ได้ (toggle publish/หมวดก็ไม่นับ)', () => {
   const before = { question: 'Q', choices: ['a', 'b'], answer: 0, explanation: 'e', isPublished: false, category: 'x' }
-  const after  = { question: 'Q', choices: ['a', 'b'], answer: 0, explanation: 'e', isPublished: true,  category: 'y' }
-  assert.equal(reviewContentChanged(before, after), false)
+  const after  = { question: 'Q', choices: ['a', 'b'], answer: 0, explanation: 'แก้ใหม่', isPublished: true, category: 'y' }
+  assert.equal(verdictContentChanged(before, after), false)
 })
-test('แก้โจทย์/เฉลย/ตัวเลือก → เปลี่ยน', () => {
+test('verdictContentChanged: แก้โจทย์/เฉลย/ตัวเลือก → เปลี่ยน', () => {
   const base = { question: 'Q', choices: ['a', 'b'], answer: 0, explanation: null }
-  assert.equal(reviewContentChanged(base, { ...base, question: 'Q2' }), true)
-  assert.equal(reviewContentChanged(base, { ...base, answer: 1 }), true)
-  assert.equal(reviewContentChanged(base, { ...base, choices: ['a', 'c'] }), true)
+  assert.equal(verdictContentChanged(base, { ...base, question: 'Q2' }), true)
+  assert.equal(verdictContentChanged(base, { ...base, answer: 1 }), true)
+  assert.equal(verdictContentChanged(base, { ...base, choices: ['a', 'c'] }), true)
 })
-test('explanation undefined กับ null ถือว่าเท่ากัน', () => {
+test('verdictContentChanged: ไม่มีข้อมูลเดิมให้เทียบ → ถือว่าเปลี่ยน (ปลอดภัยไว้ก่อน)', () => {
+  assert.equal(verdictContentChanged(null, { question: 'Q' }), true)
+})
+test('sideContentChanged: แก้คำอธิบายหรือหมายเหตุ → เปลี่ยน', () => {
+  const base = { question: 'Q', choices: ['a', 'b'], answer: 0, explanation: 'e', reviewNote: null }
+  assert.equal(sideContentChanged(base, { ...base, explanation: 'e2' }), true)
+  assert.equal(sideContentChanged(base, { ...base, reviewNote: 'ระวังตรงนี้' }), true)
+})
+test('sideContentChanged: แก้โจทย์อย่างเดียวไม่นับ (คนละชั้นกัน)', () => {
+  const base = { question: 'Q', choices: ['a', 'b'], answer: 0, explanation: 'e', reviewNote: null }
+  assert.equal(sideContentChanged(base, { ...base, question: 'Q2' }), false)
+})
+test('sideContentChanged: undefined กับ null ถือว่าเท่ากัน (doc เก่าไม่มีฟิลด์ vs payload ที่เขียน null)', () => {
   const before = { question: 'Q', choices: ['a'], answer: 0 }
-  const after  = { question: 'Q', choices: ['a'], answer: 0, explanation: null }
-  assert.equal(reviewContentChanged(before, after), false)
-})
-test('ไม่มีข้อมูลเดิมให้เทียบ → ถือว่าเปลี่ยน (ปลอดภัยไว้ก่อน)', () => {
-  assert.equal(reviewContentChanged(null, { question: 'Q' }), true)
+  const after  = { question: 'Q', choices: ['a'], answer: 0, explanation: null, reviewNote: null }
+  assert.equal(sideContentChanged(before, after), false)
 })
 test('REVIEW_RESET ทำให้ข้อกลับเข้าคิวและสถานะกลับเป็น pending', () => {
   const q = { reviewedBy: ['x', 'y'], reviewPass: 0, reviewFail: 2, reviewStatus: 'failed', ...REVIEW_RESET }
   assert.equal(computeStatus(q), 'pending')
   assert.equal(needsReviewBy(q, 'x'), true)
+})
+
+// ── lastFixBy: คนแก้ข้อไม่ใช่คนตรวจข้อ ──
+// 🔴 นี่คือเทสที่กันรูจริง: REVIEW_RESET ล้าง reviewedBy เป็น [] ⇒ เงื่อนไข reviewedBy.length < 1
+//    จะคืน true ให้ทุกคนรวมทั้งคนที่เพิ่งแก้ข้อนั้นเอง ถ้าไม่มีบรรทัด lastFixBy
+test('needsReviewBy: คนที่เพิ่งแก้ข้อ ตรวจข้อนั้นไม่ได้ แม้ reviewedBy จะว่าง', () => {
+  const q = { ...REVIEW_RESET, lastFixBy: 'me' }
+  assert.equal(needsReviewBy(q, 'me'), false)
+})
+test('needsReviewBy: คนอื่นยังตรวจข้อที่ถูกแก้ได้ตามปกติ', () => {
+  const q = { ...REVIEW_RESET, lastFixBy: 'someone-else' }
+  assert.equal(needsReviewBy(q, 'me'), true)
+})
+test('needsReviewBy: lastFixBy กันแม้ข้อจะอยู่สถานะ conflict (ไม่ให้ไปตัดสินงานตัวเอง)', () => {
+  const q = { reviewedBy: ['a', 'b'], reviewPass: 1, reviewFail: 1, lastFixBy: 'me' }
+  assert.equal(computeStatus(q), 'conflict')
+  assert.equal(needsReviewBy(q, 'me'), false)
 })
 
 // ── retired + reviewStatusKey ──

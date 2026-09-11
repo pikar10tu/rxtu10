@@ -429,7 +429,7 @@ import { topicRows, mergeTopicsPlan } from '../utils/topicMerge.js'
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail } from '../utils/mailbox.js'
 import { pctCorrect, isProblem } from '../utils/questionStats.js'
-import { reviewContentChanged, REVIEW_RESET, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL } from '../utils/questionReview.js'
+import { verdictContentChanged, REVIEW_RESET, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL } from '../utils/questionReview.js'
 import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 import TopicSelect from '../components/questions/TopicSelect.vue'
@@ -923,10 +923,10 @@ async function save() {
   if (payload.answer >= payload.choices.length) payload.answer = 0
   try {
     if (d.id) {
-      // เนื้อหาที่ผลตรวจผูกอยู่เปลี่ยน (โจทย์/ตัวเลือก/เฉลย/คำอธิบาย) → ล้างผลตรวจ
-      // ให้กลับเข้าคิว peer-review ใหม่ — toggle publish/หมวดไม่ล้าง (ไม่ทิ้งงานผู้ตรวจฟรี)
+      // เนื้อหาชั้นตัดสินถูก/ผิด (โจทย์/ตัวเลือก/เฉลย) เปลี่ยน → ล้างผลตรวจ ให้กลับเข้าคิว peer-review
+      // คำอธิบาย/หมายเหตุ/หมวด/toggle publish ไม่ล้าง (ไม่ทิ้งงานผู้ตรวจฟรี)
       const before = list.value.find(q => q.id === d.id)
-      if (reviewContentChanged(before, payload)) {
+      if (verdictContentChanged(before, payload)) {
         // แก้เนื้อหา = ตั้งใจนำกลับมาใช้ — ล้างทั้งผลตรวจและสถานะนำออก ให้วนเข้าคิวตรวจใหม่
         Object.assign(payload, REVIEW_RESET, { reviewVerdicts: deleteField(), retired: deleteField() })
       }

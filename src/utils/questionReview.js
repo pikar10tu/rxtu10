@@ -35,17 +35,32 @@ export function needsReviewBy(question, myUid) {
   if (!myUid || !question) return false
   if (question.retired) return false   // นำออกจากการใช้งานแล้ว — ไม่ต้องตรวจ
   if (question.createdBy === myUid && question.source !== 'import') return false
+  // คนแก้ข้อไม่ใช่คนตรวจข้อ — REVIEW_RESET ล้าง reviewedBy เป็น [] ทำให้ข้อเด้งกลับเข้าคิว
+  // ของคนที่เพิ่งแก้มันเอง ถ้าไม่กันตรงนี้ ตาที่สองจะหายไปเงียบๆ
+  // ไม่มีข้อยกเว้น source==='import' แบบ createdBy เพราะ lastFixBy คือคนที่ลงมือแก้เนื้อหาจริงเสมอ
+  if (question.lastFixBy === myUid) return false
   const reviewedBy = question.reviewedBy || []
   if (reviewedBy.includes(myUid)) return false
   return reviewedBy.length < 1 || computeStatus(question) === 'conflict'
 }
 
-// เนื้อหาที่ผลตรวจผูกอยู่เปลี่ยนไหม (โจทย์/ตัวเลือก/เฉลย/คำอธิบาย)
-//  ใช้ตัดสินว่าแก้ข้อสอบแล้วต้องล้างผลตรวจให้กลับเข้าคิว — toggle publish/หมวดไม่นับ
-export function reviewContentChanged(before, after) {
+// ── เนื้อหาข้อสอบ 2 ชั้น ──
+//  ชั้นตัดสินถูก/ผิด: โจทย์/ตัวเลือก/เฉลย — เปลี่ยนแล้ว "คำตัดสินเดิมพูดถึงของที่ไม่มีแล้ว"
+//    ⇒ ต้องล้างผลตรวจ กลับเข้าคิวใหม่
+//  ชั้นประกอบ: คำอธิบาย/หมายเหตุผู้ตรวจ — เปลี่ยนแล้วผลตรวจเดิมยังใช้ได้ ⇒ ไม่ล้าง
+//  ⚠️ เดิมรวม explanation ไว้ชั้นบน ทำให้แก้คำอธิบายทีเดียวโยนงานตรวจซ้ำให้ทั้งทีมฟรีๆ
+//     user เคาะ 11 ก.ย. 2026 ให้ย้ายลงชั้นล่าง — แลกกับที่คำอธิบายจะไม่มีใครตรวจซ้ำ
+const verdictKey = q => JSON.stringify([q.question, q.choices, q.answer])
+export function verdictContentChanged(before, after) {
   if (!before || !after) return true
-  const key = q => JSON.stringify([q.question, q.choices, q.answer, q.explanation ?? null])
-  return key(before) !== key(after)
+  return verdictKey(before) !== verdictKey(after)
+}
+
+// ใช้ตอบคำถามเดียว: "กดบันทึกได้หรือยัง" — ฟอร์มแก้ในหน้าตรวจเปิดปุ่มเมื่อชั้นใดชั้นหนึ่งเปลี่ยน
+const sideKey = q => JSON.stringify([q.explanation ?? null, q.reviewNote ?? null])
+export function sideContentChanged(before, after) {
+  if (!before || !after) return true
+  return sideKey(before) !== sideKey(after)
 }
 
 // payload ล้างสถานะตรวจ (ใช้ตอนเนื้อหาข้อสอบเปลี่ยน → กลับเข้าคิว peer-review ใหม่)
