@@ -200,43 +200,7 @@
       <section class="qz-card">
         <div class="qz-card-head"><Emoji :char="draft.id ? '✏️' : '➕'" /> {{ draft.id ? 'แก้ไขข้อสอบ' : 'เพิ่มข้อสอบใหม่' }}</div>
 
-        <label class="qz-label">โจทย์</label>
-        <textarea v-model="draft.question" :maxlength="LIMITS.question" class="qz-input" rows="3" placeholder="พิมพ์คำถาม…"></textarea>
-
-        <label class="qz-label">ตัวเลือก (กดวงกลมเพื่อเลือกข้อที่ถูก)</label>
-        <div v-for="(c, i) in draft.choices" :key="i" class="qz-choice">
-          <button
-            class="qz-radio" :class="{ on: draft.answer === i }"
-            type="button" @click="draft.answer = i"
-            :title="draft.answer === i ? 'ข้อที่ถูก' : 'ตั้งเป็นข้อที่ถูก'"
-          >{{ draft.answer === i ? '✓' : LETTERS[i] }}</button>
-          <input v-model="draft.choices[i]" :maxlength="LIMITS.choice" class="qz-input qz-choice-in" :placeholder="`ตัวเลือก ${LETTERS[i]}`" />
-          <button class="qz-del-choice" type="button" :disabled="draft.choices.length <= 2" @click="removeChoice(i)">✕</button>
-        </div>
-        <button class="qz-add-choice" type="button" :disabled="draft.choices.length >= 6" @click="draft.choices.push('')">+ เพิ่มตัวเลือก</button>
-
-        <label class="qz-label">กลุ่มโรค / หมวด (ตามเกณฑ์สภาเภสัชกรรม)</label>
-        <TopicSelect v-model="draft.ple" />
-
-        <label class="qz-label">ชุดข้อสอบย้อนหลัง (ไม่บังคับ — 1 ข้ออยู่ได้หลายชุด)</label>
-        <ExamSetSelect v-model="draft.examSets" />
-
-        <label class="qz-label">หมวดใหญ่ (domain)</label>
-        <select v-model="draft.domain" class="qz-input">
-          <option :value="null">— ไม่ระบุ —</option>
-          <option v-for="d in DOMAINS" :key="d.key" :value="d.key">{{ d.label }}</option>
-        </select>
-
-        <label class="qz-label">คำอธิบายเฉลย (ไม่บังคับ)</label>
-        <textarea v-model="draft.explanation" :maxlength="LIMITS.explanation" class="qz-input" rows="2" placeholder="อธิบายว่าทำไมข้อนี้ถูก…"></textarea>
-
-        <label class="qz-label">หมายเหตุผู้ตรวจ (นักศึกษาเห็นท้ายเฉลย — ไม่บังคับ)</label>
-        <textarea v-model="draft.reviewNote" :maxlength="LIMITS.reviewNote" class="qz-input" rows="2" placeholder="ข้อควรระวัง / จุดที่คนมักเข้าใจผิด…"></textarea>
-
-        <label class="qz-check">
-          <input type="checkbox" v-model="draft.isPublished" />
-          เผยแพร่ให้นักศึกษาเห็น (ติ๊กออก = ร่าง เห็นเฉพาะทีมวิชาการ)
-        </label>
+        <QuestionEditor v-model="draft" />
 
         <div v-if="draft.id && editReviews.length" class="qz-reviews">
           <div class="qz-reviews-head"><Emoji char="🔍" /> ผลตรวจจากทีมวิชาการ ({{ editReviews.length }})</div>
@@ -405,6 +369,8 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
+import QuestionEditor from '../components/questions/QuestionEditor.vue'
+import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { ref, computed, watch, onMounted } from 'vue'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp, writeBatch, setDoc, deleteField, arrayUnion, increment } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -412,7 +378,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
-import { cleanText, LIMITS } from '../utils/text.js'
+import { LIMITS } from '../utils/text.js'
 import { bankStats } from '../utils/questionBankStats.js'
 import { parseImport } from '../utils/importQuestions.js'
 import { qhash, groupDuplicates } from '../utils/qhash.js'
@@ -423,7 +389,6 @@ import { useTopics } from '../composables/useTopics.js'
 import { buildMeta } from '../utils/questionsMeta.js'
 import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js'
 import { getCategories } from '../utils/questionCategories.js'
-import { pleFields, plePatch } from '../utils/pleMapping.js'
 import { isPleGroupKey } from '../data/plecc.js'
 import { topicRows, mergeTopicsPlan } from '../utils/topicMerge.js'
 import { groupReports, resolvePayload } from '../utils/questionReport.js'
@@ -432,7 +397,6 @@ import { pctCorrect, isProblem } from '../utils/questionStats.js'
 import { verdictContentChanged, REVIEW_RESET, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL } from '../utils/questionReview.js'
 import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
-import TopicSelect from '../components/questions/TopicSelect.vue'
 import ExamSetSelect from '../components/questions/ExamSetSelect.vue'
 
 const authStore = useAuthStore()
@@ -595,28 +559,13 @@ async function publishAllFilteredDrafts() {
   finally { batchBusy.value = false }
 }
 
-function blankDraft() {
-  return { id: null, question: '', choices: ['', '', '', ''], answer: 0, ple: { group: null, sub: null }, reviewNote: '', explanation: '', isPublished: false, domain: null, examSets: [] }
-}
-const draft = ref(blankDraft())
+const draft = ref(draftFrom(null))
 // รีวิวของข้อที่กำลังแก้ (ประกาศก่อน resetDraft — กัน TDZ ถ้าอนาคตมีใครเรียกตอน setup)
 const editReviews = ref([])
-function resetDraft() { draft.value = blankDraft(); editReviews.value = [] }
+function resetDraft() { draft.value = draftFrom(null); editReviews.value = [] }
 
-const valid = computed(() => {
-  const d = draft.value
-  const filled = d.choices.filter(c => c.trim()).length
-  // กลุ่มโรคบังคับ — ทะเบียนตายตัวแล้ว ปล่อยข้อไม่มีกลุ่มออกไปคือที่มาของคลังที่จัดหมวดไม่ได้
-  return d.question.trim() && filled >= 2 && d.choices[d.answer]?.trim() && isPleGroupKey(d.ple?.group)
-})
-
-function removeChoice(i) {
-  if (draft.value.choices.length <= 2) return
-  draft.value.choices.splice(i, 1)
-  // keep answer pointing at a valid index
-  if (draft.value.answer >= draft.value.choices.length) draft.value.answer = draft.value.choices.length - 1
-  else if (draft.value.answer > i) draft.value.answer--
-}
+// draftValid ไม่เช็คกลุ่มโรค — หน้าคลังบังคับเอง (ปล่อยข้อไม่มีกลุ่มออกไปคือที่มาของคลังที่จัดหมวดไม่ได้)
+const valid = computed(() => draftValid(draft.value) && isPleGroupKey(draft.value.ple?.group))
 
 onMounted(() => {
   if (!authStore.isQuestionEditor) return
@@ -906,21 +855,7 @@ async function save() {
   if (!valid.value || saving.value) return
   saving.value = true
   const d = draft.value
-  const payload = {
-    question: cleanText(d.question, LIMITS.question),
-    choices: d.choices.map(c => cleanText(c, LIMITS.choice)).filter(Boolean),
-    answer: d.answer,
-    ...plePatch(d.ple.group, d.ple.sub),   // เขียน pleGroup/pleSub/categories พร้อมกันเสมอ
-    reviewNote: cleanText(d.reviewNote, LIMITS.reviewNote) || null,
-    explanation: cleanText(d.explanation, LIMITS.explanation) || null,
-    isPublished: !!d.isPublished,
-    domain: d.domain || null,
-    examSets: Array.isArray(d.examSets) ? d.examSets : [],
-    qhash: qhash(cleanText(d.question, LIMITS.question)), // กันซ้ำ + อัปเดตเมื่อแก้โจทย์
-    updatedAt: serverTimestamp(),
-  }
-  // clamp answer in case trailing empty choices were dropped
-  if (payload.answer >= payload.choices.length) payload.answer = 0
+  const payload = { ...draftPayload(d), updatedAt: serverTimestamp() }
   try {
     if (d.id) {
       // เนื้อหาชั้นตัดสินถูก/ผิด (โจทย์/ตัวเลือก/เฉลย) เปลี่ยน → ล้างผลตรวจ ให้กลับเข้าคิว peer-review
@@ -1002,18 +937,7 @@ async function unretireQuestion() {
 }
 
 function edit(q) {
-  draft.value = {
-    id: q.id,
-    question: q.question || '',
-    choices: (q.choices && q.choices.length >= 2) ? [...q.choices] : ['', ''],
-    answer: q.answer || 0,
-    ple: pleFields(q),
-    reviewNote: q.reviewNote || '',
-    explanation: q.explanation || '',
-    isPublished: !!q.isPublished,
-    domain: q.domain || null,
-    examSets: Array.isArray(q.examSets) ? [...q.examSets] : [],
-  }
+  draft.value = draftFrom(q)
   loadEditReviews(q) // โหลดเหตุผลผู้ตรวจ (ไม่ await — ไม่บล็อก UX)
   activeTab.value = 'edit'   // แก้จากแท็บคลัง/ตรวจสอบ → เด้งมาแท็บฟอร์มให้เห็นข้อที่กำลังแก้
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -1175,14 +1099,6 @@ async function resolveReports(g, verdict) {
 .qz-label { display: block; font-size: .7rem; font-weight: 700; color: #64748b; margin: 10px 0 5px; }
 .qz-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .qz-input:focus { outline: none; box-shadow: var(--pop); }
-.qz-choice { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
-.qz-radio { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(0,0,0,.15); background: #fff; color: rgba(0,0,0,.45); font-weight: 800; font-size: .82rem; cursor: pointer; }
-.qz-radio.on { background: #22c55e; border-color: #22c55e; color: #fff; }
-.qz-choice-in { flex: 1; }
-.qz-del-choice { flex-shrink: 0; border: none; background: rgba(0,0,0,.05); border-radius: 8px; width: 28px; height: 28px; cursor: pointer; color: #ef4444; }
-.qz-del-choice:disabled { opacity: .3; cursor: default; }
-.qz-add-choice { margin-top: 2px; border: 1px dashed rgba(0,0,0,.2); background: none; border-radius: 9px; padding: 7px 12px; font-family: inherit; font-size: .74rem; font-weight: 700; color: #475569; cursor: pointer; }
-.qz-add-choice:disabled { opacity: .4; cursor: default; }
 .qz-check { display: flex; align-items: center; gap: 8px; font-size: .74rem; color: rgba(0,0,0,.65); margin-top: 12px; cursor: pointer; }
 .qz-actions { display: flex; gap: 8px; margin-top: 14px; }
 .qz-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; }
