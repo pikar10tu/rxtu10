@@ -221,7 +221,17 @@
                         :disabled="requeuingId === q.id" @click="requeue(q)"
                       >{{ requeuingId === q.id ? 'กำลังส่ง…' : '↩️ ส่งกลับเข้าคิวตรวจ' }}</button>
                       <button v-if="k === 'conflict'" class="rv-mini" @click="jumpTo(q)">ตรวจข้อนี้เลย</button>
-                      <RouterLink v-if="k === 'nogroup'" to="/questions" class="rv-mini">แก้ในคลังข้อสอบ ›</RouterLink>
+                      <button v-if="k === 'nogroup'" class="rv-mini" @click="openNogroup(q)">
+                        {{ nogroupId === q.id ? 'ปิด' : '🏷️ เลือกกลุ่มโรค' }}
+                      </button>
+                    </div>
+                    <div v-if="k === 'nogroup' && nogroupId === q.id" class="rv-nogroup">
+                      <TopicSelect v-model="nogroupPle" />
+                      <button
+                        class="rv-btn rv-primary rv-nogroup-save"
+                        :disabled="!isPleGroupKey(nogroupPle.group) || nogroupSaving"
+                        @click="saveNogroup(q)"
+                      >{{ nogroupSaving ? 'กำลังบันทึก…' : 'บันทึกกลุ่มโรค' }}</button>
                     </div>
                   </li>
                 </ul>
@@ -489,6 +499,34 @@ const triageLoading = ref(false)
 const openBucket = ref(null)
 const bucketShown = ref({})
 const requeuingId = ref(null)
+
+// แก้กลุ่มโรคในแถวของกอง "ไม่มีกลุ่มโรค" — เดิมเป็นลิงก์ไป /questions มือเปล่า ต้องไปไล่หาข้อเอง
+// ทีละแถว ไม่ทำ bulk เพราะกองนี้ต้องอ่านโจทย์ก่อนถึงจะเลือกกลุ่มได้
+const nogroupId = ref(null)
+const nogroupPle = ref({ group: null, sub: null })
+const nogroupSaving = ref(false)
+
+function openNogroup(q) {
+  nogroupId.value = nogroupId.value === q.id ? null : q.id
+  nogroupPle.value = pleFields(q)
+}
+
+async function saveNogroup(q) {
+  const patch = plePatch(nogroupPle.value.group, nogroupPle.value.sub)
+  if (!patch || nogroupSaving.value) return
+  nogroupSaving.value = true
+  try {
+    // rules ผ่านทาง reviewUntouched() — ไม่แตะผลตรวจเลย
+    // categories มาจาก plePatch เสมอ ห้ามเขียนมือ (CLAUDE.md ข้อ 14)
+    await updateDoc(doc(db, 'questions', q.id), { ...patch, updatedAt: serverTimestamp() })
+    usage.track(0, 1)
+    patchTriageRow(q.id, patch)   // bucketsOf() อ่าน pleFields → แถวหลุดกองทันที
+    nogroupId.value = null
+    toast('บันทึกกลุ่มโรคแล้ว', 'success')
+  } catch (e) { console.error('[nogroup save]', e); toast('บันทึกไม่สำเร็จ', 'error') }
+  finally { nogroupSaving.value = false }
+}
+
 const buckets = computed(() => triageBuckets(triageRows.value))
 const triage = computed(() => triageSummary(triageRows.value))
 
@@ -892,6 +930,8 @@ async function submitAmend() {
 .rv-bucket-live { display: inline-block; background: rgba(34,197,94,.15); color: #15803d; border-radius: 999px; padding: 1px 8px; font-size: .7rem; font-weight: 800; margin-right: 5px; }
 .rv-bucket-draft { display: inline-block; background: rgba(0,0,0,.08); color: rgba(0,0,0,.55); border-radius: 999px; padding: 1px 8px; font-size: .7rem; font-weight: 800; margin-right: 5px; }
 .rv-bucket-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.rv-nogroup { margin-top: 9px; border-top: 1px dashed rgba(0,0,0,.12); padding-top: 9px; }
+.rv-nogroup-save { margin-top: 9px; width: 100%; }
 .rv-bucket-more { margin-top: 10px; }
 
 .rv-conflict-badge { font-size: .7rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: #fff7ed; color: #c2410c; }
