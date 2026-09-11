@@ -60,6 +60,26 @@
           </div>
         </div>
 
+        <!-- ข้อที่เคยถูกแก้ — โชว์ว่ารอบก่อนตกเพราะอะไร ให้คนตรวจรอบนี้ยืนยันว่าแก้ตรงจุดไหม -->
+        <div v-if="!editing && current.lastFixAt" class="rv-fixed">
+          <div class="rv-fixed-head">
+            <Emoji char="🛠️" /> แก้โดย <b>{{ current.lastFixByName || 'ไม่ระบุ' }}</b>
+            <span v-if="fmtFixTime(current.lastFixAt)" class="rv-fixed-when">· {{ fmtFixTime(current.lastFixAt) }}</span>
+          </div>
+          <template v-if="priorFixedReviews.length">
+            <div class="rv-fixed-sub">รอบก่อนแก้ ตกเพราะ ({{ priorFixedReviews.length }})</div>
+            <div v-for="p in priorFixedReviews" :key="p.id" class="rv-prior">
+              <div class="rv-prior-top">
+                <span class="rv-prior-verdict" :class="p.verdict">{{ VERDICT_LABEL[p.verdict] || p.verdict }}</span>
+                <b>{{ p.reviewerName || 'ไม่ระบุ' }}</b>
+              </div>
+              <div class="rv-prior-reason">{{ p.reason }}</div>
+              <div v-if="p.ref" class="rv-prior-ref">เรฟ: {{ p.ref }}</div>
+            </div>
+          </template>
+          <div v-else class="rv-fixed-sub">ไม่มีเหตุผลของรอบก่อนเก็บไว้ — ข้อนี้ถูกแก้ตั้งแต่ยังไม่มีใครตรวจ</div>
+        </div>
+
         <!-- รีวิวเดิม 2 ฉบับ (โชว์เฉพาะข้อ conflict ให้คนที่ 3 ตัดสิน — ข้ออื่นซ่อนกันอคติ) -->
         <div v-if="currentStatus === 'conflict' && priorReviews.length" class="rv-priors">
           <div class="rv-priors-head">ผลตรวจก่อนหน้า ({{ priorReviews.length }})</div>
@@ -255,6 +275,10 @@ const verdict = ref(null)
 const reason = ref('')
 const refText = ref('')
 const priorReviews = ref([])
+// ผลตรวจของ "รอบก่อนแก้" — subdoc ที่ uid หลุดจาก reviewedBy ไปตอน REVIEW_RESET
+// ⚠️ Firestore ไม่ได้ลบ subdoc พวกนี้ทิ้งเลย ข้อมูลอยู่ครบมาตลอด แค่ไม่เคยมีใครเอามาโชว์
+//    ⇒ เห็นได้โดยไม่ต้องเก็บฟิลด์เพิ่มสักตัว (0 write เพิ่ม · +1–2 read เฉพาะข้อที่เคยถูกแก้)
+const priorFixedReviews = ref([])
 const ple = ref({ group: null, sub: null })   // กลุ่มโรค/โรคย่อยของข้อปัจจุบัน (prefill ด้วยค่าที่เดาให้ คนตรวจยืนยัน)
 const note = ref('')          // หมายเหตุผู้ตรวจ (นักศึกษาเห็นท้ายเฉลย) — ต่อเติมจากของเดิมได้
 const hadNote = ref(false)    // ข้อนี้มีหมายเหตุจากคนก่อนไหม (ใช้โชว์ป้ายเตือนไม่ให้ลบทิ้ง)
@@ -396,6 +420,17 @@ function truncate60(text) {
   return t.length > 60 ? t.slice(0, 60) + '…' : t
 }
 
+// Firestore Timestamp | Date | number → "11 ก.ย." (รับ Date ด้วยเพราะ patch local ใช้ new Date())
+function fmtFixTime(t) {
+  if (!t) return ''
+  const ms = t instanceof Date ? t.getTime()
+    : typeof t.toMillis === 'function' ? t.toMillis()
+    : t.seconds ? t.seconds * 1000
+    : typeof t === 'number' ? t : null
+  if (!ms) return ''
+  return new Date(ms).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })
+}
+
 function openAmend() {
   amendVerdict.value = lastSubmit.value?.verdict || null
   amendReason.value = lastSubmit.value?.reason || ''
@@ -530,14 +565,19 @@ watch(currentId, async (id) => {
   note.value = q?.reviewNote || ''
   hadNote.value = !!q?.reviewNote
   if (!q) return
-  if (computeStatus(q) === 'conflict') {
+  priorFixedReviews.value = []
+  // โหลดผลตรวจเดิมเมื่อ (ก) ข้อ conflict รอคนที่ 3 ตัดสิน หรือ (ข) ข้อเคยถูกแก้ — คนตรวจรอบนี้
+  // ต้องรู้ว่ารอบก่อนตกเพราะอะไร ไม่งั้นตรวจไม่ได้ว่า "เขาแก้ตรงจุดหรือเปล่า"
+  // ข้อปกติยังไม่เห็นผลตรวจคนอื่น (กันอคติ) — เจตนาเดิมคงไว้
+  if (computeStatus(q) === 'conflict' || q.lastFixAt) {
     try {
       const snap = await getDocs(collection(db, 'questions', q.id, 'reviews'))
       if (currentId.value !== id) return   // เลื่อนข้อไปแล้วระหว่างรอเน็ต — ทิ้งผลชุดนี้
       usage.track(snap.size)
-      // กรองเฉพาะรีวิวของรอบปัจจุบัน — subdoc รอบก่อน reset (แก้เนื้อหาแล้ว) ยังค้างอยู่
-      priorReviews.value = snap.docs.filter(d => (q.reviewedBy || []).includes(d.id))
-        .map(d => ({ id: d.id, ...d.data() }))
+      const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      const nowVoters = new Set(q.reviewedBy || [])
+      priorReviews.value = rows.filter(r => nowVoters.has(r.id))        // เสียงของรอบปัจจุบัน
+      priorFixedReviews.value = rows.filter(r => !nowVoters.has(r.id))  // เสียงก่อนข้อถูกแก้
     } catch (e) { console.error('[review priors]', e) }
   }
 }, { immediate: true })
@@ -831,6 +871,11 @@ async function submitAmend() {
 .rv-edit-hint { margin-top: 12px; border-radius: 10px; padding: 9px 11px; font-size: .74rem; font-weight: 700; line-height: 1.5; }
 .rv-edit-hint.requeue { background: rgba(245,158,11,.13); color: #92400e; }
 .rv-edit-hint.stay { background: rgba(34,197,94,.13); color: #166534; }
+
+.rv-fixed { margin-top: 12px; border: 2px dashed rgba(245,158,11,.5); border-radius: 12px; padding: 10px 12px; background: rgba(245,158,11,.07); }
+.rv-fixed-head { font-size: .76rem; font-weight: 800; color: #92400e; }
+.rv-fixed-when { font-weight: 700; color: #b45309; }
+.rv-fixed-sub { margin-top: 7px; font-size: .72rem; font-weight: 700; color: #b45309; }
 
 .rv-priors { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 11px; }
 .rv-priors-head { font-size: .7rem; font-weight: 800; color: #c2410c; margin-bottom: 7px; }
