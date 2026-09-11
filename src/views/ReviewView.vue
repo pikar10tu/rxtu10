@@ -42,7 +42,12 @@
           </ul>
           <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
           <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ปุ่ม "แก้ข้อนี้"</div>
-          <button class="rv-mini rv-edit-btn" @click="openEdit">✏️ แก้ข้อนี้</button>
+          <div class="rv-card-tools">
+            <button class="rv-mini" @click="openEdit">✏️ แก้ข้อนี้</button>
+            <button class="rv-mini rv-retire" :disabled="retiring" @click="retireCurrent">
+              {{ retiring ? 'กำลังนำออก…' : '🗑️ นำออก' }}
+            </button>
+          </div>
         </template>
 
         <div v-else class="rv-editbox">
@@ -92,6 +97,17 @@
             <div v-if="p.ref" class="rv-prior-ref">เรฟ: {{ p.ref }}</div>
           </div>
         </div>
+
+        <!-- 💬 คุยกันต่อข้อ — ⚠️ QuestionComments โหลดเองตอน mount (onMounted) ไม่มี watch
+             จึงต้อง v-if ให้ mount เมื่อกางเท่านั้น (ไม่งั้นทุกข้อยิง read ทันที)
+             และต้องมี :key ไม่งั้นเลื่อนข้อแล้วยังเห็นคอมเมนต์ข้อเก่า -->
+        <details v-if="!editing" class="rv-comments" :open="commentsOpen">
+          <summary class="rv-comments-sum" @click.prevent="commentsOpen = !commentsOpen">
+            <Emoji char="💬" /> คุยกันเรื่องข้อนี้
+            <span class="rv-comments-hint">{{ commentsOpen ? 'ปิด' : 'เปิดดู' }}</span>
+          </summary>
+          <QuestionComments v-if="commentsOpen" :key="current.id" :questionId="current.id" />
+        </details>
 
         <!-- ── ฟอร์มตรวจ ── -->
         <div v-if="!editing" class="rv-form">
@@ -253,6 +269,7 @@ import { isPleGroupKey } from '../data/plecc.js'
 import { quizSample } from '../utils/quizSample.js'
 import TopicSelect from '../components/questions/TopicSelect.vue'
 import QuestionEditor from '../components/questions/QuestionEditor.vue'
+import QuestionComments from '../components/questions/QuestionComments.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 
@@ -316,6 +333,8 @@ const currentStatus = computed(() => current.value ? computeStatus(current.value
 const editing = ref(false)
 const editDraft = ref(null)
 const savingEdit = ref(false)
+const commentsOpen = ref(false)   // กล่องคอมเมนต์ — mount เมื่อกางเท่านั้น (ดูหมายเหตุที่ template)
+const retiring = ref(false)
 
 const editPayload = computed(() => (editing.value && editDraft.value) ? draftPayload(editDraft.value) : null)
 // แก้แบบนี้แล้วข้อจะวนเข้าคิวไหม — ใช้ทั้งตัดสินเส้นทางเขียนและขึ้นป้ายเตือนก่อนกด
@@ -389,6 +408,24 @@ async function saveEdit() {
     }
   } catch (e) { console.error('[review edit]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { savingEdit.value = false }
+}
+
+// นำออก = ปลดระวางข้อที่ผิดจนแก้ไม่คุ้ม — ถอนเผยแพร่ + ไม่เข้าคิวตรวจอีก (ไม่ลบ ไม่แตะผลตรวจเดิม)
+// rules ผ่านทาง reviewUntouched() · ไม่แตะ reviewMeta (drift ปล่อย self-heal ตอนแอดมินกดซิงก์ระบบตรวจ
+// — แพทเทิร์นเดียวกับ QuestionsView.retire())
+async function retireCurrent() {
+  if (retiring.value || !current.value) return
+  const q = current.value
+  if (!(await confirm(`นำข้อนี้ออกจากการใช้งาน?\n\n"${truncate60(q.question)}"\n\nข้อจะถอนเผยแพร่และไม่เข้าคิวตรวจอีก (ไม่ได้ลบทิ้ง — กู้คืนได้ที่คลังข้อสอบ)`))) return
+  retiring.value = true
+  try {
+    await updateDoc(doc(db, 'questions', q.id), { retired: true, isPublished: false, updatedAt: serverTimestamp() })
+    usage.track(0, 1)
+    patchTriageRow(q.id, { retired: true, isPublished: false })   // needsReviewBy กรอง retired → หลุดคิวเอง
+    toast('นำข้อนี้ออกแล้ว', 'success')
+    pickNext()
+  } catch (e) { console.error('[review retire]', e); toast('นำออกไม่สำเร็จ', 'error') }
+  finally { retiring.value = false }
 }
 
 // ความคืบหน้าทั้งคลัง — มาจากตัวนับใน reviewMeta (ไม่เปลือง read)
@@ -559,6 +596,7 @@ async function load() {
 //    ⇒ ถ้า watch ตัว current จะล้าง verdict/เหตุผลที่คนตรวจกรอกค้างไว้ แล้วยิงอ่าน subcollection ซ้ำฟรี
 watch(currentId, async (id) => {
   closeEdit()
+  commentsOpen.value = false
   verdict.value = null; reason.value = ''; refText.value = ''; priorReviews.value = []
   const q = current.value
   ple.value = pleFields(q)
@@ -866,7 +904,12 @@ async function submitAmend() {
 .rv-c-mark { flex-shrink: 0; font-size: .7rem; font-weight: 800; color: #15803d; }
 .rv-exp { margin-top: 9px; font-size: .74rem; color: #b45309; background: #fffbeb; border-radius: 8px; padding: 8px 10px; line-height: 1.45; }
 .rv-exp-none { color: #94a3b8; font-style: italic; }
-.rv-edit-btn { margin-top: 10px; }
+.rv-card-tools { display: flex; gap: 8px; margin-top: 10px; }
+.rv-retire { color: #b91c1c; }
+.rv-comments { margin-top: 12px; border-top: 2px dashed rgba(0,0,0,.1); padding-top: 10px; }
+.rv-comments-sum { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 7px; font-size: .78rem; font-weight: 800; color: var(--ink); }
+.rv-comments-sum::-webkit-details-marker { display: none; }
+.rv-comments-hint { margin-left: auto; font-size: .72rem; font-weight: 700; color: #64748b; }
 .rv-editbox { margin-top: 4px; }
 .rv-edit-hint { margin-top: 12px; border-radius: 10px; padding: 9px 11px; font-size: .74rem; font-weight: 700; line-height: 1.5; }
 .rv-edit-hint.requeue { background: rgba(245,158,11,.13); color: #92400e; }
