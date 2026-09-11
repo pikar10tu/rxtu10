@@ -216,6 +216,9 @@
                       {{ truncate60(q.question) }}
                     </div>
                     <div class="rv-bucket-acts">
+                      <button v-if="k === 'failed'" class="rv-mini" @click="openFix(q)">
+                        {{ fixId === q.id ? 'ปิด' : '✏️ แก้ข้อนี้' }}
+                      </button>
                       <button
                         v-if="k === 'failed'" class="rv-mini"
                         :disabled="requeuingId === q.id" @click="requeue(q)"
@@ -224,6 +227,18 @@
                       <button v-if="k === 'nogroup'" class="rv-mini" @click="openNogroup(q)">
                         {{ nogroupId === q.id ? 'ปิด' : '🏷️ เลือกกลุ่มโรค' }}
                       </button>
+                    </div>
+                    <!-- ฟอร์มแก้ในแถว (ไม่ใช่ modal จึงไม่มี overlay/Teleport ให้พลาด) -->
+                    <div v-if="k === 'failed' && fixId === q.id && fixDraft" class="rv-fix">
+                      <QuestionEditor v-model="fixDraft" compact />
+                      <p class="rv-fix-note">
+                        🔄 บันทึกแล้วข้อนี้กลับเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้
+                      </p>
+                      <button
+                        class="rv-btn rv-primary rv-fix-save"
+                        :disabled="!draftValid(fixDraft) || fixSaving"
+                        @click="saveFix(q)"
+                      >{{ fixSaving ? 'กำลังบันทึก…' : 'บันทึกการแก้' }}</button>
                     </div>
                     <div v-if="k === 'nogroup' && nogroupId === q.id" class="rv-nogroup">
                       <TopicSelect v-model="nogroupPle" />
@@ -347,16 +362,24 @@ const commentsOpen = ref(false)   // กล่องคอมเมนต์ —
 const retiring = ref(false)
 
 const editPayload = computed(() => (editing.value && editDraft.value) ? draftPayload(editDraft.value) : null)
+// 🔑 ฐานเปรียบเทียบต้อง normalize ด้วยสูตรเดียวกับฝั่งที่จะเขียน (draftFrom → draftPayload)
+//    เทียบกับ doc ดิบตรงๆ ไม่ได้: ข้อเก่าที่มีช่องว่างหัวท้าย / ตัวเลือกว่างคาไว้ / โจทย์ยาวเกิน
+//    LIMITS จะ "ต่าง" ตั้งแต่เปิดฟอร์มโดยยังไม่มีใครพิมพ์ ⇒ ป้ายส้มขึ้นหลอก แล้วกดบันทึก
+//    ก็โยนงานตรวจให้ทั้งทีมฟรีๆ
+const editBase = computed(() => current.value ? draftPayload(draftFrom(current.value)) : null)
 // แก้แบบนี้แล้วข้อจะวนเข้าคิวไหม — ใช้ทั้งตัดสินเส้นทางเขียนและขึ้นป้ายเตือนก่อนกด
-const editRequeues = computed(() => !!editPayload.value && verdictContentChanged(current.value, editPayload.value))
+const editRequeues = computed(() => !!editPayload.value && verdictContentChanged(editBase.value, editPayload.value))
 const editTouched = computed(() =>
-  !!editPayload.value && (editRequeues.value || sideContentChanged(current.value, editPayload.value)))
+  !!editPayload.value && (editRequeues.value || sideContentChanged(editBase.value, editPayload.value)))
 const canSaveEdit = computed(() => !!editPayload.value && draftValid(editDraft.value) && editTouched.value)
 
 function openEdit() {
   if (!current.value) return
   editDraft.value = draftFrom(current.value)
   editing.value = true
+  // ปิดกล่องคอมเมนต์ก่อนกางฟอร์ม — <details v-if="!editing"> unmount ทั้งก้อน ถ้าปล่อยค้างเปิดไว้
+  // พอกดยกเลิก QuestionComments จะ mount ใหม่แล้วยิงอ่านคอมเมนต์ซ้ำฟรีอีกรอบ
+  commentsOpen.value = false
 }
 function closeEdit() { editing.value = false; editDraft.value = null }
 
@@ -391,9 +414,11 @@ async function saveEdit() {
           await setDoc(doc(db, 'reviewMeta', 'main'),
             { progress: { [oldStatus]: increment(-1), pending: increment(1) } }, { merge: true })
           usage.track(0, 1)
+          // ขยับเลขในเครื่องเฉพาะตอนเซิร์ฟเวอร์รับแล้ว — ถ้า setDoc ล้มแล้วยังขยับ
+          // จอจะโชว์ตัวเลขที่ไม่มีอยู่จริงจนกว่าจะรีโหลด
+          meta.value = { ...meta.value, progress: bumpedProgress(oldStatus, 'pending') }
         } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
       }
-      meta.value = { ...meta.value, progress: bumpedProgress(oldStatus, 'pending') }
       patchTriageRow(q.id, {
         ...payload, ...REVIEW_RESET, retired: false,
         lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
@@ -528,6 +553,67 @@ async function saveNogroup(q) {
   finally { nogroupSaving.value = false }
 }
 
+// ── ✏️ แก้ข้อในแถวของกอง "ไม่ผ่านตรวจ" — ชิ้นส่วนที่ทำให้ลูปปิดจริง ──
+//  ข้อ failed ไม่เคยเข้าคิวตรวจ (load() ดึงแค่ pending + conflict ซึ่งเป็นโครงที่ต้องคงไว้
+//  เพื่อให้ต้นทุน read คงที่) ⇒ ปุ่ม "แก้ข้อนี้" บนการ์ดข้อปัจจุบันเอื้อมไม่ถึงมันเลย
+//  ทางเดียวที่เหลือคือ "ส่งกลับเข้าคิว" เปล่าๆ = ข้อที่ยังผิดวนกลับไปให้คนถัดไปกดตกอีก ไม่จบ
+//  จึงกางฟอร์มแก้ในแถวเลย (แพทเทิร์นเดียวกับกอง "ไม่มีกลุ่มโรค") แล้วบันทึกด้วยเส้นทาง
+//  เดียวกับ requeue branch ของ saveEdit() เป๊ะ — payload จาก draftPayload + REVIEW_RESET + lastFixBy
+const fixId = ref(null)
+const fixDraft = ref(null)
+const fixSaving = ref(false)
+
+function openFix(q) {
+  if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; return }
+  fixId.value = q.id
+  fixDraft.value = draftFrom(q)
+}
+
+async function saveFix(q) {
+  if (fixSaving.value || fixId.value !== q.id || !fixDraft.value) return
+  if (!draftValid(fixDraft.value) || !myUid.value) return
+  const uid = myUid.value
+  const u = authStore.userData || {}
+  const fixerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)
+  const payload = draftPayload(fixDraft.value)
+  if (!(await confirm('บันทึกการแก้?\nข้อนี้จะกลับเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้'))) return
+  fixSaving.value = true
+  const oldStatus = computeStatus(q)
+  try {
+    // ⚠️ กองนี้คือข้อที่ "ตกแล้วต้องแก้" — การกดบันทึกจากตรงนี้คือการประกาศว่าแก้แล้ว
+    //    จึงส่งกลับเข้าคิวเสมอ แม้แตะแค่คำอธิบาย (ต่างจากฟอร์มในการ์ดข้อปัจจุบัน ที่คนตรวจ
+    //    ยังต้องตรวจข้อเดิมต่อ จึงมีเส้นทาง "แก้ชั้นประกอบแล้วอยู่ข้อเดิม")
+    //    ไม่งั้นข้อจะค้างในกอง failed ทั้งที่คนแก้เชื่อว่าส่งกลับไปแล้ว
+    // rules ผ่านทาง isReviewReset() — ไม่มี hasOnly จึงเขียนเนื้อหาพร้อมล้างผลตรวจได้
+    await updateDoc(doc(db, 'questions', q.id), {
+      ...payload,
+      ...REVIEW_RESET,
+      reviewVerdicts: deleteField(),
+      retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
+      lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    })
+    usage.track(0, 1)
+    // ⚠️ ห้ามเขียนตอน oldStatus === 'pending' — key ซ้ำในก้อนเดียว ตัวหลังทับตัวแรก ตัวเลขเฟ้อ
+    if (oldStatus !== 'pending') {
+      try {
+        await setDoc(doc(db, 'reviewMeta', 'main'),
+          { progress: { [oldStatus]: increment(-1), pending: increment(1) } }, { merge: true })
+        usage.track(0, 1)
+        meta.value = { ...meta.value, progress: bumpedProgress(oldStatus, 'pending') }
+      } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
+    }
+    patchTriageRow(q.id, {
+      ...payload, ...REVIEW_RESET, retired: false,
+      lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
+    })   // computeStatus กลับเป็น pending → แถวหลุดกอง 🔴 ทันที ไม่ต้องรอโหลดใหม่
+    // ปิดเฉพาะแผงของแถวนี้ — ระหว่างรอเน็ตคนอาจกดเปิดแถวอื่นไปแล้ว (race ข้ามแถว)
+    if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null }
+    toast('บันทึกแล้ว — ส่งข้อนี้ให้คนอื่นตรวจต่อ', 'success')
+  } catch (e) { console.error('[triage fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
+  finally { fixSaving.value = false }
+}
+
 const buckets = computed(() => triageBuckets(triageRows.value))
 const triage = computed(() => triageSummary(triageRows.value))
 
@@ -553,15 +639,24 @@ async function loadTriage() {
   finally { triageLoading.value = false }
 }
 
+// ล้างร่องรอย "ใครแก้รอบก่อน" — ส่งกลับเข้าคิวเฉยๆ ไม่ได้แปลว่าเนื้อหารอบนี้มาจากคนเดิม
+// ถ้าไม่ล้าง needsReviewBy จะกันคนที่เคยแก้ข้อนี้ออกจากคิวไปตลอดกาลแบบสะสม
+// (ทีมวิชาการใช้งานจริงราว 13 คน กันทีละคนไปเรื่อยๆ คือคิวแห้งจริง)
+// ⚠️ deleteField() เป็น sentinel ของ Firestore ห้ามยัดลง local state — ฝั่งจอใช้ null
+const CLEAR_FIX_SERVER = { lastFixBy: deleteField(), lastFixByName: deleteField(), lastFixAt: deleteField() }
+const CLEAR_FIX_LOCAL = { lastFixBy: null, lastFixByName: null, lastFixAt: null }
+
 // ส่งข้อที่แก้แล้วกลับเข้าคิวตรวจ — rules อนุญาต canEditQuestions() ผ่าน isReviewReset()
 async function requeue(q) {
   if (requeuingId.value) return
   if (!(await confirm(`ส่ง "${truncate60(q.question)}" กลับเข้าคิวตรวจใหม่?`))) return
   requeuingId.value = q.id
   try {
-    await updateDoc(doc(db, 'questions', q.id), { ...REVIEW_RESET, reviewVerdicts: deleteField() })
+    await updateDoc(doc(db, 'questions', q.id), {
+      ...REVIEW_RESET, reviewVerdicts: deleteField(), ...CLEAR_FIX_SERVER,
+    })
     usage.track(0, 1)
-    patchTriageRow(q.id, REVIEW_RESET)
+    patchTriageRow(q.id, { ...REVIEW_RESET, ...CLEAR_FIX_LOCAL })
     toast('ส่งกลับเข้าคิวตรวจแล้ว', 'success')
   } catch (e) { console.error('[requeue]', e); toast('ส่งกลับไม่สำเร็จ', 'error') }
   finally { requeuingId.value = null }
@@ -933,6 +1028,9 @@ async function submitAmend() {
 .rv-bucket-acts { display: flex; flex-wrap: wrap; gap: 6px; }
 .rv-nogroup { margin-top: 9px; border-top: 1px dashed rgba(0,0,0,.12); padding-top: 9px; }
 .rv-nogroup-save { margin-top: 9px; width: 100%; }
+.rv-fix { margin-top: 9px; border-top: 1px dashed rgba(0,0,0,.12); padding-top: 9px; }
+.rv-fix-note { margin: 10px 0 0; border-radius: 10px; padding: 9px 11px; background: rgba(245,158,11,.13); color: #92400e; font-size: .74rem; font-weight: 700; line-height: 1.5; }
+.rv-fix-save { margin-top: 9px; width: 100%; }
 .rv-bucket-more { margin-top: 10px; }
 
 .rv-conflict-badge { font-size: .7rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: #fff7ed; color: #c2410c; }

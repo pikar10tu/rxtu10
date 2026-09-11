@@ -378,7 +378,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
-import { LIMITS } from '../utils/text.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 import { bankStats } from '../utils/questionBankStats.js'
 import { parseImport } from '../utils/importQuestions.js'
 import { qhash, groupDuplicates } from '../utils/qhash.js'
@@ -863,7 +863,17 @@ async function save() {
       const before = list.value.find(q => q.id === d.id)
       if (verdictContentChanged(before, payload)) {
         // แก้เนื้อหา = ตั้งใจนำกลับมาใช้ — ล้างทั้งผลตรวจและสถานะนำออก ให้วนเข้าคิวตรวจใหม่
-        Object.assign(payload, REVIEW_RESET, { reviewVerdicts: deleteField(), retired: deleteField() })
+        // 🔑 ต้องประทับ lastFixBy ที่นี่ด้วย ไม่ใช่แค่ที่หน้าตรวจ — สองหน้านี้คือ "ประตูแก้ข้อ"
+        //    คนละบานของเส้นทางเดียวกัน ถ้าประทับแค่บานเดียว (ก) คนแก้ที่คลังเดินกลับมา /review
+        //    แล้วตรวจข้อของตัวเองผ่านได้ (guard needsReviewBy รั่ว) (ข) พาแนล "รอบก่อนแก้"
+        //    ที่ gate ด้วย lastFixAt ไม่โหลด ⇒ คนตรวจรอบถัดไปไม่เห็นว่ารอบก่อนตกเพราะอะไร
+        const u = authStore.userData || {}
+        Object.assign(payload, REVIEW_RESET, {
+          reviewVerdicts: deleteField(), retired: deleteField(),
+          lastFixBy: authStore.currentUser?.uid || null,
+          lastFixByName: cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName),
+          lastFixAt: serverTimestamp(),
+        })
       }
       await updateDoc(doc(db, 'questions', d.id), payload)
       toast(payload.isPublished && payload.examSets.length ? 'บันทึกแล้ว · กด 🔄 คำนวณ meta ใหม่ ให้ชุดขึ้นในควิซ' : 'บันทึกการแก้ไขแล้ว', 'success')

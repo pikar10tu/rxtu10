@@ -119,6 +119,24 @@ test('needsReviewBy: คนอื่นยังตรวจข้อที่�
   const q = { ...REVIEW_RESET, lastFixBy: 'someone-else' }
   assert.equal(needsReviewBy(q, 'me'), true)
 })
+// ล้าง lastFixBy แล้ว (ปุ่ม "ส่งกลับเข้าคิวตรวจ" ในกอง 🔴 เขียน deleteField ให้ 3 ฟิลด์)
+// ⇒ คนที่เคยแก้ข้อนี้รอบก่อนกลับมาตรวจได้ ไม่ถูกกันสะสมข้ามรอบไปตลอดกาล
+test('needsReviewBy: ข้อที่ล้าง lastFixBy แล้ว คนแก้รอบก่อนกลับมาตรวจได้', () => {
+  const q = { ...REVIEW_RESET, lastFixBy: null, lastFixByName: null, lastFixAt: null }
+  assert.equal(needsReviewBy(q, 'me'), true)
+})
+// ข้อ failed ไม่มีใครตรวจได้เลย (1 เสียงจบข้อแล้ว และไม่ใช่ conflict) — ทางเดียวที่จะกลับเข้าคิว
+// คือมีคนเข้าไปจัดการจากกอง triage (กด "แก้ข้อนี้" หรือ "ส่งกลับเข้าคิวตรวจ")
+test('needsReviewBy: ข้อ failed ไม่เข้าคิวของใครเลย — ต้องถูกปลดจากกอง triage เท่านั้น', () => {
+  const q = { reviewedBy: ['a'], reviewPass: 0, reviewFail: 1 }
+  assert.equal(computeStatus(q), 'failed')
+  assert.equal(needsReviewBy(q, 'a'), false)
+  assert.equal(needsReviewBy(q, 'me'), false)
+  // แก้แล้ววนกลับเข้าคิว (REVIEW_RESET + lastFixBy) — คนอื่นตรวจได้ คนแก้ตรวจไม่ได้
+  const fixed = { ...q, ...REVIEW_RESET, lastFixBy: 'me' }
+  assert.equal(needsReviewBy(fixed, 'a'), true)
+  assert.equal(needsReviewBy(fixed, 'me'), false)
+})
 test('needsReviewBy: lastFixBy กันแม้ข้อจะอยู่สถานะ conflict (ไม่ให้ไปตัดสินงานตัวเอง)', () => {
   const q = { reviewedBy: ['a', 'b'], reviewPass: 1, reviewFail: 1, lastFixBy: 'me' }
   assert.equal(computeStatus(q), 'conflict')
