@@ -17,15 +17,7 @@ import { qhash } from './qhash.js'
 // ก๊อป array ใหม่เสมอ — แก้ในฟอร์มต้องไม่ไปกลายพันธุ์แถวที่ค้างอยู่ใน list ของ view
 export function draftFrom(question) {
   const q = question || {}
-  // ถ้ามี pleGroup อยู่ให้ใช้นั้น ไม่งั้นเดาจาก pleFields
-  let group = q.pleGroup ?? null
-  let sub = q.pleSub ?? null
-  if (!group && !q.pleGroup) {
-    // เดาจากข้อมูลเก่า (categories) ถ้ามีทั้งฟิลด์ไม่ได้ระบุ
-    const inferred = pleFields(q)
-    group = inferred.group
-    sub = inferred.sub
-  }
+  const { group, sub } = pleFields(q)
   return {
     id: q.id ?? null,
     question: q.question || '',

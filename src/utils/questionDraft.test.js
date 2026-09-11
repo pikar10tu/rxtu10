@@ -29,12 +29,12 @@ test('draftFrom(doc) ก๊อป choices/examSets เป็น array ใหม�
 })
 
 test('draftFrom ก๊อปช่องที่ฟอร์มย่อซ่อนไว้มาด้วย — ไม่งั้นบันทึกจากหน้าตรวจแล้วค่าหาย', () => {
-  const doc = { id: 'q1', question: 'Q', choices: ['a', 'b'], answer: 0, pleGroup: 'cardio', domain: 'pharm', isPublished: true, examSets: ['s1'] }
+  const doc = { id: 'q1', question: 'Q', choices: ['a', 'b'], answer: 0, pleGroup: 'cvs', domain: 'pharm', isPublished: true, examSets: ['s1'] }
   const d = draftFrom(doc)
   assert.equal(d.domain, 'pharm')
   assert.equal(d.isPublished, true)
   assert.deepEqual(d.examSets, ['s1'])
-  assert.equal(d.ple.group, 'cardio')
+  assert.equal(d.ple.group, 'cvs')
 })
 
 // ── draftPayload ──
