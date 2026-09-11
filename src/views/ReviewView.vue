@@ -521,7 +521,8 @@ async function saveNogroup(q) {
     await updateDoc(doc(db, 'questions', q.id), { ...patch, updatedAt: serverTimestamp() })
     usage.track(0, 1)
     patchTriageRow(q.id, patch)   // bucketsOf() อ่าน pleFields → แถวหลุดกองทันที
-    nogroupId.value = null
+    // ปิดเฉพาะแผงของแถวนี้ — กันเคสระหว่างรอ updateDoc คนเปิดแถวอื่นไปแล้ว (race ข้ามแถว)
+    if (nogroupId.value === q.id) nogroupId.value = null
     toast('บันทึกกลุ่มโรคแล้ว', 'success')
   } catch (e) { console.error('[nogroup save]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { nogroupSaving.value = false }
