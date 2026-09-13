@@ -113,6 +113,7 @@ import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { useQuestionFeed } from '../composables/useQuestionFeed.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
+import { bumpGlobalStat } from '../composables/useGlobalStats.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { rankOfScore } from '../utils/newsFeed.js'
 import { shuffleChoices } from '../utils/quizShuffle.js'
@@ -372,6 +373,7 @@ async function finish(reason) {
     },
   )
   if (!ok) { toast('บันทึกผลไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error'); return }
+  bumpGlobalStat('quizTotal', snapAnswered)
   if (grant) toast(`ได้ ${grant.toLocaleString()}🪙 จาก Time Attack`, 'success')
   // สถิติใหม่เท่านั้นที่ต้องขึ้นกระดาน · ที่ 1 ของรุ่นไปเลนข่าวอยู่ยาว อันดับ 2-3 อยู่เลน roster
   // อันดับคำนวณจาก rosterRows ที่กระดานบนจอนี้โหลดไว้แล้ว — ไม่มีในมือ = ไม่ยิงข่าว (ห้ามอ่านเพิ่ม)
