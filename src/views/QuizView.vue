@@ -156,6 +156,7 @@ import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc,
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
+import { bumpGlobalStat } from '../composables/useGlobalStats.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { shuffle, shuffleChoices } from '../utils/quizShuffle.js'
@@ -560,8 +561,12 @@ async function finish() {
       ...qcServer,   // dot-notation เท่านั้น — ห้ามส่ง study ทั้งก้อน ไม่งั้นทับ study.cards
     },
   )
-  if (ok) missingQIds.value = []
-  else toast('บันทึกผลไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error')
+  if (ok) {
+    missingQIds.value = []
+    bumpGlobalStat('quizTotal', answered.value)
+  } else {
+    toast('บันทึกผลไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error')
+  }
   if (grant) toast(`ได้ ${grant}🪙 จากการทำข้อสอบ`, 'success')
 
   // ข่าวกระดาน: ยิงครั้งเดียวต่อรอบ ที่ขั้นสูงสุดที่ถึง (10/20/30)
