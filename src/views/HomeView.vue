@@ -26,6 +26,8 @@
       <!-- สถานะส่งผจญภัย (โชว์เฉพาะตอนกำลังไป/กลับมาแล้ว) -->
       <ExpeditionCard />
 
+      <FunFactsWidget />
+
       <!-- เครื่องมือผู้ดูแล — เฉพาะแอดมิน (Shop ไป nav, Pets ไป Play แล้ว) -->
       <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-admin-btn">
         <Emoji char="⚙️" /> แผงผู้ดูแลระบบ
@@ -56,6 +58,7 @@ import { pendingAnnounce } from '../utils/mailbox.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
 import ExpeditionCard from '../components/home/ExpeditionCard.vue'
+import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
 import NextActionCard from '../components/home/NextActionCard.vue'

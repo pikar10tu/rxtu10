@@ -5,6 +5,8 @@
     <div class="ll-sub">เภสัช มธ. รุ่น 10</div>
     <p class="ll-msg">พื้นที่เล็กๆ ของพวกเรา — สะสม เล่น และเตรียมสอบใบประกอบฯ (CC) ไปด้วยกัน</p>
 
+    <FunFactsWidget />
+
     <!-- in-app browser (LINE/FB/IG) บล็อก Google login ทั้ง popup และ redirect →
          เตือนให้เปิดในเบราว์เซอร์จริง ก่อนจะกดแล้วเด้งกลับงงๆ -->
     <div v-if="inApp" class="ll-warn">
@@ -19,6 +21,7 @@
 <script setup>
 import { computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
+import FunFactsWidget from '../shared/FunFactsWidget.vue'
 import { useAuthStore } from '../../stores/auth.js'
 const auth = useAuthStore()
 
