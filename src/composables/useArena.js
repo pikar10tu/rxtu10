@@ -10,6 +10,7 @@ import { resolveBattleTeam } from '../utils/petTeam.js'
 import { rosterOpponents } from '../utils/roster.js'
 import { rankOfScore } from '../utils/newsFeed.js'
 import { useRosterSync } from './useRosterSync.js'
+import { bumpGlobalStat } from './useGlobalStats.js'
 import {
   nextRating, BOT_RATING_MULT, PVP_DAILY_ATTACKS, PVP_RATING_START,
 } from '../utils/pvpRating.js'
@@ -124,6 +125,7 @@ export function useArena() {
       history: opp.isBot ? null : { u: opp.uid, w: won ? 1 : 0, c: coin, t: Date.now() },
       event: (newRank < prevRank && newRank <= 10) ? { k: 'pv', v: newRank, t: Date.now() } : null,
     })
+    if (ok) bumpGlobalStat('pvpTotal', 1)
     return { ok, newRating, delta: newRating - base.rating, coin }
   }
 
