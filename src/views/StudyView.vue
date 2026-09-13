@@ -107,7 +107,7 @@
         <span class="sv-rev-count">{{ doneInSession }}/{{ sessionTotal }}</span>
       </div>
 
-      <div class="sv-card" :class="{ flipped }" @click="!flipped && (flipped = true)">
+      <div class="sv-card" :class="{ flipped }" @click="flipCard">
         <div class="sv-card-tag">{{ flipped ? 'เฉลย' : 'ตัวยา' }}</div>
         <div class="sv-card-front">{{ current?.n }}</div>
         <template v-if="flipped">
@@ -185,6 +185,7 @@ import { increment, addDoc, collection, serverTimestamp } from 'firebase/firesto
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
+import { bumpGlobalStat } from '../composables/useGlobalStats.js'
 import { DRUGS } from '../data/index.js'
 import { sm2Update, newSrsCard } from '../utils/sm2.js'
 import { dueCount as qcardsDueCount } from '../utils/srsQuestions.js'   // ชนกับ dueCount ของแฟลชการ์ดตัวยาด้านล่าง
@@ -229,6 +230,13 @@ const sessionTotal = ref(0)
 const sessionCorrect = ref(0)
 const sessionCoins = ref(0)
 const rewarded = ref(new Set())   // card ids already rewarded this session
+
+// พลิกการ์ดดูเฉลย — นับเข้าตัวเลข fun fact รวมทั้งเว็บ (พลิกซ้ำใบเดิมก็นับ ไม่ dedupe)
+function flipCard() {
+  if (flipped.value) return
+  flipped.value = true
+  bumpGlobalStat('flashcardFlips', 1)
+}
 
 const coachStep = ref(1)          // 1..3
 const coachThenStart = ref(false) // จบจอสอนแล้วเข้าเซสชันต่อไหม (ครั้งแรกเท่านั้น · เปิดดูซ้ำ = กลับหน้าหลัก)
