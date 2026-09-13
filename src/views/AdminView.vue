@@ -138,6 +138,20 @@
         </button>
       </section>
 
+      <!-- ───── Fun facts รวมทั้งเว็บ (stats/global) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="📊" /> สถิติรวมทั้งเว็บ (fun facts)</span></div>
+        <div class="admin-hint">
+          รวม 4 ตัวเลขสะสมของทุกคน (ข้อสอบ/ยอดขายฟาร์ม/เหรียญที่ใช้/ความสำเร็จ) เข้า doc เดียว
+          ให้หน้า fun facts อ่าน <b>1 read</b> แทนอ่าน user ทุกคน · <b>ต้องกดครั้งแรกหนึ่งครั้ง</b>
+          ก่อนหน้า fun facts จะมีเลข · กดซ้ำได้ ปลอดภัย (คำนวณใหม่จากของจริงเสมอ ไม่บวกซ้ำ) ·
+          ไม่แตะตัวนับ PvP/พลิกการ์ด (สองตัวนั้นนับสดจากการเล่นเท่านั้น)
+        </div>
+        <button class="btn-mini" :disabled="computingGlobalStats" @click="computeGlobalStats">
+          {{ computingGlobalStats ? 'กำลังคำนวณ…' : '📊 คำนวณสถิติรวมครั้งแรก' }}
+        </button>
+      </section>
+
       <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -461,6 +475,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction } from 'firebase/firestore'
 import { buildRosterFromUsers } from '../utils/roster.js'
+import { sumGlobalStatsFromUsers } from '../utils/globalStats.js'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
@@ -791,6 +806,25 @@ async function rebuildRoster() {
   } catch (e) {
     console.error('[rebuild roster]', e); toast('สร้าง roster ไม่สำเร็จ', 'error')
   } finally { rebuildingRoster.value = false }
+}
+
+// ── คำนวณสถิติรวมทั้งเว็บครั้งแรก (fun facts) — อ่าน users ทั้ง collection, sum, set ทับ
+//    เฉพาะ 4 ฟิลด์ที่มีประวัติเก่า (ห้ามแตะ pvpTotal/flashcardFlips — ไม่มีประวัติเก่า
+//    สองตัวนั้นถูก bumpGlobalStat() เพิ่มสดจากการเล่นเท่านั้น) กดซ้ำได้ปลอดภัยเพราะ sum ใหม่ทุกครั้ง
+const computingGlobalStats = ref(false)
+async function computeGlobalStats() {
+  if (computingGlobalStats.value) return
+  computingGlobalStats.value = true
+  try {
+    const snap = await getDocs(collection(db, 'users'))
+    usage.track(snap.size)
+    const sums = sumGlobalStatsFromUsers(snap.docs.map(d => d.data()))
+    await setDoc(doc(db, 'stats', 'global'), sums, { merge: true })
+    usage.track(0, 1)
+    toast(`คำนวณสถิติรวมแล้ว (ข้อสอบ ${sums.quizTotal.toLocaleString()} ข้อ)`, 'success')
+  } catch (e) {
+    console.error('[computeGlobalStats]', e); toast('คำนวณสถิติรวมไม่สำเร็จ', 'error')
+  } finally { computingGlobalStats.value = false }
 }
 
 const usageLevel = computed(() => usageStatus(usage.today?.reads || 0, usage.today?.writes || 0))
