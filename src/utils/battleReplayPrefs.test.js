@@ -62,20 +62,13 @@ test('readPrefs: ค่าที่ไม่รู้จักถูกแทน
 test('prefs รุ่นเก่าที่มี style/motionOverride ค้างอยู่ → ทิ้งฟิลด์ที่เลิกใช้ แต่ไม่ทิ้ง pace ที่เลือกไว้', () => {
   // ⚠️ เครื่องที่เคยเทสท่าชน A/B/C/D จะมีค่าเก่าค้างใน localStorage — ต้องอ่านผ่านได้ ไม่ throw
   const s = fakeStorage({ 'rxtu10.battleReplayPrefs': JSON.stringify({ fx: 'mid', pace: 'tight', style: 'C', motionOverride: true }) })
-  assert.deepEqual(readPrefs(s), { fx: 'mid', pace: 'tight', legacyBeats: false })
+  assert.deepEqual(readPrefs(s), { fx: 'mid', pace: 'tight' })
 })
 
 test('writePrefs แล้ว readPrefs ได้ค่าเดิมกลับมา', () => {
   const s = fakeStorage()
-  writePrefs({ fx: 'low', pace: 'grand', legacyBeats: true }, s)
-  assert.deepEqual(readPrefs(s), { fx: 'low', pace: 'grand', legacyBeats: true })
-})
-
-test('legacyBeats: ค่าเริ่มต้นที่ส่งถึงนักศึกษาต้องเป็นจังหวะใหม่', () => {
-  assert.equal(DEFAULT_PREFS.legacyBeats, false)
-  // ต้องเป็น true เป๊ะเท่านั้นถึงจะเปิดโหมดเดิม — ค่าขยะไม่ควรพาไปโหมดเดิมโดยบังเอิญ
-  const s = fakeStorage({ 'rxtu10.battleReplayPrefs': JSON.stringify({ legacyBeats: 'yes' }) })
-  assert.equal(readPrefs(s).legacyBeats, false)
+  writePrefs({ fx: 'low', pace: 'grand' }, s)
+  assert.deepEqual(readPrefs(s), { fx: 'low', pace: 'grand' })
 })
 
 test('ไม่มี storage เลย (SSR/โหมดปิดคุกกี้) → ไม่ throw', () => {

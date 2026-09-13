@@ -202,7 +202,6 @@ import { computeBattleSummary } from '../../utils/battleSummary.js'
 import { fluentFile } from '../../utils/emoji.js'
 import { createBattleFx } from '../../utils/battleFx.js'
 import { buildBeats, scaleTiming, BEAT } from '../../utils/battleBeats.js'
-import { buildBeatsLegacy, legacyImpact } from '../../utils/battleBeatsLegacy.js'
 import { readPrefs, fxFlags, paceMult, FX_LABEL, PACE_LABEL } from '../../utils/battleReplayPrefs.js'
 import { createFrameMeter, FALLBACK_BASE, DROP_RATIO } from '../../utils/frameMeter.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
@@ -362,8 +361,7 @@ function statusOf(uid) { return statusMap.value[uid] || [] }
 const rawLog = computed(() => props.data?.result?.log || [])
 // ⚠️ maxHp เป็น plain object ที่ buildMax() เขียนทับ ไม่ใช่ ref — beats จึงไม่ re-compute เองเมื่อ maxHp เปลี่ยน
 // แต่ปลอดภัยเพราะ buildMax(d) ถูกเรียกก่อน reset() ในตัว watcher เดียวกันเสมอ และ rawLog เปลี่ยนพร้อมกัน (props.data ใหม่ทั้งก้อน) ซึ่ง trigger การ compute ใหม่อยู่แล้ว
-// prefs.legacyBeats = สวิตช์ในห้องแล็บ (localStorage เครื่องเดียว) — ดู battleBeatsLegacy.js
-const beats = computed(() => (prefs.value.legacyBeats ? buildBeatsLegacy : buildBeats)(rawLog.value, maxHp))
+const beats = computed(() => buildBeats(rawLog.value, maxHp))
 const done = computed(() => idx.value >= beats.value.length)
 const summary = computed(() => done.value
   ? computeBattleSummary(rawLog.value, props.data?.playerTeam || [], props.data?.botTeam || [])
@@ -690,11 +688,7 @@ function applyImpact(beat, g, t) {
   //    ถ้าวันหลังเพิ่ม kind ใหม่แล้วลืมเขียนกิ่ง จะได้ default (เงียบ) ซึ่งปลอดภัย ไม่ใช่ดังสุด
   const spark = sparkOf(defForUid(beat.attacker))
   const w = beat.weight ?? 0
-  if (beat.legacyTier) {                          // โหมดเทียบจังหวะเดิม — ความดังตามชั้น
-    const L = legacyImpact(beat.legacyTier)
-    if (L.burst) fx?.burst(beat.target, L.burst, spark)
-    if (L.shake) fx?.shake(L.shake)
-  } else switch (beat.kind) {
+  switch (beat.kind) {
     case 'finish':
       fx?.burst(beat.target, 92, spark); fx?.shake('finish'); break
     case 'ko':
@@ -771,9 +765,7 @@ async function applyAttack(beat) {
   // หมัดลูก: ไม่มีงบเวลาของตัวเอง (อยู่ในหมัดหลักที่กำลังพุ่งอยู่) → ลง impact แล้วออกทันที
   if (beat.kind === 'sub') { applyImpact(beat, g, t); return }
 
-  // โหมดเทียบจังหวะเดิม: ชั้นถากไม่ขยับการ์ดเลย ใช้ประกายที่จุดปะทะแทน (พฤติกรรมเดิมเป๊ะ)
-  const chipLegacy = beat.legacyTier === 'chip'
-  const doLunge = () => { if (!ranged && !chipLegacy) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w) }
+  const doLunge = () => { if (!ranged) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w) }
 
   if (t.windup > 0) {
     highlight(beat.attacker, 'windup')                       // เปลี่ยน class ให้เสร็จ "ก่อน" สั่ง animate (ข้อบังคับ v3)
@@ -784,7 +776,6 @@ async function applyAttack(beat) {
   } else {
     doLunge()
   }
-  if (chipLegacy) fx?.jab(beat.attacker, beat.target, t.motion)
   // ⚠️ จุดสลับคลาส windup → acting นี้อยู่ "กลาง" fx.lunge() ที่ยังพุ่งอยู่บนการ์ดใบเดียวกัน
   // ปลอดภัยได้เพราะ .windup กับ .acting ตั้ง border-color ค่าเดียวกัน (#fde68a) เป๊ะ = ไม่มี paint เปลี่ยนจริง
   // ⛔ วันไหนแยกสีสองคลาสนี้ = เปลี่ยน paint ระหว่างการ์ดมี animation วิ่ง = ผิดข้อบังคับ v3 ทันที
@@ -911,8 +902,7 @@ const showFps = computed(() => new URLSearchParams(location.search).has('fps') |
 const labTag = computed(() => {
   const p = prefs.value
   const cut = prefersReducedMotion()
-  const beats = p.legacyBeats ? 'จังหวะเดิม 4 ชั้น' : `จังหวะใหม่ ${BEAT}ms`
-  return `${beats} · ${FX_LABEL[p.fx] || p.fx} · ${PACE_LABEL[p.pace] || p.pace}${cut ? ' · ⚠️ Reduce Motion ตัดการเคลื่อนไหวอยู่' : ''}`
+  return `จังหวะใหม่ ${BEAT}ms · ${FX_LABEL[p.fx] || p.fx} · ${PACE_LABEL[p.pace] || p.pace}${cut ? ' · ⚠️ Reduce Motion ตัดการเคลื่อนไหวอยู่' : ''}`
 })
 const fpsWorst = ref(0)     // เฟรมแย่สุดในหน้าต่าง ~1 วิ (ป้ายสดมุมจอ)
 const fpsDropAt = ref(FALLBACK_BASE * DROP_RATIO)   // เกณฑ์ "สะดุด" ที่คำนวณจากจอเครื่องนี้
@@ -1238,8 +1228,6 @@ onUnmounted(() => {
 /* ขนาดเลขมาจาก battleFx.pop() (0.86 + weight × 1.0 rem) แบบต่อเนื่อง — ไม่มีคลาสตามชั้นแล้ว */
 
 .brfx-call.survive { background: #34d399; color: #06371f; }
-
-.brfx-jab { width: 1.1rem; height: 1.1rem; }
 
 /* วงแหวนโซนอันตราย — เต้นด้วย opacity ล้วนบน pool element ที่ promote ถาวรแล้ว */
 .brfx-danger {

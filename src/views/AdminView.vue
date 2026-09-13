@@ -8,24 +8,6 @@
     </div>
 
     <template v-else>
-      <!-- ───── โน้ตชั่วคราว: ลิงก์แผงข้อมูลเพ็ท (ลบทิ้งได้เมื่ออ่านแล้ว) ───── -->
-      <section class="admin-card note-card">
-        <div class="admin-card-head"><span><Emoji char="🐉" /> แผงข้อมูลเพ็ท (สำหรับปรับสมดุล)</span></div>
-        <div class="admin-hint">
-          ดึงข้อมูลเพ็ททั้ง 27 ตัวออกมาให้แล้ว — ชื่อ/ระดับ/สาย/ค่าพลังทุกเกรด/พาสสีฟทุกขั้น/flavor ปัจจุบัน
-          พร้อม <b>ผลวัดความแรงของพาสสีฟ</b> ที่รันจากเอนจินไฟต์ตัวจริง (ไม่ได้เดา)
-          <br>เปิดในมือถือได้ · กรอง/เรียงได้ · มีตารางรวมสำหรับลากไปวางในชีต
-        </div>
-        <a class="note-link" href="https://claude.ai/code/artifact/45379ac4-f810-438b-90af-c5d197013457" target="_blank" rel="noopener">
-          เปิดแผงข้อมูลเพ็ท →
-        </a>
-        <div class="admin-hint" style="margin-top:8px">
-          สรุปสั้นๆ: 🐘 บากุ พาสสีฟติดลบ (−3.1%) · 🦅 กริฟฟิน +0.3% เท่ากับไม่มี ·
-          🦋 ผีเสื้อ (ธรรมดา) แรงกว่าตำนาน 5 ใน 9 ตัว · 🐕 เซอร์เบอรัสตี 3 เป้า = ทั้งทีมศัตรูพอดี
-          <br><i>การ์ดนี้เป็นโน้ตชั่วคราว อ่านแล้วบอกได้ เดี๋ยวลบให้</i>
-        </div>
-      </section>
-
       <!-- ───── โหมดซ่อมบำรุง (config/app.maintenance) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🚧" /> โหมดซ่อมบำรุง</span></div>
@@ -466,19 +448,6 @@
                   :class="{ on: fxPrefs.pace === n }" @click="pickPace(n)">{{ PACE_LABEL[n] }}</button>
         </div>
 
-        <!-- สวิตช์กู้จังหวะเดิมไว้เทียบรสนิยม 1 รอบ (สเปก 2026-08-28 §6) — ลบทิ้งหลังเทสจอจริงผ่าน
-             กู้เฉพาะ "จังหวะ" ไม่กู้บั๊ก: หมัดลูกยิงจอสั่นเต็มสูตร / สุ่มเยื้องเลข / พูลถูกยึด แก้ในทั้งสองโหมด -->
-        <div class="admin-hint"><b>จังหวะหมัด</b> — เทียบของใหม่กับของเดิม (เฉพาะเครื่องนี้)</div>
-        <div class="fxlab-row">
-          <button class="btn-mini" :class="{ on: !fxPrefs.legacyBeats }" @click="pickBeats(false)">ใหม่ · จังหวะเดียว</button>
-          <button class="btn-mini" :class="{ on: fxPrefs.legacyBeats }" @click="pickBeats(true)">เดิม · 4 ชั้น</button>
-        </div>
-        <div class="admin-hint fxlab-note">
-          {{ fxPrefs.legacyBeats
-            ? 'ของเดิม: chip 320 / solid 600 / heavy 1300 / finish 2000ms · ชั้นถากการ์ดไม่ขยับ'
-            : 'ของใหม่: ทุกหมัด 520ms ขยับเท่ากัน · KO 1040 · ปิดเกม 2080 · สกิลครั้งแรกหยุด 200ms' }}
-        </div>
-
         <button class="btn-mini" @click="runTestFight">▶ ยิงไฟต์ทดสอบ</button>
       </section>
     </template>
@@ -537,7 +506,6 @@ const fxNames = Object.keys(FX_PRESETS)
 const paceNames = Object.keys(PACE_PRESETS)
 function pickFx(name) { fxPrefs.value = writePrefs({ ...fxPrefs.value, fx: name }) }
 function pickPace(name) { fxPrefs.value = writePrefs({ ...fxPrefs.value, pace: name }) }
-function pickBeats(v) { fxPrefs.value = writePrefs({ ...fxPrefs.value, legacyBeats: v }) }
 // อ่านครั้งเดียวตอนเปิดหน้า — คนไปสลับใน Settings แล้วกลับมาต้องรีเฟรช ซึ่งเป็นสิ่งที่เขาทำอยู่แล้วตอนเทส
 
 // ไฟต์ทดสอบ: เคสหนักสุดเท่าที่ทำได้ — เพ็ททั้ง 8 ตัวเป็น melee ล้วน (ไม่มี atkStyle:"ranged" ซึ่งไม่แตะการ์ดเลย)
@@ -1177,12 +1145,6 @@ async function saveEcon(m) {
   padding: 14px;
   margin-bottom: 14px;
 }
-.note-card { border-color: var(--primary); background: #f8f7ff; }
-.note-link {
-  display: inline-block; background: var(--primary); color: #fff; text-decoration: none;
-  font-weight: 700; font-size: .82rem; padding: 8px 14px; border-radius: 10px;
-}
-.note-link:hover { filter: brightness(1.08); }
 .admin-card-head {
   display: flex;
   align-items: center;
@@ -1299,7 +1261,6 @@ async function saveEcon(m) {
 .btn-gray { background: #fff; color: var(--ink); }
 .fxlab-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
 .fxlab-row .btn-mini.on { background: var(--ink); color: #fff; }
-.fxlab-note { margin: 6px 0 10px; }
 .fxlab-warn { font-size: .72rem; line-height: 1.5; color: #92400e; background: rgba(245,158,11,.12);
   border: 1px solid rgba(245,158,11,.35); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; }
 .fxlab-check { display: flex; gap: 6px; align-items: flex-start; margin-top: 6px; cursor: pointer; }

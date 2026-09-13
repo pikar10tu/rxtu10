@@ -72,8 +72,8 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], jab: [], danger: [], sweep: [], mark: [] }
-  const idx = { pop: 0, call: 0, puff: 0, jab: 0, sweep: 0, burst: 0, proj: 0 }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [] }
+  const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0 }
   const dangerOn = new Map()      // uid → element ที่กำลังเต้นอยู่
   const markOn = new Map()        // uid → element ป้ายสถานะค้าง (ชั้นเชื้อ)
 
@@ -117,8 +117,6 @@ export function createBattleFx() {
     pool.burst.forEach(e => imgSrc(e, '💥'))
     pool.proj = [mkImg('brfx-proj'), mkImg('brfx-proj')]
     pool.dash = [mkImg('brfx-dash')]
-    pool.jab = [mkImg('brfx-jab'), mkImg('brfx-jab')]
-    pool.jab.forEach(e => imgSrc(e, '💥'))
     for (let i = 0; i < 8; i++) pool.danger.push(mkEl('brfx-danger'))   // สูงสุด 8 ตัวต่อไฟต์ (4v4)
     for (let i = 0; i < 3; i++) pool.sweep.push(mkImg('brfx-sweep'))    // cleave มากสุด 3 เป้า
     // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
@@ -253,27 +251,6 @@ export function createBattleFx() {
       { transform: base + ' scale(.4)', opacity: 1 },
       { transform: base + ' scale(1.4)', opacity: 0 },
     ], { duration: 280, easing: 'ease-out', fill: 'forwards' }).then(() => { el.style.opacity = '0' })
-  }
-
-  // ── ชั้น chip: ประกายเล็กระหว่างทาง ไม่แตะการ์ดเลย (นี่คือเหตุผลที่ชั้น 1 ราคาเกือบศูนย์) ──
-  function jab(fromUid, toUid, ms = 110) {
-    const a = centerOf(fromUid), b = centerOf(toUid); if (!a || !b) return Promise.resolve()
-    const el = take('jab')
-    el.getAnimations?.().forEach(x => x.cancel())
-    el.style.opacity = '1'
-    // ⚠️ เดิมประกายบินจากการ์ดผู้ตีไปหาเป้า 70% ของทาง — user รายงาน 27 ส.ค. ว่า "ยังเห็นเป็น range attack"
-    //    ถูกแล้ว เพราะชั้น chip = 55% ของหมัดทั้งหมด ⇒ เกินครึ่งของไฟต์ดูเหมือนยิงไกลทั้งที่ทุกตัวเป็น melee
-    //    แก้เป็น "ประกายที่จุดปะทะ" — ขยับสั้นๆ ช่วง 82%→95% ของทาง อ่านเป็นหมัดลง ไม่ใช่กระสุน
-    //    (ยังใช้ element/animation เท่าเดิม ราคาไม่เปลี่ยน · การ์ดยังไม่ขยับตามข้อตกลงชั้น chip)
-    const at = (f) => ({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f })
-    const s0 = reduced() ? b : at(0.82), s1 = reduced() ? b : at(0.95)
-    const sx = s0.x, sy = s0.y
-    const ex = s1.x, ey = s1.y
-    return run(el, [
-      { transform: `translate(${sx}px, ${sy}px) scale(.3) translateZ(0)`, opacity: .7 },
-      { transform: `translate(${ex}px, ${ey}px) scale(.85) translateZ(0)`, opacity: 1, offset: .7 },
-      { transform: `translate(${ex}px, ${ey}px) scale(.6) translateZ(0)`, opacity: 0 },
-    ], { duration: ms, easing: 'ease-out', fill: 'forwards' }).then(() => { el.style.opacity = '0' })
   }
 
   // ── การ์ดพุ่ง: 1 animation ครอบ windup+motion+hitstop+tail ทั้งก้อน (ข้อบังคับ v3 — 1 promotion/หมัด) ──
@@ -456,7 +433,7 @@ export function createBattleFx() {
     attach, reset, cancelAll, setRate, setFlags, setReducedOverride, destroy, centerOf, invalidateCenters,
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,
-    jab, lunge, squashTarget, targetReacts, shake, ko, dangerRing, dangerClearAll,
+    lunge, squashTarget, targetReacts, shake, ko, dangerRing, dangerClearAll,
     stateMark, stateMarkClearAll,
   }
 }
