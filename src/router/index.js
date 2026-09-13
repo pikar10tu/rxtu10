@@ -27,6 +27,7 @@ const routes = [
     { path: '/play/games/capsule-rush', name: 'capsule-rush', component: () => import('../views/CapsuleRushView.vue') },
     { path: '/play/games/2048', name: 'g2048', component: () => import('../views/Game2048View.vue') },
     { path: '/play/games/stacker', name: 'stacker', component: () => import('../views/StackerView.vue') },
+    { path: '/fun-facts', name: 'funFacts', component: () => import('../views/FunFactsView.vue') },
     // URL ที่ไม่รู้จัก (ลิงก์เก่า/พิมพ์ผิด) → กลับหน้าแรก แทนที่จะขึ้นจอว่างเปล่า
     { path: '/:pathMatch(.*)*', redirect: '/' },
 ]

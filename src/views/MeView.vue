@@ -33,6 +33,7 @@
       <TagChips :member="auth.userData" class="me-tags" />
 
       <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
+      <RouterLink to="/fun-facts" class="me-link"><Emoji char="🌐" /> สถิติรวมทั้งเว็บ</RouterLink>
 
       <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
       <details class="me-contact-fold">
