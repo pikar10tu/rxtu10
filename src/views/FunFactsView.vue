@@ -21,7 +21,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import { fetchGlobalStats } from '../composables/useGlobalStats.js'
 import { DEFAULT_GLOBAL_STATS } from '../utils/globalStats.js'
 
-const stats = ref(DEFAULT_GLOBAL_STATS)
+const stats = ref({ ...DEFAULT_GLOBAL_STATS })
 const loading = ref(true)
 
 onMounted(async () => {

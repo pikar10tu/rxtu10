@@ -180,7 +180,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import SectionTitle from '../components/shared/SectionTitle.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -231,12 +231,22 @@ const sessionCorrect = ref(0)
 const sessionCoins = ref(0)
 const rewarded = ref(new Set())   // card ids already rewarded this session
 
-// พลิกการ์ดดูเฉลย — นับเข้าตัวเลข fun fact รวมทั้งเว็บ (พลิกซ้ำใบเดิมก็นับ ไม่ dedupe)
+// พลิกการ์ดดูเฉลย — รวบยอดในเครื่องแล้วยิงเข้า Firestore ทีเดียวตอนจบ session
+// (เดิมยิงทุกครั้งที่พลิก — session ยาวๆ 30+ ใบ = 30+ write เข้า doc เดียวกับควิซ/PvP)
+// พลิกซ้ำใบเดิมก็นับ ไม่ dedupe — เลขรวมเท่าเดิม แค่เปลี่ยนจังหวะที่ยิงออกไป
+let pendingFlips = 0
 function flipCard() {
   if (flipped.value) return
   flipped.value = true
-  bumpGlobalStat('flashcardFlips', 1)
+  pendingFlips++
 }
+function flushFlips() {
+  if (pendingFlips > 0) {
+    bumpGlobalStat('flashcardFlips', pendingFlips)
+    pendingFlips = 0
+  }
+}
+onUnmounted(flushFlips)   // เผื่อออกจากหน้านี้กลางคันโดยไม่กดปุ่ม ✕ (เช่นกดเมนูล่างออกไป)
 
 const coachStep = ref(1)          // 1..3
 const coachThenStart = ref(false) // จบจอสอนแล้วเข้าเซสชันต่อไหม (ครั้งแรกเท่านั้น · เปิดดูซ้ำ = กลับหน้าหลัก)
@@ -298,6 +308,7 @@ function startSession(free = false) {
   sessionCoins.value = 0
   rewarded.value = new Set()
   flipped.value = false
+  pendingFlips = 0
   mode.value = 'review'
 }
 
@@ -356,12 +367,13 @@ async function grade(q) {
 
 function finishSession() {
   mode.value = 'done'
+  flushFlips()
   if (sessionCoins.value) toast(`ทบทวนจบ +${sessionCoins.value}🪙`, 'success')
 }
 
 function endSession() {
   if (queue.value.length && doneInSession.value > 0) finishSession()
-  else mode.value = 'home'
+  else { flushFlips(); mode.value = 'home' }
 }
 
 async function commit(newCards, reward, today, dailyTotal, reviewedInc = 0) {

@@ -3,7 +3,7 @@
     <div class="ffw-row"><Emoji char="📝" /> เพื่อนๆ ทำข้อสอบไปแล้ว <b>{{ stats.quizTotal.toLocaleString() }}</b> ข้อ</div>
     <div class="ffw-row"><Emoji char="⚔️" /> สู้กันไปแล้ว <b>{{ stats.pvpTotal.toLocaleString() }}</b> ครั้ง</div>
     <div class="ffw-row"><Emoji char="🃏" /> พลิกการ์ดไปแล้ว <b>{{ stats.flashcardFlips.toLocaleString() }}</b> ครั้ง</div>
-    <RouterLink to="/fun-facts" class="ffw-more">ดูสถิติทั้งหมด →</RouterLink>
+    <RouterLink v-if="showLink" to="/fun-facts" class="ffw-more">ดูสถิติทั้งหมด →</RouterLink>
   </div>
 </template>
 
@@ -14,7 +14,11 @@ import Emoji from './Emoji.vue'
 import { fetchGlobalStats } from '../../composables/useGlobalStats.js'
 import { DEFAULT_GLOBAL_STATS } from '../../utils/globalStats.js'
 
-const stats = ref(DEFAULT_GLOBAL_STATS)
+defineProps({
+  showLink: { type: Boolean, default: true },
+})
+
+const stats = ref({ ...DEFAULT_GLOBAL_STATS })
 const loading = ref(true)
 
 onMounted(async () => {

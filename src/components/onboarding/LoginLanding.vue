@@ -5,7 +5,7 @@
     <div class="ll-sub">เภสัช มธ. รุ่น 10</div>
     <p class="ll-msg">พื้นที่เล็กๆ ของพวกเรา — สะสม เล่น และเตรียมสอบใบประกอบฯ (CC) ไปด้วยกัน</p>
 
-    <FunFactsWidget />
+    <FunFactsWidget :show-link="false" />
 
     <!-- in-app browser (LINE/FB/IG) บล็อก Google login ทั้ง popup และ redirect →
          เตือนให้เปิดในเบราว์เซอร์จริง ก่อนจะกดแล้วเด้งกลับงงๆ -->
