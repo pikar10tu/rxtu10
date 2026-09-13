@@ -31,3 +31,6 @@ dist-ssr
 
 # visual brainstorm companion (mockups ชั่วคราว)
 .superpowers/
+
+# git worktrees ใช้ระหว่างพัฒนาฟีเจอร์ (subagent-driven-development)
+.worktrees/
