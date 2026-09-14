@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/questionReview.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { computeStatus, needsReviewBy, verdictContentChanged, sideContentChanged, REVIEW_RESET, tallyReviewCounts, nextReviewQueue, buildLeaderboard, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL, pickRandom } from './questionReview.js'
+import { computeStatus, needsReviewBy, verdictContentChanged, sideContentChanged, REVIEW_RESET, reviewFixResult, tallyReviewCounts, nextReviewQueue, buildLeaderboard, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL, pickRandom } from './questionReview.js'
 
 // ── computeStatus (นับจาก reviewPass/reviewFail บน doc) — เกณฑ์ 1 คน/ข้อ ──
 test('ยังไม่มีเสียง → pending', () => {
@@ -108,6 +108,18 @@ test('REVIEW_RESET ทำให้ข้อกลับเข้าคิวแ�
   assert.equal(needsReviewBy(q, 'x'), true)
 })
 
+// ── reviewFixResult: "แก้แล้ว" นับเป็นตรวจผ่านทันที (ไม่ต้องล้างกลับ pending ให้คนอื่นตรวจซ้ำ) ──
+test('reviewFixResult(uid) คืนชุดค่าเดียวของ "แก้แล้วผ่าน" — คนแก้คือคนตรวจ 1 เสียงที่จบข้อทันที', () => {
+  const patch = reviewFixResult('me')
+  assert.deepEqual(patch, { reviewedBy: ['me'], reviewPass: 1, reviewFail: 0, reviewStatus: 'passed' })
+  assert.equal(computeStatus(patch), 'passed')
+})
+test('reviewFixResult: คนที่แก้ข้อเองไม่มีทางถูกเรียกให้ตรวจข้อนั้นอีก (lastFixBy กันไว้)', () => {
+  const q = { ...reviewFixResult('me'), lastFixBy: 'me' }
+  assert.equal(needsReviewBy(q, 'me'), false)
+  assert.equal(needsReviewBy(q, 'other'), false)   // เกณฑ์ 1 คน/ข้อ: จบไปแล้ว ไม่ต้องมีคนตรวจซ้ำอีกเลย
+})
+
 // ── lastFixBy: คนแก้ข้อไม่ใช่คนตรวจข้อ ──
 // 🔴 นี่คือเทสที่กันรูจริง: REVIEW_RESET ล้าง reviewedBy เป็น [] ⇒ เงื่อนไข reviewedBy.length < 1
 //    จะคืน true ให้ทุกคนรวมทั้งคนที่เพิ่งแก้ข้อนั้นเอง ถ้าไม่มีบรรทัด lastFixBy
@@ -156,7 +168,8 @@ test('reviewStatusKey: retired ทับสถานะคำนวณ', () => {
 })
 test('label ครบทุก key', () => {
   for (const k of ['pending', 'passed', 'conflict', 'failed', 'retired']) assert.ok(REVIEW_STATUS_LABEL[k])
-  for (const k of ['correct', 'fix', 'wrong']) assert.ok(VERDICT_LABEL[k])
+  // 'fix'/'wrong' เก็บไว้แสดงผลข้อมูลเก่า แม้ UI จะไม่มีทางสร้าง verdict นี้ใหม่แล้ว
+  for (const k of ['correct', 'fix', 'wrong', 'fixed']) assert.ok(VERDICT_LABEL[k])
 })
 
 // ── tallyReviewCounts ──

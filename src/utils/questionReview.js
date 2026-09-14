@@ -66,6 +66,13 @@ export function sideContentChanged(before, after) {
 // payload ล้างสถานะตรวจ (ใช้ตอนเนื้อหาข้อสอบเปลี่ยน → กลับเข้าคิว peer-review ใหม่)
 export const REVIEW_RESET = { reviewedBy: [], reviewPass: 0, reviewFail: 0, reviewStatus: 'pending' }
 
+// payload "แก้แล้วผ่าน" — ใช้แทน REVIEW_RESET เวลาคนตรวจแก้ชั้นตัดสินเอง (โจทย์/ตัวเลือก/เฉลย)
+// แล้วถือว่าจบการตรวจในตาเดียว ไม่ต้องล้างกลับ pending ให้คนอื่นตรวจซ้ำอีกรอบ (user สั่ง 14 ก.ย. 2026
+// แก้ปมที่คนแก้ไม่ได้เครดิต + ข้อวนหาคนใหม่ตรวจ) — คนแก้ = คนตรวจ 1 เสียงที่จบข้อ ตรงเกณฑ์ 1 คน/ข้อ
+export function reviewFixResult(uid) {
+  return { reviewedBy: [uid], reviewPass: 1, reviewFail: 0, reviewStatus: 'passed' }
+}
+
 // uid → จำนวนข้อที่ตรวจไปแล้ว (นับจาก reviewedBy ทั้งคลัง = ตัวนับ leaderboard)
 export function tallyReviewCounts(questions) {
   const counts = {}
@@ -82,7 +89,7 @@ export function nextReviewQueue(questions, myUid) {
 }
 
 // ป้าย verdict / สถานะตรวจ — ใช้ร่วมหน้า Review + Questions
-export const VERDICT_LABEL = { correct: 'ถูกต้อง', fix: 'ต้องแก้', wrong: 'ผิด' }
+export const VERDICT_LABEL = { correct: 'ถูกต้อง', fix: 'ต้องแก้', wrong: 'ผิด', fixed: 'แก้แล้วผ่าน' }
 export const REVIEW_STATUS_LABEL = {
   pending: 'รอตรวจ', passed: 'ผ่านตรวจ', conflict: 'ขัดแย้ง', failed: 'ไม่ผ่าน', retired: 'นำออก',
 }
