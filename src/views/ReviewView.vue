@@ -773,7 +773,7 @@ function bumpedProgress(from, to) {
 async function submit() {
   if (!canSubmit.value || submitting.value || !current.value || !myUid.value) return
   const lbl = VERDICT_LABEL[verdict.value] || verdict.value
-  if (!(await confirm(`ยืนยันส่งผลตรวจ: "${lbl}"?\nส่งแล้วยังกดแก้ได้จากแถบด้านล่างก่อนออกจากหน้านี้`))) return
+  if (!(await confirm(`ยืนยันส่งผลตรวจ: "${lbl}"?`))) return
   submitting.value = true
   const q = current.value
   const uid = myUid.value
@@ -980,6 +980,7 @@ async function submit() {
 .rv-prior-verdict.correct { background: rgba(34,197,94,.15); color: #15803d; }
 .rv-prior-verdict.fix { background: rgba(245,158,11,.16); color: #b45309; }
 .rv-prior-verdict.wrong { background: rgba(239,68,68,.12); color: #dc2626; }
+.rv-prior-verdict.fixed { background: rgba(34,197,94,.15); color: #15803d; }
 .rv-prior-reason { font-size: .76rem; color: rgba(0,0,0,.7); line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rv-prior-ref { font-size: .7rem; color: rgba(0,0,0,.45); margin-top: 3px; overflow-wrap: anywhere; }
 
