@@ -235,12 +235,14 @@
                     <!-- ฟอร์มแก้ในแถว (ไม่ใช่ modal จึงไม่มี overlay/Teleport ให้พลาด) -->
                     <div v-if="k === 'failed' && fixId === q.id && fixDraft" class="rv-fix">
                       <QuestionEditor v-model="fixDraft" compact />
+                      <label class="rv-label">แก้อะไร/ทำไม (บังคับ)</label>
+                      <textarea v-model="triageFixReason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="สรุปสั้นๆ ว่าแก้ตรงไหน เพราะอะไร…"></textarea>
                       <p class="rv-fix-note">
-                        🔄 บันทึกแล้วข้อนี้กลับเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้
+                        ✅ บันทึกแล้ว = ตรวจผ่านทันที (นับเป็นข้อที่คุณตรวจแล้ว)
                       </p>
                       <button
                         class="rv-btn rv-primary rv-fix-save"
-                        :disabled="!draftValid(fixDraft) || fixSaving"
+                        :disabled="!draftValid(fixDraft) || !triageFixReason.trim() || fixSaving"
                         @click="saveFix(q)"
                       >{{ fixSaving ? 'กำลังบันทึก…' : 'บันทึกการแก้' }}</button>
                     </div>
@@ -579,58 +581,68 @@ async function saveNogroup(q) {
 //  เพื่อให้ต้นทุน read คงที่) ⇒ ปุ่ม "แก้ข้อนี้" บนการ์ดข้อปัจจุบันเอื้อมไม่ถึงมันเลย
 //  ทางเดียวที่เหลือคือ "ส่งกลับเข้าคิว" เปล่าๆ = ข้อที่ยังผิดวนกลับไปให้คนถัดไปกดตกอีก ไม่จบ
 //  จึงกางฟอร์มแก้ในแถวเลย (แพทเทิร์นเดียวกับกอง "ไม่มีกลุ่มโรค") แล้วบันทึกด้วยเส้นทาง
-//  เดียวกับ requeue branch ของ saveEdit() เป๊ะ — payload จาก draftPayload + REVIEW_RESET + lastFixBy
+//  เดียวกับสาขา isFix ของ saveEdit() เป๊ะ — บันทึกแล้ว = ผ่านทันที (reviewFixResult) ไม่ใช่ REVIEW_RESET
+//  ต้องบังคับกรอกเหตุผลก่อน (triageFixReason) และเขียน reviews/{uid} ก่อน updateDoc เสมอ
+//  (isReviewFix() เช็ค existsAfter ซึ่งมองเห็นแค่ผลของคำขอเดียวกัน — ดูคอมเมนต์ใน saveFix() ด้านล่าง)
 const fixId = ref(null)
 const fixDraft = ref(null)
 const fixSaving = ref(false)
+const triageFixReason = ref('')   // "แก้อะไร/ทำไม" บังคับกรอกก่อนบันทึก — คนละช่องกับฟอร์มการ์ดข้อปัจจุบัน
 
 function openFix(q) {
-  if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; return }
+  if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; triageFixReason.value = ''; return }
   fixId.value = q.id
   fixDraft.value = draftFrom(q)
+  triageFixReason.value = ''
 }
 
 async function saveFix(q) {
   if (fixSaving.value || fixId.value !== q.id || !fixDraft.value) return
-  if (!draftValid(fixDraft.value) || !myUid.value) return
+  if (!draftValid(fixDraft.value) || !triageFixReason.value.trim() || !myUid.value) return
   const uid = myUid.value
   const u = authStore.userData || {}
   const fixerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)
   const payload = draftPayload(fixDraft.value)
-  if (!(await confirm('บันทึกการแก้?\nข้อนี้จะกลับเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้'))) return
+  const fixReasonText = cleanText(triageFixReason.value, LIMITS.reviewReason)
+  if (!(await confirm('บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'))) return
   fixSaving.value = true
   const oldStatus = computeStatus(q)
   try {
-    // ⚠️ กองนี้คือข้อที่ "ตกแล้วต้องแก้" — การกดบันทึกจากตรงนี้คือการประกาศว่าแก้แล้ว
-    //    จึงส่งกลับเข้าคิวเสมอ แม้แตะแค่คำอธิบาย (ต่างจากฟอร์มในการ์ดข้อปัจจุบัน ที่คนตรวจ
-    //    ยังต้องตรวจข้อเดิมต่อ จึงมีเส้นทาง "แก้ชั้นประกอบแล้วอยู่ข้อเดิม")
-    //    ไม่งั้นข้อจะค้างในกอง failed ทั้งที่คนแก้เชื่อว่าส่งกลับไปแล้ว
-    // rules ผ่านทาง isReviewReset() — ไม่มี hasOnly จึงเขียนเนื้อหาพร้อมล้างผลตรวจได้
+    // ⚠️ ลำดับห้ามสลับ (เหมือน saveEdit() เส้นทาง isFix): isReviewFix() เช็ค existsAfter(reviews/{uid})
+    // ซึ่งมองเห็นแค่ผลของคำขอเดียวกัน — 2 คำขอนี้ไม่ได้อยู่ใน transaction เดียวกัน ต้องเขียน subdoc
+    // ให้ "มีอยู่จริง" ก่อน แล้วค่อยเขียนคำถามที่เช็ค existsAfter ทีหลัง
+    await setDoc(doc(db, 'questions', q.id, 'reviews', uid), {
+      reviewerUid: uid, reviewerName: fixerName, verdict: 'fixed',
+      reason: fixReasonText, ref: '', ts: serverTimestamp(),
+    })
+    // rules ผ่านทาง isReviewFix() — เขียนเนื้อหา + ตั้งผลตรวจเป็น passed พร้อมกันในตาเดียว
     await updateDoc(doc(db, 'questions', q.id), {
       ...payload,
-      ...REVIEW_RESET,
+      ...reviewFixResult(uid),
       reviewVerdicts: deleteField(),
       retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
       lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
-    usage.track(0, 1)
-    // ⚠️ ห้ามเขียนตอน oldStatus === 'pending' — key ซ้ำในก้อนเดียว ตัวหลังทับตัวแรก ตัวเลขเฟ้อ
-    if (oldStatus !== 'pending') {
-      try {
-        await setDoc(doc(db, 'reviewMeta', 'main'),
-          { progress: { [oldStatus]: increment(-1), pending: increment(1) } }, { merge: true })
-        usage.track(0, 1)
-        meta.value = { ...meta.value, progress: bumpedProgress(oldStatus, 'pending') }
-      } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
-    }
+    usage.track(0, 2)
+    try {
+      await setDoc(doc(db, 'reviewMeta', 'main'), {
+        counts: { [uid]: increment(1) }, names: { [uid]: fixerName },
+        ...(oldStatus !== 'passed' ? { progress: { [oldStatus]: increment(-1), passed: increment(1) } } : {}),
+      }, { merge: true })
+      usage.track(0, 1)
+      meta.value = {
+        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+        names: { ...(meta.value.names || {}), [uid]: fixerName },
+        progress: bumpedProgress(oldStatus, 'passed'),
+      }
+    } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
     patchTriageRow(q.id, {
-      ...payload, ...REVIEW_RESET, retired: false,
+      ...payload, ...reviewFixResult(uid), retired: false,
       lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
-    })   // computeStatus กลับเป็น pending → แถวหลุดกอง 🔴 ทันที ไม่ต้องรอโหลดใหม่
-    // ปิดเฉพาะแผงของแถวนี้ — ระหว่างรอเน็ตคนอาจกดเปิดแถวอื่นไปแล้ว (race ข้ามแถว)
-    if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null }
-    toast('บันทึกแล้ว — ส่งข้อนี้ให้คนอื่นตรวจต่อ', 'success')
+    })   // computeStatus กลับเป็น passed → แถวหลุดกอง 🔴 ทันที ไม่ต้องรอโหลดใหม่
+    if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; triageFixReason.value = '' }
+    toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
   } catch (e) { console.error('[triage fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { fixSaving.value = false }
 }
