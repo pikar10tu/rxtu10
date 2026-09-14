@@ -52,8 +52,12 @@
 
         <div v-else class="rv-editbox">
           <QuestionEditor v-model="editDraft" compact />
+          <template v-if="editRequeues">
+            <label class="rv-label">แก้อะไร/ทำไม (บังคับ)</label>
+            <textarea v-model="fixReason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="สรุปสั้นๆ ว่าแก้ตรงไหน เพราะอะไร…"></textarea>
+          </template>
           <div class="rv-edit-hint" :class="editRequeues ? 'requeue' : 'stay'">
-            <template v-if="editRequeues">🔄 บันทึกแล้วข้อนี้ไปเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้</template>
+            <template v-if="editRequeues">✅ บันทึกแล้ว = ตรวจผ่านทันที (นับเป็นข้อที่คุณตรวจแล้ว)</template>
             <template v-else-if="editTouched">✅ บันทึกแล้วตรวจต่อได้เลย ผลตรวจเดิมยังอยู่</template>
             <template v-else>ยังไม่ได้แก้อะไร</template>
           </div>
@@ -122,7 +126,7 @@
           <label class="rv-label">กลุ่มโรค / หมวด (ตามเกณฑ์สภาฯ — ยืนยันหรือแก้ให้ถูกก่อนส่งผล)</label>
           <TopicSelect v-model="ple" />
 
-          <label class="rv-label">เหตุผล (บังคับเมื่อ "ต้องแก้ / ผิด")</label>
+          <label class="rv-label">เหตุผล (ไม่บังคับ)</label>
           <textarea v-model="reason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="อธิบายว่าทำไมตัดสินแบบนี้…"></textarea>
 
           <label class="rv-label">เรฟอ้างอิง (ไม่บังคับ)</label>
@@ -286,7 +290,7 @@ import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { domainLabel } from '../data/domains.js'
-import { computeStatus, nextReviewQueue, needsReviewBy, buildLeaderboard, VERDICT_LABEL, pickRandom, REVIEW_RESET, verdictContentChanged, sideContentChanged } from '../utils/questionReview.js'
+import { computeStatus, nextReviewQueue, needsReviewBy, buildLeaderboard, VERDICT_LABEL, pickRandom, REVIEW_RESET, reviewFixResult, verdictContentChanged, sideContentChanged } from '../utils/questionReview.js'
 import { triageBuckets, triageSummary, BUCKET_KEYS, BUCKET_META } from '../utils/questionTriage.js'
 import { getCategories } from '../utils/questionCategories.js'
 import { pleFields, plePatch } from '../utils/pleMapping.js'
@@ -304,10 +308,10 @@ const { toast } = useToast()
 const { confirm } = useConfirm()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
+// เหลือ verdict เดียว — เจอปัญหาให้กด "✏️ แก้ข้อนี้" แก้เนื้อหาแล้วนับว่าผ่านตรวจในตาเดียว (ดู saveEdit)
+// ไม่มี "ตีว่าผิดไม่แก้" อีกแล้ว (user สั่ง 14 ก.ย. 2026) — เจอปัญหาที่แก้เองไม่ได้ ใช้ "ข้ามข้อนี้" + คอมเมนต์แทน
 const VERDICTS = [
   { key: 'correct', label: '✅ ถูกต้อง' },
-  { key: 'fix',     label: '🛠️ ต้องแก้' },
-  { key: 'wrong',   label: '❌ ผิด' },
 ]
 const list = ref([])
 const loading = ref(false)
@@ -360,6 +364,9 @@ const editDraft = ref(null)
 const savingEdit = ref(false)
 const commentsOpen = ref(false)   // กล่องคอมเมนต์ — mount เมื่อกางเท่านั้น (ดูหมายเหตุที่ template)
 const retiring = ref(false)
+// "แก้อะไร/ทำไม" — บังคับกรอกเฉพาะตอนแก้ชั้นตัดสิน (editRequeues) เพราะการบันทึกครั้งนั้นคือการตรวจ
+// ที่จบในตาเดียว (ดู saveEdit) ต้องมีเหตุผลให้คนตรวจรอบถัดไปเห็นเหมือนกับ reason ของฟอร์มตรวจหลัก
+const fixReason = ref('')
 
 const editPayload = computed(() => (editing.value && editDraft.value) ? draftPayload(editDraft.value) : null)
 // 🔑 ฐานเปรียบเทียบต้อง normalize ด้วยสูตรเดียวกับฝั่งที่จะเขียน (draftFrom → draftPayload)
@@ -367,21 +374,24 @@ const editPayload = computed(() => (editing.value && editDraft.value) ? draftPay
 //    LIMITS จะ "ต่าง" ตั้งแต่เปิดฟอร์มโดยยังไม่มีใครพิมพ์ ⇒ ป้ายส้มขึ้นหลอก แล้วกดบันทึก
 //    ก็โยนงานตรวจให้ทั้งทีมฟรีๆ
 const editBase = computed(() => current.value ? draftPayload(draftFrom(current.value)) : null)
-// แก้แบบนี้แล้วข้อจะวนเข้าคิวไหม — ใช้ทั้งตัดสินเส้นทางเขียนและขึ้นป้ายเตือนก่อนกด
+// แก้แบบนี้แล้วข้อจะนับว่าผ่านตรวจทันทีไหม (แทนที่จะ "วนเข้าคิว" แบบเดิม) — ใช้ทั้งตัดสินเส้นทางเขียน
+// และขึ้นป้ายเตือนก่อนกด (ชื่อตัวแปรคงไว้ตามเดิมเพื่อลด diff แต่ความหมายเปลี่ยนจาก "จะวนคิว" เป็น "จะนับว่าผ่านตรวจ")
 const editRequeues = computed(() => !!editPayload.value && verdictContentChanged(editBase.value, editPayload.value))
 const editTouched = computed(() =>
   !!editPayload.value && (editRequeues.value || sideContentChanged(editBase.value, editPayload.value)))
-const canSaveEdit = computed(() => !!editPayload.value && draftValid(editDraft.value) && editTouched.value)
+const canSaveEdit = computed(() => !!editPayload.value && draftValid(editDraft.value) && editTouched.value
+  && (!editRequeues.value || !!fixReason.value.trim()))
 
 function openEdit() {
   if (!current.value) return
   editDraft.value = draftFrom(current.value)
   editing.value = true
+  fixReason.value = ''
   // ปิดกล่องคอมเมนต์ก่อนกางฟอร์ม — <details v-if="!editing"> unmount ทั้งก้อน ถ้าปล่อยค้างเปิดไว้
   // พอกดยกเลิก QuestionComments จะ mount ใหม่แล้วยิงอ่านคอมเมนต์ซ้ำฟรีอีกรอบ
   commentsOpen.value = false
 }
-function closeEdit() { editing.value = false; editDraft.value = null }
+function closeEdit() { editing.value = false; editDraft.value = null; fixReason.value = '' }
 
 async function saveEdit() {
   if (!canSaveEdit.value || savingEdit.value || !current.value || !myUid.value) return
@@ -390,41 +400,52 @@ async function saveEdit() {
   const u = authStore.userData || {}
   const fixerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)
   const payload = editPayload.value
-  const requeue = editRequeues.value
-  if (!(await confirm(requeue
-    ? 'บันทึกการแก้?\nข้อนี้จะกลับเข้าคิวให้คนอื่นตรวจ — คุณจะไม่ได้ตรวจข้อนี้'
+  const isFix = editRequeues.value
+  if (!(await confirm(isFix
+    ? 'บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'
     : 'บันทึกคำอธิบาย / หมายเหตุ?\nผลตรวจเดิมยังอยู่ ตรวจต่อได้เลย'))) return
   savingEdit.value = true
   const oldStatus = computeStatus(q)
   try {
-    if (requeue) {
-      // rules ผ่านทาง isReviewReset() — ไม่มี hasOnly จึงเขียนเนื้อหาไปพร้อมกับการล้างผลตรวจได้
+    if (isFix) {
+      const fixReasonText = cleanText(fixReason.value, LIMITS.reviewReason)
+      // rules ผ่านทาง isReviewFix() — เขียนเนื้อหา + ตั้งผลตรวจเป็น passed พร้อมกันในตาเดียว
       await updateDoc(doc(db, 'questions', q.id), {
         ...payload,
-        ...REVIEW_RESET,
+        ...reviewFixResult(uid),
         reviewVerdicts: deleteField(),
         retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
         lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
-      usage.track(0, 1)
-      // ⚠️ ห้ามเขียนตอน oldStatus === 'pending' — key ซ้ำในก้อนเดียว ตัวหลังทับตัวแรก ตัวเลขเฟ้อ
-      if (oldStatus !== 'pending') {
-        try {
-          await setDoc(doc(db, 'reviewMeta', 'main'),
-            { progress: { [oldStatus]: increment(-1), pending: increment(1) } }, { merge: true })
-          usage.track(0, 1)
-          // ขยับเลขในเครื่องเฉพาะตอนเซิร์ฟเวอร์รับแล้ว — ถ้า setDoc ล้มแล้วยังขยับ
-          // จอจะโชว์ตัวเลขที่ไม่มีอยู่จริงจนกว่าจะรีโหลด
-          meta.value = { ...meta.value, progress: bumpedProgress(oldStatus, 'pending') }
-        } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
-      }
+      // หลักฐานว่าใครแก้/ทำไม — เก็บที่เดียวกับผลตรวจปกติ (reviews/{uid}) ให้กล่อง
+      // "รอบก่อนแก้ ตกเพราะ" ของรอบถัดไปเห็นได้เหมือนผลตรวจทั่วไป
+      await setDoc(doc(db, 'questions', q.id, 'reviews', uid), {
+        reviewerUid: uid, reviewerName: fixerName, verdict: 'fixed',
+        reason: fixReasonText, ref: '', ts: serverTimestamp(),
+      })
+      usage.track(0, 2)
+      // เครดิต leaderboard เสมอไม่ว่าสถานะเดิมจะเป็นอะไร (นี่คือใจความหลักของงานนี้)
+      // progress ขยับเฉพาะตอนสถานะเปลี่ยนจริง (กันคีย์ซ้ำ 'passed' ชนกันเองถ้า oldStatus เป็น 'passed' อยู่แล้ว)
+      try {
+        await setDoc(doc(db, 'reviewMeta', 'main'), {
+          counts: { [uid]: increment(1) }, names: { [uid]: fixerName },
+          ...(oldStatus !== 'passed' ? { progress: { [oldStatus]: increment(-1), passed: increment(1) } } : {}),
+        }, { merge: true })
+        usage.track(0, 1)
+        meta.value = {
+          counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+          names: { ...(meta.value.names || {}), [uid]: fixerName },
+          progress: bumpedProgress(oldStatus, 'passed'),
+        }
+      } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
       patchTriageRow(q.id, {
-        ...payload, ...REVIEW_RESET, retired: false,
+        ...payload, ...reviewFixResult(uid), retired: false,
         lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
       })
+      fixReason.value = ''
       closeEdit()
-      toast('บันทึกแล้ว — ส่งข้อนี้ให้คนอื่นตรวจต่อ', 'success')
+      toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
       pickNext()
     } else {
       await updateDoc(doc(db, 'questions', q.id), {
@@ -481,10 +502,7 @@ const myQueueCount = computed(() => nextReviewQueue(list.value, myUid.value).len
 // เหตุผลบังคับเฉพาะ verdict ที่ไม่ผ่าน — "ถูกต้อง" ไม่ต้องพิมพ์ (ลด friction กันเหตุผลขยะ)
 // กลุ่มโรคบังคับ — picker prefill ค่าที่เดาให้อยู่แล้ว ปกติจึงเป็น 0 คลิก
 // แต่ข้อที่เดาไม่ออกต้องให้คนตรวจเลือก ไม่งั้นมันจะค้างไม่มีหมวดไปตลอด
-const canSubmit = computed(() =>
-  !!verdict.value
-  && (verdict.value === 'correct' || !!reason.value.trim())
-  && isPleGroupKey(ple.value.group))
+const canSubmit = computed(() => !!verdict.value && isPleGroupKey(ple.value.group))
 
 // ตัดโจทย์ให้สั้นไว้โชว์ในแถบ "เพิ่งส่ง" — เติม … เฉพาะตอนตัดจริง กันจุดไข่ปลาโผล่ต่อท้ายข้อความสั้น
 function truncate60(text) {
