@@ -96,17 +96,27 @@ permission ถ้าสลับลำดับ)
 
 ### 4. เครดิตย้อนหลัง — ปุ่มแอดมิน one-time (idempotent)
 
-ฟิลด์ `lastFixBy` เพิ่งเกิดตอน deploy ลูปตรวจ 11 ก.ย. 2026 (`ac6aeeb`) — ของก่อนหน้าไม่มีอยู่แล้ว
-โดยธรรมชาติ จึงสแกน `questions` ที่มี `lastFixBy` (ทุกตัว) และยังไม่มี `fixCredited` ได้ตรงตัว
-ไม่ต้องกรองวันที่เพิ่ม:
+⚠️ **`syncReviewSystem()` (ปุ่ม "🔄 ซิงก์ระบบตรวจ" ที่มีอยู่แล้ว) เขียน `reviewMeta.counts`/`progress`
+ทับทั้งก้อนใหม่ทุกครั้งที่กด โดยคำนวณจาก `reviewedBy` ของทุกข้อล้วนๆ** (`tallyReviewCounts`) —
+ถ้าเครดิตย้อนหลังถูกเก็บไว้แค่ในตัวนับแยก (เช่น increment ตรงๆ) จะถูกปุ่มนี้ล้างทิ้งเงียบๆ ในการกดครั้งถัดไป
+**ทางที่ทนกว่าคือเติมคนแก้เข้า `reviewedBy` จริงถาวร** ให้กลไกเดิมที่ sync เชื่อถืออยู่แล้วเห็นและนับให้เอง
+ตลอดไป ไม่ต้องมีฟิลด์ marker แยก (`fixCredited`) เพราะการเช็ค "ยังไม่อยู่ใน `reviewedBy`" ทำให้กดซ้ำ
+ปลอดภัยอยู่แล้วโดยตัวมันเอง:
 
-- ให้เครดิต `reviewMeta.main.counts[lastFixBy] += 1` เสมอ (+ `names[lastFixBy] = lastFixByName`)
-- ถ้าสถานะปัจจุบันยังเป็น `pending` (ยังไม่มีใครตรวจซ้ำตั้งแต่แก้) → เปลี่ยนตรงเป็น `passed`
-  (`reviewedBy:[lastFixBy], reviewPass:1, reviewFail:0`) — ปิดลูปให้เลย พร้อมขยับ
-  `reviewMeta.progress` (`pending: -1, passed: +1`) ต่อข้อ ไม่งั้นแถบสรุปคิวจะเพี้ยนหลังไมเกรต
-- ถ้ามีคนตรวจซ้ำไปแล้ว (สถานะเป็น passed/failed/conflict) → ให้เครดิตคนแก้เฉยๆ ไม่แตะสถานะที่คนอื่น
-  ตัดสินไปแล้ว
-- ปั๊ม `fixCredited: true` ทุกข้อที่ประมวลผลแล้ว กันกดปุ่มซ้ำแล้วนับเครดิตซ้ำ
+ฟิลด์ `lastFixBy` เพิ่งเกิดตอน deploy ลูปตรวจ 11 ก.ย. 2026 (`ac6aeeb`) — ของก่อนหน้าไม่มีอยู่แล้ว
+โดยธรรมชาติ จึงสแกน `questions` ที่มี `lastFixBy` และ **`lastFixBy` ยังไม่อยู่ใน `reviewedBy`**:
+
+- เติม `lastFixBy` เข้า `reviewedBy` (array เดิม + ชื่อนี้) เสมอ — ให้ `tallyReviewCounts()` นับเขาได้
+  ตลอดไปไม่ว่าจะกดซิงก์อีกกี่ครั้ง
+- ถ้าสถานะที่คำนวณได้ตอนนี้ (ก่อนแก้ `reviewedBy`) เป็น `pending` (ยังไม่มีใครตรวจซ้ำตั้งแต่แก้)
+  → ตั้ง `reviewPass:1, reviewFail:0, reviewStatus:'passed'` ไปด้วยในตาเดียว — ปิดลูปให้เลย
+- ถ้ามีคนตรวจซ้ำไปแล้ว (สถานะเป็น passed/failed/conflict) → เติมแค่ `reviewedBy` ไม่แตะ
+  `reviewPass`/`reviewFail`/`reviewStatus` ที่คนอื่นตัดสินไปแล้ว (เครดิตความพยายาม ไม่เปลี่ยนผลตัดสิน)
+- จบแล้ว **รันซ้ำแพทเทิร์นเดียวกับท้าย `syncReviewSystem()`**: recompute `reviewMeta.progress` จาก
+  `reviewStatusKey()` ของทุกข้อ (หลังแพตช์) + `reviewMeta.counts` จาก `tallyReviewCounts(all)`
+  (หลังแพตช์) ในทรานแซกชันเดียว — และต้อง**เติม `names[lastFixBy] = q.lastFixByName` เข้าไปด้วย**
+  (คนที่เคยแก้แต่ไม่เคยกด "ถูกต้อง" ผ่าน `submit()` เลย จะไม่มีชื่ออยู่ใน `reviewMeta.names` มาก่อน
+  ⇒ ไม่เติมจะโชว์เป็น "ไม่ระบุ" ใน leaderboard ทั้งที่มีตัวเลข)
 
 วางในหน้า Admin เป็นปุ่มใหม่ (แพทเทิร์นเดียวกับ "🔄 ซิงก์ระบบตรวจ")
 
