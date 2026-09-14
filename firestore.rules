@@ -256,10 +256,20 @@ service cloud.firestore {
           && request.resource.data.get('reviewFail', 1) == 0
           && request.resource.data.get('reviewStatus', '') == 'pending';
       }
+      // แก้เนื้อหา + ถือว่าผ่านตรวจทันที (14 ก.ย. 2026) — คนแก้ = คนตรวจ 1 เสียงที่จบข้อ
+      // ต้องมี reviews/{uid} ของตัวเองคู่กันเสมอ (เหมือน isReviewSubmit) เป็นหลักฐานว่าใครแก้/ทำไม
+      function isReviewFix(qid) {
+        return request.resource.data.get('reviewedBy', []) == [request.auth.uid]
+          && request.resource.data.get('reviewPass', 0) == 1
+          && request.resource.data.get('reviewFail', 0) == 0
+          && request.resource.data.get('reviewStatus', '') == 'passed'
+          && request.resource.data.get('lastFixBy', '') == request.auth.uid
+          && existsAfter(/databases/$(database)/documents/questions/$(qid)/reviews/$(request.auth.uid));
+      }
       allow read:  if request.auth != null && (resource.data.get('isPublished', false) == true || canEditQuestions());
       allow create, delete: if canEditQuestions();
       allow update: if canEditQuestions()
-        && (isAdmin() || reviewUntouched() || isReviewSubmit(id) || isReviewAmend(id) || isReviewReset());
+        && (isAdmin() || reviewUntouched() || isReviewSubmit(id) || isReviewAmend(id) || isReviewReset() || isReviewFix(id));
 
       // ── Comments (SP1) — thread วิชาการ↔อาจารย์ ต่อข้อ (นักศึกษาเข้าไม่ถึง) ──
       match /comments/{commentId} {
