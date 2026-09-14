@@ -125,7 +125,10 @@
         <div class="admin-hint" style="margin-top:12px">
           <b>เครดิตย้อนหลังงานแก้ไข</b> — ก่อนเปลี่ยนเป็น "แก้แล้ว = ผ่านเลย" (14 ก.ย. 2026) คนที่แก้ข้อ
           ผ่านหน้าตรวจไม่ได้เครดิตในตัวนับ "ใครตรวจกี่ข้อ" เลย — กดปุ่มนี้ครั้งเดียวให้ย้อนไปเติมให้
-          กดซ้ำได้ ปลอดภัย (ข้อที่เคยให้เครดิตแล้วจะไม่ถูกเลือกมาให้ซ้ำ)
+          <br />⚠️ <b>ไม่ใช่แค่เติมเลข</b> — ข้อที่ยังค้าง "รอตรวจ" อยู่ (ไม่มีใครตรวจซ้ำตั้งแต่แก้) จะถูก
+          <b>ตั้งเป็น "ผ่านตรวจ" ทันทีและหลุดออกจากคิวตรวจของทุกคน</b> เหมือนย้อนไปใช้กฎ "แก้แล้ว = ผ่านเลย"
+          ตั้งแต่ตอนนั้น · ส่วนข้อที่มีคนตรวจซ้ำไปแล้ว (ผ่าน/ไม่ผ่าน/ขัดแย้ง) จะได้แค่เครดิตเพิ่ม ไม่แตะผลตรวจเดิม
+          · กดซ้ำได้ ปลอดภัย (ข้อที่เคยให้เครดิตแล้วจะไม่ถูกเลือกมาให้ซ้ำ)
         </div>
         <button class="btn-mini" :disabled="creditingFixes" @click="creditLegacyFixes">
           {{ creditingFixes ? 'กำลังให้เครดิต…' : '🧮 ให้เครดิตย้อนหลังงานแก้ไข' }}
@@ -688,14 +691,19 @@ async function creditLegacyFixes() {
     const snap = await getDocs(collection(db, 'questions'))
     const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
     const toCredit = all.filter(q => q.lastFixBy && !(q.reviewedBy || []).includes(q.lastFixBy))
+    // แยกนับ 2 กอง (แค่รายงาน ไม่ใช่ตรรกะ): กอง "flipped" คือกองที่ผลกระทบใหญ่กว่าเลขเครดิตเฉยๆ —
+    // ข้อ pending หลุดจากคิวตรวจของทุกคนไปเลย ต้องให้แอดมินเห็นแยกจากกอง "แค่เติมเครดิต"
+    let flippedCount = 0, creditOnlyCount = 0
     for (let i = 0; i < toCredit.length; i += 450) {
       const batch = writeBatch(db)
       for (const q of toCredit.slice(i, i + 450)) {
         // สถานะยังเป็น pending = ไม่มีใครตรวจซ้ำตั้งแต่แก้ → ตั้งเป็นผ่านให้เลย (เหมือนใช้ isReviewFix จริง)
         // สถานะอื่นแล้ว (มีคนตรวจซ้ำไปแล้ว) → เติมแค่ reviewedBy ให้เครดิต ไม่แตะผลที่ตัดสินไปแล้ว
-        const patch = computeStatus(q) === 'pending'
+        const wasPending = computeStatus(q) === 'pending'
+        const patch = wasPending
           ? reviewFixResult(q.lastFixBy)
           : { reviewedBy: [...(q.reviewedBy || []), q.lastFixBy] }
+        if (wasPending) flippedCount++; else creditOnlyCount++
         batch.update(doc(db, 'questions', q.id), patch)
         Object.assign(q, patch)   // สะท้อนเข้า `all` ให้ progress/counts ข้างล่างเห็นค่าใหม่
       }
@@ -716,9 +724,12 @@ async function creditLegacyFixes() {
     })
     usage.track(0, 1)
     creditReport.value = toCredit.length
-      ? `ให้เครดิตย้อนหลังแล้ว ${toCredit.length} ข้อ`
+      ? `ให้เครดิตย้อนหลังแล้ว ${toCredit.length} ข้อ — ${flippedCount} ข้อที่ยังรอตรวจถูกตั้งเป็น` +
+        `"ผ่านตรวจ"และหลุดจากคิวไปด้วย · อีก ${creditOnlyCount} ข้อแค่เติมเครดิต (มีคนตรวจซ้ำไปแล้ว ไม่แตะผลตรวจเดิม)`
       : 'ไม่มีข้อที่ต้องให้เครดิตย้อนหลัง (ให้ไปแล้วหมด หรือยังไม่มีคนแก้)'
-    toast(creditReport.value, 'success')
+    toast(toCredit.length
+      ? `ให้เครดิตย้อนหลัง ${toCredit.length} ข้อ (${flippedCount} ข้อตั้งเป็นผ่านตรวจ · ${creditOnlyCount} ข้อเติมเครดิตเฉยๆ)`
+      : creditReport.value, 'success')
   } catch (e) { console.error('[credit legacy fixes]', e); toast('ให้เครดิตย้อนหลังไม่สำเร็จ', 'error') }
   finally { creditingFixes.value = false }
 }
