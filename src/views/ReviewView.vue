@@ -409,6 +409,15 @@ async function saveEdit() {
   try {
     if (isFix) {
       const fixReasonText = cleanText(fixReason.value, LIMITS.reviewReason)
+      // ⚠️ ลำดับห้ามสลับ: isReviewFix() เช็ค existsAfter(reviews/{uid}) ซึ่งมองเห็นแค่ผลของคำขอ
+      // เดียวกัน — 2 คำขอนี้ไม่ได้อยู่ใน transaction เดียวกัน (แพทเทิร์นเดียวกับ isReviewAmend())
+      // ต้องเขียน subdoc ให้ "มีอยู่จริง" ก่อน แล้วค่อยเขียนคำถามที่เช็ค existsAfter ทีหลัง
+      // หลักฐานว่าใครแก้/ทำไม — เก็บที่เดียวกับผลตรวจปกติ (reviews/{uid}) ให้กล่อง
+      // "รอบก่อนแก้ ตกเพราะ" ของรอบถัดไปเห็นได้เหมือนผลตรวจทั่วไป
+      await setDoc(doc(db, 'questions', q.id, 'reviews', uid), {
+        reviewerUid: uid, reviewerName: fixerName, verdict: 'fixed',
+        reason: fixReasonText, ref: '', ts: serverTimestamp(),
+      })
       // rules ผ่านทาง isReviewFix() — เขียนเนื้อหา + ตั้งผลตรวจเป็น passed พร้อมกันในตาเดียว
       await updateDoc(doc(db, 'questions', q.id), {
         ...payload,
@@ -417,12 +426,6 @@ async function saveEdit() {
         retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
         lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      })
-      // หลักฐานว่าใครแก้/ทำไม — เก็บที่เดียวกับผลตรวจปกติ (reviews/{uid}) ให้กล่อง
-      // "รอบก่อนแก้ ตกเพราะ" ของรอบถัดไปเห็นได้เหมือนผลตรวจทั่วไป
-      await setDoc(doc(db, 'questions', q.id, 'reviews', uid), {
-        reviewerUid: uid, reviewerName: fixerName, verdict: 'fixed',
-        reason: fixReasonText, ref: '', ts: serverTimestamp(),
       })
       usage.track(0, 2)
       // เครดิต leaderboard เสมอไม่ว่าสถานะเดิมจะเป็นอะไร (นี่คือใจความหลักของงานนี้)
