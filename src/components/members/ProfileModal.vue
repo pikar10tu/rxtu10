@@ -19,15 +19,20 @@
 
       <div class="pf-ach"><AchievementGrid :uid="view?.uid" /></div>
 
-      <!-- Tier 2: stat strip (max 3, no coins) -->
+      <!-- Tier 2: stat strip (max 3, no coins) — การ์ดจิ๋วขอบหมึก+เงา เข้าชุดกับ AchievementGrid -->
       <div class="pf-stats">
-        <div class="pf-stat"><span><Emoji char="⚔️" /></span><b>{{ view.pvpVictories || 0 }}</b><small>PvP ชนะ</small></div>
-        <div class="pf-stat"><span><Emoji char="🏯" /></span><b>{{ view.towerBest || 0 }}</b><small>หอคอย</small></div>
-        <div class="pf-stat"><span><Emoji char="🐾" /></span><b>{{ (view.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+        <div class="pf-stat" style="background:rgba(255,176,32,.12)"><span><Emoji char="⚔️" /></span><b>{{ view.pvp?.wins || 0 }}</b><small>ชนะ (ซีซั่นนี้)</small></div>
+        <div class="pf-stat" style="background:rgba(45,168,255,.12)"><span><Emoji char="🏯" /></span><b>{{ view.towerBest || 0 }}</b><small>หอคอย</small></div>
+        <div class="pf-stat" style="background:rgba(23,195,154,.12)"><span><Emoji char="🐾" /></span><b>{{ (view.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
       </div>
 
       <!-- Tier 3: active team (tap to see stats) -->
-      <div class="pf-team-label"><Emoji char="⭐" /> ทีมต่อสู้</div>
+      <div class="pf-team-label">
+        <Emoji char="⭐" /> ทีมต่อสู้
+        <button v-if="canDuel" class="pf-duel-btn" type="button" @click="startDuel">
+          <Emoji char="⚔️" /> ท้าสู้
+        </button>
+      </div>
       <div v-if="showcase.length" class="pf-showcase">
         <button v-for="(p, i) in showcase" :key="p.id || i" class="pf-pet" @click="petPopup = p">
           <PetThumb :pet="p" />
@@ -36,12 +41,13 @@
       <div v-else class="pf-team-empty">ยังไม่ได้ตั้งทีม</div>
 
       <PetStatPopup :pet="petPopup" @close="petPopup = null" />
+      <BattleReplay :data="duelReplay" theme="arena" @close="duelReplay = null" />
 
-      <!-- Tier 4: contact (only filled rows) -->
+      <!-- Tier 4: contact (only filled rows) — ชิปแคปซูล เข้าชุดกับ pf-chip/pf-tag บนหัวการ์ด -->
       <div v-if="hasContact" class="pf-contact">
-        <div v-if="view.contact?.phone"><span><Emoji char="📞" /></span>{{ view.contact.phone }}</div>
-        <div v-if="view.contact?.ig"><span><Emoji char="📷" /></span>{{ view.contact.ig }}</div>
-        <div v-if="view.contact?.line"><span><Emoji char="💬" /></span>{{ view.contact.line }}</div>
+        <span v-if="view.contact?.phone" class="pf-contact-chip"><Emoji char="📞" /> {{ view.contact.phone }}</span>
+        <span v-if="view.contact?.ig" class="pf-contact-chip"><Emoji char="📷" /> {{ view.contact.ig }}</span>
+        <span v-if="view.contact?.line" class="pf-contact-chip"><Emoji char="💬" /> {{ view.contact.line }}</span>
       </div>
     </div>
   </div>
@@ -51,14 +57,21 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useMembersStore } from '../../stores/members.js'
+import { useAuthStore } from '../../stores/auth.js'
 import Emoji from '../shared/Emoji.vue'
 import { getTier } from '../../data/residence.js'
+import { getPetDef } from '../../data/index.js'
 import { avatarUrl, fallbackAvatar } from '../../utils/avatar.js'
+import { resolveBattleTeam } from '../../utils/petTeam.js'
+import { petSpeciesOf } from '../../utils/roster.js'
+import { simulateBattle } from '../../utils/battleEngine.js'
 import TagChips from '../shared/TagChips.vue'
 import AchievementGrid from '../shared/AchievementGrid.vue'
 import PetStatPopup from '../pets/PetStatPopup.vue'
 import PetThumb from '../shared/PetThumb.vue'
+import BattleReplay from '../battle/BattleReplay.vue'
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
+import { useToast } from '../../composables/useToast.js'
 
 const props = defineProps({ member: { type: Object, default: null } })
 const emit = defineEmits(['close'])
@@ -102,6 +115,34 @@ const hasContact = computed(() => {
   const c = view.value?.contact || {}
   return !!(c.phone || c.ig || c.line)
 })
+
+// ── ท้าสู้กระชับมิตร — จำลองสู้ล้วนๆ ฝั่ง client ไม่เขียน Firestore เลย
+//    (ไม่มีรางวัล ไม่จำกัดโควตา ไม่เก็บร่องรอย ตามที่ user เลือก) ⇒ ไม่กระทบ pvp.rating/wins/losses จริง
+const auth = useAuthStore()
+const { toast } = useToast()
+const myUid = computed(() => auth.currentUser?.uid)
+const canDuel = computed(() => !!view.value?.uid && view.value.uid !== myUid.value && showcase.value.length > 0)
+
+const duelReplay = ref(null)
+function startDuel() {
+  const myTeam = resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
+  if (!myTeam.length) { toast('จัดทีมก่อนนะ (อย่างน้อย 1 ตัว)', 'info'); return }
+  // showcase resolve instId-safe มาให้แล้ว (match ทั้ง p.id/p.instId) — กันทีมผีถ้า activePets ของอีกฝ่ายยังเป็น legacy instId
+  const opponentTeam = showcase.value.map(p => {
+    const species = petSpeciesOf(p.id || p.species)
+    if (!species) return null
+    const def = getPetDef(species) || {}
+    return { id: species, rarity: p.rarity || def.rarity || 'common', element: def.element || 'scissors', grade: p.grade || 0 }
+  }).filter(Boolean)
+  if (!opponentTeam.length) { toast('คู่ต่อสู้ยังไม่ได้จัดทีม', 'info'); return }
+  const result = simulateBattle(myTeam, opponentTeam, Date.now())
+  duelReplay.value = {
+    result, playerTeam: myTeam, botTeam: opponentTeam, won: result.winner === 'A',
+    vsLabel: `กระชับมิตร VS ${view.value.nickname}`,
+    winText: 'ชนะ! (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
+    loseText: 'แพ้ไปหน่อย (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
+  }
+}
 </script>
 
 <style scoped>
@@ -125,17 +166,25 @@ const hasContact = computed(() => {
   line-height: 1.3;
 }
 .pf-ach { padding: 12px 16px 0; }
-.pf-stats { display: flex; }
-.pf-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }
-.pf-stat:last-child { border-right: none; }
-.pf-stat span { font-size: 1rem; }
+.pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 16px 0; }
+.pf-stat { text-align: center; padding: 10px 4px 8px; border: 2px solid var(--ink); border-radius: 12px; box-shadow: var(--pop); }
+.pf-stat span { font-size: 1.1rem; }
 .pf-stat b { display: block; font-size: 1.1rem; font-weight: 800; }
-.pf-stat small { font-size: .7rem; color: rgba(0,0,0,.45); }
-.pf-team-label { font-size: .7rem; font-weight: 800; color: var(--muted, #9b8fb0); text-align: center; padding: 12px 0 0; border-top: 1px solid rgba(0,0,0,.06); }
+.pf-stat small { font-size: .68rem; color: rgba(0,0,0,.45); font-weight: 700; }
+.pf-team-label { font-size: .7rem; font-weight: 800; color: var(--muted, #9b8fb0); text-align: center; padding: 12px 0 0; border-top: 1px solid rgba(0,0,0,.06); position: relative; }
+.pf-duel-btn {
+  position: absolute; right: 12px; top: 6px; font-family: inherit; font-size: .68rem; font-weight: 800;
+  color: #fff; background: var(--primary); border: none; border-radius: 999px; padding: 5px 10px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+}
+.pf-duel-btn:active { opacity: .8; }
 .pf-team-empty { text-align: center; font-size: .7rem; color: rgba(0,0,0,.35); padding: 8px 0 14px; }
 .pf-showcase { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px 12px 12px; max-height: 180px; overflow-y: auto; }
 .pf-pet { width: 58px; padding: 0; border: none; background: none; cursor: pointer; font-family: inherit; }
 .pf-pet:active { transform: scale(.92); }
-.pf-contact { padding: 12px 16px 16px; border-top: 1px solid rgba(0,0,0,.06); display: flex; flex-direction: column; gap: 6px; font-size: .78rem; color: rgba(0,0,0,.65); }
-.pf-contact div { display: flex; gap: 8px; align-items: center; }
+.pf-contact { padding: 14px 16px 16px; border-top: 1px solid rgba(0,0,0,.06); display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.pf-contact-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; font-weight: 700; color: var(--ink);
+  background: #fff; border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px 12px;
+}
 </style>
