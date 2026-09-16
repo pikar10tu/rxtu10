@@ -202,7 +202,7 @@ service cloud.firestore {
       allow read:   if request.auth != null;
       //  ทางแอชชีฟเมนต์มาก่อน isAdmin() — เงื่อนไขล้วน ไม่มี get() (ดูเหตุผลที่ users/{userId})
       allow create: if (request.auth != null
-            && request.resource.data.type in ['achievement','legendary','tower100','record1']
+            && request.resource.data.type in ['achievement','legendary','tower100','record1','instructor']
             && request.resource.data.msg is string && request.resource.data.msg.size() <= 140
             && request.resource.data.keys().hasOnly(['msg','icon','type','uid','ts'])
             // ต้องเป็นชื่อตัวเอง — เดิมไม่บังคับ ใครก็โพสต์แอชชีฟเมนต์ในนามคนอื่นได้ผ่าน DevTools
