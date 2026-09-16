@@ -66,10 +66,18 @@ service cloud.firestore {
           && request.resource.data.get('residence', {}).get('level', 1) <= 12
           && request.resource.data.get('residence', {}).get('level', 1)
              <= resource.data.get('residence', {}).get('level', 1) + 1
-          // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร) — approve/reject = admin เท่านั้น
+          // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร guest ปกติ) — approve/reject = admin เท่านั้น
+          // ข้อยกเว้น: self-declare "อาจารย์" (instructorClaim:true) auto-approve ได้ทันที
+          //   แต่แค่ครั้งแรกที่สมัครจริงๆ เท่านั้น (guestStatus เดิมต้องเป็น null) — กันคนโดน
+          //   ปฏิเสธ/อยู่คิว pending ปกติมาลัดคิวทีหลัง · role ไม่อยู่ในเงื่อนไขนี้เลย (ยังกันอยู่ด้านบน)
           && (
             request.resource.data.get('guestStatus', null) == resource.data.get('guestStatus', null)
             || request.resource.data.get('guestStatus', null) == 'pending'
+            || (
+              request.resource.data.get('guestStatus', null) == 'approved'
+              && request.resource.data.get('instructorClaim', false) == true
+              && resource.data.get('guestStatus', null) == null
+            )
           )
         )
         || isAdmin()
