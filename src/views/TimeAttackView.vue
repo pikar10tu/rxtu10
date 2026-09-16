@@ -88,6 +88,7 @@
       <template v-if="missed.length">
         <div class="ta-miss-head"><Emoji char="📖" /> ข้อที่ตอบผิด ({{ missed.length }}) — ดูเฉลยได้เต็มที่ ไม่มีเวลาจับแล้ว</div>
         <div v-for="(m, i) in missed" :key="i" class="ta-miss">
+          <ReviewStatusBadge :question="m.q" class="ta-review-badge" />
           <div class="ta-miss-q">{{ m.q.question }}</div>
           <div class="ta-miss-line no">คุณตอบ: {{ m.q.choices[m.picked] }}</div>
           <div class="ta-miss-line ok">เฉลย: {{ m.q.choices[m.q.answer] }}</div>
@@ -101,6 +102,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import TaBoard from '../components/study/TaBoard.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
@@ -462,6 +464,7 @@ onMounted(() => { members.loadRoster() })
 .ta-res-board { margin-bottom: 16px; }
 .ta-miss-head { font-size: .82rem; font-weight: 800; margin-bottom: 8px; line-height: 1.6; }
 .ta-miss { background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); padding: 12px; margin-bottom: 8px; }
+.ta-review-badge { display: inline-block; margin-bottom: 4px; }
 .ta-miss-q { font-size: .84rem; font-weight: 700; line-height: 1.6; margin-bottom: 6px; }
 .ta-miss-line { font-size: .78rem; line-height: 1.6; }
 .ta-miss-line.no { color: #b91c1c; }

@@ -60,6 +60,7 @@
       <div class="qv-running">คะแนน {{ correct }}/{{ answered }}</div>
       <div v-if="variant === 'redo'" class="qv-redo-tag"><Emoji char="🔁" /> ทบทวนข้อที่เคยผิด</div>
 
+      <ReviewStatusBadge :question="current" class="qv-review-badge" />
       <div class="qv-q">{{ current.question }}</div>
       <div class="qv-choices">
         <button
@@ -149,6 +150,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -602,6 +604,7 @@ async function finish() {
 .qv-count { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }
 .qv-running { text-align: right; font-size: .7rem; font-weight: 700; color: #15803d; margin-bottom: 10px; }
+.qv-review-badge { display: inline-block; margin-bottom: 6px; }
 .qv-q { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 18px; font-size: .95rem; font-weight: 700; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
 .qv-choices { display: flex; flex-direction: column; gap: 10px; }
 .qv-choice { display: flex; align-items: center; gap: 10px; text-align: left; border: 2px solid var(--ink); background: #fff; border-radius: 12px; padding: 13px 14px; font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; box-shadow: var(--pop); transition: transform .1s, box-shadow .1s; }
