@@ -18,6 +18,10 @@
           <span class="ow-choice-ico"><Emoji char="👤" /></span>
           <span><b>ฉันเป็นผู้เยี่ยมชม</b><small>กรอกชื่อเล่น รอแอดมินอนุมัติ</small></span>
         </button>
+        <button class="ow-choice" @click="step = 'instructor'">
+          <span class="ow-choice-ico"><Emoji char="🩺" /></span>
+          <span><b>ฉันเป็นอาจารย์</b><small>เข้าได้ทันที — รอแอดมินเปิดสิทธิ์แก้ข้อสอบ</small></span>
+        </button>
       </template>
 
       <!-- ขั้น 2a: นักศึกษากรอกรหัส -->
@@ -54,6 +58,19 @@
           {{ busy ? 'กำลังส่ง…' : 'ส่งคำขอ →' }}
         </button>
       </template>
+
+      <!-- ขั้น 2c: อาจารย์ (self-declare, auto-approve) -->
+      <template v-else-if="step === 'instructor'">
+        <button class="ow-back" @click="step = 'type'">‹ กลับ</button>
+        <div class="ow-title">สมัครเป็นอาจารย์</div>
+        <input v-model="iRealName" class="ow-input" :maxlength="LIMITS.realName" placeholder="ชื่อ-นามสกุล (เช่น อ.สมชาย ใจดี)" />
+        <input v-model="iNick" class="ow-input" :maxlength="LIMITS.nickname" placeholder="ชื่อเล่นที่อยากให้เรียก" />
+        <textarea v-model="iReason" class="ow-input ow-ta" rows="3" :maxlength="LIMITS.guestReason" placeholder="วิชาที่สอน/เหตุผลที่มาช่วยตรวจข้อสอบ"></textarea>
+        <div v-if="iErr" class="ow-err"><Emoji char="⚠️" /> {{ iErr }}</div>
+        <button class="ow-btn" :disabled="busy" @click="submitInstructor">
+          {{ busy ? 'กำลังบันทึก…' : 'เข้าระบบ →' }}
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -63,13 +80,15 @@ import Emoji from '../shared/Emoji.vue'
 import { ref } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useMembersStore } from '../../stores/members.js'
-import { validateGuest, matchRoster } from '../../utils/onboarding.js'
+import { validateGuest, validateInstructor, matchRoster } from '../../utils/onboarding.js'
 import { LIMITS } from '../../utils/text.js'
 import { useToast } from '../../composables/useToast.js'
+import { useNewsPost } from '../../composables/useNewsPost.js'
 
 const auth = useAuthStore()
 const members = useMembersStore()
 const { toast } = useToast()
+const { postNews } = useNewsPost()
 
 const step = ref('type')
 const busy = ref(false)
@@ -110,6 +129,24 @@ async function submitGuest() {
   busy.value = false
   if (!ok) { gErr.value = 'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง'; toast('ส่งคำขอไม่สำเร็จ', 'error') }
   // สำเร็จ → guestStatus=pending → gate ไป GuestPendingScreen
+}
+
+// instructor
+const iNick = ref('')
+const iRealName = ref('')
+const iReason = ref('')
+const iErr = ref('')
+async function submitInstructor() {
+  iErr.value = ''
+  const v = validateInstructor({ nickname: iNick.value, realName: iRealName.value, reason: iReason.value })
+  if (!v.ok) { iErr.value = v.error; return }
+  busy.value = true
+  const ok = await auth.registerInstructor(iNick.value, iRealName.value, iReason.value)
+  busy.value = false
+  if (!ok) { iErr.value = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'; toast('บันทึกไม่สำเร็จ', 'error'); return }
+  // สำเร็จ → guestStatus=approved ทันที → gate เข้า 'ok' เอง (ไม่ผ่าน guest-pending)
+  // ยิงข่าวแบบ best-effort — ไม่ await ผลเพื่อไม่ให้ผู้ใช้รอ (postNews ล้มเหลวเงียบเองอยู่แล้ว)
+  postNews({ type: 'instructor', icon: '🩺', msg: `🩺 อาจารย์ ${iRealName.value} แวะมาเยือนแล้ว!` })
 }
 
 const TRACK = { sci: 'สาย Sci', care: 'สาย Care' }
