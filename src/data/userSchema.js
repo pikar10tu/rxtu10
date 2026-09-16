@@ -83,6 +83,8 @@ export const USER_DEFAULTS = {
   accountType: null,       // 'student' | 'guest'
   guestReason: null,       // เหตุผลเข้าชม (เฉพาะ guest)
   guestStatus: null,       // null | 'pending' | 'approved' | 'rejected'
+  instructorClaim: false,  // ประกาศตัวเป็นอาจารย์ตอนสมัคร (guestStatus auto-approve ทันที)
+                           // — ป้ายช่วยแอดมิน "หา" คนเท่านั้น ไม่ใช่ permission gate (role ต่างหาก)
 }
 
 export const STARTER_COINS = 2000

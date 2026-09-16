@@ -172,3 +172,17 @@ test('photoRefreshPatch: Auth ไม่ส่งรูปมา → null (ห้
   assert.equal(photoRefreshPatch({}, { googlePhoto: 'https://lh3/x' }), null)
   assert.equal(photoRefreshPatch(null, { googlePhoto: 'https://lh3/x' }), null)
 })
+
+test('USER_DEFAULTS.instructorClaim = false', () => {
+  assert.equal(USER_DEFAULTS.instructorClaim, false)
+})
+
+test('normalizeUserData เติม instructorClaim ให้ doc เก่าที่ยังไม่มี field นี้', () => {
+  const d = normalizeUserData({ coins: 5 })
+  assert.equal(d.instructorClaim, false)
+})
+
+test('normalizeUserData คงค่า instructorClaim เดิมถ้ามี', () => {
+  const d = normalizeUserData({ instructorClaim: true })
+  assert.equal(d.instructorClaim, true)
+})
