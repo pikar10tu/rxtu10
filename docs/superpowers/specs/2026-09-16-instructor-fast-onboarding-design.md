@@ -17,7 +17,8 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
 ## ขอบเขต (scope)
 
 **ทำ:** ปุ่มสมัคร "อาจารย์" แยกจาก guest ทั่วไป · auto-approve guestStatus เฉพาะทางนี้ · แฟล็ก `instructorClaim`
-ให้ admin เห็น · การ์ดคิวอาจารย์แยกใน AdminView · ข้อความอธิบายตอนเข้า `/questions` แล้วยังไม่มีสิทธิ์ · ผ่อน rules เท่าที่จำเป็น
+ให้ admin เห็น · การ์ดคิวอาจารย์แยกใน AdminView · ข้อความอธิบายตอนเข้า `/questions` แล้วยังไม่มีสิทธิ์ · ผ่อน rules เท่าที่จำเป็น ·
+เก็บชื่อ-นามสกุลจริงแยกจากชื่อเล่น · ประกาศในกระดานข่าวตอนสมัครสำเร็จ (เพิ่มเติม 16 ก.ย. — ดู decision 6)
 
 **ไม่ทำ (นอกขอบเขต):** ไม่แตะ flow guest ทั่วไป (ยังรอคิวเหมือนเดิมทุกอย่าง) · ไม่ตรวจสอบตัวตนอาจารย์อัตโนมัติ
 (ไม่เช็คโดเมนอีเมล ไม่มี invite token) — **เชื่อคำประกาศตัวเอง 100%** (เคาะกับ user แล้ว) · ไม่แตะ `role`
@@ -34,9 +35,13 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
 ยอมรับความเสี่ยงที่คนทั่วไปอาจกดปุ่ม "ฉันเป็นอาจารย์" เพื่อลัดคิวรออนุมัติแบบ guest (เข้าเกมได้เร็วขึ้นเฉยๆ)
 เพราะสิ่งเดียวที่มีความหมายจริง (แก้ไขคลังข้อสอบ) ยังล็อกด้วย role เหมือนเดิม ไม่ได้เปิดช่องเพิ่ม
 
-### 3. Data model — เพิ่ม 1 field เท่านั้น
+### 3. Data model — 1 field ใหม่ + reuse field เดิม 1 ตัว
 `users/{uid}.instructorClaim: boolean` (default `false`) — แปลว่า "ประกาศตัวเป็นอาจารย์ตอนสมัคร รอ admin ตั้ง role"
 เซ็ตครั้งเดียวตอนสมัคร ไม่มีใครแก้คืนได้ (ไม่ต้องมี unset — เอาไว้กรอง list ฝั่ง admin เท่านั้น ไม่ใช่ permission gate)
+
+`users/{uid}.realName` **มีอยู่แล้ว** ในสคีมา (ปกติมาจาก roster ตอนนักศึกษาผูกรหัส) — ทางอาจารย์ reuse field เดิม
+ตัวนี้เก็บชื่อ-นามสกุลที่กรอกเอง ไม่สร้าง field ใหม่ซ้อน ไม่มีข้อจำกัดจาก rules (owner เขียนเองได้อยู่แล้ว
+เพราะไม่ใช่ field ที่ถูกล็อกอย่าง role/tags/coins)
 
 ### 4. Rules — ผ่อน guestStatus เฉพาะเงื่อนไขแคบมาก
 เดิม owner set guestStatus เองได้แค่ `'pending'` เท่านั้น (บังคับรอคิว) เพิ่มทางเลือกที่สอง:
@@ -47,8 +52,28 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
 
 ### 5. UI — เพิ่มปุ่มที่ 3 ในหน้าเลือกตอนสมัคร ไม่ใช่ทางแยกใน guest step เดิม
 `OnboardingWizard.vue` step `'type'`: เพิ่มปุ่ม "🩺 ฉันเป็นอาจารย์" คู่กับนักศึกษา/ผู้เยี่ยมชม → ไป step ใหม่
-`'instructor'` (ฟอร์มหน้าตาเดียวกับ guest: ชื่อเล่น + เหตุผล/วิชาที่สอน แค่ placeholder ต่าง) → เรียก action ใหม่
-`auth.registerInstructor(nickname, reason)` (คู่ขนานกับ `registerGuest` เดิม ไม่แก้ของเดิม)
+`'instructor'` (ฟอร์ม **3 ช่อง** ต่างจาก guest step 2 ช่อง — ดู decision 6) → เรียก action ใหม่
+`auth.registerInstructor(nickname, realName, reason)` (คู่ขนานกับ `registerGuest` เดิม ไม่แก้ของเดิม)
+ใช้ ref ของตัวเองแยกจาก guest step (`iNick`/`iRealName`/`iReason`/`iErr`) เพราะจำนวนช่องไม่เท่ากันแล้ว
+
+### 6. ชื่อ-นามสกุล + ประกาศในกระดานข่าว (เพิ่มเติม 16 ก.ย. 2026 — user ขอเพิ่มระหว่างวางแผน implementation)
+
+**เหตุผล:** อยากให้เพื่อนในรุ่นรู้ว่า "อาจารย์ XX มาเยือนแล้ว" ผ่านกระดานข่าวหน้าแรก (ระบบข่าวมีอยู่แล้ว —
+[[2026-08-28-news-board-live-design]]) — nickname เพียงอย่างเดียวไม่พอสื่อว่าเป็นใคร ต้องมีชื่อจริง/คำนำหน้า
+
+**สิ่งที่เพิ่ม:**
+- ฟอร์มสมัครอาจารย์เก็บ **3 ช่อง**: ชื่อ-นามสกุล (เช่น "อ.สมชาย ใจดี") · ชื่อเล่น (ใช้เรียกในเกม เหมือนคนอื่น) ·
+  เหตุผล/วิชาที่สอน (ช่องเดิม) — ชื่อ-นามสกุลเก็บใน field `realName` ที่มีอยู่แล้ว (reuse ไม่สร้างใหม่)
+- เพิ่ม `LIMITS.realName = 60` ใน `utils/text.js` (ยังไม่เคยมี — เดิม `realName` มาจาก roster ที่คุมความยาวอยู่แล้ว
+  ไม่เคยผ่าน `cleanText` ตรงๆ จากฟอร์มมาก่อน)
+- สมัครสำเร็จ → ยิงข่าวเข้ากระดานข่าวทันที (เลน `news` collection — เลนข่าว "อยู่ยาว" ไม่ใช่เลน `ev` ที่หมดอายุ
+  7 วัน เพราะเป็นเหตุการณ์ไม่บ่อย ควรอยู่ให้เห็นนาน): เพิ่มชนิดข่าวใหม่ `'instructor'` เข้า `NEWS_TYPES`
+  (`useNewsPost.js`) **และ** whitelist ของ `firestore.rules` (`match /news/{newsId}`) พร้อมกันทั้งสองที่
+  ข้อความ: `🩺 อาจารย์ ${realName} แวะมาเยือนแล้ว!` (เรียก `postNews({ type:'instructor', icon:'🩺', msg })`
+  จากฝั่ง component หลัง `registerInstructor()` สำเร็จ — ตามแพทเทิร์นเดิมที่ `useTower.js`/`ShopView.vue` ใช้
+  เรียก `postNews` เองหลัง action สำเร็จ ไม่ใช่เรียกจากใน store)
+- ยิงข่าวเป็น **best-effort** — ถ้า post ข่าวล้มเหลว (เช่น rules ยังไม่ deploy) **ไม่บล็อกการสมัคร** เข้าแอปได้ปกติ
+  (ตรงกับที่ `useNewsPost.js` ออกแบบไว้แล้ว: ล้มเหลว = เงียบ ไม่ toast ไม่ retry)
 
 ---
 
@@ -58,14 +83,15 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
 เพิ่ม field `instructorClaim: false` ต่อจาก `guestStatus` (ตาม pattern บูลีนระดับบนสุดแบบ `welcomeBoxSeen`)
 
 ### Task 2 — `src/stores/auth.js`: action ใหม่ + rules ผ่อน
-- เพิ่ม `async function registerInstructor(nickname, reason)` คู่ขนาน `registerGuest` (บรรทัด ~269):
+- เพิ่ม `async function registerInstructor(nickname, realName, reason)` คู่ขนาน `registerGuest` (บรรทัด ~269):
   ```js
-  async function registerInstructor(nickname, reason) {
+  async function registerInstructor(nickname, realName, reason) {
       const nick = cleanText(nickname, LIMITS.nickname)
+      const name = cleanText(realName, LIMITS.realName)
       const why  = cleanText(reason, LIMITS.guestReason)
-      if (!nick || !why) return false
+      if (!nick || !name || !why) return false
       const patch = {
-          nickname: nick, guestReason: why,
+          nickname: nick, realName: name, guestReason: why,
           accountType: 'guest', guestStatus: 'approved', instructorClaim: true,
           onboarded: true,
       }
@@ -88,7 +114,17 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
   ```
   หลังแก้: `firebase deploy --only firestore:rules`
 
-### Task 3 — `src/components/onboarding/OnboardingWizard.vue`
+### Task 3 — `src/utils/text.js` + `src/utils/onboarding.js`: limit + validator ใหม่
+- เพิ่ม `realName: 60,` ใน `LIMITS` (`text.js`)
+- เพิ่ม `validateInstructor({ nickname, realName, reason })` ใน `onboarding.js` (pure, คู่กับ `validateGuest`
+  เดิมแต่เช็ค 3 ช่อง) + เทสใน `onboarding.test.js`
+
+### Task 4 — `src/composables/useNewsPost.js` + `firestore.rules`: เปิดชนิดข่าว `'instructor'`
+- เพิ่ม `'instructor'` เข้า `NEWS_TYPES` array (`useNewsPost.js`)
+- เพิ่ม `'instructor'` เข้า type whitelist ของ `match /news/{newsId}` ใน `firestore.rules`
+  (บรรทัด `type in ['achievement','legendary','tower100','record1']`) → deploy rules
+
+### Task 5 — `src/components/onboarding/OnboardingWizard.vue`
 - step `'type'`: เพิ่มปุ่มที่ 3 หลังปุ่ม guest เดิม (บรรทัด ~17-20):
   ```html
   <button class="ow-choice" @click="step = 'instructor'">
@@ -96,13 +132,14 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
     <span><b>ฉันเป็นอาจารย์</b><small>เข้าได้ทันที — รอแอดมินเปิดสิทธิ์แก้ข้อสอบ</small></span>
   </button>
   ```
-- เพิ่ม step ใหม่ `'instructor'` (คัดลอกโครง step `'guest'`) — placeholder ปรับเป็น "วิชาที่สอน/เหตุผลที่มาช่วยตรวจข้อสอบ"
-  ปุ่มส่งข้อความ "เข้าระบบ →" (ไม่ใช่ "ส่งคำขอ →" เพราะไม่ต้องรอ)
-- ใช้ ref `gNick`/`gReason`/`gErr` **ตัวเดิมร่วมกับ step guest** ได้เลย (สอง step เป็น `v-else-if` mount ทีละอันเท่านั้น
-  ไม่มีทางชนกัน) เขียน `submitInstructor()` เป็นฟังก์ชันแยกจาก `submitGuest()` เรียก `auth.registerInstructor(...)`
-  แทน `auth.registerGuest(...)` — สำเร็จแล้ว gate เลื่อนเข้า `'ok'` เอง (ไม่มี `'guest-pending'` เหมือนทางเดิม)
+- เพิ่ม step ใหม่ `'instructor'` — ฟอร์ม **3 ช่อง**: ชื่อ-นามสกุล / ชื่อเล่น / เหตุผล-วิชาที่สอน ใช้ ref ของตัวเอง
+  แยกจาก guest step (`iNick`/`iRealName`/`iReason`/`iErr`) ปุ่มส่งข้อความ "เข้าระบบ →"
+- `submitInstructor()`: validate ด้วย `validateInstructor` (Task 3) → เรียก `auth.registerInstructor(nick, realName, reason)`
+  → สำเร็จแล้วยิงข่าวด้วย `useNewsPost().postNews({ type:'instructor', icon:'🩺', msg: \`🩺 อาจารย์ ${realName} แวะมาเยือนแล้ว!\` })`
+  (best-effort — ไม่ await/บล็อกถ้า post ข่าวพลาด, การเข้าแอปสำเร็จแล้วตั้งแต่ `registerInstructor` ผ่าน)
+  gate เลื่อนเข้า `'ok'` เอง (ไม่มี `'guest-pending'` เหมือนทางเดิม)
 
-### Task 4 — `src/views/QuestionsView.vue`: ข้อความปฏิเสธเฉพาะทาง
+### Task 6 — `src/views/QuestionsView.vue`: ข้อความปฏิเสธเฉพาะทาง
 เปลี่ยนบรรทัด `qz-denied` (บรรทัด ~8-10) ให้เช็ค `authStore.userData?.instructorClaim` ก่อน:
 ```html
 <div v-if="!authStore.isQuestionEditor" class="qz-denied">
@@ -115,7 +152,8 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
 ### Task 5 — `src/views/AdminView.vue`: การ์ดคิวอาจารย์
 - เพิ่ม computed `pendingInstructors` (คู่กับ `pendingGuests` เดิม) กรองจาก roster/members:
   `m.instructorClaim === true && m.role !== 'instructor'`
-- เพิ่ม section การ์ดใหม่ต่อจาก "คำขอเข้าชม (รออนุมัติ)" เดิม (บรรทัด ~236):
+- เพิ่ม section การ์ดใหม่ต่อจาก "คำขอเข้าชม (รออนุมัติ)" เดิม (บรรทัด ~236) — โชว์ `realName` ด้วยถ้ามี
+  (ใช้ pattern เดียวกับ role-management list เดิมที่มี `<span v-if="m.realName">· {{ m.realName }}</span>`):
   ```html
   <section v-if="pendingInstructors.length" class="admin-card">
     <div class="admin-card-head"><span><Emoji char="🩺" /> อาจารย์ที่ขอเข้าระบบ</span></div>
@@ -123,7 +161,10 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
       <li v-for="m in pendingInstructors" :key="m.uid" class="role-row">
         <div class="role-top">
           <div class="role-info">
-            <div class="role-name">{{ m.nickname }}</div>
+            <div class="role-name">
+              {{ m.nickname }}
+              <span v-if="m.realName" class="role-real">· {{ m.realName }}</span>
+            </div>
             <div class="role-sub">{{ m.email }}</div>
             <div class="gq-reason">{{ m.guestReason }}</div>
           </div>
@@ -136,24 +177,26 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
   </section>
   ```
   reuse `setRole()` ที่มีอยู่แล้ว (ไม่ต้องเขียน handler ใหม่) — ปุ่มเดิมในลิสต์ทีมวิชาการยังอยู่เหมือนเดิม
-  (การ์ดนี้แค่ทำให้หาเจอง่ายกว่าไล่สแครอลทั้งลิสต์)
+  (การ์ดนี้แค่ทำให้หาเจอง่ายกว่าไล่สแครอลทั้งลิสต์) · `members.js` projection ต้องมี `instructorClaim`
+  (เพิ่มเข้า `light` object — `realName` มีอยู่แล้วในนั้น ไม่ต้องแตะ)
 
-### Task 6 — เทส
-- `src/utils/onboarding.test.js` (ถ้ามี) หรือไฟล์ใหม่: เทส `registerInstructor` inputs ผ่าน pure helper ถ้ามีการดึง
-  logic ออกมา pure ได้ (validate nickname/reason เหมือน `validateGuest`) — ถ้า logic เล็กพอจนไม่คุ้มแยกไฟล์
-  ให้ข้ามได้ (YAGNI) แต่ต้องมี manual test ผ่าน UI จริงก่อนปิดงาน
+### Task 8 — end-to-end + เทสที่เหลือ
+- รัน `node --test src/data/userSchema.test.js src/utils/onboarding.test.js` ให้ผ่านทั้งหมด
+- manual test เต็มรอบตาม acceptance criteria ด้านล่าง (รวมเช็คว่าข่าวขึ้นกระดานจริง)
 
 ---
 
 ## Acceptance criteria
 
-- [ ] คนที่ไม่มีรหัสนักศึกษา login แล้วเลือก "ฉันเป็นอาจารย์" → กรอกชื่อ+เหตุผล → เข้าแอปได้ทันที **ไม่เจอหน้ารอคิว**
+- [ ] คนที่ไม่มีรหัสนักศึกษา login แล้วเลือก "ฉันเป็นอาจารย์" → กรอกชื่อ-นามสกุล+ชื่อเล่น+เหตุผล → เข้าแอปได้ทันที **ไม่เจอหน้ารอคิว**
 - [ ] บัญชีนั้น: เล่นเกมปกติได้ (เหรียญ/ฟาร์ม/PvP) เหมือน guest ที่ approved แล้วทุกอย่าง
+- [ ] สมัครสำเร็จแล้วเปิดกระดานข่าวหน้าแรก → เห็นข่าว "🩺 อาจารย์ {ชื่อ-นามสกุล} แวะมาเยือนแล้ว!"
 - [ ] บัญชีนั้น: เข้า `/questions` → เห็นข้อความ "ลงทะเบียนเป็นอาจารย์แล้ว รอแอดมิน…" (ไม่ใช่ข้อความปฏิเสธทั่วไป) — ยังแก้ข้อสอบไม่ได้จริง
-- [ ] admin เข้า `/admin` → เห็นการ์ด "🩺 อาจารย์ที่ขอเข้าระบบ" มีชื่อ+เหตุผลที่กรอกไว้ → กดตั้งเป็นอาจารย์ครั้งเดียวจบ
+- [ ] admin เข้า `/admin` → เห็นการ์ด "🩺 อาจารย์ที่ขอเข้าระบบ" มีชื่อ-นามสกุล+ชื่อเล่น+เหตุผลที่กรอกไว้ → กดตั้งเป็นอาจารย์ครั้งเดียวจบ
 - [ ] หลังตั้งแล้ว: เข้า `/questions` ได้เต็มสิทธิ์ (เหมือน SP1 เดิมทุกอย่าง) การ์ดในแอดมินหายไปจากคิว (role เปลี่ยนแล้ว)
-- [ ] guest ทั่วไป (เลือกปุ่ม "ผู้เยี่ยมชม") ยังรอคิวเหมือนเดิมทุกอย่าง ไม่ได้รับผลกระทบ
+- [ ] guest ทั่วไป (เลือกปุ่ม "ผู้เยี่ยมชม") ยังรอคิวเหมือนเดิมทุกอย่าง ไม่ได้รับผลกระทบ ไม่มีช่องชื่อ-นามสกุลเพิ่ม
 - [ ] คนที่เคยถูก reject จาก guest ทั่วไป ไปกดปุ่ม "อาจารย์" ซ้ำ **ต้องไม่หลุด auto-approve** (rules เช็ค guestStatus เดิมต้องเป็น null)
+- [ ] ถ้าปิด/ยกเลิก type ข่าว `'instructor'` ใน rules ไว้ (ลืม deploy) การสมัครอาจารย์ยัง**ต้องสำเร็จ** แค่ไม่มีข่าวขึ้น (best-effort)
 - [ ] `npm run build` ผ่าน + deploy rules แล้ว (`firebase deploy --only firestore:rules`) ก่อนทดสอบจริงกับบัญชีจริง
 
 ## หมายเหตุ / กับดัก
@@ -164,7 +207,13 @@ admin กดตั้งเองเหมือนเดิม (แค่ "ห�
   ผลคือ "โผล่ในคิวแอดมิน" เฉยๆ ไม่ได้ให้สิทธิ์อะไรเพิ่ม (สิทธิ์จริงมาจาก `role==='instructor'` ที่ยังแก้ได้แค่ admin เท่านั้น)
 - `pendingInstructors` filter ต้องอ่านจาก source เดียวกับที่ `pendingGuests`/role management list ใช้อยู่แล้ว
   (ดูของเดิมใน AdminView ว่าดึงจาก `members` store ตัวไหน — อย่าเปิด read ใหม่)
-- ปุ่ม "ฉันเป็นอาจารย์" กับ "ผู้เยี่ยมชม" ใช้ `guestReason`/`LIMITS.guestReason` ร่วมกัน — ไม่ต้องเพิ่ม limit ใหม่
+- ปุ่ม "ฉันเป็นอาจารย์" กับ "ผู้เยี่ยมชม" ใช้ `guestReason`/`LIMITS.guestReason` ร่วมกัน (ช่องเหตุผล) — แต่ **ช่องชื่อ-นามสกุล
+  เป็นของใหม่เฉพาะทางอาจารย์** ไม่มีใน guest step (`LIMITS.realName` ใหม่)
+- ข่าว `'instructor'` เป็น**คนละเรื่อง**กับ rules ของ `users/{userId}` (Task 2) — ต้องแก้ `firestore.rules` **2 จุด**
+  ในไฟล์เดียวกัน (guestStatus branch + news type whitelist) อย่าแก้แค่จุดเดียวแล้วคิดว่าจบ
+- `postNews` ต้องเรียก**หลัง** `registerInstructor()` คืน `true` แล้วเท่านั้น (ต้องมี `users/{uid}` doc อยู่ก่อน
+  auth.currentUser ถึงจะ valid ให้ rules เช็ค `uid` ตรง — จริงๆ ณ จุดนี้ login เสร็จแล้วเสมอ แต่ให้เรียงลำดับตามนี้
+  เพื่อไม่ให้ข่าวขึ้นก่อนบัญชีเสร็จสมบูรณ์)
 
 ## ความเชื่อมโยง
 
