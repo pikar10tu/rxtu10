@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { needsConsent, matchRoster, validateGuest, onboardingGate } from './onboarding.js'
+import { needsConsent, matchRoster, validateGuest, validateInstructor, onboardingGate } from './onboarding.js'
 
 const V = '2026-06-20'
 const students = [
@@ -54,4 +54,20 @@ test('onboardingGate: guest approved → ok', () => {
 })
 test('onboardingGate: guest เก่า track=guest (ไม่มี guestStatus) → ok', () => {
   assert.equal(onboardingGate({ consent: { accepted: true, version: V }, studentId: null, track: 'guest' }, V), 'ok')
+})
+
+test('validateInstructor: ครบ 3 ช่อง → ok', () => {
+  assert.deepEqual(
+    validateInstructor({ nickname: 'หมอดี', realName: 'อ.สมชาย ใจดี', reason: 'สอนวิชา Pharmacotherapy' }),
+    { ok: true, error: null }
+  )
+})
+test('validateInstructor: ชื่อเล่นว่าง → error', () => {
+  assert.equal(validateInstructor({ nickname: '  ', realName: 'x', reason: 'y' }).ok, false)
+})
+test('validateInstructor: ชื่อ-นามสกุลว่าง → error', () => {
+  assert.equal(validateInstructor({ nickname: 'x', realName: '  ', reason: 'y' }).ok, false)
+})
+test('validateInstructor: เหตุผลว่าง → error', () => {
+  assert.equal(validateInstructor({ nickname: 'x', realName: 'y', reason: '' }).ok, false)
 })

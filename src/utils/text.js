@@ -35,6 +35,7 @@ export function stripTrailingEmoji(s) {
 export const LIMITS = {
   contact: 40,
   nickname: 30,
+  realName: 60,
   guestReason: 200,
   news: 280,
   feedback: 1000,

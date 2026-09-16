@@ -22,6 +22,14 @@ export function validateGuest({ nickname, reason } = {}) {
   return { ok: true, error: null }
 }
 
+// ตรวจ input ฟอร์มอาจารย์ (เพิ่มช่องชื่อ-นามสกุลจริง จาก validateGuest)
+export function validateInstructor({ nickname, realName, reason } = {}) {
+  if (!String(nickname ?? '').trim()) return { ok: false, error: 'กรุณากรอกชื่อเล่น' }
+  if (!String(realName ?? '').trim()) return { ok: false, error: 'กรุณากรอกชื่อ-นามสกุล' }
+  if (!String(reason ?? '').trim()) return { ok: false, error: 'กรุณากรอกวิชาที่สอน/เหตุผลที่มาช่วย' }
+  return { ok: true, error: null }
+}
+
 // gate ลำดับชั้น (สมมติผู้ใช้ login แล้ว) — คืนชื่อหน้าจอที่ควรแสดง
 //  ใช้ค่า "effective": คนเก่าที่มี studentId อยู่แล้ว ถือว่า onboarded
 //  และ track เดิม 'guest' ถือว่า accountType guest + approved
