@@ -146,6 +146,7 @@ export const useMembersStore = defineStore('members', () => {
                     accountType: n.accountType,
                     guestStatus: n.guestStatus,
                     guestReason: n.guestReason,
+                    instructorClaim: n.instructorClaim,
                     coins: n.coins,
                     pets: n.pets,
                     activePets: n.activePets,

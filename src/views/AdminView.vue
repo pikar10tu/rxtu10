@@ -235,6 +235,28 @@
         </ul>
       </section>
 
+      <!-- ───── อาจารย์ที่ขอเข้าระบบ (self-declare, auto-approved แล้ว รอตั้ง role) ───── -->
+      <section v-if="pendingInstructors.length" class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🩺" /> อาจารย์ที่ขอเข้าระบบ</span></div>
+        <ul class="role-list">
+          <li v-for="m in pendingInstructors" :key="m.uid" class="role-row">
+            <div class="role-top">
+              <div class="role-info">
+                <div class="role-name">
+                  {{ m.nickname }}
+                  <span v-if="m.realName" class="role-real">· {{ m.realName }}</span>
+                </div>
+                <div class="role-sub">{{ m.email }}</div>
+                <div class="gq-reason">{{ m.guestReason }}</div>
+              </div>
+              <div class="role-actions">
+                <button class="btn-mini btn-gold" @click="setRole(m, 'instructor')"><Emoji char="🩺" /> ตั้งเป็นอาจารย์</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
       <!-- ───── ทีมวิชาการ (role management) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -1089,6 +1111,9 @@ const filtered = computed(() => {
 
 const pendingGuests = computed(() =>
   (members.guestUsers || []).filter(g => g.guestStatus === 'pending'))
+
+const pendingInstructors = computed(() =>
+  (members.guestUsers || []).filter(g => g.instructorClaim === true && g.role !== 'instructor'))
 
 async function setGuestStatus(g, status) {
   try {
