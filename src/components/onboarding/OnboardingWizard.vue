@@ -146,7 +146,7 @@ async function submitInstructor() {
   if (!ok) { iErr.value = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'; toast('บันทึกไม่สำเร็จ', 'error'); return }
   // สำเร็จ → guestStatus=approved ทันที → gate เข้า 'ok' เอง (ไม่ผ่าน guest-pending)
   // ยิงข่าวแบบ best-effort — ไม่ await ผลเพื่อไม่ให้ผู้ใช้รอ (postNews ล้มเหลวเงียบเองอยู่แล้ว)
-  postNews({ type: 'instructor', icon: '🩺', msg: `🩺 อาจารย์ ${iRealName.value} แวะมาเยือนแล้ว!` })
+  postNews({ type: 'instructor', icon: '🩺', msg: `อาจารย์ ${iRealName.value} แวะมาเยือนแล้ว!` })
 }
 
 const TRACK = { sci: 'สาย Sci', care: 'สาย Care' }
