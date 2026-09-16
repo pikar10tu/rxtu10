@@ -6,7 +6,9 @@
     </div>
 
     <div v-if="!authStore.isQuestionEditor" class="qz-denied">
-      เฉพาะแอดมินหรือทีมวิชาการเท่านั้น
+      {{ authStore.userData?.instructorClaim
+          ? 'คุณลงทะเบียนเป็นอาจารย์แล้ว รอแอดมินตั้งสิทธิ์แก้ไขข้อสอบให้อีกนิดนะ'
+          : 'เฉพาะแอดมินหรือทีมวิชาการเท่านั้น' }}
     </div>
 
     <template v-else>
