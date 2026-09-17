@@ -29,8 +29,10 @@ test('categories = หมวดไม่ซ้ำของข้อที่เ�
 test('คลังว่าง → publishedTotal 0, categories [], domains ครบ 0', () => {
   assert.deepEqual(buildMeta([]), {
     publishedTotal: 0,
+    approvedTotal: 0,
     categories: [],
     domains: Object.fromEntries(DOMAIN_KEYS.map(k => [k, 0])),
+    approvedDomains: Object.fromEntries(DOMAIN_KEYS.map(k => [k, 0])),
     examSets: [],
   })
 })
@@ -61,14 +63,14 @@ test('examSets: นับต่อชื่อชุด จากข้อ publi
     q({ examSets: ['ชุด A'] }),
     q({ examSets: ['ชุด A'], isPublished: false }),   // draft ไม่นับ
   ])
-  assert.deepEqual(m.examSets, [{ name: 'ชุด A', count: 2 }])
+  assert.deepEqual(m.examSets, [{ name: 'ชุด A', count: 2, approvedCount: 0 }])
 })
 
 test('examSets: 1 ข้ออยู่หลายชุด → นับทุกชุด', () => {
   const m = buildMeta([q({ examSets: ['ชุด A', 'ชุด B'] })])
   assert.deepEqual(
     [...m.examSets].sort((a, b) => a.name.localeCompare(b.name)),
-    [{ name: 'ชุด A', count: 1 }, { name: 'ชุด B', count: 1 }],
+    [{ name: 'ชุด A', count: 1, approvedCount: 0 }, { name: 'ชุด B', count: 1, approvedCount: 0 }],
   )
 })
 
@@ -80,6 +82,19 @@ test('examSets: ข้อไม่มีชุด/ไม่ใช่ array → �
 test('examSets: เรียงตามชื่อ (th)', () => {
   const m = buildMeta([q({ examSets: ['ข'] }), q({ examSets: ['ก'] })])
   assert.deepEqual(m.examSets.map(s => s.name), ['ก', 'ข'])
+})
+
+// ── approved (reviewStatus === 'passed') ──
+test('approvedTotal/approvedDomains/examSets[].approvedCount นับเฉพาะ published+passed', () => {
+  const m = buildMeta([
+    q({ domain: 'care', examSets: ['ชุด A'], reviewStatus: 'passed' }),
+    q({ domain: 'care', examSets: ['ชุด A'], reviewStatus: 'pending' }),
+    q({ domain: 'sci', examSets: ['ชุด A'], reviewStatus: 'passed', isPublished: false }),   // draft ไม่นับ
+  ])
+  assert.equal(m.approvedTotal, 1)
+  assert.equal(m.approvedDomains.care, 1)
+  assert.equal(m.approvedDomains.sci, 0)
+  assert.deepEqual(m.examSets, [{ name: 'ชุด A', count: 2, approvedCount: 1 }])
 })
 
 test('categories ของ meta รวมทุกค่าจากข้อที่มีหลายหมวด', () => {

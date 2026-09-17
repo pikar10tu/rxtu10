@@ -34,6 +34,15 @@
           </div>
         </template>
 
+        <div class="qv-label">แหล่งข้อ</div>
+        <div class="qv-chips">
+          <button class="qv-chip" :class="{ on: !approvedOnly }" @click="approvedOnly = false">ทำทั้งหมด ({{ activeCount }})</button>
+          <button class="qv-chip" :class="{ on: approvedOnly }" @click="approvedOnly = true">เฉพาะที่ผ่านตรวจแล้ว ({{ approvedCount }})</button>
+        </div>
+        <div v-if="approvedOnly && approvedCount > 0 && approvedCount < 5" class="qv-hint">
+          มีข้อผ่านตรวจในหมวดนี้ไม่เยอะ ({{ approvedCount }} ข้อ) — ทำได้ตามปกติ แค่แจ้งให้รู้ไว้ก่อน
+        </div>
+
         <div class="qv-label">จำนวนข้อ</div>
         <div class="qv-chips">
           <button v-for="n in lenChoices" :key="n" class="qv-chip" :class="{ on: len === n }" @click="len = n">
@@ -41,7 +50,7 @@
           </button>
         </div>
 
-        <button class="qv-start" :disabled="!publishedTotal || starting" @click="start">
+        <button class="qv-start" :disabled="starting || (approvedOnly ? !approvedCount : !activeCount)" @click="start">
           {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำข้อสอบ (${quizCount} ข้อ)` }}
         </button>
         <button class="qv-history-btn" @click="openHistory"><Emoji char="📊" /> ประวัติของฉัน</button>
@@ -187,6 +196,8 @@ const DEFAULT_LEN = 5
 // ── home: อ่านแค่ config/questionsMeta (1 read) แทนการโหลดข้อทั้งคลัง ──
 const publishedTotal = ref(0)
 const metaDomains = ref({})
+const metaApprovedTotal = ref(0)
+const metaApprovedDomains = ref({})
 const loading = ref(true)
 
 async function load() {
@@ -197,6 +208,8 @@ async function load() {
     const m = snap.exists() ? snap.data() : { publishedTotal: 0, categories: [], domains: {} }
     publishedTotal.value = m.publishedTotal || 0
     metaDomains.value = m.domains || {}
+    metaApprovedTotal.value = m.approvedTotal || 0
+    metaApprovedDomains.value = m.approvedDomains || {}
     metaExamSets.value = m.examSets || []
   } catch (e) {
     console.error('[quiz meta]', e)
@@ -230,12 +243,22 @@ const examSetChips = computed(() => {
   const yearOf = Object.fromEntries(examSetConfig.value.map(s => [s.name, s.year]))
   return (metaExamSets.value || [])
     .filter(s => s.count > 0)
-    .map(s => ({ name: s.name, count: s.count, year: yearOf[s.name] ?? null }))
+    .map(s => ({ name: s.name, count: s.count, approvedCount: s.approvedCount || 0, year: yearOf[s.name] ?? null }))
     .sort((a, b) => (b.year || 0) - (a.year || 0) || a.name.localeCompare(b.name, 'th'))
 })
-// จำนวนข้อที่ทำได้ตามตัวเลือกปัจจุบัน (ชุดที่เลือก หรือ ทั้งคลัง)
-const activeCount = computed(() =>
-  examSet.value ? (examSetChips.value.find(s => s.name === examSet.value)?.count || 0) : publishedTotal.value)
+// จำนวนข้อที่ทำได้ตามตัวเลือกปัจจุบัน (ชุดที่เลือก หรือ หมวด หรือ ทั้งคลัง)
+const activeCount = computed(() => {
+  if (examSet.value) return examSetChips.value.find(s => s.name === examSet.value)?.count || 0
+  if (dom.value !== '__all') return metaDomains.value[dom.value] || 0
+  return publishedTotal.value
+})
+// เหมือน activeCount แต่นับเฉพาะข้อที่ผ่านตรวจแล้ว (reviewStatus==='passed')
+const approvedOnly = ref(false)
+const approvedCount = computed(() => {
+  if (examSet.value) return examSetChips.value.find(s => s.name === examSet.value)?.approvedCount || 0
+  if (dom.value !== '__all') return metaApprovedDomains.value[dom.value] || 0
+  return metaApprovedTotal.value
+})
 
 // เลือกหมวด → ล้างชุด (mutually exclusive)
 function pickDomain(key) { dom.value = key; examSet.value = null }
@@ -289,7 +312,7 @@ async function loadHistory() {
 function openHistory() { mode.value = 'history'; loadHistory() }
 
 // ── แจ้งข้อสอบผิด (Phase 5) ──
-const REPORT_REASONS = ['เฉลยผิด', 'โจทย์/ตัวเลือกพิมพ์ผิด', 'โจทย์ไม่ชัด', 'ข้อมูลล้าสมัย', 'อื่นๆ']
+const REPORT_REASONS = ['เฉลยผิด', 'โจทย์/ตัวเลือกพิมพ์ผิด', 'โจทย์ไม่ชัด', 'ข้อมูลล้าสมัย', 'ผิดหมวด', 'อื่นๆ']
 const reportOpen = ref(false)
 const reportReason = ref('')
 const reportNote = ref('')
@@ -338,7 +361,7 @@ const REDO_BATCH = 20
 const missingQIds = ref([])   // id ในกองที่หาย/ถูกถอนเผยแพร่ → ลบทิ้งตอน finish()
 
 // ดึงข้อสุ่ม n ข้อ — ตรรกะการสุ่มอยู่ใน useQuestionFeed (ใช้ร่วมกับ Time Attack)
-const fetchQuestions = (n) => feedQuestions(n, { domain: dom.value, examSet: examSet.value })
+const fetchQuestions = (n) => feedQuestions(n, { domain: dom.value, examSet: examSet.value, approvedOnly: approvedOnly.value })
 
 async function start() {
   if (starting.value) return
@@ -361,6 +384,7 @@ async function startZen() {
   variant.value = 'zen'
   dom.value = '__all'
   examSet.value = null
+  approvedOnly.value = false
   try {
     const picks = await fetchQuestions(ZEN_BATCH)
     quiz.value = shuffle(picks).map(shuffleChoices)

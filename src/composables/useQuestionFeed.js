@@ -6,6 +6,8 @@
  * ⇒ ไม่ต้องอ่านคลังทั้งก้อน · 1 query = n reads
  *
  * ⚠️ ต้องมี composite index: isPublished + rand (และ isPublished + examSets CONTAINS + rand)
+ * approvedOnly=true เพิ่ม where('reviewStatus','==','passed') ⇒ ต้องมี index เพิ่ม:
+ * isPublished + reviewStatus + rand (และ + domain / + examSets CONTAINS ตามหลัง)
  */
 import { collection, getDocs, query, where, orderBy, startAt, limit } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -16,14 +18,16 @@ export function useQuestionFeed() {
   const usage = useUsageStore()
 
   /**
-   * @param n       จำนวนข้อที่ขอ (ได้จริงอาจน้อยกว่าถ้าคลัง/หมวดมีไม่พอ)
-   * @param domain  '__all' = ทุกหมวด
-   * @param examSet ชื่อชุดย้อนหลัง (สลับกับ domain — ใส่แล้ว domain ถูกมองข้าม)
+   * @param n            จำนวนข้อที่ขอ (ได้จริงอาจน้อยกว่าถ้าคลัง/หมวดมีไม่พอ)
+   * @param domain       '__all' = ทุกหมวด
+   * @param examSet      ชื่อชุดย้อนหลัง (สลับกับ domain — ใส่แล้ว domain ถูกมองข้าม)
+   * @param approvedOnly true = ดึงเฉพาะข้อที่ reviewStatus==='passed'
    */
-  async function fetchQuestions(n, { domain = '__all', examSet = null } = {}) {
+  async function fetchQuestions(n, { domain = '__all', examSet = null, approvedOnly = false } = {}) {
     const R = Math.random()
     const base = [where('isPublished', '==', true)]
-    // ชุดย้อนหลังมาก่อน (สลับกับหมวด) — ใช้ composite index isPublished+examSets(CONTAINS)+rand
+    if (approvedOnly) base.push(where('reviewStatus', '==', 'passed'))
+    // ชุดย้อนหลังมาก่อน (สลับกับหมวด) — ใช้ composite index isPublished+(reviewStatus+)examSets(CONTAINS)+rand
     if (examSet) base.push(where('examSets', 'array-contains', examSet))
     else if (domain && domain !== '__all') base.push(where('domain', '==', domain))
     const col = collection(db, 'questions')

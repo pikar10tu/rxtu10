@@ -157,6 +157,36 @@
       </div>
 
 
+      <!-- ── 🚩 ข้อที่ถูกรีพอร์ท (questionReports) — ย้ายมาจาก QuestionsView 15 ก.ย. 2026 ── -->
+      <section v-if="reportsLoading || reportGroups.length" class="rv-triage rv-reports">
+        <div class="rv-triage-head"><Emoji char="🚩" /> ข้อที่ถูกรีพอร์ท<span v-if="reportGroups.length"> ({{ reportGroups.length }})</span></div>
+        <div v-if="reportsLoading" class="rv-empty">กำลังโหลด…</div>
+        <ul v-else class="rv-bucket-list">
+          <li v-for="g in reportGroups" :key="g.questionId" class="rv-bucket-item">
+            <div class="rv-bucket-q">{{ truncate60(reportQuestionText(g)) }}</div>
+            <ul class="rv-report-reasons">
+              <li v-for="r in g.reports" :key="r.id"><b>{{ r.reason }}</b><span v-if="r.note"> — {{ r.note }}</span></li>
+            </ul>
+            <div class="rv-bucket-acts">
+              <button class="rv-mini" @click="openReportedFix(g)">{{ fixId === g.questionId ? 'ปิด' : '✏️ แก้ข้อนี้' }}</button>
+              <button class="rv-mini" :disabled="resolvingReportId === g.questionId" @click="resolveReportGroup(g, 'valid')">✓ ผิดจริง (ให้รางวัล)</button>
+              <button class="rv-mini rv-danger" :disabled="resolvingReportId === g.questionId" @click="resolveReportGroup(g, 'invalid')">✕ ไม่ผิด</button>
+            </div>
+            <div v-if="fixId === g.questionId && fixDraft" class="rv-fix">
+              <QuestionEditor v-model="fixDraft" compact />
+              <label class="rv-label">แก้อะไร/ทำไม (บังคับ)</label>
+              <textarea v-model="triageFixReason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="สรุปสั้นๆ ว่าแก้ตรงไหน เพราะอะไร…"></textarea>
+              <p class="rv-fix-note">✅ บันทึกแล้ว = ตรวจผ่านทันที + ปิดรีพอร์ทให้อัตโนมัติ (ได้รางวัลผู้แจ้ง)</p>
+              <button
+                class="rv-btn rv-primary rv-fix-save"
+                :disabled="!draftValid(fixDraft) || !triageFixReason.trim() || fixSaving"
+                @click="saveFix(fixSourceQuestion)"
+              >{{ fixSaving ? 'กำลังบันทึก…' : 'บันทึกการแก้' }}</button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
       <!-- ── 🗂️ ข้อที่รอดำเนินการ — โหลด on-demand ห้ามยิงตอนเปิดหน้า (ดู loadTriage) ── -->
       <section class="rv-triage">
         <div class="rv-triage-head"><Emoji char="🗂️" /> ข้อที่รอดำเนินการ</div>
@@ -189,6 +219,27 @@
               </summary>
               <div class="rv-bucket-body">
                 <p class="rv-bucket-hint">{{ BUCKET_META[k].hint }}</p>
+
+                <!-- 🏷️ เครื่องมือจำแนกหมวดเป็นชุด (bulk) — ใช้ path เดียวกับ saveNogroup ทุกประการ แค่วนลูปแทนกดทีละข้อ -->
+                <details v-if="k === 'nogroup' && buckets[k].length" class="rv-bulk">
+                  <summary class="rv-bulk-sum">🧰 จำแนกหมวดเป็นชุด (bulk)</summary>
+                  <div class="rv-bulk-body">
+                    <p class="rv-bucket-hint">1) คัดลอกออกไปให้ AI/คนอ่านโจทย์แล้วเลือกกลุ่ม → 2) วาง JSON ผลลัพธ์กลับมาแล้วกด "นำเข้า"</p>
+                    <label class="rv-label">ส่งออกข้อที่ไม่มีกลุ่มโรค ({{ buckets[k].length }} ข้อ)</label>
+                    <textarea class="rv-input rv-bulk-text" readonly rows="4" :value="bulkExportText"></textarea>
+                    <button class="rv-mini" @click="copyBulkExport">📋 คัดลอก JSON</button>
+
+                    <label class="rv-label" style="margin-top:12px">นำเข้าผลจำแนกหมวด — รูปแบบ [{"id","pleGroup","pleSub"}, ...]</label>
+                    <textarea v-model="bulkImportText" class="rv-input rv-bulk-text" rows="4" placeholder='[{"id":"...","pleGroup":"cvs","pleSub":"..."}]'></textarea>
+                    <button class="rv-btn rv-primary" :disabled="bulkApplying || !bulkImportText.trim()" @click="applyBulkClassify">
+                      {{ bulkApplying ? 'กำลังนำเข้า…' : 'นำเข้า' }}
+                    </button>
+                    <p v-if="bulkResult" class="rv-bucket-hint">
+                      สำเร็จ {{ bulkResult.ok }} ข้อ<span v-if="bulkResult.fail"> · พลาด {{ bulkResult.fail }} ข้อ: {{ bulkResult.failIds.join(', ') }}</span>
+                    </p>
+                  </div>
+                </details>
+
                 <div v-if="!buckets[k].length" class="rv-empty rv-bucket-empty">ไม่มีข้อในกองนี้ <Emoji char="🎉" /></div>
                 <ul v-else class="rv-bucket-list">
                   <li v-for="q in buckets[k].slice(0, bucketShown[k] || BUCKET_PAGE)" :key="q.id" class="rv-bucket-item">
@@ -263,7 +314,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, getDocs, getDoc, doc, updateDoc, setDoc, runTransaction, arrayUnion, increment, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, updateDoc, setDoc, writeBatch, runTransaction, arrayUnion, increment, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -281,6 +332,9 @@ import QuestionEditor from '../components/questions/QuestionEditor.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
+import { groupReports, resolvePayload } from '../utils/questionReport.js'
+import { buildReportRewardMail } from '../utils/mailbox.js'
+import { REPORT_REWARD } from '../data/index.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
@@ -522,6 +576,50 @@ function openNogroup(q) {
   nogroupPle.value = pleFields(q)
 }
 
+// ── 🧰 จำแนกหมวดเป็นชุด (bulk) — เคลียร์กอง nogroup ทีเดียวแทนกดทีละข้อ (15 ก.ย. 2026) ──
+//  ใช้ plePatch()+updateDoc path เดียวกับ saveNogroup ทุกประการ ต่างแค่วนลูปหลายข้อ
+const bulkExportText = computed(() => JSON.stringify(
+  (buckets.value.nogroup || []).map(q => ({ id: q.id, question: q.question, choices: q.choices })),
+  null, 2,
+))
+const bulkImportText = ref('')
+const bulkApplying = ref(false)
+const bulkResult = ref(null)   // { ok, fail, failIds }
+
+async function copyBulkExport() {
+  try { await navigator.clipboard.writeText(bulkExportText.value); toast('คัดลอกแล้ว', 'success') }
+  catch (e) { toast('คัดลอกไม่สำเร็จ — เลือกข้อความในกล่องแล้ว copy เองได้', 'error') }
+}
+
+async function applyBulkClassify() {
+  if (bulkApplying.value) return
+  let items
+  try { items = JSON.parse(bulkImportText.value) } catch (e) { toast('รูปแบบ JSON ไม่ถูกต้อง', 'error'); return }
+  if (!Array.isArray(items) || !items.length) { toast('ไม่มีรายการให้นำเข้า', 'error'); return }
+  if (!(await confirm(`จะจำแนกหมวด ${items.length} ข้อ — ยืนยัน?`))) return
+  bulkApplying.value = true
+  let ok = 0
+  const failIds = []
+  const CHUNK = 20   // ยิงพร้อมกันเป็นชุด กันยิงรัวเกินไปทีเดียว 310+ ข้อ
+  for (let i = 0; i < items.length; i += CHUNK) {
+    const slice = items.slice(i, i + CHUNK)
+    await Promise.all(slice.map(async (it) => {
+      const patch = it?.id ? plePatch(it.pleGroup, it.pleSub) : null
+      if (!patch) { failIds.push(it?.id || '?'); return }
+      try {
+        await updateDoc(doc(db, 'questions', it.id), { ...patch, updatedAt: serverTimestamp() })
+        usage.track(0, 1)
+        patchTriageRow(it.id, patch)   // แถวหลุดกอง nogroup ทันที ไม่ต้องรอโหลดใหม่
+        ok++
+      } catch (e) { console.error('[bulk classify]', it.id, e); failIds.push(it.id) }
+    }))
+  }
+  bulkApplying.value = false
+  bulkResult.value = { ok, fail: failIds.length, failIds }
+  toast(`จำแนกสำเร็จ ${ok} ข้อ${failIds.length ? ` · พลาด ${failIds.length} ข้อ` : ''}`, failIds.length ? 'error' : 'success')
+  if (ok) bulkImportText.value = ''
+}
+
 async function saveNogroup(q) {
   const patch = plePatch(nogroupPle.value.group, nogroupPle.value.sub)
   if (!patch || nogroupSaving.value) return
@@ -606,6 +704,9 @@ async function saveFix(q) {
     })   // computeStatus กลับเป็น passed → แถวหลุดกอง 🔴 ทันที ไม่ต้องรอโหลดใหม่
     if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; triageFixReason.value = '' }
     toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
+    // แก้เนื้อหาแล้ว = รีพอร์ทที่ค้างของข้อนี้ (ถ้ามี) ถือว่าจริง ปิดพร้อมให้รางวัลผู้แจ้งไปเลย
+    const reportedGroup = reportGroups.value.find(g => g.questionId === q.id)
+    if (reportedGroup) resolveReportGroup(reportedGroup, 'valid')
   } catch (e) { console.error('[triage fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { fixSaving.value = false }
 }
@@ -684,7 +785,81 @@ const leaderboard = computed(() => buildLeaderboard(meta.value.counts || {}, met
 onMounted(() => {
   if (!authStore.isQuestionEditor) return
   load()
+  loadOpenReports()
 })
+
+// ── 🚩 ข้อที่ถูกรีพอร์ท (questionReports) — ย้ายมาจาก QuestionsView ให้อยู่ลูปเดียวกับการตรวจ ──
+const openReports = ref([])
+const reportsLoading = ref(false)
+const resolvingReportId = ref(null)
+const reportGroups = computed(() => groupReports(openReports.value))
+
+async function loadOpenReports() {
+  reportsLoading.value = true
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'questionReports'),
+      where('status', '==', 'open'),
+      orderBy('createdAt', 'desc'),
+      limit(200),
+    ))
+    usage.track(snap.size)
+    openReports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[reports load]', e) }
+  finally { reportsLoading.value = false }
+}
+
+function reportQuestionText(g) {
+  return list.value.find(x => x.id === g.questionId)?.question || g.snapshot?.question || '(ไม่พบโจทย์)'
+}
+
+// เปิดฟอร์มแก้ของกอง "ถูกรีพอร์ท" — ใช้เส้นทางเดียวกับ openFix/saveFix ทุกประการ (แก้ = ผ่านตรวจทันที)
+// ต่างจากกอง failed แค่ต้องไปดึงตัวข้อสดมาก่อน เพราะข้อที่ถูกรีพอร์ทอาจไม่ได้อยู่ใน list/triageRows ที่โหลดไว้
+// เก็บตัวข้อสดไว้ใน fixSourceQuestion เพื่อส่งให้ saveFix() ตอนกดบันทึก (ต้องมี reviewStatus จริงให้ computeStatus ใช้)
+const fixSourceQuestion = ref(null)
+async function openReportedFix(g) {
+  if (fixId.value === g.questionId) { fixId.value = null; fixDraft.value = null; triageFixReason.value = ''; fixSourceQuestion.value = null; return }
+  try {
+    const snap = await getDoc(doc(db, 'questions', g.questionId))
+    usage.track(1)
+    if (!snap.exists()) { toast('ข้อนี้ถูกลบไปแล้ว — แก้ไขไม่ได้', 'error'); return }
+    const q = { id: snap.id, ...snap.data() }
+    fixSourceQuestion.value = q
+    openFix(q)
+  } catch (e) { console.error('[reported fix open]', e); toast('โหลดข้อไม่สำเร็จ', 'error') }
+}
+
+// ปิดรีพอร์ท — valid มัดรางวัลเมล์ให้ผู้แจ้งทันที (เหมือนของเดิมใน QuestionsView), invalid ไม่มีรางวัล
+async function resolveReportGroup(g, verdict) {
+  if (resolvingReportId.value) return
+  resolvingReportId.value = g.questionId
+  try {
+    const batch = writeBatch(db)
+    for (const r of g.reports) {
+      if (verdict === 'valid') {
+        const mailRef = doc(collection(db, 'users', r.reportedBy, 'mail'))
+        batch.set(mailRef, buildReportRewardMail(r, REPORT_REWARD, serverTimestamp()))
+        batch.update(doc(db, 'questionReports', r.id), {
+          ...resolvePayload('valid', REPORT_REWARD),
+          rewardDelivered: true,
+          resolvedAt: serverTimestamp(),
+        })
+      } else {
+        batch.update(doc(db, 'questionReports', r.id), {
+          ...resolvePayload('invalid', REPORT_REWARD),
+          resolvedAt: serverTimestamp(),
+        })
+      }
+    }
+    await batch.commit()
+    usage.track(0, verdict === 'valid' ? g.reports.length * 2 : g.reports.length)
+    openReports.value = openReports.value.filter(r => r.questionId !== g.questionId)
+    toast(verdict === 'valid'
+      ? `ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${g.reports.length} คนแล้ว`
+      : 'ปิดรายการแล้ว (ไม่ผิด)', 'success')
+  } catch (e) { console.error('[resolve report]', e); toast('ปิดรายการไม่สำเร็จ', 'error') }
+  finally { resolvingReportId.value = null }
+}
 
 // โหลดคิว 2 ก้อนแยกกัน — ต้นทุน read คงที่ไม่โตตามขนาดคลัง
 //  ก้อน A: ข้อขัดแย้ง → ดึงมาให้ครบ (นี่คือข้อที่ค้างจริง รอคนที่ 3 ตัดสิน)
@@ -932,6 +1107,11 @@ async function submit() {
 .rv-bucket-body { padding: 10px 11px 12px; }
 .rv-bucket-hint { margin: 0 0 9px; font-size: .74rem; line-height: 1.5; color: rgba(0,0,0,.55); }
 .rv-bucket-empty { padding: 10px 0; }
+.rv-bulk { border: 1px dashed rgba(0,0,0,.18); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+.rv-bulk-sum { cursor: pointer; list-style: none; padding: 8px 10px; font-size: .78rem; font-weight: 800; background: rgba(79,70,229,.06); }
+.rv-bulk-sum::-webkit-details-marker { display: none; }
+.rv-bulk-body { padding: 10px; }
+.rv-bulk-text { font-family: monospace; font-size: .72rem; }
 .rv-bucket-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .rv-bucket-item { border-top: 1px solid #f1f5f9; padding-top: 9px; }
 .rv-bucket-item:first-child { border-top: none; padding-top: 0; }
@@ -939,6 +1119,9 @@ async function submit() {
 .rv-bucket-live { display: inline-block; background: rgba(34,197,94,.15); color: #15803d; border-radius: 999px; padding: 1px 8px; font-size: .7rem; font-weight: 800; margin-right: 5px; }
 .rv-bucket-draft { display: inline-block; background: rgba(0,0,0,.08); color: rgba(0,0,0,.55); border-radius: 999px; padding: 1px 8px; font-size: .7rem; font-weight: 800; margin-right: 5px; }
 .rv-bucket-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.rv-mini.rv-danger { background: rgba(239,68,68,.12); color: #dc2626; }
+.rv-report-reasons { list-style: none; margin: 0 0 9px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rv-report-reasons li { font-size: .74rem; color: rgba(0,0,0,.7); line-height: 1.4; }
 .rv-nogroup { margin-top: 9px; border-top: 1px dashed rgba(0,0,0,.12); padding-top: 9px; }
 .rv-nogroup-save { margin-top: 9px; width: 100%; }
 .rv-fix { margin-top: 9px; border-top: 1px dashed rgba(0,0,0,.12); padding-top: 9px; }

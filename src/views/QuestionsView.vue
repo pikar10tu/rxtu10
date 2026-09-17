@@ -82,34 +82,12 @@
       <!-- ── 🔍 แท็บ ตรวจสอบ : ข้อถูกแจ้ง + ตรวจข้อซ้ำ ── -->
       <template v-if="activeTab === 'check'">
 
-      <!-- ── ข้อที่ถูกแจ้งว่าผิด (questionReports) ── -->
-      <details v-if="authStore.isAcademic" class="qz-reports" @toggle="onReportsToggle">
-        <summary class="qz-reports-sum"><Emoji char="🚩" /> ข้อที่ถูกแจ้งว่าผิด<span v-if="reportsOpen"> ({{ reports.length }})</span></summary>
-        <div class="qz-reports-body">
-          <div v-if="reportsLoading" class="qz-empty">กำลังโหลด…</div>
-          <div v-else-if="!reportGroups.length" class="qz-empty">ยังไม่มีข้อที่ถูกแจ้ง <Emoji char="🎉" /></div>
-          <div v-else class="qz-report-list">
-            <div v-for="g in reportGroups" :key="g.questionId" class="qz-report-card">
-              <div class="qz-report-top">
-                <span class="qz-report-badge">ถูกแจ้ง {{ g.count }} ครั้ง</span>
-                <span v-if="!questionExists(g.questionId)" class="qz-report-deleted">ข้อถูกลบแล้ว</span>
-              </div>
-              <div class="qz-report-q">{{ reportQuestionText(g) }}</div>
-              <ul class="qz-report-reasons">
-                <li v-for="r in g.reports" :key="r.id">
-                  <b>{{ r.reason }}</b><span v-if="r.note"> — {{ r.note }}</span>
-                  <span class="qz-report-meta"> · {{ r.reportedByName || 'ไม่ระบุ' }} · {{ fmtTime(r.createdAt) }}</span>
-                </li>
-              </ul>
-              <div class="qz-report-actions">
-                <button class="qz-mini" :disabled="!questionExists(g.questionId)" @click="editReported(g)">แก้ไขข้อนี้</button>
-                <button class="qz-mini" :disabled="resolvingId === g.questionId" @click="resolveReports(g, 'valid')">✓ ผิดจริง (ให้รางวัล)</button>
-                <button class="qz-mini qz-danger" :disabled="resolvingId === g.questionId" @click="resolveReports(g, 'invalid')">✕ ไม่ผิด</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </details>
+      <!-- ข้อที่ถูกแจ้งว่าผิด — ย้ายไปจัดการที่หน้าตรวจข้อสอบแล้ว (15 ก.ย. 2026) เพื่อให้อยู่ลูปเดียวกับการตรวจ
+           แถวในลิสต์ด้านล่างยังโชว์ป้าย 🚩 จำนวนที่ถูกแจ้งต่อข้อไว้เป็นตัวเตือนเฉยๆ (ดู reportCountMap) -->
+      <p v-if="authStore.isAcademic && reportGroups.length" class="qz-dup-note">
+        <Emoji char="🚩" /> มีข้อถูกแจ้งว่าผิด {{ reportGroups.length }} ข้อ — จัดการได้ที่
+        <RouterLink to="/review">หน้าตรวจข้อสอบ</RouterLink>
+      </p>
 
       <!-- ── ตรวจข้อซ้ำในคลัง (Phase 6) ── -->
       <details class="qz-reports" @toggle="dupOpen = $event.target.open">
@@ -393,11 +371,10 @@ import { filterQuestions, distinctCategories } from '../utils/questionsFilter.js
 import { getCategories } from '../utils/questionCategories.js'
 import { isPleGroupKey } from '../data/plecc.js'
 import { topicRows, mergeTopicsPlan } from '../utils/topicMerge.js'
-import { groupReports, resolvePayload } from '../utils/questionReport.js'
-import { buildReportRewardMail } from '../utils/mailbox.js'
+import { groupReports } from '../utils/questionReport.js'
 import { pctCorrect, isProblem } from '../utils/questionStats.js'
 import { verdictContentChanged, REVIEW_RESET, reviewStatusKey, REVIEW_STATUS_LABEL, VERDICT_LABEL } from '../utils/questionReview.js'
-import { REPORT_REWARD, QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
+import { QUESTION_STAT_MIN_ATTEMPTS, QUESTION_STAT_PROBLEM_PCT } from '../data/index.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 import ExamSetSelect from '../components/questions/ExamSetSelect.vue'
 
@@ -966,15 +943,12 @@ async function remove(q) {
   } catch (e) { console.error('[questions remove]', e); toast('ลบไม่สำเร็จ', 'error') }
 }
 
-// ── ข้อที่ถูกแจ้งว่าผิด (Phase 5) ──
-const reportsOpen = ref(false)
+// ── ข้อที่ถูกแจ้งว่าผิด (Phase 5) — จัดการจริงย้ายไปหน้า /review แล้ว เหลือแค่นับไว้โชว์ป้ายเตือน ──
 const reports = ref([])              // open reports (flat)
 const reportsLoading = ref(false)
-const resolvingId = ref(null)        // questionId ที่กำลังปิด
 const reportGroups = computed(() => groupReports(reports.value))
 
 const statMap = ref({})              // { qid: { a, c } } — สถิติ %ถูกรายข้อ
-const reportsLoaded = ref(false)     // กัน loadReports ซ้ำ (mount + กางแผง)
 
 const reportCountMap = computed(() => {
   const m = {}
@@ -997,11 +971,6 @@ async function loadStats() {
   } catch (e) { console.error('[questionStats load]', e) }
 }
 
-function questionExists(qid) { return list.value.some(x => x.id === qid) }
-function reportQuestionText(g) {
-  const q = list.value.find(x => x.id === g.questionId)
-  return q?.question || g.snapshot?.question || '(ไม่พบโจทย์)'
-}
 function fmtTime(t) {
   const ms = t?.toMillis ? t.toMillis() : (t?.toDate ? t.toDate().getTime() : new Date(t).getTime())
   if (!ms || Number.isNaN(ms)) return ''
@@ -1019,54 +988,8 @@ async function loadReports() {
     ))
     usage.track(snap.size)
     reports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-    reportsLoaded.value = true
-  } catch (e) { console.error('[reports load]', e); toast('โหลดรายการที่ถูกแจ้งไม่สำเร็จ', 'error') }
+  } catch (e) { console.error('[reports load]', e) }
   finally { reportsLoading.value = false }
-}
-
-function onReportsToggle(e) {
-  reportsOpen.value = e.target.open
-  if (e.target.open && !reportsLoaded.value) loadReports()
-}
-
-function editReported(g) {
-  const q = list.value.find(x => x.id === g.questionId)
-  if (q) edit(q)
-  else toast('ข้อนี้ถูกลบไปแล้ว — แก้ไขไม่ได้', 'error')
-}
-
-async function resolveReports(g, verdict) {
-  if (resolvingId.value) return
-  resolvingId.value = g.questionId
-  try {
-    const batch = writeBatch(db)
-    if (verdict === 'valid') {
-      // ผิดจริง → mint mail รางวัลให้ผู้แจ้งแต่ละคน (auto-deliver) + ปิด report เป็น delivered
-      for (const r of g.reports) {
-        const mailRef = doc(collection(db, 'users', r.reportedBy, 'mail'))
-        batch.set(mailRef, buildReportRewardMail(r, REPORT_REWARD, serverTimestamp()))
-        batch.update(doc(db, 'questionReports', r.id), {
-          ...resolvePayload('valid', REPORT_REWARD),
-          rewardDelivered: true,                 // ส่งทันที (auto-mint)
-          resolvedAt: serverTimestamp(),
-        })
-      }
-    } else {
-      for (const r of g.reports) {
-        batch.update(doc(db, 'questionReports', r.id), {
-          ...resolvePayload('invalid', REPORT_REWARD),
-          resolvedAt: serverTimestamp(),
-        })
-      }
-    }
-    await batch.commit()
-    usage.track(0, verdict === 'valid' ? g.reports.length * 2 : g.reports.length)
-    reports.value = reports.value.filter(r => r.questionId !== g.questionId) // ตัดกลุ่มที่ปิดออก
-    toast(verdict === 'valid'
-      ? `ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${g.reports.length} คนแล้ว`
-      : 'ปิดรายการแล้ว (ไม่ผิด)', 'success')
-  } catch (e) { console.error('[resolve report]', e); toast('ปิดรายการไม่สำเร็จ', 'error') }
-  finally { resolvingId.value = null }
 }
 </script>
 
@@ -1197,13 +1120,9 @@ async function resolveReports(g, verdict) {
 .qz-report-card { border: 1px solid rgba(0,0,0,.1); border-radius: 12px; padding: 11px; background: #fffdf7; }
 .qz-report-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .qz-report-badge { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(245,158,11,.16); color: #b45309; }
-.qz-report-deleted { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(239,68,68,.12); color: #dc2626; }
-.qz-report-q { font-size: .82rem; font-weight: 700; color: #1e293b; margin-bottom: 7px; line-height: 1.4; }
-.qz-report-reasons { list-style: none; margin: 0 0 9px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.qz-report-reasons li { font-size: .74rem; color: rgba(0,0,0,.7); line-height: 1.4; }
 .qz-report-meta { color: rgba(0,0,0,.4); font-size: .7rem; }
-.qz-report-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .qz-dup-note { font-size: .72rem; color: rgba(0,0,0,.5); line-height: 1.4; margin: 0 0 10px; }
+.qz-dup-note a { color: var(--primary); font-weight: 700; }
 .qz-dup-q { font-size: .82rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; line-height: 1.4; }
 .qz-dup-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
 .qz-dup-items li { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }

@@ -18,6 +18,11 @@
     <template v-else-if="stage === 'pick'">
       <div class="ta-intro">ตอบให้ได้มากที่สุดก่อนหมดเวลา · ตอบแล้วไปข้อถัดไปทันที เฉลยทั้งหมดรอดูตอนจบ</div>
 
+      <div class="ta-chips">
+        <button class="ta-chip" :class="{ on: !approvedOnly }" @click="approvedOnly = false">ทำทั้งหมด</button>
+        <button class="ta-chip" :class="{ on: approvedOnly }" @click="approvedOnly = true">เฉพาะที่ผ่านตรวจแล้ว ({{ approvedTotal }})</button>
+      </div>
+
       <div class="ta-modes">
         <button v-for="m in TA_MODES" :key="m.key" class="ta-mode" :disabled="starting" @click="startRun(m)">
           <span class="ta-mode-emoji"><Emoji :char="m.emoji" /></span>
@@ -107,7 +112,7 @@ import HelpButton from '../components/help/HelpButton.vue'
 import TaBoard from '../components/study/TaBoard.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
-import { collection, addDoc, doc, writeBatch, increment, serverTimestamp, deleteField } from 'firebase/firestore'
+import { collection, addDoc, doc, getDoc, writeBatch, increment, serverTimestamp, deleteField } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
@@ -156,6 +161,8 @@ const endReason = ref('time')  // time | quit | empty
 const coinsEarned = ref(0)
 const isNewBest = ref(false)
 const prevBest = ref(0)
+const approvedOnly = ref(false)
+const approvedTotal = ref(0)
 
 let seen = new Set()           // id ที่เคยเข้าคิวแล้ว — กันข้อซ้ำในรอบเดียว
 let emptyStreak = 0            // ดึงแล้วไม่ได้ข้อใหม่ติดกันกี่ครั้ง
@@ -189,7 +196,7 @@ async function topUp() {
   if (fetching || exhausted) return
   fetching = true
   try {
-    const rows = await fetchQuestions(TA_BATCH)
+    const rows = await fetchQuestions(TA_BATCH, { approvedOnly: approvedOnly.value })
     const fresh = rows.filter(q => q?.id && !seen.has(q.id))
     for (const q of fresh) seen.add(q.id)
     if (!fresh.length) {
@@ -402,7 +409,13 @@ function onBack() {
 // เผลอกดแท็บอื่นกลางรอบ = จบรอบให้ ไม่ปล่อยให้คะแนน 15 นาทีหายเปล่า
 onBeforeRouteLeave(() => { if (stage.value === 'play') finish('quit') })
 
-onMounted(() => { members.loadRoster() })
+onMounted(() => {
+  members.loadRoster()
+  getDoc(doc(db, 'config', 'questionsMeta')).then(snap => {
+    usage.track(1)
+    approvedTotal.value = snap.exists() ? (snap.data().approvedTotal || 0) : 0
+  }).catch(e => console.error('[ta meta]', e))
+})
 </script>
 
 <style scoped>
@@ -413,6 +426,9 @@ onMounted(() => { members.loadRoster() })
 .ta-empty { text-align: center; color: rgba(0,0,0,.45); padding: 40px 16px; font-size: .85rem; line-height: 1.6; }
 .ta-intro { font-size: .78rem; color: rgba(0,0,0,.6); line-height: 1.6; margin-bottom: 12px; }
 
+.ta-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.ta-chip { border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.ta-chip.on { background: var(--primary); border-color: var(--ink); color: #fff; }
 .ta-modes { display: flex; flex-direction: column; gap: 10px; }
 .ta-mode { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px; border-radius: 16px; background: var(--primary-light); border: 2px solid var(--ink); box-shadow: var(--pop); font-family: inherit; cursor: pointer; }
 .ta-mode:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
