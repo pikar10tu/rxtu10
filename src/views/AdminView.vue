@@ -46,53 +46,6 @@
         </div>
       </section>
 
-      <!-- ───── สนามประลอง (PvP open/close gate) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="⚔️" /> สนามประลอง (PvP)</span></div>
-        <div class="admin-hint">
-          เปิดให้ทั้งชั้นปีเริ่มบุกกันได้ — ก่อนเปิด ทุกคนเข้าไปจัดทีม/เห็นแต้มได้ แต่ยังบุกไม่ได้ · มีผลทันที ไม่ต้อง deploy
-        </div>
-        <div class="maint-toggle">
-          <span class="maint-state" :class="pvpOpen ? 'on' : 'off'">
-            {{ pvpOpen ? '🟢 เปิดให้บุกแล้ว' : '🔒 ยังไม่เปิด (จัดทีม/ดูแต้มได้)' }}
-          </span>
-          <button
-            class="btn-mini" :class="pvpOpen ? 'btn-gray' : 'btn-gold'"
-            :disabled="savingPvp" @click="togglePvp"
-          >
-            {{ savingPvp ? '...' : (pvpOpen ? 'ปิดสนาม' : 'เปิดสนาม ⚔️') }}
-          </button>
-        </div>
-      </section>
-
-      <!-- ───── โฟกัสเกม: ซ่อน/เปิด ฟีเจอร์รอง ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🎯" /> โฟกัสเกม</span></div>
-        <div class="admin-hint">
-          ปิดไว้ = นักศึกษาไม่เห็นทางเข้า (แอดมินยังเข้าได้ไว้เทส) · ของเก่าไม่หาย เปิดกลับมาอยู่ครบ ·
-          มีผลทันที ไม่ต้อง deploy · <b>คนที่กำลังส่งผจญภัยอยู่ยังเข้าไปเก็บของได้เสมอ</b>
-        </div>
-
-        <div class="maint-toggle">
-          <span class="maint-state" :class="expeditionOpen ? 'on' : 'off'">
-            {{ expeditionOpen ? '🟢 ส่งผจญภัย: เปิดให้เล่นแล้ว' : '🔒 ส่งผจญภัย: ซ่อนจากนักศึกษา' }}
-          </span>
-          <button
-            class="btn-mini" :class="expeditionOpen ? 'btn-gray' : 'btn-gold'"
-            :disabled="savingFocus" @click="toggleFocus('expeditionOpen')"
-          >
-            {{ savingFocus ? '...' : (expeditionOpen ? 'ซ่อน' : 'เปิด 🗺️') }}
-          </button>
-        </div>
-
-        <!-- ปุ่มเปิด/ซ่อน "มินิเกม" (arcadeOpen) ถูกเอาออกจากหน้านี้ตามที่ user สั่ง 27 ส.ค.
-             — มินิเกมเป็นบทที่ปิดไปแล้ว ไม่ต้องมีให้เห็นบนแผงแอดมินอีก
-             ⚠️ flag `config/app.arcadeOpen` **ยังอยู่และยังกันนักศึกษาอยู่เหมือนเดิม** ไม่ได้ลบ
-                จะเปิดมินิเกมกลับต้องแก้ค่าที่ Firestore console (config/app.arcadeOpen = true)
-                หรือคืนบล็อกนี้ + `arcadeOpen` ใน useAppConfig() ด้านล่างแล้ว deploy ใหม่
-             ⚠️ อย่าเผลอลบ flag ทิ้ง — ตัวฝึกคำนวณ CrCl ฝั่งเรียนใช้โครง minigames.* ร่วมกัน -->
-      </section>
-
       <!-- ───── ตรวจข้อสอบ (วิชาการ) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🔍" /> ตรวจข้อสอบ (วิชาการ)</span></div>
@@ -110,62 +63,6 @@
           {{ reviewSyncBusy ? 'กำลังซิงก์…' : '🔄 ซิงก์ระบบตรวจ' }}
         </button>
 
-        <div class="admin-hint" style="margin-top:12px">
-          <b>แมพหมวดเข้าเกณฑ์สภาฯ</b> — ย้ายหมวดเดิม (free text) ไปเป็น <code>pleGroup</code>/<code>pleSub</code>
-          ตามภาคผนวก ๑ ของประกาศศูนย์สอบฯ · กดซ้ำได้ ปลอดภัย ·
-          <b>ไม่แตะผลตรวจและไม่ล้างคิวของใคร</b> (ไม่ยุ่งกับ qhash)
-          <br />⚠️ กดตอนที่ไม่มีเพื่อนนั่งตรวจค้างอยู่จะดีที่สุด — ถ้ามีคนส่งผลด้วยหน้าเว็บเวอร์ชันเก่า
-          ระหว่างนี้ ป้ายหมวดของข้อนั้นอาจกลับไปเป็นชื่อเดิมชั่วคราว กดปุ่มนี้ซ้ำก็หายเอง
-        </div>
-        <button class="btn-mini" :disabled="pleMigrateBusy" @click="migratePleGroups">
-          {{ pleMigrateBusy ? 'กำลังแมพ…' : '🏷️ แมพหมวดเข้าเกณฑ์สภาฯ' }}
-        </button>
-        <div v-if="pleReport" class="admin-hint" style="margin-top:8px">{{ pleReport }}</div>
-
-        <div class="admin-hint" style="margin-top:12px">
-          <b>ย้ายเครดิตตรวจจากบัญชีซ้ำ</b> — คนที่ล็อกอินด้วย 2 อีเมลจะมี 2 บัญชีแยกกัน ผลตรวจไปนับอยู่อีกบัญชี ·
-          เลือก <b>ต้นทาง</b> (บัญชีที่ถือเครดิต) กับ <b>ปลายทาง</b> (บัญชีที่เขาใช้อยู่) แล้วย้าย —
-          ย้ายทั้งรายชื่อคนตรวจบนข้อ ผลตรวจรายข้อ และตัวนับ (กดซิงก์ระบบตรวจทีหลังก็ไม่เด้งกลับ)
-        </div>
-        <button v-if="!creditAccounts.length" class="btn-mini" :disabled="creditBusy" @click="loadCreditAccounts">
-          {{ creditBusy ? 'กำลังโหลด…' : '👥 โหลดรายชื่อบัญชี' }}
-        </button>
-        <template v-else>
-          <input v-model="creditSearch" class="admin-search" type="text" placeholder="ค้นชื่อ / อีเมล…" />
-          <ul class="role-list">
-            <li v-for="a in creditRows" :key="a.uid" class="role-row">
-              <div class="role-top">
-                <div class="role-info">
-                  <div class="role-name">{{ a.name }}</div>
-                  <div class="role-sub">{{ a.email || 'uid ' + a.uid.slice(0, 8) }} · ตรวจ {{ a.count }} ข้อ</div>
-                </div>
-                <span v-if="a.role" class="role-badge" :class="'role-' + a.role">{{ roleLabel(a.role) }}</span>
-                <div class="role-actions">
-                  <button class="btn-mini" :class="creditFrom === a.uid ? 'btn-gold' : 'btn-gray'" @click="pickCredit('from', a.uid)">ต้นทาง</button>
-                  <button class="btn-mini" :class="creditTo === a.uid ? 'btn-gold' : 'btn-gray'" @click="pickCredit('to', a.uid)">ปลายทาง</button>
-                </div>
-              </div>
-            </li>
-          </ul>
-          <div v-if="creditFrom && creditTo" class="admin-hint" style="margin-top:8px">
-            {{ creditName(creditFrom) }} → <b>{{ creditName(creditTo) }}</b>
-            <div v-if="creditToNotEditor">⚠️ บัญชีปลายทางยังไม่มีสิทธิ์วิชาการ — ย้ายเสร็จแล้วตั้งสิทธิ์ในการ์ดสมาชิกด้านล่างด้วย ไม่งั้นเข้าหน้าตรวจไม่ได้</div>
-            <div v-if="creditPlan">
-              เจอในคลัง {{ creditPlan.moved }} ข้อที่จะย้ายเครดิต
-              <span v-if="creditPlan.dup"> · {{ creditPlan.dup }} ข้อตรวจไว้ทั้งสองบัญชี (นับให้ครั้งเดียว)</span>
-              <span v-if="creditPlan.fixedOnly"> · อีก {{ creditPlan.fixedOnly }} ข้อต้นทางเป็นคนแก้ล่าสุดแต่ไม่มีเครดิต (แก้จากหน้าคลังข้อสอบ = ส่งกลับคิวตรวจ ไม่นับเป็นการตรวจ)</span>
-              <span v-if="creditPlan.boardCount !== creditPlan.moved + creditPlan.dup"> · กระดานเดิมของต้นทางโชว์ {{ creditPlan.boardCount }} ข้อ (ส่วนต่างคือข้อที่ถูกแก้/ล้างผลตรวจไปแล้ว ซิงก์รอบไหนก็หายอยู่ดี)</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;margin-top:6px">
-            <button class="btn-mini" :disabled="!creditFrom || !creditTo || creditBusy" @click="previewCreditMove">
-              {{ creditBusy && !creditPlan ? 'กำลังนับ…' : '🔎 นับข้อที่จะย้าย' }}
-            </button>
-            <button class="btn-mini btn-gold" :disabled="!creditPlan || !creditPlan.updates.length || creditBusy" @click="runCreditMove">
-              {{ creditBusy && creditPlan ? 'กำลังย้าย…' : '➡️ ย้ายเครดิต' }}
-            </button>
-          </div>
-        </template>
       </section>
 
       <!-- ───── Roster (doc สรุปรวมทั้งรุ่น) ───── -->
@@ -466,15 +363,6 @@
         </div>
       </section>
 
-      <!-- ───── เคลีย emoji จากชื่อในฐานข้อมูล ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🧹" /> เคลีย emoji จากชื่อ</span></div>
-        <div class="admin-hint">ตัด emoji ท้ายชื่อเล่นที่ค้างในฐานข้อมูล — เขียนทับเฉพาะ doc ที่มี emoji จริง (ชื่อสะอาดอยู่แล้วไม่ถูกแตะ)</div>
-        <button class="btn-mini btn-gold" :disabled="cleaning" @click="cleanupNicknames">
-          {{ cleaning ? 'กำลังเคลีย…' : 'เคลีย emoji จากชื่อในฐานข้อมูล' }}
-        </button>
-      </section>
-
       <!-- ───── รายงานการโกง (cheat logs) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -533,32 +421,8 @@
         </ul>
       </section>
 
-      <!-- ───── ห้องแล็บจังหวะไฟต์ ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🎬" /> ห้องแล็บจังหวะไฟต์</span></div>
-        <div class="admin-hint">
-          ค่าที่เลือก <b>เก็บบนเครื่องนี้เครื่องเดียว</b> ไม่กระทบนักศึกษาคนอื่น ·
-          ไฟต์ทดสอบเป็นเคสหนักสุด (4v4 ประชิดล้วน) และเป็นไฟต์เดิมทุกครั้ง จึงเทียบกันได้จริง ·
-          ไม่มีรางวัล ไม่บันทึกอะไร ยิงซ้ำได้ไม่จำกัด
-        </div>
-
-        <div class="admin-hint"><b>ภาพ</b> — ไล่ลงมาถ้าเจอกระตุก</div>
-        <div class="fxlab-row">
-          <button v-for="n in fxNames" :key="n" class="btn-mini"
-                  :class="{ on: fxPrefs.fx === n }" @click="pickFx(n)">{{ FX_LABEL[n] }}</button>
-        </div>
-
-        <div class="admin-hint"><b>จังหวะ</b> — ไม่เกี่ยวกับความลื่น เลือกตามความรู้สึกล้วนๆ</div>
-        <div class="fxlab-row">
-          <button v-for="n in paceNames" :key="n" class="btn-mini"
-                  :class="{ on: fxPrefs.pace === n }" @click="pickPace(n)">{{ PACE_LABEL[n] }}</button>
-        </div>
-
-        <button class="btn-mini" @click="runTestFight">▶ ยิงไฟต์ทดสอบ</button>
-      </section>
     </template>
 
-    <BattleReplay :data="fxReplay" theme="arena" @close="fxReplay = null" />
   </div>
 </template>
 
@@ -586,9 +450,8 @@ import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 import { computeStatus, reviewStatusKey, tallyReviewCounts } from '../utils/questionReview.js'
-import { planReviewCreditMove, reviewerAccounts } from '../utils/reviewCreditMove.js'
 import { getCategories } from '../utils/questionCategories.js'
-import { migrationPlan, plePatch } from '../utils/pleMapping.js'
+import { plePatch } from '../utils/pleMapping.js'
 
 // categories ของข้อนี้หลุดจากที่ควรเป็นตาม pleGroup ไหม (= ร่องรอย client เก่าเขียนทับ)
 function pleCatsDrifted(q) {
@@ -597,58 +460,17 @@ function pleCatsDrifted(q) {
 }
 import { distinctCategories } from '../utils/questionsFilter.js'
 import { useTopics } from '../composables/useTopics.js'
-import BattleReplay from '../components/battle/BattleReplay.vue'
-import { simulateBattle } from '../utils/battleEngine.js'
-import { FX_PRESETS, PACE_PRESETS, FX_LABEL, PACE_LABEL, readPrefs, writePrefs } from '../utils/battleReplayPrefs.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
 const usage     = useUsageStore()
-const { maintenance, pvpOpen, expeditionOpen, rawConfig } = useAppConfig()   // arcadeOpen ไม่ได้ใช้แล้ว (ปุ่มมินิเกมถูกเอาออก)
+// สวิตช์ pvpOpen / expeditionOpen / arcadeOpen ถูกเอาออกจากหน้านี้แล้ว (25 ก.ย. 2026 user สั่งเคลียร์แอดมิน)
+//   ค่ายังอยู่ใน config/app และยังคุมฟีเจอร์อยู่ — จะสลับต้องแก้ที่ Firestore console
+//   ⚠️ ห้ามลบ flag arcadeOpen ทิ้ง ตัวฝึก CrCl ฝั่งเรียนใช้โครงเดียวกัน
+const { maintenance, rawConfig } = useAppConfig()
 const { toast } = useToast()
 const { confirm } = useConfirm()
 const { addTopics } = useTopics()
-
-// ── ห้องแล็บจังหวะไฟต์ (§11 ของสเปก battle-replay-pacing) ──
-// ค่าที่เลือกเก็บใน localStorage ของเครื่องนี้เท่านั้น ไม่แตะ config/app → นักศึกษาที่กำลังเล่นอยู่ไม่โดนผลกระทบ
-const fxPrefs = ref(readPrefs())
-const fxNames = Object.keys(FX_PRESETS)
-const paceNames = Object.keys(PACE_PRESETS)
-function pickFx(name) { fxPrefs.value = writePrefs({ ...fxPrefs.value, fx: name }) }
-function pickPace(name) { fxPrefs.value = writePrefs({ ...fxPrefs.value, pace: name }) }
-// อ่านครั้งเดียวตอนเปิดหน้า — คนไปสลับใน Settings แล้วกลับมาต้องรีเฟรช ซึ่งเป็นสิ่งที่เขาทำอยู่แล้วตอนเทส
-
-// ไฟต์ทดสอบ: เคสหนักสุดเท่าที่ทำได้ — เพ็ททั้ง 8 ตัวเป็น melee ล้วน (ไม่มี atkStyle:"ranged" ซึ่งไม่แตะการ์ดเลย)
-// ธาตุคละกันโดยตั้งใจ → เกิดแพ้ทางบ่อย → หมัดชั้น heavy เยอะ → จอสั่น+เป้าบีบตัวถี่สุด
-// seed 695 คัดมาจากการไล่ 3000 seed ด้วย engine จริง แล้วเลือกตัวที่หนักสุด: 40 หมัด · คริ 7 · แพ้ทาง 22
-// (ยืนยันด้วย simulateBattle จริงตอน build panel นี้ — ตรงตามที่อ้าง)
-// ไม่เขียน Firestore ไม่ให้รางวัล ยิงซ้ำได้ไม่จำกัด และเป็นไฟต์เดิมเป๊ะทุกครั้ง จึงเทียบ preset กันได้
-const TEST_SEED = 695
-const TEST_TEAM_A = [
-  { id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 },
-  { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
-  { id: 'ouroboros', rarity: 'legendary', element: 'scissors', grade: 5 },
-  { id: 'mammoth', rarity: 'legendary', element: 'paper', grade: 5 },
-]
-const TEST_TEAM_B = [
-  { id: 'simurgh', rarity: 'legendary', element: 'scissors', grade: 5 },
-  { id: 'qilin', rarity: 'legendary', element: 'paper', grade: 5 },
-  { id: 'cerberus', rarity: 'epic', element: 'fist', grade: 5 },
-  { id: 'panda', rarity: 'epic', element: 'paper', grade: 5 },
-]
-const fxReplay = ref(null)
-function runTestFight() {
-  const result = simulateBattle(TEST_TEAM_A, TEST_TEAM_B, TEST_SEED)
-  fxReplay.value = {
-    playerTeam: TEST_TEAM_A, botTeam: TEST_TEAM_B, result,
-    won: result.winner === 'A',
-    vsLabel: 'ไฟต์ทดสอบ',
-    winText: 'ชนะ (ไฟต์ทดสอบ ไม่มีรางวัล)',
-    loseText: 'แพ้ (ไฟต์ทดสอบ ไม่มีรางวัล)',
-    rewardText: '—',
-    fpsMeter: true,
-  }
-}
 
 // ซิงก์ระบบตรวจข้อสอบ: เติม reviewStatus ให้ข้อเก่า (ก่อนมีระบบตรวจ — query หน้า /review
 // มองไม่เห็นข้อที่ไม่มี field นี้) + ซ่อมสถานะที่ drift
@@ -726,126 +548,6 @@ async function syncReviewSystem() {
     toast(`ซิงก์แล้ว — อัปเดต ${stale.length} ข้อ · ความคืบหน้าตั้งต้นใหม่แล้ว${topicTail}`, 'success')
   } catch (e) { console.error('[review sync]', e); toast('ซิงก์ไม่สำเร็จ', 'error') }
   finally { reviewSyncBusy.value = false }
-}
-
-// แมพหมวดเดิม → pleGroup/pleSub ตามเกณฑ์สภาฯ (data/plecc.js)
-//  idempotent: migrationPlan คืนเฉพาะข้อที่ค่าต่างจริง กดซ้ำแล้วไม่มีอะไรให้เขียนก็จบ
-//  ⚠️ patch มีแค่ pleGroup/pleSub/categories — ไม่แตะ qhash/โจทย์/ผลตรวจ
-//     ⇒ รีวิวที่ค้างอยู่ในมือเพื่อนไม่กลายเป็น __stale และไม่มีใครเสียงานที่ตรวจไปแล้ว
-const pleMigrateBusy = ref(false)
-const pleReport = ref('')
-async function migratePleGroups() {
-  if (pleMigrateBusy.value) return
-  pleMigrateBusy.value = true
-  pleReport.value = ''
-  try {
-    const snap = await getDocs(collection(db, 'questions'))
-    const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-    const { updates, unmapped } = migrationPlan(all)
-    for (let i = 0; i < updates.length; i += 450) {
-      const batch = writeBatch(db)
-      for (const u of updates.slice(i, i + 450)) batch.update(doc(db, 'questions', u.id), u.patch)
-      await batch.commit()
-    }
-    usage.track(snap.size, updates.length)
-    const names = unmapped.slice(0, 5).map(q => getCategories(q).join('/') || '(ไม่มีหมวด)')
-    pleReport.value = updates.length || unmapped.length
-      ? `แมพแล้ว ${updates.length} ข้อ · แมพไม่ได้ ${unmapped.length} ข้อ` +
-        (unmapped.length ? ` — ต้องเข้าไปเลือกกลุ่มเองในหน้าคลัง เช่น ${names.join(', ')}` : '')
-      : 'ทุกข้ออยู่ในเกณฑ์สภาฯ อยู่แล้ว ไม่มีอะไรต้องแก้'
-    toast(`แมพหมวดแล้ว ${updates.length} ข้อ`, 'success')
-  } catch (e) { console.error('[ple migrate]', e); toast('แมพหมวดไม่สำเร็จ', 'error') }
-  finally { pleMigrateBusy.value = false }
-}
-
-// ย้ายเครดิตตรวจจากบัญชีซ้ำ → บัญชีหลัก (ตรรกะอยู่ utils/reviewCreditMove.js)
-//  อ่าน users ทั้ง collection เอง ไม่พึ่ง members store — store ข้าม doc ที่ยังไม่กรอกข้อมูล
-//  ซึ่งอาจเป็นบัญชีที่ถือเครดิตอยู่พอดี
-const creditAccounts = ref([])
-const creditSearch = ref('')
-const creditFrom = ref(null)
-const creditTo = ref(null)
-const creditPlan = ref(null)
-const creditBusy = ref(false)
-let creditMeta = { counts: {}, names: {} }
-const creditRows = computed(() => {
-  const q = creditSearch.value.trim().toLowerCase()
-  const picked = a => a.uid === creditFrom.value || a.uid === creditTo.value
-  return creditAccounts.value.filter(a => picked(a) || !q || a.search.includes(q)).slice(0, 15)
-})
-const creditName = uid => creditAccounts.value.find(a => a.uid === uid)?.name || uid
-const creditToNotEditor = computed(() => {
-  const a = creditAccounts.value.find(x => x.uid === creditTo.value)
-  return !!a && !['academic', 'admin', 'instructor'].includes(a.role)
-})
-function pickCredit(side, uid) {
-  if (side === 'from') creditFrom.value = creditFrom.value === uid ? null : uid
-  else creditTo.value = creditTo.value === uid ? null : uid
-  creditPlan.value = null
-}
-async function loadCreditAccounts() {
-  creditBusy.value = true
-  try {
-    const [uSnap, mSnap] = await Promise.all([getDocs(collection(db, 'users')), getDoc(doc(db, 'reviewMeta', 'main'))])
-    usage.track(uSnap.size + 1)
-    creditMeta = mSnap.exists() ? mSnap.data() : { counts: {}, names: {} }
-    creditAccounts.value = reviewerAccounts(uSnap.docs.map(d => ({ uid: d.id, ...d.data() })), creditMeta)
-  } catch (e) { console.error('[credit accounts]', e); toast('โหลดรายชื่อไม่สำเร็จ', 'error') }
-  finally { creditBusy.value = false }
-}
-async function previewCreditMove() {
-  if (creditFrom.value === creditTo.value) { toast('ต้นทางกับปลายทางต้องเป็นคนละบัญชี', 'error'); return }
-  creditBusy.value = true
-  try {
-    const from = creditFrom.value
-    const [a, b] = await Promise.all([
-      getDocs(query(collection(db, 'questions'), where('reviewedBy', 'array-contains', from))),
-      getDocs(query(collection(db, 'questions'), where('lastFixBy', '==', from))),
-    ])
-    usage.track(a.size + b.size || 1)
-    const byId = new Map()
-    for (const d of [...a.docs, ...b.docs]) byId.set(d.id, { id: d.id, ...d.data() })
-    creditPlan.value = {
-      ...planReviewCreditMove([...byId.values()], from, creditTo.value),
-      boardCount: (creditMeta.counts || {})[from] || 0,
-    }
-  } catch (e) { console.error('[credit preview]', e); toast('นับไม่สำเร็จ', 'error') }
-  finally { creditBusy.value = false }
-}
-async function runCreditMove() {
-  const from = creditFrom.value, to = creditTo.value, plan = creditPlan.value
-  if (!(await confirm(`ย้ายเครดิตตรวจ ${plan.moved} ข้อ จาก "${creditName(from)}" → "${creditName(to)}"?`))) return
-  creditBusy.value = true
-  try {
-    // อ่านผลตรวจรายข้อของต้นทางก่อน แล้วค่อยเขียนเป็นชุด (batch ละ ≤ 3 op ต่อข้อ → 150 ข้อ/batch)
-    const withDocs = []
-    for (const u of plan.updates) {
-      const inBy = 'reviewedBy' in u.patch
-      const snap = inBy ? await getDoc(doc(db, 'questions', u.id, 'reviews', from)) : null
-      withDocs.push({ ...u, review: snap?.exists() ? snap.data() : null })
-    }
-    for (let i = 0; i < withDocs.length; i += 150) {
-      const batch = writeBatch(db)
-      for (const u of withDocs.slice(i, i + 150)) {
-        batch.update(doc(db, 'questions', u.id), u.patch)
-        if (!u.review) continue
-        // ข้อที่ตรวจไว้ทั้งสองบัญชี: คงผลของปลายทาง ลบของต้นทางทิ้ง (ไม่งั้นโผล่เป็น "ผลตรวจรอบก่อน")
-        if (u.moveReviewDoc) batch.set(doc(db, 'questions', u.id, 'reviews', to), { ...u.review, reviewerUid: to, movedFrom: from })
-        batch.delete(doc(db, 'questions', u.id, 'reviews', from))
-      }
-      await batch.commit()
-    }
-    const names = creditMeta.names || {}
-    await setDoc(doc(db, 'reviewMeta', 'main'), {
-      counts: { [to]: increment(plan.moved), [from]: deleteField() },
-      names: { [to]: names[to] || names[from] || creditName(to), [from]: deleteField() },
-    }, { merge: true })
-    usage.track(withDocs.length, withDocs.length * 2 + 1)
-    toast(`ย้ายเครดิตแล้ว ${plan.moved} ข้อ`, 'success')
-    creditPlan.value = null
-    await loadCreditAccounts()
-  } catch (e) { console.error('[credit move]', e); toast('ย้ายไม่สำเร็จ — กดนับใหม่แล้วลองอีกครั้ง', 'error') }
-  finally { creditBusy.value = false }
 }
 
 // สถิติการสู้ราย species (อ่านทั้ง collection — admin คนเดียว cost ไม่สำคัญ)
@@ -991,37 +693,6 @@ async function sendBroadcast() {
   } finally { bcSending.value = false }
 }
 
-// ── เคลีย emoji ท้ายชื่อเล่นที่ค้างในฐานข้อมูล (one-time, อ่านค่าดิบจาก Firestore) ──
-// เขียนทับเฉพาะ doc ที่ stripTrailingEmoji แล้วต่างจากเดิม + ไม่ทำให้ชื่อกลายเป็นว่าง (ข้าม emoji ล้วน)
-const cleaning = ref(false)
-async function cleanupNicknames() {
-  if (cleaning.value) return
-  if (!await confirm('เคลีย emoji ท้ายชื่อเล่นที่ค้างในฐานข้อมูล? (เขียนทับเฉพาะ doc ที่มี emoji จริง)')) return
-  cleaning.value = true
-  try {
-    const snap = await getDocs(collection(db, 'users'))
-    const dirty = []
-    snap.forEach(d => {
-      const raw = d.data().nickname
-      if (typeof raw !== 'string') return
-      const clean = stripTrailingEmoji(raw)
-      if (clean && clean !== raw) dirty.push({ ref: d.ref, clean })
-    })
-    if (!dirty.length) { toast('ไม่มีชื่อที่ต้องเคลีย', 'info'); return }
-    for (let i = 0; i < dirty.length; i += 450) {
-      const chunk = dirty.slice(i, i + 450)
-      const batch = writeBatch(db)
-      for (const { ref: r, clean } of chunk) batch.update(r, { nickname: clean })
-      await batch.commit()
-    }
-    usage.track(snap.size, dirty.length)
-    await members.loadFbUsers({ force: true })
-    toast(`เคลีย emoji จากชื่อ ${dirty.length} คนแล้ว`, 'success')
-  } catch (e) {
-    console.error('[cleanup nicknames]', e); toast('เคลียไม่สำเร็จ', 'error')
-  } finally { cleaning.value = false }
-}
-
 // ── usage gauge (ประมาณการในแอป) ──
 const READ_LIMIT = DAILY_READ_LIMIT
 const WRITE_LIMIT = DAILY_WRITE_LIMIT
@@ -1137,45 +808,6 @@ async function toggleMaintenance() {
     toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
   } finally {
     savingMaint.value = false
-  }
-}
-
-// ── เปิด/ปิด สนามประลอง (config/app.pvpOpen) ──
-const savingPvp = ref(false)
-async function togglePvp() {
-  const next = !pvpOpen.value
-  savingPvp.value = true
-  try {
-    await setDoc(doc(db, 'config', 'app'), { pvpOpen: next }, { merge: true })
-    toast(next ? 'เปิดสนามประลองแล้ว' : 'ปิดสนามประลองแล้ว', 'success')
-  } catch (e) {
-    console.error('[admin pvpOpen]', e)
-    toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
-  } finally {
-    savingPvp.value = false
-  }
-}
-
-// ── เปิด/ซ่อน ฟีเจอร์รอง (config/app.*) ──
-// ปุ่มมินิเกม (arcadeOpen) ถูกเอาออก 27 ส.ค. — ถ้าจะคืนปุ่ม ต้องเติมทั้ง FOCUS_REF และ FOCUS_LABEL
-// และ destructure arcadeOpen จาก useAppConfig() กลับมาด้วย ไม่งั้น current เป็น undefined เงียบๆ
-const savingFocus = ref(false)
-const FOCUS_REF   = { expeditionOpen }
-const FOCUS_LABEL = { expeditionOpen: 'ส่งผจญภัย' }
-async function toggleFocus(key) {
-  const ref_ = FOCUS_REF[key]
-  if (!ref_) { console.error('[admin focus] ไม่รู้จัก key', key); return }
-  const next = !ref_.value
-  savingFocus.value = true
-  try {
-    // merge → ไม่ทับ maintenance/pvpOpen ที่อยู่ใน doc เดียวกัน
-    await setDoc(doc(db, 'config', 'app'), { [key]: next }, { merge: true })
-    toast(`${next ? 'เปิด' : 'ซ่อน'}${FOCUS_LABEL[key]}แล้ว`, 'success')
-  } catch (e) {
-    console.error('[admin focus]', key, e)
-    toast('เปลี่ยนสถานะไม่สำเร็จ', 'error')
-  } finally {
-    savingFocus.value = false
   }
 }
 
@@ -1542,12 +1174,6 @@ async function saveEcon(m) {
 .btn-mini:disabled { opacity: .4; cursor: default; }
 .btn-gold { background: var(--gold); color: #fff; }
 .btn-gray { background: #fff; color: var(--ink); }
-.fxlab-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
-.fxlab-row .btn-mini.on { background: var(--ink); color: #fff; }
-.fxlab-warn { font-size: .72rem; line-height: 1.5; color: #92400e; background: rgba(245,158,11,.12);
-  border: 1px solid rgba(245,158,11,.35); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; }
-.fxlab-check { display: flex; gap: 6px; align-items: flex-start; margin-top: 6px; cursor: pointer; }
-.fxlab-check input { margin-top: 2px; flex: none; }
 .log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .log-row { padding: 8px 10px; border-radius: 10px; background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.18); }
 .log-main { font-size: .8rem; }
