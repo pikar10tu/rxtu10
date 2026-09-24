@@ -54,8 +54,9 @@
       <PvpHistory v-if="tab === 'fight'" start-open class="me-panel" @open="openProfile" />
       <NewsBoard v-else-if="tab === 'news'" start-open class="me-panel" />
       <template v-else>
-        <p class="me-ach-hint">แตะความสำเร็จเพื่อใช้เป็นฉายา หรือปักขึ้นตู้โชว์ (ได้ 3 อัน) ให้เพื่อนเห็นในหน้าโปรไฟล์</p>
-        <AchievementGrid :uid="auth.currentUser?.uid" owner class="me-panel" />
+        <ShowcaseEditor ref="showcaseEl" :items="achItems" />
+        <p class="me-ach-hint">แตะความสำเร็จเพื่อใช้เป็นฉายา หรือใส่ตู้โชว์</p>
+        <AchievementGrid :items="achItems" owner class="me-panel" @pin="(id) => showcaseEl?.pick(id)" @unpin="unpin" />
       </template>
       <ProfileModal :member="profileOf" @close="profileOf = null" />
 
@@ -139,6 +140,8 @@ import { getTier } from '../data/residence.js'
 import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
+import ShowcaseEditor from '../components/shared/ShowcaseEditor.vue'
+import { fetchAchievementItems } from '../composables/useAchievementItems.js'
 import { makeStreak } from '../utils/gags.js'
 import { grantSecret } from '../composables/useAchievements.js'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
@@ -168,6 +171,19 @@ const TABS = [
   { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
 ]
 const tab = ref('fight')
+// แท็บความสำเร็จ: โหลดครั้งเดียวต่อเข้าหน้า แล้วส่งให้ทั้งตู้โชว์และกริด (query เดียว)
+const achItems = ref([])
+const showcaseEl = ref(null)
+let achLoaded = false
+watch(tab, async (t) => {
+  if (t !== 'ach' || achLoaded || !auth.currentUser?.uid) return
+  achLoaded = true
+  try { achItems.value = await fetchAchievementItems(auth.currentUser.uid) } catch (e) { console.error('[me ach]', e); achLoaded = false }
+})
+async function unpin(docId) {
+  const next = (auth.userData?.pinnedAch || []).map(x => (x === docId ? null : x))
+  await auth.patchUser({ pinnedAch: next }, { pinnedAch: next })
+}
 // ชื่อฉายา: docId = achId หรือ achId__date → แปลงกลับเป็นชื่อที่อ่านได้โดยไม่ต้องโหลด subcollection
 const titleLabel = computed(() => {
   const id = auth.userData?.equipTitle || ''

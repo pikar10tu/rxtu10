@@ -23,7 +23,7 @@
           {{ equipped ? '✓ ใช้เป็นฉายาอยู่ · ถอด' : '🎖️ ใช้เป็นฉายา' }}
         </button>
         <button class="ad-act" :class="{ on: pinned }" @click="$emit('pin', item.docId)">
-          {{ pinned ? '✓ อยู่ในตู้โชว์ · เอาออก' : '🏆 ปักขึ้นตู้โชว์' }}
+          {{ pinned ? '✓ อยู่ในตู้โชว์ · เอาออก' : '🏆 ใส่ตู้โชว์' }}
         </button>
       </div>
     </div>

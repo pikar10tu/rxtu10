@@ -21,10 +21,10 @@ import { ref, watch, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import { fetchAchievementItems } from '../../composables/useAchievementItems.js'
-import { togglePin } from '../../utils/achievements.js'
 import { useRosterSync } from '../../composables/useRosterSync.js'
 
 // items: แม่โหลดมาแล้ว (ProfileModal) → ไม่ query ซ้ำ · owner: ของตัวเอง → กดแล้วสวมฉายา/ปักตู้โชว์ได้
+const emit = defineEmits(['pin', 'unpin'])
 const props = defineProps({
   uid: { type: String, default: null },
   items: { type: Array, default: null },
@@ -56,10 +56,12 @@ async function onEquip(docId) {
   if (!ok) { toast('บันทึกไม่สำเร็จ', 'error'); return }
   syncRosterRow()   // ฉายาขึ้นใต้ชื่อในหน้าสมาชิก (แถว roster ti)
 }
-async function onPin(docId) {
-  const next = togglePin(pins.value, docId)
-  const ok = await auth.patchUser({ pinnedAch: next }, { pinnedAch: next })
-  if (!ok) toast('บันทึกไม่สำเร็จ', 'error')
+// ตู้โชว์: ส่งต่อให้แม่ (ShowcaseEditor ในหน้าฉันเป็นคนตัดสินว่าลงช่องไหน — ไม่ดันอันเก่าออกเงียบๆ)
+// อยู่ในตู้แล้วกดอีกที = เอาออก
+function onPin(docId) {
+  if (pins.value.includes(docId)) emit('unpin', docId)
+  else emit('pin', docId)
+  selected.value = null
 }
 </script>
 
