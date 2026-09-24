@@ -76,6 +76,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 .news-banner { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 600; display: flex; align-items: center; border-radius: 12px; overflow: hidden; cursor: pointer; margin-bottom: 10px; height: 36px; }
 
 /* LAYOUT */
+/* แถบเลื่อนทั้งเว็บ: บาง สีฟ้าพาสเทล หัวท้ายมน ไม่มีราง (เดิมเป็นแถบเทาหนาของเบราว์เซอร์ ตัดขอบมนของการ์ด — user ทัก 25 ก.ย. 2026)
+   Firefox ใช้ scrollbar-width/color · Chrome/Safari/Edge ใช้ ::-webkit-scrollbar · มือถือส่วนใหญ่ซ่อนแถบเองอยู่แล้ว */
+* { scrollbar-width: thin; scrollbar-color: rgba(53,147,207,.35) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(53,147,207,.35); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(53,147,207,.55); }
+*::-webkit-scrollbar-corner { background: transparent; }
+
 #main-content { position: fixed; top: 0; left: 0; right: 0; bottom: var(--btm); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 12px 24px; }
 
 /* BOTTOM NAV */
