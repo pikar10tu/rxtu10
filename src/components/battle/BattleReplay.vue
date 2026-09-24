@@ -1039,7 +1039,10 @@ onUnmounted(() => {
 .dot.me { background: #34d399; }
 .me-label { margin-top: 2px; }
 
-.br-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.br-team { display: flex; justify-content: center; gap: 8px; }
+/* ทีมละ 3 ตัว (BATTLE_SLOTS) แต่คงขนาดการ์ดเท่าตอนเป็นกริด 4 ช่อง แล้วจัดกลาง — ไม่ขยายการ์ด
+   (การ์ดใหญ่ขึ้น = พื้นที่เพนต์มากขึ้น ขัดกับงาน perf ที่แก้กระตุก iOS มา) · ทีมที่ตัวน้อยกว่าก็อยู่กลางเอง */
+.br-team > * { flex: 0 0 calc((100% - 24px) / 4); min-width: 0; }
 /* ไม่ตั้ง will-change ถาวร — melee lunge วิ่งผ่าน fx.lunge (WAAPI el.animate ตรง ไม่ใช่ CSS transition)
    browser promote เฉพาะช่วง animation รัน แล้ว release เอง (fill:none คืน layer ทันทีที่จบ) — ไม่มี transition: transform บน .br-unit แล้ว
    เดิม promote ถาวรทั้ง 8 การ์ด = layer เปล่าค้างตลอด → WebKit thrash */
