@@ -6,6 +6,7 @@ import { useMembersStore } from './stores/members.js'
 import { initAppConfig } from './composables/useAppConfig.js'
 import App from './App.vue'
 import './style.css'
+import { installTapSound } from './utils/sfx.js'
 
 const app   = createApp(App)
 const pinia = createPinia()
@@ -30,5 +31,7 @@ const membersStore = useMembersStore()
 authStore.init()
 membersStore.initStudents()
 initAppConfig()   // launch gate: live-subscribe to config/app { maintenance }
+
+installTapSound()   // เสียงกดปุ่มทั้งเว็บ (ปิดได้ในหน้า "ฉัน")
 
 app.mount('#app')

@@ -63,7 +63,7 @@
           <button
             v-for="(c, i) in cur.choices" :key="i"
             class="ta-choice" :class="choiceClass(i)"
-            :disabled="locked" @click="pick(i)"
+            data-sfx="none" :disabled="locked" @click="pick(i)"
           >
             <span class="ta-letter">{{ LETTERS[i] }}</span><span class="ta-ctext">{{ c }}</span>
           </button>
@@ -133,6 +133,7 @@ import {
   TA_MODES, TA_BATCH, TA_REFILL_AT, TA_FLASH_MS, TA_TICK_MS, TA_EMPTY_STREAK_MAX,
   remainingMs, clockLabel, newBest,
 } from '../utils/timeAttack.js'
+import { sfx } from '../utils/sfx.js'
 
 const auth = useAuthStore()
 const members = useMembersStore()
@@ -241,6 +242,7 @@ function pick(i) {
   picked.value = i
   answered.value++
   const ok = i === cur.value.answer
+  sfx(ok ? 'correct' : 'wrong')
   if (ok) correct.value++
   else missed.value.push({ q: cur.value, picked: i })
   answers.value.push({ id: cur.value.id, domain: cur.value.domain || null, correct: ok })

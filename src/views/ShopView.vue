@@ -137,6 +137,7 @@ import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
 import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent.js'
 import GachaBanner from '../components/shop/GachaBanner.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
+import { sfx } from '../utils/sfx.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -202,13 +203,14 @@ function showReveal(summary, multi) {
   clearRevealTimers()
   climb.value = 0
   reveal.value = { summary, multi, best, phase: reduceMotion() ? 'show' : 'anticipate' }
-  if (reveal.value.phase !== 'anticipate') return
+  if (reveal.value.phase !== 'anticipate') { sfx('reveal_' + best); return }
+  sfx('roll')
   const steps = RANK[best]
   // แบ่งเวลาแบบเร่งขึ้น: ขั้นแรกอยู่นานสุด ขั้นท้ายวูบเดียวก่อนแตกเป็นผล
   const marks = []
   for (let i = 1; i <= steps; i++) marks.push(Math.round(ANTICIPATE_MS * (0.35 + 0.5 * (i / (steps + 1)))))
-  marks.forEach((ms, i) => revealTimers.push(setTimeout(() => { climb.value = i + 1 }, ms)))
-  revealTimers.push(setTimeout(() => { if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }, ANTICIPATE_MS))
+  marks.forEach((ms, i) => revealTimers.push(setTimeout(() => { climb.value = i + 1; sfx('climb') }, ms)))
+  revealTimers.push(setTimeout(() => { if (reveal.value) { reveal.value = { ...reveal.value, phase: 'show' }; sfx('reveal_' + best) } }, ANTICIPATE_MS))
 }
 function skipReveal() { clearRevealTimers(); if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }
 function closeReveal() { clearRevealTimers(); reveal.value = null }

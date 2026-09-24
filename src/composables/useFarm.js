@@ -8,6 +8,7 @@ import {
 } from '../data/crops.js'
 import { nextPlotInfo, MAX_PLOTS } from '../data/farmPlots.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
+import { sfx } from '../utils/sfx.js'
 
 /**
  * Farming logic bound to the logged-in user.
@@ -92,6 +93,7 @@ export function useFarm() {
     const today = new Date().toISOString().slice(0, 10)
     const dq = bumpDailyQuest(auth.userData?.dailyQuest, 'farm', today, 1)
     await commit(next, { coinDelta: -crop.seedCost, dailyQuest: dq })
+    sfx('plant')
     toast(`ปลูก ${crop.name} แล้ว`, 'success')
   }
 
@@ -105,6 +107,7 @@ export function useFarm() {
     const inv = { ...inventory.value }
     inv[p.seedId] = (inv[p.seedId] || 0) + 1
     await commit(next, { inventory: inv })
+    sfx('harvest')
     toast(`เก็บเกี่ยว ${st.crop.name}!`, 'success')
   }
 

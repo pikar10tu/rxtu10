@@ -75,7 +75,7 @@
         <button
           v-for="(c, i) in current.choices" :key="i"
           class="qv-choice" :class="choiceClass(i)"
-          :disabled="picked !== null" @click="pick(i)"
+          data-sfx="none" :disabled="picked !== null" @click="pick(i)"
         >
           <span class="qv-letter">{{ LETTERS[i] }}</span><span class="qv-ctext">{{ c }}</span>
         </button>
@@ -181,6 +181,7 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
 import { QUIZ_COIN_PER_CORRECT } from '../data/index.js'
 import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srsQuestions.js'
+import { sfx } from '../utils/sfx.js'
 
 const authStore = useAuthStore()
 const { syncRosterRow } = useRosterSync()
@@ -472,6 +473,7 @@ function pick(i) {
   picked.value = i
   answered.value++
   const isCorrect = i === current.value.answer
+  sfx(isCorrect ? 'correct' : 'wrong')
   if (isCorrect) {
     correct.value++
     streak.value++

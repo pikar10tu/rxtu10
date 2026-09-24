@@ -34,6 +34,11 @@
 
       <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
       <RouterLink to="/fun-facts" class="me-link"><Emoji char="🌐" /> สถิติรวมทั้งเว็บ</RouterLink>
+      <!-- เปิด/ปิดเสียง — จำในเครื่องนี้ (localStorage) ไม่แตะ Firestore -->
+      <button class="me-link me-sound" data-sfx="none" :aria-pressed="soundOn" @click="toggleSound">
+        <Emoji :char="soundOn ? '🔊' : '🔇'" /> เสียงในเว็บ
+        <span class="me-sound-state">{{ soundOn ? 'เปิดอยู่' : 'ปิดอยู่' }}</span>
+      </button>
 
       <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
       <details class="me-contact-fold">
@@ -96,8 +101,14 @@ import { useRosterSync } from '../composables/useRosterSync.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
 import AchievementGrid from '../components/shared/AchievementGrid.vue'
+import { sfx, sfxOn, setSfxOn } from '../utils/sfx.js'
 
 const auth = useAuthStore()
+const soundOn = ref(sfxOn())
+function toggleSound() {
+  setSfxOn(!soundOn.value); soundOn.value = sfxOn()
+  sfx('coin')   // เปิดแล้วได้ยินทันทีว่าเสียงมา (ปิดอยู่ sfx เงียบเอง)
+}
 const { toast } = useToast()
 const { syncRosterRow } = useRosterSync()
 
@@ -269,6 +280,8 @@ async function save() {
 .me-stat b { display: block; font-size: 1rem; font-weight: 800; }
 .me-stat small { font-size: .7rem; color: var(--muted, #9b8fb0); }
 .me-tags { display: flex; justify-content: center; margin-top: 12px; }
+.me-sound { width: 100%; font-family: inherit; cursor: pointer; text-align: left; }
+.me-sound-state { margin-left: auto; font-size: .75rem; color: #64748b; }
 .me-link { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-weight: 700; font-size: .85rem; color: var(--ink); text-decoration: none; margin-top: 12px; }
 .me-link:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .me-feedback { width: 100%; margin-top: 22px; border: 2px solid var(--ink); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
