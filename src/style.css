@@ -523,10 +523,11 @@ html, body {
     'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol';
   color: var(--text);
   background:
-    radial-gradient(circle at 12% 6%, #ffe2c2 0, transparent 38%),
-    radial-gradient(circle at 90% 0%, #ffd3de 0, transparent 34%),
+    /* พาสเทล (25 ก.ย. 2026) — เดิมเป็นครีมส้ม #fdf3e7 ของธีมสติกเกอร์ */
+    radial-gradient(circle at 12% 6%, #ffd9ea 0, transparent 38%),
+    radial-gradient(circle at 90% 0%, #cfeefd 0, transparent 36%),
     radial-gradient(circle at 50% 102%, #cdf3e6 0, transparent 46%),
-    #fdf3e7;
+    #f4f8fd;
   background-attachment: fixed;
 }
 
