@@ -1,34 +1,55 @@
 <template>
   <div class="lab">
-    <!-- ยอด copies -->
-    <div class="lab-bal">
-      <div v-for="r in RARITIES" :key="r" class="lab-bal-cell" :style="{ borderColor: rarityColor(r) }">
-        <span class="lab-bal-n" :style="{ color: rarityColor(r) }">{{ copyTotal(r) }}</span>
-        <span class="lab-bal-l">{{ RARITY[r]?.label }}</span>
+    <!-- เพื่อนบอกว่าห้องทดลองเดิมเข้าใจยาก (25 ก.ย. 2026) ⇒ อธิบาย "ตัวซ้ำ" ก่อน แล้วแต่ละปุ่มบอกชัดว่าใช้อะไร ได้อะไร -->
+    <div class="lab-intro">
+      <div class="lab-intro-h"><Emoji char="🧪" /> ห้องทดลอง · ใช้ตัวซ้ำ</div>
+      <p>อัญเชิญได้เพ็ทที่มีอยู่แล้ว = ได้ <b>"ตัวซ้ำ"</b> 1 ชิ้น เก็บไว้ใช้ที่นี่ได้ 2 ทาง
+        <b>หลอม</b> ตัวซ้ำหลายชิ้นเป็นเพ็ทระดับสูงขึ้น หรือ <b>ขาย</b> เป็นเหรียญ · กดแล้วเลือกได้ว่าจะใช้ตัวซ้ำของตัวไหน</p>
+      <div class="lab-bal">
+        <div v-for="r in RARITIES" :key="r" class="lab-bal-cell" :style="{ '--rc': rarityColor(r) }">
+          <span class="lab-bal-n">{{ copyTotal(r) }}</span>
+          <span class="lab-bal-l">ตัวซ้ำ {{ RARITY[r]?.label }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- fusion -->
+    <!-- หลอม -->
     <div class="lab-card">
-      <div class="lab-card-h"><Emoji char="🧪" /> หลอมไต่ระดับ</div>
-      <div v-for="src in FUSE_SRC" :key="src" class="lab-fuse">
-        <span class="lab-fuse-txt">{{ RARITY[src]?.label }} → {{ RARITY[nextRarity(src)]?.label }}</span>
-        <span class="lab-fuse-cost">{{ FUSION_COST[src] }} ตัวซ้ำ</span>
+      <div class="lab-card-h"><Emoji char="⚗️" /> หลอมไต่ระดับ</div>
+      <div class="lab-card-sub">ใช้ตัวซ้ำระดับเดียวกันตามจำนวน → สุ่มได้เพ็ทระดับถัดไป 1 ตัว (ได้ตัวที่มีแล้วก็กลายเป็นตัวซ้ำระดับสูงขึ้น)</div>
+      <div v-for="src in FUSE_SRC" :key="src" class="lab-row">
+        <div class="lab-row-main">
+          <div class="lab-row-t">
+            <span class="lab-chip" :style="{ background: rarityColor(src) }">{{ RARITY[src]?.label }}</span>
+            <span class="lab-x">{{ FUSION_COST[src] }} ตัว</span>
+            <span class="lab-arrow">→</span>
+            <span class="lab-chip" :style="{ background: rarityColor(nextRarity(src)) }">{{ RARITY[nextRarity(src)]?.label }}</span>
+            <span class="lab-x">1 ตัว</span>
+          </div>
+          <div class="lab-prog" :aria-label="`มี ${copyTotal(src)} จาก ${FUSION_COST[src]}`">
+            <i :style="{ width: Math.min(100, copyTotal(src) / FUSION_COST[src] * 100) + '%', background: rarityColor(src) }"></i>
+          </div>
+          <div class="lab-have">มี {{ copyTotal(src) }}/{{ FUSION_COST[src] }}{{ copyTotal(src) >= FUSION_COST[src] ? ` · หลอมได้ ${Math.floor(copyTotal(src) / FUSION_COST[src])} ครั้ง` : ` · ขาดอีก ${FUSION_COST[src] - copyTotal(src)}` }}</div>
+        </div>
         <button class="lab-btn" :class="{ ok: copyTotal(src) >= FUSION_COST[src] }"
-          :disabled="busy || copyTotal(src) < FUSION_COST[src]"
-          @click="openFusion(src)">หลอม</button>
+          :disabled="busy || copyTotal(src) < FUSION_COST[src]" @click="openFusion(src)">หลอม</button>
       </div>
     </div>
 
-    <!-- redeem -->
+    <!-- ขาย -->
     <div class="lab-card">
-      <div class="lab-card-h"><Emoji char="🪙" /> แลกเป็นเหรียญ</div>
-      <div v-for="r in RARITIES" :key="r" class="lab-fuse">
-        <span class="lab-fuse-txt">{{ RARITY[r]?.label }}</span>
-        <span class="lab-fuse-cost">{{ REDEEM_COIN[r].toLocaleString() }}/ตัวซ้ำ</span>
+      <div class="lab-card-h"><Emoji char="🪙" /> ขายตัวซ้ำเป็นเหรียญ</div>
+      <div class="lab-card-sub">ไม่อยากหลอม ขายได้เลย · เพ็ทตัวหลักไม่หาย ขายแค่ตัวซ้ำ</div>
+      <div v-for="r in RARITIES" :key="r" class="lab-row">
+        <div class="lab-row-main">
+          <div class="lab-row-t">
+            <span class="lab-chip" :style="{ background: rarityColor(r) }">{{ RARITY[r]?.label }}</span>
+            <span class="lab-x">ชิ้นละ {{ REDEEM_COIN[r].toLocaleString() }} 🪙</span>
+          </div>
+          <div class="lab-have">มี {{ copyTotal(r) }} ชิ้น{{ copyTotal(r) ? ` · ขายหมดได้ ${(copyTotal(r) * REDEEM_COIN[r]).toLocaleString()} 🪙` : '' }}</div>
+        </div>
         <button class="lab-btn" :class="{ ok: copyTotal(r) > 0 }"
-          :disabled="busy || copyTotal(r) === 0"
-          @click="openRedeem(r)">แลก</button>
+          :disabled="busy || copyTotal(r) === 0" @click="openRedeem(r)">ขาย</button>
       </div>
     </div>
 
@@ -174,4 +195,29 @@ async function onConfirm(allocation) {
 @keyframes cb-fly { 0% { opacity: 0; transform: translateY(12px) scale(.4); } 22% { opacity: 1; } 100% { opacity: 0; transform: translateY(-74px) scale(1.1); } }
 @keyframes cb-amt { 0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.7); } 28% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-22px); } }
 
+
+/* ── rework 25 ก.ย. 2026 ── */
+.lab { display: flex; flex-direction: column; gap: 12px; }
+.lab-intro { background: linear-gradient(150deg, var(--primary-light), #fff); border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 12px 14px; }
+.lab-intro-h { font-weight: 800; font-size: .95rem; }
+.lab-intro p { margin: 4px 0 10px; font-size: .76rem; line-height: 1.55; color: var(--muted); }
+.lab-bal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; }
+.lab-bal-cell { display: flex; flex-direction: column; align-items: center; padding: 6px 2px; background: #fff; border: 1.5px solid var(--rc); border-radius: 12px; }
+.lab-bal-n { font-size: 1.15rem; font-weight: 800; color: var(--rc); font-variant-numeric: tabular-nums; }
+.lab-bal-l { font-size: .7rem; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
+.lab-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 12px 14px; margin: 0; }
+.lab-card-h { font-weight: 800; font-size: .92rem; }
+.lab-card-sub { font-size: .72rem; color: var(--muted); line-height: 1.5; margin: 2px 0 6px; }
+.lab-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dashed var(--line); }
+.lab-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.lab-row-t { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; font-size: .78rem; font-weight: 700; }
+.lab-chip { color: #fff; font-size: .7rem; font-weight: 800; border-radius: 6px; padding: 1px 7px; }
+.lab-x { color: var(--ink); }
+.lab-arrow { color: var(--muted); }
+.lab-prog { height: 7px; border-radius: 999px; background: rgba(43,53,80,.08); overflow: hidden; }
+.lab-prog i { display: block; height: 100%; border-radius: inherit; transition: width .3s; }
+.lab-have { font-size: .7rem; color: var(--muted); }
+.lab-btn { flex: none; min-width: 64px; font: inherit; font-size: .82rem; font-weight: 800; border: var(--bw) solid var(--line); background: #f1f5f9; color: var(--muted); border-radius: 12px; padding: 9px 12px; cursor: pointer; }
+.lab-btn.ok { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border-color: transparent; }
+.lab-btn:disabled { cursor: default; }
 </style>

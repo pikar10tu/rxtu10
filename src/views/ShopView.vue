@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="shop-head">
-      <div class="page-title" style="margin-bottom:0"><Emoji char="🛒" /> Shop</div>
+      <div class="page-title" style="margin-bottom:0"><Emoji char="🛍️" /> ร้านค้า</div>
       <span class="shop-coins">{{ coins.toLocaleString() }} <Emoji char="🪙" /></span>
       <HelpButton topic="summon" />
     </div>
@@ -16,14 +16,23 @@
     </template>
 
     <template v-else-if="authStore.isLoggedIn">
-      <div class="shop-tabs">
-        <button class="shop-tab" :class="{ on: tab === 'gacha' }" @click="tab = 'gacha'"><Emoji char="🎰" /> อัญเชิญ</button>
-        <button class="shop-tab" :class="{ on: tab === 'lab' }" @click="tab = 'lab'"><Emoji char="🧪" /> ห้องทดลอง</button>
-        <button class="shop-tab" :class="{ on: tab === 'style' }" @click="tab = 'style'"><Emoji char="🎀" /> แต่งตัว</button>
+      <!-- หน้าร้านค้ารวม 3 ร้าน (25 ก.ย. 2026) — ร้านเพ็ท = อัญเชิญ + ห้องทดลองในหน้าเดียว -->
+      <div class="stores" role="tablist">
+        <button v-for="s in STORES" :key="s.k" class="store" :class="['st-' + s.k, { on: tab === s.k }]" role="tab" :aria-selected="tab === s.k" @click="tab = s.k">
+          <span class="store-emoji"><Emoji :char="s.icon" /></span>
+          <span class="store-name">{{ s.name }}</span>
+          <span class="store-sub">{{ s.sub }}</span>
+        </button>
       </div>
 
-      <LabTab v-if="tab === 'lab'" />
-      <CosmeticShop v-else-if="tab === 'style'" />
+      <template v-if="tab === 'style'">
+        <div class="style-note">
+          <b><Emoji char="🎀" /> ร้านแต่งตัว</b> แตะชิ้นไหนก็ลองใส่บนการ์ดด้านล่างได้เลย ยังไม่เสียเงิน · ซื้อครั้งเดียวเก็บถาวร ใส่ได้หมวดละ 1 ชิ้น
+          <span class="style-where">โชว์ที่ไหน: <b>สีชื่อ · กรอบรูป · ป้ายหน้าชื่อ</b> ขึ้นในหน้าสมาชิก การ์ดโปรไฟล์ และหน้าฉัน · <b>พื้นการ์ด</b> ขึ้นในการ์ดโปรไฟล์และหน้าฉัน · ในหน้าสมาชิกเป็นภาพนิ่ง</span>
+        </div>
+        <CosmeticShop />
+      </template>
+      <FarmStore v-else-if="tab === 'farm'" />
       <template v-else>
       <div class="shop-storage">
         <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ ownable.length }} ชนิด
@@ -46,6 +55,8 @@
         @pull="(n) => pull(n)" @open-target="pickerOpen = true"
       />
       <div class="shop-note">สุ่ม 10 ได้ 11 ตัว · ได้ตัวเดิมซ้ำ → +1 ตัวซ้ำ (ใช้วิวัฒน์หรือหลอม)</div>
+      <div class="lab-sec"><Emoji char="🧪" /> ห้องทดลอง</div>
+      <LabTab />
       </template>
     </template>
     <div v-else class="shop-login">เข้าสู่ระบบเพื่อช้อป</div>
@@ -140,6 +151,7 @@ import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent
 import GachaBanner from '../components/shop/GachaBanner.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import CosmeticShop from '../components/shop/CosmeticShop.vue'
+import FarmStore from '../components/shop/FarmStore.vue'
 import { useRoute } from 'vue-router'
 import { sfx } from '../utils/sfx.js'
 
@@ -151,7 +163,14 @@ const SHOP_OPEN = true
 const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 const { postNews, myName } = useNewsPost()
 // ?tab=style = ลิงก์ "แต่งตัว" จากหน้าฉัน
-const tab = ref(useRoute().query.tab === 'style' ? 'style' : 'gacha') // 'gacha' | 'lab' | 'style'
+const STORES = [
+  { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · ห้องทดลอง' },
+  { k: 'farm', icon: '🌱', name: 'ร้านฟาร์ม', sub: 'ปลดแปลงเพิ่ม' },
+  { k: 'style', icon: '🎀', name: 'ร้านแต่งตัว', sub: 'สีชื่อ · กรอบ · ป้าย' },
+]
+// ?tab=style|farm|pet (เดิม gacha/lab = ร้านเพ็ท) — ลิงก์จากหน้าฉัน/หน้าเกมชี้ร้านตรงได้
+const qTab = String(useRoute().query.tab || '')
+const tab = ref(STORES.some(s => s.k === qTab) ? qTab : 'pet')
 
 const coins   = computed(() => authStore.userData?.coins || 0)
 const pets    = computed(() => authStore.userData?.pets || [])
@@ -290,6 +309,19 @@ async function chooseTarget(id) {
 <style scoped>
 .shop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .shop-coins { font-size: 1rem; font-weight: 800; color: #b45309; }
+.stores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0 14px; }
+.store { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; border: var(--bw) solid var(--line); background: #fff; box-shadow: var(--pop); cursor: pointer; color: var(--ink); transition: transform .12s; }
+.store-emoji { font-size: 1.6rem; line-height: 1.1; }
+.store-name { font-size: .82rem; font-weight: 800; }
+.store-sub { font-size: .7rem; color: var(--muted); text-align: center; line-height: 1.2; }
+.store.on { transform: translateY(-2px); }
+.store.st-pet.on { background: linear-gradient(160deg, #e6dcfd, #fff); border-color: #b9a6ef; }
+.store.st-farm.on { background: linear-gradient(160deg, #d6f5e3, #fff); border-color: #7fd9b8; }
+.store.st-style.on { background: linear-gradient(160deg, #fde2ee, #fff); border-color: #f4a6c8; }
+.style-note { font-size: .76rem; line-height: 1.55; color: var(--muted); background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; }
+.style-note > b { color: var(--ink); }
+.style-where { display: block; margin-top: 4px; }
+.lab-sec { font-size: .95rem; font-weight: 800; margin: 22px 0 8px; display: flex; align-items: center; gap: 6px; }
 .shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
 .shop-note { font-size: .7rem; color: rgba(0,0,0,.4); text-align: center; margin-top: 14px; }
 .shop-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }

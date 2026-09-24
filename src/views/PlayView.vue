@@ -6,6 +6,13 @@
     <NewsBoard />
 
     <template v-if="authStore.isLoggedIn">
+      <!-- ── ร้านค้ารวม (ร้านเพ็ท · ร้านฟาร์ม · ร้านแต่งตัว) — ทางเข้าบนสุดของหน้าเกม ── -->
+      <RouterLink to="/shop" class="shop-entry">
+        <span class="se-emoji"><Emoji char="🛍️" /></span>
+        <span class="se-txt"><b>ร้านค้า</b><small>อัญเชิญเพ็ท · ปลดแปลงฟาร์ม · ร้านแต่งตัวใหม่ 🎀</small></span>
+        <span class="se-go">›</span>
+      </RouterLink>
+
       <!-- ── 2 ระบบใหญ่: โหมดเพ็ท / โหมดฟาร์ม ── -->
       <div class="hero-grid">
         <RouterLink to="/play/pets" class="hero-card pets">
@@ -80,6 +87,13 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 </script>
 
 <style scoped>
+.shop-entry { display: flex; align-items: center; gap: 12px; margin: 10px 0 12px; padding: 12px 14px; border-radius: 18px; text-decoration: none; color: var(--ink);
+  background: linear-gradient(120deg, #e6dcfd 0%, #fde2ee 50%, #d6f5e3 100%); border: var(--bw) solid var(--line); box-shadow: var(--pop); }
+.se-emoji { font-size: 1.9rem; }
+.se-txt { flex: 1; display: flex; flex-direction: column; }
+.se-txt b { font-size: 1rem; }
+.se-txt small { font-size: .72rem; color: var(--muted); }
+.se-go { font-size: 1.5rem; font-weight: 800; color: var(--muted); }
 .pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
 .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
