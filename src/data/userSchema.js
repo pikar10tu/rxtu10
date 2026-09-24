@@ -46,6 +46,7 @@ export const USER_DEFAULTS = {
   achievementCount: 0,     // denormalized count ของ achievements subcollection
   equipTitle: null,        // docId achievement ที่สวมเป็นฉายา (utils/achievements resolveTitle)
   pinnedAch: [],           // docId ที่ปักขึ้นตู้โชว์ ≤3 (resolveShowcase)
+  cosmetics: { owned: [], n: null, f: null, b: null, g: null },  // ร้านแต่งตัว (data/cosmetics.js · utils/cosmetics.js)
   // ── v2 fields ──
   role: 'student',                            // 'student' | 'academic' | 'instructor' | 'admin'
   tags: [],                                   // admin-assigned badges

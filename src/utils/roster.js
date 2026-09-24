@@ -14,6 +14,7 @@ import { stripTrailingEmoji } from './text.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
 import { PVP_RATING_START } from './pvpRating.js'
 import { applySeasonReset, currentSeasonId } from './pvpSeason.js'
+import { rosterCos } from './cosmetics.js'
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d)
 
@@ -59,6 +60,7 @@ export function buildRosterRow(u, prev) {
   // ⚠️ ห้ามเรียก applySeasonReset ซ้ำแยกกันต่อฟิลด์ ไม่งั้นวันข้ามเดือนจะได้
   //    เรตของเดือนใหม่คู่กับชนะ/แพ้ของเดือนเก่า
   const pvp = applySeasonReset(d.pvp, currentSeasonId())
+  const cs = rosterCos(d)
 
   return {
     s:  d.studentId ?? null,
@@ -76,6 +78,8 @@ export function buildRosterRow(u, prev) {
     r:  num(pvp.rating, PVP_RATING_START),
     m,
     tm,
+    // ร้านแต่งตัว: สีชื่อ/กรอบ/ป้ายที่ใส่อยู่ (id สั้น) — ใส่เฉพาะเมื่อมี · พื้นการ์ดไม่ขึ้นแถว (โชว์แค่ในโปรไฟล์ซึ่งอ่าน doc เต็ม)
+    ...(cs ? { cs } : {}),
     ...(ta4  ? { ta4 }  : {}),
     ...(ta15 ? { ta15 } : {}),
     // ชนะ/แพ้ซีซั่นนี้ — ใช้แยก "เคยลงสนามจริง" ออกจากคนที่ยังเป็นค่าเริ่มต้น 1000 (กระดานอันดับ)
@@ -149,6 +153,7 @@ export function toMember(uid, row) {
     pvp: { rating: row.r },
     minigames,
     activePetsTeam: rosterTeam(row),
+    cosmetics: row.cs || null,
   }
 }
 

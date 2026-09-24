@@ -47,10 +47,12 @@
         @click="m.registered && (selected = m)"
       >
         <div class="mv-av-wrap" :style="{ '--ring': trackColor(m.track) }">
-          <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
+          <CosFrame :id="m.cosmetics?.f" still>
+            <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
+          </CosFrame>
           <span v-if="m.registered" class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
         </div>
-        <div class="mv-nick">{{ m.nickname }}</div>
+        <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
         <div v-if="m.uid === myUid" class="mv-you">คุณ</div>
         <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
         <div v-if="m.studentId" class="mv-sid">{{ m.studentId }}</div>
@@ -63,6 +65,8 @@
 </template>
 
 <script setup>
+import CosFrame from '../components/cosmetics/CosFrame.vue'
+import CosName from '../components/cosmetics/CosName.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'

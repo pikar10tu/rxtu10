@@ -6,11 +6,15 @@
 
     <template v-else>
       <!-- การ์ดโปรไฟล์: พื้นย้อมสีกรอบบ้าน (frameColor ของเลเวล) · ชื่อบ้าน · ทีมเฝ้าบ้าน · ตัวเลขหลัก -->
-      <section class="me-card" :style="{ '--tier': tier.frameColor }">
+      <section class="me-card" :class="{ 'me-darkbg': myBg?.dark }" :style="{ '--tier': tier.frameColor }">
+      <CosBg :id="myCos.g" />
       <div class="me-avatar-row">
-        <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
+        <CosFrame :id="myCos.f">
+          <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
+        </CosFrame>
         <div class="me-av-actions">
-          <div class="me-nick">{{ auth.userData?.nickname || 'ฉัน' }}</div>
+          <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
+          <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 แต่งตัว</RouterLink>
           <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
           <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
             {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ ยังไม่ได้เลือกฉายา — แตะเพื่อเลือก' }}
@@ -133,6 +137,11 @@ import { getTier } from '../data/residence.js'
 import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
+import CosFrame from '../components/cosmetics/CosFrame.vue'
+import CosName from '../components/cosmetics/CosName.vue'
+import CosBg from '../components/cosmetics/CosBg.vue'
+import { cosOf } from '../utils/cosmetics.js'
+import { getCosmetic } from '../data/cosmetics.js'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from '../utils/achievements.js'
 import { sfx, sfxOn, setSfxOn } from '../utils/sfx.js'
@@ -142,6 +151,8 @@ const members = useMembersStore()
 
 // ── การ์ดโปรไฟล์ ──
 const tier = computed(() => getTier(auth.userData?.residence?.level || 1))
+const myCos = computed(() => cosOf(auth.userData))
+const myBg = computed(() => getCosmetic(myCos.value.g))
 const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
   .map(p => getPetDef(p.id)?.emoji).filter(Boolean))
 
@@ -315,6 +326,9 @@ async function save() {
 <style scoped>
 .me-pagetitle { margin-bottom: 16px; }
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
+.me-card > :not(.cz-bgl) { position: relative; z-index: 1; }
+.me-card.me-darkbg .me-nick, .me-card.me-darkbg .me-home, .me-card.me-darkbg .me-guard { color: #fff; }
+.me-shoplink { display: inline-block; font-size: .72rem; font-weight: 700; color: var(--primary-dark); text-decoration: none; margin: 2px 0 4px; }
 .me-card { position: relative; padding: 16px 14px 14px; border-radius: 22px; box-shadow: var(--pop);
   border: var(--bw) solid var(--line); overflow: hidden;
   background: linear-gradient(150deg, color-mix(in srgb, var(--tier) 26%, #fff) 0%, #ffffff 58%, var(--primary-light) 100%); }

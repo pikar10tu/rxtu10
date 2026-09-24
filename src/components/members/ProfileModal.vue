@@ -4,12 +4,15 @@
   <div v-if="member" class="pf-ov" @click.self="$emit('close')">
     <div class="pf-box">
       <!-- Tier 1: hero (residence art = the flex background) -->
-      <div class="pf-hero" :style="heroStyle">
+      <div class="pf-hero" :class="{ 'pf-lightbg': cosBg && !cosBg.dark }" :style="heroStyle">
+        <CosBg :id="cos.g" />
         <button class="pf-x" @click="$emit('close')">✕</button>
         <div class="pf-hero-art"><Emoji :char="tier.art" /></div>
-        <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
+        <CosFrame :id="cos.f" class="pf-av-frame">
+          <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
+        </CosFrame>
         <div v-if="view.realName" class="pf-real">{{ view.realName }}</div>
-        <div class="pf-name">{{ view.nickname }}</div>
+        <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
         <div v-if="title" class="pf-title"><Emoji :char="title.icon" /> {{ title.label }}</div>
         <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pf-chips">
@@ -85,6 +88,11 @@ import { simulateBattle } from '../../utils/battleEngine.js'
 import TagChips from '../shared/TagChips.vue'
 import AchievementGrid from '../shared/AchievementGrid.vue'
 import { fetchAchievementItems } from '../../composables/useAchievementItems.js'
+import CosFrame from '../cosmetics/CosFrame.vue'
+import CosName from '../cosmetics/CosName.vue'
+import CosBg from '../cosmetics/CosBg.vue'
+import { cosOf } from '../../utils/cosmetics.js'
+import { getCosmetic } from '../../data/cosmetics.js'
 import { resolveShowcase, resolveTitle } from '../../utils/achievements.js'
 import PetStatPopup from '../pets/PetStatPopup.vue'
 import PetThumb from '../shared/PetThumb.vue'
@@ -127,6 +135,10 @@ const title = computed(() => resolveTitle(achItems.value, view.value?.equipTitle
 const view = computed(() => ({ ...(props.member || {}), ...(full.value || {}) }))
 
 const petPopup = ref(null)
+
+// ร้านแต่งตัว — doc เต็มมีครบทุกหมวด (รวมพื้นการ์ด) · ระหว่างรอใช้ของจากแถว roster (n/f/b)
+const cos = computed(() => full.value ? cosOf(full.value) : (props.member?.cosmetics || {}))
+const cosBg = computed(() => getCosmetic(cos.value.g))
 
 const lvl  = computed(() => view.value?.residence?.level || 1)
 const tier = computed(() => getTier(lvl.value))
@@ -191,6 +203,11 @@ function startDuel() {
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pf-box { scrollbar-gutter: stable; background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }
+.pf-hero > :not(.cz-bgl):not(.pf-x) { position: relative; z-index: 1; }
+.pf-hero .pf-x { z-index: 2; }
+/* พื้นการ์ดสีอ่อนจากร้าน → ตัวอักษรเข้ม (พื้นเดิมของ hero เข้ม ตัวอักษรขาว) */
+.pf-hero.pf-lightbg { color: var(--ink); }
+.pf-av-frame { display: inline-block; }
 .pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }

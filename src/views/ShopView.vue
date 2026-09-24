@@ -19,9 +19,11 @@
       <div class="shop-tabs">
         <button class="shop-tab" :class="{ on: tab === 'gacha' }" @click="tab = 'gacha'"><Emoji char="🎰" /> อัญเชิญ</button>
         <button class="shop-tab" :class="{ on: tab === 'lab' }" @click="tab = 'lab'"><Emoji char="🧪" /> ห้องทดลอง</button>
+        <button class="shop-tab" :class="{ on: tab === 'style' }" @click="tab = 'style'"><Emoji char="🎀" /> แต่งตัว</button>
       </div>
 
       <LabTab v-if="tab === 'lab'" />
+      <CosmeticShop v-else-if="tab === 'style'" />
       <template v-else>
       <div class="shop-storage">
         <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ ownable.length }} ชนิด
@@ -137,6 +139,8 @@ import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
 import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent.js'
 import GachaBanner from '../components/shop/GachaBanner.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
+import CosmeticShop from '../components/shop/CosmeticShop.vue'
+import { useRoute } from 'vue-router'
 import { sfx } from '../utils/sfx.js'
 
 const authStore = useAuthStore()
@@ -146,7 +150,8 @@ const { toast } = useToast()
 const SHOP_OPEN = true
 const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 const { postNews, myName } = useNewsPost()
-const tab = ref('gacha') // 'gacha' | 'lab'
+// ?tab=style = ลิงก์ "แต่งตัว" จากหน้าฉัน
+const tab = ref(useRoute().query.tab === 'style' ? 'style' : 'gacha') // 'gacha' | 'lab' | 'style'
 
 const coins   = computed(() => authStore.userData?.coins || 0)
 const pets    = computed(() => authStore.userData?.pets || [])
