@@ -30,9 +30,10 @@
 
       <ReportCaseCard
         v-else-if="reportCase"
+        :key="reportCase.group.questionId + ':' + reportCase.v"
         :group="reportCase.group"
         :question="reportCase.question"
-        :gone="reportCase.gone"
+        :goneReason="reportCase.goneReason"
         :busy="reportBusy"
         @pass="onReportPass"
         @fix="onReportFix"
@@ -59,7 +60,7 @@
             </li>
           </ul>
           <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
-          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ปุ่ม "📝 แก้คำอธิบายเฉลย"</div>
+          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ "＋ เพิ่ม…" แล้วกด "📝 แก้คำอธิบายเฉลย"</div>
         </template>
 
         <div v-else class="rv-editbox">
@@ -311,7 +312,7 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
-import { cleanText, LIMITS } from '../utils/text.js'
+import { LIMITS } from '../utils/text.js'
 import { domainLabel } from '../data/domains.js'
 import { computeStatus, nextReviewQueue, needsReviewBy, buildLeaderboard, VERDICT_LABEL, pickRandom, REVIEW_RESET, reviewFixResult, verdictContentChanged, sideContentChanged } from '../utils/questionReview.js'
 import { triageBuckets, triageSummary, BUCKET_KEYS, BUCKET_META } from '../utils/questionTriage.js'
@@ -327,7 +328,7 @@ import ReportCaseCard from '../components/review/ReportCaseCard.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { groupReports } from '../utils/questionReport.js'
-import { canHandleReport, nextReportGroup } from '../utils/reportCase.js'
+import { canHandleReport, nextReportGroup, fixedAfterReport, questionChangedSince } from '../utils/reportCase.js'
 import { REPORT_REWARD } from '../data/index.js'
 import { useReviewWrites } from '../composables/useReviewWrites.js'
 
@@ -422,8 +423,9 @@ async function saveEdit() {
   const fixerName = reviewerName()
   const payload = editPayload.value
   const isFix = editRequeues.value
+  const reportedGroup = isFix ? reportedGroupOf(q.id) : null   // หาก่อน confirm (ดู reportedGroupOf)
   if (!(await confirm(isFix
-    ? 'บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'
+    ? fixConfirmText(reportedGroup)
     : 'บันทึกคำอธิบาย / หมายเหตุ?\nผลตรวจเดิมยังอยู่ ตรวจต่อได้เลย'))) return
   savingEdit.value = true
   try {
@@ -445,6 +447,7 @@ async function saveEdit() {
       closeEdit()
       toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
       pickNext()
+      await closeReportsAfterFix(reportedGroup, '[review edit report resolve]')
     } else {
       await updateDoc(doc(db, 'questions', q.id), {
         explanation: payload.explanation,
@@ -464,13 +467,36 @@ async function saveEdit() {
   finally { savingEdit.value = false }
 }
 
+// ── แก้ข้อที่มีรีพอร์ทค้าง (จากการ์ดปกติ / ฟอร์มแก้ / กองไม่ผ่านตรวจ) = รีพอร์ทนั้นจริง ปิดพร้อมให้รางวัลผู้แจ้ง ──
+//  หากลุ่มไว้ "ก่อน confirm" แล้วใช้ตัวเดียวกันทั้งข้อความยืนยันและตอนปิดจริง — กัน reportGroups เปลี่ยน
+//  ระหว่างรอ await (มีคนปิดรีพอร์ทข้อนี้ไปพร้อมกัน) แล้วข้อความกับของจริงไม่ตรงกัน
+//  resolveReports เป็น transaction ข้ามฉบับที่ปิดไปแล้วเอง ⇒ ไม่จ่ายซ้ำ
+const FIX_CONFIRM = 'บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'
+function reportedGroupOf(questionId) {
+  return reportGroups.value.find(g => g.questionId === questionId) || null
+}
+function fixConfirmText(group) {
+  return group
+    ? `${FIX_CONFIRM}\nและปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${group.reports.length} คน`
+    : FIX_CONFIRM
+}
+async function closeReportsAfterFix(group, logTag) {
+  if (!group) return
+  try {
+    const { closed } = await resolveReports(group, 'valid')
+    openReports.value = openReports.value.filter(r => r.questionId !== group.questionId)
+    if (closed) toast(`ปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${closed} คนแล้ว`, 'success')
+  } catch (e) { console.error(logTag, e); toast('แก้ข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ', 'error') }
+}
+
 // ── ปุ่มตัดสินจาก JudgeActions (การ์ดปกติ, mode="review") ──
 // onJudgeFix: กด "มีจุดผิด" → "✏️ แก้ข้อนี้" แล้วบันทึก — แก้ชั้นตัดสินแล้วนับว่าผ่านตรวจในตาเดียว
 // เหมือนสาขา isFix ของ saveEdit() ทุกประการ ต่างแค่ผสมกลุ่มโรคจากแถวกลุ่มโรคบนการ์ด (ple.value) เข้าไปด้วย
 // เพราะ QuestionEditor compact ซ่อน TopicSelect ของตัวเอง — payload จาก JudgeActions จึงไม่มีหมวดใหม่ติดมา
 async function onJudgeFix({ payload, reason: fixReasonText }) {
   if (savingEdit.value || !current.value || !myUid.value) return
-  if (!(await confirm('บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'))) return
+  const reportedGroup = reportedGroupOf(current.value.id)   // หาก่อน confirm (ดู reportedGroupOf)
+  if (!(await confirm(fixConfirmText(reportedGroup)))) return
   const q = current.value
   const uid = myUid.value
   const fixerName = reviewerName()
@@ -492,6 +518,7 @@ async function onJudgeFix({ payload, reason: fixReasonText }) {
     })
     toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
     pickNext()
+    await closeReportsAfterFix(reportedGroup, '[review judge fix report resolve]')
   } catch (e) { console.error('[review judge fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { savingEdit.value = false }
 }
@@ -669,11 +696,8 @@ async function saveFix(q) {
   const payload = draftPayload(fixDraft.value)
   // หากลุ่มรีพอร์ทของข้อนี้ไว้ก่อน confirm — ใช้ตัวเดียวกันทั้งข้อความยืนยันและตอนปิดรีพอร์ทจริงด้านล่าง
   // กันกรณี reportGroups เปลี่ยนระหว่างรอ await (เช่นมีคนปิดรีพอร์ทข้อนี้ไปพร้อมกัน) แล้วข้อความกับของจริงไม่ตรงกัน
-  const reportedGroup = reportGroups.value.find(g => g.questionId === q.id)
-  const confirmMsg = reportedGroup
-    ? `บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ\nและปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${reportedGroup.reports.length} คน`
-    : 'บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'
-  if (!(await confirm(confirmMsg))) return
+  const reportedGroup = reportedGroupOf(q.id)
+  if (!(await confirm(fixConfirmText(reportedGroup)))) return
   fixSaving.value = true
   try {
     const { oldStatus, bumped } = await writeFix(q, payload, triageFixReason.value)
@@ -692,13 +716,7 @@ async function saveFix(q) {
     toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
     // แก้เนื้อหาแล้ว = รีพอร์ทที่ค้างของข้อนี้ (ถ้ามี) ถือว่าจริง ปิดพร้อมให้รางวัลผู้แจ้งไปเลย
     // ใช้ reportedGroup ตัวเดียวกับที่หาไว้ก่อน confirm ด้านบน (ไม่ find ซ้ำ — ข้อความยืนยันกับของจริงต้องอ้างกลุ่มเดียวกัน)
-    if (reportedGroup) {
-      try {
-        const { closed } = await resolveReports(reportedGroup, 'valid')
-        openReports.value = openReports.value.filter(r => r.questionId !== reportedGroup.questionId)
-        if (closed) toast(`ปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${closed} คนแล้ว`, 'success')
-      } catch (e) { console.error('[triage fix report resolve]', e); toast('แก้ข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ', 'error') }
-    }
+    await closeReportsAfterFix(reportedGroup, '[triage fix report resolve]')
   } catch (e) { console.error('[triage fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { fixSaving.value = false }
 }
@@ -777,7 +795,7 @@ const leaderboard = computed(() => buildLeaderboard(meta.value.counts || {}, met
 onMounted(() => {
   if (!authStore.isQuestionEditor) return
   load()
-  loadOpenReports()
+  if (authStore.isAcademic) loadOpenReports()   // rules อ่าน questionReports ได้เฉพาะทีมวิชาการ — instructor ยิงไปก็โดนปฏิเสธ
 })
 
 // ── 🚩 ข้อที่ถูกรีพอร์ท (questionReports) — ขึ้นก่อนคิวตรวจปกติเสมอ (ดู ReportCaseCard.vue) ──
@@ -802,28 +820,50 @@ async function loadOpenReports() {
 
 // การ์ดรีพอร์ทที่กำลังเปิดอยู่ — เปิดข้อถัดไปอัตโนมัติทุกครั้งที่ reportGroups/reportSkipped เปลี่ยน (ดู openNextReport)
 const reportSkipped = ref(new Set())
-const reportCase = ref(null)        // { group, question, gone }
+const reportCase = ref(null)        // { group, question, goneReason, v }
 const reportOpening = ref(false)
 const reportBusy = ref(false)
+let reportCaseV = 0                 // เลขรอบที่เปิดการ์ด — ใส่ใน :key ให้การ์ด mount ใหม่ตอนโหลดข้อสดซ้ำ (ฟอร์มแก้ต้องไม่ค้างเนื้อหาเก่า)
 // เฉพาะทีมวิชาการ (isAcademic) เห็นคิวรีพอร์ท — instructor เป็น question editor แต่ไม่ผ่าน canHandleReport/รางวัล
 const pendingReportCount = computed(() => authStore.isAcademic
   ? reportGroups.value.filter(g => !reportSkipped.value.has(g.questionId)).length : 0)
+
+// กลุ่ม + ข้อสด → เคสการ์ด (null = ข้อของตัวเอง ปล่อยให้คนอื่น)
+//  goneReason 'deleted' | 'retired' | 'fixed' = โหมด "จัดการแล้ว" เหลือปุ่มปิดรีพอร์ท + ให้รางวัลปุ่มเดียว
+//  ใครในทีมวิชาการก็กดได้ รวมคนที่แก้เอง (ข้าม canHandleReport) — เคสแก้สำเร็จแต่ปิดรีพอร์ทล้มแล้วรีโหลดหน้า (final review I2)
+function reportCaseFor(g, q) {
+  const goneReason = !q ? 'deleted' : q.retired ? 'retired' : fixedAfterReport(q, g) ? 'fixed' : null
+  if (!goneReason && !canHandleReport(q, myUid.value)) return null
+  return { group: g, question: q, goneReason, v: ++reportCaseV }
+}
+function skipReportGroup(questionId) {
+  reportSkipped.value = new Set([...reportSkipped.value, questionId])
+}
+
 let openToken = 0
 async function openNextReport() {
-  const g = authStore.isAcademic ? nextReportGroup(reportGroups.value, reportSkipped.value) : null
+  if (!authStore.isAcademic) { reportCase.value = null; return }
+  // การ์ดที่เปิดอยู่ยังค้าง (ไม่ได้ข้าม + ยังมีรีพอร์ท open) → ตรึงไว้ อัปเดตแค่ group
+  // ห้ามสุ่มสลับข้อเพียงเพราะ watch ยิงซ้ำ (nextReportGroup สุ่ม — คนกำลังอ่านอยู่ข้อจะเด้งหนี)
+  const cur = reportCase.value
+  if (cur && !reportSkipped.value.has(cur.group.questionId)) {
+    const still = reportGroups.value.find(x => x.questionId === cur.group.questionId)
+    if (still) { reportCase.value = { ...cur, group: still }; return }
+  }
+  const g = nextReportGroup(reportGroups.value, reportSkipped.value)
   if (!g) { reportCase.value = null; return }
-  if (reportCase.value?.group.questionId === g.questionId) { reportCase.value = { ...reportCase.value, group: g }; return }
+  await openReportGroup(g)
+}
+async function openReportGroup(g) {
   const token = ++openToken
   reportOpening.value = true
   try {
     const snap = await getDoc(doc(db, 'questions', g.questionId))
     usage.track(1)
     if (token !== openToken) return
-    const q = snap.exists() ? { id: snap.id, ...snap.data() } : null
-    if (q && !q.retired && !canHandleReport(q, myUid.value)) {   // ข้อของตัวเอง → ปล่อยให้คนอื่น
-      reportSkipped.value = new Set([...reportSkipped.value, g.questionId]); return
-    }
-    reportCase.value = { group: g, question: q, gone: !q || !!q.retired }
+    const c = reportCaseFor(g, snap.exists() ? { id: snap.id, ...snap.data() } : null)
+    if (!c) { reportCase.value = null; skipReportGroup(g.questionId); return }   // ข้อของตัวเอง → ปล่อยให้คนอื่น
+    reportCase.value = c
   } catch (e) { console.error('[report open]', e); toast('โหลดข้อที่ถูกแจ้งไม่สำเร็จ', 'error'); reportCase.value = null }
   finally { if (token === openToken) reportOpening.value = false }
 }
@@ -838,6 +878,33 @@ function finishReport(g, closed, skipped, verdict = 'valid') {
   toast(`จัดการแล้ว ขอบคุณ!${rewardSuffix}`, 'success')
 }
 
+// 🔒 อ่านรีพอร์ท + ข้อสดอีกรอบ หลัง confirm และก่อนเขียนอะไรทั้งนั้น (final review I1)
+//  หลายคนอาจเปิดการ์ดข้อเดียวกันอยู่ — ถ้าคนแรกจัดการไปแล้ว คนที่สองห้ามเขียนทับ/รับเครดิตซ้ำ
+//  คืน true = เขียนต่อได้ · false = จัดการให้แล้ว (toast + ไปข้อถัดไป หรือโหลดข้อสดใหม่) ผู้เรียกต้องหยุดทันที
+async function reportCaseStillValid(g, loaded) {
+  const [qSnap, ...rSnaps] = await Promise.all([
+    getDoc(doc(db, 'questions', g.questionId)),
+    ...g.reports.map(r => getDoc(doc(db, 'questionReports', r.id))),
+  ])
+  usage.track(1 + rSnaps.length)
+  const openIds = new Set(g.reports.filter((r, i) => rSnaps[i].exists() && rSnaps[i].data().status === 'open').map(r => r.id))
+  if (!openIds.size) {
+    openReports.value = openReports.value.filter(r => r.questionId !== g.questionId)   // watch เปิดข้อถัดไปเอง
+    toast('มีคนจัดการข้อนี้ไปแล้ว — ไปข้อถัดไปให้แล้ว', 'info')
+    return false
+  }
+  const fresh = qSnap.exists() ? { id: qSnap.id, ...qSnap.data() } : null
+  if (!questionChangedSince(loaded, fresh)) return true
+  // รีพอร์ทยังเปิดอยู่แต่ข้อเพิ่งถูกแก้/นำออก/ลบ → ทิ้งฉบับที่ปิดไปแล้ว แล้วเปิดการ์ดใหม่ด้วยข้อสด
+  openReports.value = openReports.value.filter(r => r.questionId !== g.questionId || openIds.has(r.id))
+  const g2 = reportGroups.value.find(x => x.questionId === g.questionId) || g
+  const c = reportCaseFor(g2, fresh)
+  if (c) reportCase.value = c
+  else { reportCase.value = null; skipReportGroup(g.questionId) }
+  toast('ข้อนี้เพิ่งถูกแก้ — โหลดใหม่ให้แล้ว', 'info')
+  return false
+}
+
 // ── ปุ่มตัดสินจาก ReportCaseCard (JudgeActions mode="report") ──
 async function onReportPass({ note: passNote }) {
   if (reportBusy.value || !reportCase.value) return
@@ -846,7 +913,8 @@ async function onReportPass({ note: passNote }) {
   if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\nผู้แจ้ง ${n} คนจะได้จดหมายแจ้งผล ไม่มีรางวัล`))) return
   reportBusy.value = true
   try {
-    const { already, oldStatus, newStatus } = await writeVote(q, {
+    if (!(await reportCaseStillValid(g, q))) return
+    const { already, oldStatus, newStatus, newPass, newFail } = await writeVote(q, {
       verdict: 'correct', reason: passNote, ref: '', ple: null, note: undefined,
     })
     if (already) {
@@ -857,20 +925,24 @@ async function onReportPass({ note: passNote }) {
         names: { ...(meta.value.names || {}), [myUid.value]: reviewerName() },
         progress: bumpedProgress(oldStatus, newStatus),
       }
+      // เสียง "ไม่ผิด" = ผลตรวจปกติ 1 เสียง → แถวในคิว/กองรอดำเนินการต้องขยับตาม (ไม่งั้นยังโผล่ในคิวตรวจปกติ)
+      patchTriageRow(q.id, {
+        reviewedBy: [...(q.reviewedBy || []), myUid.value],
+        reviewPass: newPass, reviewFail: newFail, reviewStatus: newStatus,
+      })
     }
     try {
       const { closed, skipped } = await resolveReports(g, 'invalid', passNote)
       finishReport(g, closed, skipped, 'invalid')
     } catch (e) {
       console.error('[report resolve invalid]', e)
-      // กดไม่ผิดซ้ำได้ (writeVote คืน already) — ไม่ต้องตั้ง gone:true ต่างจากแก้/นำออกด้านล่าง
-      toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
+      // กดไม่ผิดซ้ำได้ (writeVote คืน already) — ไม่ต้องเข้าโหมดจัดการแล้วแบบแก้/นำออกด้านล่าง
+      toast('บันทึกผลตรวจแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท" อีกครั้ง', 'error')
     }
   } catch (e) {
     if (e.message === '__stale') {
       toast('ข้อนี้เพิ่งถูกแก้เนื้อหา — โหลดใหม่ให้แล้ว', 'error')
-      reportCase.value = null
-      openNextReport()
+      openReportGroup(g)   // เปิดข้อเดิมใหม่ด้วยข้อสด (ไม่สุ่มไปข้ออื่น)
     } else { console.error('[report pass]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   } finally { reportBusy.value = false }
 }
@@ -884,6 +956,7 @@ async function onReportFix({ payload, reason: fixReasonText }) {
   const uid = myUid.value
   const fixerName = reviewerName()
   try {
+    if (!(await reportCaseStillValid(g, q))) return
     const { oldStatus, bumped } = await writeFix(q, payload, fixReasonText)
     if (bumped) {
       meta.value = {
@@ -892,17 +965,19 @@ async function onReportFix({ payload, reason: fixReasonText }) {
         progress: bumpedProgress(oldStatus, 'passed'),
       }
     }
-    patchTriageRow(q.id, {
+    const fixedPatch = {
       ...payload, ...reviewFixResult(uid), retired: false,
       lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
-    })
+    }
+    patchTriageRow(q.id, fixedPatch)
     try {
       const { closed, skipped } = await resolveReports(g, 'valid')
       finishReport(g, closed, skipped, 'valid')
     } catch (e) {
       console.error('[report resolve valid]', e)
       toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
-      reportCase.value = { ...reportCase.value, gone: true }   // ข้อจัดการแล้ว เหลือปุ่มเดียว
+      // ข้อแก้แล้ว เหลือปุ่มเดียว — โชว์เนื้อหาหลังแก้ (โหมดเดียวกับที่ openReportGroup เปิดให้หลังรีโหลดหน้า)
+      reportCase.value = { ...reportCase.value, question: { ...q, ...fixedPatch }, goneReason: 'fixed' }
     }
   } catch (e) { console.error('[report fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { reportBusy.value = false }
@@ -915,6 +990,7 @@ async function onReportRetire({ reason: retireReasonText }) {
   if (!(await confirm(`นำข้อนี้ออก?\nถอนเผยแพร่ และส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${n} คน`))) return
   reportBusy.value = true
   try {
+    if (!(await reportCaseStillValid(g, q))) return
     const { oldStatus, credited, bumped } = await writeRetireWithCredit(q, retireReasonText)
     patchTriageRow(q.id, { retired: true, isPublished: false })
     if (credited && bumped) {
@@ -930,7 +1006,7 @@ async function onReportRetire({ reason: retireReasonText }) {
     } catch (e) {
       console.error('[report resolve valid]', e)
       toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
-      reportCase.value = { ...reportCase.value, gone: true }   // ข้อจัดการแล้ว เหลือปุ่มเดียว
+      reportCase.value = { ...reportCase.value, goneReason: 'retired' }   // ข้อนำออกแล้ว เหลือปุ่มเดียว
     }
   } catch (e) { console.error('[report retire]', e); toast('นำออกไม่สำเร็จ', 'error') }
   finally { reportBusy.value = false }
@@ -943,6 +1019,7 @@ async function onReportCloseGone() {
   if (!(await confirm(`ปิดรีพอร์ท + ให้รางวัล ${REPORT_REWARD} เหรียญแก่ผู้แจ้ง ${n} คน?`))) return
   reportBusy.value = true
   try {
+    // ไม่ต้องอ่านซ้ำก่อน — resolveReports เป็น transaction ข้ามฉบับที่ปิดไปแล้วเอง (ไม่จ่ายซ้ำ)
     const { closed, skipped } = await resolveReports(g, 'valid')
     finishReport(g, closed, skipped, 'valid')
   } catch (e) { console.error('[report close gone]', e); toast('ปิดรีพอร์ทไม่สำเร็จ', 'error') }
@@ -951,7 +1028,7 @@ async function onReportCloseGone() {
 
 function onReportSkip() {
   if (!reportCase.value) return
-  reportSkipped.value = new Set([...reportSkipped.value, reportCase.value.group.questionId])
+  skipReportGroup(reportCase.value.group.questionId)
 }
 
 // โหลดคิว 2 ก้อนแยกกัน — ต้นทุน read คงที่ไม่โตตามขนาดคลัง

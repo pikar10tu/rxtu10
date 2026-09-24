@@ -4,29 +4,31 @@
 
      ⚠️ ไม่เขียน Firestore เอง ไม่ confirm เอง — parent (ReviewView) เป็นคนตัดสินใจ/เขียนทั้งหมด
         คอมโพเนนต์นี้แค่แสดงผล + ส่ง event ต่อจาก JudgeActions (mode="report") ขึ้นไป
-     ⚠️ parent ต้องใส่ :key="group.questionId" (หรือเทียบเท่า) ให้ mount ใหม่ทุกครั้งที่เปลี่ยนข้อที่ถูกรีพอร์ท
-        (commentsOpen ต้องรีเซตกลับเป็นปิดเมื่อเปลี่ยนข้อ — ทำผ่าน mount ใหม่ ไม่ต้อง watch เอง)
+     ⚠️ parent ใส่ :key="group.questionId + ':' + รอบที่เปิด" ให้ mount ใหม่ทุกครั้งที่เปลี่ยนข้อ หรือโหลดข้อสดซ้ำ
+        (commentsOpen + ฟอร์มแก้ใน JudgeActions ต้องรีเซต — ทำผ่าน mount ใหม่ ไม่ต้อง watch เอง)
 
-     gone = true เมื่อข้อถูกลบไปแล้ว หรือถูกนำออก (retired) ไปแล้ว — ไม่มีอะไรให้ตัดสินอีก
-     เหลือทางเดียวคือปิดรีพอร์ท + ให้รางวัลผู้แจ้ง ใช้ group.snapshot แสดงเนื้อหาแทน (question อาจเป็น null) -->
+     goneReason = โหมด "จัดการแล้ว" — ไม่มีอะไรให้ตัดสินอีก เหลือปุ่มเดียวคือปิดรีพอร์ท + ให้รางวัลผู้แจ้ง
+       'fixed'   ข้อถูกแก้หลังมีคนแจ้ง (เช่นแก้สำเร็จแต่ปิดรีพอร์ทล้ม) → โชว์ข้อ "ปัจจุบัน" (question)
+       'retired' ข้อถูกนำออกไปแล้ว → โชว์ group.snapshot
+       'deleted' ข้อถูกลบไปแล้ว (question = null) → โชว์ group.snapshot -->
 <template>
   <section class="rc-card">
     <div class="rc-head"><Emoji char="🚩" /> นักศึกษาแจ้ง {{ group.count }} คน</div>
 
     <template v-if="gone">
-      <div class="rc-gone"><Emoji char="⚠️" /> ข้อนี้ถูกนำออกหรือลบไปแล้ว</div>
+      <div class="rc-gone"><Emoji char="⚠️" /> {{ goneText }}</div>
 
-      <div class="rc-q">{{ group.snapshot?.question || '(ไม่พบโจทย์)' }}</div>
-      <ul v-if="(group.snapshot?.choices || []).length" class="rc-choices">
+      <div class="rc-q">{{ shown?.question || '(ไม่พบโจทย์)' }}</div>
+      <ul v-if="(shown?.choices || []).length" class="rc-choices">
         <li
-          v-for="(c, i) in group.snapshot.choices" :key="i"
-          :class="{ correct: c === group.snapshot.answerText }"
+          v-for="(c, i) in shown.choices" :key="i"
+          :class="{ correct: c === shown.answerText }"
         >
           <span class="rc-c-letter">{{ LETTERS[i] }}</span><span class="rc-c-text">{{ c }}</span>
-          <span v-if="c === group.snapshot.answerText" class="rc-c-mark">✓ เฉลย</span>
+          <span v-if="c === shown.answerText" class="rc-c-mark">✓ เฉลย</span>
         </li>
       </ul>
-      <div v-if="group.snapshot?.explanation" class="rc-exp"><Emoji char="💡" /> {{ group.snapshot.explanation }}</div>
+      <div v-if="shown?.explanation" class="rc-exp"><Emoji char="💡" /> {{ shown.explanation }}</div>
 
       <ul class="rc-reports">
         <li v-for="r in group.reports" :key="r.id"><b>{{ r.reason }}</b><span v-if="r.note"> — {{ r.note }}</span></li>
@@ -91,8 +93,8 @@ import { snapshotDiffers } from '../../utils/reportCase.js'
 
 const props = defineProps({
   group: { type: Object, required: true },     // { questionId, count, reports[], snapshot }
-  question: { type: Object, default: null },    // ข้อสด (null เมื่อ gone และถูกลบไปแล้ว)
-  gone: { type: Boolean, default: false },
+  question: { type: Object, default: null },    // ข้อสด (null เมื่อ goneReason = 'deleted')
+  goneReason: { type: String, default: null },  // null | 'fixed' | 'retired' | 'deleted' (ดูหัวไฟล์)
   busy: { type: Boolean, default: false },
 })
 defineEmits(['pass', 'fix', 'retire', 'closeGone', 'skip'])
@@ -100,7 +102,23 @@ defineEmits(['pass', 'fix', 'retire', 'closeGone', 'skip'])
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const commentsOpen = ref(false)
 
-const differs = computed(() => !props.gone && snapshotDiffers(props.group.snapshot, props.question))
+const GONE_TEXT = {
+  fixed: 'ข้อนี้ถูกแก้ไปแล้วหลังมีคนแจ้ง — ปิดรีพอร์ทและให้รางวัลผู้แจ้งได้เลย',
+  retired: 'ข้อนี้ถูกนำออกไปแล้ว',
+  deleted: 'ข้อนี้ถูกลบไปแล้ว',
+}
+const gone = computed(() => !!props.goneReason)
+const goneText = computed(() => GONE_TEXT[props.goneReason] || GONE_TEXT.deleted)
+// เนื้อหาที่โชว์ในโหมดจัดการแล้ว — 'fixed' โชว์ข้อปัจจุบัน (รูปเดียวกับ snapshot: answerText เป็นข้อความ) · อื่นๆ ใช้ snapshot ตอนแจ้ง
+const shown = computed(() => {
+  const q = props.question
+  if (props.goneReason === 'fixed' && q) {
+    return { question: q.question, choices: q.choices || [], answerText: q.choices?.[q.answer] ?? '', explanation: q.explanation || '' }
+  }
+  return props.group.snapshot || null
+})
+
+const differs = computed(() => !gone.value && snapshotDiffers(props.group.snapshot, props.question))
 </script>
 
 <style scoped>
