@@ -74,10 +74,14 @@ export function reviewFixResult(uid) {
 }
 
 // uid → จำนวนข้อที่ตรวจไปแล้ว (นับจาก reviewedBy ทั้งคลัง = ตัวนับ leaderboard)
+//  + นำออก (retiredBy) นับ 1 ข้อให้คนนำออก ถ้าเขาไม่ได้อยู่ใน reviewedBy ของข้อนั้นอยู่แล้ว
+//    (24 ก.ย. 2026 — นำออกได้เครดิต · ไม่งั้นปุ่มซิงก์ระบบตรวจจะลบเครดิตนี้ทิ้งทุกครั้ง)
 export function tallyReviewCounts(questions) {
   const counts = {}
   for (const q of questions || []) {
-    for (const uid of q.reviewedBy || []) counts[uid] = (counts[uid] || 0) + 1
+    const by = q.reviewedBy || []
+    for (const uid of by) counts[uid] = (counts[uid] || 0) + 1
+    if (q.retiredBy && !by.includes(q.retiredBy)) counts[q.retiredBy] = (counts[q.retiredBy] || 0) + 1
   }
   return counts
 }
@@ -89,7 +93,7 @@ export function nextReviewQueue(questions, myUid) {
 }
 
 // ป้าย verdict / สถานะตรวจ — ใช้ร่วมหน้า Review + Questions
-export const VERDICT_LABEL = { correct: 'ถูกต้อง', fix: 'ต้องแก้', wrong: 'ผิด', fixed: 'แก้แล้วผ่าน' }
+export const VERDICT_LABEL = { correct: 'ถูกต้อง', fix: 'ต้องแก้', wrong: 'ผิด', fixed: 'แก้แล้วผ่าน', retired: 'นำออก' }
 export const REVIEW_STATUS_LABEL = {
   pending: 'รอตรวจ', passed: 'ผ่านตรวจ', conflict: 'ขัดแย้ง', failed: 'ไม่ผ่าน', retired: 'นำออก',
 }

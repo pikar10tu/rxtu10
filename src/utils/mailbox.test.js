@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/mailbox.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rewardCoins, rewardTickets, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildBroadcastMail, buildWelcomeGiftMail, pendingAnnounce } from './mailbox.js'
+import { rewardCoins, rewardTickets, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildReportResultMail, buildBroadcastMail, buildWelcomeGiftMail, pendingAnnounce } from './mailbox.js'
 
 test('rewardCoins: คืนจำนวนเหรียญถ้า reward.coins เป็นบวก, ไม่งั้น 0', () => {
   assert.equal(rewardCoins({ reward: { coins: 50 } }), 50)
@@ -170,4 +170,16 @@ test('pendingAnnounce: มีประกาศหลายฉบับ → ด�
 test('pendingAnnounce: ข้ามจดหมายอื่นที่มาก่อนประกาศในลิสต์', () => {
   const mails = [{ id: 'w', from: 'welcome', read: false }, ann({ id: 'a9' })]
   assert.equal(pendingAnnounce(mails, null).id, 'a9')
+})
+
+test('buildReportResultMail: notice ไม่มีรางวัล + เหตุผลจากคนตรวจ', () => {
+  const r = { questionSnapshot: { question: 'ข้อทดสอบ' } }
+  const m = buildReportResultMail(r, 'ข้อนี้ถามที่ eGFR 30–45', 'TS')
+  assert.equal(m.type, 'notice')
+  assert.equal(m.reward, undefined)
+  assert.ok(m.body.includes('ข้อทดสอบ'))
+  assert.ok(m.body.includes('eGFR 30–45'))
+  assert.equal(m.createdAt, 'TS')
+  assert.equal(m.claimed, false)
+  assert.ok(!buildReportResultMail(r, '', 'TS').body.includes('เหตุผล'))
 })

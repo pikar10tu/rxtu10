@@ -262,3 +262,13 @@ test('pickRandom — ลิสต์ว่างคืน null', () => {
   assert.equal(pickRandom([], () => 0), null)
   assert.equal(pickRandom(undefined, () => 0), null)
 })
+
+test('tallyReviewCounts — นำออกได้เครดิต (retiredBy) แต่ไม่นับซ้ำคนที่อยู่ใน reviewedBy', () => {
+  const qs = [
+    { reviewedBy: ['a'], retiredBy: 'b' },
+    { reviewedBy: ['c'], retiredBy: 'c' },
+    { retiredBy: 'b' },
+  ]
+  assert.deepEqual(tallyReviewCounts(qs), { a: 1, b: 2, c: 1 })
+})
+test('VERDICT_LABEL มีป้ายนำออก', () => { assert.equal(VERDICT_LABEL.retired, 'นำออก') })

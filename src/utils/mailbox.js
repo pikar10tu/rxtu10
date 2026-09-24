@@ -71,6 +71,24 @@ export function buildReportRewardMail(report, coins, createdAt) {
   }
 }
 
+// จดหมายแจ้งผู้แจ้งว่า "ข้อนี้ไม่ผิด" — ไม่มีรางวัล (notice) · note = เหตุผลที่คนตรวจเขียน (ผ่าน cleanText มาแล้ว)
+// ⚠️ body แสดงด้วย {{ }} ใน MailboxCard (ไม่มี pre-wrap) — ต่อด้วย " · " ไม่ใช้ขึ้นบรรทัด
+export function buildReportResultMail(report, note, createdAt) {
+  const q = report?.questionSnapshot?.question
+  const head = q
+    ? `ทีมวิชาการตรวจข้อ "${truncate(q, 60)}" ที่คุณแจ้งแล้ว — ข้อนี้ถูกต้องอยู่แล้ว`
+    : 'ทีมวิชาการตรวจข้อที่คุณแจ้งแล้ว — ข้อนี้ถูกต้องอยู่แล้ว'
+  return {
+    type: 'notice',
+    title: 'ผลการแจ้งข้อสอบ',
+    body: note ? `${head} · เหตุผล: ${note}` : head,
+    from: 'system',
+    createdAt,
+    read: false,
+    claimed: false,
+  }
+}
+
 // สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ/achievement)
 //   coins > 0 หรือ tickets > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
 //   caller เติม createdAt = serverTimestamp()
