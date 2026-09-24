@@ -295,7 +295,7 @@
               </label>
               <label class="econ-field">
                 <span><Emoji char="🏠" /> เลเวลบ้าน (1–12)</span>
-                <input v-model.number="econLevel" type="number" inputmode="numeric" min="1" max="12" />
+                <input v-model.number="econLevel" type="number" inputmode="numeric" min="1" :max="MAX_RESIDENCE_LEVEL" />
               </label>
               <button class="btn-mini btn-gold" :disabled="savingUid === m.uid" @click="saveEcon(m)">บันทึก</button>
             </div>
@@ -448,6 +448,7 @@ import { currentSeasonId, seasonMonthLabel } from '../utils/pvpSeason.js'
 import { TAG_LIST } from '../data/tags.js'
 import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
+import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 import { computeStatus, reviewStatusKey, tallyReviewCounts } from '../utils/questionReview.js'
 import { getCategories } from '../utils/questionCategories.js'
@@ -1012,7 +1013,7 @@ function openEcon(m) {
 
 async function saveEcon(m) {
   const coins = Math.max(0, Math.min(Number(econCoins.value) || 0, 50000000))
-  const level = Math.max(1, Math.min(Math.round(Number(econLevel.value) || 1), 12))
+  const level = Math.max(1, Math.min(Math.round(Number(econLevel.value) || 1), MAX_RESIDENCE_LEVEL))
   if (!(await confirm(`ตั้งเหรียญ ${coins.toLocaleString()} + เลเวลบ้าน ${level} ให้ ${m.nickname}?`))) return
   savingUid.value = m.uid
   try {

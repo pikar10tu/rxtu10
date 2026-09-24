@@ -2,7 +2,8 @@
 //  ที่อยู่อาศัย (Residence) — house-upgrade ladder
 // ════════════════════════════════════════════════════════════
 //  Narrative arc: สู้ชีวิต → สร้างตัว → ประสบความสำเร็จ → (อนาคต) เหนือระดับ
-//  15 tiers defined; only 1–12 are RELEASED (MAX_RESIDENCE_LEVEL).
+//  15 tiers ปลดครบแล้ว (25 ก.ย. 2026 user สั่งขยายเพดาน 12 → 15 พร้อมชื่อใหม่ 13–15)
+//  ⚠️ แปลงฟาร์มยังตันที่ 12 (MAX_PLOTS) — ชั้น 13–15 จึงใส่ plots: 12 ให้ตรงของจริง
 //  `residence.level` drives daily income, farm plots, pet-income bonus %,
 //  (battle slots ไม่ผูกเลเวลแล้ว = BATTLE_SLOTS คงที่ 3 · field `battleSlots` ในตารางเป็น legacy)
 //  market unlock, seed tier, shop discount, art/frame. All numbers tunable.
@@ -24,14 +25,15 @@ export const RESIDENCE_TIERS = [
   { level: 10, tierName: 'คฤหาสน์หรูพร้อมสระว่ายน้ำ', art: '🏛️', upgradeCost: 190000, dailyIncome: 26000,  plots: 10,  battleSlots: 3, marketUnlocked: true,  maxSeedTier: 'epic',  eggSlots: 5, frameColor: '#a855f7' },
   { level: 11, tierName: 'เพนต์เฮาส์ลอยฟ้า',         art: '🌆', upgradeCost: 350000, dailyIncome: 38000,  plots: 11, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary',  eggSlots: 5, frameColor: '#ec4899' },
   { level: 12, tierName: 'คฤหาสน์บนเกาะส่วนตัว',     art: '🏝️', upgradeCost: 650000, dailyIncome: 55000,  plots: 12, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', eggSlots: 6, frameColor: '#f59e0b' },
-  // ── 🚀 อนาคต (เหนือระดับ–หลุดโลก) — ยังไม่เปิด (cap = 12) ──
-  { level: 13, tierName: 'ปราสาทโบราณในยุโรป',       art: '🏰', upgradeCost: 1100000, dailyIncome: 75000,  plots: 13, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#f43f5e' },
-  { level: 14, tierName: 'สถานีอวกาศส่วนตัว',        art: '🛰️', upgradeCost: 1900000, dailyIncome: 100000, plots: 14, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#a21caf' },
-  { level: 15, tierName: 'มิติส่วนตัวเหนือกาลเวลา',   art: '🌌', upgradeCost: 3200000, dailyIncome: 140000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#fbbf24' },
+  // ── 🚀 เหนือระดับ (ปลดแล้ว) ──
+  { level: 13, tierName: 'คฤหาสน์ลอยตัวกลางมหาสมุทร', art: '🌊', upgradeCost: 1100000, dailyIncome: 75000,  plots: 12, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#f43f5e' },
+  { level: 14, tierName: 'มหานครใต้บาดาล',           art: '🔱', upgradeCost: 1900000, dailyIncome: 100000, plots: 12, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#a21caf' },
+  { level: 15, tierName: 'สวนสวรรค์เหนือน่านฟ้า',     art: '☁️', upgradeCost: 3200000, dailyIncome: 140000, plots: 12, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#fbbf24' },
 ]
 
 export const MIN_RESIDENCE_LEVEL = 1
-export const MAX_RESIDENCE_LEVEL = 12 // released cap (array defines 15 for future tiers)
+// ⚠️ ต้องตรงกับ firestore.rules (residence.level <= 15) — แก้ที่นี่แล้วต้องแก้ rules + deploy ด้วย
+export const MAX_RESIDENCE_LEVEL = 15
 
 // ── Lookups (all clamp the level into range, accept missing/undefined) ──
 export function clampLevel(level) {

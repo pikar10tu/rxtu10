@@ -2,7 +2,8 @@
 // pure: คืน array ใหม่ ไม่ mutate ของเดิม
 function byKey(key) {
   if (key === 'nickname') return (a, b) => String(a.nickname || '').localeCompare(String(b.nickname || ''), 'th')
-  if (key === 'level')    return (a, b) => (b.residence?.level || 1) - (a.residence?.level || 1)
+  // เลเวลเท่ากัน → ตามรหัสนักศึกษา (ไม่งั้นลำดับในเลเวลเดียวกันสลับไปมาตามลำดับที่โหลดมา)
+  if (key === 'level')    return (a, b) => (b.residence?.level || 1) - (a.residence?.level || 1) || byKey('studentId')(a, b)
   // default studentId น้อย→มาก (numeric-aware)
   return (a, b) => String(a.studentId || '').localeCompare(String(b.studentId || ''), undefined, { numeric: true })
 }

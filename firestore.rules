@@ -63,7 +63,7 @@ service cloud.firestore {
           && request.resource.data.get('coins', 0) >= 0
           && request.resource.data.get('coins', 0) <= 50000000
           && request.resource.data.get('residence', {}).get('level', 1) >= 1
-          && request.resource.data.get('residence', {}).get('level', 1) <= 12
+          && request.resource.data.get('residence', {}).get('level', 1) <= 15   // = MAX_RESIDENCE_LEVEL (data/residence.js)
           && request.resource.data.get('residence', {}).get('level', 1)
              <= resource.data.get('residence', {}).get('level', 1) + 1
           // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร guest ปกติ) — approve/reject = admin เท่านั้น
