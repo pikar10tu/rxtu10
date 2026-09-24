@@ -1,19 +1,25 @@
 <template>
   <div v-if="next" class="ec-wrap">
     <div class="ec-card">
-      <span class="ec-emoji"><Emoji :char="next.emoji || '🎯'" /></span>
-      <div class="ec-body">
-        <div class="ec-label">{{ next.label }}</div>
-        <div class="ec-date">{{ fmtRange(next) }}</div>
+      <div class="ec-head">
+        <span class="ec-emoji"><Emoji :char="next.emoji || '🎯'" /></span>
+        <div class="ec-body">
+          <div class="ec-label">{{ next.label }}</div>
+          <div class="ec-date">{{ fmtRange(next) }}</div>
+        </div>
       </div>
-      <div class="ec-count">
-        <template v-if="leftMs > 0"><b>{{ days }}</b><small>วัน</small></template>
-        <b v-else class="ec-today">วันนี้!</b>
+      <!-- นาฬิกาพลิก วัน/ชม./นาที/วิ — นับถึง 00:00 น. เวลาไทยของวันสอบ (รอบเช้า/บ่ายแต่ละคนไม่เท่ากัน จึงนับถึงต้นวัน) -->
+      <div v-if="leftMs > 0" class="ec-flip" role="timer"
+           :aria-label="`เหลือ ${days} วัน ${units[1].v} ชั่วโมง ${units[2].v} นาที`">
+        <div v-for="u in units" :key="u.k" class="ec-group">
+          <div class="ec-digits">
+            <!-- :key ผูกกับค่าตัวเลข ⇒ เปลี่ยนเลขเมื่อไหร่ element ใหม่ mount = เล่นอนิเมชันพลิกเฉพาะหลักที่เปลี่ยน -->
+            <span v-for="(d, i) in u.v" :key="i + '-' + d" class="ec-tile">{{ d }}</span>
+          </div>
+          <span class="ec-cap">{{ u.k }}</span>
+        </div>
       </div>
-    </div>
-    <!-- นับถึงระดับวินาที ถึง 00:00 น. เวลาไทยของวันสอบ (รอบเช้า/บ่ายแต่ละคนไม่เท่ากัน จึงนับถึงต้นวัน) -->
-    <div v-if="leftMs > 0" class="ec-tick" aria-hidden="true">
-      <span v-for="u in units" :key="u.k" class="ec-unit"><b>{{ u.v }}</b><small>{{ u.k }}</small></span>
+      <div v-else class="ec-today">วันนี้แล้ว สู้ๆ!</div>
     </div>
   </div>
 </template>
@@ -43,7 +49,12 @@ const days = computed(() => Math.floor(leftMs.value / 86400000))
 const units = computed(() => {
   const s = Math.floor((leftMs.value % 86400000) / 1000)
   const p = (n) => String(n).padStart(2, '0')
-  return [{ k: 'ชม.', v: p(Math.floor(s / 3600)) }, { k: 'นาที', v: p(Math.floor(s / 60) % 60) }, { k: 'วิ', v: p(s % 60) }]
+  return [
+    { k: 'วัน', v: p(days.value) },   // เกิน 99 วัน = 3 หลักเอง
+    { k: 'ชม.', v: p(Math.floor(s / 3600)) },
+    { k: 'นาที', v: p(Math.floor(s / 60) % 60) },
+    { k: 'วิ', v: p(s % 60) },
+  ]
 })
 
 function fmtDate(iso) {
@@ -64,18 +75,32 @@ function fmtRange(e) {
 
 <style scoped>
 .ec-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-.ec-card { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, var(--primary), #6366f1); color: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; }
-.ec-emoji { font-size: 1.6rem; flex-shrink: 0; }
+.ec-card { background: linear-gradient(135deg, var(--primary), #6366f1); color: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px 14px; }
+.ec-head { display: flex; align-items: center; gap: 10px; }
+.ec-emoji { font-size: 1.5rem; flex-shrink: 0; }
 .ec-body { flex: 1; min-width: 0; }
 .ec-label { font-weight: 800; font-size: .9rem; }
 .ec-date { font-size: .7rem; opacity: .85; margin-top: 2px; }
-.ec-count { text-align: center; flex-shrink: 0; line-height: 1; min-width: 52px; }
-.ec-count b { font-size: 1.8rem; font-weight: 800; font-family: var(--font-display); font-variant-numeric: tabular-nums; }
-.ec-count small { display: block; font-size: .7rem; opacity: .85; margin-top: 3px; }
-.ec-today { font-size: 1.15rem; }
-/* แถบชม./นาที/วิ ใต้การ์ด — ตัวเลขเดินให้เห็นว่าเวลาไหลจริง */
-.ec-tick { display: flex; justify-content: center; gap: 8px; margin-top: -2px; }
-.ec-unit { display: flex; align-items: baseline; gap: 3px; background: #fff; border: 2px solid var(--ink); border-radius: 10px; padding: 3px 10px; box-shadow: var(--pop); }
-.ec-unit b { font-size: 1.1rem; font-weight: 800; font-family: var(--font-display); font-variant-numeric: tabular-nums; color: var(--primary); }
-.ec-unit small { font-size: .7rem; font-weight: 700; color: #475569; }
+.ec-today { margin-top: 10px; text-align: center; font-size: 1.15rem; font-weight: 800; }
+
+/* ── นาฬิกาพลิก (ป้ายแบบสนามบิน) ── */
+.ec-flip { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
+.ec-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.ec-digits { display: flex; gap: 3px; perspective: 300px; }
+.ec-tile {
+  position: relative; display: grid; place-items: center;
+  width: 30px; height: 44px; border-radius: 6px;
+  background: linear-gradient(#fff 0 49%, #eef0f4 51% 100%);
+  border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink);
+  color: #1e293b; font-family: var(--font-display); font-weight: 800; font-size: 1.7rem;
+  font-variant-numeric: tabular-nums; line-height: 1;
+  transform-origin: 50% 50%; animation: ec-flip .35s ease-out;
+}
+/* เส้นแบ่งกลางแผ่น + หมุดสองข้าง */
+.ec-tile::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: rgba(15, 23, 42, .35); }
+.ec-tile::after { content: ''; position: absolute; left: -4px; right: -4px; top: 50%; height: 6px; margin-top: -3px;
+  background: linear-gradient(90deg, var(--ink) 0 4px, transparent 4px calc(100% - 4px), var(--ink) calc(100% - 4px)); border-radius: 2px; }
+.ec-cap { font-size: .7rem; font-weight: 700; letter-spacing: .02em; opacity: .9; }
+@keyframes ec-flip { from { transform: rotateX(-90deg); } to { transform: rotateX(0); } }
+@media (max-width: 340px) { .ec-tile { width: 26px; height: 38px; font-size: 1.45rem; } .ec-flip { gap: 7px; } }
 </style>
