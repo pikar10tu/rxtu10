@@ -80,6 +80,9 @@ export function buildRosterRow(u, prev) {
     tm,
     // ร้านตกแต่ง: สีชื่อ/กรอบ/ป้าย/พื้นการ์ดที่ใส่อยู่ (id สั้น) — ใส่เฉพาะเมื่อมี
     ...(cs ? { cs } : {}),
+    // ฉายาที่สวม (docId achievement เช่น home_13 / tower_champ__2026-09) — หน้ารวมโชว์ใต้ชื่อ
+    // ⚠️ หน้ารวมไม่ได้เช็คกับ subcollection (ไม่มี read ต่อคน) = trust-based · การ์ดโปรไฟล์ยังเช็คจริงเสมอ
+    ...(d.equipTitle ? { ti: String(d.equipTitle).slice(0, 60) } : {}),
     ...(ta4  ? { ta4 }  : {}),
     ...(ta15 ? { ta15 } : {}),
     // ชนะ/แพ้ซีซั่นนี้ — ใช้แยก "เคยลงสนามจริง" ออกจากคนที่ยังเป็นค่าเริ่มต้น 1000 (กระดานอันดับ)
@@ -154,6 +157,7 @@ export function toMember(uid, row) {
     minigames,
     activePetsTeam: rosterTeam(row),
     cosmetics: row.cs || null,
+    equipTitle: row.ti || null,
   }
 }
 

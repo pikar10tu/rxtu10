@@ -22,6 +22,7 @@ import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import { fetchAchievementItems } from '../../composables/useAchievementItems.js'
 import { togglePin } from '../../utils/achievements.js'
+import { useRosterSync } from '../../composables/useRosterSync.js'
 
 // items: แม่โหลดมาแล้ว (ProfileModal) → ไม่ query ซ้ำ · owner: ของตัวเอง → กดแล้วสวมฉายา/ปักตู้โชว์ได้
 const props = defineProps({
@@ -31,6 +32,7 @@ const props = defineProps({
 })
 const auth = useAuthStore()
 const { toast } = useToast()
+const { syncRosterRow } = useRosterSync()
 const own = ref([])
 const loading = ref(false)
 const selected = ref(null)
@@ -51,7 +53,8 @@ const pins = computed(() => auth.userData?.pinnedAch || [])
 async function onEquip(docId) {
   const next = equip.value === docId ? null : docId
   const ok = await auth.patchUser({ equipTitle: next }, { equipTitle: next })
-  if (!ok) toast('บันทึกไม่สำเร็จ', 'error')
+  if (!ok) { toast('บันทึกไม่สำเร็จ', 'error'); return }
+  syncRosterRow()   // ฉายาขึ้นใต้ชื่อในหน้าสมาชิก (แถว roster ti)
 }
 async function onPin(docId) {
   const next = togglePin(pins.value, docId)

@@ -43,7 +43,7 @@
     <div v-else class="mv-grid">
       <button
         v-for="m in list" :key="m.uid"
-        class="mv-card" :class="{ off: !m.registered }"
+        class="mv-card" :class="{ off: !m.registered, me: m.uid === myUid }"
         @click="m.registered && (selected = m)"
       >
         <!-- พื้นการ์ดจากร้านตกแต่ง: จางๆ + ภาพนิ่ง (หน้ารวมคนเยอะ ของขยับพร้อมกันมือถือหนัก) -->
@@ -55,7 +55,9 @@
           <span v-if="m.registered" class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
         </div>
         <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
-        <div v-if="m.uid === myUid" class="mv-you">คุณ</div>
+        <!-- บรรทัดฉายา (เดิมเป็นป้าย "คุณ") — ไม่ได้สวม = ไม่มีบรรทัด · "คุณ" ย้ายไปมุมการ์ด + กรอบนอก -->
+        <div v-if="titleOf(m)" class="mv-title"><Emoji :char="titleOf(m).icon" /> {{ titleOf(m).label }}</div>
+        <span v-if="m.uid === myUid" class="mv-you">คุณ</span>
         <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
         <div v-if="m.studentId" class="mv-sid">{{ m.studentId }}</div>
         <div v-if="!m.registered" class="mv-off-tag">ยังไม่เข้าระบบ</div>
@@ -70,6 +72,8 @@
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
 import CosBg from '../components/cosmetics/CosBg.vue'
+import { getAchievement } from '../data/achievements.js'
+import { achievementTitle } from '../utils/achievements.js'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
@@ -137,6 +141,12 @@ const trackLabel = (t) => TRACK[t]?.[0] || 'สมาชิก'
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
 const avatarOf = (m) => avatarUrl(m, m.nickname)
+// ฉายาจากแถว roster (docId = achId หรือ achId__date) → { icon, label } · id ไม่รู้จัก = ไม่โชว์
+function titleOf(m) {
+  const [achId, date] = String(m.equipTitle || '').split('__')
+  const def = achId && getAchievement(achId)
+  return def ? { icon: def.icon, label: achievementTitle(def, date || null) } : null
+}
 </script>
 
 <style scoped>
@@ -207,7 +217,11 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
   font-size: .8rem; font-weight: 700; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
-.mv-you { font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 1px 7px; }
+/* การ์ดของเรา: กรอบนอก + ป้าย "คุณ" ที่มุมซ้ายบน */
+.mv-card.me { box-shadow: 0 0 0 2px var(--primary), var(--pop); }
+.mv-card .mv-you { position: absolute; top: 6px; left: 6px; z-index: 2; font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 1px 7px; }
+.mv-title { font-size: .7rem; font-weight: 800; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mv-track { font-size: .7rem; font-weight: 700; }
 .mv-sid { font-size: .7rem; color: rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
 .mv-off-tag { font-size: .7rem; color: rgba(0,0,0,.35); }
