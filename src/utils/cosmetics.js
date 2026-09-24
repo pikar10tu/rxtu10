@@ -32,12 +32,14 @@ export function afterWear(u, kind, id) {
   return { ...cur, [kind]: id || null }
 }
 
-/** ชิ้นที่ทั้งรุ่นเห็น (ขี่แถว roster) — เฉพาะที่ใส่อยู่ · ไม่มีเลย = null (ไม่ใส่คีย์ในแถว) */
+/** ชิ้นที่ทั้งรุ่นเห็น (ขี่แถว roster) — เฉพาะที่ใส่อยู่ · ไม่มีเลย = null (ไม่ใส่คีย์ในแถว)
+ *  g (พื้นการ์ด) ขึ้นแถวด้วยแล้ว — หน้าสมาชิกโชว์จางๆ (user ขอ 25 ก.ย. 2026) */
 export function rosterCos(u) {
-  const { n, f, b } = cosOf(u)
+  const { n, f, b, g } = cosOf(u)
   const out = {}
   if (n) out.n = n
   if (f) out.f = f
   if (b) out.b = b
+  if (g) out.g = g
   return Object.keys(out).length ? out : null
 }

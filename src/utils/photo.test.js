@@ -23,7 +23,7 @@ test('รูปเล็กอยู่แล้ว → ใช้คุณภา
 })
 
 test('รูปหนัก → ไล่ลดคุณภาพจนลอดเพดาน', async () => {
-  const enc = fakeEncode(6000)          // q .6 → 3600 เกิน · q .45 → 2700 ผ่าน
+  const enc = fakeEncode(9000)          // q .6 → 5400 เกิน · q .45 → 4050 ผ่าน (เพดาน 4500)
   const out = await makePhotoMini('data:image/jpeg;base64,AAA', enc)
   assert.ok(out.length <= MINI_MAX_CHARS)
   assert.equal(enc.calls.length, 2)

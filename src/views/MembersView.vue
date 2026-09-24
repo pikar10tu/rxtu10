@@ -46,6 +46,8 @@
         class="mv-card" :class="{ off: !m.registered }"
         @click="m.registered && (selected = m)"
       >
+        <!-- พื้นการ์ดจากร้านตกแต่ง: จางๆ + ภาพนิ่ง (หน้ารวมคนเยอะ ของขยับพร้อมกันมือถือหนัก) -->
+        <CosBg :id="m.cosmetics?.g" class="cz-still mv-bg" />
         <div class="mv-av-wrap" :style="{ '--ring': trackColor(m.track) }">
           <CosFrame :id="m.cosmetics?.f" still>
             <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
@@ -67,6 +69,7 @@
 <script setup>
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
+import CosBg from '../components/cosmetics/CosBg.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
@@ -171,6 +174,9 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
 .mv-sort-sel { border: var(--bw) solid var(--line); border-radius: 10px; padding: 5px 10px; font-family: inherit; font-size: .74rem; font-weight: 700; background: #fff; color: var(--ink); }
 .mv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 28px 0; font-size: .85rem; }
 .mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mv-card { position: relative; overflow: hidden; }
+.mv-card > :not(.cz-bgl) { position: relative; z-index: 1; }
+.mv-card .mv-bg { opacity: .4; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;

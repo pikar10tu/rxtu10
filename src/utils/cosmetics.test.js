@@ -37,7 +37,7 @@ test('ใส่/ถอด + กันค่าเพี้ยน: ใส่ข�
   assert.equal(afterWear(u, 'b', 'b-star').b, 'b-star')
   assert.equal(afterWear(u, 'b', 'b-crown').b, null)
   assert.equal(afterWear(u, 'n', null).n, null)
-  assert.deepEqual(rosterCos(u), { n: 'n-sky' })
+  assert.deepEqual(rosterCos(u), { n: 'n-sky', g: 'g-pink' })
   assert.equal(rosterCos({}), null)
   assert.equal(getCosmetic('g-pink').kind, 'g')
 })

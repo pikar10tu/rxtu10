@@ -7,6 +7,8 @@
       <span v-if="badge" class="cz-bd" :class="badge.fx ? 'cz-bd-' + badge.fx : null"><Emoji :char="badge.emoji" /></span>
     </span>
     <span class="cz-txt" :class="color ? 'cz-' + color.id : null">{{ name }}</span>
+    <!-- ช่องเปล่าฝั่งขวาเท่าช่องป้าย — การ์ดหน้าสมาชิกจัดชื่อกึ่งกลาง ช่องข้างเดียวดันชื่อเบ้ขวา (user เจอ) -->
+    <span v-if="reserve" class="cz-slot" aria-hidden="true"></span>
   </span>
 </template>
 

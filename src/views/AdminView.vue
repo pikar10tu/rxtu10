@@ -75,6 +75,10 @@
           หลังจากนั้นแต่ละคนอัปเดตแถวตัวเองอัตโนมัติ · กดซ้ำได้ ปลอดภัย (สร้างใหม่จากของจริง) ·
           ประวัติการบุกและข่าวกระดานของทุกคนถูกพ่วงต่อให้ ไม่หาย
         </div>
+        <button class="btn-mini" :disabled="rebuildingRoster" @click="regenMinis">
+          {{ rebuildingRoster ? 'กำลังทำ…' : '🖼️ สร้างรูปย่อใหม่ทั้งรุ่น + roster' }}
+        </button>
+        <div class="admin-hint">รูปที่อัปเองในหน้าสมาชิกคมขึ้น (ย่อใหม่เป็น {{ MINI_SIZE }}px) · เฉพาะคนที่ยังเป็นรุ่นเก่า · กดซ้ำได้</div>
         <button class="btn-mini" :disabled="rebuildingRoster" @click="rebuildRoster">
           {{ rebuildingRoster ? 'กำลังสร้าง…' : '🔄 สร้าง roster ใหม่' }}
         </button>
@@ -431,6 +435,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, where, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction, increment } from 'firebase/firestore'
 import { buildRosterFromUsers } from '../utils/roster.js'
+import { makePhotoMini, MINI_SIZE } from '../utils/photo.js'
 import { sumGlobalStatsFromUsers } from '../utils/globalStats.js'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -700,6 +705,30 @@ const WRITE_LIMIT = DAILY_WRITE_LIMIT
 // ── Roster: อ่าน users ทั้ง collection ครั้งเดียว (แอดมินคนเดียวกด = ถูก) → เขียน roster/current
 //    ให้ทุกจอของนักศึกษาอ่าน 1 read แทน · แพทเทิร์นเดียวกับ "คำนวณ meta ใหม่" ของคลังข้อสอบ
 const rebuildingRoster = ref(false)
+// รูปย่อรุ่นเก่า (48/72px) → สร้างใหม่ที่ MINI_SIZE ให้ทั้งรุ่นทีเดียว (ไม่ต้องรอเจ้าของเปิดหน้าฉัน) แล้วสร้าง roster
+async function regenMinis() {
+  if (rebuildingRoster.value) return
+  rebuildingRoster.value = true
+  let done = 0
+  try {
+    const snap = await getDocs(collection(db, 'users'))
+    usage.track(snap.size)
+    for (const d of snap.docs) {
+      const u = d.data()
+      if (!u.customPhoto || u.photoMiniSize === MINI_SIZE) continue
+      const mini = await makePhotoMini(u.customPhoto)
+      if (!mini) continue
+      await updateDoc(d.ref, { photoMini: mini, photoMiniSize: MINI_SIZE })
+      done++
+    }
+    usage.track(0, done)
+    toast(`ย่อรูปใหม่ ${done} คน · กำลังสร้าง roster…`, 'info')
+  } catch (e) {
+    console.error('[regen minis]', e); toast('ย่อรูปไม่สำเร็จ', 'error')
+  } finally { rebuildingRoster.value = false }
+  await rebuildRoster()
+}
+
 async function rebuildRoster() {
   if (rebuildingRoster.value) return
   rebuildingRoster.value = true

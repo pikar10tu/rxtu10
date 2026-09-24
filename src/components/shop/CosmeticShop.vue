@@ -102,7 +102,7 @@ async function doBuy() {
   if (!done) { toast('ซื้อไม่สำเร็จ', 'error'); return }
   sfx('coin')
   toast(`ได้ "${c.label}" แล้ว ใส่ให้เลย`, 'success')
-  if (c.kind !== 'g') syncRosterRow()   // พื้นการ์ดไม่ขึ้นแถว roster
+  syncRosterRow()
 }
 
 async function doWear(id) {
@@ -112,7 +112,7 @@ async function doWear(id) {
   const done = await auth.patchUser({ cosmetics: next }, { cosmetics: next })
   busy.value = false
   if (!done) { toast('บันทึกไม่สำเร็จ', 'error'); return }
-  if (k !== 'g') syncRosterRow()
+  syncRosterRow()
 }
 </script>
 
