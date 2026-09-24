@@ -41,13 +41,7 @@
             </li>
           </ul>
           <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
-          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ปุ่ม "แก้ข้อนี้"</div>
-          <div class="rv-card-tools">
-            <button class="rv-mini" @click="openEdit">✏️ แก้ข้อนี้</button>
-            <button class="rv-mini rv-retire" :disabled="retiring" @click="retireCurrent">
-              {{ retiring ? 'กำลังนำออก…' : '🗑️ นำออก' }}
-            </button>
-          </div>
+          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ปุ่ม "📝 แก้คำอธิบายเฉลย"</div>
         </template>
 
         <div v-else class="rv-editbox">
@@ -113,37 +107,47 @@
           <QuestionComments v-if="commentsOpen" :key="current.id" :questionId="current.id" />
         </details>
 
-        <!-- ── ฟอร์มตรวจ ── -->
+        <!-- ── กลุ่มโรค + ช่องเสริมที่พับไว้ + ปุ่มตัดสิน ── -->
         <div v-if="!editing" class="rv-form">
-          <div class="rv-verdicts">
-            <button
-              v-for="v in VERDICTS" :key="v.key"
-              type="button" class="rv-vbtn" :class="[v.key, { on: verdict === v.key }]"
-              @click="verdict = v.key"
-            >{{ v.label }}</button>
+          <div v-if="ple.group" class="rv-group-row">
+            กลุ่มโรค: <b>{{ groupLabel(ple.group) }}</b><template v-if="ple.sub"> · {{ ple.sub }}</template>
+            <span v-if="ple.inferred" class="rv-group-guess">เดาให้</span>
+            <button class="rv-mini rv-group-change" type="button" @click="groupOpen = !groupOpen">เปลี่ยน</button>
+          </div>
+          <div v-else class="rv-group-warn">ต้องเลือกกลุ่มโรคก่อนส่ง — ระบบเดาจากหมวดเดิมไม่ได้</div>
+          <TopicSelect v-if="groupOpen || !ple.group" v-model="ple" />
+
+          <button class="rv-mini rv-extras-toggle" type="button" @click="extrasOpen = !extrasOpen">
+            {{ extrasOpen ? '− ซ่อน' : '＋ เพิ่ม' }} เหตุผล / เรฟ / หมายเหตุถึงนักศึกษา
+          </button>
+          <div v-if="extrasOpen" class="rv-extras">
+            <label class="rv-label">เหตุผล (ไม่บังคับ)</label>
+            <textarea v-model="reason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="อธิบายว่าทำไมตัดสินแบบนี้…"></textarea>
+
+            <label class="rv-label">เรฟอ้างอิง (ไม่บังคับ)</label>
+            <input v-model="refText" :maxlength="LIMITS.reviewRef" class="rv-input" placeholder="ลิงก์ / ชื่อหนังสือ / แนวทาง…" />
+
+            <label class="rv-label">
+              หมายเหตุผู้ตรวจ (นักศึกษาเห็นท้ายเฉลย — ไม่บังคับ)
+              <span v-if="hadNote" class="rv-note-hint">มีหมายเหตุจากผู้ตรวจคนก่อน — ต่อเติมหรือขัดเกลาได้</span>
+            </label>
+            <textarea v-model="note" :maxlength="LIMITS.reviewNote" class="rv-input" rows="3" placeholder="ข้อควรระวัง / จุดที่คนมักเข้าใจผิด…"></textarea>
+
+            <button class="rv-mini rv-open-edit" type="button" @click="openEdit">📝 แก้คำอธิบายเฉลย</button>
           </div>
 
-          <label class="rv-label">กลุ่มโรค / หมวด (ตามเกณฑ์สภาฯ — ยืนยันหรือแก้ให้ถูกก่อนส่งผล)</label>
-          <TopicSelect v-model="ple" />
-
-          <label class="rv-label">เหตุผล (ไม่บังคับ)</label>
-          <textarea v-model="reason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="อธิบายว่าทำไมตัดสินแบบนี้…"></textarea>
-
-          <label class="rv-label">เรฟอ้างอิง (ไม่บังคับ)</label>
-          <input v-model="refText" :maxlength="LIMITS.reviewRef" class="rv-input" placeholder="ลิงก์ / ชื่อหนังสือ / แนวทาง…" />
-
-          <label class="rv-label">
-            หมายเหตุผู้ตรวจ (นักศึกษาเห็นท้ายเฉลย — ไม่บังคับ)
-            <span v-if="hadNote" class="rv-note-hint">มีหมายเหตุจากผู้ตรวจคนก่อน — ต่อเติมหรือขัดเกลาได้</span>
-          </label>
-          <textarea v-model="note" :maxlength="LIMITS.reviewNote" class="rv-input" rows="3" placeholder="ข้อควรระวัง / จุดที่คนมักเข้าใจผิด…"></textarea>
-
-          <div class="rv-actions">
-            <button class="rv-btn rv-gray" :disabled="submitting" @click="skip">ข้ามข้อนี้</button>
-            <button class="rv-btn rv-primary" :disabled="!canSubmit || submitting" @click="submit">
-              {{ submitting ? 'กำลังส่ง…' : 'ส่งผลตรวจ' }}
-            </button>
-          </div>
+          <JudgeActions
+            :key="current.id"
+            mode="review"
+            :question="current"
+            :busy="submitting || savingEdit || retiring"
+            :canPass="canSubmit"
+            blockedHint="เลือกกลุ่มโรคก่อนถึงจะส่งผลได้"
+            @pass="submit"
+            @fix="onJudgeFix"
+            @retire="onJudgeRetire"
+            @skip="skip"
+          />
         </div>
       </section>
 
@@ -330,6 +334,7 @@ import { quizSample } from '../utils/quizSample.js'
 import TopicSelect from '../components/questions/TopicSelect.vue'
 import QuestionEditor from '../components/questions/QuestionEditor.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
+import JudgeActions from '../components/review/JudgeActions.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { groupReports } from '../utils/questionReport.js'
@@ -343,16 +348,12 @@ const { confirm } = useConfirm()
 const { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports } = useReviewWrites()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
-// เหลือ verdict เดียว — เจอปัญหาให้กด "✏️ แก้ข้อนี้" แก้เนื้อหาแล้วนับว่าผ่านตรวจในตาเดียว (ดู saveEdit)
+// เหลือผลตรวจเดียว "ถูกต้อง" — เจอปัญหาให้กด "มีจุดผิด" ใน JudgeActions แก้เนื้อหาแล้วนับว่าผ่านตรวจในตาเดียว (ดู onJudgeFix)
 // ไม่มี "ตีว่าผิดไม่แก้" อีกแล้ว (user สั่ง 14 ก.ย. 2026) — เจอปัญหาที่แก้เองไม่ได้ ใช้ "ข้ามข้อนี้" + คอมเมนต์แทน
-const VERDICTS = [
-  { key: 'correct', label: '✅ ถูกต้อง' },
-]
 const list = ref([])
 const loading = ref(false)
 const submitting = ref(false)
 const skippedIds = ref(new Set())
-const verdict = ref(null)
 const reason = ref('')
 const refText = ref('')
 const priorReviews = ref([])
@@ -363,6 +364,8 @@ const priorFixedReviews = ref([])
 const ple = ref({ group: null, sub: null })   // กลุ่มโรค/โรคย่อยของข้อปัจจุบัน (prefill ด้วยค่าที่เดาให้ คนตรวจยืนยัน)
 const note = ref('')          // หมายเหตุผู้ตรวจ (นักศึกษาเห็นท้ายเฉลย) — ต่อเติมจากของเดิมได้
 const hadNote = ref(false)    // ข้อนี้มีหมายเหตุจากคนก่อนไหม (ใช้โชว์ป้ายเตือนไม่ให้ลบทิ้ง)
+const groupOpen = ref(false)  // กางตัวเลือกกลุ่มโรค (มีกลุ่มอยู่แล้วแต่กด "เปลี่ยน") — ไม่มีกลุ่ม = กางเลยเสมอ ไม่ต้องพึ่งตัวนี้
+const extrasOpen = ref(false) // กางช่องเหตุผล/เรฟ/หมายเหตุ — ค่าเริ่มต้นตั้งจาก reviewNote เดิม (ดู watch(currentId))
 
 
 const myUid = computed(() => authStore.currentUser?.uid || null)
@@ -435,13 +438,14 @@ async function saveEdit() {
   savingEdit.value = true
   try {
     if (isFix) {
-      const { oldStatus } = await writeFix(q, payload, fixReason.value)
-      // เครดิต leaderboard เสมอไม่ว่าสถานะเดิมจะเป็นอะไร (นี่คือใจความหลักของงานนี้)
-      // progress ขยับเฉพาะตอนสถานะเปลี่ยนจริง (bumpedProgress กันคีย์ซ้ำ 'passed' ชนกันเองถ้า oldStatus เป็น 'passed' อยู่แล้ว)
-      meta.value = {
-        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
-        names: { ...(meta.value.names || {}), [uid]: fixerName },
-        progress: bumpedProgress(oldStatus, 'passed'),
+      const { oldStatus, bumped } = await writeFix(q, payload, fixReason.value)
+      // เครดิต local เฉพาะตอน reviewMeta bump ฝั่งเซิร์ฟเวอร์สำเร็จจริง (ดูคอมเมนต์ bumped ใน useReviewWrites.js)
+      if (bumped) {
+        meta.value = {
+          counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+          names: { ...(meta.value.names || {}), [uid]: fixerName },
+          progress: bumpedProgress(oldStatus, 'passed'),
+        }
       }
       patchTriageRow(q.id, {
         ...payload, ...reviewFixResult(uid), retired: false,
@@ -470,21 +474,58 @@ async function saveEdit() {
   finally { savingEdit.value = false }
 }
 
-// นำออก = ปลดระวางข้อที่ผิดจนแก้ไม่คุ้ม — ถอนเผยแพร่ + ไม่เข้าคิวตรวจอีก (ไม่ลบ ไม่แตะผลตรวจเดิม)
-// rules ผ่านทาง reviewUntouched() · ไม่แตะ reviewMeta (drift ปล่อย self-heal ตอนแอดมินกดซิงก์ระบบตรวจ
-// — แพทเทิร์นเดียวกับ QuestionsView.retire())
-async function retireCurrent() {
+// ── ปุ่มตัดสินจาก JudgeActions (การ์ดปกติ, mode="review") ──
+// onJudgeFix: กด "มีจุดผิด" → "✏️ แก้ข้อนี้" แล้วบันทึก — แก้ชั้นตัดสินแล้วนับว่าผ่านตรวจในตาเดียว
+// เหมือนสาขา isFix ของ saveEdit() ทุกประการ ต่างแค่ผสมกลุ่มโรคจากแถวกลุ่มโรคบนการ์ด (ple.value) เข้าไปด้วย
+// เพราะ QuestionEditor compact ซ่อน TopicSelect ของตัวเอง — payload จาก JudgeActions จึงไม่มีหมวดใหม่ติดมา
+async function onJudgeFix({ payload, reason: fixReasonText }) {
+  if (savingEdit.value || !current.value || !myUid.value) return
+  if (!(await confirm('บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'))) return
+  const q = current.value
+  const uid = myUid.value
+  const fixerName = reviewerName()
+  const finalPayload = { ...payload, ...(plePatch(ple.value.group, ple.value.sub) || {}) }
+  savingEdit.value = true
+  try {
+    const { oldStatus, bumped } = await writeFix(q, finalPayload, fixReasonText)
+    // เครดิต local เฉพาะตอน reviewMeta bump ฝั่งเซิร์ฟเวอร์สำเร็จจริง (ดูคอมเมนต์ bumped ใน useReviewWrites.js)
+    if (bumped) {
+      meta.value = {
+        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+        names: { ...(meta.value.names || {}), [uid]: fixerName },
+        progress: bumpedProgress(oldStatus, 'passed'),
+      }
+    }
+    patchTriageRow(q.id, {
+      ...finalPayload, ...reviewFixResult(uid), retired: false,
+      lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
+    })
+    toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
+    pickNext()
+  } catch (e) { console.error('[review judge fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
+  finally { savingEdit.value = false }
+}
+
+// onJudgeRetire: แทนที่ retireCurrent() เดิม — ต่างจากของเดิมตรงใช้ writeRetireWithCredit (Task 2)
+// ที่ให้เครดิตคนกดด้วย (ของเดิมแค่ updateDoc เฉยๆ ไม่เครดิตเลย) · คงพฤติกรรม patchTriageRow + pickNext ไว้เหมือนเดิม
+async function onJudgeRetire({ reason: retireReasonText }) {
   if (retiring.value || !current.value) return
   const q = current.value
   if (!(await confirm(`นำข้อนี้ออกจากการใช้งาน?\n\n"${truncate60(q.question)}"\n\nข้อจะถอนเผยแพร่และไม่เข้าคิวตรวจอีก (ไม่ได้ลบทิ้ง — กู้คืนได้ที่คลังข้อสอบ)`))) return
   retiring.value = true
   try {
-    await updateDoc(doc(db, 'questions', q.id), { retired: true, isPublished: false, updatedAt: serverTimestamp() })
-    usage.track(0, 1)
+    const { oldStatus, credited, bumped } = await writeRetireWithCredit(q, retireReasonText)
     patchTriageRow(q.id, { retired: true, isPublished: false })   // needsReviewBy กรอง retired → หลุดคิวเอง
+    if (credited && bumped) {
+      meta.value = {
+        counts: { ...(meta.value.counts || {}), [myUid.value]: ((meta.value.counts || {})[myUid.value] || 0) + 1 },
+        names: { ...(meta.value.names || {}), [myUid.value]: reviewerName() },
+        progress: bumpedProgress(oldStatus, 'retired'),
+      }
+    }
     toast('นำข้อนี้ออกแล้ว', 'success')
     pickNext()
-  } catch (e) { console.error('[review retire]', e); toast('นำออกไม่สำเร็จ', 'error') }
+  } catch (e) { console.error('[review judge retire]', e); toast('นำออกไม่สำเร็จ', 'error') }
   finally { retiring.value = false }
 }
 
@@ -503,10 +544,10 @@ const progress = computed(() => {
 // จำนวนข้อที่ต้องให้ฉันตรวจ "ในคิวรอบนี้" (เท่าที่โหลดมา ไม่ใช่ทั้งคลัง)
 const myQueueCount = computed(() => nextReviewQueue(list.value, myUid.value).length)
 
-// เหตุผลบังคับเฉพาะ verdict ที่ไม่ผ่าน — "ถูกต้อง" ไม่ต้องพิมพ์ (ลด friction กันเหตุผลขยะ)
 // กลุ่มโรคบังคับ — picker prefill ค่าที่เดาให้อยู่แล้ว ปกติจึงเป็น 0 คลิก
 // แต่ข้อที่เดาไม่ออกต้องให้คนตรวจเลือก ไม่งั้นมันจะค้างไม่มีหมวดไปตลอด
-const canSubmit = computed(() => !!verdict.value && isPleGroupKey(ple.value.group))
+// ผลตรวจเหลือทางเดียวคือ "ถูกต้อง" (JudgeActions ส่ง pass ทันทีเมื่อกด) จึงไม่ต้องเช็ค verdict อีกต่อไป
+const canSubmit = computed(() => isPleGroupKey(ple.value.group))
 
 // ตัดโจทย์ให้สั้นไว้โชว์ในแถบ "เพิ่งส่ง" — เติม … เฉพาะตอนตัดจริง กันจุดไข่ปลาโผล่ต่อท้ายข้อความสั้น
 function truncate60(text) {
@@ -639,11 +680,13 @@ async function saveFix(q) {
   if (!(await confirm('บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'))) return
   fixSaving.value = true
   try {
-    const { oldStatus } = await writeFix(q, payload, triageFixReason.value)
-    meta.value = {
-      counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
-      names: { ...(meta.value.names || {}), [uid]: fixerName },
-      progress: bumpedProgress(oldStatus, 'passed'),
+    const { oldStatus, bumped } = await writeFix(q, payload, triageFixReason.value)
+    if (bumped) {
+      meta.value = {
+        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+        names: { ...(meta.value.names || {}), [uid]: fixerName },
+        progress: bumpedProgress(oldStatus, 'passed'),
+      }
     }
     patchTriageRow(q.id, {
       ...payload, ...reviewFixResult(uid), retired: false,
@@ -831,11 +874,13 @@ async function load() {
 watch(currentId, async (id) => {
   closeEdit()
   commentsOpen.value = false
-  verdict.value = null; reason.value = ''; refText.value = ''; priorReviews.value = []
+  reason.value = ''; refText.value = ''; priorReviews.value = []
   const q = current.value
   ple.value = pleFields(q)
   note.value = q?.reviewNote || ''
   hadNote.value = !!q?.reviewNote
+  extrasOpen.value = !!q?.reviewNote   // มีหมายเหตุเดิมอยู่แล้ว — กางให้เห็นเลยไม่ต้องเดาว่ามันซ่อนอยู่
+  groupOpen.value = false
   if (!q) return
   priorFixedReviews.value = []
   // โหลดผลตรวจเดิมเมื่อ (ก) ข้อ conflict รอคนที่ 3 ตัดสิน หรือ (ข) ข้อเคยถูกแก้ — คนตรวจรอบนี้
@@ -874,10 +919,12 @@ function bumpedProgress(from, to) {
   return p
 }
 
+// รับ event payload จาก JudgeActions (@pass="submit") — ตัวคอมโพเนนต์ส่ง { note } มาด้วย
+// แต่หน้านี้ยังใช้ note.value เดิมจากช่องเสริมที่พับไว้เป็นแหล่งความจริง (event payload ของ mode="review"
+// เป็น note:'' เปล่าๆ เสมอ เพราะ JudgeActions ส่ง pass ทันทีไม่ถามซ้ำ) — ไม่รับพารามิเตอร์จึงไม่ชนกัน
 async function submit() {
   if (!canSubmit.value || submitting.value || !current.value || !myUid.value) return
-  const lbl = VERDICT_LABEL[verdict.value] || verdict.value
-  if (!(await confirm(`ยืนยันส่งผลตรวจ: "${lbl}"?`))) return
+  if (!(await confirm('ส่งผลว่า "ถูกต้อง"?'))) return
   submitting.value = true
   const q = current.value
   const uid = myUid.value
@@ -887,7 +934,7 @@ async function submit() {
       already, wasResolved, oldStatus: oldStatusLocal, newStatus, newPass, newFail,
       committedCats, committedPle, committedNote,
     } = await writeVote(q, {
-      verdict: verdict.value, reason: reason.value, ref: refText.value, ple: ple.value, note: note.value,
+      verdict: 'correct', reason: reason.value, ref: refText.value, ple: ple.value, note: note.value,
     })
     // หมวดที่ติดมากับข้ออาจไม่เคยขึ้นทะเบียนกลาง (มาจาก bulk import / category เดี่ยวของข้อเก่า)
     // อัปเดต local ให้คิว/leaderboard เลื่อนทันที (ไม่ reload) — ใช้ค่าที่ "เขียนจริง" เป๊ะ ไม่คำนวณซ้ำจากฟอร์ม
@@ -996,8 +1043,6 @@ async function submit() {
 .rv-c-mark { flex-shrink: 0; font-size: .7rem; font-weight: 800; color: #15803d; }
 .rv-exp { margin-top: 9px; font-size: .74rem; color: #b45309; background: #fffbeb; border-radius: 8px; padding: 8px 10px; line-height: 1.45; }
 .rv-exp-none { color: #94a3b8; font-style: italic; }
-.rv-card-tools { display: flex; gap: 8px; margin-top: 10px; }
-.rv-retire { color: #b91c1c; }
 .rv-comments { margin-top: 12px; border-top: 2px dashed rgba(0,0,0,.1); padding-top: 10px; }
 .rv-comments-sum { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 7px; font-size: .78rem; font-weight: 800; color: var(--ink); }
 .rv-comments-sum::-webkit-details-marker { display: none; }
@@ -1025,12 +1070,14 @@ async function submit() {
 .rv-prior-ref { font-size: .7rem; color: rgba(0,0,0,.45); margin-top: 3px; overflow-wrap: anywhere; }
 
 .rv-form { margin-top: 13px; border-top: 1px dashed var(--border); padding-top: 12px; }
-.rv-verdicts { display: flex; gap: 7px; margin-bottom: 11px; }
-.rv-vbtn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 10px 6px; font-family: inherit; font-size: .78rem; font-weight: 800; background: #fff; color: var(--ink); cursor: pointer; transition: transform .1s; }
-.rv-vbtn:active { transform: translate(1px,1px); }
-.rv-vbtn.correct.on { background: #22c55e; border-color: #22c55e; color: #fff; }
-.rv-vbtn.fix.on { background: #f59e0b; border-color: #f59e0b; color: #fff; }
-.rv-vbtn.wrong.on { background: #ef4444; border-color: #ef4444; color: #fff; }
+.rv-group-row { font-size: .78rem; color: #334155; line-height: 1.6; margin-bottom: 10px; }
+.rv-group-row b { color: var(--ink); }
+.rv-group-guess { display: inline-block; background: #fef3c7; color: #92400e; border-radius: 999px; padding: 1px 8px; font-size: .7rem; font-weight: 800; margin-left: 6px; }
+.rv-group-change { margin-left: 6px; }
+.rv-group-warn { font-size: .76rem; font-weight: 700; color: #92400e; background: rgba(245,158,11,.13); border-radius: 10px; padding: 9px 11px; margin-bottom: 10px; line-height: 1.5; }
+.rv-extras-toggle { margin-bottom: 4px; }
+.rv-extras { margin-top: 11px; border-top: 1px dashed var(--border); padding-top: 11px; }
+.rv-open-edit { margin-top: 4px; }
 .rv-label { display: block; font-size: .7rem; font-weight: 700; color: #64748b; margin: 9px 0 5px; }
 .rv-note-hint { display: block; font-weight: 700; color: #b45309; font-size: .7rem; margin-top: 2px; }
 .rv-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }

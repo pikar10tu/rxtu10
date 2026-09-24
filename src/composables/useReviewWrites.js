@@ -161,8 +161,10 @@ export function useReviewWrites() {
     usage.track(0, 2)
     // เครดิต leaderboard เสมอไม่ว่าสถานะเดิมจะเป็นอะไร (นี่คือใจความหลักของงานนี้)
     // progress ขยับเฉพาะตอนสถานะเปลี่ยนจริง (bumpMeta กันคีย์ซ้ำ 'passed' ชนกันเองถ้า oldStatus เป็น 'passed' อยู่แล้ว)
-    if (await bumpMeta(uid, name, oldStatus, 'passed')) usage.track(0, 1)
-    return { oldStatus }
+    // bumped = คืนให้ caller เพื่อ guard การ patch meta.value ในเครื่อง (setDoc ล้มแล้ว local ไม่ควรขยับตาม — Task 3 review)
+    const bumped = await bumpMeta(uid, name, oldStatus, 'passed')
+    if (bumped) usage.track(0, 1)
+    return { oldStatus, bumped }
   }
 
   // นำออก = ปลดระวางข้อที่ผิดจนแก้ไม่คุ้ม — ถอนเผยแพร่ + ไม่เข้าคิวตรวจอีก (ไม่ลบ ไม่แตะผลตรวจเดิม)
@@ -179,8 +181,10 @@ export function useReviewWrites() {
     usage.track(0, 1)
     // เครดิตเฉพาะคนที่ไม่ได้อยู่ใน reviewedBy — ตรงกับ tallyReviewCounts (ไม่งั้นซิงก์แล้วเลขหด)
     const credited = !(q.reviewedBy || []).includes(uid)
-    if (credited && await bumpMeta(uid, name, oldStatus, 'retired')) usage.track(0, 1)
-    return { oldStatus, credited }
+    // bumped = คืนให้ caller เพื่อ guard การ patch meta.value ในเครื่อง (Task 3 review) — false ทันทีถ้าไม่ credited
+    const bumped = credited ? await bumpMeta(uid, name, oldStatus, 'retired') : false
+    if (bumped) usage.track(0, 1)
+    return { oldStatus, credited, bumped }
   }
 
   // ปิดรีพอร์ท — valid มัดรางวัลเมล์ให้ผู้แจ้งทันที, invalid ส่งจดหมายแจ้งผลเฉยๆ (ไม่มีรางวัล)
