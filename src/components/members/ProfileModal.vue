@@ -102,6 +102,8 @@ import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import { useToast } from '../../composables/useToast.js'
 import { useRosterSync } from '../../composables/useRosterSync.js'
 import { shouldLogFriendly } from '../../utils/pvpHistory.js'
+import { noteProfileView } from '../../utils/gags.js'
+import { grantSecret } from '../../composables/useAchievements.js'
 
 const props = defineProps({ member: { type: Object, default: null } })
 const emit = defineEmits(['close'])
@@ -112,6 +114,13 @@ useEscapeKey(() => !!props.member, () => emit('close'))
 const members = useMembersStore()
 const full = ref(null)
 watch(() => props.member?.uid, async (uid) => {
+  // achievement ลับ: ส่องโปรไฟล์คนอื่นติดกัน (ของตัวเองไม่นับ)
+  // ⚠️ ใช้ useAuthStore() ตรงๆ — const auth ประกาศทีหลังในไฟล์ watch immediate จะชน TDZ
+  if (uid && uid !== useAuthStore().currentUser?.uid) {
+    const n = noteProfileView(uid)
+    if (n >= 5) grantSecret('gag_stalker')
+    if (n >= 10) grantSecret('gag_fbi')
+  }
   full.value = null
   if (!uid || String(uid).startsWith('static_')) return   // คนที่ยังไม่เข้าระบบ ไม่มี doc ให้อ่าน
   full.value = await members.loadProfile(uid)

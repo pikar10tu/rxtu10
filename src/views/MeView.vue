@@ -12,7 +12,7 @@
       <div class="me-hero">
         <div class="me-av-box">
           <CosFrame :id="myCos.f">
-            <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
+            <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" @click="pokeMirror" />
           </CosFrame>
           <button class="me-cam" aria-label="เปลี่ยนรูป" @click="fileEl?.click()"><Emoji char="📷" /></button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
@@ -139,6 +139,8 @@ import { getTier } from '../data/residence.js'
 import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
+import { makeStreak } from '../utils/gags.js'
+import { grantSecret } from '../composables/useAchievements.js'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
 import CosBg from '../components/cosmetics/CosBg.vue'
@@ -182,7 +184,11 @@ function openProfile(uid) {
   if (row) profileOf.value = toMember(uid, row)
 }
 const soundOn = ref(sfxOn())
+const mirrorTaps = makeStreak(800)
+function pokeMirror() { if (mirrorTaps.hit() === 7) grantSecret('gag_mirror') }   // achievement ลับ กระจกวิเศษ
+const djTaps = makeStreak(1200)
 function toggleSound() {
+  if (djTaps.hit() === 6) grantSecret('gag_dj')   // achievement ลับ ดีเจมือใหม่
   setSfxOn(!soundOn.value); soundOn.value = sfxOn()
   sfx('coin')   // เปิดแล้วได้ยินทันทีว่าเสียงมา (ปิดอยู่ sfx เงียบเอง)
 }

@@ -1,3 +1,4 @@
+import { resetProfileStreak } from '../utils/gags.js'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -90,6 +91,7 @@ const ROUTE_WORLD = {
   'play-farm': 'farm',
 }
 router.afterEach((to) => {
+  resetProfileStreak()   // achievement ลับ สายส่อง/FBI: ไปทำอย่างอื่น = เริ่มนับใหม่
   sessionStorage.removeItem('chunkReloaded')
   const w = ROUTE_WORLD[to.name]
   if (w) document.body.dataset.world = w

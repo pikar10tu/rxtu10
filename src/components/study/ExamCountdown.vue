@@ -1,6 +1,7 @@
 <template>
   <div v-if="next" class="ec-wrap">
-    <div class="ec-card">
+    <div class="ec-card" :class="{ 'ec-jig': jig === 1, 'ec-panic': jig === 2 }" role="button" tabindex="0" data-sfx="none"
+         @click="poke" @keydown.enter="poke" @animationend="jig = 0">
       <div class="ec-head">
         <span class="ec-emoji"><Emoji :char="next.emoji || '🎯'" /></span>
         <div class="ec-body">
@@ -29,6 +30,21 @@ import Emoji from '../shared/Emoji.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { EXAMS } from '../../data/exams.js'
 import { upcomingExams } from '../../utils/countdown.js'
+import { makeStreak } from '../../utils/gags.js'
+import { grantSecret } from '../../composables/useAchievements.js'
+import { sfx } from '../../utils/sfx.js'
+
+// ── จิ้มนับถอยหลัง (achievement ลับ ตื่นเต้นล่ะสิ / PANIC ATTACK) ──
+const taps = makeStreak(700)
+const jig = ref(0)   // 0 นิ่ง · 1 ขยับ · 2 สั่นแรง (PANIC)
+function poke() {
+  const n = taps.hit()
+  sfx('tap')
+  jig.value = 0
+  requestAnimationFrame(() => { jig.value = n >= 10 ? 2 : 1 })
+  if (n === 3) grantSecret('gag_excited')
+  if (n === 10) { grantSecret('gag_panic'); sfx('wrong') }
+}
 
 // ticker 1 วิ (นาฬิกาเครื่องผู้ใช้ล้วน ไม่แตะ Firestore) · หยุดตอนแท็บถูกซ่อน กันเปลืองแบต
 const now = ref(Date.now())
@@ -82,6 +98,12 @@ function fmtRange(e) {
 .ec-label { font-weight: 800; font-size: .9rem; }
 .ec-date { font-size: .7rem; opacity: .85; margin-top: 2px; }
 .ec-today { margin-top: 10px; text-align: center; font-size: 1.15rem; font-weight: 800; }
+
+.ec-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ec-jig { animation: ec-jig .25s ease-out; }
+.ec-panic { animation: ec-panic .6s ease-in-out; }
+@keyframes ec-jig { 40% { transform: scale(.97) rotate(-1deg); } 70% { transform: scale(1.01) rotate(.6deg); } }
+@keyframes ec-panic { 10%, 30%, 50%, 70%, 90% { transform: translateX(-6px) rotate(-2deg); } 20%, 40%, 60%, 80% { transform: translateX(6px) rotate(2deg); } }
 
 /* ── นาฬิกาพลิก (ป้ายแบบสนามบิน) ── */
 .ec-flip { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }

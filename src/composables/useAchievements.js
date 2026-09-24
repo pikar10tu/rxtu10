@@ -59,6 +59,12 @@ export async function announceAchievement(achId, date = null) {
 }
 
 // grant milestone (self): เขียน subcollection + นับ + (ถ้า announceOn) ประกาศ
+/** ปลด achievement ลับ (type 'secret') จากที่ไหนก็ได้ — ได้แล้วเงียบ · ประกาศเหมือนปลดปกติ */
+export function grantSecret(achId) {
+  if (getAchievement(achId)?.type !== 'secret') return
+  return grantMilestone(achId)
+}
+
 async function grantMilestone(achId) {
   const auth = useAuthStore()
   const uid = auth.currentUser?.uid

@@ -222,6 +222,8 @@ import { tallyAnswers } from '../utils/questionStats.js'
 import { QUIZ_COIN_PER_CORRECT } from '../data/index.js'
 import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srsQuestions.js'
 import { sfx } from '../utils/sfx.js'
+import { isOwlHour } from '../utils/gags.js'
+import { grantSecret } from '../composables/useAchievements.js'
 
 const authStore = useAuthStore()
 const { syncRosterRow } = useRosterSync()
@@ -641,6 +643,7 @@ async function finish() {
   const touchedQcards = Object.keys(qcServer).length > 0
   // achievement ไร้ที่ติ: ถูกหมดทั้งชุดที่ทำจริง ≥10 ข้อ (ออกกลางคันก็นับเฉพาะที่ตอบ)
   const perfect = answered.value >= 10 && correct.value === answered.value
+  if (answered.value >= 5 && isOwlHour()) grantSecret('gag_owl')   // achievement ลับ นกฮูกราตรี
 
   const ok = await authStore.patchUser(
     {

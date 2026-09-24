@@ -52,6 +52,14 @@ export const ACHIEVEMENTS = {
   cos_5: { title: 'สายแฟ', icon: '🎀', type: 'milestone', trigger: { stat: 'cosmeticsOwned', gte: 5 }, desc: 'มีของตกแต่ง 5 ชิ้น', flavor: 'แต่งตัวก่อนออกจากบ้าน' },
   cos_20: { title: 'แฟชั่นนิสต้า', icon: '💅', type: 'milestone', trigger: { stat: 'cosmeticsOwned', gte: 20 }, desc: 'มีของตกแต่ง 20 ชิ้น', flavor: 'ตู้เสื้อผ้าไม่พอแล้ว' },
   cos_legend: { title: 'ไอคอนแห่งรุ่น', icon: '✨', type: 'milestone', trigger: { stat: 'cosmeticLegend', gte: 1 }, desc: 'มีของตกแต่งระดับตำนาน', flavor: 'เดินผ่านทีไรคนหันมอง' },
+  // ── ลับ (กิมมิคตลก) — ปลดด้วย grantSecret() · ก่อนปลดไม่โชว์ที่ไหน (กริดโชว์แค่ของที่ได้) · user ขอ 25 ก.ย. 2026 ──
+  gag_excited: { title: 'ตื่นเต้นล่ะสิ', icon: '😳', type: 'secret', desc: 'จิ้มนับถอยหลังวันสอบ 3 ครั้งรัวๆ', flavor: 'จิ้มแล้ววันสอบก็ไม่เลื่อนนะ' },
+  gag_panic:   { title: 'PANIC ATTACK', icon: '😱', type: 'secret', desc: 'จิ้มนับถอยหลังวันสอบ 10 ครั้งรัวๆ', flavor: 'หายใจเข้า… หายใจออก…' },
+  gag_stalker: { title: 'สายส่อง', icon: '👀', type: 'secret', desc: 'เปิดดูโปรไฟล์เพื่อน 5 คนติดโดยไม่ไปหน้าอื่น', flavor: 'แค่ดูเฉยๆ ไม่ได้คิดอะไร' },
+  gag_fbi:     { title: 'FBI มาเอง', icon: '🕵️', type: 'secret', desc: 'เปิดดูโปรไฟล์เพื่อน 10 คนติดโดยไม่ไปหน้าอื่น', flavor: 'รู้หมดว่าใครเลี้ยงอะไร' },
+  gag_mirror:  { title: 'กระจกวิเศษ', icon: '🪞', type: 'secret', desc: 'จิ้มรูปตัวเองในหน้าฉัน 7 ครั้งรัวๆ', flavor: 'ใครงามเลิศในปฐพี' },
+  gag_dj:      { title: 'ดีเจมือใหม่', icon: '🎧', type: 'secret', desc: 'เปิดปิดเสียงรัวๆ 6 ครั้ง', flavor: 'เปิด… ปิด… เปิด…' },
+  gag_owl:     { title: 'นกฮูกราตรี', icon: '🦉', type: 'secret', desc: 'ทำข้อสอบจบชุดช่วงตี 1–ตี 4', flavor: 'ร่างกายต้องการการนอนนะ' },
   // บ้านเลเวล 12 = เพดานเดิม · id คง home_max ไว้ (คนที่ได้ไปแล้วไม่หาย) แต่ผูกเลข 12 ตรงๆ แทน sentinel
   // เพราะเพดานขยายเป็น 15 แล้ว (25 ก.ย. 2026) — user สั่งให้ "เจ้าของคฤหาสน์" อยู่ที่ 12 เหมือนเดิม + ขั้นละอันถึง 15
   home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 12 }, desc: 'อัปบ้านถึงเลเวล 12', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },
