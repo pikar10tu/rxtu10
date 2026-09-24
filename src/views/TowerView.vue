@@ -9,6 +9,7 @@
     </div>
 
     <template v-if="authStore.isLoggedIn">
+      <SeasonCountdown kind="tower" />
       <TowerPath :floor="displayFloor" :best="displayBest" :max="TOWER_MAX" :crowd="crowd"
                  @pick="sheetFloor = $event" />
 
@@ -123,6 +124,7 @@ import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import TowerPath from '../components/tower/TowerPath.vue'
+import SeasonCountdown from '../components/shared/SeasonCountdown.vue'
 import FloorSheet from '../components/tower/FloorSheet.vue'
 import TowerRankSheet from '../components/tower/TowerRankSheet.vue'
 

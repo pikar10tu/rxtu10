@@ -1,4 +1,6 @@
 // achievements — pure helpers (ไม่ import data/firestore; ctx/catalog ส่งเข้ามา)
+import { seasonMonthLabel } from './pvpSeason.js'
+
 const SENTINEL = { ALL_SPECIES: 'allSpecies', MAX_RESIDENCE: 'maxResidence' }
 
 export function computeProgress(userData) {
@@ -32,7 +34,9 @@ export function checkMilestones(milestones, progress, earnedIds, ctx = {}) {
   return out
 }
 
-export const achievementTitle = (def, date) => (date ? `${def.title} ${date}` : def.title)
+// def.season: date = 'YYYY-MM' ของซีซั่น → "… ซีซั่น ก.ย. 69" (ไม่ใช่วันที่ดิบ)
+export const achievementTitle = (def, date) =>
+  (!date ? def.title : def.season ? `${def.title} ซีซั่น ${seasonMonthLabel(date, true)}` : `${def.title} ${date}`)
 export const achievementDocId = (achId, date) => (date ? `${achId}__${date}` : achId)
 
 export function buildAchievementNews(nickname, def, date) {

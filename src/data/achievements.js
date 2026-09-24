@@ -20,6 +20,10 @@ export const ACHIEVEMENTS = {
   spent_100k: { title: 'นักช้อป',      icon: '🛍️', type: 'milestone', trigger: { stat: 'totalSpent', gte: 100000 }, desc: 'ใช้จ่ายรวม 100,000', flavor: 'เงินมีไว้ใช้ ไม่ได้มีไว้กอด' },
   spent_500k: { title: 'ขาช้อปตัวยง', icon: '💳', type: 'milestone', trigger: { stat: 'totalSpent', gte: 500000 }, desc: 'ใช้จ่ายรวม 500,000', flavor: 'บัตรเครดิตเริ่มร้อน' },
   home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 'MAX_RESIDENCE' }, desc: 'อัปบ้านถึงระดับสูงสุด', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },
+  // รางวัลสิ้นซีซั่น — แอดมินแจกผ่านจดหมาย (AdminView "แจกรางวัลซีซั่น") · date = 'YYYY-MM' ของซีซั่น
+  // ⏳ จะกลายเป็นฉายาที่สวมได้ตอนทำระบบฉายา (roadmap #8)
+  tower_champ: { title: 'ผู้ครอบครองหอคอย', icon: '🏯', type: 'awarded', dated: true, season: true, desc: 'ติดท็อป 10 หอคอยตอนจบซีซั่น', flavor: 'ยืนอยู่บนยอดหอคอยตอนหมดเวลา' },
+  arena_champ: { title: 'ผู้ครอบครองอารีน่า', icon: '⚔️', type: 'awarded', dated: true, season: true, desc: 'ติดท็อป 3 อารีน่าตอนจบซีซั่น', flavor: 'สามคนสุดท้ายที่ยังยืนอยู่กลางสนาม' },
   daily_king: { title: 'ราชาควิซประจำวัน', icon: '👑', type: 'awarded', dated: true, desc: 'อันดับ 1 ข้อสอบประจำวัน', flavor: 'ทำคะแนนข้อสอบประจำวันได้อันดับ 1' },
 }
 

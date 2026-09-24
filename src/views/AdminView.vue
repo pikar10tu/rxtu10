@@ -251,13 +251,38 @@
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูสถิติ</div>
       </section>
 
-      <!-- ───── รีเซตหอคอย (ลาดเดอร์รายเดือน) ───── -->
+      <!-- ───── แจกรางวัลซีซั่น (หอคอย + อารีน่า) + รีเซตหอคอย ───── -->
       <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🏯" /> รีเซตหอคอย</span></div>
-        <div class="admin-hint">ลาดเดอร์รายเดือน — ตั้งชั้นหอคอยทุกคนกลับชั้น 1 (โบนัสหายจนไต่ใหม่ · ไม่แตะเพ็ท/เหรียญ)</div>
-        <button class="btn-mini" :disabled="resettingTower" @click="resetTower">
-          {{ resettingTower ? 'กำลังรีเซต…' : 'รีเซตชั้นหอคอยทุกคน' }}
-        </button>
+        <div class="admin-card-head"><span><Emoji char="🏆" /> แจกรางวัลซีซั่น</span></div>
+        <div class="admin-hint">
+          กดหลังขึ้นเดือนใหม่ (เวลาไทย) ยิ่งเร็วยิ่งดี — ชั้นหอคอยที่ไต่ในเดือนใหม่ก่อนกดจะถูกนับเป็นของซีซั่นเก่า ·
+          ส่งจดหมายรางวัล (กดรับเอง) + รีเซตหอคอยทุกคนเป็นชั้น 1 ในการกดเดียว · กดซ้ำซีซั่นเดิมไม่ได้
+        </div>
+        <div class="sp-row">
+          <select v-model="spSeason" class="sp-select" @change="spPreview = null">
+            <option v-for="o in spOptions" :key="o.id" :value="o.id">ซีซั่น {{ o.label }}{{ o.current ? ' (ยังไม่จบ ดูได้อย่างเดียว)' : '' }}</option>
+          </select>
+          <button class="btn-mini" :disabled="spBusy" @click="previewSeason">{{ spBusy && !spPreview ? 'กำลังโหลด…' : 'ดูว่าใครได้อะไร' }}</button>
+        </div>
+        <template v-if="spPreview">
+          <div v-if="spPreview.paid" class="admin-hint sp-paid">
+            {{ spPreview.paid.status === 'done' ? `✅ ซีซั่นนี้แจกไปแล้ว ${spPreview.paid.mails} ฉบับ` : '⚠️ ค้างกลางทาง — เช็คจดหมายก่อนทำอะไรต่อ' }}
+          </div>
+          <div class="admin-hint">
+            หอคอย {{ spPreview.tower }} คน (ท็อป {{ spPreview.towerTop }} · ได้ตั๋ว {{ spPreview.tickets }}) ·
+            อารีน่า {{ spPreview.arena }} คน (ท็อป {{ spPreview.arenaTop }}) · จดหมาย {{ spPreview.mails }} ฉบับ
+          </div>
+          <ul class="sp-list">
+            <li v-for="r in spPreview.rows" :key="r.uid">
+              <b>{{ r.nickname }}</b>
+              <span v-if="r.tower"> · 🏯 ชั้น {{ r.tower.best }}{{ r.tower.top ? ' 👑' : '' }} → {{ r.tower.coins.toLocaleString() }}{{ r.tower.tickets ? ` + ตั๋ว ${r.tower.tickets}` : '' }}</span>
+              <span v-if="r.arena"> · ⚔️ {{ r.arena.rating }} แต้ม{{ r.arena.top ? ' 👑' : '' }} → {{ r.arena.coins.toLocaleString() }}</span>
+            </li>
+          </ul>
+          <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
+            {{ spBusy ? 'กำลังส่ง…' : `แจก ${spPreview.mails} ฉบับ + รีเซตหอคอย` }}
+          </button>
+        </template>
       </section>
 
       <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
@@ -554,6 +579,8 @@ import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
 import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
+import { computeSeasonRewards, seasonRewardMails } from '../utils/seasonRewards.js'
+import { currentSeasonId, seasonMonthLabel } from '../utils/pvpSeason.js'
 import { TAG_LIST } from '../data/tags.js'
 import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
@@ -843,26 +870,81 @@ async function loadBattleStats() {
   finally { loadingBattle.value = false }
 }
 
-// ── รีเซตชั้นหอคอยทุกคน (ลาดเดอร์รายเดือน) — batch ทุก user doc, เฉพาะ 2 field หอคอย ──
-const resettingTower = ref(false)
-async function resetTower() {
-  if (resettingTower.value) return
-  const ok = await confirm('รีเซตชั้นหอคอยของผู้เล่นทุกคน?\n• towerFloor→1, towerBest→0\n• โบนัสรายได้หอคอยจะหายจนกว่าจะไต่ใหม่\n• เพ็ท/ทีม/เหรียญไม่ถูกแตะ')
-  if (!ok) return
-  resettingTower.value = true
+// ── แจกรางวัลซีซั่น (หอคอย + อารีน่า) — อ่าน users ตรง (แถว roster ถูกรีซีซั่นทับแล้วตั้งแต่วันที่ 1) ──
+//  กันกดซ้ำด้วย config/seasonPayouts.{YYYY-MM}: จอง 'sending' ในทรานแซคชันก่อนส่ง แล้วค่อย 'done'
+//  ค้าง 'sending' = บางคนได้แล้วบางคนยัง → ไม่ให้กดซ้ำอัตโนมัติ ต้องเช็คด้วยมือ
+const spCur = currentSeasonId()
+const spPrev = currentSeasonId(new Date(Date.parse(spCur + '-01T00:00:00+07:00') - 1))
+const spOptions = [
+  { id: spPrev, label: seasonMonthLabel(spPrev, true), current: false },
+  { id: spCur, label: seasonMonthLabel(spCur, true), current: true },
+]
+const spSeason = ref(spPrev)
+const spIsCurrent = computed(() => spSeason.value === spCur)
+const spPreview = ref(null)
+const spBusy = ref(false)
+let spUserDocs = []
+
+async function previewSeason() {
+  if (spBusy.value) return
+  spBusy.value = true; spPreview.value = null
   try {
-    const snap = await getDocs(collection(db, 'users'))
-    let batch = writeBatch(db), n = 0, total = 0
-    for (const d of snap.docs) {
-      batch.set(d.ref, { towerFloor: 1, towerBest: 0 }, { merge: true })
-      n++; total++
-      if (n >= 450) { await batch.commit(); batch = writeBatch(db); n = 0 }  // chunk กันเกิน 500
+    const [snap, paidSnap] = await Promise.all([getDocs(collection(db, 'users')), getDoc(doc(db, 'config', 'seasonPayouts'))])
+    usage.track(snap.size + 1, 0)
+    spUserDocs = snap.docs
+    const users = snap.docs.map(d => {
+      const x = d.data()
+      return { uid: d.id, nickname: stripTrailingEmoji(x.nickname || x.name?.split(' ')[0] || '') || '?', towerBest: x.towerBest || 0, pvp: x.pvp }
+    })
+    const rows = computeSeasonRewards(users, spSeason.value)
+      .sort((a, b) => (b.tower?.best || 0) - (a.tower?.best || 0) || (b.arena?.rating || 0) - (a.arena?.rating || 0))
+    spPreview.value = {
+      rows,
+      paid: paidSnap.exists() ? paidSnap.data()[spSeason.value] || null : null,
+      tower: rows.filter(r => r.tower).length, towerTop: rows.filter(r => r.tower?.top).length,
+      tickets: rows.filter(r => r.tower?.tickets).length,
+      arena: rows.filter(r => r.arena).length, arenaTop: rows.filter(r => r.arena?.top).length,
+      mails: rows.reduce((n, r) => n + (r.tower ? 1 : 0) + (r.arena ? 1 : 0), 0),
     }
-    if (n > 0) await batch.commit()
-    usage.track(snap.size, total)
-    toast(`รีเซตหอคอย ${total} คนแล้ว`, 'success')
-  } catch (e) { console.error('[resetTower]', e); toast('รีเซตไม่สำเร็จ', 'error') }
-  finally { resettingTower.value = false }
+  } catch (e) { console.error('[season preview]', e); toast('โหลดไม่สำเร็จ', 'error') }
+  finally { spBusy.value = false }
+}
+
+async function paySeason() {
+  const p = spPreview.value, season = spSeason.value
+  if (!p || p.paid || spIsCurrent.value || spBusy.value) return
+  const label = seasonMonthLabel(season, true)
+  const ok = await confirm(`แจกรางวัลซีซั่น ${label}?\n• จดหมาย ${p.mails} ฉบับ (หอคอย ${p.tower} · อารีน่า ${p.arena})\n• รีเซตหอคอยทุกคน ${spUserDocs.length} คน → ชั้น 1\n• กดแล้วกดซ้ำซีซั่นนี้ไม่ได้`)
+  if (!ok) return
+  spBusy.value = true
+  const payRef = doc(db, 'config', 'seasonPayouts')
+  try {
+    // เช็คสดอีกรอบ + จองก่อนส่ง (กันแอดมินสองคน/สองแท็บกดพร้อมกัน)
+    await runTransaction(db, async (tx) => {
+      const cur = await tx.get(payRef)
+      if (cur.exists() && cur.data()[season]) throw new Error('already-paid')
+      tx.set(payRef, { [season]: { status: 'sending', at: serverTimestamp() } }, { merge: true })
+    })
+    const ops = []
+    for (const r of p.rows) {
+      for (const m of seasonRewardMails(r, season, label)) {
+        ops.push((bt) => bt.set(doc(collection(db, 'users', r.uid, 'mail')), buildBroadcastMail({ ...m, from: 'system' }, serverTimestamp())))
+      }
+    }
+    for (const d of spUserDocs) ops.push((bt) => bt.set(d.ref, { towerFloor: 1, towerBest: 0 }, { merge: true }))
+    for (let i = 0; i < ops.length; i += 450) {   // < 500 ops/batch ของ Firestore
+      const batch = writeBatch(db)
+      ops.slice(i, i + 450).forEach(op => op(batch))
+      await batch.commit()
+    }
+    await setDoc(payRef, { [season]: { status: 'done', mails: p.mails, at: serverTimestamp() } }, { merge: true })
+    usage.track(1, ops.length + 2)
+    toast(`แจกรางวัลซีซั่น ${label} แล้ว ${p.mails} ฉบับ`, 'success')
+    await previewSeason()
+  } catch (e) {
+    if (e?.message === 'already-paid') toast('ซีซั่นนี้แจกไปแล้ว', 'error')
+    else { console.error('[season pay]', e); toast('ส่งไม่ครบ — เช็คจดหมายก่อนทำต่อ', 'error') }
+  } finally { spBusy.value = false }
 }
 
 // ── ส่งจดหมายถึงสมาชิก (Mailbox broadcast) ──
@@ -1325,6 +1407,12 @@ async function saveEcon(m) {
   padding: 24px 0;
   font-size: .85rem;
 }
+/* ── แจกรางวัลซีซั่น ── */
+.sp-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 6px 0; }
+.sp-select { font: inherit; font-size: .8rem; padding: 4px 6px; border-radius: 8px; border: 1px solid #cbd5e1; }
+.sp-list { list-style: none; margin: 6px 0; padding: 0; max-height: 260px; overflow: auto; font-size: .75rem; line-height: 1.6; }
+.sp-paid { color: #15803d; font-weight: 700; }
+
 /* ── broadcast (ส่งจดหมาย) ── */
 .bc-form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .bc-body { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }

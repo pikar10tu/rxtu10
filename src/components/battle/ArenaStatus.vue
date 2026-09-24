@@ -27,6 +27,8 @@
       </span>
     </div>
 
+    <SeasonCountdown kind="arena" />
+
     <div class="as-sep" />
 
     <div class="as-team">
@@ -51,7 +53,8 @@ import { computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import PetThumb from '../shared/PetThumb.vue'
 import { PVP_DAILY_ATTACKS } from '../../utils/pvpRating.js'
-import { currentSeasonId } from '../../utils/pvpSeason.js'
+import { currentSeasonId, seasonMonthLabel } from '../../utils/pvpSeason.js'
+import SeasonCountdown from '../shared/SeasonCountdown.vue'
 
 const props = defineProps({
   rating: { type: Number, default: 0 },
@@ -69,13 +72,7 @@ const max = PVP_DAILY_ATTACKS
 const rankLabel = computed(() =>
   props.myRank ? `อันดับ ${props.myRank} จาก ${props.total}` : 'ยังไม่ติดอันดับ')
 
-const TH_MONTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-                  'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
-// currentSeasonId() คืน 'YYYY-MM' — แปลงเป็นชื่อเดือนไทยย่อ
-const seasonLabel = computed(() => {
-  const id = currentSeasonId()
-  return TH_MONTH[Number(id.slice(5, 7)) - 1] || id
-})
+const seasonLabel = computed(() => seasonMonthLabel(currentSeasonId()))
 </script>
 
 <style scoped>

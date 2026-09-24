@@ -86,6 +86,8 @@ export function useArena() {
       wins: base.wins + (won ? 1 : 0),
       losses: base.losses + (won ? 0 : 1),
       seasonId: season,
+      // ผลซีซั่นก่อน (applySeasonReset แนบมาตอนบุกครั้งแรกของเดือน) — แอดมินใช้แจกรางวัลซีซั่น ห้ามทิ้ง
+      ...(base.last ? { last: base.last } : {}),
     }
     const today = todayStr()
     const usedBefore = auth.userData?.pvpAttackDate === today
