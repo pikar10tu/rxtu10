@@ -23,12 +23,7 @@
     </RouterLink>
 
     <div class="play-grid">
-      <RouterLink to="/shop?tab=pet" class="game-card gc-shop">
-        <span class="gc-emoji"><Emoji char="🎰" /></span>
-        <span class="gc-name">ร้านเพ็ท</span>
-        <span class="gc-badge grow">อัญเชิญ · ห้องทดลอง</span>
-      </RouterLink>
-
+      <!-- ร้านเพ็ทไม่ต้องมีที่นี่ — เข้าจากปุ่มร้านค้าบนสุดของหน้าเกมที่เดียว (user สั่ง 25 ก.ย. 2026) -->
       <RouterLink to="/tower" class="game-card gc-tower">
         <span class="gc-emoji"><Emoji char="🏯" /></span>
         <span class="gc-name">ปีนหอคอย</span>
