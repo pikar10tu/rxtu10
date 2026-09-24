@@ -1,7 +1,7 @@
 // ════════════════════════════════════════════════════════════
 //  Achievement catalog (data-driven) — ความสำเร็จที่ได้อัตโนมัติ
 //  type 'milestone' (trigger {stat,gte}) | 'awarded' (ระบบ/admin มอบ, dated?)
-//  gte sentinel: 'ALL_SPECIES' = จำนวนสัตว์ทุกชนิด, 'MAX_RESIDENCE' = บ้านสูงสุด
+//  gte sentinel: 'ALL_SPECIES' = จำนวนสัตว์ทุกชนิด, 'MAX_RESIDENCE' = บ้านสูงสุด (ตอนนี้ไม่มีใครใช้แล้ว — บ้านผูกเลขตรงๆ)
 // ════════════════════════════════════════════════════════════
 export const ACHIEVEMENTS = {
   pet_5:   { title: 'นักเลี้ยงสัตว์',  icon: '🐣', type: 'milestone', trigger: { stat: 'petCount', gte: 5 },  desc: 'สะสมสัตว์ 5 ตัว', flavor: 'เริ่มจากตัวเล็กๆ สู่คอกในฝัน' },
@@ -19,7 +19,12 @@ export const ACHIEVEMENTS = {
   farm_2m:   { title: 'เจ้าสัวเกษตร', icon: '🏭', type: 'milestone', trigger: { stat: 'farmSalesTotal', gte: 2000000 }, desc: 'ขายผลผลิตรวม 2,000,000', flavor: 'เกษตรกรเกือบพันล้าน' },
   spent_100k: { title: 'นักช้อป',      icon: '🛍️', type: 'milestone', trigger: { stat: 'totalSpent', gte: 100000 }, desc: 'ใช้จ่ายรวม 100,000', flavor: 'เงินมีไว้ใช้ ไม่ได้มีไว้กอด' },
   spent_500k: { title: 'ขาช้อปตัวยง', icon: '💳', type: 'milestone', trigger: { stat: 'totalSpent', gte: 500000 }, desc: 'ใช้จ่ายรวม 500,000', flavor: 'บัตรเครดิตเริ่มร้อน' },
-  home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 'MAX_RESIDENCE' }, desc: 'อัปบ้านถึงระดับสูงสุด', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },
+  // บ้านเลเวล 12 = เพดานเดิม · id คง home_max ไว้ (คนที่ได้ไปแล้วไม่หาย) แต่ผูกเลข 12 ตรงๆ แทน sentinel
+  // เพราะเพดานขยายเป็น 15 แล้ว (25 ก.ย. 2026) — user สั่งให้ "เจ้าของคฤหาสน์" อยู่ที่ 12 เหมือนเดิม + ขั้นละอันถึง 15
+  home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 12 }, desc: 'อัปบ้านถึงเลเวล 12', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },
+  home_13:  { title: 'เจ้าสมุทร',         icon: '🌊', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 13 }, desc: 'อัปบ้านถึงเลเวล 13 คฤหาสน์ลอยตัวกลางมหาสมุทร', flavor: 'ตื่นมาเจอทะเลทุกทิศ ไม่มีเพื่อนบ้านมากวน' },
+  home_14:  { title: 'ราชันใต้บาดาล',      icon: '🔱', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 14 }, desc: 'อัปบ้านถึงเลเวล 14 มหานครใต้บาดาล', flavor: 'ทั้งเมืองใต้น้ำเป็นของเรา' },
+  home_15:  { title: 'ผู้ครองสวนสวรรค์',   icon: '☁️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 15 }, desc: 'อัปบ้านถึงเลเวล 15 สวนสวรรค์เหนือน่านฟ้า บ้านสูงสุดของเกม', flavor: 'สูงกว่านี้ไม่มีแล้ว นอกจากท้องฟ้า' },
   // รางวัลสิ้นซีซั่น — แอดมินแจกผ่านจดหมาย (AdminView "แจกรางวัลซีซั่น") · date = 'YYYY-MM' ของซีซั่น
   // ⏳ จะกลายเป็นฉายาที่สวมได้ตอนทำระบบฉายา (roadmap #8)
   tower_champ: { title: 'ผู้ครอบครองหอคอย', icon: '🏯', type: 'awarded', dated: true, season: true, desc: 'ติดท็อป 10 หอคอยตอนจบซีซั่น', flavor: 'ยืนอยู่บนยอดหอคอยตอนหมดเวลา' },
