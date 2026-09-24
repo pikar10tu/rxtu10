@@ -22,8 +22,9 @@ export const KO_MULT = 2          // หมัดที่ทำให้ใค�
 export const FINISH_MULT = 4      // หมัดปิดเกม
 /** หยุดให้อ่านตอนสกิลโปรก "ครั้งแรก" ของสกิลนั้นในไฟต์ — ครั้งซ้ำไม่หยุด */
 export const SKILL_PAUSE = 200
-/** ยกแรก (aura + onStart) ป้ายขึ้นพร้อมกันทุกใบ แล้วค้างรวมครั้งเดียว ไม่ว่าจะกี่ตัว */
-export const OPEN_GROUP_MS = 1100
+/** ยกแรก (aura + onStart): เพ็ทแต่ละตัวได้ "โชว์ไทม์" ของตัวเองทีละตัว (แบนเนอร์ชื่อสกิล + หน้าเพ็ท + ผลสั้นๆ)
+ *  เดิมขึ้นพร้อมกันทุกใบแล้วค้าง 1100ms ⇒ เสียงตีกัน อ่านไม่ทัน (user ขอเปลี่ยน 25 ก.ย. 2026) */
+export const OPEN_SHOW_MS = 800
 
 /** สัดส่วนเฟส [windup, motion, hitstop, tail] — แต่ละชุดต้องรวมได้ 1 พอดี (มีเทสคุม) */
 export const SHAPE = {
@@ -36,7 +37,8 @@ export const SHAPE = {
 export const WEIGHT_CFG = { dmgFull: 0.30, dmgWeight: 0.70, crit: 0.18, super: 0.12 }
 
 /** โหมดเร่ง (กดค้าง) ย่อเฉพาะหมัดปกติ — โมเมนต์ห้ามแตะ ไม่งั้นกลายเป็นปุ่มข้าม */
-export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMoment: 1, openGroup: 1 }
+// openShow ย่อได้ครึ่งเดียว — ยกแรกมีได้ถึง 6 โชว์ติดกัน กดเร่งแล้วต้องรู้สึกว่าเร็วขึ้นจริง
+export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMoment: 1, openShow: 0.5 }
 
 /** จังหวะเป็น-ตาย — ได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ */
 // 'grit' = การกันตายชั้นที่ 2-3 ของแมว — runtime state ที่เกิดจากการกิน cheatDeath มาก่อน
@@ -79,7 +81,7 @@ export function timingOf(kind) {
     case 'finish':      return phasesOf(BEAT * FINISH_MULT, SHAPE.finish)
     case 'skillMoment': return phasesOf(BEAT * KO_MULT, SHAPE.ko)
     case 'skill':       return { ...ZERO, hitstop: SKILL_PAUSE }
-    case 'openGroup':   return { ...ZERO, hitstop: OPEN_GROUP_MS }
+    case 'openShow':    return phasesOf(OPEN_SHOW_MS, SHAPE.ko)
     // sub · openQuiet · skillQuiet · round/end/ไม่รู้จัก = ผ่านไปเงียบๆ ไม่กินเวลา
     default:            return { ...ZERO }
   }
@@ -133,7 +135,7 @@ function openCutOf(evts) {
  * @param {Object} maxHpByUid  uid → maxHp (จาก buildCombatant) — uid ที่ขาดถูกมองเป็น 1 กันหารศูนย์
  * @returns {Array} beat[] ยาวเท่า log เสมอ (1 event = 1 beat) เพื่อให้ index ตรงกับของเดิม
  */
-export function buildBeats(log, maxHpByUid) {
+export function buildBeats(log, maxHpByUid, { rng = null } = {}) {
   const evts = Array.isArray(log) ? log : []
   const mh = maxHpByUid || {}
 
@@ -195,7 +197,7 @@ export function buildBeats(log, maxHpByUid) {
     }
   }
 
-  // ใบอื่นที่อยู่ในบีตเดียวกับหมัดปิดเกม → ยกเวลาให้ใบที่ปิดไฟต์คนเดียว (แพทเทิร์นเดียวกับ openGroup)
+  // ใบอื่นที่อยู่ในบีตเดียวกับหมัดปิดเกม → ยกเวลาให้ใบที่ปิดไฟต์คนเดียว (แพทเทิร์นเดียวกับ openQuiet→openShow)
   const finishGroup = new Set()
   for (let i = finishAt; i >= 0; i--) {
     const ev = evts[i]
@@ -212,18 +214,21 @@ export function buildBeats(log, maxHpByUid) {
   // → replay ยิงป้ายรัวจนครบ (ห่างกัน 0ms = ตาเห็นเป็นพร้อมกัน) แล้วค้างทีเดียว
   // ทำแบบนี้เพราะต้องคง "1 event = 1 beat" ไว้ (index ต้องตรงกับ log)
   const pKind = new Map()
+  const openCut = openCutOf(evts)
   {
-    const openCut = openCutOf(evts)
-    const openIdx = []
+    // ยกแรก: ก้อนละเพ็ท (event ติดกันของ uid เดียวกัน) → ใบท้ายก้อนได้ openShow ถือเวลาโชว์ · ใบอื่น openQuiet 0ms
+    //   (ผลของใบ openQuiet ถูกพักไว้ลงพร้อมโชว์ของก้อนตัวเอง — ดู BattleReplay.applyPassive)
     for (let i = 0; i < openCut; i++) {
       const e = evts[i]
-      if (e && e.t === 'passive') { pKind.set(i, 'openQuiet'); openIdx.push(i) }
+      if (!e || e.t !== 'passive') continue
+      const nx = evts[i + 1]
+      const lastOfChunk = !(i + 1 < openCut && nx && nx.t === 'passive' && nx.uid === e.uid)
+      pKind.set(i, lastOfChunk ? 'openShow' : 'openQuiet')
     }
-    if (openIdx.length) pKind.set(openIdx[openIdx.length - 1], 'openGroup')
 
     // ที่เหลือ: ครั้งแรกของสกิลนั้นได้หยุดสั้นๆ · ครั้งซ้ำเงียบ · จังหวะเป็น-ตายได้โมเมนต์เต็ม
     // 🔑 เพ็ทตัวเดียวยิงหลาย part ติดกัน = "ก้อนเดียว" ⇒ ใบสุดท้ายของก้อนถือเวลาคนเดียว
-    //    ที่เหลือ 0ms (แพทเทิร์นเดียวกับ openQuiet/openGroup ของยกแรก)
+    //    ที่เหลือ 0ms (แพทเทิร์นเดียวกับ openQuiet/openShow ของยกแรก)
     //    ถ้าไม่ทำ เพ็ท 3 part จะได้ SKILL_PAUSE × 3 = หยุด 600ms ติดกันในจังหวะเดียว
     // ⚠️ คีย์ตัวดักซ้ำต้องมีลำดับ part ด้วย ไม่งั้นสอง part ที่ effect เดียวกัน
     //    ใบที่สองจะถูกลดเป็น skillQuiet แล้วหายไปเงียบๆ
@@ -271,7 +276,7 @@ export function buildBeats(log, maxHpByUid) {
 
   // ── pass 3: ประกอบ beat ตามลำดับ log จริง (danger/survive ต้องไล่ตามเวลา) ──
   const belowSurvive = new Set()
-  return evts.map((e, i) => {
+  const out = evts.map((e, i) => {
     const ev = e || {}
     const inf = info[i]
 
@@ -312,6 +317,24 @@ export function buildBeats(log, maxHpByUid) {
       danger, survive,
     }
   })
+  return rng ? shuffleOpening(out, openCut, rng) : out
+}
+
+/** สลับลำดับโชว์ของยกแรกทีละก้อน (ก้อน = เพ็ทหนึ่งตัว) — ทุกอย่างในยกแรกเกิดพร้อมกันอยู่แล้ว (aura)
+ *  ลำดับบนจอจึงเป็นแค่การแสดงผล สลับได้โดยไม่เปลี่ยนผลไฟต์ · จำนวน beat ยังเท่าเดิม (ก้อนย้ายทั้งก้อน) */
+export function shuffleOpening(beats, openCut, rng) {
+  const chunks = []
+  let cur = []
+  for (let i = 0; i < openCut; i++) {
+    cur.push(beats[i])
+    if (beats[i].kind !== 'openQuiet') { chunks.push(cur); cur = [] }   // openShow ปิดก้อน
+  }
+  if (cur.length) chunks.push(cur)
+  for (let i = chunks.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [chunks[i], chunks[j]] = [chunks[j], chunks[i]]
+  }
+  return [...chunks.flat(), ...beats.slice(openCut)]
 }
 
 /** คูณเวลาตาม pace (รสนิยม) และ ff (กดค้างเร่ง) — ไม่แก้ beat เดิม */

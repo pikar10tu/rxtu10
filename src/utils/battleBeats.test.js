@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   buildBeats, scaleTiming, beatDuration, totalDuration, weightOf, timingOf,
-  BEAT, KO_MULT, FINISH_MULT, SKILL_PAUSE, OPEN_GROUP_MS, SHAPE, FF_SCALE, WEIGHT_CFG, OPENING_EFFECTS,
+  BEAT, KO_MULT, FINISH_MULT, SKILL_PAUSE, OPEN_SHOW_MS, SHAPE, FF_SCALE, WEIGHT_CFG, OPENING_EFFECTS,
   CLUTCH_EFFECTS,
 } from './battleBeats.js'
 // battleBeats.js ไม่ import อะไรโดยตั้งใจ — เทสจึงเป็นที่เดียวที่เอาสองฝั่งมาชนกันได้
@@ -31,7 +31,7 @@ test('timingOf: หมัดปกติ/KO/ปิดเกม ได้เว�
   assert.equal(Math.round(sum(timingOf('ko'))), BEAT * KO_MULT)
   assert.equal(Math.round(sum(timingOf('finish'))), BEAT * FINISH_MULT)
   assert.equal(Math.round(sum(timingOf('skill'))), SKILL_PAUSE)
-  assert.equal(Math.round(sum(timingOf('openGroup'))), OPEN_GROUP_MS)
+  assert.equal(Math.round(sum(timingOf('openShow'))), OPEN_SHOW_MS)
 })
 
 test('timingOf: kind ที่ไม่รู้จัก/หมัดลูก = ไม่กินเวลา (ไม่ throw ไม่ undefined)', () => {
@@ -226,17 +226,33 @@ test('จังหวะเป็น-ตาย ได้โมเมนต์เ
   }
 })
 
-test('ยกแรก: ทุกตัวเวลา 0 ยกเว้นตัวท้ายกลุ่มที่ถือเวลาค้างไว้คนเดียว', () => {
+test('ยกแรก: เพ็ทแต่ละตัวได้โชว์ของตัวเอง · หลาย part ของตัวเดียวกันรวมเป็นโชว์เดียว', () => {
   const log = [
     pas({ uid: 'A0', effect: 'teamAtk', fxKind: 'aura' }),
+    pas({ uid: 'A0', effect: 'teamHp', fxKind: 'aura' }),
     pas({ uid: 'A1', effect: 'teamCrit', fxKind: 'aura' }),
     atk(),
   ]
   const bs = buildBeats(log, MH)
-  assert.equal(bs[0].kind, 'openQuiet')
+  assert.deepEqual(kinds(bs).slice(0, 3), ['openQuiet', 'openShow', 'openShow'])
   assert.equal(beatDuration(bs[0]), 0)
-  assert.equal(bs[1].kind, 'openGroup')
-  assert.equal(Math.round(beatDuration(bs[1])), OPEN_GROUP_MS)
+  assert.equal(Math.round(beatDuration(bs[1])), OPEN_SHOW_MS)
+})
+
+test('ยกแรก: rng สลับลำดับโชว์ทีละก้อน · ก้อนไม่แตก · จำนวน beat เท่าเดิม · หลังยกแรกไม่ขยับ', () => {
+  const log = [
+    pas({ uid: 'A0', effect: 'teamAtk', fxKind: 'aura' }),
+    pas({ uid: 'A0', effect: 'teamHp', fxKind: 'aura' }),
+    pas({ uid: 'A1', effect: 'teamCrit', fxKind: 'aura' }),
+    pas({ uid: 'B0', effect: 'enemyVuln', fxKind: 'aura' }),
+    atk(),
+  ]
+  const bs = buildBeats(log, MH, { rng: () => 0 })   // rng 0 = หมุนทุกก้อน
+  assert.equal(bs.length, log.length)
+  assert.deepEqual(bs.map(b => b.uid).slice(0, 4), ['A1', 'B0', 'A0', 'A0'])
+  assert.deepEqual(kinds(bs).slice(2, 4), ['openQuiet', 'openShow'])
+  assert.equal(bs[4].kind, 'finish')
+  assert.deepEqual(buildBeats(log, MH).map(b => b.uid).slice(0, 4), ['A0', 'A0', 'A1', 'B0'], 'ไม่ส่ง rng = ลำดับ log')
 })
 
 test('🔑 สกิล onAttack ของตัวที่ตีคนแรก ต้องไม่ถูกกลืนเข้ายกแรก (บั๊ก 6)', () => {
@@ -247,13 +263,13 @@ test('🔑 สกิล onAttack ของตัวที่ตีคนแร�
     atk(),
   ]
   const bs = buildBeats(log, MH)
-  assert.equal(bs[0].kind, 'openGroup', 'aura = ยกแรก และเป็นตัวท้ายกลุ่ม')
+  assert.equal(bs[0].kind, 'openShow', 'aura = ยกแรก')
   assert.equal(bs[1].kind, 'skill', 'cleave ต้องได้ประกาศตอนโปรกจริง')
 })
 
-test('ไม่มี passive ก่อนหมัดแรกเลย → ไม่มี openGroup และไม่ throw', () => {
+test('ไม่มี passive ก่อนหมัดแรกเลย → ไม่มี openShow และไม่ throw', () => {
   const bs = buildBeats([atk(), atk({ dmg: 99, targetHpAfter: 0, dead: true })], MH)
-  assert.equal(kinds(bs).filter(k => k === 'openGroup').length, 0)
+  assert.equal(kinds(bs).filter(k => k === 'openShow').length, 0)
 })
 
 // ── danger / survive ───────────────────────────────────────────────
@@ -312,7 +328,7 @@ test('totalDuration: ไฟต์ตัวอย่างอยู่ในง�
   log.push(atk({ dmg: 99, targetHpAfter: 0, dead: true }))
   log.push(atk({ dmg: 99, targetHpAfter: 0, dead: true, target: 'B1' }))
   log.push(atk({ dmg: 99, targetHpAfter: 0, dead: true, target: 'B1' }))
-  const want = 20 * BEAT + 2 * BEAT * KO_MULT + BEAT * FINISH_MULT + OPEN_GROUP_MS + SKILL_PAUSE
+  const want = 20 * BEAT + 2 * BEAT * KO_MULT + BEAT * FINISH_MULT + OPEN_SHOW_MS + SKILL_PAUSE
   assert.equal(Math.round(totalDuration(buildBeats(log, MH))), want)
 })
 

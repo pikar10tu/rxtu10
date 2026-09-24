@@ -69,12 +69,12 @@
       <!-- สปอตไลต์สกิล — หรี่ฉากแล้วชูแบนเนอร์ให้อ่านก่อน ผลค่อยลงทีหลัง
            🚫 ห้ามใช้ backdrop-filter/blur ตรงนี้เด็ดขาด — เป็นตัวฆ่าเฟรมบน iOS Safari (ดูเคสกระตุก v3)
            อยู่ "ใต้" fx layer เพื่อให้เลข/ประกายของผลที่ลงตามมาไม่ถูกฉากหรี่กลบ -->
-      <div v-if="spot" class="br-spot" :class="{ out: spotOut }" :style="spotStyle" aria-hidden="true">
+      <div v-if="spot" class="br-spot" :class="{ out: spotOut, foe: spot.side === 'B' }" :style="spotStyle" aria-hidden="true">
         <div class="br-spot-dim"></div>
         <div class="br-spot-card">
           <div class="br-spot-top">
             <span class="br-spot-icon"><Emoji :char="spot.icon" /></span>
-            <span class="br-spot-name">{{ spot.name }}</span>
+            <span class="br-spot-name"><Emoji v-if="spot.skillIcon" :char="spot.skillIcon" /> {{ spot.name }}</span>
           </div>
           <div v-if="spot.desc" class="br-spot-desc">{{ spot.desc }}</div>
         </div>
@@ -194,7 +194,7 @@ import Emoji from '../shared/Emoji.vue'
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, sparkOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
-import { passiveText, passiveTitle, STATUS_MAX } from '../../data/petPassives.js'
+import { passiveText, passiveTitle, effectText, STATUS_MAX } from '../../data/petPassives.js'
 import { buffSources, liveBuffs, badgesOf } from '../../utils/battleBuffs.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
@@ -362,7 +362,8 @@ function statusOf(uid) { return statusMap.value[uid] || [] }
 const rawLog = computed(() => props.data?.result?.log || [])
 // ⚠️ maxHp เป็น plain object ที่ buildMax() เขียนทับ ไม่ใช่ ref — beats จึงไม่ re-compute เองเมื่อ maxHp เปลี่ยน
 // แต่ปลอดภัยเพราะ buildMax(d) ถูกเรียกก่อน reset() ในตัว watcher เดียวกันเสมอ และ rawLog เปลี่ยนพร้อมกัน (props.data ใหม่ทั้งก้อน) ซึ่ง trigger การ compute ใหม่อยู่แล้ว
-const beats = computed(() => buildBeats(rawLog.value, maxHp))
+// rng: ลำดับโชว์ยกแรกสุ่มใหม่ทุกไฟต์ (แสดงผลล้วน ไม่แตะผลไฟต์)
+const beats = computed(() => buildBeats(rawLog.value, maxHp, { rng: Math.random }))
 const done = computed(() => idx.value >= beats.value.length)
 const summary = computed(() => done.value
   ? computeBattleSummary(rawLog.value, props.data?.playerTeam || [], props.data?.botTeam || [])
@@ -468,6 +469,10 @@ function skipIntro() {
 
 // ── ตำแหน่ง/การเคลื่อนไหว ──
 // centers cache ย้ายไป fx pool (battleFx.js createBattleFx().centerOf) — ใช้ fx.centerOf(uid) แทน
+function entryForUid(uid) {
+  const arr = uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam
+  return arr?.[parseInt(uid.slice(1), 10)] || null
+}
 function defForUid(uid) {
   const i = parseInt(uid.slice(1), 10)
   const arr = uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam
@@ -480,7 +485,7 @@ const handlers = {
   // ตัวที่รอดมาด้วยเลือด ≤25% ไม่เคยถูกสั่งปิดวงแหวน (dangerRing(uid,false) เรียกเฉพาะตอนตาย)
   // → เดิมวงแหวน iterations:Infinity เต้นค้างผ่านหน้าสรุป/ตอน peek ยาวจนกว่าจะ reset() (§5.2 บอกให้ปิดตอนจบไฟต์)
   end() { clearHighlights(); fx?.dangerClearAll() },
-  // passive — ชั้นมาจาก battleBeats (spotlight/glance/openGroup/mute) · เวลาเดินในตัว handler เอง
+  // passive — ชั้นมาจาก battleBeats (spotlight/glance/openShow/mute) · เวลาเดินในตัว handler เอง
   passive(e) { return applyPassive(e) },
 }
 
@@ -515,7 +520,8 @@ function skillTitle(e) {
 //   skillMoment → หรี่ฉาก + แบนเนอร์ + ผลลงทีหลัง (revive/cheatDeath/saveAlly เท่านั้น)
 //   skill       → ครั้งแรกของสกิลนั้นในไฟต์: หยุด SKILL_PAUSE แล้วปล่อยไหล
 //   skillQuiet  → ครั้งซ้ำ: ผลอย่างเดียว 0ms (ประกาศชื่อไปแล้วครั้งแรก)
-//   openGroup   → ยกแรก ชิปขึ้นพร้อมกันทุกใบ (ตัวท้ายกลุ่มถือเวลาค้างไว้คนเดียว) แล้วจางพร้อมกัน
+//   openQuiet   → ยกแรก part ที่ไม่ใช่ใบท้ายของเพ็ทตัวนั้น: พักผลไว้ 0ms
+//   openShow    → ยกแรก โชว์ไทม์ของเพ็ททีละตัว: แบนเนอร์หน้าเพ็ท+ชื่อสกิล+ผลสั้นๆ + เสียงของสกิล แล้วผลของทั้งก้อนลง
 async function applyPassive(e) {
   if (!e?.uid) return
   const g = gen
@@ -525,19 +531,20 @@ async function applyPassive(e) {
 
   const hold = t.windup + t.motion + t.hitstop + t.tail
 
-  if (e.kind === 'openQuiet' || e.kind === 'openGroup') {
-    showChip(e.uid, e)                             // ยกแรก: ขึ้นค้างไว้ก่อน ยังไม่เลือน
+  if (e.kind === 'openQuiet') { openEvents.push(e); return }   // ผลลงพร้อมโชว์ของเพ็ทตัวเดียวกัน
+  if (e.kind === 'openShow') {
+    const chunk = openEvents.splice(0)
+    const parts = [...chunk, e]
     openSfx(e)
-    openChips.add(e.uid)
-    if (hold > 0) {
-      await wait(hold); if (g !== gen) return
-      for (const uid of openChips) hideChip(uid)   // ตัวท้ายกลุ่มสั่งจางพร้อมกันทั้งชุด
-      openChips.clear()
-      for (const ev of openEvents) firePassiveFx(ev)
-      openEvents.length = 0
-    } else {
-      openEvents.push(e)                           // ผลของยกแรกลงพร้อมกันตอนกลุ่มจบ
-    }
+    const pet = defForUid(e.uid)
+    const lv = entryForUid(e.uid)?.passiveLv
+    const p = passiveOf(pet)
+    await spotlightPassive(e, t, g, {
+      icon: pet.emoji || e.icon || '✨',
+      desc: p && p.name === e.name ? effectText(p, lv) : '',
+      side: e.uid[0],
+      fire: () => parts.forEach(firePassiveFx),
+    })
     return
   }
 
@@ -555,27 +562,20 @@ async function applyPassive(e) {
   firePassiveFx(e)
 }
 
-// ── เสียงสกิลเปิดไฟต์ ── ยกแรกมีได้ถึง 6 ใบขึ้นพร้อมกัน ⇒ ดังแค่ 1 เสียงต่อกลุ่ม (กั้น 700ms)
-// ยกเว้น 🦁 คำราม (ครบ 3 สาย) ดังเสมอ — เป็นเงื่อนไขที่ผู้เล่นต้องจัดทีมให้ได้ จึงต้องได้ยินชัด
+// ── เสียงสกิลเปิดไฟต์ ── โชว์ทีละตัวแล้ว แต่ละตัวได้เสียงของตัวเอง (🦁 ครบ 3 สาย = คำราม)
 const OPEN_SFX = {
   elementTrinity: 'roar', teamCrit: 'open_crit', teamHp: 'open_hp', teamLifesteal: 'open_drain',
   teamDamageReduction: 'open_wall', enemyVuln: 'curse',
 }
-let openSfxAt = -1e9
 function openSfx(e) {
-  const name = OPEN_SFX[e.effect] || (e.fxKind === 'debuff' ? 'curse' : 'aura')
-  const now = performance.now()
-  if (name !== 'roar' && now - openSfxAt < 700) return
-  openSfxAt = now
-  sfx(name)
+  sfx(OPEN_SFX[e.effect] || (e.fxKind === 'debuff' ? 'curse' : e.fxKind === 'damage' ? 'p_fire' : 'aura'))
 }
 
 // ── ชิปชื่อสกิลเกาะบนการ์ด ──
 // ⚠️ ใช้ชิปแทนป้ายลอย (fx.banner) เพราะป้ายลอยใช้พูลแค่ 2 ช่อง แล้วถูกยึดไปโผล่ผิดการ์ด
 //    (อาการเดียวกับเลขดาเมจที่ user รายงานว่า "ป้ายขึ้นมั่ว") · ชิปผูกกับการ์ดตรงๆ ไม่มีพูลให้ยึด
 const chipOn = ref({})            // uid → { name, icon, out }
-const openChips = new Set()       // uid ที่ถือชิปยกแรกอยู่ (จางพร้อมกันตอนกลุ่มจบ)
-const openEvents = []             // event ยกแรกที่รอลงผลพร้อมกันตอนกลุ่มจบ
+const openEvents = []             // event ยกแรก (openQuiet) ที่รอลงผลพร้อมโชว์ของเพ็ทตัวเดียวกัน
 const CHIP_OUT_MS = 300
 
 function showChip(uid, e) {
@@ -592,7 +592,7 @@ function hideChip(uid) {
     chipOn.value = next
   }, CHIP_OUT_MS)
 }
-function clearChips() { chipOn.value = {}; openChips.clear(); openEvents.length = 0 }
+function clearChips() { chipOn.value = {}; openEvents.length = 0 }
 
 function clearSpot(uid) {
   spot.value = null
@@ -602,13 +602,17 @@ function clearSpot(uid) {
 }
 
 /** ไทม์ไลน์สปอตไลต์: หรี่ฉาก+แบนเนอร์เข้า (windup) → ค้างอ่าน (hitstop) → ผลลง+แบนเนอร์ออก (tail) */
-async function spotlightPassive(e, t, g) {
+// opts (ยกแรก): icon = หน้าเพ็ท · desc = ผลสั้น (เลขตามเลเวลจริง) · side = 'A'|'B' (สีแบนเนอร์) · fire = ลงผลทั้งก้อน
+async function spotlightPassive(e, t, g, opts = {}) {
   spotStyle.value = {
     '--spot-delay': `${Math.round(t.windup * 0.43)}ms`,
     '--spot-in': `${Math.round(t.windup * 0.57)}ms`,
     '--spot-out': `${Math.round(t.tail) || 1}ms`,
   }
-  spot.value = { icon: e.icon || '✨', name: skillTitle(e), desc: passiveDescOf(e) }
+  spot.value = {
+    icon: opts.icon || e.icon || '✨', name: skillTitle(e),
+    desc: opts.desc ?? passiveDescOf(e), side: opts.side || null, skillIcon: opts.icon ? e.icon : null,
+  }
   spotOut.value = false
   highlight(e.uid, 'spotlit')
   await wait(t.windup + t.motion); if (g !== gen) return clearSpot(e.uid)
@@ -617,7 +621,7 @@ async function spotlightPassive(e, t, g) {
   // ⚠️ หลอดเลือด/เลขเด้ง ต้องอยู่ตรงนี้เท่านั้น ห้ามไปอัปตั้งแต่ต้นฟังก์ชัน
   //    ไม่งั้นเลือดจะขยับตั้งแต่แบนเนอร์ยังไม่ทันขึ้น = คนดูเห็น "ผล" ก่อน "เหตุ" ซึ่งเป็นสิ่งที่ฟีเจอร์นี้ตั้งใจแก้
   spotOut.value = true
-  firePassiveFx(e)      // ป้ายเล็กเหนือหัวไม่ต้องแล้ว — แบนเนอร์ใหญ่ทำหน้าที่นั้นไปแล้ว
+  if (opts.fire) opts.fire(); else firePassiveFx(e)   // ป้ายเล็กเหนือหัวไม่ต้องแล้ว — แบนเนอร์ใหญ่ทำหน้าที่นั้นไปแล้ว
   await wait(t.tail); if (g !== gen) return clearSpot(e.uid)
   clearSpot(e.uid)
 }
@@ -1178,6 +1182,9 @@ onUnmounted(() => {
   will-change: transform, opacity; animation: br-spot-in var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.2) var(--spot-delay, 180ms) both; }
 .br-spot-top { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .br-spot-icon { font-size: 1.5rem; line-height: 1; }
+/* โชว์ยกแรกของฝั่งศัตรู — ขอบ/ชื่อแดง ให้รู้ทันทีว่าเป็นของใคร */
+.br-spot.foe .br-spot-card { border-color: #b91c1c; }
+.br-spot.foe .br-spot-name { color: #991b1b; }
 .br-spot-name { font-size: 1.05rem; font-weight: 800; color: #312e81; }
 .br-spot-desc { margin-top: 3px; font-size: .76rem; line-height: 1.4; color: rgba(0,0,0,.7); }
 .br-spot.out .br-spot-dim { animation: br-spot-dim-out var(--spot-out, 230ms) ease-in forwards; }
