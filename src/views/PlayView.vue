@@ -6,10 +6,10 @@
     <NewsBoard />
 
     <template v-if="authStore.isLoggedIn">
-      <!-- ── ร้านค้ารวม (ร้านเพ็ท · ร้านฟาร์ม · ร้านแต่งตัว) — ทางเข้าบนสุดของหน้าเกม ── -->
+      <!-- ── ร้านค้ารวม (ร้านเพ็ท · ร้านฟาร์ม · ร้านตกแต่ง) — ทางเข้าบนสุดของหน้าเกม ── -->
       <RouterLink to="/shop" class="shop-entry">
         <span class="se-emoji"><Emoji char="🛍️" /></span>
-        <span class="se-txt"><b>ร้านค้า</b><small>อัญเชิญเพ็ท · ปลดแปลงฟาร์ม · ร้านแต่งตัวใหม่ 🎀</small></span>
+        <span class="se-txt"><b>ร้านค้า</b><small>อัญเชิญเพ็ท · ปลดแปลงฟาร์ม · ร้านตกแต่งใหม่ 🎀</small></span>
         <span class="se-go">›</span>
       </RouterLink>
 

@@ -30,6 +30,11 @@
           </template>
         </template>
       </div>
+      <!-- ช่องขยายแปลง → ร้านฟาร์มในหน้าร้านค้า (ปลดแปลงอยู่ที่นั่นที่เดียว) -->
+      <RouterLink v-if="farm.nextPlot.value.reason !== 'maxed'" to="/shop?tab=farm" class="plot plot-add">
+        <span class="plot-plus">＋</span>
+        <span class="plot-hint">ขยายแปลง</span>
+      </RouterLink>
     </div>
 
     <!-- inventory / sell -->
@@ -250,4 +255,7 @@ const invList = computed(() =>
   45%  { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
+.plot-add { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 94px; text-decoration: none; color: #2f7d55;
+  background: rgba(255,255,255,.55); border: 2px dashed #7fd9b8; }
+.plot-add .plot-hint { font-size: .72rem; font-weight: 700; }
 </style>

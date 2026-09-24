@@ -8,7 +8,7 @@
 
     <FarmGrid />
     <FarmOrders />
-    <FarmShop />
+    <!-- ปลดแปลงย้ายไปร้านค้า (ร้านฟาร์ม) ที่เดียว — user สั่ง 25 ก.ย. 2026 · ช่อง ＋ ขยายแปลงในกริดพาไปที่นั่น -->
   </div>
 </template>
 
@@ -16,7 +16,6 @@
 import Emoji from '../components/shared/Emoji.vue'
 import FarmGrid from '../components/farm/FarmGrid.vue'
 import FarmOrders from '../components/farm/FarmOrders.vue'
-import FarmShop from '../components/farm/FarmShop.vue'
 </script>
 
 <style scoped>

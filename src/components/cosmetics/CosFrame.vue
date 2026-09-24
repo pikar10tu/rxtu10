@@ -1,4 +1,4 @@
-<!-- กรอบรูปจากร้านแต่งตัว — ห่อรูปโปรไฟล์ (slot) · ไม่มีกรอบ = คืน slot เปล่าๆ ไม่มี wrapper เพิ่ม
+<!-- กรอบรูปจากร้านตกแต่ง — ห่อรูปโปรไฟล์ (slot) · ไม่มีกรอบ = คืน slot เปล่าๆ ไม่มี wrapper เพิ่ม
      still = ภาพนิ่ง (รายชื่อสมาชิก) · ของประดับ/ของวนรอบวาดเป็น emoji ทับบน (pointer-events: none) -->
 <template>
   <div v-if="item" class="cz-fw" :class="['cz-' + item.id, { 'cz-still': still }]">

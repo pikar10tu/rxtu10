@@ -1,4 +1,4 @@
-<!-- พื้นการ์ดโปรไฟล์จากร้านแต่งตัว — ชั้นพื้นหลังเต็มกล่องแม่ (แม่ต้อง position: relative + overflow: hidden)
+<!-- พื้นการ์ดโปรไฟล์จากร้านตกแต่ง — ชั้นพื้นหลังเต็มกล่องแม่ (แม่ต้อง position: relative + overflow: hidden)
      เนื้อหาของแม่ต้องอยู่เหนือชั้นนี้ (position: relative; z-index: 1) · emit dark ให้แม่เปลี่ยนสีตัวอักษร -->
 <template>
   <div v-if="item" class="cz-bgl" :class="'cz-' + item.id" aria-hidden="true">

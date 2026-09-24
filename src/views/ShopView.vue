@@ -27,7 +27,7 @@
 
       <template v-if="tab === 'style'">
         <div class="style-note">
-          <b><Emoji char="🎀" /> ร้านแต่งตัว</b> แตะชิ้นไหนก็ลองใส่บนการ์ดด้านล่างได้เลย ยังไม่เสียเงิน · ซื้อครั้งเดียวเก็บถาวร ใส่ได้หมวดละ 1 ชิ้น
+          <b><Emoji char="🎀" /> ร้านตกแต่ง</b> แตะชิ้นไหนก็ลองใส่บนการ์ดด้านล่างได้เลย ยังไม่เสียเงิน · ซื้อครั้งเดียวเก็บถาวร ใส่ได้หมวดละ 1 ชิ้น
           <span class="style-where">โชว์ที่ไหน: <b>สีชื่อ · กรอบรูป · ป้ายหน้าชื่อ</b> ขึ้นในหน้าสมาชิก การ์ดโปรไฟล์ และหน้าฉัน · <b>พื้นการ์ด</b> ขึ้นในการ์ดโปรไฟล์และหน้าฉัน · ในหน้าสมาชิกเป็นภาพนิ่ง</span>
         </div>
         <CosmeticShop />
@@ -162,11 +162,11 @@ const { toast } = useToast()
 const SHOP_OPEN = true
 const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 const { postNews, myName } = useNewsPost()
-// ?tab=style = ลิงก์ "แต่งตัว" จากหน้าฉัน
+// ?tab=style = ลิงก์ "ตกแต่ง" จากหน้าฉัน
 const STORES = [
   { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · ห้องทดลอง' },
   { k: 'farm', icon: '🌱', name: 'ร้านฟาร์ม', sub: 'ปลดแปลงเพิ่ม' },
-  { k: 'style', icon: '🎀', name: 'ร้านแต่งตัว', sub: 'สีชื่อ · กรอบ · ป้าย' },
+  { k: 'style', icon: '🎀', name: 'ร้านตกแต่ง', sub: 'สีชื่อ · กรอบ · ป้าย' },
 ]
 // ?tab=style|farm|pet (เดิม gacha/lab = ร้านเพ็ท) — ลิงก์จากหน้าฉัน/หน้าเกมชี้ร้านตรงได้
 const qTab = String(useRoute().query.tab || '')

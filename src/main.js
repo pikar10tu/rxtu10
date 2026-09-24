@@ -6,7 +6,7 @@ import { useMembersStore } from './stores/members.js'
 import { initAppConfig } from './composables/useAppConfig.js'
 import App from './App.vue'
 import './style.css'
-import './styles/cosmetics.css'   // ร้านแต่งตัว (โหลดทั้งเว็บ — ของที่ใส่โผล่ในรายชื่อ/โปรไฟล์/หน้าฉัน)
+import './styles/cosmetics.css'   // ร้านตกแต่ง (โหลดทั้งเว็บ — ของที่ใส่โผล่ในรายชื่อ/โปรไฟล์/หน้าฉัน)
 import { installTapSound } from './utils/sfx.js'
 
 const app   = createApp(App)

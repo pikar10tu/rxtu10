@@ -136,7 +136,7 @@ const view = computed(() => ({ ...(props.member || {}), ...(full.value || {}) })
 
 const petPopup = ref(null)
 
-// ร้านแต่งตัว — doc เต็มมีครบทุกหมวด (รวมพื้นการ์ด) · ระหว่างรอใช้ของจากแถว roster (n/f/b)
+// ร้านตกแต่ง — doc เต็มมีครบทุกหมวด (รวมพื้นการ์ด) · ระหว่างรอใช้ของจากแถว roster (n/f/b)
 const cos = computed(() => full.value ? cosOf(full.value) : (props.member?.cosmetics || {}))
 const cosBg = computed(() => getCosmetic(cos.value.g))
 

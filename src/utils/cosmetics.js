@@ -1,4 +1,4 @@
-// ร้านแต่งตัว — ตรรกะล้วน (ไม่แตะ Firestore/Vue) · เทส: node --test src/utils/cosmetics.test.js
+// ร้านตกแต่ง — ตรรกะล้วน (ไม่แตะ Firestore/Vue) · เทส: node --test src/utils/cosmetics.test.js
 import { getCosmetic } from '../data/cosmetics.js'
 
 /** ของที่ใส่อยู่ + ของที่มี จาก user doc (กันค่าเพี้ยน/ของที่ถูกลบจากร้าน) */

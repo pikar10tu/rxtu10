@@ -181,6 +181,8 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
 .mv-card.off { opacity: .5; cursor: default; box-shadow: none; border-style: dashed; }
 .mv-card.off:active { transform: none; box-shadow: none; }
 .mv-av-wrap { position: relative; }
+/* ใส่กรอบจากร้าน = วง/ของประดับยื่นออกนอกรูป ⇒ เว้นบน-ล่างเพิ่ม ไม่ให้ชื่อชิดรูป */
+.mv-av-wrap:has(.cz-fw) { margin: 4px 0 6px; }
 .mv-avatar {
   width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #eee;
   border: 3px solid var(--ring, #ddd); box-sizing: border-box;

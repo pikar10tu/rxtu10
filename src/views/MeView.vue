@@ -14,7 +14,7 @@
         </CosFrame>
         <div class="me-av-actions">
           <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
-          <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 แต่งตัว</RouterLink>
+          <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ตกแต่ง</RouterLink>
           <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
           <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
             {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ ยังไม่ได้เลือกฉายา — แตะเพื่อเลือก' }}
