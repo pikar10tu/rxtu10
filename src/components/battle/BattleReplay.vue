@@ -527,6 +527,7 @@ async function applyPassive(e) {
 
   if (e.kind === 'openQuiet' || e.kind === 'openGroup') {
     showChip(e.uid, e)                             // ยกแรก: ขึ้นค้างไว้ก่อน ยังไม่เลือน
+    openSfx(e)
     openChips.add(e.uid)
     if (hold > 0) {
       await wait(hold); if (g !== gen) return
@@ -552,6 +553,21 @@ async function applyPassive(e) {
 
   // skillQuiet (ครั้งซ้ำ) — ผลอย่างเดียว ไม่มีชิป ไม่กินเวลา
   firePassiveFx(e)
+}
+
+// ── เสียงสกิลเปิดไฟต์ ── ยกแรกมีได้ถึง 6 ใบขึ้นพร้อมกัน ⇒ ดังแค่ 1 เสียงต่อกลุ่ม (กั้น 700ms)
+// ยกเว้น 🦁 คำราม (ครบ 3 สาย) ดังเสมอ — เป็นเงื่อนไขที่ผู้เล่นต้องจัดทีมให้ได้ จึงต้องได้ยินชัด
+const OPEN_SFX = {
+  elementTrinity: 'roar', teamCrit: 'open_crit', teamHp: 'open_hp', teamLifesteal: 'open_drain',
+  teamDamageReduction: 'open_wall', enemyVuln: 'curse',
+}
+let openSfxAt = -1e9
+function openSfx(e) {
+  const name = OPEN_SFX[e.effect] || (e.fxKind === 'debuff' ? 'curse' : 'aura')
+  const now = performance.now()
+  if (name !== 'roar' && now - openSfxAt < 700) return
+  openSfxAt = now
+  sfx(name)
 }
 
 // ── ชิปชื่อสกิลเกาะบนการ์ด ──
@@ -627,6 +643,7 @@ function firePassiveFx(e) {
   // event ทั้งตอนแปะและตอนย้ายเชื้อส่ง amount = ชั้นสะสมของเป้าหลังเหตุการณ์นั้น
   if (e.effect === 'infect' || e.effect === 'infectSpread') {
     for (const t of on) fx?.stateMark(t, '🦠', e.amount || 0)
+    sfx('virus')
   }
 
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
@@ -730,7 +747,7 @@ function applyImpact(beat, g, t) {
   // เด้งไล่ทีละชั้น 90ms ให้ตาอ่านได้ว่า "3 ชั้น = 3 ก้อน" — later() ผูก pendingTimers จึงถูกล้างตอน reset เสมอ
   // (เช็ค gen ซ้ำอีกชั้นกันไฟต์ใหม่ที่เริ่มก่อน timer ครบ)
   infHits.forEach((n, k) => {
-    if (n > 0) later(() => { if (g === gen) fx?.pop(beat.target, { dmg: n, infect: true, weight: 0.12 }) }, 90 * (k + 1))
+    if (n > 0) later(() => { if (g === gen) { fx?.pop(beat.target, { dmg: n, infect: true, weight: 0.12 }); sfx('virus_tick') } }, 90 * (k + 1))
   })
   if (beat.eff === 'super' || beat.eff === 'weak') fx?.callout(beat.target, beat.eff)
   if (beat.kill) fx?.dangerRing(beat.target, false)

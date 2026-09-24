@@ -60,6 +60,36 @@ function noise(t = 0, d = 0.12, { vol = 0.5, hp = 800 } = {}) {
   src.start(t0)
 }
 
+// โน้ตที่ความถี่ส่าย (LFO) — ได้เสียงยวบยาบ/คำราม · rate = ส่ายกี่ครั้งต่อวิ · depth = ส่ายกว้างกี่ Hz
+function wobble(f, t = 0, d = 0.4, { type = 'sawtooth', vol = 0.5, slide = null, rate = 18, depth = 40, lp = null } = {}) {
+  const a = ctx, t0 = a.currentTime + t
+  const o = a.createOscillator(), g = a.createGain(), lfo = a.createOscillator(), lg = a.createGain()
+  o.type = type
+  o.frequency.setValueAtTime(f, t0)
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + d)
+  lfo.frequency.value = rate; lg.gain.value = depth
+  lfo.connect(lg).connect(o.frequency)
+  g.gain.setValueAtTime(0.0001, t0)
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.04)
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + d)
+  let node = o.connect(g)
+  if (lp) { const f2 = a.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = lp; node = node.connect(f2) }
+  node.connect(out)
+  o.start(t0); lfo.start(t0); o.stop(t0 + d + 0.02); lfo.stop(t0 + d + 0.02)
+}
+
+// เสียงซ่าผ่าน lowpass (ทุ้ม) — ลมหายใจ/คำราม
+function rumble(t = 0, d = 0.5, { vol = 0.5, lp = 600 } = {}) {
+  const a = ctx, t0 = a.currentTime + t
+  const buf = a.createBuffer(1, Math.max(1, Math.floor(a.sampleRate * d)), a.sampleRate)
+  const ch = buf.getChannelData(0)
+  for (let i = 0; i < ch.length; i++) { const k = i / ch.length; ch[i] = (Math.random() * 2 - 1) * Math.min(1, k * 8) * (1 - k) }
+  const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain()
+  src.buffer = buf; f.type = 'lowpass'; f.frequency.value = lp; g.gain.value = vol
+  src.connect(f).connect(g).connect(out)
+  src.start(t0)
+}
+
 const arp = (notes, step, opt) => notes.forEach((f, i) => tone(f, i * step, opt?.d ?? 0.14, opt))
 
 // ── คลังเสียง ── (ความถี่อิงโน้ต C major: C5=523 E5=659 G5=784 C6=1047)
@@ -89,6 +119,17 @@ const SOUNDS = {
   ko:           () => { tone(330, 0, 0.35, { type: 'square', vol: 0.25, slide: 90 }); noise(0.05, 0.25, { vol: 0.25, hp: 200 }) },
   boom:         () => { tone(90, 0, 0.5, { type: 'sine', vol: 1, slide: 40 }); noise(0, 0.4, { vol: 0.45, hp: 150 }) },
   super:        () => arp([880, 1175], 0.05, { type: 'square', vol: 0.18, d: 0.08 }),
+  // สกิลเปิดไฟต์ (ยกแรก)
+  roar:     () => { wobble(170, 0, 0.9, { vol: 0.7, slide: 85, rate: 32, depth: 30, lp: 900 }); wobble(115, 0.02, 0.85, { vol: 0.5, slide: 60, rate: 23, depth: 18, lp: 700 }); rumble(0, 0.9, { vol: 0.7, lp: 800 }) },
+  aura:     () => { tone(392, 0, 0.35, { type: 'sawtooth', vol: 0.18 }); tone(523, 0.12, 0.4, { type: 'sawtooth', vol: 0.18 }); tone(784, 0.24, 0.45, { type: 'triangle', vol: 0.3 }) },
+  open_crit:  () => { noise(0, 0.12, { vol: 0.3, hp: 5000 }); tone(1568, 0.05, 0.3, { type: 'triangle', vol: 0.3 }) },
+  open_hp:    () => arp([392, 523, 659, 784], 0.07, { type: 'sine', vol: 0.4, d: 0.3 }),
+  open_drain: () => wobble(220, 0, 0.5, { type: 'triangle', vol: 0.35, slide: 440, rate: 9, depth: 20 }),
+  open_wall:  () => { tone(110, 0, 0.4, { type: 'sine', vol: 0.7 }); tone(1500, 0.05, 0.25, { type: 'square', vol: 0.12 }) },
+  curse:    () => { wobble(300, 0, 0.5, { type: 'triangle', vol: 0.35, slide: 150, rate: 7, depth: 25 }) },
+  // เชื้อ 🦠 — ยวบยาบเหนียวๆ (ติดเชื้อ) · ฟองปุด (ดาเมจเชื้อแต่ละชั้น)
+  virus:    () => { wobble(240, 0, 0.32, { type: 'square', vol: 0.22, slide: 110, rate: 26, depth: 70, lp: 1400 }); wobble(360, 0.08, 0.25, { type: 'square', vol: 0.15, slide: 170, rate: 31, depth: 60, lp: 1400 }) },
+  virus_tick: () => tone(520, 0, 0.07, { type: 'sine', vol: 0.3, slide: 220 }),
   // ชิปสกิลโผล่ครั้งแรกของไฟต์
   skill:        () => { tone(660, 0, 0.1, { type: 'triangle', vol: 0.5 }); tone(990, 0.07, 0.18, { type: 'triangle', vol: 0.5 }) },
   // ผลพาสสีฟตาม fxKind
