@@ -1,4 +1,4 @@
-# เคลียร์ข้อที่ถูกรีพอร์ทในการ์ดตรวจหลัก (Report Case Flow)
+# ตรวจข้อสอบด้วยปุ่มชุดเดียว: การ์ดปกติ + ข้อที่ถูกรีพอร์ท (Report Case Flow)
 
 **วันที่:** 24 ก.ย. 2026 · **สถานะ:** user อนุมัติแนว B แล้ว ("เอาแบบที่เสนอเลยครับ เริ่ดมาก")
 **เดโม:** https://claude.ai/artifact/Gh5MJCCDTxRsmdddJARXgc
@@ -48,6 +48,29 @@
 กล่องรีพอร์ทเดิมท้ายหน้า **ลบทิ้ง** · สาขา "ปิดรีพอร์ทอัตโนมัติ" ใน `saveFix()` ของกอง failed **คงไว้**
 (ข้อที่ไม่ผ่านตรวจอาจมีรีพอร์ทค้าง แก้จากกองนั้นก็ต้องปิดให้) แต่เปลี่ยนไปเรียก `resolveReports` ตัวใหม่
 
+## การ์ดตรวจข้อปกติ — ปุ่มชุดเดียวกัน (user อนุมัติ 24 ก.ย. "โอเคเลยครับ สวยงามมาก")
+
+ปัญหาเดิม: verdict มีปุ่มเดียว "✅ ถูกต้อง" แต่ต้องกดก่อนส่ง (ข้อถูก = 3 แตะ) · ทางแก้ข้อเป็นปุ่มเล็กบนสุด
+เจอข้อผิดแล้วฟอร์มไม่มีทางไป · ปุ่มส่งเทาเงียบเมื่อขาดกลุ่มโรค · ช่องไม่บังคับกางตลอด · "นำออก" ไม่ได้เครดิต
+
+โครงใหม่ของการ์ด (ข้อ pending/conflict):
+- โจทย์ · ตัวเลือก · เฉลย · คำอธิบาย · แผง "แก้โดย/รอบก่อนแก้" · แผงผลตรวจ conflict · 💬 คุยกัน — คงเดิม
+- **แถวกลุ่มโรค 1 บรรทัด**: "กลุ่มโรค: X (เดาให้)" + ปุ่ม [เปลี่ยน] กาง `TopicSelect` · ถ้าไม่มีกลุ่ม → กรอบเหลือง
+  "ต้องเลือกกลุ่มโรคก่อนส่ง" + TopicSelect กางให้เลย (เหตุผลที่ปุ่มกดไม่ได้ต้องมองเห็นก่อนกด)
+- **"＋ เพิ่ม เหตุผล / เรฟ / หมายเหตุถึงนักศึกษา"** พับไว้ · ข้อที่มี `reviewNote` เดิม → กางให้เอง
+- คำถาม **"ข้อนี้ถูกต้องไหม?"** + 2 ปุ่มใหญ่: **มีจุดผิด** · **✅ ถูกต้อง ส่งผล** (ยืนยัน 1 ครั้ง → submit เดิม verdict `correct`)
+  + ลิงก์เล็ก "ข้ามข้อนี้"
+- **มีจุดผิด** → "จะจัดการข้อนี้ยังไง?" ✏️ แก้ / 🗑️ นำออก / ‹ ย้อนกลับ — **คอมโพเนนต์เดียวกับขั้น 2b ของการ์ดรีพอร์ท**
+  · แก้ = `writeFix` เดิม (ต้องแก้ชั้นตัดสิน) · นำออก = `writeRetireWithCredit` (ต้องมีเหตุผล)
+- ปุ่มเล็ก "✏️ แก้ข้อนี้ / 🗑️ นำออก" บนหัวการ์ด **ถอดออก** (ย้ายมาอยู่ใต้ "มีจุดผิด")
+- แก้แค่คำอธิบาย/หมายเหตุ (ไม่ใช่จุดผิด) → ทำได้ในแผง "＋ เพิ่ม…" ช่องหมายเหตุ ส่งไปพร้อมผลตรวจ ·
+  คำอธิบายเฉลยแก้ได้ในฟอร์ม ✏️ แก้ (ชั้นประกอบ บันทึกแล้วตรวจต่อได้ ตามพฤติกรรม `saveEdit` สาขา non-fix เดิม) —
+  ปุ่มนี้อยู่ในแผง "＋ เพิ่ม…" ชื่อ "แก้คำอธิบายเฉลย"
+- ตัว verdict state (`verdict` ref + `VERDICTS`) ถูกลบ — เหลือเส้นเดียว
+
+คอมโพเนนต์ร่วม: `components/review/JudgeActions.vue` (คำถาม + 2 ปุ่ม + ขั้นแก้/นำออก + confirm) ใช้ทั้ง ReportCaseCard และการ์ดปกติ
+ต่างกันแค่ข้อความคำถาม/ปุ่มซ้าย และ callback ของ "ถูกต้อง"/"ไม่ผิด"
+
 ## ใครเห็นรีพอร์ทข้อไหน
 
 - เฉพาะ **academic/admin** (rules `questionReports` อ่านได้แค่ `isAcademic()` — อาจารย์ไม่เห็น การ์ดรีพอร์ทไม่ขึ้นให้อาจารย์ คิวปกติเหมือนเดิม)
@@ -63,6 +86,7 @@
 | `utils/reportCase.js` (+test) ใหม่ | pure: `canHandleReport` · `nextReportGroup(groups, skippedIds)` · `snapshotDiffers(snapshot, q)` · `buildReportResultMail(report, note, createdAt)` (notice ไม่มีรางวัล) |
 | `utils/questionReview.js` | `tallyReviewCounts` นับ `retiredBy` ด้วย (เมื่อ uid นั้นไม่อยู่ใน `reviewedBy` ของข้อเดียวกัน) ⇒ ปุ่มซิงก์ระบบตรวจไม่ลบเครดิตนำออก |
 | `composables/useReviewWrites.js` ใหม่ | เส้นเขียน Firestore ที่ใช้ร่วม: `writeFix(q, payload, reason)` (ย้ายจาก saveEdit/saveFix ที่ซ้ำกันเกือบทั้งก้อน) · `writeRetireWithCredit(q, reason)` · `resolveReports(group, verdict, note)` แบบ **transaction** อ่านสถานะก่อน — ฉบับที่ไม่ `open` แล้วข้าม ⇒ ไม่จ่ายซ้ำ |
+| `components/review/JudgeActions.vue` ใหม่ | คำถามตัดสิน + 2 ปุ่ม + ขั้นแก้/นำออก + confirm · ใช้ร่วมสองการ์ด |
 | `components/review/ReportCaseCard.vue` ใหม่ | UI 3 ขั้นทั้งหมด · props `group`, `question` · emits `done`, `skip` · เรียก useReviewWrites + submit เสียง `correct` |
 | `views/ReviewView.vue` | แบนเนอร์ + เลือกระหว่าง ReportCaseCard กับการ์ดปกติ · ลบกล่องรีพอร์ทเดิม · saveEdit/saveFix เรียก `writeFix` · แยก transaction ส่งเสียงของ submit() ออกเป็นฟังก์ชันที่ ReportCaseCard ใช้ได้ (`writeVote(q, {verdict, reason, ref, ple, note})`) |
 | `firestore.rules` | ไม่ต้องแก้: `retiredBy/retireReason/...` ผ่าน `reviewUntouched()` · mail create = `isAcademic()` · reviewMeta = `canEditQuestions()` |
