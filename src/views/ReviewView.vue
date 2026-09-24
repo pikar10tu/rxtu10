@@ -667,7 +667,13 @@ async function saveFix(q) {
   const uid = myUid.value
   const fixerName = reviewerName()
   const payload = draftPayload(fixDraft.value)
-  if (!(await confirm('บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'))) return
+  // หากลุ่มรีพอร์ทของข้อนี้ไว้ก่อน confirm — ใช้ตัวเดียวกันทั้งข้อความยืนยันและตอนปิดรีพอร์ทจริงด้านล่าง
+  // กันกรณี reportGroups เปลี่ยนระหว่างรอ await (เช่นมีคนปิดรีพอร์ทข้อนี้ไปพร้อมกัน) แล้วข้อความกับของจริงไม่ตรงกัน
+  const reportedGroup = reportGroups.value.find(g => g.questionId === q.id)
+  const confirmMsg = reportedGroup
+    ? `บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ\nและปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${reportedGroup.reports.length} คน`
+    : 'บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'
+  if (!(await confirm(confirmMsg))) return
   fixSaving.value = true
   try {
     const { oldStatus, bumped } = await writeFix(q, payload, triageFixReason.value)
@@ -685,7 +691,7 @@ async function saveFix(q) {
     if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; triageFixReason.value = '' }
     toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
     // แก้เนื้อหาแล้ว = รีพอร์ทที่ค้างของข้อนี้ (ถ้ามี) ถือว่าจริง ปิดพร้อมให้รางวัลผู้แจ้งไปเลย
-    const reportedGroup = reportGroups.value.find(g => g.questionId === q.id)
+    // ใช้ reportedGroup ตัวเดียวกับที่หาไว้ก่อน confirm ด้านบน (ไม่ find ซ้ำ — ข้อความยืนยันกับของจริงต้องอ้างกลุ่มเดียวกัน)
     if (reportedGroup) {
       try {
         const { closed } = await resolveReports(reportedGroup, 'valid')
