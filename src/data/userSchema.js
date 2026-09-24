@@ -16,6 +16,7 @@ import { getPetDef } from './index.js'
 export const USER_DEFAULTS = {
   customPhoto: null,
   photoMini: null,     // ตัวจิ๋วของ customPhoto — ตัวเดียวที่ขี่ไปกับ roster ได้ (utils/photo.js)
+  photoMiniSize: null, // ขนาดของตัวจิ๋ว (px) — ต่างจาก MINI_SIZE = รุ่นเก่า หน้าฉันสร้างใหม่ให้
   coins: 0,
   pets: [],
   activePets: [null, null, null],

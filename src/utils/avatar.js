@@ -67,7 +67,13 @@ export function fallbackAvatar(e, name, size = 96) {
  */
 export function avatarUrl(u, name, size = 96) {
   return (
-    u?.customPhoto || u?.photoMini || u?.googlePhoto ||
+    u?.customPhoto || u?.photoMini || googleSized(u?.googlePhoto) ||
     letterAvatar(name ?? u?.nickname, size)
   )
+}
+
+/** รูป Google มักลงท้าย =s96-c → ขอ 128px ให้คมบนจอ 2–3x (ไฟล์มาจาก CDN Google ไม่แตะ roster) */
+export function googleSized(url, px = 128) {
+  if (!url) return url
+  return /=s\d+(-c)?$/.test(url) ? url.replace(/=s\d+(-c)?$/, `=s${px}-c`) : url
 }

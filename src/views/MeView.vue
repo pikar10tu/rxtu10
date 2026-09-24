@@ -124,7 +124,7 @@ import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { avatarUrl, fallbackAvatar } from '../utils/avatar.js'
-import { makePhotoMini } from '../utils/photo.js'
+import { makePhotoMini, MINI_SIZE } from '../utils/photo.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
@@ -249,11 +249,12 @@ async function sendFeedback() {
 let backfilled = false
 async function backfillMini() {
   const u = auth.userData
-  if (backfilled || !u || !u.customPhoto || u.photoMini) return
+  // ยังไม่มีตัวจิ๋ว หรือเป็นรุ่นเก่า (48px ก่อน 25 ก.ย. 2026) → สร้างใหม่ที่ MINI_SIZE
+  if (backfilled || !u || !u.customPhoto || (u.photoMini && u.photoMiniSize === MINI_SIZE)) return
   backfilled = true
   const mini = await makePhotoMini(u.customPhoto)
   if (!mini) return
-  if (await auth.patchUser({ photoMini: mini })) syncRosterRow()
+  if (await auth.patchUser({ photoMini: mini, photoMiniSize: MINI_SIZE })) syncRosterRow()
 }
 onMounted(backfillMini)
 watch(() => auth.userData?.customPhoto, backfillMini)
@@ -305,6 +306,7 @@ async function save() {
     patch.customPhoto = newPhoto.value
     // เขียนคู่กันเสมอ — ตัวจิ๋วคือตัวเดียวที่เพื่อนจะได้เห็นในตารางสมาชิก/หอคอย
     patch.photoMini = newPhotoMini.value ?? await makePhotoMini(newPhoto.value)
+    patch.photoMiniSize = MINI_SIZE   // รุ่นของตัวจิ๋ว — backfillMini สร้างใหม่ถ้ายังเป็นรุ่นเก่า
   }
 
   auth.blockSnapshot()

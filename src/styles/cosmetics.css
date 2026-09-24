@@ -33,7 +33,10 @@
 /* ══ กรอบรูป ══ */
 .cz-fw { position: relative; border-radius: 50%; display: inline-flex; vertical-align: middle; }
 /* รูปใน slot ต้องอยู่เหนือวงกรอบ (::before วาดเป็นแผ่นเต็มวง) — ไม่งั้นรูปที่ไม่มี position ถูกทับ (user เจอในหน้าฉัน) */
-.cz-fw > :not(.cz-deco):not(.cz-orbit) { position: relative; z-index: 1; }   /* หดพอดีรูป — block จะยืดเต็มแถว วงกลมกลายเป็นวงรี */
+.cz-fw > :not(.cz-deco):not(.cz-orbit) { position: relative; z-index: 1; }
+/* รูปเป็น block + ไม่มี line-height ⇒ ตัวห่อกรอบเท่ารูปเป๊ะ (ช่องใต้บรรทัดของ inline img ทำวงกรอบเหลื่อมลงล่าง) */
+.cz-fw { line-height: 0; }
+.cz-fw > img { display: block; }   /* หดพอดีรูป — block จะยืดเต็มแถว วงกลมกลายเป็นวงรี */
 .cz-f-sky { box-shadow: 0 0 0 3px #7cc8ef; } .cz-f-mint { box-shadow: 0 0 0 3px #7fd9b8; } .cz-f-rose { box-shadow: 0 0 0 3px #f4a6c8; } .cz-f-grape { box-shadow: 0 0 0 3px #b9a6ef; }
 .cz-f-cream { box-shadow: 0 0 0 5px #fff, 0 2px 8px 5px rgba(43,53,80,.15); } .cz-f-plaingold { box-shadow: 0 0 0 3px #e0b04a; }
 .cz-f-double { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #7cc8ef, 0 0 0 6px #fff, 0 0 0 8px #f4a6c8; }

@@ -10,7 +10,9 @@
 //     (ดูคอมเมนต์ที่ utils/roster.js ฟิลด์ p/pm)
 // ════════════════════════════════════════════════════════════
 
-export const MINI_SIZE = 48
+// 48 → 72 (25 ก.ย. 2026 รูปในหน้าสมาชิกแตก — โชว์ 56px บนจอ 2–3x) · เพดานความยาวเท่าเดิม = roster ไม่ใหญ่ขึ้น
+//   ได้ความคมจาก WebP (คมกว่า JPEG ที่ขนาดเท่ากัน) + ครอปจัตุรัส (รูปโชว์เป็นวงกลม พิกเซลขอบๆ ที่ถูกตัดทิ้ง = เปลือง)
+export const MINI_SIZE = 72
 /** เพดานความยาว data URL ของตัวจิ๋ว — 83 คน × 3000 ≈ 250 KB ยังห่างเพดาน doc มาก */
 export const MINI_MAX_CHARS = 3000
 /** ไล่ลดคุณภาพจนกว่าจะลอดเพดาน — รูปที่มี noise สูงจะกินที่มากกว่าปกติ */
@@ -24,26 +26,30 @@ export const MINI_QUALITIES = [0.6, 0.45, 0.3]
  */
 export async function makePhotoMini(src, encode = encodeViaCanvas) {
   if (!src) return null
-  for (const q of MINI_QUALITIES) {
-    const out = await encode(src, MINI_SIZE, q)
-    if (out && out.length <= MINI_MAX_CHARS) return out
+  // WebP ก่อน (เบราว์เซอร์ที่เข้ารหัส WebP ไม่ได้จะคืน PNG ยาวเกินเพดานเอง → ตกไป JPEG)
+  for (const type of ['image/webp', 'image/jpeg']) {
+    for (const q of MINI_QUALITIES) {
+      const out = await encode(src, MINI_SIZE, q, type)
+      if (out && out.length <= MINI_MAX_CHARS && out.startsWith(`data:${type}`)) return out
+    }
   }
   return null
 }
 
-/** ย่อรูปด้วย canvas (เบราว์เซอร์เท่านั้น) — คืน data URL JPEG · null ถ้าโหลดรูปไม่ได้ */
-export function encodeViaCanvas(src, max, quality) {
+/** ย่อรูปด้วย canvas (เบราว์เซอร์เท่านั้น) — ครอปจัตุรัสกลางรูป · null ถ้าโหลดรูปไม่ได้ */
+export function encodeViaCanvas(src, max, quality, type = 'image/jpeg') {
   return new Promise((resolve) => {
     const img = new Image()
     img.onerror = () => resolve(null)
     img.onload = () => {
-      const scale = Math.min(1, max / Math.max(img.width, img.height))
-      const w = Math.max(1, Math.round(img.width * scale))
-      const h = Math.max(1, Math.round(img.height * scale))
+      const side = Math.min(img.width, img.height)
+      const out = Math.max(1, Math.min(max, side))
       const c = document.createElement('canvas')
-      c.width = w; c.height = h
-      c.getContext('2d').drawImage(img, 0, 0, w, h)
-      resolve(c.toDataURL('image/jpeg', quality))
+      c.width = out; c.height = out
+      const ctx = c.getContext('2d')
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, out, out)
+      resolve(c.toDataURL(type, quality))
     }
     img.src = src
   })

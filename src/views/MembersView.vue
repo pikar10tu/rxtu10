@@ -180,9 +180,11 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
 .mv-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .mv-card.off { opacity: .5; cursor: default; box-shadow: none; border-style: dashed; }
 .mv-card.off:active { transform: none; box-shadow: none; }
-.mv-av-wrap { position: relative; }
+.mv-av-wrap { position: relative; display: flex; }   /* flex = ไม่มีช่องใต้บรรทัด ป้ายเลเวลเกาะมุมรูปเป๊ะ */
 /* ใส่กรอบจากร้าน = วง/ของประดับยื่นออกนอกรูป ⇒ เว้นบน-ล่างเพิ่ม ไม่ให้ชื่อชิดรูป */
 .mv-av-wrap:has(.cz-fw) { margin: 4px 0 6px; }
+/* ใส่กรอบแล้ว วงสีสายซ้อนกับกรอบดูเหลื่อม ⇒ เปลี่ยนเป็นขอบขาวบางๆ ให้กรอบเป็นตัวเอก */
+.mv-av-wrap:has(.cz-fw) .mv-avatar { border-color: #fff; }
 .mv-avatar {
   width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #eee;
   border: 3px solid var(--ring, #ddd); box-sizing: border-box;
@@ -193,6 +195,7 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
   color: #fff; font-size: .7rem; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   border: 2px solid #fff;
+  z-index: 3;   /* อยู่เหนือกรอบตกแต่ง (รูป z1 · ของประดับ z2) */
 }
 .mv-nick {
   font-size: .8rem; font-weight: 700; white-space: nowrap;

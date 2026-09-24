@@ -207,7 +207,7 @@ function startDuel() {
 .pf-hero .pf-x { z-index: 2; }
 /* พื้นการ์ดสีอ่อนจากร้าน → ตัวอักษรเข้ม (พื้นเดิมของ hero เข้ม ตัวอักษรขาว) */
 .pf-hero.pf-lightbg { color: var(--ink); }
-.pf-av-frame { display: inline-block; }
+/* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
 .pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }

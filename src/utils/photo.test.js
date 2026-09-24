@@ -5,9 +5,9 @@ import { makePhotoMini, MINI_MAX_CHARS, MINI_QUALITIES, MINI_SIZE } from './phot
 // encoder ปลอม: ยิ่งคุณภาพสูงยิ่งยาว — เลียนแบบพฤติกรรม JPEG พอให้เทสตรรกะไล่คุณภาพ
 const fakeEncode = (lenAtFullQuality) => {
   const calls = []
-  const fn = async (src, size, q) => {
-    calls.push({ src, size, q })
-    return 'x'.repeat(Math.round(lenAtFullQuality * q))
+  const fn = async (src, size, q, type = 'image/jpeg') => {
+    calls.push({ src, size, q, type })
+    return `data:${type};` + 'x'.repeat(Math.round(lenAtFullQuality * q))
   }
   fn.calls = calls
   return fn
@@ -16,7 +16,7 @@ const fakeEncode = (lenAtFullQuality) => {
 test('รูปเล็กอยู่แล้ว → ใช้คุณภาพสูงสุด เรียก encode ครั้งเดียว', async () => {
   const enc = fakeEncode(1000)
   const out = await makePhotoMini('data:image/jpeg;base64,AAA', enc)
-  assert.equal(out.length, 600)
+  assert.ok(out.startsWith('data:image/webp'), 'ลอง WebP ก่อน')
   assert.equal(enc.calls.length, 1)
   assert.equal(enc.calls[0].q, MINI_QUALITIES[0])
   assert.equal(enc.calls[0].size, MINI_SIZE)
@@ -32,7 +32,13 @@ test('รูปหนัก → ไล่ลดคุณภาพจนลอด
 test('หนักเกินทุกระดับ → null (ยอมไม่มีรูปจิ๋ว ดีกว่าทำ roster บวม)', async () => {
   const enc = fakeEncode(100000)
   assert.equal(await makePhotoMini('data:image/jpeg;base64,AAA', enc), null)
-  assert.equal(enc.calls.length, MINI_QUALITIES.length)
+  assert.equal(enc.calls.length, MINI_QUALITIES.length * 2, 'ครบทั้ง WebP และ JPEG')
+})
+
+test('เบราว์เซอร์เข้ารหัส WebP ไม่ได้ (คืน PNG) → ตกไป JPEG', async () => {
+  const enc = async (src, size, q, type) => (type === 'image/webp' ? 'data:image/png;' : 'data:image/jpeg;') + 'x'.repeat(100)
+  const out = await makePhotoMini('data:image/jpeg;base64,AAA', enc)
+  assert.ok(out.startsWith('data:image/jpeg'))
 })
 
 test('ไม่มีรูปเข้ามา → null และไม่เรียก encode เลย', async () => {
