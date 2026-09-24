@@ -79,13 +79,44 @@ const SOUNDS = {
   reveal_rare:      () => arp([659, 988], 0.09, { type: 'triangle', vol: 0.7, d: 0.2 }),
   reveal_epic:      () => arp([523, 784, 1047], 0.09, { type: 'triangle', vol: 0.75, d: 0.24 }),
   reveal_legendary: () => { arp([523, 659, 784, 1047, 1319], 0.08, { type: 'triangle', vol: 0.8, d: 0.3 }); noise(0.4, 0.5, { vol: 0.15, hp: 4000 }) },
+
+  // ── สนามรบ (BattleReplay) ──
+  // หมัดตามสาย: w = weight 0–1 (ความแรงจริงของหมัด) · crit = ติ๊งแหลมซ้อน
+  hit_fist:     ({ w = 0.5, crit } = {}) => { tone(140 - w * 40, 0, 0.12 + w * 0.08, { type: 'sine', vol: 0.6 + w * 0.4, slide: 60 }); noise(0, 0.06, { vol: 0.25 + w * 0.2, hp: 300 }); if (crit) tone(1760, 0.02, 0.1, { type: 'square', vol: 0.2 }) },
+  hit_scissors: ({ w = 0.5, crit } = {}) => { noise(0, 0.09 + w * 0.05, { vol: 0.35 + w * 0.25, hp: 3500 }); tone(1200, 0, 0.07, { type: 'sawtooth', vol: 0.12, slide: 500 }); if (crit) tone(1760, 0.02, 0.1, { type: 'square', vol: 0.2 }) },
+  hit_paper:    ({ w = 0.5, crit } = {}) => { noise(0, 0.14 + w * 0.06, { vol: 0.3 + w * 0.2, hp: 1200 }); tone(420, 0, 0.12, { type: 'triangle', vol: 0.35, slide: 260 }); if (crit) tone(1760, 0.02, 0.1, { type: 'square', vol: 0.2 }) },
+  hit_sub:      () => noise(0, 0.04, { vol: 0.2, hp: 2000 }),
+  ko:           () => { tone(330, 0, 0.35, { type: 'square', vol: 0.25, slide: 90 }); noise(0.05, 0.25, { vol: 0.25, hp: 200 }) },
+  boom:         () => { tone(90, 0, 0.5, { type: 'sine', vol: 1, slide: 40 }); noise(0, 0.4, { vol: 0.45, hp: 150 }) },
+  super:        () => arp([880, 1175], 0.05, { type: 'square', vol: 0.18, d: 0.08 }),
+  // ชิปสกิลโผล่ครั้งแรกของไฟต์
+  skill:        () => { tone(660, 0, 0.1, { type: 'triangle', vol: 0.5 }); tone(990, 0.07, 0.18, { type: 'triangle', vol: 0.5 }) },
+  // ผลพาสสีฟตาม fxKind
+  p_heal:   () => arp([784, 988, 1175], 0.06, { type: 'sine', vol: 0.45, d: 0.2 }),
+  p_revive: () => { arp([523, 659, 784, 1047, 1319], 0.07, { type: 'sine', vol: 0.5, d: 0.25 }); noise(0.3, 0.4, { vol: 0.12, hp: 5000 }) },
+  p_guard:  () => { tone(1500, 0, 0.18, { type: 'square', vol: 0.18, slide: 1400 }); tone(2250, 0, 0.12, { type: 'sine', vol: 0.2 }) },
+  p_save:   () => { tone(1500, 0, 0.2, { type: 'square', vol: 0.2 }); arp([784, 1175], 0.08, { type: 'sine', vol: 0.35, d: 0.2 }) },
+  p_dodge:  () => noise(0, 0.16, { vol: 0.3, hp: 2500 }),
+  p_thorns: () => { tone(1800, 0, 0.05, { type: 'sawtooth', vol: 0.15 }); tone(1500, 0.05, 0.05, { type: 'sawtooth', vol: 0.15 }) },
+  p_fire:   () => { noise(0, 0.45, { vol: 0.4, hp: 500 }); tone(200, 0, 0.4, { type: 'sawtooth', vol: 0.15, slide: 90 }) },
+  p_cleave: () => { noise(0, 0.08, { vol: 0.35, hp: 3000 }); noise(0.1, 0.08, { vol: 0.35, hp: 3000 }) },
+  p_buff:   () => { tone(523, 0, 0.2, { type: 'triangle', vol: 0.35, slide: 1047 }) },
+  p_aim:    () => { tone(2000, 0, 0.03, { type: 'square', vol: 0.2 }); tone(2000, 0.08, 0.03, { type: 'square', vol: 0.2 }) },
+  p_chain:  () => { for (let i = 0; i < 4; i++) tone(900 + (i % 2) * 500, i * 0.035, 0.04, { type: 'sawtooth', vol: 0.15 }) },
 }
 
-/** เล่นเสียงตามชื่อ · ปิดเสียงอยู่/เบราว์เซอร์ไม่รองรับ = เงียบเฉยๆ ไม่ throw */
-export function sfx(name) {
+// กันเสียงเดียวกันยิงซ้อนถี่เกิน (โหมดเร่ง/หมัดลูกหลายหมัดในจังหวะเดียว) — ต่อชื่อ
+const GAP_MS = 45
+const lastAt = new Map()
+
+/** เล่นเสียงตามชื่อ (opts ส่งต่อให้เสียงที่ปรับได้ เช่น hit_*) · ปิดเสียงอยู่/เบราว์เซอร์ไม่รองรับ = เงียบเฉยๆ ไม่ throw */
+export function sfx(name, opts) {
   const play = SOUNDS[name]
   if (!play || !audio()) return
-  try { play() } catch { /* เสียงห้ามทำให้ฟีเจอร์พัง */ }
+  const now = performance.now()
+  if (now - (lastAt.get(name) || -1e9) < GAP_MS) return
+  lastAt.set(name, now)
+  try { play(opts) } catch { /* เสียงห้ามทำให้ฟีเจอร์พัง */ }
 }
 
 // เสียงกดปุ่มทั้งเว็บ — ผูกที่ document ทีเดียว (ไม่ต้องไล่ใส่ทุกปุ่ม)

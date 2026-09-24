@@ -205,6 +205,7 @@ import { buildBeats, scaleTiming, BEAT } from '../../utils/battleBeats.js'
 import { readPrefs, fxFlags, paceMult, FX_LABEL, PACE_LABEL } from '../../utils/battleReplayPrefs.js'
 import { createFrameMeter, FALLBACK_BASE, DROP_RATIO } from '../../utils/frameMeter.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
+import { sfx } from '../../utils/sfx.js'
 
 const props = defineProps({
   data: { type: Object, default: null },
@@ -541,6 +542,7 @@ async function applyPassive(e) {
 
   if (e.kind === 'skill') {
     showChip(e.uid, e)
+    sfx('skill')
     if (hold > 0) { await wait(hold); if (g !== gen) return }
     // ★ ไม่ await สองบรรทัดนี้ — ชิปเลือนและผลลง ทับ beat ถัดไปได้เลย
     hideChip(e.uid)
@@ -627,6 +629,9 @@ function firePassiveFx(e) {
     for (const t of on) fx?.stateMark(t, '🦠', e.amount || 0)
   }
 
+  const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
+    thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim' }
+  if (PSFX[e.fxKind]) sfx(PSFX[e.fxKind])
   switch (e.fxKind) {
     case 'damage':  fx?.sweep(on, e.icon, 60); break        // bahamut สาดไฟใส่ทุกตัว
     case 'cleave':  fx?.sweep(on, e.icon, 45); break        // เขี้ยว/เปลวไฟลงหลายใบในจังหวะเดียว
@@ -688,6 +693,13 @@ function applyImpact(beat, g, t) {
   //    ถ้าวันหลังเพิ่ม kind ใหม่แล้วลืมเขียนกิ่ง จะได้ default (เงียบ) ซึ่งปลอดภัย ไม่ใช่ดังสุด
   const spark = sparkOf(defForUid(beat.attacker))
   const w = beat.weight ?? 0
+  // เสียงหมัดตามสายของผู้ตี (fist ทุบ · scissors ฟัน · paper ปัด) · ปิดเกม/น็อกซ้อนเสียงหนักอีกชั้น
+  const elem = defForUid(beat.attacker)?.element
+  if (beat.kind === 'sub') sfx('hit_sub')
+  else if (!beat.silent) sfx(['fist', 'scissors', 'paper'].includes(elem) ? 'hit_' + elem : 'hit_fist', { w, crit: beat.crit })
+  if (beat.kind === 'finish') sfx('boom')
+  else if (beat.kill) sfx('ko')
+  if (beat.eff === 'super') sfx('super')
   switch (beat.kind) {
     case 'finish':
       fx?.burst(beat.target, 92, spark); fx?.shake('finish'); break
