@@ -59,6 +59,7 @@ export function buildReportRewardMail(report, coins, createdAt) {
   const q = report?.questionSnapshot?.question
   return {
     type: 'reward',
+    kind: 'report',   // achievement ตาไว/นักสืบ นับตอนกดรับ (stores/mailbox claim)
     title: 'รางวัลแจ้งข้อสอบผิด',
     body: q
       ? `ขอบคุณที่ช่วยแจ้งข้อสอบ "${truncate(q, 60)}" — ทีมวิชาการตรวจแล้วว่าถูกต้อง`

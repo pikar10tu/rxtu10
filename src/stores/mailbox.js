@@ -69,6 +69,10 @@ export const useMailbox = defineStore('mailbox', () => {
             { achId: ach.id, ...(ach.date ? { date: ach.date } : {}), earnedAt: serverTimestamp() })
           userPatch.achievementCount = increment(1)
         }
+        if (ach?.id === 'tower_champ') userPatch.towerChampTotal = increment(1)
+        if (ach?.id === 'arena_champ') userPatch.arenaChampTotal = increment(1)
+        // จดหมายรางวัลแจ้งข้อผิด (kind ใหม่ · ของเก่าดูจากหัวข้อ)
+        if (data.kind === 'report' || data.title === 'รางวัลแจ้งข้อสอบผิด') userPatch.reportsConfirmed = increment(1)
         if (Object.keys(userPatch).length) tx.update(doc(db, 'users', uid), userPatch)
         return { coins: c, tickets: t, ach }
       })

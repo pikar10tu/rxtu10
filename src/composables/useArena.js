@@ -105,12 +105,14 @@ export function useArena() {
         pvp: nextPvp, pvpAttackDate: today, pvpAttacksUsed: usedBefore + 1,
         pvpBoardNonce: nextNonce, dailyQuest: dq,
         ...(coin ? { coins: (auth.userData?.coins || 0) + coin } : {}),
+        ...(won ? { pvpWinsTotal: (auth.userData?.pvpWinsTotal || 0) + 1 } : {}),   // achievement ชนะตลอดชีพ
       },
       {
         // ใช้ค่าตรงๆ ไม่ใช้ increment() — ให้ตรงกับ optimistic เป๊ะ กัน seed กระดานกระพริบ
         pvp: nextPvp, pvpAttackDate: today, pvpAttacksUsed: usedBefore + 1,
         pvpBoardNonce: nextNonce, dailyQuest: dq,
         ...(coin ? { coins: increment(coin) } : {}),
+        ...(won ? { pvpWinsTotal: increment(1) } : {}),
       },
     )
     // patchUser คืน false เมื่อเขียน Firestore ล้มเหลว (+rollback optimistic แล้ว)

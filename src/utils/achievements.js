@@ -14,6 +14,18 @@ export function computeProgress(userData) {
     farmSalesTotal: u.farmSalesTotal || 0,
     totalSpent: u.totalSpent || 0,
     residenceLevel: u.residence?.level || 1,
+    // ── ชุด 25 ก.ย. 2026 ──
+    towerBest: u.towerBest || 0,
+    ta15Best: u.timeAttack?.best15 || 0,
+    legendarySpecies: new Set(pets.filter(p => p?.rarity === 'legendary').map(p => p.id)).size,
+    pvpWinsTotal: u.pvpWinsTotal || 0,
+    gachaPullsTotal: u.gachaPullsTotal || 0,
+    labFuseTotal: u.labFuseTotal || 0,
+    quizPerfectTotal: u.quizPerfectTotal || 0,
+    reportsConfirmed: u.reportsConfirmed || 0,
+    towerChampTotal: u.towerChampTotal || 0,
+    arenaChampTotal: u.arenaChampTotal || 0,
+    cosmeticsOwned: Array.isArray(u.cosmetics?.owned) ? u.cosmetics.owned.length : 0,
   }
 }
 

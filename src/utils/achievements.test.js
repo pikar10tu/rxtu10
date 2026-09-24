@@ -90,3 +90,16 @@ test('ตู้โชว์: ปักไว้ตามลำดับ ตั�
   assert.deepEqual(togglePin(['a', 'b', 'c'], 'd'), ['b', 'c', 'd'])
   assert.deepEqual(togglePin(['a', 'b'], 'a'), ['b'])
 })
+
+test('progress ชุด 25 ก.ย.: เลเจนด์นับชนิดไม่นับตัวซ้ำ · หอคอย/Time Attack/ตัวนับ/ของตกแต่ง อ่านถูก', () => {
+  const p = computeProgress({
+    pets: [{ id: 'lion', rarity: 'legendary' }, { id: 'lion', rarity: 'legendary' }, { id: 'phoenix', rarity: 'legendary' }, { id: 'cat', rarity: 'common' }],
+    towerBest: 42, timeAttack: { best15: 31 }, pvpWinsTotal: 12, cosmetics: { owned: ['n-sky', 'f-sky'] },
+  })
+  assert.equal(p.legendarySpecies, 2)
+  assert.equal(p.towerBest, 42)
+  assert.equal(p.ta15Best, 31)
+  assert.equal(p.pvpWinsTotal, 12)
+  assert.equal(p.cosmeticsOwned, 2)
+  assert.equal(computeProgress({}).gachaPullsTotal, 0)
+})

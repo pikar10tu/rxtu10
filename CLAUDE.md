@@ -60,7 +60,7 @@ gates: `auth.isAdmin`, `auth.isAcademic` (admin ⊃ academic) · user แก้ 
 **ข้อยกเว้นเดียว: ป้ายฉายา `components/shared/TitlePill.vue`** — หดตัวอักษรต่ำกว่า .7rem ได้ (ตั้งผ่าน style inline ตามความยาวชื่อ) เพื่อให้อยู่บรรทัดเดียวไม่ตัดชื่อ · user อนุญาต 25 ก.ย. 2026 ("สองบรรทัดดูไม่ดี ตัวเล็กก็ได้ เพราะเท่") · ห้ามลามไปข้อความอื่น
 
 **สไตล์:** คอมเมนต์/commit เป็นไทยปนอังกฤษ · commit รูปแบบ `Area: อะไร (ทำไม)` · โทนข้อความผู้ใช้: ยึด docs/voice-guide.md (เป็นกันเอง อธิบายฟังก์ชันชัด ไม่ใช้คำหวือหวา) ·
-single-file component + scoped style · สีธีมหลัก indigo (#4f46e5) ใน style.css
+single-file component + scoped style · ธีมพาสเทลนุ่ม (25 ก.ย. 2026) — ใช้ตัวแปรใน style.css เสมอ: สี `--primary` ฟ้า `--accent` ชมพู `--mint` · ขอบ `var(--bw) solid var(--line)` · เงา `var(--pop)` (ห้ามกลับไปขอบหมึก 2px/เงาแข็ง)
 
 ## Data model (Firestore)
 

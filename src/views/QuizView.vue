@@ -639,6 +639,8 @@ async function finish() {
     set: qcSet, remove: qcRemove, deleteSentinel: deleteField(),
   })
   const touchedQcards = Object.keys(qcServer).length > 0
+  // achievement ไร้ที่ติ: ถูกหมดทั้งชุดที่ทำจริง ≥10 ข้อ (ออกกลางคันก็นับเฉพาะที่ตอบ)
+  const perfect = answered.value >= 10 && correct.value === answered.value
 
   const ok = await authStore.patchUser(
     {
@@ -647,12 +649,14 @@ async function finish() {
       quizDoneTotal: (authStore.userData?.quizDoneTotal || 0) + answered.value,
       dailyQuest: dq,
       ...(touchedQcards ? { study: optimisticStudy } : {}),
+      ...(perfect ? { quizPerfectTotal: (authStore.userData?.quizPerfectTotal || 0) + 1 } : {}),
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
       quizHigh: newHigh,
       quizDoneTotal: increment(answered.value),
       dailyQuest: dq,
+      ...(perfect ? { quizPerfectTotal: increment(1) } : {}),
       ...qcServer,   // dot-notation เท่านั้น — ห้ามส่ง study ทั้งก้อน ไม่งั้นทับ study.cards
     },
   )

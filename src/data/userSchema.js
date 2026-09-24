@@ -44,6 +44,14 @@ export const USER_DEFAULTS = {
   quizDoneTotal: 0,        // lifetime: ข้อสอบที่ทำ (achievement)
   studyReviewedTotal: 0,   // lifetime: แฟลชการ์ดที่ทบทวน (achievement)
   farmSalesTotal: 0,       // lifetime: เหรียญจากการขายฟาร์ม (achievement)
+  // ── ตัวนับ achievement ชุด 25 ก.ย. 2026 (นับตั้งแต่ deploy — ย้อนหลังไม่ได้) ──
+  pvpWinsTotal: 0,         // ชนะอารีน่าตลอดชีพ (pvp.wins รีทุกซีซั่น)
+  gachaPullsTotal: 0,      // อัญเชิญตลอดชีพ (นับตัวที่ได้ · 10 ครั้ง = 11)
+  labFuseTotal: 0,         // หลอมสำเร็จ
+  quizPerfectTotal: 0,     // ชุดข้อสอบที่ถูกหมด (≥10 ข้อ)
+  reportsConfirmed: 0,     // แจ้งข้อผิดที่ทีมยืนยัน (นับตอนกดรับรางวัลในจดหมาย)
+  towerChampTotal: 0,      // ซีซั่นที่ติดท็อปหอคอย (นับตอนกดรับรางวัล)
+  arenaChampTotal: 0,      // ซีซั่นที่ติดท็อปอารีน่า
   achievementCount: 0,     // denormalized count ของ achievements subcollection
   equipTitle: null,        // docId achievement ที่สวมเป็นฉายา (utils/achievements resolveTitle)
   pinnedAch: [],           // docId ที่ปักขึ้นตู้โชว์ ≤3 (resolveShowcase)

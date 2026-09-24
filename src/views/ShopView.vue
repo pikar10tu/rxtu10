@@ -275,12 +275,14 @@ async function pull(n, isEvent = false) {
     : { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed }
   const optimistic = {
     ...base,
+    gachaPullsTotal: (authStore.userData?.gachaPullsTotal || 0) + rolls,   // achievement มือเติมไม่ยั้ง
     ...(pay === 'ticket'
       ? { freeGachaTickets: tickets.value - amount }
       : { coins: coins.value - amount, totalSpent: (authStore.userData?.totalSpent || 0) + amount }),
   }
   const server = {
     ...base,
+    gachaPullsTotal: increment(rolls),
     ...(pay === 'ticket'
       ? { freeGachaTickets: increment(-amount) }
       : { coins: increment(-amount), totalSpent: increment(amount) }),

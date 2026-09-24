@@ -1,5 +1,6 @@
 import { watch } from 'vue'
-import { collection, getDocs, doc, setDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, setDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { getCosmetic } from '../data/cosmetics.js'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -25,6 +26,23 @@ const ctx = () => ({
 })
 
 export function addEarned(achId) { earned.add(achId) }
+
+// ค่าที่ computeProgress (pure) คิดเองไม่ได้ — ของตกแต่งระดับตำนาน (ต้องรู้แคตตาล็อก) · ข้อที่ตรวจ (อยู่ใน reviewMeta/main)
+let reviewedCount = 0
+async function loadReviewedCount(uid) {
+  reviewedCount = 0
+  if (!useAuthStore().isAcademic) return        // คนตรวจได้มีแค่ทีมวิชาการ ⇒ นักศึกษาทั่วไปไม่เสีย read
+  try {
+    const snap = await getDoc(doc(db, 'reviewMeta', 'main'))
+    useUsageStore().track(1)
+    reviewedCount = Number(snap.data()?.counts?.[uid]) || 0
+  } catch (e) { console.error('[achievement review count]', e) }
+}
+const progressOf = (u) => ({
+  ...computeProgress(u),
+  cosmeticLegend: (u?.cosmetics?.owned || []).filter(id => getCosmetic(id)?.tier === 4).length,
+  reviewedCount,
+})
 
 // balloon + กระดานข่าว (ใช้ร่วม self-grant + claim) — best effort
 export async function announceAchievement(achId, date = null) {
@@ -74,8 +92,9 @@ export function initAchievements() {
     if (!uid) return
     try {
       await loadEarned(uid)
+      await loadReviewedCount(uid)
       // backfill เงียบ: grant ที่เข้าเกณฑ์อยู่แล้ว โดยไม่ประกาศ
-      const news = checkMilestones(MILESTONES, computeProgress(auth.userData), earned, ctx())
+      const news = checkMilestones(MILESTONES, progressOf(auth.userData), earned, ctx())
       for (const id of news) await grantMilestone(id)
     } catch (e) { console.error('[achievement init]', e) }
     finally { announceOn = true }   // หลังจากนี้ปลดล็อกจริง → ประกาศ
@@ -84,7 +103,7 @@ export function initAchievements() {
   // ปลดล็อกระหว่างเล่น: userData เปลี่ยน → เช็ค → grant (ประกาศ)
   watch(() => auth.userData, async (u) => {
     if (!u || !announceOn || !auth.currentUser?.uid) return
-    const news = checkMilestones(MILESTONES, computeProgress(u), earned, ctx())
+    const news = checkMilestones(MILESTONES, progressOf(u), earned, ctx())
     for (const id of news) await grantMilestone(id)
   }, { deep: true })
 }

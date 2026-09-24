@@ -130,7 +130,8 @@ async function onConfirm(allocation) {
       const id = fuseRoll(rarity, releasedPets(rawConfig.value?.gachaEvent))
       if (!id) { toast('หลอมไม่สำเร็จ', 'error'); return }
       const { pets: finalPets, summary } = mergeRolls(petsAfter, [{ id }], PETS)
-      const ok = await auth.patchUser({ pets: finalPets }, { pets: finalPets })
+      const fuseN = (auth.userData?.labFuseTotal || 0) + 1   // achievement นักเล่นแร่แปรธาตุ
+      const ok = await auth.patchUser({ pets: finalPets, labFuseTotal: fuseN }, { pets: finalPets, labFuseTotal: increment(1) })
       if (ok) reveal.value = summary[0]
       else toast('หลอมไม่สำเร็จ', 'error')
     } else {
