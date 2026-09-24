@@ -56,7 +56,7 @@
         </div>
         <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
         <!-- บรรทัดฉายา (เดิมเป็นป้าย "คุณ") — ไม่ได้สวม = ไม่มีบรรทัด · "คุณ" ย้ายไปมุมการ์ด + กรอบนอก -->
-        <div v-if="titleOf(m)" class="mv-title"><Emoji :char="titleOf(m).icon" /> {{ titleOf(m).label }}</div>
+        <div v-if="titleOf(m)" class="mv-ttl"><TitlePill :label="titleOf(m).label" :icon="titleOf(m).icon" :fit="11" /></div>
         <span v-if="m.uid === myUid" class="mv-you">คุณ</span>
         <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
         <div v-if="m.studentId" class="mv-sid">{{ m.studentId }}</div>
@@ -72,6 +72,7 @@
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
 import CosBg from '../components/cosmetics/CosBg.vue'
+import TitlePill from '../components/shared/TitlePill.vue'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from '../utils/achievements.js'
 import Emoji from '../components/shared/Emoji.vue'
@@ -220,10 +221,8 @@ function titleOf(m) {
 /* การ์ดของเรา: กรอบนอก + ป้าย "คุณ" ที่มุมซ้ายบน */
 .mv-card.me { box-shadow: 0 0 0 2px var(--primary), var(--pop); }
 .mv-card .mv-you { position: absolute; top: 5px; left: 5px; z-index: 2; font-size: .7rem; font-weight: 700; line-height: 1.35; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 6px; }
-.mv-title :deep(img), .mv-title :deep(span) { font-size: .9em; }
-/* .7rem คือขั้นต่ำของเว็บ (CLAUDE.md) — ลดขนาดด้วยน้ำหนักตัวอักษร/ระยะขอบ/ไอคอนแทน */
-.mv-title { font-size: .7rem; font-weight: 600; line-height: 1.35; color: #a23b6c; background: var(--accent-light); border: 1px solid rgba(242,139,176,.55); border-radius: 999px; padding: 0 6px;
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ป้ายฉายา: บรรทัดเดียว หดตัวอักษรตามความยาว (TitlePill · ข้อยกเว้นกฎ .7rem เฉพาะป้ายนี้) */
+.mv-ttl { max-width: 100%; font-weight: 600; color: #a23b6c; background: var(--accent-light); border: 1px solid rgba(242,139,176,.55); border-radius: 999px; padding: 0 6px; overflow: hidden; }
 .mv-track { font-size: .7rem; font-weight: 700; }
 .mv-sid { font-size: .7rem; color: rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
 .mv-off-tag { font-size: .7rem; color: rgba(0,0,0,.35); }

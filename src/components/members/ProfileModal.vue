@@ -13,7 +13,7 @@
         </CosFrame>
         <div v-if="view.realName" class="pf-real">{{ view.realName }}</div>
         <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
-        <div v-if="title" class="pf-title"><Emoji :char="title.icon" /> {{ title.label }}</div>
+        <div v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.74" :fit="22" /></div>
         <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pf-chips">
           <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
@@ -91,6 +91,7 @@ import { fetchAchievementItems } from '../../composables/useAchievementItems.js'
 import CosFrame from '../cosmetics/CosFrame.vue'
 import CosName from '../cosmetics/CosName.vue'
 import CosBg from '../cosmetics/CosBg.vue'
+import TitlePill from '../shared/TitlePill.vue'
 import { cosOf } from '../../utils/cosmetics.js'
 import { getCosmetic } from '../../data/cosmetics.js'
 import { resolveShowcase, resolveTitle } from '../../utils/achievements.js'

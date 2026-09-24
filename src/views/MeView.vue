@@ -25,7 +25,7 @@
         </div>
         <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
         <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
-          {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ เลือกฉายา' }}
+          <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
         </button>
         <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
         <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ร้านตกแต่ง ›</RouterLink>
@@ -142,6 +142,7 @@ import { toMember } from '../utils/roster.js'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
 import CosBg from '../components/cosmetics/CosBg.vue'
+import TitlePill from '../components/shared/TitlePill.vue'
 import { cosOf } from '../utils/cosmetics.js'
 import { getCosmetic } from '../data/cosmetics.js'
 import { getAchievement } from '../data/achievements.js'
@@ -349,7 +350,7 @@ async function save() {
 .me-tab.on { background: var(--surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
 .me-panel { margin-top: 10px; }
 /* ป้ายยาวพอดีข้อความ (เดิมยืดเต็มคอลัมน์เพราะแม่เป็น flex column) */
-.me-title { align-self: flex-start; width: fit-content; max-width: 100%; font: inherit; font-size: .72rem; font-weight: 700; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 9px; cursor: pointer; margin-bottom: 6px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.me-title { align-self: flex-start; width: fit-content; max-width: 100%; font: inherit; font-size: .72rem; font-weight: 700; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 9px; cursor: pointer; margin-bottom: 6px; text-align: left; overflow: hidden; }
 .me-title.empty { color: var(--muted); background: rgba(255,255,255,.7); border-style: dashed; border-color: var(--line); font-weight: 600; }
 .me-ach-hint { font-size: .72rem; color: var(--muted); margin: 10px 2px 0; line-height: 1.5; }
 .me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: var(--bw) solid var(--line); background: #eee; box-shadow: var(--pop); }
