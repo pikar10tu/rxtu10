@@ -4,6 +4,10 @@
       <span class="farm-title"><Emoji char="🌾" /> ฟาร์ม <HelpButton topic="farm" /></span>
       <span class="farm-coins" ref="coinChipEl"><Emoji char="🪙" /> {{ shownCoins.toLocaleString() }}</span>
     </div>
+    <!-- เก็บทั้งหมด (โผล่เมื่อพร้อมตั้งแต่ 2 แปลง — แปลงเดียวกดที่แปลงเองเร็วกว่า) -->
+    <button v-if="readyIdx.length >= 2" class="farm-harvest-all" @click="onHarvestAll">
+      <Emoji char="🧺" /> เก็บทั้งหมด ({{ readyIdx.length }} แปลง)
+    </button>
     <div class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} {{ upcomingEmojis }}</template></div>
 
     <!-- plots -->
@@ -127,6 +131,19 @@ function emojiStyle(plot) {
   if (s.ready) return {}
   const scale = 0.55 + 0.45 * s.progress
   return { transform: `scale(${scale.toFixed(2)})` }
+}
+
+// แปลงที่พร้อมเก็บ (ใช้ stat เดียวกับที่แปลงแสดงป้าย "พร้อม!")
+const readyIdx = computed(() => plots.value.map((p, i) => (p && stat(p).ready ? i : -1)).filter(i => i >= 0))
+// เก็บทั้งหมด: จับตำแหน่ง/อีโมจิทุกแปลงก่อน (หลัง harvestAll แปลงว่างทันที — เหตุผลเดียวกับ onHarvest)
+async function onHarvestAll() {
+  const to = invHeadEl.value?.getBoundingClientRect()
+  const flights = readyIdx.value.map(i => ({ from: plotEls.value[i]?.getBoundingClientRect(), char: stat(plots.value[i]).crop?.emoji }))
+  const n = await farm.harvestAll()
+  if (!n || !to) return
+  flights.forEach((f, k) => {
+    if (f.from && f.char) setTimeout(() => flyTo({ emoji: f.char, from: f.from, to, count: 1, onArrive: popBasket }), k * 70)
+  })
 }
 
 // เก็บเกี่ยว: ต้องจับตำแหน่งแปลง "ก่อน" เรียก harvest เพราะ patchUser เป็น optimistic update
@@ -258,4 +275,8 @@ const invList = computed(() =>
 .plot-add { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 94px; text-decoration: none; color: #2f7d55;
   background: rgba(255,255,255,.55); border: 2px dashed #7fd9b8; }
 .plot-add .plot-hint { font-size: .72rem; font-weight: 700; }
+.farm-harvest-all { width: 100%; margin: 6px 0 8px; font: inherit; font-size: .9rem; font-weight: 800; color: #fff; border: 0; border-radius: 14px; padding: 11px;
+  background: linear-gradient(135deg, #4cc9a0, #7fd9b8); box-shadow: var(--pop); cursor: pointer; animation: fh-pulse 1.6s ease-in-out infinite; }
+.farm-harvest-all:active { transform: translateY(1px); }
+@keyframes fh-pulse { 50% { box-shadow: 0 0 0 4px rgba(76,201,160,.25), var(--pop); } }
 </style>

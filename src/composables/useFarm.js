@@ -111,6 +111,25 @@ export function useFarm() {
     toast(`เก็บเกี่ยว ${st.crop.name}!`, 'success')
   }
 
+  // เก็บทุกแปลงที่พร้อมใน write เดียว (roadmap #6) · คืนจำนวนที่เก็บได้ (0 = ไม่มีแปลงพร้อม)
+  async function harvestAll() {
+    const now = Date.now()
+    const next = clonePlots()
+    const inv = { ...inventory.value }
+    let n = 0
+    next.forEach((p, i) => {
+      if (!p || !status(p, now).ready) return
+      inv[p.seedId] = (inv[p.seedId] || 0) + 1
+      next[i] = null
+      n++
+    })
+    if (!n) { toast('ยังไม่มีแปลงที่พร้อมเก็บ', 'info'); return 0 }
+    await commit(next, { inventory: inv })
+    sfx('harvest')
+    toast(`เก็บเกี่ยวทั้งหมด ${n} แปลง!`, 'success')
+    return n
+  }
+
   async function sell(cropId, qty = null) {
     const have = inventory.value[cropId] || 0
     const n = qty == null ? have : Math.min(qty, have)
@@ -157,6 +176,6 @@ export function useFarm() {
     level, ceiling, plotsUnlocked, plotCount, nextPlot,
     plots, inventory, seedChoices, upcomingSeed,
     status,
-    plant, harvest, sell, sellAll, unlockPlot,
+    plant, harvest, harvestAll, sell, sellAll, unlockPlot,
   }
 }
