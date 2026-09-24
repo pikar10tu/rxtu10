@@ -13,17 +13,23 @@
       <div v-if="loading" class="qv-empty">กำลังโหลดข้อสอบ…</div>
       <div v-else-if="!publishedTotal" class="qv-empty">ยังไม่มีข้อสอบที่เผยแพร่ — รอทีมวิชาการเพิ่มก่อนนะ <Emoji char="📚" /></div>
       <template v-else>
-        <div class="qv-info">มีข้อสอบให้ทำ <b>{{ activeCount }}</b> ข้อ</div>
+        <!-- การ์ดหัว: จำนวนข้อ + ทางลัดทบทวนข้อที่เคยผิด (โชว์เมื่อมีข้อถึงกำหนด) -->
+        <div class="qv-hero">
+          <div><span class="qv-hero-num">{{ activeCount.toLocaleString() }}</span><small>ข้อพร้อมให้ทำ</small></div>
+          <button v-if="dueCount" class="qv-hero-due" :disabled="starting" @click="startRedo">
+            <b>{{ dueCount }} ข้อ</b>เคยผิด รอทบทวน →
+          </button>
+        </div>
 
-        <template v-if="domainChips.length">
+        <div v-if="domainChips.length" class="qv-card">
           <div class="qv-label">หมวด</div>
           <div class="qv-chips">
             <button class="qv-chip" :class="{ on: dom === '__all' && !examSet }" @click="pickDomain('__all')">ทั้งหมด</button>
             <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="pickDomain(d.key)">{{ d.label }}</button>
           </div>
-        </template>
+        </div>
 
-        <template v-if="examSetChips.length">
+        <div v-if="examSetChips.length" class="qv-card">
           <div class="qv-label"><Emoji char="📜" /> ข้อสอบย้อนหลัง</div>
           <div class="qv-chips">
             <button
@@ -32,8 +38,9 @@
               @click="pickExamSet(s.name)"
             >{{ s.name }}<span v-if="s.year"> · {{ s.year }}</span> ({{ s.count }})</button>
           </div>
-        </template>
+        </div>
 
+        <div class="qv-card">
         <div class="qv-label">แหล่งข้อ</div>
         <div class="qv-chips">
           <button class="qv-chip" :class="{ on: !approvedOnly }" @click="approvedOnly = false">ทำทั้งหมด ({{ activeCount }})</button>
@@ -44,17 +51,20 @@
         </div>
 
         <div class="qv-label">จำนวนข้อ</div>
-        <div class="qv-chips">
-          <button v-for="n in lenChoices" :key="n" class="qv-chip" :class="{ on: len === n }" @click="len = n">
-            {{ n }} ข้อ
-          </button>
+        <div class="qv-seg" role="group" aria-label="จำนวนข้อ">
+          <button v-for="n in lenChoices" :key="n" :class="{ on: len === n }" :aria-pressed="len === n" @click="len = n">{{ n }}</button>
+        </div>
         </div>
 
-        <button class="qv-start" :disabled="starting || (approvedOnly ? !approvedCount : !activeCount)" @click="start">
-          {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำข้อสอบ (${quizCount} ข้อ)` }}
-        </button>
         <button class="qv-history-btn" @click="openHistory"><Emoji char="📊" /> ประวัติของฉัน</button>
         <div class="qv-hint">ทำข้อสอบได้เหรียญ +{{ QUIZ_COIN_PER_CORRECT }}/ข้อที่ถูก · ทำมากได้มาก ไม่จำกัดต่อวัน</div>
+
+        <!-- ปุ่มหลักติดขอบล่าง (sticky ใน #main-content) — ไม่ต้องเลื่อนหา -->
+        <div class="qv-dock">
+          <button class="qv-start" :disabled="starting || (approvedOnly ? !approvedCount : !activeCount)" @click="start">
+            {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำ ${quizCount} ข้อ →` }}
+          </button>
+        </div>
       </template>
     </template>
 
@@ -64,12 +74,16 @@
         <button class="qv-quit" aria-label="ออกจากการทำข้อสอบ" @click="quit">✕</button>
         <div v-if="variant === 'zen'" class="qv-zen-tag"><Emoji char="♾️" /> Zen</div>
         <div v-else class="qv-bar"><div class="qv-fill" :style="{ width: progress + '%' }"></div></div>
-        <span class="qv-count">{{ variant === 'zen' ? `ข้อที่ ${idx + 1}` : `${idx + 1}/${quiz.length}` }}</span>
+        <span class="qv-pill qv-streak" :class="{ off: !streak }" :aria-label="`ถูกติดกัน ${streak} ข้อ`">🔥 {{ streak }}</span>
       </div>
-      <div class="qv-running">คะแนน {{ correct }}/{{ answered }}</div>
-      <div v-if="variant === 'redo'" class="qv-redo-tag"><Emoji char="🔁" /> ทบทวนข้อที่เคยผิด</div>
-
-      <ReviewStatusBadge :question="current" class="qv-review-badge" />
+      <!-- แถวป้าย: ข้อที่ · หมวด · สถานะตรวจ · คะแนน -->
+      <div class="qv-meta">
+        <span class="qv-tag">{{ variant === 'zen' ? `ข้อที่ ${idx + 1}` : `ข้อ ${idx + 1}/${quiz.length}` }}</span>
+        <span v-if="variant === 'redo'" class="qv-tag qv-tag-redo"><Emoji char="🔁" /> ทบทวน</span>
+        <span v-if="current.domain" class="qv-tag">{{ domainLabel(current.domain) }}</span>
+        <ReviewStatusBadge :question="current" />
+        <span class="qv-pill qv-score">ถูก {{ correct }}/{{ answered }}</span>
+      </div>
       <div class="qv-q">{{ current.question }}</div>
       <div class="qv-choices">
         <button
@@ -82,13 +96,12 @@
       </div>
 
       <div v-if="picked !== null" class="qv-feedback">
-        <div :class="picked === current.answer ? 'qv-fb ok' : 'qv-fb no'">
-          {{ picked === current.answer ? '✓ ถูกต้อง!' : `✗ ยังไม่ถูก — เฉลยคือข้อ ${LETTERS[current.answer]}` }}
+        <div :class="picked === current.answer ? 'qv-fb ok' : 'qv-fb no'" role="status">
+          <b>{{ picked === current.answer ? '✓ ถูกต้อง!' : '✗ ยังไม่ถูก' }}</b>
+          {{ picked === current.answer ? `ได้ +${QUIZ_COIN_PER_CORRECT} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้เข้าคิวทบทวนแล้ว` }}
         </div>
         <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
         <div v-if="current.reviewNote" class="qv-note"><Emoji char="📝" /> หมายเหตุจากผู้ตรวจ: {{ current.reviewNote }}</div>
-        <button class="qv-next" @click="next">{{ idx + 1 < quiz.length ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
-
         <!-- 🚩 แจ้งข้อผิด -->
         <div class="qv-report">
           <button v-if="reportedIds.has(current.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
@@ -110,18 +123,45 @@
           </div>
         </div>
       </div>
+      <p v-else class="qv-idle">เลือกคำตอบเพื่อดูเฉลย</p>
+
+      <div v-if="picked !== null" class="qv-dock">
+        <button class="qv-start" @click="next">{{ idx + 1 < quiz.length || variant === 'zen' ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
+      </div>
     </template>
 
     <!-- ── RESULT ── -->
     <template v-else-if="mode === 'result'">
       <div class="qv-result">
-        <div class="qv-result-emoji">{{ resultEmoji }}</div>
-        <div class="qv-result-title">ทำข้อสอบจบแล้ว!</div>
-        <div class="qv-result-score">{{ correct }}<span>/{{ sessionTotal }}</span></div>
-        <div class="qv-result-pct">{{ pct }}%</div>
-        <div v-if="coinsEarned" class="qv-result-coins">+{{ coinsEarned.toLocaleString() }} <Emoji char="🪙" /></div>
-        <div v-else class="qv-result-nocoins">รอบนี้ยังไม่ได้เหรียญ — ตอบถูกได้เลย!</div>
-        <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
+        <div class="qv-result-title">{{ resultEmoji }} ทำข้อสอบจบแล้ว!</div>
+        <div class="qv-ring" role="img" :aria-label="`ถูก ${correct} จาก ${sessionTotal} ข้อ ${pct} เปอร์เซ็นต์`">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(43,53,80,.08)" stroke-width="12" />
+            <circle class="qv-ring-arc" cx="60" cy="60" r="50" fill="none" stroke-width="12" stroke-linecap="round"
+                    stroke-dasharray="314.16" :stroke-dashoffset="314.16 * (1 - pct / 100)" />
+          </svg>
+          <div class="qv-ring-c"><b>{{ correct }}/{{ sessionTotal }}</b><small>{{ pct }}%</small></div>
+        </div>
+        <div v-if="prevPct !== null" class="qv-result-cmp" :class="{ up: pct > prevPct, down: pct < prevPct }">
+          {{ pct > prevPct ? `ดีกว่ารอบก่อน +${pct - prevPct}%` : pct < prevPct ? `ต่ำกว่ารอบก่อน ${pct - prevPct}%` : 'เท่ากับรอบก่อน' }}
+        </div>
+        <div class="qv-stats">
+          <div class="qv-stat coin"><b>{{ coinsEarned ? `+${coinsEarned.toLocaleString()}` : '0' }}</b><small>เหรียญ</small></div>
+          <div class="qv-stat"><b>🔥 {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
+          <div class="qv-stat"><b>{{ sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
+        </div>
+        <div v-if="roundDomains.length > 1" class="qv-card qv-rdom">
+          <div class="qv-label">รายหมวดรอบนี้</div>
+          <div v-for="d in roundDomains" :key="d.key" class="qv-dom-row">
+            <span class="qv-dom-name">{{ d.label }}</span>
+            <span class="qv-dom-bar"><span class="qv-dom-fill" :style="{ width: d.pct + '%' }"></span></span>
+            <span class="qv-dom-val">{{ d.c }}/{{ d.t }}</span>
+          </div>
+        </div>
+        <div class="qv-dock qv-dock-row">
+          <button v-if="sessionTotal - correct > 0" class="qv-ghost" :disabled="starting" @click="startRedo">ทบทวนข้อผิด</button>
+          <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
+        </div>
       </div>
     </template>
 
@@ -354,6 +394,33 @@ const current = computed(() => quiz.value[idx.value] || null)
 const progress = computed(() => quiz.value.length ? Math.round((idx.value / quiz.value.length) * 100) : 0)
 const pct = computed(() => sessionTotal.value ? Math.round((correct.value / sessionTotal.value) * 100) : 0)
 const resultEmoji = computed(() => pct.value >= 80 ? '🏆' : pct.value >= 50 ? '😊' : '📚')
+
+// ข้อที่เคยผิดถึงกำหนดทบทวน (นับจาก qcards ใน user doc ที่มีอยู่แล้ว — 0 read)
+const dueCount = computed(() => dueQuestionIds(authStore.userData?.study?.qcards, Date.now(), 999).length)
+
+// ผลรายหมวดของรอบนี้ (จาก answers ในเครื่อง)
+const roundDomains = computed(() => {
+  const m = new Map()
+  for (const a of answers.value) {
+    const k = a.domain || 'other'
+    const r = m.get(k) || { key: k, label: a.domain ? domainLabel(a.domain) : 'อื่นๆ', c: 0, t: 0 }
+    r.t++; if (a.correct) r.c++
+    m.set(k, r)
+  }
+  return [...m.values()].map(r => ({ ...r, pct: Math.round((r.c / r.t) * 100) })).sort((a, b) => b.t - a.t)
+})
+
+// เทียบกับรอบก่อน — จำ % รอบล่าสุดไว้ในเครื่อง (localStorage) ไม่ต้องอ่านประวัติจาก Firestore
+const PREV_KEY = 'rxtu.quizLastPct'
+const prevPct = ref(null)
+watch(mode, (m) => {
+  if (m !== 'result' || !sessionTotal.value) return
+  try {
+    const raw = localStorage.getItem(PREV_KEY)
+    prevPct.value = raw === null ? null : Number(raw)
+    localStorage.setItem(PREV_KEY, String(pct.value))
+  } catch { prevPct.value = null }
+})
 
 const starting = ref(false)
 
@@ -611,13 +678,29 @@ async function finish() {
 .qv-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qv-empty { text-align: center; color: rgba(0,0,0,.45); padding: 40px 16px; font-size: .85rem; line-height: 1.6; }
 
-.qv-info { font-size: .9rem; color: #334155; margin-bottom: 14px; }
+/* การ์ดหัว + การ์ดกลุ่มตัวเลือก */
+.qv-hero { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border-radius: 20px; box-shadow: var(--pop); padding: 14px 16px; margin-bottom: 12px; }
+.qv-hero-num { display: block; font-family: var(--font-display); font-size: 1.9rem; line-height: 1; }
+.qv-hero small { font-size: .72rem; opacity: .92; }
+.qv-hero-due { margin-left: auto; text-align: right; font: inherit; font-size: .72rem; line-height: 1.35; color: #fff; background: rgba(255,255,255,.22); border: 0; border-radius: 12px; padding: 7px 10px; cursor: pointer; }
+.qv-hero-due b { display: block; font-size: 1rem; }
+.qv-card { background: var(--surface); border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop); padding: 4px 14px 14px; margin-bottom: 12px; }
+.qv-seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--primary-light); border-radius: 12px; padding: 3px; }
+.qv-seg button { font: inherit; font-size: .8rem; font-weight: 700; border: 0; background: transparent; color: var(--muted); border-radius: 9px; padding: 7px 0; cursor: pointer; }
+.qv-seg button.on { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
+/* ปุ่มหลักติดขอบล่างของพื้นที่เลื่อน */
+.qv-dock { position: sticky; bottom: 0; z-index: 2; margin: 14px -2px 0; padding: 12px 2px 4px; background: linear-gradient(0deg, rgba(247,249,253,.97) 72%, rgba(247,249,253,0)); }
+.qv-dock .qv-start { margin-top: 0; }
+.qv-dock-row { display: flex; gap: 8px; }
+.qv-dock-row .qv-start { flex: 1.3; }
+.qv-ghost { flex: 1; font: inherit; font-size: .88rem; font-weight: 700; color: var(--primary); background: var(--surface); border: var(--bw) solid var(--line); border-radius: 14px; padding: 12px; cursor: pointer; }
+.qv-idle { text-align: center; font-size: .74rem; color: var(--muted); margin-top: 14px; }
 .qv-redo-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800;
   color: #92400e; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 999px; padding: 4px 12px; margin-bottom: 10px; }
 .qv-label { font-size: .7rem; font-weight: 700; color: #64748b; margin: 12px 0 6px; }
 .qv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .qv-chip { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
-.qv-chip.on { background: var(--primary); border-color: var(--ink); color: #fff; }
+.qv-chip.on { background: var(--primary); border-color: var(--primary); color: #fff; }
 .qv-start { width: 100%; margin-top: 20px; border: var(--bw) solid var(--line); border-radius: 14px; padding: 15px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .qv-start:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qv-start:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
@@ -625,8 +708,15 @@ async function finish() {
 
 .qv-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .qv-quit { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 30px; height: 30px; font-size: .85rem; cursor: pointer; flex-shrink: 0; }
-.qv-bar { flex: 1; height: 7px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
-.qv-fill { height: 100%; background: linear-gradient(90deg,var(--primary),var(--primary-2)); transition: width .3s; }
+.qv-bar { flex: 1; height: 10px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
+.qv-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width .35s; }
+.qv-pill { font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 3px 9px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.qv-streak { background: var(--accent-light); color: #a23b6c; flex-shrink: 0; transition: opacity .2s; }
+.qv-streak.off { opacity: .45; }
+.qv-score { background: var(--mint-light); color: #1f7a5c; }
+.qv-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
+.qv-tag { font-size: .7rem; font-weight: 700; border-radius: 6px; padding: 2px 8px; background: var(--primary-light); color: var(--primary-dark); }
+.qv-tag-redo { background: #fef3c7; color: #92400e; }
 .qv-count { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }
 .qv-running { text-align: right; font-size: .7rem; font-weight: 700; color: #15803d; margin-bottom: 10px; }
@@ -636,17 +726,20 @@ async function finish() {
 .qv-choice { display: flex; align-items: center; gap: 10px; text-align: left; border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; padding: 13px 14px; font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; box-shadow: var(--pop); transition: transform .1s, box-shadow .1s; }
 .qv-choice:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qv-choice:disabled { cursor: default; }
-.qv-letter { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,.06); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .78rem; }
+.qv-letter { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; background: var(--primary-light); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .78rem; }
 .qv-ctext { flex: 1; }
-.qv-choice.correct { border-color: #22c55e; background: rgba(34,197,94,.1); color: #15803d; font-weight: 700; }
-.qv-choice.correct .qv-letter { background: #22c55e; color: #fff; }
-.qv-choice.wrong { border-color: #ef4444; background: rgba(239,68,68,.08); color: #dc2626; }
-.qv-choice.wrong .qv-letter { background: #ef4444; color: #fff; }
+.qv-choice.correct { border-color: var(--mint); background: var(--mint-light); color: #1f7a5c; font-weight: 700; animation: qv-pop .35s; }
+.qv-choice.correct .qv-letter { background: var(--mint); color: #fff; }
+.qv-choice.wrong { border-color: #f28bb0; background: #fde7ef; color: #b0386a; animation: qv-shake .35s; }
+.qv-choice.wrong .qv-letter { background: #e0719a; color: #fff; }
+@keyframes qv-pop { 40% { transform: scale(1.03); } }
+@keyframes qv-shake { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
 .qv-choice.dim { opacity: .5; }
 .qv-feedback { margin-top: 14px; }
-.qv-fb { font-weight: 800; font-size: .9rem; text-align: center; padding: 8px; border-radius: 10px; }
-.qv-fb.ok { color: #15803d; background: rgba(34,197,94,.12); }
-.qv-fb.no { color: #dc2626; background: rgba(239,68,68,.1); }
+.qv-fb { font-size: .8rem; line-height: 1.5; padding: 10px 12px; border-radius: 14px; }
+.qv-fb b { display: block; font-size: .92rem; }
+.qv-fb.ok { color: #1f7a5c; background: var(--mint-light); }
+.qv-fb.no { color: #b0386a; background: #fde7ef; }
 .qv-exp { margin-top: 10px; font-size: .76rem; color: #b45309; background: #fffbeb; border-radius: 10px; padding: 10px 12px; line-height: 1.5; }
 .qv-note { margin-top: 8px; font-size: .76rem; color: #1e40af; background: #eff6ff; border-radius: 8px; padding: 9px 11px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .qv-next { width: 100%; margin-top: 14px; border: none; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .88rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,var(--primary),var(--primary-2)); cursor: pointer; }
@@ -664,9 +757,24 @@ async function finish() {
 .qv-report-send { flex: 1; border: none; border-radius: 10px; padding: 8px; font-family: inherit; font-size: .78rem; font-weight: 800; color: #fff; background: var(--primary); cursor: pointer; }
 .qv-report-send:disabled { background: #cbd5e1; cursor: default; }
 
-.qv-result { text-align: center; padding: 24px 0; }
+.qv-result { text-align: center; padding: 8px 0 0; }
+.qv-ring { position: relative; width: 170px; height: 170px; margin: 10px auto 6px; }
+.qv-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.qv-ring-arc { stroke: var(--primary); transition: stroke-dashoffset .8s ease-out; }
+.qv-ring-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.qv-ring-c b { font-family: var(--font-display); font-weight: 400; font-size: 2.2rem; color: var(--primary); line-height: 1; }
+.qv-ring-c small { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.qv-result-cmp { font-size: .82rem; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+.qv-result-cmp.up { color: #1f7a5c; }
+.qv-result-cmp.down { color: #b0386a; }
+.qv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.qv-stat { background: var(--surface); border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 9px 4px; }
+.qv-stat b { display: block; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.qv-stat small { font-size: .7rem; color: var(--muted); }
+.qv-stat.coin b { color: #d97706; }
+.qv-rdom { text-align: left; }
 .qv-result-emoji { font-size: 3.4rem; }
-.qv-result-title { font-size: 1.2rem; font-weight: 800; margin: 6px 0 14px; }
+.qv-result-title { font-size: 1.15rem; font-weight: 800; }
 .qv-result-score { font-family: var(--font-display); font-weight: 400; font-size: 2.8rem; color: var(--primary); line-height: 1; }
 .qv-result-score span { font-size: 1.3rem; color: rgba(0,0,0,.35); }
 .qv-result-pct { font-size: 1rem; font-weight: 700; color: #64748b; margin-top: 4px; }
