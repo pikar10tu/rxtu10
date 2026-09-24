@@ -314,7 +314,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { collection, getDocs, getDoc, doc, updateDoc, setDoc, writeBatch, runTransaction, arrayUnion, increment, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, updateDoc, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -332,14 +332,15 @@ import QuestionEditor from '../components/questions/QuestionEditor.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
-import { groupReports, resolvePayload } from '../utils/questionReport.js'
-import { buildReportRewardMail } from '../utils/mailbox.js'
+import { groupReports } from '../utils/questionReport.js'
 import { REPORT_REWARD } from '../data/index.js'
+import { useReviewWrites } from '../composables/useReviewWrites.js'
 
 const authStore = useAuthStore()
 const usage = useUsageStore()
 const { toast } = useToast()
 const { confirm } = useConfirm()
+const { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports } = useReviewWrites()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 // เหลือ verdict เดียว — เจอปัญหาให้กด "✏️ แก้ข้อนี้" แก้เนื้อหาแล้วนับว่าผ่านตรวจในตาเดียว (ดู saveEdit)
@@ -425,51 +426,23 @@ async function saveEdit() {
   if (!canSaveEdit.value || savingEdit.value || !current.value || !myUid.value) return
   const q = current.value
   const uid = myUid.value
-  const u = authStore.userData || {}
-  const fixerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)
+  const fixerName = reviewerName()
   const payload = editPayload.value
   const isFix = editRequeues.value
   if (!(await confirm(isFix
     ? 'บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'
     : 'บันทึกคำอธิบาย / หมายเหตุ?\nผลตรวจเดิมยังอยู่ ตรวจต่อได้เลย'))) return
   savingEdit.value = true
-  const oldStatus = computeStatus(q)
   try {
     if (isFix) {
-      const fixReasonText = cleanText(fixReason.value, LIMITS.reviewReason)
-      // ⚠️ ลำดับห้ามสลับ: isReviewFix() เช็ค existsAfter(reviews/{uid}) ซึ่งมองเห็นแค่ผลของคำขอ
-      // เดียวกัน — 2 คำขอนี้ไม่ได้อยู่ใน transaction เดียวกัน (แพทเทิร์นเดียวกับ isReviewAmend())
-      // ต้องเขียน subdoc ให้ "มีอยู่จริง" ก่อน แล้วค่อยเขียนคำถามที่เช็ค existsAfter ทีหลัง
-      // หลักฐานว่าใครแก้/ทำไม — เก็บที่เดียวกับผลตรวจปกติ (reviews/{uid}) ให้กล่อง
-      // "รอบก่อนแก้ ตกเพราะ" ของรอบถัดไปเห็นได้เหมือนผลตรวจทั่วไป
-      await setDoc(doc(db, 'questions', q.id, 'reviews', uid), {
-        reviewerUid: uid, reviewerName: fixerName, verdict: 'fixed',
-        reason: fixReasonText, ref: '', ts: serverTimestamp(),
-      })
-      // rules ผ่านทาง isReviewFix() — เขียนเนื้อหา + ตั้งผลตรวจเป็น passed พร้อมกันในตาเดียว
-      await updateDoc(doc(db, 'questions', q.id), {
-        ...payload,
-        ...reviewFixResult(uid),
-        reviewVerdicts: deleteField(),
-        retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
-        lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      })
-      usage.track(0, 2)
+      const { oldStatus } = await writeFix(q, payload, fixReason.value)
       // เครดิต leaderboard เสมอไม่ว่าสถานะเดิมจะเป็นอะไร (นี่คือใจความหลักของงานนี้)
-      // progress ขยับเฉพาะตอนสถานะเปลี่ยนจริง (กันคีย์ซ้ำ 'passed' ชนกันเองถ้า oldStatus เป็น 'passed' อยู่แล้ว)
-      try {
-        await setDoc(doc(db, 'reviewMeta', 'main'), {
-          counts: { [uid]: increment(1) }, names: { [uid]: fixerName },
-          ...(oldStatus !== 'passed' ? { progress: { [oldStatus]: increment(-1), passed: increment(1) } } : {}),
-        }, { merge: true })
-        usage.track(0, 1)
-        meta.value = {
-          counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
-          names: { ...(meta.value.names || {}), [uid]: fixerName },
-          progress: bumpedProgress(oldStatus, 'passed'),
-        }
-      } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
+      // progress ขยับเฉพาะตอนสถานะเปลี่ยนจริง (bumpedProgress กันคีย์ซ้ำ 'passed' ชนกันเองถ้า oldStatus เป็น 'passed' อยู่แล้ว)
+      meta.value = {
+        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+        names: { ...(meta.value.names || {}), [uid]: fixerName },
+        progress: bumpedProgress(oldStatus, 'passed'),
+      }
       patchTriageRow(q.id, {
         ...payload, ...reviewFixResult(uid), retired: false,
         lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
@@ -661,43 +634,17 @@ async function saveFix(q) {
   if (fixSaving.value || fixId.value !== q.id || !fixDraft.value) return
   if (!draftValid(fixDraft.value) || !triageFixReason.value.trim() || !myUid.value) return
   const uid = myUid.value
-  const u = authStore.userData || {}
-  const fixerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)
+  const fixerName = reviewerName()
   const payload = draftPayload(fixDraft.value)
-  const fixReasonText = cleanText(triageFixReason.value, LIMITS.reviewReason)
   if (!(await confirm('บันทึกการแก้?\nนับว่าคุณตรวจข้อนี้ผ่านแล้ว ไม่ต้องรอคนอื่นตรวจซ้ำ'))) return
   fixSaving.value = true
-  const oldStatus = computeStatus(q)
   try {
-    // ⚠️ ลำดับห้ามสลับ (เหมือน saveEdit() เส้นทาง isFix): isReviewFix() เช็ค existsAfter(reviews/{uid})
-    // ซึ่งมองเห็นแค่ผลของคำขอเดียวกัน — 2 คำขอนี้ไม่ได้อยู่ใน transaction เดียวกัน ต้องเขียน subdoc
-    // ให้ "มีอยู่จริง" ก่อน แล้วค่อยเขียนคำถามที่เช็ค existsAfter ทีหลัง
-    await setDoc(doc(db, 'questions', q.id, 'reviews', uid), {
-      reviewerUid: uid, reviewerName: fixerName, verdict: 'fixed',
-      reason: fixReasonText, ref: '', ts: serverTimestamp(),
-    })
-    // rules ผ่านทาง isReviewFix() — เขียนเนื้อหา + ตั้งผลตรวจเป็น passed พร้อมกันในตาเดียว
-    await updateDoc(doc(db, 'questions', q.id), {
-      ...payload,
-      ...reviewFixResult(uid),
-      reviewVerdicts: deleteField(),
-      retired: deleteField(),   // แก้เนื้อหา = ตั้งใจนำกลับมาใช้
-      lastFixBy: uid, lastFixByName: fixerName, lastFixAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
-    usage.track(0, 2)
-    try {
-      await setDoc(doc(db, 'reviewMeta', 'main'), {
-        counts: { [uid]: increment(1) }, names: { [uid]: fixerName },
-        ...(oldStatus !== 'passed' ? { progress: { [oldStatus]: increment(-1), passed: increment(1) } } : {}),
-      }, { merge: true })
-      usage.track(0, 1)
-      meta.value = {
-        counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
-        names: { ...(meta.value.names || {}), [uid]: fixerName },
-        progress: bumpedProgress(oldStatus, 'passed'),
-      }
-    } catch (e) { console.error('[reviewMeta fix bump]', e) }   // พลาดตรงนี้ต้องไม่ทำให้การแก้ล้ม
+    const { oldStatus } = await writeFix(q, payload, triageFixReason.value)
+    meta.value = {
+      counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
+      names: { ...(meta.value.names || {}), [uid]: fixerName },
+      progress: bumpedProgress(oldStatus, 'passed'),
+    }
     patchTriageRow(q.id, {
       ...payload, ...reviewFixResult(uid), retired: false,
       lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
@@ -834,25 +781,7 @@ async function resolveReportGroup(g, verdict) {
   if (resolvingReportId.value) return
   resolvingReportId.value = g.questionId
   try {
-    const batch = writeBatch(db)
-    for (const r of g.reports) {
-      if (verdict === 'valid') {
-        const mailRef = doc(collection(db, 'users', r.reportedBy, 'mail'))
-        batch.set(mailRef, buildReportRewardMail(r, REPORT_REWARD, serverTimestamp()))
-        batch.update(doc(db, 'questionReports', r.id), {
-          ...resolvePayload('valid', REPORT_REWARD),
-          rewardDelivered: true,
-          resolvedAt: serverTimestamp(),
-        })
-      } else {
-        batch.update(doc(db, 'questionReports', r.id), {
-          ...resolvePayload('invalid', REPORT_REWARD),
-          resolvedAt: serverTimestamp(),
-        })
-      }
-    }
-    await batch.commit()
-    usage.track(0, verdict === 'valid' ? g.reports.length * 2 : g.reports.length)
+    await resolveReports(g, verdict)
     openReports.value = openReports.value.filter(r => r.questionId !== g.questionId)
     toast(verdict === 'valid'
       ? `ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${g.reports.length} คนแล้ว`
@@ -952,86 +881,14 @@ async function submit() {
   submitting.value = true
   const q = current.value
   const uid = myUid.value
-  const u = authStore.userData || {}
-  const reviewerName = cleanText(u.realName || u.nickname || u.name || 'ไม่ระบุ', LIMITS.reviewerName)   // snapshot ชื่อจริง
-  const v = verdict.value
-  const isPass = v === 'correct'
-  let newPass = 0, newFail = 0, newStatus = 'pending', already = false
-  let wasResolved = false      // ข้อปิดไปแล้วตอนเราส่ง = มีคนตรวจชนเราพอดี (เสียงเรายังนับ)
-  let oldStatusLocal = 'pending'   // สถานะก่อนหน้า — Task 13 ใช้ขยับแถบความคืบหน้าในเครื่อง
-  let committedCats = null, committedNote = null, committedPle = null   // ค่าที่ "เขียนจริง" ไปยัง Firestore รอบที่ commit สำเร็จ — ใช้ sync local ให้ตรงเป๊ะ
+  const myName = reviewerName()   // snapshot ชื่อจริง
   try {
-    // transaction: อ่านค่าสดก่อนคำนวณ → reviewStatus บน doc เชื่อถือได้แม้ 2 คนส่งพร้อมกัน
-    // (จำเป็น เพราะ load() query จาก reviewStatus ตรงๆ — ถ้าค่าเพี้ยนข้อจะหลุดคิวถาวร)
-    await runTransaction(db, async (tx) => {
-      already = false
-      oldStatusLocal = 'pending'   // reset ทุกรอบที่ callback รัน กันค่าเก่าจากรอบก่อนหน้าค้าง (ทรานแซกชันรีทรายได้)
-      const qRef = doc(db, 'questions', q.id)
-      const snap = await tx.get(qRef)
-      if (!snap.exists()) { already = true; return }   // ข้อถูกลบระหว่างตรวจ
-      const cur = snap.data()
-      // ข้อถูกแก้เนื้อหาไประหว่างเราดูอยู่ (qhash เปลี่ยน) — verdict เราตัดสินจากเวอร์ชันเก่า ห้ามนับ
-      if ((cur.qhash || null) !== (q.qhash || null)) throw new Error('__stale')
-      if ((cur.reviewedBy || []).includes(uid)) { already = true; return }   // เคยส่งไปแล้ว (เช่น จากอีกเครื่อง)
-      const oldStatus = computeStatus(cur)
-      oldStatusLocal = oldStatus
-      newPass = (cur.reviewPass || 0) + (isPass ? 1 : 0)
-      newFail = (cur.reviewFail || 0) + (isPass ? 0 : 1)
-      newStatus = computeStatus({ reviewPass: newPass, reviewFail: newFail })
-      // ข้อปิดไปแล้วก่อนเราส่ง — เกิดได้จากตรวจชนกันพอดี (เกณฑ์ 1 คน/ข้อ = เสียงแรกปิดข้อทันที)
-      // หรือมีคนตัดสิน conflict ไปก่อนเรา · เสียงเรายังถูกนับ แค่ไม่ใช่คนตัดสิน
-      wasResolved = oldStatus === 'passed' || oldStatus === 'failed'
-      // 1) รายละเอียดเต็มใน subcollection (doc id = uid → กันตรวจซ้ำ)
-      tx.set(doc(db, 'questions', q.id, 'reviews', uid), {
-        reviewerUid: uid,
-        reviewerName,
-        verdict: v,
-        reason: cleanText(reason.value, LIMITS.reviewReason),
-        ref: cleanText(refText.value, LIMITS.reviewRef),
-        ts: serverTimestamp(),
-      })
-      // 2) aggregate บนข้อ — ห้ามใส่ field นอก reviewSubmitKeys (rules ใช้ hasOnly จะปฏิเสธทั้งก้อน)
-      const qPatch = {
-        reviewedBy: arrayUnion(uid),
-        reviewPass: newPass,
-        reviewFail: newFail,
-        reviewStatus: newStatus,
-        reviewVerdicts: deleteField(),   // ล้าง map โครงเก่า (ถ้ามี)
-      }
-      // หมวดใหม่: เขียน pleGroup/pleSub/categories เป็นชุดเดียว (plePatch คุมให้สอดคล้องกันเสมอ)
-      // เขียนก็ต่อเมื่อค่าต่างจากบน doc จริง — ไม่งั้นเปลือง write ทุกครั้งที่มีคนตรวจ
-      const plePatchOut = plePatch(ple.value.group, ple.value.sub)
-      const newCats = plePatchOut ? plePatchOut.categories : getCategories(cur)
-      if (plePatchOut && (
-            cur.pleGroup !== plePatchOut.pleGroup
-            || (cur.pleSub || null) !== plePatchOut.pleSub
-            || JSON.stringify(getCategories(cur)) !== JSON.stringify(newCats))) {
-        Object.assign(qPatch, plePatchOut)
-      }
-      const newNote = cleanText(note.value, LIMITS.reviewNote)
-      const baseNote = cleanText(q.reviewNote || '', LIMITS.reviewNote)   // ค่าที่เราโหลดมาเห็นตอนเปิดข้อ
-      if (newNote !== baseNote) {
-        // ล้างช่องทิ้ง = ลบโน้ตจริง แต่ถ้ามีคนเพิ่งเขียนโน้ตใหม่หลังเราโหลด (cur ต่างจาก baseline ที่เราเห็น) อย่าลบของเขา
-        if (newNote || baseNote === (cur.reviewNote || '')) qPatch.reviewNote = newNote || null
-      }
-      // เก็บค่าที่ "เขียนจริง" ไว้ sync local ทีหลัง — ถ้า key ไหนไม่ได้แตะ ให้ยึดค่าปัจจุบันบน doc (cur) แทน กันจอเพี้ยนจากเซิร์ฟเวอร์
-      committedCats = 'categories' in qPatch ? newCats : getCategories(cur)
-      committedPle = 'pleGroup' in qPatch
-        ? { group: qPatch.pleGroup, sub: qPatch.pleSub }
-        : { group: cur.pleGroup ?? null, sub: cur.pleSub ?? null }
-      committedNote = 'reviewNote' in qPatch ? qPatch.reviewNote : (cur.reviewNote || null)
-      tx.update(qRef, qPatch)
-      // 3) ตัวนับ leaderboard + ชื่อ snapshot + ความคืบหน้าคลัง (collection แยก นักศึกษาอ่านไม่ได้)
-      const metaPatch = { counts: { [uid]: increment(1) }, names: { [uid]: reviewerName } }
-      // สถานะไม่เปลี่ยน (เช่น passed 2-0 + เสียงที่ 3) = ไม่ต้องขยับแถบ — และห้ามส่ง progress: {} เข้าไป
-      // เพราะ tx.set(merge) เจอ empty map จะดันเข้า field mask ทำให้ progress ทั้งก้อนถูกล้างทิ้ง (ไม่ใช่ "เว้นไว้เฉยๆ")
-      // (ต้องไม่ใส่ increment ซ้ำ key เดียวกันในก้อนเดียว ไม่งั้นตัวหลังทับตัวแรก = ตัวเลขเพี้ยน — เคสนี้ oldStatus !== newStatus เสมอเมื่อเข้าเงื่อนไข)
-      if (oldStatus !== newStatus) {
-        metaPatch.progress = { [oldStatus]: increment(-1), [newStatus]: increment(1) }
-      }
-      tx.set(doc(db, 'reviewMeta', 'main'), metaPatch, { merge: true })
+    const {
+      already, wasResolved, oldStatus: oldStatusLocal, newStatus, newPass, newFail,
+      committedCats, committedPle, committedNote,
+    } = await writeVote(q, {
+      verdict: verdict.value, reason: reason.value, ref: refText.value, ple: ple.value, note: note.value,
     })
-    usage.track(1, already ? 0 : 3)
     // หมวดที่ติดมากับข้ออาจไม่เคยขึ้นทะเบียนกลาง (มาจาก bulk import / category เดี่ยวของข้อเก่า)
     // อัปเดต local ให้คิว/leaderboard เลื่อนทันที (ไม่ reload) — ใช้ค่าที่ "เขียนจริง" เป๊ะ ไม่คำนวณซ้ำจากฟอร์ม
     const idx = list.value.findIndex(x => x.id === q.id)
@@ -1048,7 +905,7 @@ async function submit() {
     if (!already) {
       meta.value = {
         counts: { ...(meta.value.counts || {}), [uid]: ((meta.value.counts || {})[uid] || 0) + 1 },
-        names: { ...(meta.value.names || {}), [uid]: reviewerName },
+        names: { ...(meta.value.names || {}), [uid]: myName },
         progress: bumpedProgress(oldStatusLocal, newStatus),
       }
     }
