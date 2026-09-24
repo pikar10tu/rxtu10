@@ -329,7 +329,7 @@ import { computeStatus, nextReviewQueue, needsReviewBy, buildLeaderboard, VERDIC
 import { triageBuckets, triageSummary, BUCKET_KEYS, BUCKET_META } from '../utils/questionTriage.js'
 import { getCategories } from '../utils/questionCategories.js'
 import { pleFields, plePatch } from '../utils/pleMapping.js'
-import { isPleGroupKey } from '../data/plecc.js'
+import { isPleGroupKey, groupLabel } from '../data/plecc.js'
 import { quizSample } from '../utils/quizSample.js'
 import TopicSelect from '../components/questions/TopicSelect.vue'
 import QuestionEditor from '../components/questions/QuestionEditor.vue'
