@@ -93,7 +93,7 @@ watch(() => props.floor, (f) => { if (f === null) scout.value = null })
 .fs-name { font-size: .78rem; font-weight: 700; color: var(--ink); }
 
 .fs-fight {
-  margin-top: 4px; border: 2px solid var(--ink); border-radius: 12px;
+  margin-top: 4px; border: var(--bw) solid var(--line); border-radius: 12px;
   padding: 12px; min-height: 44px;
   font-family: inherit; font-size: .92rem; font-weight: 800;
   color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer;

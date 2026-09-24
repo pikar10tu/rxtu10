@@ -261,20 +261,20 @@ onBeforeUnmount(clearTimers)
 
 <style scoped>
 .tp {
-  background: #fff; border: 2px solid var(--ink); border-radius: 16px;
+  background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   box-shadow: var(--pop); margin-bottom: 12px; overflow: hidden;
 }
 
 .tp-head {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 9px 12px; border-bottom: 2px solid var(--ink); background: #fff;
+  padding: 9px 12px; border-bottom: var(--bw) solid var(--line); background: #fff;
 }
 .tp-floor { font-weight: 800; font-size: .9rem; color: var(--ink); }
 .tp-of    { font-weight: 700; font-size: .78rem; color: var(--muted); }
 .tp-head-r { display: flex; align-items: center; gap: 8px; }
 .tp-best  { font-size: .72rem; font-weight: 700; color: var(--muted); }
 .tp-recenter {
-  border: 1.5px solid var(--ink); background: var(--gold); border-radius: 999px;
+  border: var(--bw) solid var(--line); background: var(--gold); border-radius: 999px;
   padding: 4px 9px; font-family: inherit; font-size: .72rem; font-weight: 800;
   color: var(--ink); cursor: pointer; white-space: nowrap;
 }
@@ -347,7 +347,7 @@ onBeforeUnmount(clearTimers)
   position: relative; z-index: 1;
   width: 108px; height: 44px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; gap: 5px;
-  border: 2px solid var(--ink); border-radius: 12px;
+  border: var(--bw) solid var(--line); border-radius: 12px;
   background: #fff; box-shadow: 0 0 0 4px #fff, 3px 3px 0 4px var(--ink);
   font-family: inherit; cursor: pointer;
 }
@@ -400,7 +400,7 @@ onBeforeUnmount(clearTimers)
   font-size: 1.35rem; line-height: 1;
   display: flex; align-items: center; justify-content: center;
   width: 30px; height: 30px;
-  border-radius: 999px; background: var(--gold); border: 2px solid var(--ink);
+  border-radius: 999px; background: var(--gold); border: var(--bw) solid var(--line);
 }
 
 /* ── อนิเมชันไต่ขึ้น ────────────────────────────────────
@@ -466,7 +466,7 @@ onBeforeUnmount(clearTimers)
 .tp-gain {
   position: relative;
   padding: 3px 9px; border-radius: 999px;
-  background: var(--gold); border: 2px solid var(--ink);
+  background: var(--gold); border: var(--bw) solid var(--line);
   font-size: .74rem; font-weight: 800; color: var(--ink); white-space: nowrap;
   animation: tp-gain .9s ease-out forwards;
 }

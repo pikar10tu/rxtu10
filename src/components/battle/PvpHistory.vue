@@ -81,14 +81,14 @@ const summary = computed(() => {
 </script>
 
 <style scoped>
-.ph { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; margin-top: 14px; }
+.ph { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; margin-top: 14px; }
 .ph-toggle { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none; padding: 0; font-family: inherit; cursor: pointer; text-align: left; color: inherit; }
 .ph-title { font-size: .88rem; font-weight: 800; flex-shrink: 0; }
 .ph-sum { flex: 1; font-size: .74rem; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ph-caret { margin-left: auto; font-size: .8rem; color: var(--muted); transition: transform .15s ease; }
 .ph-caret.open { transform: rotate(90deg); }
 .ph-tabs { display: flex; gap: 6px; margin: 10px 0 4px; }
-.ph-tab { border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 4px 12px; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
+.ph-tab { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
 .ph-tab.on { background: var(--primary); color: #fff; }
 .ph-n { display: inline-block; margin-left: 5px; font-size: .7rem; opacity: .75; }
 .ph-row { display: flex; align-items: center; gap: 6px; padding: 7px 0; border-top: 1px dashed rgba(0,0,0,.12); font-size: .76rem; }

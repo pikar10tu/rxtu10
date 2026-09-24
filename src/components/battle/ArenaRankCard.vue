@@ -56,7 +56,7 @@ const rows = computed(() => {
 </script>
 
 <style scoped>
-.arc { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; margin-top: 16px; }
+.arc { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; margin-top: 16px; }
 .arc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .arc-title { font-size: .88rem; font-weight: 800; }
 .arc-my { font-size: .72rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
@@ -73,6 +73,6 @@ const rows = computed(() => {
 .arc-gap { text-align: center; color: rgba(0,0,0,.35); font-size: .8rem; line-height: 1; padding: 2px 0; }
 .arc-none { font-size: .74rem; color: var(--muted); text-align: center; padding: 8px 4px 2px; line-height: 1.5; }
 
-.arc-all { margin-top: 10px; width: 100%; border: 2px solid var(--ink); background: #fff; border-radius: 11px; padding: 8px 12px; font-family: inherit; font-weight: 800; font-size: .76rem; cursor: pointer; box-shadow: var(--pop); }
+.arc-all { margin-top: 10px; width: 100%; border: var(--bw) solid var(--line); background: #fff; border-radius: 11px; padding: 8px 12px; font-family: inherit; font-weight: 800; font-size: .76rem; cursor: pointer; box-shadow: var(--pop); }
 .arc-all:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 </style>

@@ -160,7 +160,7 @@ onMounted(() => { members.loadRoster() })
 .ar-head-r { display: flex; align-items: center; gap: 8px; }
 .ar-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
 .ar-list { display: flex; flex-direction: column; gap: 8px; }
-.ar-opp { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); padding: 10px; }
+.ar-opp { display: flex; flex-direction: column; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 10px; }
 .ar-opp-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .ar-opp-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ar-opp-name { font-size: .78rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -168,7 +168,7 @@ onMounted(() => { members.loadRoster() })
 .ar-opp-team { display: flex; gap: 8px; }
 /* 58px = อ่าน ATK/HP/สาย/เกรด ที่การ์ดมีอยู่แล้วออก · เป็นปุ่มจึงต้องรีเซ็ตสไตล์ปุ่มดีฟอลต์ */
 .ar-opp-pet { width: 58px; flex-shrink: 0; padding: 0; border: none; background: none; font-family: inherit; cursor: pointer; }
-.ar-fight { border: 2px solid var(--ink); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .76rem; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.ar-fight { border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .76rem; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .ar-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ar-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .ar-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
@@ -176,7 +176,7 @@ onMounted(() => { members.loadRoster() })
 .ar-board-title { font-size: .88rem; font-weight: 800; }
 .ar-board-hint { font-size: .72rem; color: rgba(0,0,0,.5); margin-bottom: 8px; }
 .ar-opp-rank { font-weight: 800; color: var(--primary); margin-right: 3px; }
-.ar-refresh { border: 2px solid var(--ink); background: #fff; border-radius: 11px; padding: 6px 12px; font-family: inherit; font-weight: 800; font-size: .74rem; cursor: pointer; box-shadow: var(--pop); display: inline-flex; align-items: center; gap: 5px; }
+.ar-refresh { border: var(--bw) solid var(--line); background: #fff; border-radius: 11px; padding: 6px 12px; font-family: inherit; font-weight: 800; font-size: .74rem; cursor: pointer; box-shadow: var(--pop); display: inline-flex; align-items: center; gap: 5px; }
 .ar-refresh:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ar-refresh:disabled { opacity: .5; cursor: default; }
 .ar-opp-coin { margin-left: 6px; font-weight: 800; color: #b45309; }

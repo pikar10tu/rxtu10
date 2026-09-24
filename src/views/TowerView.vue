@@ -252,7 +252,7 @@ function onSheetFight() {
 .tw-head-r { display: flex; align-items: center; gap: 8px; }
 .tw-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
 
-.tw-card { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
+.tw-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
 .tw-zone { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: #fff; }
 .tw-zone-art { font-size: 2rem; }
 .tw-zone-name { font-family: var(--font-display); font-size: 1.3rem; line-height: 1; }
@@ -277,15 +277,15 @@ function onSheetFight() {
 .tw-empty { font-size: .76rem; color: var(--muted); }
 .tw-vs { text-align: center; font-weight: 800; font-size: .72rem; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 4px; }
 .tw-actions { display: flex; gap: 8px; padding: 6px 16px 16px; }
-.tw-edit { border: 2px solid var(--ink); background: #fff; border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); display: flex; align-items: center; gap: 4px; }
+.tw-edit { border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); display: flex; align-items: center; gap: 4px; }
 .tw-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.tw-fight { flex: 1; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.tw-fight { flex: 1; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .tw-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .tw-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }
 .tw-login { text-align: center; color: var(--muted); padding: 30px 0; font-size: .85rem; }
 
-.tw-rival { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
+.tw-rival { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
 .tw-rival-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
 .tw-rival-head > span:first-child { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); flex-shrink: 0; }
 .tw-rival-rank { font-size: .72rem; font-weight: 700; color: var(--muted); text-align: right; }
@@ -297,7 +297,7 @@ function onSheetFight() {
 .tw-rival-badge { display: inline-block; font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); padding: 1px 6px; border-radius: 999px; margin-left: 5px; vertical-align: middle; }
 .tw-rival-floor { font-size: .8rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 .tw-rival-gap { text-align: center; font-size: .8rem; color: rgba(0,0,0,.28); line-height: 1; padding: 2px 0; }
-.tw-rival-all { display: block; width: 100%; margin-top: 10px; border: 2px solid var(--ink); border-radius: 11px; background: #fff; color: var(--ink); font-family: inherit; font-size: .78rem; font-weight: 800; padding: 9px; cursor: pointer; box-shadow: var(--pop); }
+.tw-rival-all { display: block; width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); font-family: inherit; font-size: .78rem; font-weight: 800; padding: 9px; cursor: pointer; box-shadow: var(--pop); }
 .tw-rival-all:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .tw-rival-chase { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: #ffeef1; border: 1.5px solid var(--accent); font-size: .76rem; font-weight: 700; color: var(--ink); }
 

@@ -195,14 +195,14 @@ async function evolve() {
    คนเล่นกด ⋯ แล้วเห็นแค่จอมืดลง (เกิดจริง 28 ส.ค. ที่หอคอยและสนามประลอง)
    บันไดชั้น: sheet/modal ฐาน = 400 · อะไรที่เปิดจากในนั้น = 410 (ดู SeedPicker, SpendCopiesModal) */
 .pd-ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.pd-box { background: #fff; width: 100%; max-width: 380px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; }
+.pd-box { background: #fff; width: 100%; max-width: 380px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; }
 .pd-hero { position: relative; padding: 20px 16px 16px; text-align: center; color: #fff; }
 .pd-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .pd-emoji { font-size: 3.4rem; }
 .pd-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
 .pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .pd-tag { background: rgba(255,255,255,.25); font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
-.pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: #fff; color: var(--ink); box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: #fff; color: var(--ink); box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .pd-active.on { background: var(--gold); color: #fff; }
 .pd-active:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pd-active:disabled { opacity: .6; box-shadow: none; }
@@ -212,7 +212,7 @@ async function evolve() {
 .pd-stat span { font-size: 1.1rem; }
 .pd-stat b { display: block; font-size: 1.15rem; font-weight: 800; }
 .pd-stat small { font-size: .7rem; color: rgba(0,0,0,.45); }
-.pd-skill { margin: 12px 14px 0; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 14px; background: linear-gradient(135deg, #eef2ff, #f8fafc); box-shadow: var(--pop); }
+.pd-skill { margin: 12px 14px 0; padding: 10px 12px; border: var(--bw) solid var(--line); border-radius: 14px; background: linear-gradient(135deg, #eef2ff, #f8fafc); box-shadow: var(--pop); }
 .pd-skill.none { background: #f8fafc; box-shadow: none; border-color: rgba(0,0,0,.18); }
 .pd-skill-kicker { font-size: .7rem; font-weight: 800; color: rgba(0,0,0,.4); letter-spacing: .04em; }
 .pd-skill-top { display: flex; align-items: center; gap: 7px; margin-top: 2px; }
@@ -220,12 +220,12 @@ async function evolve() {
 .pd-skill-name { font-size: .95rem; font-weight: 800; color: var(--primary); }
 .pd-skill.none .pd-skill-name { color: rgba(0,0,0,.45); font-size: .82rem; }
 .pd-skill-desc { font-size: .74rem; color: rgba(0,0,0,.65); line-height: 1.45; margin-top: 4px; }
-.pd-btn { width: 100%; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.pd-btn { width: 100%; border: var(--bw) solid var(--line); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .pd-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .pd-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
 .pd-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .pd-axes { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; padding: 0 16px; }
-.pd-axis { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 11px; border: 2px solid var(--ink); border-radius: 12px; }
+.pd-axis { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 11px; border: var(--bw) solid var(--line); border-radius: 12px; }
 .pd-axis-k { font-size: .72rem; font-weight: 800; color: #64748b; }
 .pd-axis-k-help { display: inline-flex; align-items: center; gap: 4px; }
 .pd-axis-v { display: inline-flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 800; }

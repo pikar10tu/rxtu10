@@ -79,7 +79,7 @@ const seasonLabel = computed(() => seasonMonthLabel(currentSeasonId()))
 .as {
   position: relative;
   background: linear-gradient(160deg, #4338ca 0%, #4f46e5 50%, #6366f1 100%);
-  border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop);
+  border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop);
   padding: 14px 16px; margin-bottom: 16px; color: #fff; overflow: hidden;
 }
 /* ลายจางแบบเดียวกับ .tower-arena — ให้พื้นไม่แบนจนดูเป็นกล่องสี */
@@ -114,7 +114,7 @@ const seasonLabel = computed(() => seasonMonthLabel(currentSeasonId()))
 .as-thumbs > * { width: 40px; flex-shrink: 0; }
 .as-team-empty { font-size: .74rem; font-weight: 700; color: #fde68a; line-height: 1.45; }
 
-.as-pick { border: 2px solid var(--ink); background: #fff; color: var(--ink); border-radius: 11px; padding: 9px 13px; font-family: inherit; font-weight: 800; font-size: .78rem; cursor: pointer; box-shadow: var(--pop); display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.as-pick { border: var(--bw) solid var(--line); background: #fff; color: var(--ink); border-radius: 11px; padding: 9px 13px; font-family: inherit; font-weight: 800; font-size: .78rem; cursor: pointer; box-shadow: var(--pop); display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .as-pick:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .as-pick.hot { background: #fde68a; }
 </style>

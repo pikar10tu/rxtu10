@@ -152,7 +152,7 @@ function pick(id) {
 .tp-slot.cur { outline: 3px solid var(--primary); outline-offset: 2px; border-color: var(--primary); animation: tp-pulse 1.4s ease-in-out infinite; }
 @keyframes tp-pulse { 0%, 100% { outline-color: var(--primary); } 50% { outline-color: rgba(79,70,229,.35); } }
 .tp-slotno { position: absolute; top: -6px; left: -4px; font-size: .78rem; color: var(--ink); background: #fff; border-radius: 999px; line-height: 1; padding: 1px; pointer-events: none; }
-.tp-more { position: absolute; bottom: -6px; right: -6px; width: 26px; height: 26px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; color: var(--ink); font-family: inherit; font-size: .8rem; font-weight: 800; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--pop); }
+.tp-more { position: absolute; bottom: -6px; right: -6px; width: 26px; height: 26px; border-radius: 999px; border: var(--bw) solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: .8rem; font-weight: 800; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--pop); }
 .tp-more:active { transform: translate(1px,1px); box-shadow: 0 0 0 var(--ink); }
 
 .tp-status { font-size: .74rem; color: rgba(0,0,0,.6); text-align: center; margin-top: 10px; }
@@ -171,5 +171,5 @@ function pick(id) {
 .tp-inteam { position: absolute; top: 1px; right: 3px; font-size: .8rem; line-height: 1; color: var(--primary); }
 .tp-el { position: absolute; top: 2px; left: 3px; font-size: .72rem; line-height: 1; }
 .tp-none { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: .76rem; color: rgba(0,0,0,.4); padding: 16px 0; }
-.tp-none-cta { border: 2px solid var(--ink); background: var(--primary); color: #fff; border-radius: 11px; padding: 9px 18px; font-weight: 800; font-size: .8rem; text-decoration: none; box-shadow: var(--pop); }
+.tp-none-cta { border: var(--bw) solid var(--line); background: var(--primary); color: #fff; border-radius: 11px; padding: 9px 18px; font-weight: 800; font-size: .8rem; text-decoration: none; box-shadow: var(--pop); }
 </style>
