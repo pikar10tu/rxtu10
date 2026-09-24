@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/questionReport.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { reportDocId, buildSnapshot, groupReports, resolvePayload } from './questionReport.js'
+import { reportDocId, buildSnapshot, groupReports, resolvePayload, toMs } from './questionReport.js'
 
 test('reportDocId: deterministic ${questionId}__${uid}', () => {
   assert.equal(reportDocId('q1', 'u1'), 'q1__u1')
@@ -39,4 +39,15 @@ test('resolvePayload valid: stamp reward + rewardDelivered:false (ไม่ม�
 
 test('resolvePayload invalid: ไม่มีรางวัล', () => {
   assert.deepEqual(resolvePayload('invalid', 50), { status: 'resolved', verdict: 'invalid', rewardAmount: 0 })
+})
+
+test('toMs — Timestamp/toDate/{seconds}/Date/number/ISO → ms', () => {
+  assert.equal(toMs({ toMillis: () => 5000 }), 5000)
+  assert.equal(toMs({ toDate: () => new Date(6000) }), 6000)
+  assert.equal(toMs({ seconds: 7, nanoseconds: 500000000 }), 7500)
+  assert.equal(toMs(new Date(8000)), 8000)
+  assert.equal(toMs(9000), 9000)
+  assert.equal(toMs('1970-01-01T00:00:10.000Z'), 10000)
+  assert.equal(toMs(null), 0)
+  assert.equal(toMs('ไม่ใช่วันที่'), 0)
 })

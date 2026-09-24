@@ -23,12 +23,13 @@ export function buildSnapshot(q) {
   }
 }
 
-// Firestore Timestamp | Date | ISO string | number → ms (0 ถ้าแปลงไม่ได้)
-function toMs(t) {
+// Firestore Timestamp | {seconds} (Timestamp ที่ผ่าน JSON/แคช) | Date | ISO string | number → ms (0 ถ้าแปลงไม่ได้)
+export function toMs(t) {
   if (!t) return 0
   if (typeof t === 'number') return t
   if (typeof t.toMillis === 'function') return t.toMillis()
   if (typeof t.toDate === 'function') return t.toDate().getTime()
+  if (typeof t.seconds === 'number') return t.seconds * 1000 + Math.floor((t.nanoseconds || 0) / 1e6)
   const n = new Date(t).getTime()
   return Number.isNaN(n) ? 0 : n
 }
