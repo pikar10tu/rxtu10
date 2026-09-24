@@ -121,6 +121,50 @@
           {{ pleMigrateBusy ? 'กำลังแมพ…' : '🏷️ แมพหมวดเข้าเกณฑ์สภาฯ' }}
         </button>
         <div v-if="pleReport" class="admin-hint" style="margin-top:8px">{{ pleReport }}</div>
+
+        <div class="admin-hint" style="margin-top:12px">
+          <b>ย้ายเครดิตตรวจจากบัญชีซ้ำ</b> — คนที่ล็อกอินด้วย 2 อีเมลจะมี 2 บัญชีแยกกัน ผลตรวจไปนับอยู่อีกบัญชี ·
+          เลือก <b>ต้นทาง</b> (บัญชีที่ถือเครดิต) กับ <b>ปลายทาง</b> (บัญชีที่เขาใช้อยู่) แล้วย้าย —
+          ย้ายทั้งรายชื่อคนตรวจบนข้อ ผลตรวจรายข้อ และตัวนับ (กดซิงก์ระบบตรวจทีหลังก็ไม่เด้งกลับ)
+        </div>
+        <button v-if="!creditAccounts.length" class="btn-mini" :disabled="creditBusy" @click="loadCreditAccounts">
+          {{ creditBusy ? 'กำลังโหลด…' : '👥 โหลดรายชื่อบัญชี' }}
+        </button>
+        <template v-else>
+          <input v-model="creditSearch" class="admin-search" type="text" placeholder="ค้นชื่อ / อีเมล…" />
+          <ul class="role-list">
+            <li v-for="a in creditRows" :key="a.uid" class="role-row">
+              <div class="role-top">
+                <div class="role-info">
+                  <div class="role-name">{{ a.name }}</div>
+                  <div class="role-sub">{{ a.email || 'uid ' + a.uid.slice(0, 8) }} · ตรวจ {{ a.count }} ข้อ</div>
+                </div>
+                <span v-if="a.role" class="role-badge" :class="'role-' + a.role">{{ roleLabel(a.role) }}</span>
+                <div class="role-actions">
+                  <button class="btn-mini" :class="creditFrom === a.uid ? 'btn-gold' : 'btn-gray'" @click="pickCredit('from', a.uid)">ต้นทาง</button>
+                  <button class="btn-mini" :class="creditTo === a.uid ? 'btn-gold' : 'btn-gray'" @click="pickCredit('to', a.uid)">ปลายทาง</button>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div v-if="creditFrom && creditTo" class="admin-hint" style="margin-top:8px">
+            {{ creditName(creditFrom) }} → <b>{{ creditName(creditTo) }}</b>
+            <div v-if="creditToNotEditor">⚠️ บัญชีปลายทางยังไม่มีสิทธิ์วิชาการ — ย้ายเสร็จแล้วตั้งสิทธิ์ในการ์ดสมาชิกด้านล่างด้วย ไม่งั้นเข้าหน้าตรวจไม่ได้</div>
+            <div v-if="creditPlan">
+              เจอในคลัง {{ creditPlan.moved }} ข้อที่จะย้ายเครดิต
+              <span v-if="creditPlan.dup"> · {{ creditPlan.dup }} ข้อตรวจไว้ทั้งสองบัญชี (นับให้ครั้งเดียว)</span>
+              <span v-if="creditPlan.boardCount !== creditPlan.moved + creditPlan.dup"> · กระดานเดิมของต้นทางโชว์ {{ creditPlan.boardCount }} ข้อ (ส่วนต่างคือข้อที่ถูกแก้/ล้างผลตรวจไปแล้ว ซิงก์รอบไหนก็หายอยู่ดี)</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn-mini" :disabled="!creditFrom || !creditTo || creditBusy" @click="previewCreditMove">
+              {{ creditBusy && !creditPlan ? 'กำลังนับ…' : '🔎 นับข้อที่จะย้าย' }}
+            </button>
+            <button class="btn-mini btn-gold" :disabled="!creditPlan || !creditPlan.updates.length || creditBusy" @click="runCreditMove">
+              {{ creditBusy && creditPlan ? 'กำลังย้าย…' : '➡️ ย้ายเครดิต' }}
+            </button>
+          </div>
+        </template>
       </section>
 
       <!-- ───── Roster (doc สรุปรวมทั้งรุ่น) ───── -->
@@ -495,7 +539,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction } from 'firebase/firestore'
+import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, where, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction, increment } from 'firebase/firestore'
 import { buildRosterFromUsers } from '../utils/roster.js'
 import { sumGlobalStatsFromUsers } from '../utils/globalStats.js'
 import { db } from '../firebase/config.js'
@@ -514,6 +558,7 @@ import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
 import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
 import { computeStatus, reviewStatusKey, tallyReviewCounts } from '../utils/questionReview.js'
+import { planReviewCreditMove, reviewerAccounts } from '../utils/reviewCreditMove.js'
 import { getCategories } from '../utils/questionCategories.js'
 import { migrationPlan, plePatch } from '../utils/pleMapping.js'
 
@@ -683,6 +728,96 @@ async function migratePleGroups() {
     toast(`แมพหมวดแล้ว ${updates.length} ข้อ`, 'success')
   } catch (e) { console.error('[ple migrate]', e); toast('แมพหมวดไม่สำเร็จ', 'error') }
   finally { pleMigrateBusy.value = false }
+}
+
+// ย้ายเครดิตตรวจจากบัญชีซ้ำ → บัญชีหลัก (ตรรกะอยู่ utils/reviewCreditMove.js)
+//  อ่าน users ทั้ง collection เอง ไม่พึ่ง members store — store ข้าม doc ที่ยังไม่กรอกข้อมูล
+//  ซึ่งอาจเป็นบัญชีที่ถือเครดิตอยู่พอดี
+const creditAccounts = ref([])
+const creditSearch = ref('')
+const creditFrom = ref(null)
+const creditTo = ref(null)
+const creditPlan = ref(null)
+const creditBusy = ref(false)
+let creditMeta = { counts: {}, names: {} }
+const creditRows = computed(() => {
+  const q = creditSearch.value.trim().toLowerCase()
+  const picked = a => a.uid === creditFrom.value || a.uid === creditTo.value
+  return creditAccounts.value.filter(a => picked(a) || !q || a.search.includes(q)).slice(0, 15)
+})
+const creditName = uid => creditAccounts.value.find(a => a.uid === uid)?.name || uid
+const creditToNotEditor = computed(() => {
+  const a = creditAccounts.value.find(x => x.uid === creditTo.value)
+  return !!a && !['academic', 'admin', 'instructor'].includes(a.role)
+})
+function pickCredit(side, uid) {
+  if (side === 'from') creditFrom.value = creditFrom.value === uid ? null : uid
+  else creditTo.value = creditTo.value === uid ? null : uid
+  creditPlan.value = null
+}
+async function loadCreditAccounts() {
+  creditBusy.value = true
+  try {
+    const [uSnap, mSnap] = await Promise.all([getDocs(collection(db, 'users')), getDoc(doc(db, 'reviewMeta', 'main'))])
+    usage.track(uSnap.size + 1)
+    creditMeta = mSnap.exists() ? mSnap.data() : { counts: {}, names: {} }
+    creditAccounts.value = reviewerAccounts(uSnap.docs.map(d => ({ uid: d.id, ...d.data() })), creditMeta)
+  } catch (e) { console.error('[credit accounts]', e); toast('โหลดรายชื่อไม่สำเร็จ', 'error') }
+  finally { creditBusy.value = false }
+}
+async function previewCreditMove() {
+  if (creditFrom.value === creditTo.value) { toast('ต้นทางกับปลายทางต้องเป็นคนละบัญชี', 'error'); return }
+  creditBusy.value = true
+  try {
+    const from = creditFrom.value
+    const [a, b] = await Promise.all([
+      getDocs(query(collection(db, 'questions'), where('reviewedBy', 'array-contains', from))),
+      getDocs(query(collection(db, 'questions'), where('lastFixBy', '==', from))),
+    ])
+    usage.track(a.size + b.size || 1)
+    const byId = new Map()
+    for (const d of [...a.docs, ...b.docs]) byId.set(d.id, { id: d.id, ...d.data() })
+    creditPlan.value = {
+      ...planReviewCreditMove([...byId.values()], from, creditTo.value),
+      boardCount: (creditMeta.counts || {})[from] || 0,
+    }
+  } catch (e) { console.error('[credit preview]', e); toast('นับไม่สำเร็จ', 'error') }
+  finally { creditBusy.value = false }
+}
+async function runCreditMove() {
+  const from = creditFrom.value, to = creditTo.value, plan = creditPlan.value
+  if (!(await confirm(`ย้ายเครดิตตรวจ ${plan.moved} ข้อ จาก "${creditName(from)}" → "${creditName(to)}"?`))) return
+  creditBusy.value = true
+  try {
+    // อ่านผลตรวจรายข้อของต้นทางก่อน แล้วค่อยเขียนเป็นชุด (batch ละ ≤ 3 op ต่อข้อ → 150 ข้อ/batch)
+    const withDocs = []
+    for (const u of plan.updates) {
+      const inBy = 'reviewedBy' in u.patch
+      const snap = inBy ? await getDoc(doc(db, 'questions', u.id, 'reviews', from)) : null
+      withDocs.push({ ...u, review: snap?.exists() ? snap.data() : null })
+    }
+    for (let i = 0; i < withDocs.length; i += 150) {
+      const batch = writeBatch(db)
+      for (const u of withDocs.slice(i, i + 150)) {
+        batch.update(doc(db, 'questions', u.id), u.patch)
+        if (!u.review) continue
+        // ข้อที่ตรวจไว้ทั้งสองบัญชี: คงผลของปลายทาง ลบของต้นทางทิ้ง (ไม่งั้นโผล่เป็น "ผลตรวจรอบก่อน")
+        if (u.moveReviewDoc) batch.set(doc(db, 'questions', u.id, 'reviews', to), { ...u.review, reviewerUid: to, movedFrom: from })
+        batch.delete(doc(db, 'questions', u.id, 'reviews', from))
+      }
+      await batch.commit()
+    }
+    const names = creditMeta.names || {}
+    await setDoc(doc(db, 'reviewMeta', 'main'), {
+      counts: { [to]: increment(plan.moved), [from]: deleteField() },
+      names: { [to]: names[to] || names[from] || creditName(to), [from]: deleteField() },
+    }, { merge: true })
+    usage.track(withDocs.length, withDocs.length * 2 + 1)
+    toast(`ย้ายเครดิตแล้ว ${plan.moved} ข้อ`, 'success')
+    creditPlan.value = null
+    await loadCreditAccounts()
+  } catch (e) { console.error('[credit move]', e); toast('ย้ายไม่สำเร็จ — กดนับใหม่แล้วลองอีกครั้ง', 'error') }
+  finally { creditBusy.value = false }
 }
 
 // สถิติการสู้ราย species (อ่านทั้ง collection — admin คนเดียว cost ไม่สำคัญ)

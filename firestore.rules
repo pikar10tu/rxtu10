@@ -298,11 +298,14 @@ service cloud.firestore {
       //          ผลรวม pass+fail เพี้ยน แต่ rules ไม่ได้ผูกสองการเขียนนี้เข้าด้วยกัน (ไม่มี atomic
       //          coupling) — ขึ้นกับ client ส่งคู่กันในทรานแซกชันเดียวเอง
       //  delete: admin (แล้วใช้ปุ่ม "ล้างผลตรวจ" ใน Questions ให้ aggregate กลับเข้าคิว)
+      //  create โดย admin: ปุ่ม "ย้ายเครดิตตรวจจากบัญชีซ้ำ" ย้ายผลตรวจไปไว้ใต้ uid ปลายทาง
+      //    (id กับ reviewerUid ต้องตรงกันเสมอ)
       match /reviews/{reviewerUid} {
         allow read:   if canEditQuestions();
-        allow create: if canEditQuestions()
+        allow create: if (isAdmin() && request.resource.data.get('reviewerUid', '') == reviewerUid)
+          || (canEditQuestions()
           && reviewerUid == request.auth.uid
-          && request.resource.data.get('reviewerUid', '') == request.auth.uid;
+          && request.resource.data.get('reviewerUid', '') == request.auth.uid);
         allow update: if isAdmin()
           || (canEditQuestions()
               && reviewerUid == request.auth.uid
