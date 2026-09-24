@@ -10,12 +10,13 @@
       <div class="pt-team">
         <div class="pt-team-head">
           <span><Emoji char="⚔️" /> ทีมต่อสู้ ({{ teamSlots.filter(Boolean).length }}/{{ battleSlots }})</span>
-          <button class="pt-team-edit" @click="pickOpen = true">จัดทีม</button>
+          <button class="pt-team-edit" @click="pickOpen = true">⚙️ จัดทีม</button>
         </div>
         <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
-          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" @click="id ? sel = id : pickOpen = true">
+          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" :style="id ? { '--rc': rarityColor(teamPetOf(id).rarity) } : null" @click="id ? sel = id : pickOpen = true">
+            <span class="pt-team-no">{{ i + 1 }}</span>
             <PetThumb v-if="id" :pet="teamPetOf(id)" />
-            <span v-else class="pt-team-empty">+</span>
+            <span v-else class="pt-team-empty">＋</span>
           </div>
         </div>
       </div>
@@ -45,7 +46,7 @@
       <div v-else class="pt-grid">
         <button
           v-for="p in sorted" :key="p.id"
-          class="pt-cell" :style="{ borderColor: rarityColor(p.rarity) }"
+          class="pt-cell" :style="{ '--rc': rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
           <span v-if="activeSet.has(p.id)" class="pt-cell-team">ทีม</span>
@@ -192,4 +193,25 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell.soon { background: #f1f5f9; border-color: rgba(0,0,0,.15); box-shadow: none; cursor: default; }
 .pt-cell-emoji.shade { filter: brightness(0); opacity: .38; }
 .pt-cell-team { position: absolute; top: -5px; right: -5px; background: var(--primary); color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; }
+
+/* ═══ จัดใหม่ 25 ก.ย. 2026 — การ์ดย้อมสีตามความหายาก (--rc) · เข้าชุดกับหน้าจัดทีม ═══ */
+.pt-team { border-radius: 20px; padding: 14px; background: linear-gradient(150deg, #e6dcfd, #fff 65%); }
+.pt-team-head { font-size: .88rem; }
+.pt-team-edit { border: 0; background: linear-gradient(135deg, #8b6ee0, #b9a6ef); color: #fff; border-radius: 999px; padding: 6px 14px; box-shadow: var(--pop); }
+.pt-team-slots { gap: 10px; }
+.pt-team-slot { position: relative; border: 2px dashed #c9b8f4; border-radius: 16px; background: rgba(255,255,255,.65); }
+.pt-team-slot.filled { border: 2px solid var(--rc); background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 16%, #fff), #fff 70%); box-shadow: var(--pop); }
+.pt-team-no { position: absolute; top: 3px; left: 6px; font-size: .7rem; font-weight: 800; color: var(--muted); z-index: 1; }
+.pt-team-empty { color: #b9a6ef; }
+.pt-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: none; border: 0; box-shadow: none; overflow: visible; }
+.pt-summary > div { border: var(--bw) solid var(--line); border-right: var(--bw) solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--pop); }
+.pt-grid { gap: 10px; }
+.pt-cell { border: 1.5px solid color-mix(in srgb, var(--rc) 60%, #fff); border-radius: 16px; background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 14%, #fff), #fff 70%); }
+.pt-cell:active { transform: scale(.96); box-shadow: var(--pop); }
+.pt-cell-emoji { font-size: 2rem; }
+.pt-cell-name { color: var(--ink); }
+.pt-cell-el { background: rgba(255,255,255,.8); }
+.pt-cell-grade { background: var(--rc); }
+.pt-cell-team { background: #8b6ee0; }
+.pt-cell.soon { background: rgba(255,255,255,.55); border: 1.5px dashed #cbd5e1; }
 </style>
