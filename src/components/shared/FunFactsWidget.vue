@@ -28,7 +28,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.ffw { background:#fff; border:2px solid var(--ink); border-radius:14px; box-shadow:var(--pop); padding:12px 14px; margin:10px 0; display:flex; flex-direction:column; gap:6px; }
+.ffw { background:#fff; border:var(--bw) solid var(--line); border-radius:14px; box-shadow:var(--pop); padding:12px 14px; margin:10px 0; display:flex; flex-direction:column; gap:6px; }
 .ffw-row { font-size:.82rem; color:var(--ink); display:flex; align-items:center; gap:6px; }
-.ffw-more { align-self:flex-end; font-size:.75rem; color:var(--accent,#4f46e5); font-weight:700; text-decoration:none; }
+.ffw-more { align-self:flex-end; font-size:.75rem; color:var(--accent,var(--primary)); font-weight:700; text-decoration:none; }
 </style>

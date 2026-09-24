@@ -147,8 +147,8 @@ onBeforeUnmount(() => { stop(); dispose() })
 .cr-pick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
 .cr-pet { all: unset; cursor: pointer; font-size: 1.8rem; padding: 10px; border: 2px solid transparent;
   border-radius: 14px; background: rgba(0,0,0,.03); text-align: center; min-height: 44px; }
-.cr-pet.sel { border-color: #4f46e5; background: rgba(79,70,229,.12); }
-.cr-start { all: unset; cursor: pointer; background: #4f46e5; color: #fff; font-weight: 800;
+.cr-pet.sel { border-color: var(--primary); background: rgba(79,70,229,.12); }
+.cr-start { all: unset; cursor: pointer; background: var(--primary); color: #fff; font-weight: 800;
   padding: 12px 28px; border-radius: 14px; }
 .cr-exit { all: unset; cursor: pointer; padding: 12px 22px; border-radius: 14px; font-weight: 700;
   border: 2px solid var(--ink, #333); }

@@ -54,7 +54,7 @@ const board = computed(() => taBoard(members.rosterRows || {}, me.value, mode.va
 </script>
 
 <style scoped>
-.tb { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; }
+.tb { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; }
 .tb-head { margin-bottom: 8px; }
 .tb-title { font-size: .84rem; font-weight: 800; }
 .tb-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px dashed rgba(0,0,0,.12); font-size: .78rem; }

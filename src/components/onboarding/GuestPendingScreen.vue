@@ -24,6 +24,6 @@ const rejected = computed(() => auth.userData?.guestStatus === 'rejected')
 .gp-emoji { font-size:3rem; }
 .gp-title { font-size:1.4rem; font-weight:800; color:#92400e; }
 .gp-msg { font-size:.86rem; color:rgba(0,0,0,.6); max-width:320px; line-height:1.6; }
-.gp-btn { margin-top:12px; border:2px solid var(--ink); border-radius:12px; padding:11px 22px; font-family:inherit; font-size:.88rem; font-weight:800; background:#fff; box-shadow:var(--pop); cursor:pointer; }
+.gp-btn { margin-top:12px; border:var(--bw) solid var(--line); border-radius:12px; padding:11px 22px; font-family:inherit; font-size:.88rem; font-weight:800; background:#fff; box-shadow:var(--pop); cursor:pointer; }
 .gp-btn:active { transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 </style>

@@ -155,19 +155,19 @@ const trackLabel = (t) => TRACK[t] || 'สมาชิก'
 
 <style scoped>
 .ow-ov { position: fixed; inset: 0; z-index: 320; background: linear-gradient(160deg,#eef2ff,#fff); display:flex; align-items:center; justify-content:center; padding:18px; overflow-y:auto; }
-.ow-box { background:#fff; width:100%; max-width:400px; border:2px solid var(--ink); border-radius:20px; box-shadow:var(--pop-lg); padding:22px; max-height:92vh; overflow-y:auto; }
+.ow-box { background:#fff; width:100%; max-width:400px; border:var(--bw) solid var(--line); border-radius:20px; box-shadow:var(--pop-lg); padding:22px; max-height:92vh; overflow-y:auto; }
 .ow-email { font-size:.74rem; color:rgba(0,0,0,.6); background:#f1f5f9; border-radius:12px; padding:10px 12px; margin-bottom:16px; }
 .ow-email b { color:var(--ink); word-break:break-all; }
 .ow-email-warn { font-size: .7rem; margin-top:4px; color:rgba(0,0,0,.5); }
 .ow-email-warn a { color:#b45309; }
 .ow-title { font-family:var(--font-display); font-weight:400; font-size:1.3rem; color:var(--ink); margin-bottom:14px; }
-.ow-choice { display:flex; gap:12px; align-items:center; width:100%; text-align:left; background:#fff; border:2px solid var(--ink); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
+.ow-choice { display:flex; gap:12px; align-items:center; width:100%; text-align:left; background:#fff; border:var(--bw) solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
 .ow-choice:active { transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 .ow-choice-ico { font-size:1.6rem; }
 .ow-choice b { display:block; font-size:.88rem; color:var(--ink); }
 .ow-choice small { font-size: .7rem; color:var(--muted); }
 .ow-back { background:none; border:none; color:var(--muted); font-size:.8rem; cursor:pointer; margin-bottom:8px; padding:0; }
-.ow-input { width:100%; border:2px solid var(--ink); border-radius:12px; padding:12px; font-family:inherit; font-size:.9rem; margin-bottom:10px; box-sizing:border-box; }
+.ow-input { width:100%; border:var(--bw) solid var(--line); border-radius:12px; padding:12px; font-family:inherit; font-size:.9rem; margin-bottom:10px; box-sizing:border-box; }
 .ow-ta { resize:vertical; }
 .ow-err { font-size:.76rem; color:#dc2626; margin-bottom:10px; }
 .ow-confirm { border:2px dashed var(--ink); border-radius:14px; padding:14px; text-align:center; margin-bottom:12px; background:#f8fafc; }
@@ -175,7 +175,7 @@ const trackLabel = (t) => TRACK[t] || 'สมาชิก'
 .ow-confirm-nick { font-size:1.3rem; font-weight:800; color:var(--ink); margin:4px 0; }
 .ow-confirm-sub { font-size:.8rem; color:rgba(0,0,0,.6); }
 .ow-confirm-mail { font-size:.7rem; color:rgba(0,0,0,.5); margin-top:6px; word-break:break-all; }
-.ow-btn { width:100%; border:2px solid var(--ink); border-radius:12px; padding:13px; font-family:inherit; font-size:.92rem; font-weight:800; color:#fff; background:var(--gold); box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
+.ow-btn { width:100%; border:var(--bw) solid var(--line); border-radius:12px; padding:13px; font-family:inherit; font-size:.92rem; font-weight:800; color:#fff; background:var(--gold); box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
 .ow-btn:disabled { opacity:.5; cursor:not-allowed; }
 .ow-btn:active:not(:disabled) { transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 </style>

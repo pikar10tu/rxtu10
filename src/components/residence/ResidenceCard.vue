@@ -45,7 +45,7 @@ const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useReside
 <style scoped>
 .res-card {
   background: #fff;
-  border: 2px solid var(--ink);
+  border: var(--bw) solid var(--line);
   border-radius: 18px;
   padding: 14px;
   margin-bottom: 14px;
@@ -67,7 +67,7 @@ const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useReside
 .res-next-income { color: #059669; font-weight: 700; }
 .res-upgrade {
   width: 100%;
-  border: 2px solid var(--ink); border-radius: 12px;
+  border: var(--bw) solid var(--line); border-radius: 12px;
   padding: 11px; font-family: inherit; font-size: .86rem; font-weight: 800;
   color: #fff; background: #c9c2d4; cursor: pointer;
   transition: transform .12s, box-shadow .12s, opacity .12s;

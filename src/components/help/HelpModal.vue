@@ -50,7 +50,7 @@ const revealUpTo = computed(() => Math.min(myLevel.value + 1, MAX_RESIDENCE_LEVE
 
 <style scoped>
 .help-ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
-.help-box { background: #fff; width: 100%; max-width: 480px; max-height: 85dvh; border: 2px solid var(--ink); border-bottom: none; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: help-up .2s ease; }
+.help-box { background: #fff; width: 100%; max-width: 480px; max-height: 85dvh; border: var(--bw) solid var(--line); border-bottom: none; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: help-up .2s ease; }
 @keyframes help-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .help-head { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,.07); }
 .help-head span:first-child { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; color: var(--ink); }

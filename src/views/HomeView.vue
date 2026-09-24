@@ -108,7 +108,7 @@ function onCardSheet(name) { if (name === 'quest') showQuest.value = true }
   width: 50px; height: 50px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.7rem; border-radius: 16px;
-  background: var(--gold); border: 2px solid var(--ink); box-shadow: var(--pop);
+  background: var(--gold); border: var(--bw) solid var(--line); box-shadow: var(--pop);
   transform: rotate(-6deg);
 }
 .home-head-txt { min-width: 0; }

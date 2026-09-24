@@ -96,7 +96,7 @@ watch(open, (v) => { if (v) { stop(); now.value = Date.now() } else start() })
 </script>
 
 <style scoped>
-.news { background: #fff; border: 2px solid var(--ink); border-radius: 18px; padding: 10px 14px; margin-bottom: 14px; box-shadow: var(--pop); }
+.news { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; padding: 10px 14px; margin-bottom: 14px; box-shadow: var(--pop); }
 /* collapsed: บรรทัดล่าสุด (กดเพื่อกาง) */
 .news-latest { all: unset; cursor: pointer; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; }
 .news-latest-msg { flex: 1; min-width: 0; text-align: left; font-size: .8rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

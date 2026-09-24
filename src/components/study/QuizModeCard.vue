@@ -23,15 +23,15 @@ defineProps({
 </script>
 
 <style scoped>
-.qmc { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; background: var(--primary-light); border: 2px solid var(--ink); box-shadow: var(--pop); text-decoration: none; transition: transform .12s, box-shadow .12s; }
+.qmc { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; background: var(--primary-light); border: var(--bw) solid var(--line); box-shadow: var(--pop); text-decoration: none; transition: transform .12s, box-shadow .12s; }
 .qmc:not(.soon):active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qmc.soon { background: #f1f5f9; border-color: #94a3b8; box-shadow: none; opacity: .75; cursor: default; }
 .qmc-emoji { font-size: 1.6rem; flex-shrink: 0; }
 .qmc-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .qmc-text b { font-size: .9rem; color: #3730a3; }
-.qmc-text small { font-size: .7rem; color: #6366f1; }
+.qmc-text small { font-size: .7rem; color: var(--primary-2); }
 .qmc.soon .qmc-text b { color: #475569; }
 .qmc.soon .qmc-text small { color: #64748b; }
-.qmc-go { font-size: 1.4rem; color: #6366f1; flex-shrink: 0; }
+.qmc-go { font-size: 1.4rem; color: var(--primary-2); flex-shrink: 0; }
 .qmc-soon { font-size: .7rem; font-weight: 800; color: #fff; background: #94a3b8; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
 </style>

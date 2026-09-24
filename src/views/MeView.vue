@@ -253,7 +253,7 @@ async function save() {
 .me-pagetitle { margin-bottom: 16px; }
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 .me-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
-.me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--ink); background: #eee; box-shadow: var(--pop); }
+.me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: var(--bw) solid var(--line); background: #eee; box-shadow: var(--pop); }
 .me-av-actions { display: flex; flex-direction: column; gap: 6px; }
 .me-nick { font-size: 1rem; font-weight: 800; color: var(--text, #4a3f5e); }
 .me-btn-sm { border: none; background: var(--primary-light, #f4edff); color: var(--primary, #b58df1); border-radius: 9px; padding: 7px 12px; font-family: inherit; font-size: .76rem; font-weight: 700; cursor: pointer; }
@@ -261,19 +261,19 @@ async function save() {
 .me-btn-sm.on { background: var(--primary, #b58df1); color: #fff; }
 .me-btn-sm:disabled { opacity: .6; cursor: default; }
 .me-photo-save { display: flex; gap: 6px; }
-.me-input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 11px; font-family: inherit; font-size: .85rem; background: #fff; }
+.me-input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: var(--bw) solid var(--line); border-radius: 11px; font-family: inherit; font-size: .85rem; background: #fff; }
 .me-input:focus { outline: none; box-shadow: var(--pop); }
 .me-contact { display: flex; flex-direction: column; gap: 8px; }
 .me-crow { display: flex; align-items: center; gap: 8px; }
 .me-crow span { font-size: 1rem; width: 22px; text-align: center; }
-.me-save { width: 100%; margin-top: 18px; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .9rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.me-save { width: 100%; margin-top: 18px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .9rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .me-save:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .me-save:disabled { opacity: .6; box-shadow: none; }
-.me-contact-fold { margin: 14px 0; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); background: #fff; padding: 10px 12px; }
+.me-contact-fold { margin: 14px 0; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); background: #fff; padding: 10px 12px; }
 .me-contact-fold summary { font-weight: 800; font-size: .85rem; color: var(--ink); cursor: pointer; list-style: none; }
 .me-contact-fold summary::-webkit-details-marker { display: none; }
 .me-contact-fold[open] summary { margin-bottom: 10px; }
-.me-stats { display: flex; margin-top: 22px; background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; }
+.me-stats { display: flex; margin-top: 22px; background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; }
 .me-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid var(--border, #efe7fb); }
 .me-stat:last-child { border-right: none; }
 .me-stat span { font-size: 1.1rem; }
@@ -282,26 +282,26 @@ async function save() {
 .me-tags { display: flex; justify-content: center; margin-top: 12px; }
 .me-sound { width: 100%; font-family: inherit; cursor: pointer; text-align: left; }
 .me-sound-state { margin-left: auto; font-size: .75rem; color: #64748b; }
-.me-link { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-weight: 700; font-size: .85rem; color: var(--ink); text-decoration: none; margin-top: 12px; }
+.me-link { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border: var(--bw) solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-weight: 700; font-size: .85rem; color: var(--ink); text-decoration: none; margin-top: 12px; }
 .me-link:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.me-feedback { width: 100%; margin-top: 22px; border: 2px solid var(--ink); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.me-feedback { width: 100%; margin-top: 22px; border: var(--bw) solid var(--line); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .me-feedback:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.me-logout { width: 100%; margin-top: 10px; border: 2px solid var(--ink); background: #fff; color: var(--accent); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.me-logout { width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); background: #fff; color: var(--accent); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .me-logout:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 
 /* feedback modal */
 /* align-items:flex-start + overflow + box margin:auto = จัดกลางเมื่อเตี้ย, เลื่อนได้เมื่อสูงเกินจอ
    สำคัญตอนคีย์บอร์ดมือถือเด้งขึ้น (textarea) — ปุ่มส่งจะไม่จมใต้คีย์บอร์ด เลื่อนถึงได้เสมอ */
 .fb-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
-.fb-box { background: #fff; width: 100%; max-width: 380px; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 16px; margin: auto 0; }
+.fb-box { background: #fff; width: 100%; max-width: 380px; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop-lg); padding: 16px; margin: auto 0; }
 .fb-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .92rem; margin-bottom: 12px; }
 .fb-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .fb-cats { display: flex; gap: 6px; margin-bottom: 10px; }
 .fb-cat-btn { flex: 1; border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 10px; padding: 8px 4px; font-family: inherit; font-size: .72rem; font-weight: 700; color: rgba(0,0,0,.5); cursor: pointer; }
 .fb-cat-btn.on { background: var(--primary); border-color: var(--ink); color: #fff; }
-.fb-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.fb-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .fb-input:focus { outline: none; box-shadow: var(--pop); }
-.fb-send { width: 100%; margin-top: 10px; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.fb-send { width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .fb-send:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .fb-send:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 </style>

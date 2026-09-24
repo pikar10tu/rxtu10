@@ -39,6 +39,6 @@ function reload() { window.location.reload() }
 .eb-title { font-size: 1.1rem; font-weight: 800; color: #1e293b; }
 .eb-msg { font-size: .8rem; color: rgba(0,0,0,.5); max-width: 300px; line-height: 1.6; }
 .eb-actions { display: flex; gap: 8px; margin-top: 14px; }
-.eb-btn { border: none; border-radius: 11px; padding: 10px 18px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#4f46e5,#6366f1); cursor: pointer; }
-.eb-btn.ghost { background: #fff; color: #4f46e5; border: 1px solid rgba(99,102,241,.35); }
+.eb-btn { border: none; border-radius: 11px; padding: 10px 18px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,var(--primary),var(--primary-2)); cursor: pointer; }
+.eb-btn.ghost { background: #fff; color: var(--primary); border: 1px solid rgba(99,102,241,.35); }
 </style>

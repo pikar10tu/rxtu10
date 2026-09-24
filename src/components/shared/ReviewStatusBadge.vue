@@ -18,7 +18,7 @@ const label = computed(() => REVIEW_STATUS_LABEL[statusKey.value])
 
 <style scoped>
 .rsb { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
-.rsb.pending  { background: #eef2ff; color: #4f46e5; }
+.rsb.pending  { background: #eef2ff; color: var(--primary); }
 .rsb.passed   { background: rgba(34,197,94,.15); color: #15803d; }
 .rsb.conflict { background: #fff7ed; color: #c2410c; }
 .rsb.failed   { background: #fef2f2; color: #b91c1c; }

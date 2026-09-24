@@ -66,7 +66,7 @@ async function finish(goStudy) {
 
 <style scoped>
 .it-ov { position: fixed; inset: 0; z-index: 330; background: linear-gradient(160deg,var(--primary-light),#fff); display: flex; align-items: center; justify-content: center; padding: 18px; overflow-y: auto; }
-.it-box { background: #fff; width: 100%; max-width: 400px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 22px; text-align: center; max-height: 88vh; overflow-y: auto; }
+.it-box { background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 22px; text-align: center; max-height: 88vh; overflow-y: auto; }
 .it-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; }
 .it-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,.15); }
 .it-dot.on { background: var(--primary); }
@@ -74,7 +74,7 @@ async function finish(goStudy) {
 .it-title { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--ink); margin-bottom: 10px; }
 .it-body { font-size: .84rem; color: rgba(0,0,0,.65); line-height: 1.6; margin: 0 0 10px; }
 .it-body-dim { font-size: .76rem; color: rgba(0,0,0,.45); }
-.it-btn { width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 13px; margin-top: 6px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--gold); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.it-btn { width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 13px; margin-top: 6px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--gold); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .it-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .it-skip { background: none; border: none; color: var(--muted); font-size: .78rem; margin-top: 10px; padding: 8px; cursor: pointer; }
 </style>

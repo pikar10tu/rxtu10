@@ -294,10 +294,10 @@ async function chooseTarget(id) {
 .shop-maint-msg { font-size: .82rem; color: rgba(0,0,0,.55); max-width: 280px; line-height: 1.6; }
 
 .ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain; }
-.picker { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 80vh; overflow-y: auto; }
+.picker { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 80vh; overflow-y: auto; }
 .picker-head { font-weight: 800; margin-bottom: 12px; text-align: center; }
 .picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.picker-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid var(--ink); border-radius: 11px; padding: 8px 4px; background: #fff; cursor: pointer; font-family: inherit; }
+.picker-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 8px 4px; background: #fff; cursor: pointer; font-family: inherit; }
 .picker-cell.on { background: var(--gold); }
 .picker-info { position: absolute; top: 2px; right: 2px; border: none; background: transparent; padding: 2px; font-size: .7rem; line-height: 1; cursor: pointer; opacity: .65; }
 .picker-info:active { opacity: 1; }
@@ -305,8 +305,8 @@ async function chooseTarget(id) {
 .picker-emoji { font-size: 1.6rem; }
 .picker-name { font-size: .7rem; font-weight: 700; }
 .picker-have { font-size: .7rem; color: #059669; font-weight: 800; }
-.picker-clear { width: 100%; margin-top: 12px; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; background: #fff; cursor: pointer; }
-.info-box { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 20px 20px; text-align: center; max-width: 320px; width: 100%; }
+.picker-clear { width: 100%; margin-top: 12px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; background: #fff; cursor: pointer; }
+.info-box { position: relative; background: #fff; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 20px 20px; text-align: center; max-width: 320px; width: 100%; }
 .info-x { position: absolute; right: 12px; top: 12px; border: none; background: rgba(0,0,0,.08); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .info-emoji { font-size: 3.4rem; }
 .info-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
@@ -315,7 +315,7 @@ async function chooseTarget(id) {
    คืนได้ด้วยการเอาบรรทัด .info-flavor ในเทมเพลตกลับมา + สไตล์ด้านล่าง
 .info-flavor { font-size: .8rem; color: rgba(0,0,0,.65); line-height: 1.6; margin: 12px 4px; font-style: italic; } */
 .info-passive { margin-top: 12px; font-size: .7rem; color: rgba(0,0,0,.45); background: rgba(0,0,0,.04); border-radius: 9px; padding: 7px; }
-.info-target { width: 100%; margin-top: 14px; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+.info-target { width: 100%; margin-top: 14px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 /* ── reveal: ลุ้น (anticipate) → เผย (show) ── */
 .rv-ov { position: fixed; inset: 0; z-index: 410; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(10,8,20,.74); overscroll-behavior: contain; }
 .rv-ov.anticipate { cursor: pointer; }
@@ -337,7 +337,7 @@ async function chooseTarget(id) {
 .anti.c3 .orb, .anti.c3 .orb-core { animation-duration: .3s; }
 .anti.c3 .anti-txt { letter-spacing: .14em; }
 
-.rv-box { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; overflow: hidden; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
+.rv-box { position: relative; background: #fff; border: var(--bw) solid var(--line); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; overflow: hidden; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
 .rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 40px 4px rgba(245,158,11,.5), var(--pop-lg); }
 .rv-inner { position: relative; z-index: 1; }
 .legend-rays { position: absolute; left: 50%; top: 42%; width: 220%; height: 220%; transform: translate(-50%,-50%); z-index: 0; pointer-events: none;
@@ -346,14 +346,14 @@ async function chooseTarget(id) {
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); margin-bottom: 10px; }
 .rv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .rv-grid.single { grid-template-columns: 1fr; }
-.rv-cell { position: relative; border: 2px solid var(--ink); border-radius: 11px; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: #fff; animation: cell-in .42s cubic-bezier(.2,1.3,.45,1) both; }
+.rv-cell { position: relative; border: var(--bw) solid var(--line); border-radius: 11px; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: #fff; animation: cell-in .42s cubic-bezier(.2,1.3,.45,1) both; }
 .rv-grid.single .rv-cell { animation: cell-pop .52s cubic-bezier(.2,1.45,.4,1) both; box-shadow: 0 0 22px -2px var(--rc); }
 .rv-grid.single .rv-emoji { font-size: 3.4rem; }
 .rv-emoji { font-size: 1.7rem; }
 .rv-nm { font-size: .7rem; font-weight: 700; }
 .rv-grid.single .rv-nm { font-size: .9rem; }
 .rv-badge { color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; }
-.rv-ok { position: relative; z-index: 1; display: block; width: 100%; margin-top: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+.rv-ok { position: relative; z-index: 1; display: block; width: 100%; margin-top: 16px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 
 @keyframes orb-pulse { from { transform: scale(.92); } to { transform: scale(1.08); box-shadow: 0 0 80px 14px var(--glow), inset 0 0 22px rgba(255,255,255,.6); } }
 @keyframes orb-core { from { transform: scale(.78); opacity: .78; } to { transform: scale(1.16); opacity: 1; } }
@@ -365,6 +365,6 @@ async function chooseTarget(id) {
 @keyframes ray-fade { from { opacity: .85; } to { opacity: .4; } }
 
 .shop-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-.shop-tab { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; font-size: .82rem; background: #fff; color: var(--ink); cursor: pointer; }
+.shop-tab { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; font-size: .82rem; background: #fff; color: var(--ink); cursor: pointer; }
 .shop-tab.on { background: var(--gold); }
 </style>

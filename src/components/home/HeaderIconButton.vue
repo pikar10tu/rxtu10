@@ -26,7 +26,7 @@ defineEmits(['click'])
   width: 42px; height: 42px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.25rem; border-radius: 13px;
-  background: #fff; border: 2px solid var(--ink); box-shadow: var(--pop);
+  background: #fff; border: var(--bw) solid var(--line); box-shadow: var(--pop);
   cursor: pointer;
   transition: transform .12s, box-shadow .12s;
 }

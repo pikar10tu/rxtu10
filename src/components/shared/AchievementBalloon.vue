@@ -29,7 +29,7 @@ watch(current, (c) => {
 .ach-balloon {
   position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
   z-index: 500; display: flex; align-items: center; gap: 12px;
-  background: var(--gold, #fbbf24); border: 2px solid var(--ink); border-radius: 16px;
+  background: var(--gold, #fbbf24); border: var(--bw) solid var(--line); border-radius: 16px;
   box-shadow: var(--pop); padding: 10px 16px; max-width: 92vw; cursor: pointer;
 }
 .ach-balloon-icon { font-size: 1.8rem; }

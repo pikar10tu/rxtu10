@@ -38,11 +38,11 @@ const inApp = computed(() => {
 
 <style scoped>
 .ll { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:28px; gap:8px; background:linear-gradient(160deg,#eef2ff,#fff); }
-.ll-badge { width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-size:2rem; border-radius:18px; background:var(--gold); border:2px solid var(--ink); box-shadow:var(--pop); transform:rotate(-6deg); margin-bottom:8px; }
+.ll-badge { width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-size:2rem; border-radius:18px; background:var(--gold); border:var(--bw) solid var(--line); box-shadow:var(--pop); transform:rotate(-6deg); margin-bottom:8px; }
 .ll-title { font-family:var(--font-display); font-weight:400; font-size:2.2rem; color:var(--ink); line-height:1; }
 .ll-sub { font-size:.8rem; color:var(--muted); font-weight:700; }
 .ll-msg { font-size:.84rem; color:rgba(0,0,0,.6); max-width:300px; line-height:1.6; margin:12px 0 18px; }
 .ll-warn { max-width:320px; font-size:.8rem; line-height:1.55; color:#7c2d12; background:#fff7ed; border:2px solid #fdba74; border-radius:12px; padding:10px 14px; margin-bottom:16px; }
-.ll-btn { border:2px solid var(--ink); border-radius:12px; padding:13px 24px; font-family:inherit; font-size:.92rem; font-weight:800; color:#fff; background:var(--accent,#4f46e5); box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
+.ll-btn { border:var(--bw) solid var(--line); border-radius:12px; padding:13px 24px; font-family:inherit; font-size:.92rem; font-weight:800; color:#fff; background:var(--accent,var(--primary)); box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
 .ll-btn:active { transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 </style>

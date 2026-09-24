@@ -50,7 +50,7 @@ async function accept() {
 
 <style scoped>
 .cg-ov { position: fixed; inset: 0; z-index: 320; background: linear-gradient(160deg,#eef2ff,#fff); display: flex; align-items: center; justify-content: center; padding: 18px; overflow-y: auto; }
-.cg-box { background:#fff; width:100%; max-width:420px; border:2px solid var(--ink); border-radius:20px; box-shadow:var(--pop-lg); padding:22px; max-height:92vh; overflow-y:auto; }
+.cg-box { background:#fff; width:100%; max-width:420px; border:var(--bw) solid var(--line); border-radius:20px; box-shadow:var(--pop-lg); padding:22px; max-height:92vh; overflow-y:auto; }
 .cg-emoji { font-size:2.2rem; text-align:center; }
 .cg-title { font-family:var(--font-display); font-weight:400; font-size:1.4rem; color:var(--ink); text-align:center; margin-top:4px; }
 .cg-intro { font-size:.8rem; color:rgba(0,0,0,.6); line-height:1.6; margin:12px 0 8px; }
@@ -61,7 +61,7 @@ async function accept() {
 .cg-item b { color:var(--ink); }
 .cg-check { display:flex; gap:10px; align-items:center; font-size:.82rem; font-weight:700; color:var(--ink); cursor:pointer; margin-bottom:14px; }
 .cg-check input { width:20px; height:20px; flex-shrink:0; }
-.cg-btn { width:100%; border:2px solid var(--ink); border-radius:12px; padding:13px; font-family:inherit; font-size:.92rem; font-weight:800; color:#fff; background:var(--gold); box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
+.cg-btn { width:100%; border:var(--bw) solid var(--line); border-radius:12px; padding:13px; font-family:inherit; font-size:.92rem; font-weight:800; color:#fff; background:var(--gold); box-shadow:var(--pop); cursor:pointer; transition:transform .12s,box-shadow .12s; }
 .cg-btn:disabled { opacity:.5; cursor:not-allowed; }
 .cg-btn:active:not(:disabled) { transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 .cg-logout { width:100%; margin-top:10px; background:none; border:none; color:rgba(0,0,0,.45); font-size:.72rem; cursor:pointer; }

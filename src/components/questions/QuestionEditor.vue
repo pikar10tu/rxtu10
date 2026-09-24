@@ -97,7 +97,7 @@ function removeChoice(i) {
 
 <style scoped>
 .qz-label { display: block; font-size: .7rem; font-weight: 700; color: #64748b; margin: 10px 0 5px; }
-.qz-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.qz-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .qz-input:focus { outline: none; box-shadow: var(--pop); }
 .qz-choice { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
 .qz-radio { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(0,0,0,.15); background: #fff; color: rgba(0,0,0,.45); font-weight: 800; font-size: .82rem; cursor: pointer; }

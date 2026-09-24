@@ -34,8 +34,8 @@ onMounted(async () => {
 .ff-sub { font-size:.78rem; color:var(--muted); margin:-4px 0 14px; }
 .ff-empty { font-size:.82rem; color:var(--muted); padding:20px 0; text-align:center; }
 .ff-list { display:flex; flex-direction:column; gap:10px; }
-.ff-row { display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--ink); border-radius:12px; padding:10px 12px; box-shadow:var(--pop); }
+.ff-row { display:flex; align-items:center; gap:8px; background:#fff; border:var(--bw) solid var(--line); border-radius:12px; padding:10px 12px; box-shadow:var(--pop); }
 .ff-label { flex:1; font-size:.8rem; color:var(--ink); }
-.ff-num { font-size:1rem; color:var(--accent,#4f46e5); }
+.ff-num { font-size:1rem; color:var(--accent,var(--primary)); }
 .ff-unit { font-size:.74rem; color:var(--muted); }
 </style>

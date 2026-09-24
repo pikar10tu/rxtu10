@@ -1048,14 +1048,14 @@ async function saveEcon(m) {
 
 /* ── broadcast (ส่งจดหมาย) ── */
 .bc-form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.bc-body { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.bc-body { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .bc-row { display: flex; gap: 8px; }
 .bc-field { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: .7rem; font-weight: 700; color: #64748b; }
-.bc-coins, .bc-target { box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); width: 100%; }
+.bc-coins, .bc-target { box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); width: 100%; }
 .bc-send { width: 100%; }
 .admin-card {
   background: #fff;
-  border: 2px solid var(--ink);
+  border: var(--bw) solid var(--line);
   border-radius: 16px;
   box-shadow: var(--pop);
   padding: 14px;
@@ -1080,7 +1080,7 @@ async function saveEcon(m) {
   margin-bottom: 10px;
 }
 .usage-banner {
-  border: 2px solid var(--ink); border-radius: 10px; padding: 8px 12px;
+  border: var(--bw) solid var(--line); border-radius: 10px; padding: 8px 12px;
   font-size: .74rem; font-weight: 700; margin-bottom: 10px;
 }
 .usage-banner.warn   { background: #fff7e6; }
@@ -1090,7 +1090,7 @@ async function saveEcon(m) {
 .usage-lbl { color: rgba(0,0,0,.6); }
 .usage-num { color: var(--ink); }
 .usage-bar {
-  height: 8px; border: 2px solid var(--ink); border-radius: 999px;
+  height: 8px; border: var(--bw) solid var(--line); border-radius: 999px;
   background: #fff; overflow: hidden; margin-bottom: 6px;
 }
 .usage-bar i { display: block; height: 100%; transition: width .3s; }
@@ -1103,7 +1103,7 @@ async function saveEcon(m) {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
-  border: 2px solid var(--ink);
+  border: var(--bw) solid var(--line);
   border-radius: 10px;
   font-family: inherit;
   font-size: .82rem;
@@ -1132,7 +1132,7 @@ async function saveEcon(m) {
 .tag-editor { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px; }
 .econ-editor { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding-top: 4px; }
 .econ-field { display: flex; flex-direction: column; gap: 3px; font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.55); }
-.econ-field input { box-sizing: border-box; width: 130px; border: 2px solid var(--ink); border-radius: 8px; padding: 6px 8px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); }
+.econ-field input { box-sizing: border-box; width: 130px; border: var(--bw) solid var(--line); border-radius: 8px; padding: 6px 8px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); }
 .tag-toggle {
   border: 1px solid rgba(0,0,0,.15); background: #fff; color: rgba(0,0,0,.55);
   border-radius: 999px; padding: 4px 9px; font-family: inherit; font-size: .7rem;
@@ -1163,7 +1163,7 @@ async function saveEcon(m) {
 .role-instructor { background: #fff7ed; color: #9a3412; }
 .role-actions { flex-shrink: 0; }
 .btn-mini {
-  border: 2px solid var(--ink);
+  border: var(--bw) solid var(--line);
   border-radius: 8px;
   padding: 6px 10px;
   font-family: inherit;
@@ -1186,7 +1186,7 @@ async function saveEcon(m) {
 .rep-done { border: none; background: rgba(34,197,94,.15); color: #15803d; border-radius: 8px; padding: 3px 9px; font-family: inherit; font-size: .7rem; font-weight: 700; cursor: pointer; flex-shrink: 0; }
 .rep-cur { font-size: .7rem; color: rgba(0,0,0,.5); margin-top: 2px; }
 .rep-note { font-size: .76rem; color: #1e293b; margin-top: 4px; line-height: 1.4; word-break: break-word; }
-.fb-cat { font-size: .7rem; font-weight: 700; color: #4f46e5; }
+.fb-cat { font-size: .7rem; font-weight: 700; color: var(--primary); }
 .news-form { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
 .news-icon-in { width: 42px; text-align: center; padding: 8px 0; border: 1px solid rgba(0,0,0,.12); border-radius: 10px; font-family: inherit; font-size: 1rem; }
 .news-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }

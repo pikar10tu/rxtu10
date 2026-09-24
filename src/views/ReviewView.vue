@@ -1175,7 +1175,7 @@ async function submit() {
 <style scoped>
 .rv-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
 .rv-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
-.rv-back { font-size: .72rem; font-weight: 700; color: #4f46e5; text-decoration: none; }
+.rv-back { font-size: .72rem; font-weight: 700; color: var(--primary); text-decoration: none; }
 .rv-denied, .rv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 26px 0; font-size: .85rem; }
 .rv-done { color: #15803d; font-weight: 700; }
 
@@ -1186,15 +1186,15 @@ async function submit() {
 .rv-bar-fill { height: 100%; background: #22c55e; border-radius: 999px; transition: width .3s; }
 .rv-sum-mine { font-size: .7rem; color: rgba(0,0,0,.5); }
 
-.rv-report-banner { font-size: .78rem; font-weight: 800; color: #b45309; background: rgba(245,158,11,.15); border: 2px solid var(--ink); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.5; }
+.rv-report-banner { font-size: .78rem; font-weight: 800; color: #b45309; background: rgba(245,158,11,.15); border: var(--bw) solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.5; }
 
-.rv-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
+.rv-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
 .rv-card-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
-.rv-cat { font-size: .7rem; color: #4f46e5; font-weight: 700; }
+.rv-cat { font-size: .7rem; color: var(--primary); font-weight: 700; }
 .rv-cat-sub { color: rgba(0,0,0,.45); }
 .rv-draft { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.07); color: rgba(0,0,0,.5); }
 /* ── 🗂️ ข้อที่รอดำเนินการ ── */
-.rv-triage { border: 2px solid var(--ink); border-radius: 14px; padding: 12px; margin-top: 14px; background: #fff; }
+.rv-triage { border: var(--bw) solid var(--line); border-radius: 14px; padding: 12px; margin-top: 14px; background: #fff; }
 .rv-triage-head { font-size: .88rem; font-weight: 800; margin-bottom: 9px; }
 .rv-triage-p { margin: 0 0 9px; font-size: .78rem; line-height: 1.55; color: #334155; }
 .rv-triage-note { margin: 7px 0 0; font-size: .72rem; color: rgba(0,0,0,.45); }
@@ -1277,19 +1277,19 @@ async function submit() {
 .rv-open-edit { margin-top: 4px; }
 .rv-label { display: block; font-size: .7rem; font-weight: 700; color: #64748b; margin: 9px 0 5px; }
 .rv-note-hint { display: block; font-weight: 700; color: #b45309; font-size: .7rem; margin-top: 2px; }
-.rv-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.rv-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .rv-input:focus { outline: none; box-shadow: var(--pop); }
 .rv-actions { display: flex; gap: 8px; margin-top: 13px; }
-.rv-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.rv-btn { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .rv-primary { background: var(--primary); color: #fff; box-shadow: var(--pop); }
 .rv-primary:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .rv-primary:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .rv-gray { background: #fff; color: var(--ink); flex: 0 0 110px; }
 .rv-unskip { flex: none; display: block; margin: 12px auto 0; padding: 9px 18px; font-size: .78rem; }
 
-.rv-mini { flex-shrink: 0; border: 2px solid var(--ink); border-radius: 9px; padding: 5px 11px; font-family: inherit; font-size: .72rem; font-weight: 800; background: #fff; color: var(--ink); cursor: pointer; }
+.rv-mini { flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 9px; padding: 5px 11px; font-family: inherit; font-size: .72rem; font-weight: 800; background: #fff; color: var(--ink); cursor: pointer; }
 
-.rv-board { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px; }
+.rv-board { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 14px; }
 .rv-board-head { font-weight: 800; font-size: .9rem; margin-bottom: 10px; }
 .rv-board-empty { padding: 14px 0; }
 .rv-board-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; counter-reset: rank; }
@@ -1297,7 +1297,7 @@ async function submit() {
 .rv-board-row::before { counter-increment: rank; content: counter(rank); flex-shrink: 0; width: 20px; font-weight: 800; color: rgba(0,0,0,.35); font-size: .72rem; }
 .rv-board-row.me { background: var(--primary-light, #eef2ff); }
 .rv-board-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.rv-you { color: #4f46e5; font-weight: 800; }
+.rv-you { color: var(--primary); font-weight: 800; }
 .rv-board-count { flex-shrink: 0; font-weight: 800; color: var(--ink); font-size: .78rem; }
 
 /* ต่อยอด .rv-mini เดิม (นิยามหลักอยู่ด้านบน) ให้ใช้กับปุ่ม disabled และลิงก์ในรายการรอดำเนินการ */

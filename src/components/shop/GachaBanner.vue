@@ -79,7 +79,7 @@ defineEmits(['pull', 'open-target'])
 </script>
 
 <style scoped>
-.banner { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 14px; box-shadow: var(--pop); }
+.banner { position: relative; background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 14px; box-shadow: var(--pop); }
 .banner + .banner { margin-top: 12px; }
 .banner-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .banner-title { font-weight: 800; font-size: .95rem; }
@@ -92,7 +92,7 @@ defineEmits(['pull', 'open-target'])
 .banner-rates { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; font-size: .7rem; font-weight: 700; }
 .ticket-note { font-size: .7rem; font-weight: 800; color: #b45309; margin-bottom: 8px; }
 .pull-row { display: flex; gap: 8px; }
-.pull-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .85rem; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.pull-btn { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .85rem; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .pull-btn small { font-size: .7rem; font-weight: 700; }
 .pull-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .pull-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }

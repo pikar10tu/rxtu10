@@ -145,11 +145,11 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))    // กันลูปรั�
 
 <style scoped>
 .s-score { text-align: center; font-size: .95rem; margin-bottom: 10px; }
-.s-stage { max-width: 360px; margin: 0 auto; border: 2px solid var(--ink); border-radius: 14px;
+.s-stage { max-width: 360px; margin: 0 auto; border: var(--bw) solid var(--line); border-radius: 14px;
   background: linear-gradient(160deg, #eef2ff, #fff); padding: 8px; touch-action: none; cursor: pointer; }
 .s-grid { display: flex; flex-direction: column-reverse; gap: 3px; min-height: 320px; justify-content: flex-start; }
 .s-row { position: relative; height: 26px; }
-.s-blk { position: absolute; top: 0; height: 100%; border-radius: 6px; border: 2px solid var(--ink); }
+.s-blk { position: absolute; top: 0; height: 100%; border-radius: 6px; border: var(--bw) solid var(--line); }
 .s-blk.placed { background: var(--primary-light); }
 .s-blk.moving { background: var(--primary); }
 .s-hint { text-align: center; font-size: .72rem; color: rgba(0,0,0,.45); margin-top: 10px; }

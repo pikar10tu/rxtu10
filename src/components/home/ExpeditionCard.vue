@@ -33,7 +33,7 @@ const remainText = computed(() => {
 </script>
 
 <style scoped>
-.exc { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); padding: 11px 13px; margin-top: 4px; }
+.exc { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 11px 13px; margin-top: 4px; }
 .exc.ready { background: rgba(34,197,94,.12); border-color: #16a34a; }
 .exc-emoji { font-size: 1.4rem; }
 .exc-txt { display: flex; flex-direction: column; min-width: 0; }

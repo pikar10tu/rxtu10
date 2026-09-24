@@ -80,14 +80,14 @@ async function confirmAdd() {
 
 <style scoped>
 .es-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 7px; }
-.es-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light, #eef2ff); color: #4f46e5; border-radius: 999px; padding: 4px 6px 4px 11px; font-size: .74rem; font-weight: 700; }
-.es-chip-x { border: none; background: rgba(0,0,0,.08); border-radius: 50%; width: 18px; height: 18px; cursor: pointer; color: #4f46e5; font-size: .7rem; line-height: 1; }
-.es-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; background: #fff; }
+.es-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light, #eef2ff); color: var(--primary); border-radius: 999px; padding: 4px 6px 4px 11px; font-size: .74rem; font-weight: 700; }
+.es-chip-x { border: none; background: rgba(0,0,0,.08); border-radius: 50%; width: 18px; height: 18px; cursor: pointer; color: var(--primary); font-size: .7rem; line-height: 1; }
+.es-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; background: #fff; }
 .es-input:focus { outline: none; box-shadow: var(--pop); }
 .es-add { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .es-add .es-input { flex: 1; min-width: 120px; }
 .es-year { flex: 0 0 90px; }
-.es-btn { flex-shrink: 0; border: 2px solid var(--ink); border-radius: 9px; padding: 6px 12px; font-family: inherit; font-size: .75rem; font-weight: 800; background: var(--primary); color: #fff; cursor: pointer; }
+.es-btn { flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 9px; padding: 6px 12px; font-family: inherit; font-size: .75rem; font-weight: 800; background: var(--primary); color: #fff; cursor: pointer; }
 .es-btn:disabled { background: #cbd5e1; cursor: default; }
 .es-cancel { background: #fff; color: var(--ink); }
 </style>

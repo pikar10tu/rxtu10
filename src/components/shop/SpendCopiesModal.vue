@@ -87,26 +87,26 @@ function confirm() {
 
 <style scoped>
 .ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain; }
-.sc-box { background: #fff; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 82vh; display: flex; flex-direction: column; }
+.sc-box { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop-lg); padding: 18px; width: 100%; max-width: 360px; max-height: 82vh; display: flex; flex-direction: column; }
 .sc-head { font-weight: 800; text-align: center; }
 .sc-sub { font-size: .72rem; color: rgba(0,0,0,.6); text-align: center; margin: 4px 0 12px; }
 .sc-empty { text-align: center; color: rgba(0,0,0,.4); padding: 20px 0; }
 .sc-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-.sc-row { display: flex; align-items: center; gap: 8px; border: 2px solid var(--ink); border-radius: 11px; padding: 7px 10px; }
+.sc-row { display: flex; align-items: center; gap: 8px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 7px 10px; }
 .sc-emoji { font-size: 1.4rem; }
 .sc-name { flex: 1; min-width: 0; font-size: .8rem; font-weight: 700; }
 .sc-name small { color: rgba(0,0,0,.45); font-weight: 600; }
 .sc-step { display: flex; align-items: center; gap: 8px; }
-.sc-pm { width: 40px; height: 40px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
+.sc-pm { width: 40px; height: 40px; border: var(--bw) solid var(--line); border-radius: 8px; background: #fff; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
 .sc-pm:disabled { opacity: .35; cursor: default; }
-.sc-max { min-height: 40px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
+.sc-max { min-height: 40px; padding: 0 12px; border: var(--bw) solid var(--line); border-radius: 8px; background: #fff; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
 .sc-max:disabled { opacity: .35; cursor: default; }
 .sc-n { min-width: 18px; text-align: center; font-weight: 800; }
 .sc-warn { font-size: .7rem; color: #dc2626; text-align: center; margin-top: 8px; }
 .sc-actions { display: flex; gap: 8px; margin-top: 14px; }
-.sc-auto { border: 2px solid var(--ink); border-radius: 10px; padding: 9px 10px; font-family: inherit; font-weight: 800; font-size: .72rem; background: #fff; cursor: pointer; }
-.sc-cancel { flex: 1; border: 2px solid var(--ink); border-radius: 10px; padding: 9px; font-family: inherit; font-weight: 800; background: #fff; cursor: pointer; }
-.sc-ok { flex: 1; border: 2px solid var(--ink); border-radius: 10px; padding: 9px; font-family: inherit; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; }
+.sc-auto { border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 10px; font-family: inherit; font-weight: 800; font-size: .72rem; background: #fff; cursor: pointer; }
+.sc-cancel { flex: 1; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px; font-family: inherit; font-weight: 800; background: #fff; cursor: pointer; }
+.sc-ok { flex: 1; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px; font-family: inherit; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; }
 .sc-ok.ready { background: var(--primary); box-shadow: var(--pop); }
 .sc-ok:disabled { cursor: default; }
 </style>

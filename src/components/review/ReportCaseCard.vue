@@ -122,7 +122,7 @@ const differs = computed(() => !gone.value && snapshotDiffers(props.group.snapsh
 </script>
 
 <style scoped>
-.rc-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
+.rc-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
 .rc-head { font-size: .88rem; font-weight: 800; color: #c2410c; margin-bottom: 10px; }
 
 .rc-gone { font-size: .78rem; font-weight: 700; color: #92400e; background: rgba(245,158,11,.13); border-radius: 10px; padding: 9px 11px; margin-bottom: 11px; line-height: 1.5; }
@@ -143,7 +143,7 @@ const differs = computed(() => !gone.value && snapshotDiffers(props.group.snapsh
 .rc-diff-badge { font-size: .74rem; font-weight: 700; color: #92400e; background: rgba(245,158,11,.13); border-radius: 10px; padding: 8px 11px; margin-bottom: 11px; line-height: 1.5; }
 
 .rc-actions { display: flex; gap: 8px; margin-top: 4px; }
-.rc-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; background: #fff; color: var(--ink); }
+.rc-btn { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; background: #fff; color: var(--ink); }
 .rc-btn:active:not(:disabled) { transform: translate(1px,1px); }
 .rc-btn:disabled { opacity: .55; cursor: default; }
 .rc-primary { background: var(--primary); color: #fff; box-shadow: var(--pop); }

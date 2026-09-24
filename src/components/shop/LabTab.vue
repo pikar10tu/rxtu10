@@ -139,17 +139,17 @@ async function onConfirm(allocation) {
 .lab-bal-cell { display: flex; flex-direction: column; align-items: center; border: 2px solid; border-radius: 11px; padding: 8px 2px; background: #fff; }
 .lab-bal-n { font-size: 1.2rem; font-weight: 800; }
 .lab-bal-l { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); }
-.lab-card { background: #fff; border: 2px solid var(--ink); border-radius: 16px; padding: 12px; box-shadow: var(--pop); }
+.lab-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 12px; box-shadow: var(--pop); }
 .lab-card-h { font-weight: 800; font-size: .9rem; margin-bottom: 10px; }
 .lab-fuse { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(0,0,0,.06); }
 .lab-fuse:first-of-type { border-top: none; }
 .lab-fuse-txt { flex: 1; font-size: .78rem; font-weight: 700; }
 .lab-fuse-cost { font-size: .7rem; color: rgba(0,0,0,.5); font-weight: 700; }
-.lab-btn { border: 2px solid var(--ink); border-radius: 10px; padding: 7px 14px; font-family: inherit; font-weight: 800; font-size: .76rem; color: #fff; background: #c9c2d4; cursor: pointer; }
+.lab-btn { border: var(--bw) solid var(--line); border-radius: 10px; padding: 7px 14px; font-family: inherit; font-weight: 800; font-size: .76rem; color: #fff; background: #c9c2d4; cursor: pointer; }
 .lab-btn.ok { background: var(--primary); box-shadow: var(--pop); }
 .lab-btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
 .ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.rv-box { position: relative; overflow: hidden; background: #fff; border: 2px solid var(--ink); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; max-height: 88vh; overflow-y: auto; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
+.rv-box { position: relative; overflow: hidden; background: #fff; border: var(--bw) solid var(--line); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; max-height: 88vh; overflow-y: auto; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
 .rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 38px 4px rgba(245,158,11,.5), var(--pop-lg); }
 .rv-label { font-size: .8rem; color: rgba(0,0,0,.5); }
 .rv-emoji-wrap { position: relative; display: grid; place-items: center; width: 110px; height: 110px; margin: 10px auto; }
@@ -159,7 +159,7 @@ async function onConfirm(allocation) {
 .rv-emoji { position: relative; z-index: 1; font-size: 4rem; filter: drop-shadow(0 0 12px var(--rc)); animation: emoji-pop .5s cubic-bezier(.2,1.45,.4,1) both; }
 .rv-nm { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
 .rv-badge { display: inline-block; color: #fff; font-size: .7rem; font-weight: 800; padding: 3px 12px; border-radius: 999px; margin-top: 8px; }
-.rv-ok { display: block; width: 100%; margin-top: 16px; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+.rv-ok { display: block; width: 100%; margin-top: 16px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 
 /* redeem coin-burst */
 .cb-ov { position: fixed; inset: 0; z-index: 420; display: flex; align-items: center; justify-content: center; pointer-events: none; }

@@ -116,7 +116,7 @@ async function claimReward() {
 .dq-task-r { display: flex; align-items: center; gap: 6px; }
 .dq-task-n { font-variant-numeric: tabular-nums; }
 .dq-task-go { font-size: 1rem; line-height: 1; color: rgba(0,0,0,.3); }
-.dq-claim { width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.dq-claim { width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .dq-claim.ready { background: var(--gold); box-shadow: var(--pop); }
 .dq-claim.ready:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .dq-claim:disabled { cursor: default; }

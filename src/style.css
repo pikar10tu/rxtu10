@@ -6,7 +6,7 @@
   --sci: #0ea5e9;
   --care: #10b981;
   --gold: #f59e0b;
-  --primary: #4f46e5;
+  --primary: var(--primary);
   --primary-light: #eef2ff;
   --bg: #f1f5f9;
   --surface: #ffffff;
@@ -34,7 +34,7 @@ html, body {
      เพื่อให้ emoji แสดงเป็นสีเสมอ (กันขึ้นเป็นสี่เหลี่ยม □ บนบางเครื่อง) */
   font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol';
-  background: var(--bg);
+  background: var(--bg) linear-gradient(180deg, #fdf2f8 0%, #eef8fd 45%, #ecfdf6 100%) fixed;
   color: var(--text);
 }
 
@@ -73,7 +73,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 .ticker-label { background: var(--gold); color: #fff; padding: 3px 9px; font-weight: 800; font-size: .72rem; white-space: nowrap; border-radius: 6px 0 0 6px; }
 .ticker-scroll { flex: 1; overflow: hidden; position: relative; height: 34px; }
 .ticker-inner { position: absolute; left: 0; right: 0; padding: 0 12px; line-height: 34px; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-.news-banner { background: linear-gradient(135deg, var(--primary), #6366f1); color: #fff; font-weight: 600; display: flex; align-items: center; border-radius: 12px; overflow: hidden; cursor: pointer; margin-bottom: 10px; height: 36px; }
+.news-banner { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 600; display: flex; align-items: center; border-radius: 12px; overflow: hidden; cursor: pointer; margin-bottom: 10px; height: 36px; }
 
 /* LAYOUT */
 #main-content { position: fixed; top: 0; left: 0; right: 0; bottom: var(--btm); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 12px 24px; }
@@ -89,7 +89,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 
 /* HOME HERO */
 .home-hero { border-radius: 20px; overflow: hidden; margin-bottom: 10px; position: relative; box-shadow: var(--shadow-md); }
-.hero-bg { background: linear-gradient(160deg, #4338ca 0%, #4f46e5 50%, #6366f1 100%); padding: 20px 16px 0; position: relative; }
+.hero-bg { background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-2) 100%); padding: 20px 16px 0; position: relative; }
 .hero-bg::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; }
 .hero-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; position: relative; }
 .pc-img-wrap { position: relative; flex-shrink: 0; }
@@ -185,7 +185,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 /* MODALS */
 .modal-ov { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 900; align-items: center; justify-content: center; padding: 14px; backdrop-filter: blur(4px); }
 .modal-ov.active { display: flex; }
-.modal-box { background: #fff; border: 2px solid var(--ink); color: var(--text); border-radius: 20px; padding: 24px 18px; max-width: 340px; width: 100%; animation: popIn .35s cubic-bezier(.34,1.56,.64,1); will-change: transform,opacity; position: relative; max-height: 88vh; overflow-y: auto; box-shadow: var(--pop-lg); }
+.modal-box { background: #fff; border: var(--bw) solid var(--line); color: var(--text); border-radius: 20px; padding: 24px 18px; max-width: 340px; width: 100%; animation: popIn .35s cubic-bezier(.34,1.56,.64,1); will-change: transform,opacity; position: relative; max-height: 88vh; overflow-y: auto; box-shadow: var(--pop-lg); }
 @keyframes popIn { from { transform: scale(.5); opacity: 0 } to { transform: scale(1); opacity: 1 } }
 .mclose { position: absolute; top: 10px; right: 10px; background: var(--bg); border: 1px solid var(--border); width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: .85rem; display: flex; align-items: center; justify-content: center; color: var(--muted); }
 .pm-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 7px; margin-bottom: 9px; }
@@ -252,18 +252,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 .mega-inp:focus { border-color: var(--gold); }
 
 /* BUTTONS */
-.btn-gold { background: var(--gold); color: #fff; border: 2px solid var(--ink); padding: 9px 16px; border-radius: 10px; font-family: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.btn-gold { background: var(--gold); color: #fff; border: var(--bw) solid var(--line); padding: 9px 16px; border-radius: 10px; font-family: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .btn-gold:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .btn-gold:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
 .btn-gold.full { width: 100%; }
 .btn-gold.sm { padding: 6px 11px; font-size: .78rem; }
-.btn-gray { background: #fff; color: var(--ink); border: 2px solid var(--ink); padding: 8px 14px; border-radius: 10px; font-family: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; transition: transform .12s, box-shadow .12s; box-shadow: var(--pop); }
+.btn-gray { background: #fff; color: var(--ink); border: var(--bw) solid var(--line); padding: 8px 14px; border-radius: 10px; font-family: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; transition: transform .12s, box-shadow .12s; box-shadow: var(--pop); }
 .btn-gray:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .btn-gray.sm { padding: 5px 10px; font-size: .74rem; }
 .btn-gray.full { width: 100%; }
 
 /* BATTLE */
-.battle-arena { background: linear-gradient(160deg, #4338ca 0%, #4f46e5 50%, #6366f1 100%); border-radius: 20px; padding: 16px 14px; margin-bottom: 10px; position: relative; }
+.battle-arena { background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-2) 100%); border-radius: 20px; padding: 16px 14px; margin-bottom: 10px; position: relative; }
 .battle-arena::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M20 0l20 20-20 20L0 20z'/%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; border-radius: 20px; }
 .battle-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; position: relative; }
 .battle-title { font-size: .72rem; font-weight: 800; color: rgba(255,255,255,.8); letter-spacing: 2px; text-transform: uppercase; }
@@ -378,7 +378,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 
 /* TOWER */
 .tower-sheet { width:100%;max-width:480px;margin:0 auto;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 12px 28px;box-sizing:border-box;border-radius:20px 20px 0 0;background:#fff;box-shadow:0 -8px 40px rgba(15,23,42,.1); }
-.tower-arena { background:linear-gradient(160deg,#4338ca 0%,#4f46e5 50%,#6366f1 100%);border-radius:20px;padding:16px 14px;margin-bottom:10px;position:relative; }
+.tower-arena { background:linear-gradient(160deg,var(--primary-dark) 0%,var(--primary) 50%,var(--primary-2) 100%);border-radius:20px;padding:16px 14px;margin-bottom:10px;position:relative; }
 .tower-arena::before { content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M20 0l20 20-20 20L0 20z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;border-radius:20px; }
 .tower-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative; }
 .tower-title { font-size:1rem;font-weight:800;color:#fff;letter-spacing:.5px;display:flex;align-items:center;gap:8px; }
@@ -484,28 +484,37 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 }
 
 /* ═══════════════════════════════════════════════════════
-   🧪 STICKER POP — Apothecary Arcade (bold redesign)
-   พื้นกระดาษครีม + สีจัด + การ์ดสติกเกอร์ขอบหมึก เงาแข็ง
+   🌸 PASTEL SOFT — ธีมพาสเทล ฟ้า-เขียว-ชมพู + สไตล์นุ่ม (user เคาะ 25 ก.ย. 2026 จากเดโม)
+   ขอบบางจาง + เงาฟุ้ง แทนสติกเกอร์ขอบหมึก/เงาแข็งเดิม
+   🔑 ทั้งเว็บอ่านสี/ขอบ/เงาจากตัวแปรชุดนี้ — อย่าเขียน hex ของสีหลักลงไฟล์ตรงๆ อีก
+      ขอบ: `var(--bw) solid var(--line)` · เงา: `var(--pop)` · สีหลัก: `var(--primary)`
+   ⚠️ --primary เข้มกว่าฟ้าพาสเทลในเดโมนิดหน่อย เพราะตัวอักษรขาวบนปุ่มต้องอ่านออก
    ═══════════════════════════════════════════════════════ */
 :root {
-  --ink: #241b33;            /* deep plum-ink: text, sticker borders + hard shadow */
-  --sci: #2da8ff;
-  --care: #17c39a;
-  --gold: #ffb020;
-  --primary: #6d3bf5;        /* electric violet */
-  --primary-light: #efe9ff;
-  --accent: #ff5d73;         /* hot coral */
-  --mint: #17c39a;
-  --bg: #fdf3e7;             /* warm cream paper */
+  --ink: #2b3550;            /* น้ำเงินหม่น: ตัวอักษรหลัก (เดิมใช้เป็นขอบ/เงาด้วย — ตอนนี้ขอบใช้ --line) */
+  --sci: #5ab8e8;
+  --care: #4cc9a0;
+  --gold: #ffb020;           /* เหรียญ — คงเดิม คนจำสีนี้เป็นเงินแล้ว */
+  --primary: #3593cf;        /* ฟ้า (ปุ่ม/ของที่เลือก) */
+  --primary-2: #7cc8ef;      /* ฟ้าอ่อน ปลายไล่สี */
+  --primary-dark: #22719f;
+  --primary-light: #e6f5fc;
+  --accent: #f28bb0;         /* ชมพู */
+  --accent-light: #fff0f6;
+  --mint: #4cc9a0;
+  --mint-light: #dcf5ec;
+  --bg: #f7f9fd;
   --surface: #ffffff;
-  --text: #241b33;
-  --muted: #8a8197;
-  --border: #ece1d2;         /* soft warm divider (เก็บไว้อ่อน — ใช้เป็นเส้นคั่น/แทร็ก) */
-  --shadow-sm: 0 2px 8px rgba(36,27,51,.07);
-  --shadow-md: 0 8px 22px rgba(36,27,51,.12);
-  --shadow-lg: 0 16px 36px rgba(36,27,51,.16);
-  --pop: 3px 3px 0 var(--ink);     /* hard sticker shadow */
-  --pop-lg: 5px 6px 0 var(--ink);
+  --text: #2b3550;
+  --muted: #6b7590;
+  --border: #e3e9f2;
+  --line: rgba(43,53,80,.12);   /* ขอบการ์ด/ปุ่ม */
+  --bw: 1px;
+  --shadow-sm: 0 2px 8px rgba(43,53,80,.06);
+  --shadow-md: 0 8px 22px rgba(43,53,80,.10);
+  --shadow-lg: 0 16px 36px rgba(43,53,80,.14);
+  --pop: 0 6px 18px -8px rgba(43,53,80,.28);      /* เงาฟุ้ง (เดิม 3px 3px 0 ink) */
+  --pop-lg: 0 12px 28px -10px rgba(43,53,80,.32);
   --font-display: 'Chonburi', 'Kanit', serif;
 }
 
@@ -564,7 +573,7 @@ body[data-world="farm"]   .page-title { color: #276b2f; }
 /* floating sticker bottom nav */
 #bottom-nav {
   background: #fff;
-  border: 2px solid var(--ink);
+  border: var(--bw) solid var(--line);
   border-bottom: none;
   border-radius: 22px 22px 0 0;
   box-shadow: 0 -3px 0 rgba(36,27,51,.10);
@@ -580,25 +589,25 @@ body[data-world="farm"]   .page-title { color: #276b2f; }
   width: 52px; height: 52px; margin-top: -26px; margin-bottom: 1px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.6rem; color: #fff;
-  background: var(--primary); border: 2px solid var(--ink); border-radius: 50%;
+  background: var(--primary); border: var(--bw) solid var(--line); border-radius: 50%;
   box-shadow: var(--pop);
 }
 .bn-center.router-link-exact-active { color: var(--primary); }
 .bn-center.router-link-exact-active .bn-icon { transform: translateY(-3px) scale(1.08); }
 
 /* sticker cards + page transition */
-.card { background: var(--surface); border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop); }
+.card { background: var(--surface); border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); }
 .tab-content { animation: fadeup .28s cubic-bezier(.34,1.4,.64,1); }
 @keyframes fadeup { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* help FAB → coral sticker */
 .help-fab {
   background: var(--accent) !important;
-  border: 2px solid var(--ink) !important;
+  border: var(--bw) solid var(--line) !important;
   color: #fff !important;
   box-shadow: var(--pop) !important;
 }
-.help-fab:active { transform: translate(2px,2px) !important; box-shadow: 1px 1px 0 var(--ink) !important; }
+.help-fab:active { transform: translate(2px,2px) !important; box-shadow: var(--pop) !important; }
 
 /* shared page heading — display font (ใช้ทุกหน้า) */
 .page-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: var(--ink); margin-bottom: 14px; letter-spacing: .3px; }

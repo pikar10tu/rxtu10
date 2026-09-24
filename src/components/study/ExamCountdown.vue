@@ -75,7 +75,7 @@ function fmtRange(e) {
 
 <style scoped>
 .ec-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-.ec-card { background: linear-gradient(135deg, var(--primary), #6366f1); color: #fff; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px 14px; }
+.ec-card { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px 14px; }
 .ec-head { display: flex; align-items: center; gap: 10px; }
 .ec-emoji { font-size: 1.5rem; flex-shrink: 0; }
 .ec-body { flex: 1; min-width: 0; }
@@ -91,7 +91,7 @@ function fmtRange(e) {
   position: relative; display: grid; place-items: center;
   width: 30px; height: 44px; border-radius: 6px;
   background: linear-gradient(#fff 0 49%, #eef0f4 51% 100%);
-  border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink);
+  border: var(--bw) solid var(--line); box-shadow: 0 2px 0 var(--ink);
   color: #1e293b; font-family: var(--font-display); font-weight: 800; font-size: 1.7rem;
   font-variant-numeric: tabular-nums; line-height: 1;
   transform-origin: 50% 50%; animation: ec-flip .35s ease-out;

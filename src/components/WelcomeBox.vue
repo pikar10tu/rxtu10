@@ -34,12 +34,12 @@ useEscapeKey(show, close)
 
 <style scoped>
 .wb-ov { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.wb-box { background: #fff; border: 2px solid var(--ink); border-radius: 20px; padding: 24px 20px; box-shadow: var(--pop); max-width: 320px; width: 100%; text-align: center; max-height: 88vh; overflow-y: auto; }
+.wb-box { background: #fff; border: var(--bw) solid var(--line); border-radius: 20px; padding: 24px 20px; box-shadow: var(--pop); max-width: 320px; width: 100%; text-align: center; max-height: 88vh; overflow-y: auto; }
 .wb-emoji { font-size: 3rem; }
 .wb-title { font-size: 1.25rem; font-weight: 800; color: var(--ink); margin-top: 6px; }
 .wb-sub { font-size: .82rem; color: rgba(0,0,0,.55); margin-top: 4px; }
 .wb-gifts { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
 .wb-gift { border: 2px dashed var(--ink); border-radius: 12px; padding: 10px; font-weight: 800; font-size: .95rem; background: var(--primary-light); }
 .wb-hint { font-size: .74rem; color: rgba(0,0,0,.55); line-height: 1.5; margin-bottom: 14px; }
-.wb-btn { width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+.wb-btn { width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 </style>

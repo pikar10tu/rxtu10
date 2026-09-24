@@ -36,11 +36,11 @@ function fmtDate(ts) {
 
 <style scoped>
 .ad-ov { position: fixed; inset: 0; z-index: 260; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.ad-box { position: relative; background: #fff; width: 100%; max-width: 320px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 18px 18px; text-align: center; max-height: 88vh; overflow-y: auto; }
+.ad-box { position: relative; background: #fff; width: 100%; max-width: 320px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); padding: 24px 18px 18px; text-align: center; max-height: 88vh; overflow-y: auto; }
 .ad-x { position: absolute; left: 10px; top: 10px; border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .ad-icon { font-size: 3.2rem; line-height: 1; }
 .ad-title { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-top: 8px; }
-.ad-flavor { font-size: .8rem; color: #6366f1; font-style: italic; margin-top: 6px; line-height: 1.4; }
+.ad-flavor { font-size: .8rem; color: var(--primary-2); font-style: italic; margin-top: 6px; line-height: 1.4; }
 .ad-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; text-align: left; }
 .ad-row { background: #f8fafc; border: 1px solid rgba(0,0,0,.05); border-radius: 10px; padding: 8px 11px; }
 .ad-row-k { display: block; font-size: .7rem; font-weight: 700; color: #64748b; }

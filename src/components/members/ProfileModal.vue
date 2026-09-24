@@ -147,7 +147,7 @@ function startDuel() {
 
 <style scoped>
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.pf-box { background: #fff; width: 100%; max-width: 400px; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
+.pf-box { background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }
 .pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -167,7 +167,7 @@ function startDuel() {
 }
 .pf-ach { padding: 12px 16px 0; }
 .pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 16px 0; }
-.pf-stat { text-align: center; padding: 10px 4px 8px; border: 2px solid var(--ink); border-radius: 12px; box-shadow: var(--pop); }
+.pf-stat { text-align: center; padding: 10px 4px 8px; border: var(--bw) solid var(--line); border-radius: 12px; box-shadow: var(--pop); }
 .pf-stat span { font-size: 1.1rem; }
 .pf-stat b { display: block; font-size: 1.1rem; font-weight: 800; }
 .pf-stat small { font-size: .68rem; color: rgba(0,0,0,.45); font-weight: 700; }
@@ -185,6 +185,6 @@ function startDuel() {
 .pf-contact { padding: 14px 16px 16px; border-top: 1px solid rgba(0,0,0,.06); display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .pf-contact-chip {
   display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; font-weight: 700; color: var(--ink);
-  background: #fff; border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px 12px;
+  background: #fff; border: var(--bw) solid var(--line); border-radius: 999px; padding: 6px 12px;
 }
 </style>

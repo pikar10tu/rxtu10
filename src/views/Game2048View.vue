@@ -140,7 +140,7 @@ onMounted(() => reset())
 <style scoped>
 .g-score { text-align: center; font-size: .95rem; margin-bottom: 10px; }
 .g-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 360px;
-  margin: 0 auto; padding: 8px; background: rgba(0,0,0,.08); border: 2px solid var(--ink);
+  margin: 0 auto; padding: 8px; background: rgba(0,0,0,.08); border: var(--bw) solid var(--line);
   border-radius: 14px; touch-action: none; }
 .g-board:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .g-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center;

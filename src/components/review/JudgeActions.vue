@@ -161,17 +161,17 @@ function submitRetire() {
 <style scoped>
 /* ── ก๊อปมาจาก ReviewView.vue (scoped จึงต้องมีสำเนาของตัวเอง) ── */
 .rv-label { display: block; font-size: .7rem; font-weight: 700; color: #64748b; margin: 9px 0 5px; }
-.rv-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
+.rv-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .rv-input:focus { outline: none; box-shadow: var(--pop); }
 .rv-actions { display: flex; gap: 8px; margin-top: 13px; }
-.rv-btn { flex: 1; border: 2px solid var(--ink); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; background: #fff; color: var(--ink); }
+.rv-btn { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; transition: transform .12s, box-shadow .12s; background: #fff; color: var(--ink); }
 .rv-btn:active:not(:disabled) { transform: translate(1px,1px); }
 .rv-btn:disabled { opacity: .55; cursor: default; }
 .rv-primary { background: var(--primary); color: #fff; box-shadow: var(--pop); }
 .rv-primary:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .rv-primary:disabled { background: #cbd5e1; color: #fff; cursor: default; box-shadow: none; opacity: 1; }
 .rv-gray { background: #fff; color: var(--ink); flex: 0 0 110px; }
-.rv-mini { flex-shrink: 0; border: 2px solid var(--ink); border-radius: 9px; padding: 5px 11px; font-family: inherit; font-size: .72rem; font-weight: 800; background: #fff; color: var(--ink); cursor: pointer; }
+.rv-mini { flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 9px; padding: 5px 11px; font-family: inherit; font-size: .72rem; font-weight: 800; background: #fff; color: var(--ink); cursor: pointer; }
 .rv-mini:disabled { background: #f1f5f9; color: rgba(0,0,0,.4); cursor: default; }
 
 /* ── ใหม่เฉพาะคอมโพเนนต์นี้ ── */

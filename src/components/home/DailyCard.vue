@@ -69,7 +69,7 @@ const fmtRemain = computed(() => {
 <style scoped>
 .daily-card {
   background: #fff;
-  border: 2px solid var(--ink);
+  border: var(--bw) solid var(--line);
   border-radius: 18px;
   padding: 14px;
   margin-bottom: 14px;
@@ -86,7 +86,7 @@ const fmtRemain = computed(() => {
 .dc-fill.full { background: linear-gradient(90deg, var(--gold), var(--accent)); }
 .dc-pool-sub { display: flex; justify-content: space-between; font-size: .7rem; color: rgba(0,0,0,.45); margin-top: 4px; }
 .dc-claim {
-  width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 11px;
+  width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px;
   font-family: inherit; font-size: .86rem; font-weight: 800; color: #fff;
   background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; margin-bottom: 12px;
 }

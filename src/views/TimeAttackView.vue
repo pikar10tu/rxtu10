@@ -423,31 +423,31 @@ onMounted(() => {
 <style scoped>
 .ta-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .ta-head-title { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); }
-.ta-back { border: 2px solid var(--ink); background: #fff; border-radius: 10px; width: 32px; height: 32px; font-size: 1.1rem; cursor: pointer; box-shadow: var(--pop); }
+.ta-back { border: var(--bw) solid var(--line); background: #fff; border-radius: 10px; width: 32px; height: 32px; font-size: 1.1rem; cursor: pointer; box-shadow: var(--pop); }
 .ta-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ta-empty { text-align: center; color: rgba(0,0,0,.45); padding: 40px 16px; font-size: .85rem; line-height: 1.6; }
 .ta-intro { font-size: .78rem; color: rgba(0,0,0,.6); line-height: 1.6; margin-bottom: 12px; }
 
 .ta-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.ta-chip { border: 2px solid var(--ink); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.ta-chip { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
 .ta-chip.on { background: var(--primary); border-color: var(--ink); color: #fff; }
 .ta-modes { display: flex; flex-direction: column; gap: 10px; }
-.ta-mode { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px; border-radius: 16px; background: var(--primary-light); border: 2px solid var(--ink); box-shadow: var(--pop); font-family: inherit; cursor: pointer; }
+.ta-mode { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px; border-radius: 16px; background: var(--primary-light); border: var(--bw) solid var(--line); box-shadow: var(--pop); font-family: inherit; cursor: pointer; }
 .ta-mode:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ta-mode:disabled { opacity: .6; cursor: default; }
 .ta-mode-emoji { font-size: 1.6rem; flex-shrink: 0; }
 .ta-mode-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .ta-mode-text b { font-size: .95rem; color: #3730a3; }
-.ta-mode-text small { font-size: .72rem; color: #6366f1; }
+.ta-mode-text small { font-size: .72rem; color: var(--primary-2); }
 .ta-mode-best { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
 .ta-mode-best-n { font-size: 1.1rem; font-weight: 800; color: #3730a3; }
-.ta-mode-best-l { font-size: .7rem; color: #6366f1; }
+.ta-mode-best-l { font-size: .7rem; color: var(--primary-2); }
 .ta-loading { text-align: center; font-size: .78rem; color: rgba(0,0,0,.5); margin-top: 10px; }
 .ta-boards { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .ta-hint { margin-top: 14px; font-size: .72rem; color: rgba(0,0,0,.5); line-height: 1.6; }
 
 .ta-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.ta-quit { border: 2px solid var(--ink); background: #fff; border-radius: 10px; width: 32px; height: 32px; font-size: .95rem; cursor: pointer; box-shadow: var(--pop); flex-shrink: 0; }
+.ta-quit { border: var(--bw) solid var(--line); background: #fff; border-radius: 10px; width: 32px; height: 32px; font-size: .95rem; cursor: pointer; box-shadow: var(--pop); flex-shrink: 0; }
 .ta-clock { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ta-clock.hurry { color: #dc2626; animation: ta-pulse .6s ease-in-out infinite; }
 @keyframes ta-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
@@ -456,7 +456,7 @@ onMounted(() => {
 .ta-wait small { display: block; font-size: .72rem; margin-top: 4px; }
 .ta-q { font-size: .95rem; font-weight: 700; line-height: 1.7; margin-bottom: 14px; }
 .ta-choices { display: flex; flex-direction: column; gap: 8px; }
-.ta-choice { display: flex; align-items: flex-start; gap: 10px; text-align: left; width: 100%; padding: 12px; border: 2px solid var(--ink); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-family: inherit; font-size: .84rem; line-height: 1.6; cursor: pointer; }
+.ta-choice { display: flex; align-items: flex-start; gap: 10px; text-align: left; width: 100%; padding: 12px; border: var(--bw) solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-family: inherit; font-size: .84rem; line-height: 1.6; cursor: pointer; }
 .ta-choice:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ta-choice.correct { background: #dcfce7; border-color: #15803d; }
 .ta-choice.wrong { background: #fee2e2; border-color: #b91c1c; }
@@ -474,14 +474,14 @@ onMounted(() => {
 .ta-res-prev { margin-top: 8px; font-size: .78rem; color: rgba(0,0,0,.45); }
 .ta-res-coins { margin-top: 6px; font-size: 1rem; font-weight: 800; color: #b45309; }
 .ta-res-actions { display: flex; gap: 8px; margin: 8px 0 16px; }
-.ta-again, .ta-tohome { flex: 1; border: 2px solid var(--ink); border-radius: 12px; padding: 12px; font-family: inherit; font-weight: 800; font-size: .82rem; cursor: pointer; box-shadow: var(--pop); }
+.ta-again, .ta-tohome { flex: 1; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-weight: 800; font-size: .82rem; cursor: pointer; box-shadow: var(--pop); }
 .ta-again { background: var(--primary); color: #fff; }
 .ta-tohome { background: #fff; }
 .ta-again:active:not(:disabled), .ta-tohome:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ta-again:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .ta-res-board { margin-bottom: 16px; }
 .ta-miss-head { font-size: .82rem; font-weight: 800; margin-bottom: 8px; line-height: 1.6; }
-.ta-miss { background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop); padding: 12px; margin-bottom: 8px; }
+.ta-miss { background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 12px; margin-bottom: 8px; }
 .ta-review-badge { display: inline-block; margin-bottom: 4px; }
 .ta-miss-q { font-size: .84rem; font-weight: 700; line-height: 1.6; margin-bottom: 6px; }
 .ta-miss-line { font-size: .78rem; line-height: 1.6; }

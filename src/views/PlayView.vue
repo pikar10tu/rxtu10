@@ -83,7 +83,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
 .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
-.hero-card { all: unset; cursor: pointer; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 18px; box-shadow: var(--pop); padding: 22px 14px; min-height: 148px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: transform .12s, box-shadow .12s; }
+.hero-card { all: unset; cursor: pointer; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 22px 14px; min-height: 148px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: transform .12s, box-shadow .12s; }
 .hero-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .hero-card.pets { background: linear-gradient(160deg,#e0e7ff,#c7d2fe); }
 .hero-card.farm { background: linear-gradient(160deg,#dcfce7,#bbf7d0); }
@@ -96,7 +96,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 
 .soon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-.mg-card { all: unset; cursor: pointer; box-sizing: border-box; border: 2px solid var(--ink);
+.mg-card { all: unset; cursor: pointer; box-sizing: border-box; border: var(--bw) solid var(--line);
   border-radius: 16px; box-shadow: var(--pop); padding: 16px 12px; display: flex; flex-direction: column;
   align-items: center; gap: 4px; text-align: center; background: linear-gradient(160deg,#fef3c7,#fde68a); }
 .mg-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }

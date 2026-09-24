@@ -68,13 +68,13 @@ function onSub(e) {
 
 <style scoped>
 .ts-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.ts-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light, #eef2ff); color: #4f46e5; border-radius: 999px; padding: 4px 11px; font-size: .74rem; font-weight: 700; }
+.ts-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light, #eef2ff); color: var(--primary); border-radius: 999px; padding: 4px 11px; font-size: .74rem; font-weight: 700; }
 .ts-chip-sub { background: #f1f5f9; color: #334155; }
 .ts-guess { background: #fef3c7; color: #92400e; border-radius: 999px; padding: 1px 7px; font-size: .7rem; font-weight: 800; }
 .ts-lbl { display: block; font-size: .74rem; font-weight: 800; color: #334155; margin: 8px 0 4px; }
 .ts-lbl:first-of-type { margin-top: 0; }
 .ts-req { color: #dc2626; }
 .ts-opt { font-weight: 600; color: rgba(0,0,0,.45); }
-.ts-input { width: 100%; box-sizing: border-box; border: 2px solid var(--ink); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; background: #fff; }
+.ts-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; background: #fff; }
 .ts-input:focus { outline: none; box-shadow: var(--pop); }
 </style>

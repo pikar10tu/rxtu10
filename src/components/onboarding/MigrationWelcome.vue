@@ -84,7 +84,7 @@ async function dismiss() {
 }
 .mw-box {
   background: #fff; width: 100%; max-width: 380px;
-  border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--pop-lg);
+  border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg);
   padding: 22px; text-align: center;
   max-height: 88vh; overflow-y: auto;
 }
@@ -97,7 +97,7 @@ async function dismiss() {
 .mw-item b { font-size: .84rem; }
 .mw-note { font-size: .7rem; color: rgba(0,0,0,.5); line-height: 1.45; margin-top: 2px; }
 .mw-btn {
-  width: 100%; border: 2px solid var(--ink); border-radius: 12px; padding: 12px;
+  width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px;
   font-family: inherit; font-size: .88rem; font-weight: 800; cursor: pointer;
   box-shadow: var(--pop); transition: transform .12s, box-shadow .12s;
 }

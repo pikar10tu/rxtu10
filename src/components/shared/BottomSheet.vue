@@ -42,7 +42,7 @@ useEscapeKey(() => props.open, close)
 
 <style scoped>
 .sheet-ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
-.sheet-box { background: #fff; width: 100%; max-width: 480px; max-height: 85dvh; border: 2px solid var(--ink); border-bottom: none; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: sheet-up .2s ease; }
+.sheet-box { background: #fff; width: 100%; max-width: 480px; max-height: 85dvh; border: var(--bw) solid var(--line); border-bottom: none; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: sheet-up .2s ease; }
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .sheet-head { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid rgba(0,0,0,.07); }
 .sheet-title { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; color: var(--ink); margin-right: auto; }

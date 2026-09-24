@@ -144,17 +144,17 @@ onBeforeUnmount(() => { flush() })   // fire-and-forget: ออกจากห�
 .cr-back { all: unset; cursor: pointer; font-weight: 700; color: var(--primary); padding: 6px 4px; }
 .cr-formula-btn { all: unset; cursor: pointer; display: block; margin: 0 auto 8px; font-size: .78rem;
   color: var(--primary); text-decoration: underline; padding: 6px; }
-.cr-formula { background: var(--primary-light); border: 2px solid var(--ink); border-radius: 12px;
+.cr-formula { background: var(--primary-light); border: var(--bw) solid var(--line); border-radius: 12px;
   padding: 12px; margin-bottom: 12px; text-align: center; }
 .cr-formula-main { font-weight: 800; font-size: .84rem; color: var(--ink); line-height: 1.5; }
 .cr-formula-note { font-size: .72rem; color: rgba(0,0,0,.55); margin-top: 5px; }
-.cr-card { background: #fff; border: 2px solid var(--ink); border-radius: 14px; box-shadow: var(--pop);
+.cr-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop);
   padding: 14px 16px; margin-bottom: 14px; }
 .cr-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0;
   font-size: .86rem; color: rgba(0,0,0,.6); }
 .cr-row b { font-size: 1rem; color: var(--ink); }
 .cr-answer { display: flex; gap: 8px; }
-.cr-input { flex: 1; min-width: 0; border: 2px solid var(--ink); border-radius: 12px; padding: 12px;
+.cr-input { flex: 1; min-width: 0; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px;
   font-family: inherit; font-size: 1rem; box-sizing: border-box; }
 .cr-input[readonly] { background: #f1f5f9; }   /* readonly ไม่ใช่ disabled — disabled จะไม่ยิง keyup ทำให้ Enter ข้อถัดไปตาย */
 .cr-btn { flex-shrink: 0; all: unset; cursor: pointer; background: var(--primary); color: #fff;
