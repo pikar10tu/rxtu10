@@ -550,7 +550,7 @@ async function applyPassive(e) {
 
   if (e.kind === 'skill') {
     showChip(e.uid, e)
-    sfx('skill')
+    if (e.effect !== 'atkOnHit') sfx('skill')   // 🦍 มีเสียงตีอกของตัวเองตอนผลลงแล้ว
     if (hold > 0) { await wait(hold); if (g !== gen) return }
     // ★ ไม่ await สองบรรทัดนี้ — ชิปเลือนและผลลง ทับ beat ถัดไปได้เลย
     hideChip(e.uid)
@@ -564,7 +564,7 @@ async function applyPassive(e) {
 
 // ── เสียงสกิลเปิดไฟต์ ── โชว์ทีละตัวแล้ว แต่ละตัวได้เสียงของตัวเอง (🦁 ครบ 3 สาย = คำราม)
 const OPEN_SFX = {
-  elementTrinity: 'roar', teamCrit: 'open_crit', teamHp: 'open_hp', teamLifesteal: 'open_drain',
+  elementTrinity: 'roar', aoeOpener: 'dragon_roar', teamCrit: 'open_crit', teamHp: 'open_hp', teamLifesteal: 'open_drain',
   teamDamageReduction: 'open_wall', enemyVuln: 'curse',
 }
 function openSfx(e) {
@@ -652,7 +652,13 @@ function firePassiveFx(e) {
 
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
     thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim' }
-  if (PSFX[e.fxKind]) sfx(PSFX[e.fxKind])
+  // เสียงประจำสกิล (สัตว์ใหญ่) ทับเสียงกลางตาม fxKind
+  // 🦍 taunt ไม่ปล่อย event (เอนจินแค่ดึงเป้า) ⇒ ตีอกผูกกับ "โมโหครั้งแรก" (atkOnHit ที่ได้ชิปประกาศ)
+  //    ครั้งซ้ำ (skillQuiet) ใช้เสียงบัฟเบาๆ ตามปกติ ไม่งั้นตีอกทุกหมัดที่โดน
+  const SIG = { aoeOpener: 'dragon_breath' }
+  if (e.effect === 'atkOnHit' && e.kind === 'skill') sfx('gorilla')
+  else if (SIG[e.effect]) sfx(SIG[e.effect])
+  else if (PSFX[e.fxKind]) sfx(PSFX[e.fxKind])
   switch (e.fxKind) {
     case 'damage':  fx?.sweep(on, e.icon, 60); break        // bahamut สาดไฟใส่ทุกตัว
     case 'cleave':  fx?.sweep(on, e.icon, 45); break        // เขี้ยว/เปลวไฟลงหลายใบในจังหวะเดียว
