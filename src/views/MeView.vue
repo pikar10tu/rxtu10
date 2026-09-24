@@ -8,28 +8,27 @@
       <!-- การ์ดโปรไฟล์: พื้นย้อมสีกรอบบ้าน (frameColor ของเลเวล) · ชื่อบ้าน · ทีมเฝ้าบ้าน · ตัวเลขหลัก -->
       <section class="me-card" :class="{ 'me-darkbg': myBg?.dark }" :style="{ '--tier': tier.frameColor }">
       <CosBg :id="myCos.g" />
-      <div class="me-avatar-row">
-        <CosFrame :id="myCos.f">
-          <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
-        </CosFrame>
-        <div class="me-av-actions">
-          <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
-          <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ร้านตกแต่ง ›</RouterLink>
-          <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
-          <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
-            {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ ยังไม่ได้เลือกฉายา — แตะเพื่อเลือก' }}
-          </button>
-          <button class="me-btn-sm" @click="fileEl?.click()"><Emoji char="📷" /> เปลี่ยนรูป</button>
+      <!-- หัวการ์ดจัดกลางแบบการ์ดโปรไฟล์: รูป (ปุ่มกล้องที่มุม) → ชื่อ → ฉายา → บ้าน → ปุ่มร้านตกแต่ง -->
+      <div class="me-hero">
+        <div class="me-av-box">
+          <CosFrame :id="myCos.f">
+            <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
+          </CosFrame>
+          <button class="me-cam" aria-label="เปลี่ยนรูป" @click="fileEl?.click()"><Emoji char="📷" /></button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
-          <!-- ปุ่มบันทึกต้องอยู่ตรงนี้ ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
-               เดิมเลือกรูปแล้วเห็นรูปเปลี่ยนบนจอ แต่หาปุ่มบันทึกไม่เจอ ⇒ รีเฟรชแล้วรูปเด้งกลับ -->
-          <div v-if="newPhoto" class="me-photo-save">
-            <button class="me-btn-sm on" :disabled="saving" @click="save">
-              {{ saving ? 'กำลังบันทึก…' : '💾 บันทึกรูปนี้' }}
-            </button>
-            <button class="me-btn-sm ghost" :disabled="saving" @click="cancelPhoto">ยกเลิก</button>
-          </div>
         </div>
+        <!-- ปุ่มบันทึกต้องอยู่ใกล้รูป ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
+             เดิมเลือกรูปแล้วเห็นรูปเปลี่ยนบนจอ แต่หาปุ่มบันทึกไม่เจอ ⇒ รีเฟรชแล้วรูปเด้งกลับ -->
+        <div v-if="newPhoto" class="me-photo-save">
+          <button class="me-btn-sm on" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึกรูปนี้' }}</button>
+          <button class="me-btn-sm ghost" :disabled="saving" @click="cancelPhoto">ยกเลิก</button>
+        </div>
+        <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
+        <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
+          {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ เลือกฉายา' }}
+        </button>
+        <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
+        <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ร้านตกแต่ง ›</RouterLink>
       </div>
 
       <div v-if="guard.length" class="me-guard">
@@ -38,10 +37,10 @@
       </div>
 
       <div class="me-stats">
-        <div class="me-stat"><span><Emoji char="🪙" /></span><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
-        <div class="me-stat"><span><Emoji char="🐾" /></span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
-        <div class="me-stat"><span><Emoji char="🏅" /></span><b>{{ auth.userData?.achievementCount || 0 }}</b><small>ความสำเร็จ</small></div>
-        <div class="me-stat"><span><Emoji char="⚔️" /></span><b>{{ (auth.userData?.pvp?.rating || 1000).toLocaleString() }}</b><small>แต้มประลอง</small></div>
+        <div class="me-stat"><Emoji char="🪙" /><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
+        <div class="me-stat"><Emoji char="🐾" /><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+        <div class="me-stat"><Emoji char="🏅" /><b>{{ auth.userData?.achievementCount || 0 }}</b><small>ความสำเร็จ</small></div>
+        <div class="me-stat"><Emoji char="⚔️" /><b>{{ (auth.userData?.pvp?.rating || 1000).toLocaleString() }}</b><small>แต้มประลอง</small></div>
       </div>
       <TagChips :member="auth.userData" class="me-tags" />
       </section>
@@ -60,13 +59,16 @@
       </template>
       <ProfileModal :member="profileOf" @close="profileOf = null" />
 
-      <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
-      <RouterLink to="/fun-facts" class="me-link"><Emoji char="🌐" /> สถิติรวมทั้งเว็บ</RouterLink>
-      <!-- เปิด/ปิดเสียง — จำในเครื่องนี้ (localStorage) ไม่แตะ Firestore -->
-      <button class="me-link me-sound" data-sfx="none" :aria-pressed="soundOn" @click="toggleSound">
-        <Emoji :char="soundOn ? '🔊' : '🔇'" /> เสียงในเว็บ
-        <span class="me-sound-state">{{ soundOn ? 'เปิดอยู่' : 'ปิดอยู่' }}</span>
-      </button>
+      <!-- เมนูรวมเป็นการ์ดเดียว (เดิมเป็นปุ่มแยกหลายก้อน) -->
+      <nav class="me-menu" aria-label="เมนู">
+        <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ <span class="me-go">›</span></RouterLink>
+        <RouterLink to="/fun-facts" class="me-link"><Emoji char="🌐" /> สถิติรวมทั้งเว็บ <span class="me-go">›</span></RouterLink>
+        <!-- เปิด/ปิดเสียง — จำในเครื่องนี้ (localStorage) ไม่แตะ Firestore -->
+        <button class="me-link me-sound" data-sfx="none" :aria-pressed="soundOn" @click="toggleSound">
+          <Emoji :char="soundOn ? '🔊' : '🔇'" /> เสียงในเว็บ
+          <span class="me-switch" :class="{ on: soundOn }" aria-hidden="true"><i></i></span>
+        </button>
+      </nav>
 
       <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
       <details class="me-contact-fold">
@@ -401,4 +403,32 @@ async function save() {
 .fb-send { width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .fb-send:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .fb-send:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
+
+/* ═══ หน้าฉัน จัดใหม่ (25 ก.ย. 2026) ═══ */
+.me-card { padding: 18px 14px 14px; }
+.me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+.me-av-box { position: relative; margin-bottom: 4px; }
+.me-avatar { width: 92px; height: 92px; }
+.me-cam { position: absolute; right: -2px; bottom: -2px; z-index: 3; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff;
+  background: var(--primary); color: #fff; display: grid; place-items: center; font-size: .9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(43,53,80,.25); }
+.me-hero .me-nick { font-size: 1.35rem; font-weight: 800; line-height: 1.25; }
+.me-hero .me-title, .me-hero .me-shoplink { align-self: center; margin: 0; }
+.me-hero .me-home { margin: 0; }
+.me-photo-save { justify-content: center; }
+.me-guard { justify-content: center; margin-top: 12px; }
+.me-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; background: none; border: 0; box-shadow: none; overflow: visible; }
+.me-stat { display: flex; align-items: center; gap: 8px; text-align: left; padding: 10px 12px; border: var(--bw) solid var(--line); border-right: var(--bw) solid var(--line);
+  border-radius: 14px; background: rgba(255,255,255,.88); }
+.me-stat b { font-size: 1rem; font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.me-stat small { margin-left: auto; white-space: nowrap; }
+.me-card.me-darkbg .me-nick :deep(.cz-txt:not([class*="cz-n-"])) { color: #fff; }
+.me-menu { margin-top: 16px; background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
+.me-menu .me-link { margin: 0; border: 0; border-radius: 0; box-shadow: none; border-top: 1px solid var(--border); padding: 13px 14px; }
+.me-menu .me-link:first-child { border-top: 0; }
+.me-menu .me-link:active { transform: none; background: var(--primary-light); }
+.me-go { margin-left: auto; color: var(--muted); font-size: 1.1rem; }
+.me-switch { margin-left: auto; width: 38px; height: 22px; border-radius: 999px; background: #cbd5e1; position: relative; transition: background .2s; }
+.me-switch i { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.me-switch.on { background: var(--mint); }
+.me-switch.on i { transform: translateX(16px); }
 </style>

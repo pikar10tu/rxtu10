@@ -214,7 +214,7 @@ function titleOf(m) {
   z-index: 3;   /* อยู่เหนือกรอบตกแต่ง (รูป z1 · ของประดับ z2) */
 }
 .mv-nick {
-  font-size: .8rem; font-weight: 700; white-space: nowrap;
+  font-size: .92rem; font-weight: 800; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 /* การ์ดของเรา: กรอบนอก + ป้าย "คุณ" ที่มุมซ้ายบน */
