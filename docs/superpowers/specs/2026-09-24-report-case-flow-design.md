@@ -83,7 +83,7 @@
 
 | ไฟล์ | หน้าที่ |
 |---|---|
-| `utils/reportCase.js` (+test) ใหม่ | pure: `canHandleReport` · `nextReportGroup(groups, skippedIds)` · `snapshotDiffers(snapshot, q)` · `buildReportResultMail(report, note, createdAt)` (notice ไม่มีรางวัล) |
+| `utils/reportCase.js` (+test) ใหม่ | pure: `canHandleReport` · `nextReportGroup(groups, skippedIds)` · `snapshotDiffers(snapshot, q)` · (`buildReportResultMail` อยู่ `utils/mailbox.js` ข้าง `buildReportRewardMail` — notice ไม่มีรางวัล) |
 | `utils/questionReview.js` | `tallyReviewCounts` นับ `retiredBy` ด้วย (เมื่อ uid นั้นไม่อยู่ใน `reviewedBy` ของข้อเดียวกัน) ⇒ ปุ่มซิงก์ระบบตรวจไม่ลบเครดิตนำออก |
 | `composables/useReviewWrites.js` ใหม่ | เส้นเขียน Firestore ที่ใช้ร่วม: `writeFix(q, payload, reason)` (ย้ายจาก saveEdit/saveFix ที่ซ้ำกันเกือบทั้งก้อน) · `writeRetireWithCredit(q, reason)` · `resolveReports(group, verdict, note)` แบบ **transaction** อ่านสถานะก่อน — ฉบับที่ไม่ `open` แล้วข้าม ⇒ ไม่จ่ายซ้ำ |
 | `components/review/JudgeActions.vue` ใหม่ | คำถามตัดสิน + 2 ปุ่ม + ขั้นแก้/นำออก + confirm · ใช้ร่วมสองการ์ด |
