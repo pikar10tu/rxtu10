@@ -31,10 +31,14 @@
         <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ร้านตกแต่ง ›</RouterLink>
       </div>
 
-      <div v-if="guard.length" class="me-guard">
+      <!-- ทีมเฝ้าบ้าน + ปุ่มจัดทีม (เปิดแผ่นจัดทีมตัวเดียวกับหน้าเพ็ท/หอคอย/อารีน่า) -->
+      <div class="me-guard">
         <span class="me-guard-cap">ทีมเฝ้าบ้าน</span>
         <span v-for="(g, i) in guard" :key="i" class="me-guard-pet"><Emoji :char="g" /></span>
+        <span v-if="!guard.length" class="me-guard-none">ยังไม่ได้จัด</span>
+        <button class="me-guard-edit" @click="teamOpen = true">⚙️ จัดทีม</button>
       </div>
+      <TeamPicker v-model:open="teamOpen" />
 
       <div class="me-stats">
         <div class="me-stat"><Emoji char="🪙" /><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
@@ -141,6 +145,7 @@ import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
 import ShowcaseEditor from '../components/shared/ShowcaseEditor.vue'
+import TeamPicker from '../components/battle/TeamPicker.vue'
 import { fetchAchievementItems } from '../composables/useAchievementItems.js'
 import { makeStreak } from '../utils/gags.js'
 import { grantSecret } from '../composables/useAchievements.js'
@@ -170,6 +175,7 @@ const TABS = [
   { k: 'news', icon: '📢', label: 'ข่าวรุ่น' },
   { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
 ]
+const teamOpen = ref(false)
 const tab = ref('fight')
 // แท็บความสำเร็จ: โหลดครั้งเดียวต่อเข้าหน้า แล้วส่งให้ทั้งตู้โชว์และกริด (query เดียว)
 const achItems = ref([])
@@ -454,4 +460,7 @@ async function save() {
 .me-switch i { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
 .me-switch.on { background: var(--mint); }
 .me-switch.on i { transform: translateX(16px); }
+.me-guard-none { font-size: .72rem; color: var(--muted); }
+.me-guard-edit { font: inherit; font-size: .72rem; font-weight: 700; color: #fff; border: 0; border-radius: 999px; padding: 4px 11px; margin-left: 4px; cursor: pointer;
+  background: linear-gradient(135deg, #8b6ee0, #b9a6ef); box-shadow: 0 1px 3px rgba(43,53,80,.18); }
 </style>
