@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   buildBeats, scaleTiming, beatDuration, totalDuration, weightOf, timingOf,
-  BEAT, KO_MULT, FINISH_MULT, SKILL_PAUSE, OPEN_SHOW_MS, SHAPE, FF_SCALE, WEIGHT_CFG, OPENING_EFFECTS,
+  BEAT, KO_MULT, FINISH_MULT, SKILL_PAUSE, OPEN_SHOW_MS, SKILL_SHOW_MS, SHAPE, FF_SCALE, WEIGHT_CFG, OPENING_EFFECTS,
   CLUTCH_EFFECTS,
 } from './battleBeats.js'
 // battleBeats.js ไม่ import อะไรโดยตั้งใจ — เทสจึงเป็นที่เดียวที่เอาสองฝั่งมาชนกันได้
@@ -265,6 +265,21 @@ test('🔑 สกิล onAttack ของตัวที่ตีคนแร�
   const bs = buildBeats(log, MH)
   assert.equal(bs[0].kind, 'openShow', 'aura = ยกแรก')
   assert.equal(bs[1].kind, 'skill', 'cleave ต้องได้ประกาศตอนโปรกจริง')
+})
+
+test('showPets: ครั้งแรกของเลเจนด์ได้ skillShow ครั้งเดียวต่อตัว · ตัวอื่นยังเป็น skill', () => {
+  const log = [
+    atk(),
+    pas({ uid: 'A0', petId: 'gorilla', effect: 'atkOnHit', fxKind: 'buff' }),
+    atk(),
+    pas({ uid: 'A0', petId: 'gorilla', effect: 'atkOnHit', fxKind: 'buff' }),
+    pas({ uid: 'A1', petId: 'fox', effect: 'dodge', fxKind: 'dodge' }),
+    atk(),
+  ]
+  const bs = buildBeats(log, MH, { showPets: new Set(['gorilla']) })
+  assert.deepEqual([bs[1].kind, bs[3].kind, bs[4].kind], ['skillShow', 'skillQuiet', 'skill'])
+  assert.equal(Math.round(beatDuration(bs[1])), SKILL_SHOW_MS)
+  assert.equal(buildBeats(log, MH)[1].kind, 'skill', 'ไม่ส่ง showPets = พฤติกรรมเดิม')
 })
 
 test('ไม่มี passive ก่อนหมัดแรกเลย → ไม่มี openShow และไม่ throw', () => {

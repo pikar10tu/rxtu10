@@ -362,8 +362,16 @@ function statusOf(uid) { return statusMap.value[uid] || [] }
 const rawLog = computed(() => props.data?.result?.log || [])
 // ⚠️ maxHp เป็น plain object ที่ buildMax() เขียนทับ ไม่ใช่ ref — beats จึงไม่ re-compute เองเมื่อ maxHp เปลี่ยน
 // แต่ปลอดภัยเพราะ buildMax(d) ถูกเรียกก่อน reset() ในตัว watcher เดียวกันเสมอ และ rawLog เปลี่ยนพร้อมกัน (props.data ใหม่ทั้งก้อน) ซึ่ง trigger การ compute ใหม่อยู่แล้ว
+// ── เลเจนด์: โชว์ไทม์ครั้งแรกที่สกิลโปรก + เสียงประจำตัว (ดังตอนแบนเนอร์ขึ้น) ──
+// ตัวที่สกิลเป็นยกแรก (🐉 🦁 🐳) ได้โชว์ยกแรกอยู่แล้ว ใส่ไว้เพื่อเสียงประจำตัว · 🐦‍🔥 revive เป็น skillMoment อยู่แล้ว
+const LEGEND_SFX = {
+  bahamut: 'dragon_roar', lion: 'roar', whale: 'whale', phoenix: 'phoenix', kirin: 'kirin', trex: 'trex',
+  ouroboros: 'ouroboros', simurgh: 'simurgh', qilin: 'qilin', virus: 'virus_big', gorilla: 'gorilla', mammoth: 'mammoth',
+}
+const LEGEND_SHOW = new Set(Object.keys(LEGEND_SFX))
+
 // rng: ลำดับโชว์ยกแรกสุ่มใหม่ทุกไฟต์ (แสดงผลล้วน ไม่แตะผลไฟต์)
-const beats = computed(() => buildBeats(rawLog.value, maxHp, { rng: Math.random }))
+const beats = computed(() => buildBeats(rawLog.value, maxHp, { rng: Math.random, showPets: LEGEND_SHOW }))
 const done = computed(() => idx.value >= beats.value.length)
 const summary = computed(() => done.value
   ? computeBattleSummary(rawLog.value, props.data?.playerTeam || [], props.data?.botTeam || [])
@@ -527,7 +535,21 @@ async function applyPassive(e) {
   const g = gen
   const t = scaleTiming(e, { pace: pace.value, ff: ffActive.value })
 
-  if (e.kind === 'skillMoment') { await spotlightPassive(e, t, g); return }
+  if (e.kind === 'skillMoment') {
+    if (LEGEND_SFX[e.petId]) sfx(LEGEND_SFX[e.petId])      // 🐦‍🔥 เกิดใหม่ ฯลฯ
+    await spotlightPassive(e, t, g); return
+  }
+  if (e.kind === 'skillShow') {
+    sfx(LEGEND_SFX[e.petId] || 'skill')
+    const pet = defForUid(e.uid)
+    const p = passiveOf(pet)
+    await spotlightPassive(e, t, g, {
+      icon: pet.emoji || e.icon || '✨',
+      desc: p && p.name === e.name ? effectText(p, entryForUid(e.uid)?.passiveLv) : '',
+      side: e.uid[0],
+    })
+    return
+  }
 
   const hold = t.windup + t.motion + t.hitstop + t.tail
 
@@ -550,7 +572,7 @@ async function applyPassive(e) {
 
   if (e.kind === 'skill') {
     showChip(e.uid, e)
-    if (e.effect !== 'atkOnHit') sfx('skill')   // 🦍 มีเสียงตีอกของตัวเองตอนผลลงแล้ว
+    sfx('skill')
     if (hold > 0) { await wait(hold); if (g !== gen) return }
     // ★ ไม่ await สองบรรทัดนี้ — ชิปเลือนและผลลง ทับ beat ถัดไปได้เลย
     hideChip(e.uid)
@@ -568,6 +590,7 @@ const OPEN_SFX = {
   teamDamageReduction: 'open_wall', enemyVuln: 'curse',
 }
 function openSfx(e) {
+  if (LEGEND_SFX[e.petId]) return sfx(LEGEND_SFX[e.petId])
   sfx(OPEN_SFX[e.effect] || (e.fxKind === 'debuff' ? 'curse' : e.fxKind === 'damage' ? 'p_fire' : 'aura'))
 }
 
@@ -653,11 +676,11 @@ function firePassiveFx(e) {
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
     thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim' }
   // เสียงประจำสกิล (สัตว์ใหญ่) ทับเสียงกลางตาม fxKind
-  // 🦍 taunt ไม่ปล่อย event (เอนจินแค่ดึงเป้า) ⇒ ตีอกผูกกับ "โมโหครั้งแรก" (atkOnHit ที่ได้ชิปประกาศ)
-  //    ครั้งซ้ำ (skillQuiet) ใช้เสียงบัฟเบาๆ ตามปกติ ไม่งั้นตีอกทุกหมัดที่โดน
+  // 🐉 ไฟลงจริงมีเสียงพ่นไฟของตัวเอง · 🐦‍🔥 เสียงเกิดใหม่ดังตอนแบนเนอร์แล้ว ไม่ซ้อนเสียงกลาง
+  // (เลเจนด์ตัวอื่นเสียงประจำตัวดังตอนโชว์ไทม์ — ตอนผลลงใช้เสียงกลางตาม fxKind เป็นฟีดแบ็กสั้นๆ)
   const SIG = { aoeOpener: 'dragon_breath' }
-  if (e.effect === 'atkOnHit' && e.kind === 'skill') sfx('gorilla')
-  else if (SIG[e.effect]) sfx(SIG[e.effect])
+  if (SIG[e.effect]) sfx(SIG[e.effect])
+  else if (e.fxKind === 'revive' && LEGEND_SFX[e.petId]) { /* เสียงเกิดใหม่ดังไปแล้ว */ }
   else if (PSFX[e.fxKind]) sfx(PSFX[e.fxKind])
   switch (e.fxKind) {
     case 'damage':  fx?.sweep(on, e.icon, 60); break        // bahamut สาดไฟใส่ทุกตัว

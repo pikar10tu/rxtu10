@@ -25,6 +25,8 @@ export const SKILL_PAUSE = 200
 /** ยกแรก (aura + onStart): เพ็ทแต่ละตัวได้ "โชว์ไทม์" ของตัวเองทีละตัว (แบนเนอร์ชื่อสกิล + หน้าเพ็ท + ผลสั้นๆ)
  *  เดิมขึ้นพร้อมกันทุกใบแล้วค้าง 1100ms ⇒ เสียงตีกัน อ่านไม่ทัน (user ขอเปลี่ยน 25 ก.ย. 2026) */
 export const OPEN_SHOW_MS = 800
+/** เลเจนด์: ครั้งแรกที่สกิลโปรกได้แบนเนอร์เต็ม (โชว์ไทม์) แทนชิปเล็ก — user ขอ 25 ก.ย. 2026 */
+export const SKILL_SHOW_MS = 1000
 
 /** สัดส่วนเฟส [windup, motion, hitstop, tail] — แต่ละชุดต้องรวมได้ 1 พอดี (มีเทสคุม) */
 export const SHAPE = {
@@ -38,7 +40,7 @@ export const WEIGHT_CFG = { dmgFull: 0.30, dmgWeight: 0.70, crit: 0.18, super: 0
 
 /** โหมดเร่ง (กดค้าง) ย่อเฉพาะหมัดปกติ — โมเมนต์ห้ามแตะ ไม่งั้นกลายเป็นปุ่มข้าม */
 // openShow ย่อได้ครึ่งเดียว — ยกแรกมีได้ถึง 6 โชว์ติดกัน กดเร่งแล้วต้องรู้สึกว่าเร็วขึ้นจริง
-export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMoment: 1, openShow: 0.5 }
+export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMoment: 1, openShow: 0.5, skillShow: 0.5 }
 
 /** จังหวะเป็น-ตาย — ได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ */
 // 'grit' = การกันตายชั้นที่ 2-3 ของแมว — runtime state ที่เกิดจากการกิน cheatDeath มาก่อน
@@ -82,6 +84,7 @@ export function timingOf(kind) {
     case 'skillMoment': return phasesOf(BEAT * KO_MULT, SHAPE.ko)
     case 'skill':       return { ...ZERO, hitstop: SKILL_PAUSE }
     case 'openShow':    return phasesOf(OPEN_SHOW_MS, SHAPE.ko)
+    case 'skillShow':   return phasesOf(SKILL_SHOW_MS, SHAPE.ko)
     // sub · openQuiet · skillQuiet · round/end/ไม่รู้จัก = ผ่านไปเงียบๆ ไม่กินเวลา
     default:            return { ...ZERO }
   }
@@ -135,7 +138,8 @@ function openCutOf(evts) {
  * @param {Object} maxHpByUid  uid → maxHp (จาก buildCombatant) — uid ที่ขาดถูกมองเป็น 1 กันหารศูนย์
  * @returns {Array} beat[] ยาวเท่า log เสมอ (1 event = 1 beat) เพื่อให้ index ตรงกับของเดิม
  */
-export function buildBeats(log, maxHpByUid, { rng = null } = {}) {
+// showPets: Set ของ petId ที่ครั้งแรกของสกิลได้โชว์ไทม์ (skillShow) แทน skill · ครั้งเดียวต่อตัวต่อไฟต์
+export function buildBeats(log, maxHpByUid, { rng = null, showPets = null } = {}) {
   const evts = Array.isArray(log) ? log : []
   const mh = maxHpByUid || {}
 
@@ -243,6 +247,7 @@ export function buildBeats(log, maxHpByUid, { rng = null } = {}) {
     //    นับแยกต่อ-effect แก้ปัญหานี้เพราะ stackAtk เป็น "ใบที่ 0 ของ stackAtk ในก้อน" เสมอ
     //    ไม่ว่า regenSelf จะร่วมก้อนด้วยหรือไม่ — คีย์เดิม ยังถูกจับเป็นครั้งซ้ำถูกต้อง
     const seen = new Set()
+    const shown = new Set()    // uid ที่ได้ skillShow ไปแล้ว
     let groupId = null
     let groupEffCount = null   // Map: effect → กี่ใบของ effect นี้แล้วในก้อนปัจจุบัน
     for (let i = openCut; i < evts.length; i++) {
@@ -270,6 +275,7 @@ export function buildBeats(log, maxHpByUid, { rng = null } = {}) {
       const lastOfGroup = !(next && next.t === 'passive' && groupIdOf(next) === gid)
       if (CLUTCH_EFFECTS.has(e.effect)) pKind.set(i, 'skillMoment')
       else if (!lastOfGroup) pKind.set(i, 'skillQuiet')
+      else if (first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
       else pKind.set(i, first ? 'skill' : 'skillQuiet')
     }
   }
