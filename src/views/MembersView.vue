@@ -219,8 +219,10 @@ function titleOf(m) {
 }
 /* การ์ดของเรา: กรอบนอก + ป้าย "คุณ" ที่มุมซ้ายบน */
 .mv-card.me { box-shadow: 0 0 0 2px var(--primary), var(--pop); }
-.mv-card .mv-you { position: absolute; top: 6px; left: 6px; z-index: 2; font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 1px 7px; }
-.mv-title { font-size: .7rem; font-weight: 800; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px;
+.mv-card .mv-you { position: absolute; top: 5px; left: 5px; z-index: 2; font-size: .7rem; font-weight: 700; line-height: 1.35; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 6px; }
+.mv-title :deep(img), .mv-title :deep(span) { font-size: .9em; }
+/* .7rem คือขั้นต่ำของเว็บ (CLAUDE.md) — ลดขนาดด้วยน้ำหนักตัวอักษร/ระยะขอบ/ไอคอนแทน */
+.mv-title { font-size: .7rem; font-weight: 600; line-height: 1.35; color: #a23b6c; background: var(--accent-light); border: 1px solid rgba(242,139,176,.55); border-radius: 999px; padding: 0 6px;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mv-track { font-size: .7rem; font-weight: 700; }
 .mv-sid { font-size: .7rem; color: rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }

@@ -14,7 +14,7 @@
         </CosFrame>
         <div class="me-av-actions">
           <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
-          <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ตกแต่ง</RouterLink>
+          <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ร้านตกแต่ง ›</RouterLink>
           <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
           <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
             {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ ยังไม่ได้เลือกฉายา — แตะเพื่อเลือก' }}
@@ -330,7 +330,10 @@ async function save() {
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 .me-card > :not(.cz-bgl) { position: relative; z-index: 1; }
 .me-card.me-darkbg .me-nick, .me-card.me-darkbg .me-home, .me-card.me-darkbg .me-guard { color: #fff; }
-.me-shoplink { display: inline-block; font-size: .72rem; font-weight: 700; color: var(--primary-dark); text-decoration: none; margin: 2px 0 4px; }
+/* ลิงก์ร้านตกแต่งเป็นปุ่มมีกรอบ — เดิมเป็นข้อความเปล่าๆ ไม่รู้ว่ากดได้ */
+.me-shoplink { align-self: flex-start; width: fit-content; display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; color: var(--primary-dark); text-decoration: none; margin: 2px 0 6px;
+  background: #fff; border: 1px solid var(--primary-2); border-radius: 999px; padding: 2px 10px; box-shadow: 0 1px 3px rgba(43,53,80,.1); }
+.me-shoplink:active { transform: translateY(1px); }
 .me-card { position: relative; padding: 16px 14px 14px; border-radius: 22px; box-shadow: var(--pop);
   border: var(--bw) solid var(--line); overflow: hidden;
   background: linear-gradient(150deg, color-mix(in srgb, var(--tier) 26%, #fff) 0%, #ffffff 58%, var(--primary-light) 100%); }
@@ -343,7 +346,8 @@ async function save() {
 .me-tab { flex: 1; font: inherit; font-size: .78rem; font-weight: 700; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 8px 2px; cursor: pointer; }
 .me-tab.on { background: var(--surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
 .me-panel { margin-top: 10px; }
-.me-title { font: inherit; font-size: .74rem; font-weight: 800; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 10px; cursor: pointer; margin-bottom: 6px; max-width: 100%; text-align: left; }
+/* ป้ายยาวพอดีข้อความ (เดิมยืดเต็มคอลัมน์เพราะแม่เป็น flex column) */
+.me-title { align-self: flex-start; width: fit-content; max-width: 100%; font: inherit; font-size: .72rem; font-weight: 700; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 9px; cursor: pointer; margin-bottom: 6px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .me-title.empty { color: var(--muted); background: rgba(255,255,255,.7); border-style: dashed; border-color: var(--line); font-weight: 600; }
 .me-ach-hint { font-size: .72rem; color: var(--muted); margin: 10px 2px 0; line-height: 1.5; }
 .me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: var(--bw) solid var(--line); background: #eee; box-shadow: var(--pop); }
