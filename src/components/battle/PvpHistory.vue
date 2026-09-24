@@ -8,38 +8,42 @@
          เห็นแค่หัวข้อลอยๆ แล้วแจ้งว่า "ประวัติบุกไม่ขึ้น" (31 ส.ค.)
          กดเองเมื่อไหร่ค่าที่กดชนะเสมอ (manual) — ไม่ให้ของที่โหลดมาทีหลังไปเด้งกลับ -->
     <button class="ph-toggle" :aria-expanded="open" @click="manual = !open">
-      <span class="ph-title"><Emoji char="📜" /> ประวัติ</span>
+      <span class="ph-title"><Emoji char="📜" /> ประวัติการต่อสู้</span>
       <span v-if="summary" class="ph-sum">{{ summary }}</span>
       <span class="ph-caret" :class="{ open }">▸</span>
     </button>
 
     <div v-if="open" class="ph-tabs" role="tablist">
       <button class="ph-tab" :class="{ on: tab === 'def' }" role="tab" :aria-selected="tab === 'def'"
-        @click="pickedTab = 'def'">ตั้งรับ<span v-if="defense.length" class="ph-n">{{ defense.length }}</span></button>
+        @click="pickedTab = 'def'">มีคนมาหาเรา<span v-if="defense.length" class="ph-n">{{ defense.length }}</span></button>
       <button class="ph-tab" :class="{ on: tab === 'atk' }" role="tab" :aria-selected="tab === 'atk'"
         @click="pickedTab = 'atk'">เราไปบุก<span v-if="attacks.length" class="ph-n">{{ attacks.length }}</span></button>
     </div>
 
     <template v-if="open && tab === 'def'">
       <div v-if="!defense.length" class="ph-empty">ยังไม่มีใครมาบุกเลย — ทีมที่จัดไว้กำลังเฝ้าอยู่</div>
-      <div v-for="(r, i) in defense" :key="'d' + i" class="ph-row">
-        <span class="ph-who"><Emoji char="🛡️" /> {{ r.name }} บุกเรา</span>
-        <span class="ph-res" :class="r.won ? 'ok' : 'no'">{{ r.won ? 'เรารอด' : 'เราแพ้' }}</span>
+      <div v-for="(r, i) in defense" :key="'d' + i" class="ph-row" :class="{ fr: r.friendly }">
+        <button class="ph-who" type="button" @click="$emit('open', r.uid)">
+          <Emoji :char="r.friendly ? '🤝' : '🛡️'" /> <b>{{ r.name }}</b> {{ r.friendly ? 'มาท้าสู้กระชับมิตร' : 'บุกเรา' }}
+        </button>
+        <span class="ph-res" :class="r.won ? 'ok' : 'no'">{{ r.friendly ? (r.won ? 'เราชนะ' : 'เราแพ้') : (r.won ? 'เรารอด' : 'เราแพ้') }}</span>
         <span class="ph-ago">{{ agoLabel(r.t, now) }}</span>
       </div>
     </template>
 
     <template v-else-if="open">
       <div v-if="!attacks.length" class="ph-empty">ยังไม่ได้ออกบุกใครเลย — เลือกสักคนจากกระดานด้านบน</div>
-      <div v-for="(r, i) in attacks" :key="'a' + i" class="ph-row">
-        <span class="ph-who"><Emoji char="⚔️" /> บุก {{ r.name }}</span>
+      <div v-for="(r, i) in attacks" :key="'a' + i" class="ph-row" :class="{ fr: r.friendly }">
+        <button class="ph-who" type="button" @click="$emit('open', r.uid)">
+          <Emoji :char="r.friendly ? '🤝' : '⚔️'" /> {{ r.friendly ? 'ท้า' : 'บุก' }} <b>{{ r.name }}</b>
+        </button>
         <span class="ph-res" :class="r.won ? 'ok' : 'no'">{{ r.won ? 'ชนะ' : 'แพ้' }}</span>
         <span v-if="r.coin" class="ph-coin">+{{ r.coin.toLocaleString() }}<Emoji char="🪙" /></span>
         <span class="ph-ago">{{ agoLabel(r.t, now) }}</span>
       </div>
     </template>
 
-    <div v-if="open" class="ph-note">เก็บ 5 รายการล่าสุดของแต่ละคน · ทั้งรุ่นเห็นประวัติของกันและกันได้</div>
+    <div v-if="open" class="ph-note">🤝 = ท้าสู้กระชับมิตร (ไม่มีเหรียญ ไม่กระทบแต้ม) · กดชื่อเพื่อดูโปรไฟล์/ท้ากลับ · เก็บ {{ HISTORY_MAX }} รายการล่าสุดของแต่ละคน</div>
   </div>
 </template>
 
@@ -48,7 +52,11 @@ import Emoji from '../shared/Emoji.vue'
 import { ref, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useMembersStore } from '../../stores/members.js'
-import { myAttacks, defenseLog, agoLabel } from '../../utils/pvpHistory.js'
+import { myAttacks, defenseLog, agoLabel, HISTORY_MAX } from '../../utils/pvpHistory.js'
+
+// startOpen: หน้าฉันกางไว้เสมอ (สนามประลองยังพับเมื่อว่างตามเดิม) · open(uid) = กดชื่อ → ผู้ใช้หน้าแม่เปิดโปรไฟล์
+const props = defineProps({ startOpen: { type: Boolean, default: false } })
+defineEmits(['open'])
 
 const auth = useAuthStore()
 const members = useMembersStore()
@@ -62,7 +70,7 @@ const defense = computed(() => defenseLog(members.rosterRows || {}, uid.value))
 // กาง/พับ: null = ยังไม่ได้กดเอง → ตัดสินจาก "มีของไหม"
 // (roster โหลดเสร็จทีหลังได้ · computed จึงกางเองตอนของมาถึง)
 const manual = ref(null)
-const open = computed(() => manual.value ?? (attacks.value.length > 0 || defense.value.length > 0))
+const open = computed(() => manual.value ?? (props.startOpen || attacks.value.length > 0 || defense.value.length > 0))
 
 // แท็บ: null = ยังไม่ได้เลือกเอง → เปิดแท็บที่มีของ (ตั้งรับก่อนถ้ามีทั้งคู่ — ของที่ไม่เคยเห็นมาก่อน)
 const pickedTab = ref(null)
@@ -73,7 +81,7 @@ const tab = computed(() =>
 const summary = computed(() => {
   const parts = []
   if (defense.value.length) {
-    parts.push(`โดนบุก ${defense.value.length} ครั้ง (รอด ${defense.value.filter(r => r.won).length})`)
+    parts.push(`มีคนมาหา ${defense.value.length} ครั้ง (ชนะ/รอด ${defense.value.filter(r => r.won).length})`)
   }
   if (attacks.value.length) parts.push(`เราไปบุก ${attacks.value.length} ครั้ง`)
   return parts.join(' · ')
@@ -87,6 +95,9 @@ const summary = computed(() => {
 .ph-sum { flex: 1; font-size: .74rem; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ph-caret { margin-left: auto; font-size: .8rem; color: var(--muted); transition: transform .15s ease; }
 .ph-caret.open { transform: rotate(90deg); }
+.ph-who { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.ph-who b { font-weight: 800; }
+.ph-row.fr { background: var(--accent-light); border-radius: 10px; padding-left: 6px; padding-right: 6px; }
 .ph-tabs { display: flex; gap: 6px; margin: 10px 0 4px; }
 .ph-tab { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-family: inherit; font-weight: 800; font-size: .72rem; cursor: pointer; }
 .ph-tab.on { background: var(--primary); color: #fff; }

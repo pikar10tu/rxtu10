@@ -1,15 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pushHistory, myAttacks, defenseLog, agoLabel, HISTORY_MAX } from './pvpHistory.js'
+import { shouldLogFriendly, pushHistory, myAttacks, defenseLog, agoLabel, HISTORY_MAX } from './pvpHistory.js'
 
 const e = (u, w, c, t) => ({ u, w, c, t })
 
-test('pushHistory ใหม่สุดอยู่หน้า และตัดที่ 5', () => {
+test('pushHistory ใหม่สุดอยู่หน้า และตัดที่ HISTORY_MAX', () => {
   let list = []
-  for (let i = 1; i <= 7; i++) list = pushHistory(list, e('x' + i, 1, 10, i))
+  for (let i = 1; i <= HISTORY_MAX + 2; i++) list = pushHistory(list, e('x' + i, 1, 10, i))
   assert.equal(list.length, HISTORY_MAX)
-  assert.equal(list[0].u, 'x7', 'ใหม่สุดต้องอยู่หน้า')
-  assert.equal(list[4].u, 'x3', 'เก่าสุดที่เหลือคือรายการที่ 3')
+  assert.equal(list[0].u, 'x' + (HISTORY_MAX + 2), 'ใหม่สุดต้องอยู่หน้า')
+  assert.equal(list[HISTORY_MAX - 1].u, 'x3', 'เก่าสุดที่เหลือคือรายการที่ 3')
 })
 
 test('pushHistory รับ list ที่ไม่ใช่ array ได้ (แถวเก่าที่ยังไม่มี h)', () => {
@@ -33,7 +33,7 @@ const rows = {
 test('myAttacks เติมชื่อเป้าหมายจากแถวของเขา และคงลำดับเดิม', () => {
   const r = myAttacks(rows, 'me')
   assert.equal(r.length, 2)
-  assert.deepEqual(r[0], { uid: 'bob', name: 'บ๊อบ', won: true, coin: 250, t: 300 })
+  assert.deepEqual(r[0], { uid: 'bob', name: 'บ๊อบ', won: true, coin: 250, t: 300, friendly: false })
   assert.equal(r[1].name, 'แอน')
   assert.equal(r[1].won, false)
 })
@@ -74,4 +74,15 @@ test('agoLabel อ่านง่ายทุกช่วง', () => {
   assert.equal(agoLabel(now - 2 * 86_400_000, now), '2 วันก่อน')
   assert.equal(agoLabel(0, now), '')
   assert.equal(agoLabel(now + 60_000, now), 'เมื่อกี้', 'นาฬิกาเครื่องเพี้ยน = ห้ามโชว์เวลาติดลบ')
+})
+
+test('ท้าสู้กระชับมิตร: f=1 ไม่มีเหรียญ · ทั้งสองฝั่งรู้ว่าเป็นกระชับมิตร · จดคนเดิมซ้ำได้หลัง 10 นาที', () => {
+  const rows = { A: { n: 'เอ', h: [{ u: 'B', w: 1, c: 999, t: 100, f: 1 }] }, B: { n: 'บี' } }
+  const [a] = myAttacks(rows, 'A')
+  assert.equal(a.friendly, true); assert.equal(a.coin, 0)
+  const [d] = defenseLog(rows, 'B')
+  assert.equal(d.friendly, true); assert.equal(d.won, false)
+  assert.equal(shouldLogFriendly(rows.A.h, 'B', 100 + 60_000), false)
+  assert.equal(shouldLogFriendly(rows.A.h, 'B', 100 + 10 * 60_000), true)
+  assert.equal(shouldLogFriendly(rows.A.h, 'C', 200), true)
 })

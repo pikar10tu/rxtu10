@@ -5,11 +5,13 @@
     <div v-if="!auth.isLoggedIn" class="me-empty">กรุณาเข้าสู่ระบบ</div>
 
     <template v-else>
-      <!-- identity (ดันขึ้นบนสุด) -->
+      <!-- การ์ดโปรไฟล์: พื้นย้อมสีกรอบบ้าน (frameColor ของเลเวล) · ชื่อบ้าน · ทีมเฝ้าบ้าน · ตัวเลขหลัก -->
+      <section class="me-card" :style="{ '--tier': tier.frameColor }">
       <div class="me-avatar-row">
         <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" />
         <div class="me-av-actions">
           <div class="me-nick">{{ auth.userData?.nickname || 'ฉัน' }}</div>
+          <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
           <button class="me-btn-sm" @click="fileEl?.click()"><Emoji char="📷" /> เปลี่ยนรูป</button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
           <!-- ปุ่มบันทึกต้องอยู่ตรงนี้ ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
@@ -23,14 +25,30 @@
         </div>
       </div>
 
-      <div class="me-stats">
-        <div class="me-stat"><span><Emoji char="🪙" /></span><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
-        <div class="me-stat"><span><Emoji char="🏠" /></span><b>Lv.{{ auth.userData?.residence?.level || 1 }}</b><small>ที่อยู่อาศัย</small></div>
-        <div class="me-stat"><span><Emoji char="🐾" /></span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+      <div v-if="guard.length" class="me-guard">
+        <span class="me-guard-cap">ทีมเฝ้าบ้าน</span>
+        <span v-for="(g, i) in guard" :key="i" class="me-guard-pet"><Emoji :char="g" /></span>
       </div>
 
-      <AchievementGrid :uid="auth.currentUser?.uid" />
+      <div class="me-stats">
+        <div class="me-stat"><span><Emoji char="🪙" /></span><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>
+        <div class="me-stat"><span><Emoji char="🐾" /></span><b>{{ (auth.userData?.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+        <div class="me-stat"><span><Emoji char="🏅" /></span><b>{{ auth.userData?.achievementCount || 0 }}</b><small>ความสำเร็จ</small></div>
+        <div class="me-stat"><span><Emoji char="⚔️" /></span><b>{{ (auth.userData?.pvp?.rating || 1000).toLocaleString() }}</b><small>แต้มประลอง</small></div>
+      </div>
       <TagChips :member="auth.userData" class="me-tags" />
+      </section>
+
+      <!-- แท็บ: ประวัติการต่อสู้ (รวมท้าสู้กระชับมิตร) · ข่าวรุ่น · ความสำเร็จ -->
+      <div class="me-tabs" role="tablist">
+        <button v-for="t in TABS" :key="t.k" class="me-tab" :class="{ on: tab === t.k }" role="tab" :aria-selected="tab === t.k" @click="tab = t.k">
+          <Emoji :char="t.icon" /> {{ t.label }}
+        </button>
+      </div>
+      <PvpHistory v-if="tab === 'fight'" start-open class="me-panel" @open="openProfile" />
+      <NewsBoard v-else-if="tab === 'news'" start-open class="me-panel" />
+      <AchievementGrid v-else :uid="auth.currentUser?.uid" class="me-panel" />
+      <ProfileModal :member="profileOf" @close="profileOf = null" />
 
       <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
       <RouterLink to="/fun-facts" class="me-link"><Emoji char="🌐" /> สถิติรวมทั้งเว็บ</RouterLink>
@@ -101,9 +119,39 @@ import { useRosterSync } from '../composables/useRosterSync.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
 import AchievementGrid from '../components/shared/AchievementGrid.vue'
+import PvpHistory from '../components/battle/PvpHistory.vue'
+import NewsBoard from '../components/home/NewsBoard.vue'
+import ProfileModal from '../components/members/ProfileModal.vue'
+import { useMembersStore } from '../stores/members.js'
+import { getTier } from '../data/residence.js'
+import { getPetDef } from '../data/index.js'
+import { resolveBattleTeam } from '../utils/petTeam.js'
+import { toMember } from '../utils/roster.js'
 import { sfx, sfxOn, setSfxOn } from '../utils/sfx.js'
 
 const auth = useAuthStore()
+const members = useMembersStore()
+
+// ── การ์ดโปรไฟล์ ──
+const tier = computed(() => getTier(auth.userData?.residence?.level || 1))
+const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
+  .map(p => getPetDef(p.id)?.emoji).filter(Boolean))
+
+// ── แท็บ ── (ประวัติต่อสู้อ่าน roster ที่ต้องโหลดเอง — หน้านี้เข้าตรงได้โดยไม่ผ่านหน้าที่โหลดให้)
+const TABS = [
+  { k: 'fight', icon: '⚔️', label: 'ประวัติต่อสู้' },
+  { k: 'news', icon: '📢', label: 'ข่าวรุ่น' },
+  { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
+]
+const tab = ref('fight')
+onMounted(() => { if (!members.rosterReady) members.loadRoster() })
+
+// กดชื่อในประวัติ → เปิดโปรไฟล์คนนั้น (มีปุ่มท้าสู้ในนั้นอยู่แล้ว = ท้ากลับ)
+const profileOf = ref(null)
+function openProfile(uid) {
+  const row = members.rosterRows?.[uid]
+  if (row) profileOf.value = toMember(uid, row)
+}
 const soundOn = ref(sfxOn())
 function toggleSound() {
   setSfxOn(!soundOn.value); soundOn.value = sfxOn()
@@ -252,7 +300,18 @@ async function save() {
 <style scoped>
 .me-pagetitle { margin-bottom: 16px; }
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
-.me-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.me-card { position: relative; padding: 16px 14px 14px; border-radius: 22px; box-shadow: var(--pop);
+  border: var(--bw) solid var(--line); overflow: hidden;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tier) 26%, #fff) 0%, #ffffff 58%, var(--primary-light) 100%); }
+.me-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+.me-home { font-size: .76rem; font-weight: 700; color: var(--muted); margin: 2px 0 6px; }
+.me-guard { display: flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 700; color: var(--muted); }
+.me-guard-cap { margin-right: 2px; }
+.me-guard-pet { width: 34px; height: 34px; display: grid; place-items: center; font-size: 1.25rem; background: rgba(255,255,255,.8); border: var(--bw) solid var(--line); border-radius: 10px; }
+.me-tabs { display: flex; gap: 6px; margin: 16px 0 0; background: var(--primary-light); padding: 4px; border-radius: 14px; }
+.me-tab { flex: 1; font: inherit; font-size: .78rem; font-weight: 700; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 8px 2px; cursor: pointer; }
+.me-tab.on { background: var(--surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
+.me-panel { margin-top: 10px; }
 .me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: var(--bw) solid var(--line); background: #eee; box-shadow: var(--pop); }
 .me-av-actions { display: flex; flex-direction: column; gap: 6px; }
 .me-nick { font-size: 1rem; font-weight: 800; color: var(--text, #4a3f5e); }
@@ -273,7 +332,7 @@ async function save() {
 .me-contact-fold summary { font-weight: 800; font-size: .85rem; color: var(--ink); cursor: pointer; list-style: none; }
 .me-contact-fold summary::-webkit-details-marker { display: none; }
 .me-contact-fold[open] summary { margin-bottom: 10px; }
-.me-stats { display: flex; margin-top: 22px; background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; }
+.me-stats { display: flex; margin-top: 12px; background: rgba(255,255,255,.85); border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; }
 .me-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid var(--border, #efe7fb); }
 .me-stat:last-child { border-right: none; }
 .me-stat span { font-size: 1.1rem; }

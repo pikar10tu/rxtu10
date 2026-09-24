@@ -72,6 +72,8 @@ import PetThumb from '../shared/PetThumb.vue'
 import BattleReplay from '../battle/BattleReplay.vue'
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import { useToast } from '../../composables/useToast.js'
+import { useRosterSync } from '../../composables/useRosterSync.js'
+import { shouldLogFriendly } from '../../utils/pvpHistory.js'
 
 const props = defineProps({ member: { type: Object, default: null } })
 const emit = defineEmits(['close'])
@@ -116,10 +118,12 @@ const hasContact = computed(() => {
   return !!(c.phone || c.ig || c.line)
 })
 
-// ── ท้าสู้กระชับมิตร — จำลองสู้ล้วนๆ ฝั่ง client ไม่เขียน Firestore เลย
-//    (ไม่มีรางวัล ไม่จำกัดโควตา ไม่เก็บร่องรอย ตามที่ user เลือก) ⇒ ไม่กระทบ pvp.rating/wins/losses จริง
+// ── ท้าสู้กระชับมิตร — จำลองสู้ฝั่ง client ไม่มีรางวัล ไม่จำกัดโควตา ไม่กระทบ pvp.rating/wins/losses จริง
+//    25 ก.ย. 2026 user สั่งให้คนถูกท้ารู้ด้วย ⇒ จดผลลงประวัติในแถว roster ของเรา (f:1) ทางเดียวกับประวัติบุก
+//    กดท้าคนเดิมรัวๆ จดครั้งเดียวต่อ 10 นาที (shouldLogFriendly) กันช่องประวัติเต็ม + เขียน roster ถี่
 const auth = useAuthStore()
 const { toast } = useToast()
+const { syncRosterRow } = useRosterSync()
 const myUid = computed(() => auth.currentUser?.uid)
 const canDuel = computed(() => !!view.value?.uid && view.value.uid !== myUid.value && showcase.value.length > 0)
 
@@ -141,6 +145,10 @@ function startDuel() {
     vsLabel: `กระชับมิตร VS ${view.value.nickname}`,
     winText: 'ชนะ! (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
     loseText: 'แพ้ไปหน่อย (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
+  }
+  const target = view.value.uid
+  if (shouldLogFriendly(members.rosterRows?.[myUid.value]?.h, target)) {
+    syncRosterRow({ history: { u: target, w: result.winner === 'A' ? 1 : 0, c: 0, t: Date.now(), f: 1 } })
   }
 }
 </script>

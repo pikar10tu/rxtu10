@@ -132,8 +132,8 @@ export function buildRosterFromUsers(docs, prevRows) {
   return rows
 }
 
-/** แถวย่อ → รูปที่ view เดิมคุ้นเคย (คล้าย light subset ของ fbUsers) */
-function toMember(uid, row) {
+/** แถวย่อ → รูปที่ view เดิมคุ้นเคย (คล้าย light subset ของ fbUsers) · export ให้หน้าฉันเปิด ProfileModal จากประวัติได้ */
+export function toMember(uid, row) {
   const minigames = {}
   for (const [k, best] of Object.entries(row.m || {})) minigames[k] = { best }
   return {

@@ -50,7 +50,9 @@ const auth = useAuthStore()
 
 const newsDocs = ref([])
 const loading = ref(true)
-const open = ref(false)     // collapsed by default — กดบรรทัดเพื่อกาง log
+// startOpen: หน้าฉัน (แท็บข่าวรุ่น) กางรายการไว้เลย · หน้า Home ยังพับเป็นบรรทัดเดียวเหมือนเดิม
+const props = defineProps({ startOpen: { type: Boolean, default: false } })
+const open = ref(props.startOpen)     // collapsed by default — กดบรรทัดเพื่อกาง log
 const idx = ref(0)          // บรรทัดที่โชว์อยู่ตอนพับ
 const now = ref(Date.now()) // ให้ "x นาทีที่แล้ว" ขยับตามเวลาจริง
 
