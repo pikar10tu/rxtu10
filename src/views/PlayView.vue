@@ -18,8 +18,7 @@
         <RouterLink to="/play/pets" class="hero-card pets">
           <span class="hero-emoji"><Emoji char="🐾" /></span>
           <span class="hero-name">โหมดเพ็ท</span>
-          <span class="hero-sub">คลัง · ร้านค้า · หอคอย · ประลอง · ผจญภัย</span>
-          <span v-if="expState === 'ready'" class="hero-badge ready"><Emoji char="🎉" /> ผจญภัยกลับมาแล้ว!</span>
+          <span class="hero-sub">คลัง · จัดทีม · หอคอย · ประลอง</span>
         </RouterLink>
 
         <RouterLink to="/play/farm" class="hero-card farm">

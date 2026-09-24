@@ -36,7 +36,7 @@ const action = computed(() => nextAction(
   {
     today: new Date().toISOString().slice(0, 10),
     now: Date.now(),
-    expeditionOpen: expeditionOpen.value,
+    expeditionOpen: false,   // ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ
     pvpOpen: pvpOpen.value,
   },
 ))

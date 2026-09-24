@@ -84,7 +84,9 @@ const { toast } = useToast()
 const detailId = ref(null)
 const owned = computed(() => auth.userData?.pets || [])
 // เพ็ทที่กำลังออกผจญภัย — เอาเข้าทีมไม่ได้จนกว่าจะกลับ (แต่ยังกดได้ เพื่อเด้งเหตุผลบอก)
-const expeditionIds = computed(() => new Set(auth.userData?.expedition?.petIds || []))
+// ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ
+// ⇒ ไม่ล็อกเพ็ทที่ค้างสถานะ 'กำลังผจญภัย' อีก (จัดลงทีมได้เลย)
+const expeditionIds = computed(() => new Set())
 const battleSlots = computed(() => BATTLE_SLOTS)
 const ownedIds = computed(() => new Set(owned.value.map(p => p.id)))
 // active เฉพาะตัวที่ยังครอบครอง ตัดให้ยาวไม่เกิน battleSlots

@@ -24,7 +24,7 @@
       <!-- เหรียญ + รับรายได้รายวัน (ส่วนตัว เห็นเฉพาะเจ้าของ) -->
       <DailyCard />
       <!-- สถานะส่งผจญภัย (โชว์เฉพาะตอนกำลังไป/กลับมาแล้ว) -->
-      <ExpeditionCard />
+      <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
 
       <FunFactsWidget />
 
@@ -57,7 +57,6 @@ import { questNotClaimed } from '../utils/dailyQuest.js'
 import { pendingAnnounce } from '../utils/mailbox.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
-import ExpeditionCard from '../components/home/ExpeditionCard.vue'
 import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'

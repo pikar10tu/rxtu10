@@ -37,13 +37,7 @@
       </RouterLink>
       <SoonCard v-else emoji="⚔️" label="สนามประลอง" />
 
-      <RouterLink v-if="expeditionOpen || authStore.isAdmin" to="/expedition" class="game-card gc-exp">
-        <span class="gc-emoji"><Emoji char="🗺️" /></span>
-        <span class="gc-name">ส่งผจญภัย</span>
-        <span v-if="expState === 'ready'" class="gc-badge ready"><Emoji char="🎉" /> กลับมาแล้ว!</span>
-        <span v-else-if="expState === 'active'" class="gc-badge plant"><Emoji char="⏳" /> กำลังไป</span>
-        <span v-else class="gc-badge grow">ส่งเพ็ทหารางวัล</span>
-      </RouterLink>
+      <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
 
       <SoonCard emoji="🐲" label="บอสรวมรุ่น" />
     </div>
