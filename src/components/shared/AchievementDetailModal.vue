@@ -1,5 +1,7 @@
-<!-- popup รายละเอียด achievement — mirror PetStatPopup (fixed overlay, ไม่ต้อง Teleport) -->
+<!-- popup รายละเอียด achievement · Teleport ไป body (เปิดจากหน้าฉันได้แล้ว = อยู่ใต้ RouterView · CLAUDE.md ข้อ 6)
+     owner = เจ้าของดูของตัวเอง → มีปุ่มสวมฉายา / ปักขึ้นตู้โชว์ -->
 <template>
+  <Teleport to="body">
   <div v-if="item" class="ad-ov" @click.self="$emit('close')">
     <div class="ad-box">
       <button class="ad-x" aria-label="ปิด" @click="$emit('close')">✕</button>
@@ -16,14 +18,28 @@
           <span class="ad-row-v">{{ fmtDate(item.earnedAt) }}</span>
         </div>
       </div>
+      <div v-if="owner" class="ad-acts">
+        <button class="ad-act" :class="{ on: equipped }" @click="$emit('equip', item.docId)">
+          {{ equipped ? '✓ ใช้เป็นฉายาอยู่ · ถอด' : '🎖️ ใช้เป็นฉายา' }}
+        </button>
+        <button class="ad-act" :class="{ on: pinned }" @click="$emit('pin', item.docId)">
+          {{ pinned ? '✓ อยู่ในตู้โชว์ · เอาออก' : '🏆 ปักขึ้นตู้โชว์' }}
+        </button>
+      </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
 import Emoji from './Emoji.vue'
-defineProps({ item: { type: Object, default: null } })
-defineEmits(['close'])
+defineProps({
+  item: { type: Object, default: null },
+  owner: { type: Boolean, default: false },
+  equipped: { type: Boolean, default: false },
+  pinned: { type: Boolean, default: false },
+})
+defineEmits(['close', 'equip', 'pin'])
 
 // รองรับ Firestore Timestamp / Date / ms · คืน '' ถ้าพัง (ซ่อนแถววันที่)
 function fmtDate(ts) {
@@ -41,6 +57,9 @@ function fmtDate(ts) {
 .ad-icon { font-size: 3.2rem; line-height: 1; }
 .ad-title { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-top: 8px; }
 .ad-flavor { font-size: .8rem; color: var(--primary-2); font-style: italic; margin-top: 6px; line-height: 1.4; }
+.ad-acts { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.ad-act { font: inherit; font-size: .82rem; font-weight: 700; border: var(--bw) solid var(--line); background: var(--surface); color: var(--primary-dark); border-radius: 12px; padding: 10px; cursor: pointer; }
+.ad-act.on { background: var(--primary-light); border-color: var(--primary-2); }
 .ad-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; text-align: left; }
 .ad-row { background: #f8fafc; border: 1px solid rgba(0,0,0,.05); border-radius: 10px; padding: 8px 11px; }
 .ad-row-k { display: block; font-size: .7rem; font-weight: 700; color: #64748b; }

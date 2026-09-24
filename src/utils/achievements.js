@@ -46,3 +46,29 @@ export function buildAchievementNews(nickname, def, date) {
     type: 'achievement',
   }
 }
+
+// ── ตู้โชว์ + ฉายา (roadmap #8 ส่วนแรก) ──
+// user doc: equipTitle = docId ของ achievement ที่สวมเป็นฉายา · pinnedAch = docId ที่ปักขึ้นตู้ (≤ SHOWCASE_MAX)
+// ⚠️ ค่าบน user doc เจ้าของเขียนเองได้ ⇒ ต้องเช็คกับรายการที่ "มีจริง" (subcollection) ทุกครั้งก่อนโชว์
+export const SHOWCASE_MAX = 3
+
+/** ตู้โชว์: ของที่ปักไว้ (เรียงตามที่ปัก · ตัดของที่ไม่มีจริง) · ไม่ได้ปักเลย = ล่าสุด n อัน */
+export function resolveShowcase(items, pinned, n = SHOWCASE_MAX) {
+  const list = Array.isArray(items) ? items : []
+  const byId = new Map(list.map(a => [a.docId, a]))
+  const picked = (Array.isArray(pinned) ? pinned : []).map(id => byId.get(id)).filter(Boolean).slice(0, n)
+  return picked.length ? picked : list.slice(0, n)
+}
+
+/** ฉายาที่สวม — คืน item หรือ null (ไม่ได้สวม/ไม่มีจริง) */
+export function resolveTitle(items, equip) {
+  if (!equip) return null
+  return (Array.isArray(items) ? items : []).find(a => a.docId === equip) || null
+}
+
+/** ปัก/ถอด 1 อัน · เต็มแล้วปักใหม่ = ดันอันเก่าสุดออก */
+export function togglePin(pinned, docId, n = SHOWCASE_MAX) {
+  const cur = Array.isArray(pinned) ? pinned.filter(Boolean) : []
+  if (cur.includes(docId)) return cur.filter(x => x !== docId)
+  return [...cur, docId].slice(-n)
+}

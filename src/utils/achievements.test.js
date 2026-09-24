@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import {
   computeProgress, resolveGte, checkMilestones,
   achievementTitle, achievementDocId, buildAchievementNews,
+  resolveShowcase, resolveTitle, togglePin,
 } from './achievements.js'
 
 const M = [
@@ -77,4 +78,15 @@ test('buildAchievementNews: msg ไม่มี emoji, icon แยก field', ()
   assert.equal(n.icon, '💼')
   assert.ok(!/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(n.msg))  // ไม่มี emoji ใน msg
   assert.ok(n.msg.includes('โจ้') && n.msg.includes('นักธุรกิจ'))
+})
+
+test('ตู้โชว์: ปักไว้ตามลำดับ ตัดของปลอม · ไม่ปัก = ล่าสุด 3 · ฉายาต้องมีจริง · ปักเกิน 3 ดันอันเก่าออก', () => {
+  const items = ['a', 'b', 'c', 'd'].map(docId => ({ docId }))
+  assert.deepEqual(resolveShowcase(items, ['c', 'zz', 'a']).map(x => x.docId), ['c', 'a'])
+  assert.deepEqual(resolveShowcase(items, []).map(x => x.docId), ['a', 'b', 'c'])
+  assert.deepEqual(resolveShowcase(items, ['zz']).map(x => x.docId), ['a', 'b', 'c'], 'ปักแต่ของปลอม = ถือว่าไม่ได้ปัก')
+  assert.equal(resolveTitle(items, 'b').docId, 'b')
+  assert.equal(resolveTitle(items, 'zz'), null)
+  assert.deepEqual(togglePin(['a', 'b', 'c'], 'd'), ['b', 'c', 'd'])
+  assert.deepEqual(togglePin(['a', 'b'], 'a'), ['b'])
 })

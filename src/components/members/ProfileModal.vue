@@ -10,6 +10,7 @@
         <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
         <div v-if="view.realName" class="pf-real">{{ view.realName }}</div>
         <div class="pf-name">{{ view.nickname }}</div>
+        <div v-if="title" class="pf-title"><Emoji :char="title.icon" /> {{ title.label }}</div>
         <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pf-chips">
           <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
@@ -17,7 +18,23 @@
         <div class="pf-chips" style="margin-top:5px"><TagChips :member="view" /></div>
       </div>
 
-      <div class="pf-ach"><AchievementGrid :uid="view?.uid" /></div>
+      <!-- 🏆 ตู้โชว์: 3 ชิ้นที่เจ้าของปักไว้ (ไม่ได้ปัก = ล่าสุด 3) · ทั้งหมดพับไว้ใต้ปุ่ม
+           โหลด achievements ครั้งเดียวที่นี่ แล้วส่ง items ให้กริด = ไม่ query ซ้ำตอนกาง -->
+      <div class="pf-shelf-wrap">
+        <div class="pf-shelf-head"><Emoji char="🏆" /> ตู้โชว์</div>
+        <div v-if="achLoading" class="pf-shelf-empty">กำลังโหลด…</div>
+        <div v-else-if="!shelf.length" class="pf-shelf-empty">ยังไม่มีของโชว์</div>
+        <div v-else class="pf-shelf">
+          <div v-for="a in shelf" :key="a.docId" class="pf-trophy">
+            <span class="pf-trophy-icon"><Emoji :char="a.icon" /></span>
+            <span class="pf-trophy-name">{{ a.label }}</span>
+          </div>
+        </div>
+        <button v-if="achItems.length > shelf.length" class="pf-more" :aria-expanded="showAll" @click="showAll = !showAll">
+          {{ showAll ? 'ซ่อน' : `ดูความสำเร็จทั้งหมด (${achItems.length})` }} <span :class="{ up: showAll }">▾</span>
+        </button>
+        <AchievementGrid v-if="showAll" :items="achItems" class="pf-allgrid" />
+      </div>
 
       <!-- Tier 2: stat strip (max 3, no coins) — การ์ดจิ๋วขอบหมึก+เงา เข้าชุดกับ AchievementGrid -->
       <div class="pf-stats">
@@ -67,6 +84,8 @@ import { petSpeciesOf } from '../../utils/roster.js'
 import { simulateBattle } from '../../utils/battleEngine.js'
 import TagChips from '../shared/TagChips.vue'
 import AchievementGrid from '../shared/AchievementGrid.vue'
+import { fetchAchievementItems } from '../../composables/useAchievementItems.js'
+import { resolveShowcase, resolveTitle } from '../../utils/achievements.js'
 import PetStatPopup from '../pets/PetStatPopup.vue'
 import PetThumb from '../shared/PetThumb.vue'
 import BattleReplay from '../battle/BattleReplay.vue'
@@ -88,6 +107,21 @@ watch(() => props.member?.uid, async (uid) => {
   if (!uid || String(uid).startsWith('static_')) return   // คนที่ยังไม่เข้าระบบ ไม่มี doc ให้อ่าน
   full.value = await members.loadProfile(uid)
 }, { immediate: true })
+
+// ── ตู้โชว์ + ฉายา ── (ค่าบน user doc เช็คกับของที่มีจริงเสมอ — resolveShowcase/resolveTitle)
+const achItems = ref([])
+const achLoading = ref(false)
+const showAll = ref(false)
+watch(() => props.member?.uid, async (uid) => {
+  achItems.value = []; showAll.value = false
+  if (!uid || String(uid).startsWith('static_')) return
+  achLoading.value = true
+  try { achItems.value = await fetchAchievementItems(uid) }
+  catch (e) { console.error('[profile ach]', e) }
+  finally { achLoading.value = false }
+}, { immediate: true })
+const shelf = computed(() => resolveShowcase(achItems.value, view.value?.pinnedAch))
+const title = computed(() => resolveTitle(achItems.value, view.value?.equipTitle))
 
 // ระหว่างรอ doc เต็ม ใช้แถวย่อไปก่อน (ชื่อ/รูป/เลเวลมีครบแล้ว) — จอไม่กระพริบ
 const view = computed(() => ({ ...(props.member || {}), ...(full.value || {}) }))
@@ -173,7 +207,18 @@ function startDuel() {
   font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95; padding: 0 14px;
   line-height: 1.3;
 }
-.pf-ach { padding: 12px 16px 0; }
+.pf-title { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: .74rem; font-weight: 800; color: #a23b6c; background: rgba(255,240,246,.95); border: 1px solid #f4a6c8; border-radius: 999px; padding: 2px 10px; }
+.pf-shelf-wrap { margin: 12px 16px 0; padding: 10px 12px; border-radius: 16px; background: linear-gradient(180deg, var(--primary-light), #fff); border: var(--bw) solid var(--line); }
+.pf-shelf-head { font-size: .78rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+.pf-shelf-empty { font-size: .72rem; color: var(--muted); }
+.pf-shelf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pf-trophy { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 8px 4px 6px; background: #fff; border-radius: 12px; box-shadow: var(--pop); }
+.pf-trophy-icon { font-size: 1.7rem; line-height: 1; }
+.pf-trophy-name { font-size: .7rem; font-weight: 700; color: var(--ink); line-height: 1.25; }
+.pf-more { width: 100%; margin-top: 8px; font: inherit; font-size: .74rem; font-weight: 700; color: var(--primary-dark); background: none; border: 0; cursor: pointer; padding: 4px; }
+.pf-more span { display: inline-block; transition: transform .15s; }
+.pf-more span.up { transform: rotate(180deg); }
+.pf-allgrid { margin-top: 6px; }
 .pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 16px 0; }
 .pf-stat { text-align: center; padding: 10px 4px 8px; border: var(--bw) solid var(--line); border-radius: 12px; box-shadow: var(--pop); }
 .pf-stat span { font-size: 1.1rem; }

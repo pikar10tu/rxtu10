@@ -12,6 +12,9 @@
         <div class="me-av-actions">
           <div class="me-nick">{{ auth.userData?.nickname || 'ฉัน' }}</div>
           <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
+          <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
+            {{ auth.userData?.equipTitle ? '🎖️ ' + titleLabel : '🎖️ ยังไม่ได้เลือกฉายา — แตะเพื่อเลือก' }}
+          </button>
           <button class="me-btn-sm" @click="fileEl?.click()"><Emoji char="📷" /> เปลี่ยนรูป</button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
           <!-- ปุ่มบันทึกต้องอยู่ตรงนี้ ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
@@ -47,7 +50,10 @@
       </div>
       <PvpHistory v-if="tab === 'fight'" start-open class="me-panel" @open="openProfile" />
       <NewsBoard v-else-if="tab === 'news'" start-open class="me-panel" />
-      <AchievementGrid v-else :uid="auth.currentUser?.uid" class="me-panel" />
+      <template v-else>
+        <p class="me-ach-hint">แตะความสำเร็จเพื่อใช้เป็นฉายา หรือปักขึ้นตู้โชว์ (ได้ 3 อัน) ให้เพื่อนเห็นในหน้าโปรไฟล์</p>
+        <AchievementGrid :uid="auth.currentUser?.uid" owner class="me-panel" />
+      </template>
       <ProfileModal :member="profileOf" @close="profileOf = null" />
 
       <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ</RouterLink>
@@ -127,6 +133,8 @@ import { getTier } from '../data/residence.js'
 import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
+import { getAchievement } from '../data/achievements.js'
+import { achievementTitle } from '../utils/achievements.js'
 import { sfx, sfxOn, setSfxOn } from '../utils/sfx.js'
 
 const auth = useAuthStore()
@@ -144,6 +152,13 @@ const TABS = [
   { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
 ]
 const tab = ref('fight')
+// ชื่อฉายา: docId = achId หรือ achId__date → แปลงกลับเป็นชื่อที่อ่านได้โดยไม่ต้องโหลด subcollection
+const titleLabel = computed(() => {
+  const id = auth.userData?.equipTitle || ''
+  const [achId, date] = id.split('__')
+  const def = getAchievement(achId)
+  return def ? achievementTitle(def, date || null) : ''
+})
 onMounted(() => { if (!members.rosterReady) members.loadRoster() })
 
 // กดชื่อในประวัติ → เปิดโปรไฟล์คนนั้น (มีปุ่มท้าสู้ในนั้นอยู่แล้ว = ท้ากลับ)
@@ -312,6 +327,9 @@ async function save() {
 .me-tab { flex: 1; font: inherit; font-size: .78rem; font-weight: 700; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 8px 2px; cursor: pointer; }
 .me-tab.on { background: var(--surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
 .me-panel { margin-top: 10px; }
+.me-title { font: inherit; font-size: .74rem; font-weight: 800; color: #a23b6c; background: var(--accent-light); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 10px; cursor: pointer; margin-bottom: 6px; max-width: 100%; text-align: left; }
+.me-title.empty { color: var(--muted); background: rgba(255,255,255,.7); border-style: dashed; border-color: var(--line); font-weight: 600; }
+.me-ach-hint { font-size: .72rem; color: var(--muted); margin: 10px 2px 0; line-height: 1.5; }
 .me-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: var(--bw) solid var(--line); background: #eee; box-shadow: var(--pop); }
 .me-av-actions { display: flex; flex-direction: column; gap: 6px; }
 .me-nick { font-size: 1rem; font-weight: 800; color: var(--text, #4a3f5e); }

@@ -24,7 +24,7 @@ export const ACHIEVEMENTS = {
   home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 12 }, desc: 'อัปบ้านถึงเลเวล 12', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },
   home_13:  { title: 'เจ้าสมุทร',         icon: '🌊', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 13 }, desc: 'อัปบ้านถึงเลเวล 13 คฤหาสน์ลอยตัวกลางมหาสมุทร', flavor: 'ตื่นมาเจอทะเลทุกทิศ ไม่มีเพื่อนบ้านมากวน' },
   home_14:  { title: 'ราชันใต้บาดาล',      icon: '🔱', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 14 }, desc: 'อัปบ้านถึงเลเวล 14 มหานครใต้บาดาล', flavor: 'ทั้งเมืองใต้น้ำเป็นของเรา' },
-  home_15:  { title: 'ผู้ครองสวนสวรรค์',   icon: '☁️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 15 }, desc: 'อัปบ้านถึงเลเวล 15 สวนสวรรค์เหนือน่านฟ้า บ้านสูงสุดของเกม', flavor: 'สูงกว่านี้ไม่มีแล้ว นอกจากท้องฟ้า' },
+  home_15:  { title: 'ชาวสวรรค์',         icon: '☁️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 15 }, desc: 'อัปบ้านถึงเลเวล 15 สวนสวรรค์เหนือน่านฟ้า บ้านสูงสุดของเกม', flavor: 'สูงกว่านี้ไม่มีแล้ว นอกจากท้องฟ้า' },
   // รางวัลสิ้นซีซั่น — แอดมินแจกผ่านจดหมาย (AdminView "แจกรางวัลซีซั่น") · date = 'YYYY-MM' ของซีซั่น
   // ⏳ จะกลายเป็นฉายาที่สวมได้ตอนทำระบบฉายา (roadmap #8)
   tower_champ: { title: 'ผู้ครอบครองหอคอย', icon: '🏯', type: 'awarded', dated: true, season: true, desc: 'ติดท็อป 10 หอคอยตอนจบซีซั่น', flavor: 'ยืนอยู่บนยอดหอคอยตอนหมดเวลา' },
