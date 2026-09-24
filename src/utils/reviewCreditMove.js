@@ -12,10 +12,11 @@
 // ════════════════════════════════════════════════════════════
 
 // → { updates: [{ id, patch, moveReviewDoc }], moved, dup }
-//  moved = ข้อที่บัญชีใหม่ได้เครดิตเพิ่ม · dup = ข้อที่ตรวจไว้ทั้งสองบัญชี (ตัดตัวเก่าทิ้ง
+//  moved = ข้อที่บัญชีใหม่ได้เครดิตเพิ่ม · fixedOnly = ข้อที่แก้ไว้แต่ไม่มีเครดิต (แก้ในหน้าคลัง
+//  = ล้างผลตรวจ+ส่งกลับคิว ไม่นับให้คนแก้) — ใช้ตอบคำถาม "ตรวจแล้วทำไมไม่ขึ้น" · dup = ข้อที่ตรวจไว้ทั้งสองบัญชี (ตัดตัวเก่าทิ้ง
 //  คงผลตรวจของบัญชีใหม่ไว้ ตัวนับเสียง pass/fail บนข้อไม่แตะ)
 export function planReviewCreditMove(questions, fromUid, toUid) {
-  const out = { updates: [], moved: 0, dup: 0 }
+  const out = { updates: [], moved: 0, dup: 0, fixedOnly: 0 }
   if (!fromUid || !toUid || fromUid === toUid) return out
   for (const q of questions || []) {
     const by = q.reviewedBy || []
@@ -35,6 +36,7 @@ export function planReviewCreditMove(questions, fromUid, toUid) {
       }
     }
     if (fixed) patch.lastFixBy = toUid
+    if (fixed && !inBy) out.fixedOnly++
     out.updates.push({ id: q.id, patch, moveReviewDoc })
   }
   return out

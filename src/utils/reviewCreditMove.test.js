@@ -42,6 +42,7 @@ test('planReviewCreditMove — นับเฉพาะข้อที่เค�
   const { updates, moved } = planReviewCreditMove(BANK, 'old', 'new')
   assert.deepEqual(updates.map(u => u.id).sort(), ['a', 'b', 'c', 'd', 'e'])
   assert.equal(moved, 3)   // a b d (c ซ้ำ ไม่ได้เพิ่มเครดิตให้บัญชีใหม่ · e ไม่มีเสียง)
+  assert.equal(planReviewCreditMove(BANK, 'old', 'new').fixedOnly, 1)   // e: แก้ไว้แต่ไม่มีเครดิต
 })
 
 test('planReviewCreditMove — uid เดียวกัน/ว่าง = ไม่ทำอะไร', () => {

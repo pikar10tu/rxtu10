@@ -153,6 +153,7 @@
             <div v-if="creditPlan">
               เจอในคลัง {{ creditPlan.moved }} ข้อที่จะย้ายเครดิต
               <span v-if="creditPlan.dup"> · {{ creditPlan.dup }} ข้อตรวจไว้ทั้งสองบัญชี (นับให้ครั้งเดียว)</span>
+              <span v-if="creditPlan.fixedOnly"> · อีก {{ creditPlan.fixedOnly }} ข้อต้นทางเป็นคนแก้ล่าสุดแต่ไม่มีเครดิต (แก้จากหน้าคลังข้อสอบ = ส่งกลับคิวตรวจ ไม่นับเป็นการตรวจ)</span>
               <span v-if="creditPlan.boardCount !== creditPlan.moved + creditPlan.dup"> · กระดานเดิมของต้นทางโชว์ {{ creditPlan.boardCount }} ข้อ (ส่วนต่างคือข้อที่ถูกแก้/ล้างผลตรวจไปแล้ว ซิงก์รอบไหนก็หายอยู่ดี)</span>
             </div>
           </div>
