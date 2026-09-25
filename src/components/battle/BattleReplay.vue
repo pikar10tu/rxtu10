@@ -1149,6 +1149,7 @@ onUnmounted(() => {
   clearTimeout(timer); clearTimeout(introTimer); clearTimeout(resultTimer)
   clearTimeout(holdTimer); clearTimeout(hintTimer)
   clearPending()
+  clearHpTicks()   // hpAnims เป็น rAF loop นอก pendingTimers — ไม่ล้างที่นี่จะยังเขียน hpShown ต่อได้ถึง 350ms หลัง unmount
   window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize)
   if (fpsRaf) { cancelAnimationFrame(fpsRaf); fpsRaf = 0 }
   fx?.destroy(); fx = null; attachedLayer = null
