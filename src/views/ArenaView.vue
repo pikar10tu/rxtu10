@@ -86,6 +86,7 @@ import PetThumb from '../components/shared/PetThumb.vue'
 import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import { getPetDef } from '../data/index.js'
 import HelpButton from '../components/help/HelpButton.vue'
+import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const members = useMembersStore()
@@ -142,7 +143,9 @@ const rankBadge = (rank) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank ==
 async function onFight(opp) {
   if (busy.value) return
   busy.value = true
-  try { const r = await fight(opp); if (r) replay.value = r }
+  // สนามครึ่งบน = ของคู่ต่อสู้ (แถว roster · บอทไม่มีแถว = สนามฟรี) · ครึ่งล่าง = ของเรา
+  const top = opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null)
+  try { const r = await fight(opp); if (r) replay.value = { ...r, arenas: { top, bot: rosterArena(authStore.userData) } } }
   finally { busy.value = false }
 }
 

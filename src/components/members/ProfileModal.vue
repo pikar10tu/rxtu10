@@ -104,6 +104,7 @@ import { useRosterSync } from '../../composables/useRosterSync.js'
 import { shouldLogFriendly } from '../../utils/pvpHistory.js'
 import { noteProfileView } from '../../utils/gags.js'
 import { grantSecret } from '../../composables/useAchievements.js'
+import { rosterArena } from '../../utils/arenas.js'
 
 const props = defineProps({ member: { type: Object, default: null } })
 const emit = defineEmits(['close'])
@@ -201,6 +202,8 @@ function startDuel() {
     vsLabel: `กระชับมิตร VS ${view.value.nickname}`,
     winText: 'ชนะ! (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
     loseText: 'แพ้ไปหน่อย (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
+    // ครึ่งบน = สนามของคนที่เราท้า · ครึ่งล่าง = ของเรา
+    arenas: { top: members.rosterRows?.[view.value.uid]?.ar ?? null, bot: rosterArena(auth.userData) },
   }
   const target = view.value.uid
   if (shouldLogFriendly(members.rosterRows?.[myUid.value]?.h, target)) {

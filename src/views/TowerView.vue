@@ -127,6 +127,7 @@ import TowerPath from '../components/tower/TowerPath.vue'
 import SeasonCountdown from '../components/shared/SeasonCountdown.vue'
 import FloorSheet from '../components/tower/FloorSheet.vue'
 import TowerRankSheet from '../components/tower/TowerRankSheet.vue'
+import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
@@ -219,6 +220,7 @@ async function onFight() {
     if (r) replay.value = {
       ...r,
       loseTip: buildLoseTip('tower', authStore.userData),
+      arenas: { top: 'tower', bot: rosterArena(authStore.userData) },   // ครึ่งบน = พื้นหอคอย · ครึ่งล่าง = สนามเรา
       // รางวัลเดียวของหอคอยคือรายได้/วัน — จอชนะต้องพูดเรื่องเงิน ไม่ใช่แค่ "ขึ้นชั้น"
       rewardText: gainOfFight > 0
         ? `รายได้รายวัน ${bonusBefore.toLocaleString()} → ${(bonusBefore + gainOfFight).toLocaleString()} (+${gainOfFight.toLocaleString()}/วัน)`

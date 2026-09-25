@@ -7,7 +7,17 @@
   <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z420 สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
-  <div v-if="data" class="br-ov" :class="'br-theme-' + theme">
+  <div v-if="data" class="br-ov" ref="ovRef">
+    <!-- พื้นครึ่งสนาม: บน = สนามอีกฝ่าย · ล่าง = สนามเรา · เส้นกลาง = กึ่งกลางแถว .br-vs (ไม่ใช่กลางจอ)
+         ของตกแต่งวางได้แค่ "เขตขอบนอก" ระหว่างขอบจอกับ .br-box (ArenaFloor + utils/arenaLayout.js)
+         user เลือกรอยต่อแบบตรง 25 ก.ย. 2026 · สเปก 2026-09-25-arena-skins-replay-news-design.md §3.1 -->
+    <div class="br-bg" :style="seam ? { top: 0, height: seam.y + 'px' } : { top: 0, height: '50%' }">
+      <ArenaFloor :arena-ref="arenas.top" side="top" :zone="seam?.zTop || null" />
+    </div>
+    <div class="br-bg" :style="seam ? { top: seam.y + 'px', bottom: 0 } : { top: '50%', bottom: 0 }">
+      <ArenaFloor :arena-ref="arenas.bot" side="bot" :zone="seam?.zBot || null" />
+    </div>
+    <div v-if="seam" class="br-seam" :style="{ top: seam.y + 'px' }"></div>
     <div class="br-box" ref="boxRef"
          @pointerdown="onHoldStart" @pointerup="onHoldEnd"
          @pointercancel="onHoldEnd" @pointerleave="onHoldEnd">
@@ -42,7 +52,7 @@
         </div>
       </div>
 
-      <div class="br-vs"><Emoji char="⚔️" /> {{ data.vsLabel ?? ('ชั้น ' + data.cleared) }}</div>
+      <div class="br-vs" ref="vsRef"><Emoji char="⚔️" /> {{ data.vsLabel ?? ('ชั้น ' + data.cleared) }}</div>
 
       <div class="br-team">
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
@@ -191,6 +201,7 @@
 <script setup>
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import Emoji from '../shared/Emoji.vue'
+import ArenaFloor from './ArenaFloor.vue'
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, sparkOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
@@ -209,8 +220,40 @@ import { sfx } from '../../utils/sfx.js'
 
 const props = defineProps({
   data: { type: Object, default: null },
-  theme: { type: String, default: 'tower' },   // 'arena' | 'tower' — พื้นหลังสนาม
+  theme: { type: String, default: 'tower' },   // 'arena' | 'tower' — สนามดีฟอลต์ครึ่งบน ถ้า data.arenas ไม่ส่งมา
 })
+
+// ── พื้นครึ่งสนาม ──
+// data.arenas = { top, bot } สตริงแบบแถว roster ('ar-lab' · 'ch-2026-09#3' · 'tower' · null = สนามฟรี)
+const arenas = computed(() => ({
+  top: props.data?.arenas?.top ?? (props.theme === 'tower' ? 'tower' : null),
+  bot: props.data?.arenas?.bot ?? null,
+}))
+const ovRef = ref(null)
+const vsRef = ref(null)
+const seam = ref(null)   // { y, zTop, zBot } — null = ยังไม่ได้วัด (ใช้ 50% ไปก่อน)
+// วัดจาก rect จริง: เส้นกลางที่แถว .br-vs · เขตขอบนอก = นอก .br-box
+// ⚠️ วัดเฉพาะตอนเปิด/เปลี่ยนขนาด (ResizeObserver) — ห้ามวัดใน loop ของไฟต์
+function measureSeam() {
+  const ov = ovRef.value, box = boxRef.value, vs = vsRef.value
+  if (!ov || !box || !vs) return
+  const o = ov.getBoundingClientRect(), b = box.getBoundingClientRect(), v = vs.getBoundingClientRect()
+  const y = Math.round(v.top + v.height / 2 - o.top)
+  const w = Math.round(o.width)
+  seam.value = {
+    y,
+    zTop: { y0: 0, y1: Math.round(b.top - o.top), w },
+    zBot: { y0: Math.round(b.bottom - o.top) - y, y1: Math.round(o.height) - y, w },
+  }
+}
+let seamRO = null
+function watchSeam() {
+  seamRO?.disconnect(); seamRO = null
+  if (!ovRef.value || !boxRef.value || typeof ResizeObserver === 'undefined') return
+  seamRO = new ResizeObserver(() => measureSeam())
+  seamRO.observe(ovRef.value); seamRO.observe(boxRef.value)
+  measureSeam()
+}
 const emit = defineEmits(['close'])
 
 const router = useRouter()
@@ -995,6 +1038,11 @@ function stopFps() {
 }
 
 watch(() => props.data, (d) => { if (d) { buildMax(d); preloadCombat(d); reset() } }, { immediate: true })
+// พื้นครึ่งสนาม: วัดเส้นกลางหลัง overlay render · ปิดรีเพลย์ = ถอด observer
+watch(() => props.data, async (d) => {
+  if (!d) { seamRO?.disconnect(); seamRO = null; seam.value = null; return }
+  await nextTick(); watchSeam()
+}, { immediate: true })
 // ตีจบ → เว้น ~0.5 วิ ให้เห็นสนามจบ แล้วเปิด modal สรุป (เช็ก resultReady กันตั้งซ้ำ — reset() เปิดเองทันทีถ้า log ว่างตั้งแต่แรก)
 watch(done, (v) => {
   if (!v) return
@@ -1021,28 +1069,21 @@ onUnmounted(() => {
   window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize)
   if (fpsRaf) { cancelAnimationFrame(fpsRaf); fpsRaf = 0 }
   fx?.destroy(); fx = null; attachedLayer = null
+  seamRO?.disconnect(); seamRO = null
 })
 </script>
 
 <style scoped>
 .br-ov { position: fixed; inset: 0; z-index: 420; background: #0f172a; display: flex; align-items: center; justify-content: center; padding: 16px; }
-/* Tower = ดันเจี้ยน/หอคอย: หินม่วง-น้ำเงินเข้ม + เรืองคบเพลิงอุ่นมุมล่าง (คงโทนเดิมแต่มีมิติ) */
-.br-theme-tower {
-  background:
-    radial-gradient(120% 80% at 50% 0%, rgba(76,29,149,.55), transparent 60%),
-    radial-gradient(80% 55% at 50% 100%, rgba(217,119,6,.22), transparent 70%),
-    linear-gradient(180deg, #1e1b4b, #0f172a 70%);
-}
-/* Arena = โคลอสเซียม: ฟ้าเย็นด้านบน → หินทรายอุ่นเข้มด้านล่าง + ลายเสาแนวตั้งจางๆ (คุมเข้มพอให้ตัวขาวอ่านออก) */
-.br-theme-arena {
-  background:
-    radial-gradient(100% 70% at 50% 10%, rgba(59,130,246,.28), transparent 55%),
-    linear-gradient(180deg, #3b2f1a 0%, #2a1f12 60%, #17100a 100%),
-    repeating-linear-gradient(90deg, rgba(255,220,150,.05) 0 2px, transparent 2px 46px);
-}
+/* พื้นครึ่งสนาม (ArenaFloor) อยู่ใต้ .br-box เสมอ — ชั้น: พื้น → การ์ด/ป้าย → แบนเนอร์/เลข */
+.br-bg { position: absolute; left: 0; right: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.br-seam { position: absolute; left: 0; right: 0; height: 2px; margin-top: -1px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.85) 15%, #fff 50%, rgba(255,255,255,.85) 85%, transparent);
+  box-shadow: 0 0 10px rgba(255,255,255,.55); }
+/* พื้นหอคอย/โคลอสเซียมเดิม (.br-theme-*) ย้ายไปเป็นพื้น 'tower' / 'sand' ใน styles/arenas.css แล้ว */
 /* touch-action:none + กันเลือกข้อความ/callout ของ iOS — กล่องนี้รับ pointerdown ค้างเป็น input เกม (เร่ง)
    ไม่งั้นกดค้าง ~400ms บนข้อความ (เช่น "รอบ 1") อาจเด้งเมนู copy/แว่นขยายของ Safari มาแทรกกลางค้าง */
-.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative;
+.br-box { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 1;
   touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 /* hitstop เดิม scale ทั้ง box = re-raster เต็มจอ @DPR3 ทุก crit (แพงสุด คุ้มน้อยสุด แค่เด้ง 1.2%) → ตัดทิ้ง
    crit ยังสื่อผ่านเลขใหญ่/ทอง + จังหวะ freeze (extra delay ใน step) ที่ยังอยู่ */
