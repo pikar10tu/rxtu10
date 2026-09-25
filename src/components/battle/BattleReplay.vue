@@ -412,7 +412,7 @@ const hpHit = ref({})            // uid → true ช่วงกระพริ�
 const hpAnims = new Map()        // uid → rAF id
 function shownHp(uid) { return hpShown.value[uid] ?? curHp(uid) }
 function tickHp(uid, from) {
-  const mode = tuning.value.hpTick || 'snap'
+  const mode = tuning.value.hpTick || 'count'   // ดีฟอลต์ = ที่ user เลือก (26 ก.ย.) · ห้องแล็บส่ง 'snap' เทียบของเดิมได้
   if (mode === 'snap') return
   hpHit.value = { ...hpHit.value, [uid]: true }
   later(() => { hpHit.value = { ...hpHit.value, [uid]: false } }, 320)
@@ -420,7 +420,7 @@ function tickHp(uid, from) {
   cancelAnimationFrame(hpAnims.get(uid))
   const to = curHp(uid), t0 = performance.now(), DUR = 350
   const step = (now) => {
-    const k = Math.min(1, (now - t0) / DUR)
+    const k = Math.min(1, Math.max(0, (now - t0) / DUR))   // rAF อาจส่ง timestamp ก่อน t0 นิดหน่อย
     const v = Math.round(from + (to - from) * (1 - (1 - k) * (1 - k)))
     if (hpShown.value[uid] !== v) hpShown.value = { ...hpShown.value, [uid]: v }
     if (k < 1) hpAnims.set(uid, requestAnimationFrame(step))
@@ -718,7 +718,7 @@ const CHIP_OUT_MS = 300
 // tuning.skillMark 'lit': ไอคอนมุมการ์ดขยาย + ×N เมื่อสกิลของใบนั้นโปรก (ค้างทั้งไฟต์ = อ่านย้อนได้)
 const skillCount = ref({})       // uid → จำนวนครั้งที่โปรก
 function markSkill(uid) {
-  if (tuning.value.skillMark !== 'lit' || !uid) return
+  if ((tuning.value.skillMark || 'lit') !== 'lit' || !uid) return   // ดีฟอลต์ lit (user เลือก) · แล็บส่ง 'dot' ได้
   skillCount.value = { ...skillCount.value, [uid]: (skillCount.value[uid] || 0) + 1 }
 }
 
@@ -855,7 +855,7 @@ function applyImpact(beat, g, t) {
 
   // ── 1) paint บนการ์ดเป้า + Vue patch ลงให้ครบก่อน (ยังไม่มีอนิเมชันการ์ดวิ่งตอนนี้) ──
   highlight(beat.target, 'flash')
-  const hpBefore = curHp(beat.target)
+  const hpBefore = shownHp(beat.target)   // โดนซ้ำกลางการไล่นับ = นับต่อจากเลขที่เห็นอยู่ ไม่กระโดด
   hp.value = { ...hp.value, [beat.target]: Math.max(0, Math.round((beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100)) }
   tickHp(beat.target, hpBefore)
 
@@ -1236,14 +1236,15 @@ onUnmounted(() => {
 .br-unit.flash { border-color: #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
 
-/* --br-hp-h ฯลฯ = ตัวแปรจูนจากห้องแล็บ ตั้งบน body — ไม่ตั้ง = fallback ค่าเดิมเป๊ะ */
-.br-hp { position: relative; width: 84%; height: var(--br-hp-h, 7px); background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
+/* --br-hp-h ฯลฯ = ตัวแปรจูนจากห้องแล็บ ตั้งบน body · fallback = ค่าที่ user เลือกจากห้องเทียบ v4 (26 ก.ย. 2026)
+   เดิม 7px / ผีขาวจาง .75 / .45s หลัง .16s ⇒ "ตามไม่ค่อยทันว่าเลือดลด" */
+.br-hp { position: relative; width: 84%; height: var(--br-hp-h, 11px); background: rgba(0,0,0,.35); border-radius: 999px; overflow: hidden; }
 /* เลือด: scaleX (composite) แทน transition width (layout ทุกเฟรม) — origin ซ้าย · promote เฉพาะตอน transition รัน (ไม่ตั้ง will-change ถาวร) */
 .br-hp-fill { position: relative; width: 100%; height: 100%; background: #ef4444; border-radius: 999px; transform-origin: left center; transition: transform .1s linear; }
 .br-hp-fill.mine { background: #34d399; }
-/* หลอดผี: อยู่ใต้หลอดจริง หดตามหลัง → ช่องขาวที่โผล่ = ดาเมจที่เพิ่งกิน */
-.br-hp-ghost { position: absolute; inset: 0; background: var(--br-ghost-bg, #fff); opacity: var(--br-ghost-op, .75); border-radius: 999px;
-  transform-origin: left center; transition: transform var(--br-ghost-dur, .45s) ease-out var(--br-ghost-delay, .16s); }
+/* หลอดผี: อยู่ใต้หลอดจริง หดตามหลัง → ช่องส้มที่โผล่ = ดาเมจที่เพิ่งกิน */
+.br-hp-ghost { position: absolute; inset: 0; background: var(--br-ghost-bg, #fbbf24); opacity: var(--br-ghost-op, 1); border-radius: 999px;
+  transform-origin: left center; transition: transform var(--br-ghost-dur, .8s) ease-out var(--br-ghost-delay, .22s); }
 .br-tick { position: absolute; top: 0; width: 1px; height: 100%; background: rgba(255,255,255,.55); }
 .br-stats { display: flex; justify-content: space-between; align-items: center; gap: 3px; width: 88%; margin-top: 3px; }
 .br-atk, .br-hpn { font-size: .72rem; font-weight: 800; color: #fff; line-height: 1; padding: 2px 6px; border-radius: 999px; min-width: 18px; text-align: center; }
@@ -1251,11 +1252,10 @@ onUnmounted(() => {
 .br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
 .br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
 
-/* tuning.hpTick flash/count — เด้ง + วงแดงจาง (transform/opacity ล้วน) */
+/* tuning.hpTick flash/count — เด้ง + วงส้มจาง (transform/opacity ล้วน) · วงมีเฉพาะตอน .hit ไม่ค้างเป็นกล่องบนการ์ด */
 .br-hpn { position: relative; }
-.br-hpn::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; box-shadow: 0 0 0 2px #fbbf24; opacity: 0; pointer-events: none; }
 .br-hpn.hit { animation: br-hpn-pop .32s ease-out; }
-.br-hpn.hit::after { animation: br-hpn-ring .32s ease-out; }
+.br-hpn.hit::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; box-shadow: 0 0 0 2px #fbbf24; opacity: 0; pointer-events: none; animation: br-hpn-ring .32s ease-out; }
 @keyframes br-hpn-pop { 0% { transform: scale(1) } 30% { transform: scale(1.28) } 100% { transform: scale(1) } }
 @keyframes br-hpn-ring { 0% { opacity: .95; transform: scale(.9) } 100% { opacity: 0; transform: scale(1.35) } }
 
@@ -1394,7 +1394,7 @@ onUnmounted(() => {
 /* จุดไอคอนสกิลมุมการ์ด — บอกว่าตัวนี้มีทักษะเฉพาะ (เดิมต้องไล่แตะทีละใบถึงจะรู้) */
 .br-skill-dot { position: absolute; top: 2px; right: 4px; font-size: .72rem; line-height: 1; opacity: .85; pointer-events: none; }
 /* tuning.skillMark 'lit' — ขนาดคงที่หลังติดไฟ (ไม่วิ่งอนิเมชันระหว่างการ์ดพุ่ง) */
-.br-skill-dot.lit { font-size: 1rem; opacity: 1; filter: none; background: rgba(15,23,42,.72); border-radius: 999px; padding: 1px 4px; box-shadow: 0 0 0 1.5px #fbbf24; display: flex; align-items: center; gap: 1px; }
+.br-skill-dot.lit { font-size: 1rem; opacity: 1; background: rgba(15,23,42,.72); border-radius: 999px; padding: 1px 4px; box-shadow: 0 0 0 1.5px #fbbf24; display: flex; align-items: center; gap: 1px; }
 .br-skill-dot i { font-style: normal; font-size: .7rem; font-weight: 800; color: #fde68a; }
 
 /* ── ป้ายสถานะที่ติดอยู่บนการ์ดใบนี้ (สเปก §5) ──

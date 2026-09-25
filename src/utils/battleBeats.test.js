@@ -69,13 +69,23 @@ test('weight: อยู่ใน [0,1] เสมอ แม้ maxHp ขาด/�
   }
 })
 
-test('weight ไม่แตะเวลา · kind ไม่แตะ weight (สองแกนต้องอิสระต่อกัน)', () => {
+test('weight ไม่แตะเวลา (hitSpread 0) · kind ไม่แตะ weight (สองแกนต้องอิสระต่อกัน)', () => {
   // ตัวที่ 3 มีไว้กันไม่ให้ตัวที่ 2 กลายเป็น finish (หมัดหลักตัวสุดท้ายของ log)
   const log = [atk({ dmg: 30, targetHpAfter: 70 }), atk({ dmg: 30, targetHpAfter: 40, crit: true }), atk()]
-  const bs = buildBeats(log, MH)
+  const bs = buildBeats(log, MH, { hitSpread: 0 })
   assert.ok(bs[1].weight > bs[0].weight, 'คริต้องดังกว่า')
   assert.equal(bs[0].kind, bs[1].kind, 'kind เดียวกัน')
   assert.deepEqual(bs[0].timing, bs[1].timing, 'แต่ต้องกินเวลาเท่ากัน')
+})
+
+// ⚠️ ข้อยกเว้นที่ตั้งใจ (26 ก.ย. 2026): hitSpread ให้ weight "แบ่ง" เวลาภายใน kind hit เท่านั้น
+//    kind ยังเป็นคนเดียวที่ตัดสินว่าได้งบเวลาแบบไหน (hit/ko/finish) และงบรวมของ hit ทั้งไฟต์เท่าเดิม
+test('hitSpread ดีฟอลต์: หมัดดังกว่าในกลุ่ม hit ได้เวลามากกว่า · kind/weight ยังเหมือนเดิม', () => {
+  const log = [atk({ dmg: 30, targetHpAfter: 70 }), atk({ dmg: 30, targetHpAfter: 40, crit: true }), atk()]
+  const bs = buildBeats(log, MH)
+  assert.equal(bs[0].kind, bs[1].kind)
+  assert.deepEqual(bs.map(b => b.weight), buildBeats(log, MH, { hitSpread: 0 }).map(b => b.weight))
+  assert.ok(beatDuration(bs[1]) > beatDuration(bs[0]))
 })
 
 // ── kind ของหมัด ───────────────────────────────────────────────────
@@ -511,10 +521,18 @@ const realFight = (seed) => {
   return { log: r.log, mh }
 }
 
-test('HIT_SPREAD ดีฟอลต์ = 0 ⇒ ทุกหมัดปกติยาว BEAT เท่าเดิม', () => {
-  assert.equal(HIT_SPREAD, 0)
+test('HIT_SPREAD ดีฟอลต์ = 0.6 (user เลือก) · ไม่ส่ง = ใช้ค่านี้ · ความยาวรวมเท่า hitSpread 0', () => {
+  assert.equal(HIT_SPREAD, 0.6)
   const { log, mh } = realFight(424242)
-  for (const b of buildBeats(log, mh)) {
+  const def = buildBeats(log, mh)
+  const flat = buildBeats(log, mh, { hitSpread: 0 })
+  assert.ok(Math.abs(totalDuration(def) - totalDuration(flat)) <= 1)
+  assert.deepEqual(def.map(b => b.timing), buildBeats(log, mh, { hitSpread: 0.6 }).map(b => b.timing))
+})
+
+test('hitSpread 0 ⇒ ทุกหมัดปกติยาว BEAT เท่ากัน · hitMult === 1', () => {
+  const { log, mh } = realFight(424242)
+  for (const b of buildBeats(log, mh, { hitSpread: 0 })) {
     if (b.kind === 'hit') {
       assert.equal(Math.round(beatDuration(b)), BEAT)
       assert.equal(b.hitMult, 1, 'hit beat ต้องมี hitMult === 1 เมื่อ hitSpread=0')
