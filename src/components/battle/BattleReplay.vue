@@ -45,7 +45,7 @@
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
              class="br-unit foe" @click="inspect('B'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
-          <span v-if="skillIcon(p)" class="br-skill-dot"><Emoji :char="skillIcon(p)" /></span>
+          <span v-if="skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['B'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['B'+i] > 1">×{{ skillCount['B'+i] }}</i></span>
           <span v-if="statusOf('B'+i).length" class="br-status">
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
@@ -58,7 +58,7 @@
             <div class="br-hp-fill" :style="{ transform: 'scaleX(' + hpPct('B'+i) / 100 + ')' }"></div>
             <span v-for="(t, ti) in ticksFor('B'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
-          <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe">{{ curHp('B'+i) }}</span></div>
+          <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe" :class="{ hit: hpHit['B'+i] }">{{ shownHp('B'+i) }}</span></div>
         </div>
       </div>
 
@@ -68,7 +68,7 @@
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
              class="br-unit me" @click="inspect('A'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
-          <span v-if="skillIcon(p)" class="br-skill-dot"><Emoji :char="skillIcon(p)" /></span>
+          <span v-if="skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['A'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['A'+i] > 1">×{{ skillCount['A'+i] }}</i></span>
           <span v-if="statusOf('A'+i).length" class="br-status">
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
@@ -81,7 +81,7 @@
             <div class="br-hp-fill mine" :style="{ transform: 'scaleX(' + hpPct('A'+i) / 100 + ')' }"></div>
             <span v-for="(t, ti) in ticksFor('A'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
-          <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me">{{ curHp('A'+i) }}</span></div>
+          <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me" :class="{ hit: hpHit['A'+i] }">{{ shownHp('A'+i) }}</span></div>
         </div>
       </div>
       <div class="br-side me-label"><i class="dot me"></i> <b>{{ sideBot.name }}</b><span v-if="sideBot.sub" class="br-side-sub">{{ sideBot.sub }}</span></div>
@@ -405,6 +405,31 @@ function ensureFx() {
 // ── การ์ดสไตล์ Hearthstone: ATK/HP เป็นเลข + หลอดเลือดขีดทุก 50 HP ──
 function atkOf(uid) { return dispStats.value[uid]?.atk ?? 0 }
 function curHp(uid) { return Math.round((dispStats.value[uid]?.maxHp || 0) * (hp.value[uid] ?? 100) / 100) }
+
+// ── เลข HP: snap (เดิม) / flash / count — tuning.hpTick ──
+const hpShown = ref({})          // uid → HP ที่โชว์ระหว่างไล่นับ (ไม่มี = ใช้ curHp ตรงๆ)
+const hpHit = ref({})            // uid → true ช่วงกระพริบ
+const hpAnims = new Map()        // uid → rAF id
+function shownHp(uid) { return hpShown.value[uid] ?? curHp(uid) }
+function tickHp(uid, from) {
+  const mode = tuning.value.hpTick || 'snap'
+  if (mode === 'snap') return
+  hpHit.value = { ...hpHit.value, [uid]: true }
+  later(() => { hpHit.value = { ...hpHit.value, [uid]: false } }, 320)
+  if (mode !== 'count') return
+  cancelAnimationFrame(hpAnims.get(uid))
+  const to = curHp(uid), t0 = performance.now(), DUR = 350
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / DUR)
+    const v = Math.round(from + (to - from) * (1 - (1 - k) * (1 - k)))
+    if (hpShown.value[uid] !== v) hpShown.value = { ...hpShown.value, [uid]: v }
+    if (k < 1) hpAnims.set(uid, requestAnimationFrame(step))
+    else { const n = { ...hpShown.value }; delete n[uid]; hpShown.value = n; hpAnims.delete(uid) }
+  }
+  hpAnims.set(uid, requestAnimationFrame(step))
+}
+function clearHpTicks() { hpAnims.forEach(id => cancelAnimationFrame(id)); hpAnims.clear(); hpShown.value = {}; hpHit.value = {} }
+
 function ticksFor(uid) {
   const max = dispStats.value[uid]?.maxHp || 1, out = []
   for (let h = 50; h < max; h += 50) out.push((h / max) * 100)  // % ตำแหน่งขีดทุก 50 HP
@@ -531,6 +556,8 @@ function reset() {
   ffActive.value = false; holdHint.value = false                             // เคลียร์โหมดเร่ง/คำใบ้ค้างจากไฟต์ก่อน
   clearTimeout(holdTimer); clearTimeout(hintTimer)
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
+  clearHpTicks()                                                             // ล้างเลข HP ไล่นับ/กระพริบค้างจากไฟต์ก่อน (tuning.hpTick)
+  skillCount.value = {}                                                      // ล้างตัวนับสกิลติดไฟค้างจากไฟต์ก่อน (tuning.skillMark)
   Object.keys(maxHp).forEach(setDead)                                       // ทุกตัว hp=100 → setDead ถอด class dead ค้างจากไฟต์ก่อน
   // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
   nextTick(() => { ensureFx(); fx?.reset() })                              // reset() ภายใน fx = invalidateCenters + cancelAll (ยกเลิก pop/callout/projectile ค้าง)
@@ -656,6 +683,7 @@ async function applyPassive(e) {
   }
 
   if (e.kind === 'skill') {
+    markSkill(e.uid)          // tuning.skillMark 'lit' — นับครั้งที่โปรกของสกิลนี้
     showChip(e.uid, e)
     sfx('skill')
     if (hold > 0) { await wait(hold); if (g !== gen) return }
@@ -666,6 +694,7 @@ async function applyPassive(e) {
   }
 
   // skillQuiet (ครั้งซ้ำ) — ผลอย่างเดียว ไม่มีชิป ไม่กินเวลา
+  markSkill(e.uid)            // tuning.skillMark 'lit' — นับซ้ำด้วย (ตัวเลข ×N ต้องรวมครั้งซ้ำ)
   firePassiveFx(e)
 }
 
@@ -685,6 +714,13 @@ function openSfx(e) {
 const chipOn = ref({})            // uid → { name, icon, out }
 const openEvents = []             // event ยกแรก (openQuiet) ที่รอลงผลพร้อมโชว์ของเพ็ทตัวเดียวกัน
 const CHIP_OUT_MS = 300
+
+// tuning.skillMark 'lit': ไอคอนมุมการ์ดขยาย + ×N เมื่อสกิลของใบนั้นโปรก (ค้างทั้งไฟต์ = อ่านย้อนได้)
+const skillCount = ref({})       // uid → จำนวนครั้งที่โปรก
+function markSkill(uid) {
+  if (tuning.value.skillMark !== 'lit' || !uid) return
+  skillCount.value = { ...skillCount.value, [uid]: (skillCount.value[uid] || 0) + 1 }
+}
 
 function showChip(uid, e) {
   chipOn.value = { ...chipOn.value, [uid]: { name: skillTitle(e), icon: e.icon || '✨', out: false } }
@@ -730,6 +766,7 @@ async function spotlightPassive(e, t, g, opts = {}) {
   // ⚠️ หลอดเลือด/เลขเด้ง ต้องอยู่ตรงนี้เท่านั้น ห้ามไปอัปตั้งแต่ต้นฟังก์ชัน
   //    ไม่งั้นเลือดจะขยับตั้งแต่แบนเนอร์ยังไม่ทันขึ้น = คนดูเห็น "ผล" ก่อน "เหตุ" ซึ่งเป็นสิ่งที่ฟีเจอร์นี้ตั้งใจแก้
   spotOut.value = true
+  markSkill(e.uid)     // tuning.skillMark 'lit' — นับครั้งเดียวต่อการโชว์ แม้ opts.fire ลงหลายผลของ uid เดียวกัน (openShow ก้อนเดียว)
   if (opts.fire) opts.fire(); else firePassiveFx(e)   // ป้ายเล็กเหนือหัวไม่ต้องแล้ว — แบนเนอร์ใหญ่ทำหน้าที่นั้นไปแล้ว
   await wait(t.tail); if (g !== gen) return clearSpot(e.uid)
   clearSpot(e.uid)
@@ -818,7 +855,9 @@ function applyImpact(beat, g, t) {
 
   // ── 1) paint บนการ์ดเป้า + Vue patch ลงให้ครบก่อน (ยังไม่มีอนิเมชันการ์ดวิ่งตอนนี้) ──
   highlight(beat.target, 'flash')
+  const hpBefore = curHp(beat.target)
   hp.value = { ...hp.value, [beat.target]: Math.max(0, Math.round((beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100)) }
+  tickHp(beat.target, hpBefore)
 
   // ── 2) ของที่ไม่ได้แตะการ์ดเป้า ยิงที่จังหวะ impact ตรงๆ (จังหวะที่คนดูรู้สึกว่า "โดน") ──
   //
@@ -1211,6 +1250,14 @@ onUnmounted(() => {
 .br-hpn.foe { background: #ef4444; }    /* HP ศัตรู = แดง */
 .br-hpn.me { background: #16a34a; }     /* HP ทีมคุณ = เขียว */
 
+/* tuning.hpTick flash/count — เด้ง + วงแดงจาง (transform/opacity ล้วน) */
+.br-hpn { position: relative; }
+.br-hpn::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; box-shadow: 0 0 0 2px #fbbf24; opacity: 0; pointer-events: none; }
+.br-hpn.hit { animation: br-hpn-pop .32s ease-out; }
+.br-hpn.hit::after { animation: br-hpn-ring .32s ease-out; }
+@keyframes br-hpn-pop { 0% { transform: scale(1) } 30% { transform: scale(1.28) } 100% { transform: scale(1) } }
+@keyframes br-hpn-ring { 0% { opacity: .95; transform: scale(.9) } 100% { opacity: 0; transform: scale(1.35) } }
+
 /* pop/call/puff/proj (เลขดาเมจ, callout สาย, 💀, projectile) ย้ายไป fx pool (.brfx- ท้ายไฟล์ ไม่ scoped) แล้ว —
    CSS เดิม (br-pop, br-call, br-puff, br-proj และตัวแปรย่อย) + keyframes br-pop-rise, br-rise, br-fly ตัดทิ้ง (ไม่มี markup ใช้แล้ว) */
 
@@ -1345,6 +1392,9 @@ onUnmounted(() => {
 
 /* จุดไอคอนสกิลมุมการ์ด — บอกว่าตัวนี้มีทักษะเฉพาะ (เดิมต้องไล่แตะทีละใบถึงจะรู้) */
 .br-skill-dot { position: absolute; top: 2px; right: 4px; font-size: .72rem; line-height: 1; opacity: .85; pointer-events: none; }
+/* tuning.skillMark 'lit' — ขนาดคงที่หลังติดไฟ (ไม่วิ่งอนิเมชันระหว่างการ์ดพุ่ง) */
+.br-skill-dot.lit { font-size: 1rem; opacity: 1; filter: none; background: rgba(15,23,42,.72); border-radius: 999px; padding: 1px 4px; box-shadow: 0 0 0 1.5px #fbbf24; display: flex; align-items: center; gap: 1px; }
+.br-skill-dot i { font-style: normal; font-size: .7rem; font-weight: 800; color: #fde68a; }
 
 /* ── ป้ายสถานะที่ติดอยู่บนการ์ดใบนี้ (สเปก §5) ──
    static ล้วน: ไม่มี will-change ไม่มี animation ไม่มี transition
