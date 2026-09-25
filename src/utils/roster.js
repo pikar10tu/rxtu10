@@ -15,6 +15,7 @@ import { BATTLE_SLOTS } from '../data/residence.js'
 import { PVP_RATING_START } from './pvpRating.js'
 import { applySeasonReset, currentSeasonId } from './pvpSeason.js'
 import { rosterCos } from './cosmetics.js'
+import { rosterArena } from './arenas.js'
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d)
 
@@ -61,6 +62,7 @@ export function buildRosterRow(u, prev) {
   //    เรตของเดือนใหม่คู่กับชนะ/แพ้ของเดือนเก่า
   const pvp = applySeasonReset(d.pvp, currentSeasonId())
   const cs = rosterCos(d)
+  const ar = rosterArena(d)
 
   return {
     s:  d.studentId ?? null,
@@ -80,6 +82,8 @@ export function buildRosterRow(u, prev) {
     tm,
     // ร้านตกแต่ง: สีชื่อ/กรอบ/ป้าย/พื้นการ์ดที่ใส่อยู่ (id สั้น) — ใส่เฉพาะเมื่อมี
     ...(cs ? { cs } : {}),
+    // สนามประลองที่ใส่อยู่ (id สั้น · แชมป์พ่วงอันดับ 'ch-2026-09#3') — ครึ่งบนของฉากต่อสู้ตอนมีคนมาบุก
+    ...(ar ? { ar } : {}),
     // ฉายาที่สวม (docId achievement เช่น home_13 / tower_champ__2026-09) — หน้ารวมโชว์ใต้ชื่อ
     // ⚠️ หน้ารวมไม่ได้เช็คกับ subcollection (ไม่มี read ต่อคน) = trust-based · การ์ดโปรไฟล์ยังเช็คจริงเสมอ
     ...(d.equipTitle ? { ti: String(d.equipTitle).slice(0, 60) } : {}),

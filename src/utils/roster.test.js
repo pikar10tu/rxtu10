@@ -386,3 +386,9 @@ test('canWriteRosterRow: ยังไม่มี doc = ห้ามเขีย
 test('canWriteRosterRow: โหลดแล้วและมี doc = เขียนได้', () => {
   assert.equal(canWriteRosterRow({ ready: true, missing: false }), true)
 })
+
+test('buildRosterRow: สนามฟรี = ไม่ใส่คีย์ ar · สนามแชมป์พ่วงอันดับ', () => {
+  assert.equal('ar' in buildRosterRow(user()), false)
+  assert.equal(buildRosterRow(user({ arenas: { owned: ['ar-lab'], on: 'ar-lab' } })).ar, 'ar-lab')
+  assert.equal(buildRosterRow(user({ arenas: { owned: ['ch-2026-09'], on: 'ch-2026-09', champ: { '2026-09': 2 } } })).ar, 'ch-2026-09#2')
+})

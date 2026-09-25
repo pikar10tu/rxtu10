@@ -56,6 +56,7 @@ export const USER_DEFAULTS = {
   equipTitle: null,        // docId achievement ที่สวมเป็นฉายา (utils/achievements resolveTitle)
   pinnedAch: [],           // docId ที่ปักขึ้นตู้โชว์ ≤3 (resolveShowcase)
   cosmetics: { owned: [], n: null, f: null, b: null, g: null },  // ร้านตกแต่ง (data/cosmetics.js · utils/cosmetics.js)
+  arenas: { owned: [], on: null, champ: {} },   // สนามประลอง (data/arenas.js · utils/arenas.js) · champ = { 'YYYY-MM': อันดับ }
   // ── v2 fields ──
   role: 'student',                            // 'student' | 'academic' | 'instructor' | 'admin'
   tags: [],                                   // admin-assigned badges
