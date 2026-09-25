@@ -1,16 +1,17 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pushEvent, rankOfScore, buildFeed, timeAgo, EVENT_MAX } from './newsFeed.js'
+import { pushEvent, rankOfScore, buildFeed, groupFeed, timeAgo, EVENT_MAX } from './newsFeed.js'
 
 const DAY = 24 * 60 * 60 * 1000
 const NOW = 1_800_000_000_000
 
 test('pushEvent ต่อหน้าสุด ตัดเหลือ EVENT_MAX', () => {
   let list = []
-  for (let i = 1; i <= 5; i++) list = pushEvent(list, { k: 'tw', v: i * 10, t: NOW + i })
+  const N = EVENT_MAX + 2
+  for (let i = 1; i <= N; i++) list = pushEvent(list, { k: 'tw', v: i * 10, t: NOW + i })
   assert.equal(list.length, EVENT_MAX)
-  assert.equal(list[0].v, 50)
-  assert.equal(list[2].v, 30)
+  assert.equal(list[0].v, N * 10)
+  assert.equal(list[2].v, (N - 2) * 10)
 })
 
 test('pushEvent entry เสีย = ไม่แตะของเดิม', () => {
@@ -47,20 +48,38 @@ test('buildFeed ตัดข่าวเลน roster ที่เกิน 7 �
   assert.equal(feed[0].text, 'ประกาศเก่า')
 })
 
-test('buildFeed จำกัด 2 บรรทัดต่อคน', () => {
+test('buildFeed ไม่จำกัดข่าวต่อคน', () => {
   const rows = {
     a: { n: 'มายด์', ev: [
       { k: 'tw', v: 30, t: NOW - 1 }, { k: 'tw', v: 20, t: NOW - 2 }, { k: 'tw', v: 10, t: NOW - 3 },
     ] },
   }
-  assert.equal(buildFeed(rows, [], { now: NOW, myUid: null }).length, 2)
+  assert.equal(buildFeed(rows, [], { now: NOW, myUid: null }).length, 3)
 })
 
-test('buildFeed ตัดเหลือ 10 บรรทัด', () => {
+test('buildFeed ไม่ตัดจำนวนทั้งกระดาน', () => {
   const rows = {}
   for (let i = 0; i < 20; i++) rows[`u${i}`] = { n: `คน${i}`, ev: [{ k: 'tw', v: 10, t: NOW - i }] }
-  assert.equal(buildFeed(rows, [], { now: NOW, myUid: null }).length, 10)
+  assert.equal(buildFeed(rows, [], { now: NOW, myUid: null }).length, 20)
 })
+
+test('EVENT_MAX = 10', () => assert.equal(EVENT_MAX, 10))
+
+test('groupFeed รวมข่าวคนเดียวกัน หัวกลุ่ม = ข่าวล่าสุด เรียงกลุ่มตามหัว', () => {
+  const rows = {
+    a: { n: 'มายด์', ev: [{ k: 'tw', v: 30, t: NOW - 1 }, { k: 'tw', v: 20, t: NOW - 50 }] },
+    b: { n: 'บีม', ev: [{ k: 'qz', v: 10, t: NOW - 10 }] },
+  }
+  const docs = [{ id: 'n1', msg: 'ประกาศ', ts: NOW - 5 }, { id: 'n2', msg: 'ประกาศ 2', ts: NOW - 6 }]
+  const g = groupFeed(buildFeed(rows, docs, { now: NOW, myUid: null }))
+  assert.deepEqual(g.map(x => x.key), ['a', 'news:n1', 'news:n2', 'b'])
+  assert.match(g[0].head.text, /ชั้น 30/)
+  assert.equal(g[0].rest.length, 1)
+  assert.match(g[0].rest[0].text, /ชั้น 20/)
+  assert.equal(g[1].rest.length, 0)
+})
+
+test('groupFeed ข้อมูลว่าง = []', () => assert.deepEqual(groupFeed(null), []))
 
 test('buildFeed ใช้คำว่า "คุณ" กับข่าวของตัวเอง', () => {
   const rows = { me: { n: 'ปาล์ม', ev: [{ k: 'hs', v: 5, t: NOW }] } }

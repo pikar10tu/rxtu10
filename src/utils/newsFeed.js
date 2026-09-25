@@ -16,12 +16,10 @@ import { RESIDENCE_TIERS } from '../data/residence.js'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from './achievements.js'
 
-/** เก็บกี่ข่าวต่อคน — ⚠️ เพิ่มแล้วต้องคำนวณขนาด doc ใหม่ (3×~30B×105คน ≈ 9.5KB จากลิมิต 1MB) */
-export const EVENT_MAX = 3
-/** กี่บรรทัดบนกระดาน */
-export const FEED_MAX = 10
-/** กันคนเดียวยึดกระดาน — เก็บ 3 แต่โชว์ได้ 2 */
-export const PER_USER_MAX = 2
+/** เก็บกี่ข่าวต่อคน — ⚠️ เพิ่มแล้วต้องคำนวณขนาด doc ใหม่ (10×~35B×105คน ≈ 37KB จากลิมิต 1MB)
+ *  roster โหลดทุกเซสชันอยู่แล้ว ⇒ อ่านเพิ่ม 0 · 3→10 (25 ก.ย. 2026 user ขอ ข่าวแสดงไม่ครบ)
+ *  กระดานไม่ตัดจำนวนแล้ว — กันรกด้วยการรวมกลุ่มต่อคน (groupFeed) แทนเพดาน */
+export const EVENT_MAX = 10
 /** ข่าวเลน roster เก่ากว่านี้ = ไม่โชว์ (ev ไม่มีวันหมดอายุเอง คนเลิกเล่นจะค้างหัวกระดานถาวร) */
 export const EVENT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -158,17 +156,25 @@ export function buildFeed(rows, newsDocs, { now = Date.now(), myUid = null } = {
   }
 
   items.sort((a, b) => b.t - a.t)
+  return items
+}
 
-  const perUser = {}
+/**
+ * รวมข่าวของคนเดียวกันเป็นกลุ่ม — หัวกลุ่ม = ข่าวล่าสุดของคนนั้น · กลุ่มเรียงตามเวลาหัวกลุ่ม ใหม่→เก่า
+ * ข่าวเลน news ที่ไม่มีเจ้าของ (uid null) เป็นกลุ่มเดี่ยว · ข่าวเลน news ที่มี uid รวมเข้ากลุ่มคนนั้น (ตั้งใจ)
+ * @param items ผลของ buildFeed (เรียงใหม่→เก่าแล้ว)
+ * @returns [{ key, head, rest: [] }]
+ */
+export function groupFeed(items) {
   const out = []
-  for (const it of items) {
-    if (it.uid) {
-      const n = (perUser[it.uid] || 0) + 1
-      if (n > PER_USER_MAX) continue
-      perUser[it.uid] = n
-    }
-    out.push(it)
-    if (out.length >= FEED_MAX) break
+  const byKey = new Map()
+  for (const it of items || []) {
+    const key = it.uid || it.id
+    const g = byKey.get(key)
+    if (g) { g.rest.push(it); continue }
+    const ng = { key, head: it, rest: [] }
+    byKey.set(key, ng)
+    out.push(ng)
   }
   return out
 }
