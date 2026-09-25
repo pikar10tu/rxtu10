@@ -31,7 +31,9 @@
       <div v-if="introPhase === 'ready' || introPhase === 'go'" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
       </div>
-      <div class="br-round" v-if="!done">รอบ {{ round }}</div>
+      <!-- ⚠️ จบไฟต์ = ซ่อนด้วย visibility (.br-gone) ห้าม v-if — ถอดออกแล้วกล่องหด การ์ดเลื่อน 32px
+           เส้นกลางสนามขยับ 2 จังหวะ + ของตกแต่งวางใหม่ ตรงกับหมัดปิดเกมพอดี (วัดจริง 25 ก.ย. 2026) -->
+      <div class="br-round" :class="{ 'br-gone': done }">รอบ {{ round }}</div>
       <!-- ป้ายบอกว่ากำลังดูค่าชุดไหนอยู่ — โผล่เฉพาะไฟต์ทดสอบในห้องแล็บ (fpsMeter/?fps=1)
            เทียบท่าชน 4 แบบติดกันแล้วจำไม่ได้ว่ากำลังดูอันไหน = เทสเสียเปล่าทั้งรอบ -->
       <div v-if="showFps" class="br-lab-tag">{{ labTag }}</div>
@@ -104,7 +106,7 @@
       <!-- fx pool layer (pops/callouts/koPuff/projectile) — พิกัดสัมพัทธ์กับ .br-box -->
       <div class="br-fx-layer" ref="fxLayerEl"></div>
 
-      <div class="br-ctrl" v-if="!done">
+      <div class="br-ctrl" :class="{ 'br-gone': done }">
         <button class="br-btn sm" @click="togglePause"><Emoji :char="paused ? '▶️' : '⏸️'" /> {{ paused ? 'เล่น' : 'พัก' }}</button>
       </div>
       <div v-if="ffActive" class="br-ff"><Emoji char="⏩" /> เร่ง</div>
@@ -505,6 +507,9 @@ function preloadCombat(d) {
     if (img.decode) img.decode().catch(() => {})                         // force decode ล่วงหน้า
     preloadedImgs.push(img)
   }
+  // ฟอนต์เลขดาเมจ (Lilita One) เบราว์เซอร์โหลดแบบ lazy = ตอนมีตัวหนังสือใช้จริงครั้งแรก
+  // ⇒ เลขแรกของเซสชันขึ้นฟอนต์สำรองแล้วสลับกลางอนิเมชัน · สั่งโหลดตอน intro แทน
+  try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
@@ -1120,6 +1125,7 @@ onUnmounted(() => {
   touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 /* hitstop เดิม scale ทั้ง box = re-raster เต็มจอ @DPR3 ทุก crit (แพงสุด คุ้มน้อยสุด แค่เด้ง 1.2%) → ตัดทิ้ง
    crit ยังสื่อผ่านเลขใหญ่/ทอง + จังหวะ freeze (extra delay ใน step) ที่ยังอยู่ */
+.br-gone { visibility: hidden; }   /* จองที่ไว้ กล่องไม่หดตอนจบไฟต์ (visibility:hidden กดไม่ได้อยู่แล้ว) */
 .br-round { text-align: center; color: #fff; font-weight: 800; font-size: .82rem; letter-spacing: .06em; margin-bottom: 2px; }
 
 /* FPS meter (?fps=1) — เขียว=ลื่น เหลือง=หลุด 60fps แดง=ต่ำกว่า 30fps (กระตุกชัด) */
@@ -1169,7 +1175,9 @@ onUnmounted(() => {
 /* ไม่ตั้ง will-change ถาวร — melee lunge วิ่งผ่าน fx.lunge (WAAPI el.animate ตรง ไม่ใช่ CSS transition)
    browser promote เฉพาะช่วง animation รัน แล้ว release เอง (fill:none คืน layer ทันทีที่จบ) — ไม่มี transition: transform บน .br-unit แล้ว
    เดิม promote ถาวรทั้ง 8 การ์ด = layer เปล่าค้างตลอด → WebKit thrash */
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(12,16,30,.62); border: 2px solid transparent; border-radius: 16px; transition: border-color .15s; cursor: pointer; }
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(12,16,30,.62); border: 2px solid transparent; border-radius: 16px; cursor: pointer; }
+/* ⛔ ห้ามใส่ transition: border-color กลับ — ขอบแดงตอนโดนจะไล่สี 150ms "พร้อม" squash/lunge
+   = การ์ดถูกวาดใหม่ทุกเฟรมระหว่างขยับ (ผิดข้อบังคับ v3) · เปลี่ยนสีทันทีแทน */
 .br-unit.foe { border-color: rgba(248,113,113,.35); }
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
