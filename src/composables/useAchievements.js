@@ -1,16 +1,17 @@
 import { watch } from 'vue'
-import { collection, getDocs, getDoc, doc, setDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, setDoc, serverTimestamp, increment } from 'firebase/firestore'
 import { getCosmetic } from '../data/cosmetics.js'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAchievementBalloon } from './useAchievementBalloon.js'
+import { useRosterSync } from './useRosterSync.js'
 import { MILESTONES, getAchievement } from '../data/achievements.js'
 import { obtainablePets } from '../utils/petCatalog.js'
 import { useAppConfig } from './useAppConfig.js'
 import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
 import {
-  computeProgress, checkMilestones, achievementDocId, achievementTitle, buildAchievementNews,
+  computeProgress, checkMilestones, achievementDocId, achievementTitle,
 } from '../utils/achievements.js'
 
 const earned = new Set()       // achId/docId-base ที่ได้แล้ว (in-memory)
@@ -45,38 +46,56 @@ const progressOf = (u) => ({
 })
 
 // balloon + กระดานข่าว (ใช้ร่วม self-grant + claim) — best effort
+// ข่าวไปเลน roster (`ev` k:'ac') ไม่ใช่ collection news แล้ว (25 ก.ย. 2026):
+//   เดิม 1 ความสำเร็จ = 1 doc ใน news · กระดานดึงแค่ 5 doc ⇒ คนปลดรวด 5 อันดันข่าวตำนาน/หอคอย 100 ตกหมด
+//   ตอนนี้ปลดรวดภายใน 30 นาที = รวมเป็นบรรทัดเดียว (pushAchievementEvent) · คนหนึ่งกินได้ไม่เกิน 3 ช่องอยู่แล้ว
 export async function announceAchievement(achId, date = null) {
-  const def = getAchievement(achId)
-  if (!def) return
-  const auth = useAuthStore()
-  const usage = useUsageStore()
-  useAchievementBalloon().celebrate({ title: achievementTitle(def, date), icon: def.icon })
-  try {
-    const news = buildAchievementNews(auth.userData?.nickname || auth.userData?.name, def, date)
-    await addDoc(collection(db, 'news'), { ...news, uid: auth.currentUser?.uid || null, ts: serverTimestamp() })
-    usage.track(0, 1)
-  } catch (e) { console.error('[achievement news]', e) }
+  return announceMany([{ achId, date }])
 }
 
-// grant milestone (self): เขียน subcollection + นับ + (ถ้า announceOn) ประกาศ
+async function announceMany(list) {
+  const items = list.filter(x => getAchievement(x.achId))
+  if (!items.length) return
+  const balloon = useAchievementBalloon()
+  for (const { achId, date } of items) {
+    const def = getAchievement(achId)
+    balloon.celebrate({ title: achievementTitle(def, date), icon: def.icon })
+  }
+  // ใหม่สุดก่อน · write เดียวต่อชุด (roster doc รับได้ ~1 write/วินาที)
+  const docIds = items.map(({ achId, date }) => achievementDocId(achId, date)).reverse()
+  try { await useRosterSync().syncRosterRow({ achievements: docIds }) }
+  catch (e) { console.error('[achievement news]', e) }
+}
+
 /** ปลด achievement ลับ (type 'secret') จากที่ไหนก็ได้ — ได้แล้วเงียบ · ประกาศเหมือนปลดปกติ */
-export function grantSecret(achId) {
+export async function grantSecret(achId) {
   if (getAchievement(achId)?.type !== 'secret') return
-  return grantMilestone(achId)
+  // ยังโหลดของที่ได้แล้วไม่เสร็จ = ไม่รู้ว่าเคยได้หรือยัง → ข้าม (กัน achievementCount นับซ้ำ)
+  if (!announceOn) return
+  if (await grantMilestone(achId)) await announceAchievement(achId, null)
 }
 
+// grant milestone (self): เขียน subcollection + นับ · คืน true ถ้าปลดสำเร็จ (คนเรียกตัดสินเองว่าจะประกาศไหม)
 async function grantMilestone(achId) {
   const auth = useAuthStore()
   const uid = auth.currentUser?.uid
-  if (!uid || earned.has(achId)) return
+  if (!uid || earned.has(achId)) return false
   earned.add(achId)   // กัน loop/ซ้ำก่อน write
   try {
     await setDoc(doc(db, 'users', uid, 'achievements', achievementDocId(achId, null)),
       { achId, earnedAt: serverTimestamp() })
     await auth.patchUser({ achievementCount: (auth.userData?.achievementCount || 0) + 1 },
       { achievementCount: increment(1) })
-    if (announceOn) await announceAchievement(achId, null)
-  } catch (e) { console.error('[achievement grant]', e); earned.delete(achId) }
+    return true
+  } catch (e) { console.error('[achievement grant]', e); earned.delete(achId); return false }
+}
+
+/** เช็คแล้วปลดทุกอันที่เข้าเกณฑ์ · announce=false = backfill เงียบ */
+async function grantAll(u, announce) {
+  const ids = checkMilestones(MILESTONES, progressOf(u), earned, ctx())
+  const got = []
+  for (const id of ids) if (await grantMilestone(id)) got.push({ achId: id, date: null })
+  if (announce && got.length) await announceMany(got)
 }
 
 async function loadEarned(uid) {
@@ -92,24 +111,43 @@ export function initAchievements() {
   _started = true
   const auth = useAuthStore()
 
+  // 🔑 backfill ต้องเงียบ "เสมอ" — คนเพิ่งย้ายระบบ/achievement ชุดใหม่ deploy จะเข้าเกณฑ์ทีเดียวหลายสิบอัน
+  //    เดิม: backfill รันตอน uid มา แต่ userData อาจยังไม่มา (onSnapshot ตามหลัง ensureDoc)
+  //    ⇒ backfill ได้ progress ว่าง → เปิด announceOn → snapshot แรกมาถึง → ปลดทั้งกองแบบประกาศ = กระดานถูกท่วม
+  //    ตอนนี้: เช็คครั้งแรกที่มี "ทั้ง earned และ userData" = เงียบ · หลังจากนั้นเท่านั้นที่ประกาศ
+  let loadedFor = null      // uid ที่โหลด earned เสร็จแล้ว (โหลดพัง = null ⇒ ไม่ปลดอะไรเลย ดีกว่าปลดซ้ำทั้งกอง)
+  let busy = false          // กัน 2 watcher เช็คซ้อนกัน
+  let again = false         // มีการเปลี่ยนระหว่างเช็ค → วนเช็คอีกรอบ (ไม่ทิ้งของที่ปลดระหว่างนั้น)
+
+  async function check() {
+    if (busy) { again = true; return }
+    busy = true
+    try {
+      do {
+        again = false
+        const uid = auth.currentUser?.uid
+        if (!uid || loadedFor !== uid || !auth.userData) return
+        if (!announceOn) { await grantAll(auth.userData, false); announceOn = true }
+        else await grantAll(auth.userData, true)
+      } while (again)
+    } catch (e) { console.error('[achievement check]', e) }
+    finally { busy = false }
+  }
+
   watch(() => auth.currentUser?.uid, async (uid) => {
     announceOn = false
+    loadedFor = null
     earned.clear()
     if (!uid) return
     try {
       await loadEarned(uid)
       await loadReviewedCount(uid)
-      // backfill เงียบ: grant ที่เข้าเกณฑ์อยู่แล้ว โดยไม่ประกาศ
-      const news = checkMilestones(MILESTONES, progressOf(auth.userData), earned, ctx())
-      for (const id of news) await grantMilestone(id)
+      if (auth.currentUser?.uid !== uid) return        // สลับบัญชีระหว่างโหลด
+      loadedFor = uid
+      await check()                                    // userData มาแล้ว = backfill เงียบเลย · ยังไม่มา = รอ watcher ข้างล่าง
     } catch (e) { console.error('[achievement init]', e) }
-    finally { announceOn = true }   // หลังจากนี้ปลดล็อกจริง → ประกาศ
   }, { immediate: true })
 
-  // ปลดล็อกระหว่างเล่น: userData เปลี่ยน → เช็ค → grant (ประกาศ)
-  watch(() => auth.userData, async (u) => {
-    if (!u || !announceOn || !auth.currentUser?.uid) return
-    const news = checkMilestones(MILESTONES, progressOf(u), earned, ctx())
-    for (const id of news) await grantMilestone(id)
-  }, { deep: true })
+  // userData เปลี่ยน → เช็ค (ครั้งแรกเงียบ · หลังจากนั้นประกาศ)
+  watch(() => auth.userData, () => { check() }, { deep: true })
 }

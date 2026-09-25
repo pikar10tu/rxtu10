@@ -5,7 +5,7 @@ import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { buildRosterRow, rosterRowChanged, canWriteRosterRow } from '../utils/roster.js'
 import { pushHistory } from '../utils/pvpHistory.js'
-import { pushEvent } from '../utils/newsFeed.js'
+import { pushEvent, pushAchievementEvent } from '../utils/newsFeed.js'
 
 /**
  * เขียนแถวของตัวเองลง `roster/current` — **จุดเดียว**ที่ฝั่งนักศึกษาเขียน doc นี้
@@ -29,8 +29,10 @@ export function useRosterSync() {
    *        — พ่วงไปกับ write ที่เกิดหลังไฟต์อยู่แล้ว (เรตเปลี่ยน) ⇒ ไม่มี write เพิ่ม
    * @param opts.event ข่าวกระดาน 1 รายการ ({k,v,g?,t}) หรือ null (ดู utils/newsFeed.js)
    *        — พ่วงไปกับ write ที่เกิดอยู่แล้วเช่นกัน ⇒ ข่าวหอคอย/สนาม/บ้าน/เพ็ท/มินิเกม ไม่มี write เพิ่ม
+   * @param opts.achievements docId ความสำเร็จที่เพิ่งปลด (string/array) — รวมกลุ่มกับข่าวความสำเร็จล่าสุด
+   *        ถ้ายังอยู่ในช่วง ACH_MERGE_MS (ดู pushAchievementEvent)
    */
-  async function syncRosterRow({ history = null, event = null } = {}) {
+  async function syncRosterRow({ history = null, event = null, achievements = null } = {}) {
     const uid = auth.currentUser?.uid
     const u = auth.userData
     if (!uid || !u) return
@@ -47,6 +49,7 @@ export function useRosterSync() {
     const next = buildRosterRow({ ...u, uid }, prev)   // prev = พ่วง h เดิมไว้ ไม่ให้ถูกล้างทุกครั้งที่ sync
     if (history) next.h = pushHistory(prev?.h, history)
     if (event) next.ev = pushEvent(prev?.ev, event)
+    if (achievements) next.ev = pushAchievementEvent(next.ev ?? prev?.ev, achievements)
     if (!rosterRowChanged(prev, next)) return
 
     try {

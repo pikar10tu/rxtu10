@@ -110,3 +110,38 @@ test('timeAgo อ่านออกทุกช่วง', () => {
   assert.equal(timeAgo(NOW - 3 * 3_600_000, NOW), '3 ชั่วโมงที่แล้ว')
   assert.equal(timeAgo(NOW - 2 * DAY, NOW), '2 วันที่แล้ว')
 })
+
+// ── ความสำเร็จ (เลน roster · รวมกลุ่ม) ──
+import { pushAchievementEvent, ACH_MERGE_MS, ACH_KEEP } from './newsFeed.js'
+import { MILESTONES } from '../data/achievements.js'
+const [A1, A2, A3, A4, A5, A6] = MILESTONES.slice(0, 6).map(m => m.id)
+
+test('pushAchievementEvent ปลดรวดในช่วงรวม = บรรทัดเดียว นับครบ', () => {
+  let ev = [{ k: 'tw', v: 40, t: NOW - 5000 }]
+  ev = pushAchievementEvent(ev, A1, NOW)
+  ev = pushAchievementEvent(ev, A2, NOW + 1000)
+  ev = pushAchievementEvent(ev, [A3, A4, A5, A6], NOW + 2000)
+  assert.equal(ev.length, 2)                    // ข่าวหอคอยไม่ถูกดันตก
+  assert.equal(ev[0].k, 'ac')
+  assert.equal(ev[0].n, 6)
+  assert.equal(ev[0].v.length, ACH_KEEP)
+  assert.equal(ev[0].v[0], A3)                  // ใหม่สุดก่อน
+  const feed = buildFeed({ u: { n: 'บีม', ev } }, [], { now: NOW + 3000 })
+  assert.match(feed[0].text, /บีม ปลดล็อก 6 ความสำเร็จ .* และอีก 4/)
+})
+
+test('pushAchievementEvent เกินช่วงรวม = ข่าวใหม่แยก', () => {
+  let ev = pushAchievementEvent([], A1, NOW)
+  ev = pushAchievementEvent(ev, A2, NOW + ACH_MERGE_MS + 1)
+  assert.equal(ev.length, 2)
+  assert.equal(ev[0].n, 1)
+  const feed = buildFeed({ u: { n: 'บีม', ev } }, [], { now: NOW + ACH_MERGE_MS + 2 })
+  assert.match(feed[0].text, /^บีม ปลดล็อก "/)
+})
+
+test('ข่าวความสำเร็จ id ไม่รู้จัก = ไม่ throw', () => {
+  const ev = [{ k: 'ac', v: ['zz_unknown__2026-09'], n: 1, t: NOW }]
+  const feed = buildFeed({ u: { n: 'บีม', ev } }, [], { now: NOW })
+  assert.match(feed[0].text, /ปลดล็อกความสำเร็จใหม่/)
+  assert.equal(feed[0].icon, '🏅')
+})

@@ -22,6 +22,8 @@
     <button class="dc-claim" :class="{ ready: accrued > 0 }" :disabled="accrued < 1" @click="claim">
       <template v-if="accrued > 0">เก็บ +{{ accrued.toLocaleString() }}<Emoji char="🪙" /></template>
       <template v-else>ยังไม่มีรายได้สะสม</template>
+      <!-- จุดแดงคู่กับแท็บ Home (useNavDots) — เกินครึ่งหลอดแล้ว ชวนมาเก็บ -->
+      <span v-if="fillPct >= DAILY_DOT_PCT && accrued >= 1" class="nav-dot dc-dot" aria-hidden="true"></span>
     </button>
 
     <!-- breakdown -->
@@ -49,6 +51,7 @@ import { RouterLink } from 'vue-router'
 import { getTowerBonus } from '../../data/towerFloors.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useDaily } from '../../composables/useDaily.js'
+import { DAILY_DOT_PCT } from '../../composables/useNavDots.js'
 
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
@@ -88,10 +91,12 @@ const fmtRemain = computed(() => {
 .dc-claim {
   width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px;
   font-family: inherit; font-size: .86rem; font-weight: 800; color: #fff;
+  position: relative;
   background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; margin-bottom: 12px;
 }
 .dc-claim.ready { background: var(--mint); box-shadow: var(--pop); }
 .dc-claim.ready:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+.dc-dot { top: -6px; right: -6px; }
 .dc-claim:disabled { cursor: default; opacity: .6; box-shadow: none; }
 .dc-breakdown { background: rgba(0,0,0,.03); border-radius: 10px; padding: 8px 12px; }
 .dc-row { display: flex; justify-content: space-between; align-items: center; font-size: .74rem; color: rgba(0,0,0,.6); padding: 3px 0; }

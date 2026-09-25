@@ -22,6 +22,8 @@
         </RouterLink>
 
         <RouterLink to="/play/farm" class="hero-card farm">
+          <!-- จุดแดงคู่กับแท็บ Play (useNavDots) — มีพืชพร้อมเก็บ -->
+          <span v-if="readyCount" class="nav-dot hero-dot" aria-hidden="true"></span>
           <span class="hero-emoji"><Emoji char="🌱" /></span>
           <span class="hero-name">โหมดฟาร์ม</span>
           <span v-if="readyCount" class="hero-badge ready"><Emoji char="🧺" /> เก็บได้ {{ readyCount }}</span>
@@ -99,8 +101,9 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .hero-card { all: unset; cursor: pointer; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 22px 14px; min-height: 148px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: transform .12s, box-shadow .12s; }
 .hero-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .hero-card.pets { background: linear-gradient(160deg,#e0e7ff,#c7d2fe); }
-.hero-card.farm { background: linear-gradient(160deg,#dcfce7,#bbf7d0); }
+.hero-card.farm { position: relative; background: linear-gradient(160deg,#dcfce7,#bbf7d0); }
 .hero-emoji { font-size: 2.4rem; }
+.hero-dot { top: 10px; right: 10px; width: 13px; height: 13px; }
 .hero-name { font-size: 1rem; font-weight: 800; }
 .hero-sub { font-size: .7rem; color: rgba(0,0,0,.5); font-weight: 600; line-height: 1.3; }
 .hero-badge { font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }

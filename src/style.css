@@ -92,6 +92,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible,
 .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; border: none; background: none; font-family: inherit; color: var(--muted); font-size: .7rem; font-weight: 600; transition: .15s; padding: 5px 2px; }
 .bn-icon { font-size: 1.3rem; transition: .15s; }
 
+/* จุดแดงนำทาง (useNavDots) — ใช้ร่วม: แถบล่าง · ปุ่มเก็บรายได้ · การ์ดโหมดฟาร์ม
+   parent ต้อง position:relative · เต้นเบาๆ ให้สะดุดตา (ปิดเมื่อผู้ใช้ลดอนิเมชัน) */
+.bn-icon { position: relative; }
+.nav-dot {
+  position: absolute; top: -2px; right: -6px; z-index: 1;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #ef4444; border: 2px solid #fff; box-sizing: content-box;
+  animation: nav-dot-pulse 1.6s ease-in-out infinite;
+}
+@keyframes nav-dot-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .nav-dot { animation: none; } }
+
 /* CARDS */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm); margin-bottom: 10px; }
 .sec-head { font-size: .72rem; font-weight: 700; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; text-align: center; margin: 16px 0 8px; }

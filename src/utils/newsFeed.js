@@ -13,6 +13,8 @@
 import { MINIGAMES } from '../data/minigames.js'
 import { TA_MODES } from './timeAttack.js'
 import { RESIDENCE_TIERS } from '../data/residence.js'
+import { getAchievement } from '../data/achievements.js'
+import { achievementTitle } from './achievements.js'
 
 /** เก็บกี่ข่าวต่อคน — ⚠️ เพิ่มแล้วต้องคำนวณขนาด doc ใหม่ (3×~30B×105คน ≈ 9.5KB จากลิมิต 1MB) */
 export const EVENT_MAX = 3
@@ -39,6 +41,28 @@ function houseText(who, e) {
     : `${who} ได้เข้าสู่ระบบ ยินดีต้อนรับ`
 }
 
+/** ปลดความสำเร็จซ้อนกันภายในช่วงนี้ = รวมเป็นบรรทัดเดียว (ไม่ยึดกระดาน · กิน ev แค่ช่องเดียว) */
+export const ACH_MERGE_MS = 30 * 60 * 1000
+/** เก็บชื่อความสำเร็จในข่าวรวมได้กี่อัน — เกินนี้นับจำนวนอย่างเดียว (`n`) คุมขนาดแถว roster */
+export const ACH_KEEP = 4
+
+/** docId ของ achievement ('id' หรือ 'id__date') → ชื่อบนจอ · ไม่รู้จัก (เวอร์ชันใหม่กว่า) = null */
+function achLabel(docId) {
+  const [id, date] = String(docId).split('__')
+  const def = getAchievement(id)
+  return def ? achievementTitle(def, date || null) : null
+}
+function achText(who, e) {
+  const ids = Array.isArray(e.v) ? e.v : [e.v]
+  const names = ids.map(achLabel).filter(Boolean)
+  const n = Math.max(Number(e.n) || 0, ids.length)
+  if (!names.length) return `${who} ปลดล็อกความสำเร็จใหม่`
+  if (n === 1) return `${who} ปลดล็อก "${names[0]}"`
+  const shown = names.slice(0, 2).map(x => `"${x}"`).join(' ')
+  return n > 2 ? `${who} ปลดล็อก ${n} ความสำเร็จ ${shown} และอีก ${n - 2}` : `${who} ปลดล็อก ${shown}`
+}
+const achIcon = (e) => getAchievement(String([].concat(e.v)[0]).split('__')[0])?.icon || '🏅'
+
 /**
  * ทะเบียนชนิดข่าว — เพิ่มชนิดใหม่ที่นี่ที่เดียว
  * text(who, e) : who = ชื่อที่ขึ้นต้นประโยค ('คุณ' ถ้าเป็นตัวเอง) · e = { k, v, g?, t }
@@ -53,6 +77,8 @@ const KINDS = {
   hs: { icon: '🏠', text: houseText },
   fo: { icon: '🌾', text: (who, e) => `${who} ส่งออเดอร์ฟาร์มชิ้นใหญ่ ได้ ${(Number(e.v) || 0).toLocaleString()} เหรียญ` },
   pv: { icon: '⚔️', text: (who, e) => `${who} ขึ้นอันดับ ${e.v} ของสนามประลอง` },
+  // ความสำเร็จ (ย้ายจากเลน news 25 ก.ย. 2026) — v = [docId ล่าสุดก่อน] · n = จำนวนรวมในกลุ่ม
+  ac: { icon: achIcon, text: achText },
 }
 
 /** ต่อข่าวใหม่ไว้หน้าสุด แล้วตัดท้ายให้เหลือ EVENT_MAX — คู่แฝดของ pushHistory */
@@ -60,6 +86,25 @@ export function pushEvent(list, ev) {
   const prev = Array.isArray(list) ? list : []
   if (!ev || !ev.k || !KINDS[ev.k]) return prev      // ข่าวเสีย = ไม่แตะของเดิม
   return [ev, ...prev].slice(0, EVENT_MAX)
+}
+
+/**
+ * ข่าวปลดความสำเร็จ — ถ้าข่าวบนสุดเป็นความสำเร็จที่เพิ่งเกิดภายใน ACH_MERGE_MS ให้รวมเข้ากลุ่มเดิม
+ * ⇒ ปลด 5 อันรวดขึ้นกระดานบรรทัดเดียว "ปลดล็อก 5 ความสำเร็จ …" และไม่ดันข่าวหอคอย/สนามของคนนั้นตกช่อง
+ * @param docIds docId ที่เพิ่งปลด (ใหม่สุดก่อน) — string เดียวก็ได้
+ */
+export function pushAchievementEvent(list, docIds, now = Date.now()) {
+  const prev = Array.isArray(list) ? list : []
+  const ids = [].concat(docIds || []).filter(Boolean).map(String)
+  if (!ids.length) return prev
+  const head = prev[0]
+  if (head?.k === 'ac' && now - (Number(head.t) || 0) < ACH_MERGE_MS) {
+    const old = [].concat(head.v || [])
+    const merged = { k: 'ac', v: [...ids, ...old].slice(0, ACH_KEEP),
+      n: Math.max(Number(head.n) || 0, old.length) + ids.length, t: now }
+    return [merged, ...prev.slice(1)]
+  }
+  return pushEvent(prev, { k: 'ac', v: ids.slice(0, ACH_KEEP), n: ids.length, t: now })
 }
 
 /**
@@ -101,7 +146,8 @@ export function buildFeed(rows, newsDocs, { now = Date.now(), myUid = null } = {
       const t = Number(e.t) || 0
       if (!t || now - t > EVENT_TTL_MS) continue
       const who = uid === myUid ? 'คุณ' : (row?.n || '?')
-      items.push({ id: `${uid}:${i}:${t}`, uid, icon: def.icon, text: def.text(who, e), t })
+      const icon = typeof def.icon === 'function' ? def.icon(e) : def.icon
+      items.push({ id: `${uid}:${i}:${t}`, uid, icon, text: def.text(who, e), t })
     }
   }
 
