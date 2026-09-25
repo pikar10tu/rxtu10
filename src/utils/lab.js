@@ -44,3 +44,17 @@ export function fuseRoll(sourceRarity, catalog, rng = Math.random) {
 export function redeemValue(allocation, rarity) {
   return allocationTotal(allocation) * (REDEEM_COIN[rarity] || 0)
 }
+
+/** หลอมตำนาน (user ขอ 25 ก.ย. 2026): ตัวซ้ำตำนาน 3 ชิ้น → ตำนาน 1 ตัว "ที่ไม่ใช่ตัวที่เอามาหลอม" */
+export const LEGEND_SWAP_COST = 3
+
+/**
+ * สุ่ม legendary แบบ uniform โดยตัดสายพันธุ์ที่จ่ายตัวซ้ำออกไป (จ่าย 3 ชิ้นจากตัวเดียว = ตัดตัวเดียว)
+ * ได้ตัวที่มีอยู่แล้ว = กลายเป็นตัวซ้ำ (เหมือนหลอมระดับอื่น) · คลังหลังตัดว่าง = null (คนเรียกต้องไม่หักของ)
+ */
+export function legendSwapRoll(catalog, excludeIds, rng = Math.random) {
+  const ex = new Set(excludeIds || [])
+  const pool = rarityPool(catalog, 'legendary').filter((id) => !ex.has(id))
+  if (!pool.length) return null
+  return pool[Math.floor(rng() * pool.length)]
+}

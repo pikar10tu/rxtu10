@@ -75,3 +75,29 @@ test('redeemValue = Σn × rate', () => {
   assert.equal(redeemValue([{ id: 'bahamut', n: 2 }], 'legendary'), 6000) // 2 × 3000
   assert.equal(redeemValue([{ id: 'cat', n: 3 }], 'common'), 150)         // 3 × 50
 })
+
+import { LEGEND_SWAP_COST, legendSwapRoll } from './lab.js'
+const LEG = [
+  { id: 'a', rarity: 'legendary' }, { id: 'b', rarity: 'legendary' },
+  { id: 'c', rarity: 'legendary' }, { id: 'd', rarity: 'legendary' }, { id: 'x', rarity: 'epic' },
+]
+
+test('หลอมตำนาน: ใช้ 3 ชิ้น', () => { assert.equal(LEGEND_SWAP_COST, 3) })
+
+test('หลอมตำนาน: ไม่มีทางได้ตัวที่เอามาหลอม ไม่ว่าสุ่มได้ค่าไหน', () => {
+  for (let r = 0; r < 1; r += 0.01) {
+    const id = legendSwapRoll(LEG, ['a', 'c'], () => r)
+    assert.ok(id === 'b' || id === 'd', `r=${r} ได้ ${id}`)
+  }
+})
+
+test('หลอมตำนาน: จ่ายจากตัวเดียว = ตัดตัวเดียว · ไม่ออก epic', () => {
+  const got = new Set()
+  for (let r = 0; r < 1; r += 0.05) got.add(legendSwapRoll(LEG, ['a'], () => r))
+  assert.deepEqual([...got].sort(), ['b', 'c', 'd'])
+})
+
+test('หลอมตำนาน: ตัดจนคลังว่าง = null', () => {
+  assert.equal(legendSwapRoll(LEG, ['a', 'b', 'c', 'd']), null)
+  assert.equal(legendSwapRoll([], []), null)
+})

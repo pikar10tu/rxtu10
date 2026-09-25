@@ -250,10 +250,10 @@ function startDuel() {
 .pf-stat { text-align: center; padding: 10px 4px 8px; border: var(--bw) solid var(--line); border-radius: 12px; box-shadow: var(--pop); }
 .pf-stat span { font-size: 1.1rem; }
 .pf-stat b { display: block; font-size: 1.1rem; font-weight: 800; }
-.pf-stat small { font-size: .68rem; color: rgba(0,0,0,.45); font-weight: 700; }
+.pf-stat small { font-size: .7rem; color: rgba(0,0,0,.45); font-weight: 700; }
 .pf-team-label { font-size: .7rem; font-weight: 800; color: var(--muted, #9b8fb0); text-align: center; padding: 12px 0 0; border-top: 1px solid rgba(0,0,0,.06); position: relative; }
 .pf-duel-btn {
-  position: absolute; right: 12px; top: 6px; font-family: inherit; font-size: .68rem; font-weight: 800;
+  position: absolute; right: 12px; top: 6px; font-family: inherit; font-size: .7rem; font-weight: 800;
   color: #fff; background: var(--primary); border: none; border-radius: 999px; padding: 5px 10px;
   cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
 }

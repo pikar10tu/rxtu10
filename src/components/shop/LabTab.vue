@@ -36,6 +36,22 @@
       </div>
     </div>
 
+    <!-- หลอมตำนาน (user ขอ 25 ก.ย. 2026): ตำนานซ้ำ 3 → ตำนานตัวอื่น 1 (ไม่ได้ตัวที่ใส่ไป) -->
+    <div class="lab-card lab-swap">
+      <div class="lab-card-h"><Emoji char="🌟" /> หลอมตำนานเป็นตัวอื่น</div>
+      <div class="lab-card-sub">ใช้ตัวซ้ำตำนาน {{ LEGEND_SWAP_COST }} ชิ้น → สุ่มได้ตำนาน 1 ตัวจากตัว<b>อื่น</b> (ไม่มีทางได้ตัวที่ใส่ลงไป · ได้ตัวที่มีแล้วก็กลายเป็นตัวซ้ำ)</div>
+      <div class="lab-row">
+        <div class="lab-row-main">
+          <div class="lab-prog" :aria-label="`มี ${copyTotal('legendary')} จาก ${LEGEND_SWAP_COST}`">
+            <i :style="{ width: Math.min(100, copyTotal('legendary') / LEGEND_SWAP_COST * 100) + '%', background: rarityColor('legendary') }"></i>
+          </div>
+          <div class="lab-have">มี {{ copyTotal('legendary') }}/{{ LEGEND_SWAP_COST }}{{ copyTotal('legendary') >= LEGEND_SWAP_COST ? ` · หลอมได้ ${Math.floor(copyTotal('legendary') / LEGEND_SWAP_COST)} ครั้ง` : ` · ขาดอีก ${LEGEND_SWAP_COST - copyTotal('legendary')}` }}</div>
+        </div>
+        <button class="lab-btn" :class="{ ok: copyTotal('legendary') >= LEGEND_SWAP_COST }"
+          :disabled="busy || copyTotal('legendary') < LEGEND_SWAP_COST" @click="openSwap">หลอม</button>
+      </div>
+    </div>
+
     <!-- ขาย -->
     <div class="lab-card">
       <div class="lab-card-h"><Emoji char="🪙" /> ขายตัวซ้ำเป็นเหรียญ</div>
@@ -96,7 +112,7 @@ import { PETS, RARITY } from '../../data/index.js'
 import { releasedPets } from '../../utils/petCatalog.js'
 import { useAppConfig } from '../../composables/useAppConfig.js'
 import { mergeRolls } from '../../utils/gachaMerge.js'
-import { FUSION_COST, REDEEM_COIN, nextRarity, rarityCopyTotal, applyCopySpend, fuseRoll, redeemValue } from '../../utils/lab.js'
+import { FUSION_COST, REDEEM_COIN, LEGEND_SWAP_COST, nextRarity, rarityCopyTotal, applyCopySpend, fuseRoll, legendSwapRoll, redeemValue } from '../../utils/lab.js'
 import SpendCopiesModal from './SpendCopiesModal.vue'
 
 const auth = useAuthStore()
@@ -117,17 +133,21 @@ const busy = ref(false)
 let cbTimer = null
 
 function openFusion(src) { pending.value = { mode: 'fusion', rarity: src, required: FUSION_COST[src] } }
+function openSwap() { pending.value = { mode: 'fusion', swap: true, rarity: 'legendary', required: LEGEND_SWAP_COST } }
 function openRedeem(r) { pending.value = { mode: 'redeem', rarity: r, required: 0 } }
 
 async function onConfirm(allocation) {
   if (busy.value || !pending.value) return
-  const { mode, rarity } = pending.value
+  const { mode, rarity, swap } = pending.value
   pending.value = null
   busy.value = true
   try {
     const petsAfter = applyCopySpend(pets.value, allocation)
     if (mode === 'fusion') {
-      const id = fuseRoll(rarity, releasedPets(rawConfig.value?.gachaEvent))
+      // หลอมตำนาน: ตัดสายพันธุ์ที่จ่ายตัวซ้ำออกจากคลังก่อนสุ่ม (ห้ามได้ตัวเดิมคืน)
+      const id = swap
+        ? legendSwapRoll(releasedPets(rawConfig.value?.gachaEvent), allocation.map((a) => a.id))
+        : fuseRoll(rarity, releasedPets(rawConfig.value?.gachaEvent))
       if (!id) { toast('หลอมไม่สำเร็จ', 'error'); return }
       const { pets: finalPets, summary } = mergeRolls(petsAfter, [{ id }], PETS)
       const fuseN = (auth.userData?.labFuseTotal || 0) + 1   // achievement นักเล่นแร่แปรธาตุ
