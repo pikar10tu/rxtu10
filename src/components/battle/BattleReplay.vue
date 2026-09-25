@@ -18,10 +18,17 @@
       <ArenaFloor :arena-ref="arenas.bot" side="bot" :zone="seam?.zBot || null" />
     </div>
     <div v-if="seam" class="br-seam" :style="{ top: seam.y + 'px' }"></div>
+    <!-- ฉาก VS (สนามประลอง/ท้าสู้) แทน READY/GO: ครึ่งบนสไลด์ลง ครึ่งล่างสไลด์ขึ้น ชนที่เส้นกลาง · แตะข้ามได้ -->
+    <div v-if="introPhase === 'vs'" class="br-vsi" :style="{ '--sy': (seam ? seam.y + 'px' : '50%') }" @click="skipIntro">
+      <div class="br-vsi-h top"><ArenaFloor mode="thumb" :arena-ref="arenas.top" side="top" /><span class="br-vsi-n"><b>{{ sideTop.name }}</b>{{ arenaNameOf(arenas.top) }}</span></div>
+      <div class="br-vsi-h bot"><ArenaFloor mode="thumb" :arena-ref="arenas.bot" side="bot" /><span class="br-vsi-n"><b>{{ sideBot.name }}</b>{{ arenaNameOf(arenas.bot) }}</span></div>
+      <div class="br-vsi-bar"></div>
+      <div class="br-vsi-x">VS</div>
+    </div>
     <div class="br-box" ref="boxRef"
          @pointerdown="onHoldStart" @pointerup="onHoldEnd"
          @pointercancel="onHoldEnd" @pointerleave="onHoldEnd">
-      <div v-if="introPhase" class="br-intro" @click="skipIntro">
+      <div v-if="introPhase === 'ready' || introPhase === 'go'" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
       </div>
       <div class="br-round" v-if="!done">รอบ {{ round }}</div>
@@ -30,7 +37,8 @@
       <div v-if="showFps" class="br-lab-tag">{{ labTag }}</div>
       <div v-if="showFps" class="br-fps" :class="{ bad: fpsWorst > 33, warn: fpsWorst > fpsDropAt && fpsWorst <= 33 }">{{ fpsWorst }}ms</div>
 
-      <div class="br-side foe-label"><i class="dot foe"></i> ศัตรู</div>
+      <!-- ป้ายชื่อ: ใคร · แต้ม · สนามอะไร (data.sides ไม่ส่งมา = "ศัตรู"/"ทีมคุณ" แบบเดิม) -->
+      <div class="br-side foe-label"><i class="dot foe"></i> <b>{{ sideTop.name }}</b><span v-if="sideTop.sub" class="br-side-sub">{{ sideTop.sub }}</span></div>
       <div class="br-team">
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
              class="br-unit foe" @click="inspect('B'+i)">
@@ -74,19 +82,22 @@
           <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me">{{ curHp('A'+i) }}</span></div>
         </div>
       </div>
-      <div class="br-side me-label"><i class="dot me"></i> ทีมคุณ</div>
+      <div class="br-side me-label"><i class="dot me"></i> <b>{{ sideBot.name }}</b><span v-if="sideBot.sub" class="br-side-sub">{{ sideBot.sub }}</span></div>
 
       <!-- สปอตไลต์สกิล — หรี่ฉากแล้วชูแบนเนอร์ให้อ่านก่อน ผลค่อยลงทีหลัง
            🚫 ห้ามใช้ backdrop-filter/blur ตรงนี้เด็ดขาด — เป็นตัวฆ่าเฟรมบน iOS Safari (ดูเคสกระตุก v3)
            อยู่ "ใต้" fx layer เพื่อให้เลข/ประกายของผลที่ลงตามมาไม่ถูกฉากหรี่กลบ -->
       <div v-if="spot" class="br-spot" :class="{ out: spotOut, foe: spot.side === 'B' }" :style="spotStyle" aria-hidden="true">
         <div class="br-spot-dim"></div>
-        <div class="br-spot-card">
-          <div class="br-spot-top">
-            <span class="br-spot-icon"><Emoji :char="spot.icon" /></span>
-            <span class="br-spot-name"><Emoji v-if="spot.skillIcon" :char="spot.skillIcon" /> {{ spot.name }}</span>
-          </div>
-          <div v-if="spot.desc" class="br-spot-desc">{{ spot.desc }}</div>
+        <!-- คัทอิน (user เลือกแบบ 2 จากเดโม 25 ก.ย. 2026): แถบเฉียง + หน้าเพ็ทเจ้าของสกิลทุกครั้ง
+             ทีมเราเข้าจากซ้าย (ฟ้า) · ศัตรูเข้าจากขวา (แดง) · จังหวะเดิม: spotlightPassive await จนจบ = ไม่มีใครตีระหว่างนี้ -->
+        <div class="br-cut">
+          <span class="br-cut-face"><Emoji :char="spot.face" /></span>
+          <span class="br-cut-t">
+            <span class="br-cut-who">{{ spot.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }}</span>
+            <b class="br-cut-name"><Emoji v-if="spot.skillIcon" :char="spot.skillIcon" /> {{ spot.name }}</b>
+            <span v-if="spot.desc" class="br-cut-desc">{{ spot.desc }}</span>
+          </span>
         </div>
       </div>
 
@@ -202,6 +213,8 @@
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import Emoji from '../shared/Emoji.vue'
 import ArenaFloor from './ArenaFloor.vue'
+import { getArena } from '../../data/arenas.js'
+import { parseArenaRef } from '../../utils/arenas.js'
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, sparkOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
@@ -229,6 +242,20 @@ const arenas = computed(() => ({
   top: props.data?.arenas?.top ?? (props.theme === 'tower' ? 'tower' : null),
   bot: props.data?.arenas?.bot ?? null,
 }))
+// ป้ายชื่อสองฝั่ง: data.sides = { top: { name, rating? }, bot: { name, rating? } } · sub = แต้ม · ชื่อสนาม
+const arenaNameOf = (r) => {
+  const id = parseArenaRef(r).id
+  return id === 'tower' ? '' : (getArena(id)?.name || '')
+}
+function sideOf(key, fallback) {
+  const s = props.data?.sides?.[key]
+  const arena = arenaNameOf(arenas.value[key])
+  if (!s) return { name: fallback, sub: '' }
+  const bits = [typeof s.rating === 'number' ? s.rating.toLocaleString() : null, arena || null].filter(Boolean)
+  return { name: s.name || fallback, sub: bits.join(' · ') }
+}
+const sideTop = computed(() => sideOf('top', 'ศัตรู'))
+const sideBot = computed(() => sideOf('bot', 'ทีมคุณ'))
 const ovRef = ref(null)
 const vsRef = ref(null)
 const seam = ref(null)   // { y, zTop, zBot } — null = ยังไม่ได้วัด (ใช้ 50% ไปก่อน)
@@ -503,8 +530,13 @@ function reset() {
   startFps()   // รีเซ็ตตัวนับ fps ทุกไฟต์ใหม่ (ไม่งั้นไฟต์ที่ 2+ ในพาเนล Admin จะสะสมทับไฟต์ก่อนหน้า)
 }
 
-// intro READY?→GO! ก่อนเริ่มเล่น log (แตะข้ามได้)
+// intro ก่อนเริ่มเล่น log (แตะข้ามได้) — มีป้ายชื่อสองฝั่ง (สนามประลอง/ท้าสู้) = ฉาก VS · หอคอย = READY?→GO!
 function runIntro() {
+  if (props.data?.sides && arenas.value.top !== 'tower') {
+    introPhase.value = 'vs'
+    introTimer = setTimeout(() => { introPhase.value = null; step() }, 1150)
+    return
+  }
   introPhase.value = 'ready'
   introTimer = setTimeout(() => {
     introPhase.value = 'go'
@@ -676,8 +708,9 @@ async function spotlightPassive(e, t, g, opts = {}) {
     '--spot-out': `${Math.round(t.tail) || 1}ms`,
   }
   spot.value = {
-    icon: opts.icon || e.icon || '✨', name: skillTitle(e),
-    desc: opts.desc ?? passiveDescOf(e), side: opts.side || null, skillIcon: opts.icon ? e.icon : null,
+    face: defForUid(e.uid)?.emoji || opts.icon || '✨',       // หน้าเจ้าของสกิลทุกครั้ง (เดิมมีแค่ยกแรก)
+    skillIcon: e.icon || null, name: skillTitle(e),
+    desc: opts.desc ?? passiveDescOf(e), side: opts.side || e.uid?.[0] || 'A',
   }
   spotOut.value = false
   highlight(e.uid, 'spotlit')
@@ -1103,7 +1136,27 @@ onUnmounted(() => {
 .br-fps-sum b.bad { color: #f87171; }
 .br-fps-note { font-size: .7rem; color: rgba(255,255,255,.5); margin-top: 3px; }
 
-.br-side { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; color: rgba(255,255,255,.8); padding: 0 2px; }
+.br-side { display: flex; align-items: center; gap: 6px; align-self: flex-start; max-width: 100%; font-size: .72rem; font-weight: 800; color: #fff;
+  padding: 3px 10px 3px 8px; border-radius: 999px; background: rgba(10,14,28,.62); white-space: nowrap; overflow: hidden; }
+.br-side b { overflow: hidden; text-overflow: ellipsis; }
+.br-side-sub { font-weight: 700; color: rgba(255,255,255,.7); overflow: hidden; text-overflow: ellipsis; }
+/* ฉาก VS — transform/opacity ล้วน · พื้นใช้ ArenaFloor ภาพย่อ (ไม่วัดขนาด ไม่มีอนิเมชันพื้น) */
+.br-vsi { position: absolute; inset: 0; z-index: 3; cursor: pointer; animation: br-vsi-out .3s ease-in .85s forwards; }
+.br-vsi-h { position: absolute; left: 0; right: 0; overflow: hidden; }
+.br-vsi-h.top { top: 0; height: var(--sy); animation: br-vsi-t .45s cubic-bezier(.2,.9,.3,1.15) both; }
+.br-vsi-h.bot { top: var(--sy); bottom: 0; animation: br-vsi-b .45s cubic-bezier(.2,.9,.3,1.15) both; }
+.br-vsi-n { position: absolute; left: 0; right: 0; z-index: 3; text-align: center; color: #fff; font-size: .8rem; text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+.br-vsi-n b { display: block; font-size: 1.5rem; font-weight: 800; }
+.br-vsi-h.top .br-vsi-n { bottom: 28px; }
+.br-vsi-h.bot .br-vsi-n { top: 28px; }
+.br-vsi-bar { position: absolute; left: 0; right: 0; top: var(--sy); height: 4px; margin-top: -2px; background: #fff; box-shadow: 0 0 18px #fff; transform: scaleX(0); animation: br-vsi-bar .3s ease-out .3s forwards; }
+.br-vsi-x { position: absolute; left: 50%; top: var(--sy); font-size: 3rem; font-weight: 900; color: #fff; text-shadow: 0 0 18px rgba(255,190,80,.9), 0 4px 0 #7c2d12;
+  transform: translate(-50%, -50%) scale(0); animation: br-vsi-x .35s ease-out .35s forwards; }
+@keyframes br-vsi-t { from { transform: translateY(-100%); } }
+@keyframes br-vsi-b { from { transform: translateY(100%); } }
+@keyframes br-vsi-bar { to { transform: scaleX(1); } }
+@keyframes br-vsi-x { to { transform: translate(-50%, -50%) scale(1); } }
+@keyframes br-vsi-out { to { opacity: 0; } }
 .br-side .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
 .dot.foe { background: #f87171; }
 .dot.me { background: #34d399; }
@@ -1248,24 +1301,28 @@ onUnmounted(() => {
    z-index 4 = ใต้ fx layer (6) เพื่อให้เลข/ประกายของ "ผล" ที่ลงตามมาลอยเหนือฉากหรี่
    🚫 ห้าม backdrop-filter/blur — iOS Safari เพนต์ไม่ไหว (เคสกระตุกที่แก้ไป 4 รอบกว่าจะเจอ)
    ทุกอย่างขยับด้วย transform/opacity เท่านั้น */
-.br-spot { position: absolute; inset: 0; z-index: 4; pointer-events: none; display: flex; align-items: center; justify-content: center; }
-.br-spot-dim { position: absolute; inset: 0; background: #0f172a; opacity: 0; will-change: opacity; animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
-.br-spot-card { position: relative; max-width: 84%; padding: 10px 16px; border-radius: 14px; text-align: center;
-  background: rgba(255,255,255,.97); border: 2px solid #0f172a; box-shadow: 0 8px 0 rgba(0,0,0,.35);
-  will-change: transform, opacity; animation: br-spot-in var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.2) var(--spot-delay, 180ms) both; }
-.br-spot-top { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.br-spot-icon { font-size: 1.5rem; line-height: 1; }
-/* โชว์ยกแรกของฝั่งศัตรู — ขอบ/ชื่อแดง ให้รู้ทันทีว่าเป็นของใคร */
-.br-spot.foe .br-spot-card { border-color: #b91c1c; }
-.br-spot.foe .br-spot-name { color: #991b1b; }
-.br-spot-name { font-size: 1.05rem; font-weight: 800; color: #312e81; }
-.br-spot-desc { margin-top: 3px; font-size: .76rem; line-height: 1.4; color: rgba(0,0,0,.7); }
+.br-spot { position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+/* ⚠️ .br-spot ไม่มี z-index (ไม่สร้าง stacking context) — ม่าน z4 < การ์ดเจ้าของ .spotlit z5 ≤ แถบคัทอิน z5 (มาทีหลังใน DOM จึงอยู่บน)
+   ⇒ การ์ดเจ้าของสว่างเหนือม่าน แต่ไม่บังตัวหนังสือบนแถบ · fx layer z6 อยู่บนสุดเหมือนเดิม */
+.br-spot-dim { position: absolute; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
+.br-cut { position: relative; z-index: 5; width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
+  transform: skewY(-5deg); background: linear-gradient(90deg, #2563eb 0%, #2563eb 35%, rgba(15,23,42,.96) 100%); box-shadow: 0 0 0 3px #fff;
+  will-change: transform, opacity; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
+.br-spot.foe .br-cut { flex-direction: row-reverse; text-align: right;
+  background: linear-gradient(270deg, #dc2626 0%, #dc2626 35%, rgba(15,23,42,.96) 100%); animation-name: br-cut-in-r; }
+.br-cut-face { flex: none; width: 70px; height: 70px; display: grid; place-items: center; border-radius: 50%; font-size: 3rem; line-height: 1;
+  background: rgba(255,255,255,.18); transform: skewY(5deg); }
+.br-cut-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; transform: skewY(5deg); }
+.br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
+.br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+.br-cut-desc { font-size: .74rem; line-height: 1.35; color: rgba(255,255,255,.88); }
 .br-spot.out .br-spot-dim { animation: br-spot-dim-out var(--spot-out, 230ms) ease-in forwards; }
-.br-spot.out .br-spot-card { animation: br-spot-out var(--spot-out, 230ms) ease-in forwards; }
+.br-spot.out .br-cut { animation: br-cut-out var(--spot-out, 230ms) ease-in forwards; }
 @keyframes br-spot-dim-in  { to { opacity: .55; } }
 @keyframes br-spot-dim-out { from { opacity: .55; } to { opacity: 0; } }
-@keyframes br-spot-in  { from { opacity: 0; transform: translateY(14px) scale(.92); } to { opacity: 1; transform: none; } }
-@keyframes br-spot-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-10px) scale(.96); } }
+@keyframes br-cut-in-l { from { transform: skewY(-5deg) translateX(-110%); } to { transform: skewY(-5deg); } }
+@keyframes br-cut-in-r { from { transform: skewY(-5deg) translateX(110%); } to { transform: skewY(-5deg); } }
+@keyframes br-cut-out { from { opacity: 1; transform: skewY(-5deg); } to { opacity: 0; transform: skewY(-5deg) scaleY(.2); } }
 /* การ์ดเจ้าของสกิล — ยกขึ้นเหนือฉากหรี่ให้เห็นว่าใครเป็นคนออกท่า */
 .br-unit.spotlit { z-index: 5; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251,191,36,.35); }
 /* fade สำรองของสปอตไลต์ (เดิมใช้ตอนเครื่องขอลดการเคลื่อนไหว — ตอนนี้ bypass แล้ว ดู utils/motionPref.js) */
@@ -1322,14 +1379,30 @@ onUnmounted(() => {
 
 /* ยุคเดิม (call site ที่ยังไม่ส่ง tier — battleFx.js ไม่แปะ tier class เลยเมื่อ tier undefined แล้ว
    ตกลงมาที่กฎกลุ่มนี้ตรงๆ) — Task 4 ส่ง tier ครบทุกจุดเรียกแล้วค่อยลบทิ้งได้ */
-.brfx-pop { font-weight: 900; font-size: 1.5rem; color: #fecaca; -webkit-text-stroke: 3px rgba(15,23,42,.85); paint-order: stroke fill; white-space: nowrap; }
-.brfx-pop.crit { color: #fbbf24; font-size: 2rem; }
-.brfx-pop.weak { color: #cbd5e1; font-size: 1.1rem; }
-.brfx-pop.super { color: #fca5a5; }
-.brfx-pop.heal { color: #86efac; font-size: 1.15rem; }   /* ฟื้นเลือด — เขียวและเล็กกว่าดาเมจ ไม่แย่งสายตาหมัดจริง */
+.brfx-pop { width: 0; height: 0; font-family: 'Lilita One', 'Kanit', sans-serif; font-weight: 400; font-size: 1.5rem; color: #fff; white-space: nowrap; }
+/* เลขดาเมจแบบ B ระเบิดการ์ตูน (user เลือกจากเดโม 25 ก.ย. 2026) — ตัวเลขอยู่บนดาวแหลม
+   element หลักกว้าง/สูง 0 = จุดกึ่งกลางการ์ดพอดี · ลูก .brfx-pop-in จัดกลางด้วย translate
+   ดาวเป็นรูปนิ่ง (clip-path ไม่ขยับ) ขยับทั้งก้อนผ่าน WAAPI transform/opacity เท่านั้น */
+.brfx-pop-in { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); display: block; }
+.brfx-pop-n { position: relative; -webkit-text-stroke: 4px #1c1917; paint-order: stroke fill; }
+.brfx-pop-bg { position: absolute; left: 50%; top: 50%; width: 2.7em; height: 2.7em; margin: -1.35em 0 0 -1.35em; z-index: -1; background: #f97316;
+  clip-path: polygon(50% 0, 61% 30%, 93% 18%, 74% 45%, 100% 60%, 68% 66%, 76% 100%, 50% 76%, 24% 100%, 32% 66%, 0 60%, 26% 45%, 7% 18%, 39% 30%); }
+.brfx-pop-tag { display: none; position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 2px;
+  font: 900 .7rem/1 'Kanit', sans-serif; letter-spacing: .06em; padding: 2px 6px; border-radius: 6px; background: #fbbf24; color: #451a03; }
+.brfx-pop.crit { color: #fde047; font-size: 2rem; }
+.brfx-pop.crit .brfx-pop-bg { background: #dc2626; width: 2.9em; height: 2.9em; margin: -1.45em 0 0 -1.45em; }
+.brfx-pop.crit .brfx-pop-tag { display: block; }
+.brfx-pop.weak { color: #e2e8f0; font-size: 1.1rem; }
+.brfx-pop.weak .brfx-pop-bg { background: #64748b; }
+.brfx-pop.super { color: #fff7ed; }
+.brfx-pop.super .brfx-pop-bg { background: #ea580c; }
+.brfx-pop.heal { color: #dcfce7; font-size: 1.15rem; }   /* ฟื้นเลือด — วงกลมเขียวและเล็กกว่าดาเมจ ไม่แย่งสายตาหมัดจริง */
+.brfx-pop.heal .brfx-pop-bg { background: #16a34a; clip-path: circle(38%); }
 /* ดาเมจเชื้อ 🦠 ชั้นละก้อน — ม่วงและเล็กที่สุด อ่านเป็น "ของแถมจากสกิล" ไม่ใช่หมัดอีกดอก
    ⚠️ ขนาดจริงมาจาก inline font-size ใน fx.pop (weight) — ที่นี่คุมแค่สี/เส้นขอบ */
-.brfx-pop.infect { color: #d8b4fe; -webkit-text-stroke: 2px rgba(15,23,42,.9); }
+.brfx-pop.infect { color: #f3e8ff; }
+.brfx-pop.infect .brfx-pop-bg { background: #9333ea; }
+.brfx-pop.infect .brfx-pop-n { -webkit-text-stroke: 3px #1c1917; }
 
 /* ชั้น = เจ้าของขนาด — นี่คือช่องทางหลักที่ผู้เล่นอ่านน้ำหนักของหมัดออกขณะดูเร็วๆ
    มาทีหลังด้วย specificity เท่ากัน (สองคลาสเท่ากับ .crit/.weak ด้านบน) จึงชนะเรื่องขนาดด้วยลำดับประกาศ

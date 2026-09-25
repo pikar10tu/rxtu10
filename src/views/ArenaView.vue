@@ -159,7 +159,12 @@ async function onFight(opp) {
   busy.value = true
   // สนามครึ่งบน = ของคู่ต่อสู้ (แถว roster · บอทไม่มีแถว = สนามฟรี) · ครึ่งล่าง = ของเรา
   const top = opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null)
-  try { const r = await fight(opp); if (r) replay.value = { ...r, arenas: { top, bot: rosterArena(authStore.userData) } } }
+  // ⚠️ หยิบแต้มก่อน await — fight() เขียนแต้มใหม่แบบ synchronous (CLAUDE.md ข้อ 9)
+  const sides = {
+    top: { name: opp?.isBot ? 'หุ่นซ้อม' : (opp?.nickname || '?'), rating: opp?.rating ?? null },
+    bot: { name: 'คุณ', rating: rating.value },
+  }
+  try { const r = await fight(opp); if (r) replay.value = { ...r, sides, arenas: { top, bot: rosterArena(authStore.userData) } } }
   finally { busy.value = false }
 }
 

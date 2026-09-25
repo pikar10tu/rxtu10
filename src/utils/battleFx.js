@@ -109,7 +109,18 @@ export function createBattleFx() {
   function buildPools() {
     // พูล pop/call ใหญ่ขึ้นตามที่วัดจริง (pop พีค 6 ตัวใน 900ms · call ซ้อนได้จาก super/weak/survive/น็อก)
     // 10 → 16: เลขเชื้อ 🦠 เด้งแยกชั้นละก้อน (สูงสุด 5) ทับกับเลขหมัดหลักของ cleave ที่ลง 3 เป้าพร้อมกัน
-    for (let i = 0; i < 16; i++) pool.pop.push(mkEl('brfx-pop'))
+    // เลขดาเมจแบบ B "ระเบิดการ์ตูน" (user เลือกจากเดโม 25 ก.ย. 2026): ดาวแหลมหลังตัวเลข
+    // ลูก (ดาว/ตัวเลข/ป้าย CRITICAL) สร้างครั้งเดียวที่นี่ — ห้ามสร้าง DOM ระหว่างไฟต์
+    // ⚠️ pop() ต้องเขียนเลขที่ el.__n ห้ามใช้ el.textContent (จะลบลูกทิ้งหมด)
+    for (let i = 0; i < 16; i++) {
+      const e = mkEl('brfx-pop')
+      const inner = document.createElement('span'); inner.className = 'brfx-pop-in'
+      const bg = document.createElement('i'); bg.className = 'brfx-pop-bg'
+      const n = document.createElement('span'); n.className = 'brfx-pop-n'
+      const tag = document.createElement('span'); tag.className = 'brfx-pop-tag'; tag.textContent = 'CRITICAL'
+      inner.append(bg, n, tag); e.appendChild(inner); e.__n = n
+      pool.pop.push(e)
+    }
     for (let i = 0; i < 4; i++) pool.call.push(mkEl('brfx-call'))
     for (let i = 0; i < 2; i++) { const e = mkImg('brfx-puff'); imgSrc(e, '💀'); pool.puff.push(e) }
     pool.ring = [mkEl('brfx-ring')]
@@ -157,7 +168,7 @@ export function createBattleFx() {
     const w = Math.max(0, Math.min(1, o?.weight ?? 0.4))
     const el = take('pop')
     el.getAnimations?.().forEach(a => a.cancel())
-    el.textContent = (heal ? '+' : '-') + dmg
+    el.__n.textContent = (heal ? '+' : '-') + dmg
     el.className = 'brfx brfx-pop'
       + (infect ? ' infect' : heal ? ' heal' : crit ? ' crit' : eff === 'super' ? ' super' : eff === 'weak' ? ' weak' : '')
     // ขนาดต่อเนื่อง — CSS .tier-* 4 คลาสถูกลบแล้ว ขนาดมาจากที่นี่ที่เดียว
@@ -176,8 +187,8 @@ export function createBattleFx() {
     const ms = 620 + w * 420
     const rise = 16 + w * 26
     const kf = [
-      { transform: base + ' translateY(0) scale(.4)', opacity: 0, offset: 0 },
-      { transform: base + ' translateY(-7px) scale(1.28)', opacity: 1, offset: .26 },
+      { transform: base + ' translateY(0) scale(.4) rotate(-14deg)', opacity: 0, offset: 0 },
+      { transform: base + ' translateY(-7px) scale(1.28) rotate(4deg)', opacity: 1, offset: .26 },
       { transform: base + ' translateY(-12px) scale(1)', opacity: 1, offset: .44 },
       { transform: base + ` translateY(-${rise.toFixed(0)}px) scale(1)`, opacity: 0, offset: 1 },
     ]

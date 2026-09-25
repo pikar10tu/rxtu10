@@ -204,6 +204,7 @@ function startDuel() {
     loseText: 'แพ้ไปหน่อย (ท้าสู้กันเอง ไม่กระทบแต้มประลอง)',
     // ครึ่งบน = สนามของคนที่เราท้า · ครึ่งล่าง = ของเรา
     arenas: { top: members.rosterRows?.[view.value.uid]?.ar ?? null, bot: rosterArena(auth.userData) },
+    sides: { top: { name: view.value.nickname || '?' }, bot: { name: 'คุณ' } },
   }
   const target = view.value.uid
   if (shouldLogFriendly(members.rosterRows?.[myUid.value]?.h, target)) {
