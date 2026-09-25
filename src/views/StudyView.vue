@@ -12,59 +12,92 @@
       <div class="sv-empty">เข้าสู่ระบบเพื่อเริ่มทบทวน</div>
     </template>
 
-    <!-- ── HOME ── -->
+    <!-- ── HOME ── แท็บ ข้อสอบ | แฟลชการ์ด (แบบ B — user เลือก 25 ก.ย. 2026) -->
     <template v-else-if="mode === 'home'">
-      <!-- ── ส่วนทำข้อสอบ (ฮับโหมด) ── -->
-      <SectionTitle><Emoji char="📝" /> ทำข้อสอบ</SectionTitle>
-      <div class="sv-modes">
-        <QuizModeCard emoji="🗓️" title="ข้อสอบประจำวัน" subtitle="ชุดเดียวกันทั้งรุ่น 3 ข้อ แข่งเก็บคะแนน" coming-soon />
-        <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
-        <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
-        <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
-        <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
-        <QuizModeCard emoji="🧮" title="ฝึกคำนวณ CrCl" subtitle="ฝึกสูตร Cockcroft-Gault · ทำกี่ข้อก็ได้" to="/study/crcl" />
+      <div class="sv-tabs" role="tablist">
+        <button role="tab" :aria-selected="tab === 'quiz'" :class="{ on: tab === 'quiz' }" @click="setTab('quiz')">
+          <Emoji char="📝" /> ข้อสอบ
+        </button>
+        <button role="tab" :aria-selected="tab === 'flash'" :class="{ on: tab === 'flash' }" @click="setTab('flash')">
+          <Emoji char="🧠" /> แฟลชการ์ด
+          <!-- ป้ายจำนวนใบรอ = ตัวดึงคนเข้าแท็บนี้ (แฟลชการ์ดคนใช้น้อย — user บอก) -->
+          <span v-if="queueSize" class="sv-tab-n">{{ queueSize }}</span>
+        </button>
       </div>
 
-      <!-- ── ส่วนทบทวน flashcard ── -->
-      <div class="sv-section-flash"><SectionTitle><Emoji char="📚" /> ทบทวน flashcard</SectionTitle></div>
-      <div class="sv-stats">
-        <div class="sv-stat due"><span class="sv-stat-n">{{ dueCount }}</span><span class="sv-stat-l">ครบกำหนด</span></div>
-        <div class="sv-stat new"><span class="sv-stat-n">{{ newCount }}</span><span class="sv-stat-l">ยังไม่เคยเรียน</span></div>
-        <div class="sv-stat mast"><span class="sv-stat-n">{{ masteredCount }}</span><span class="sv-stat-l">แม่นแล้ว</span></div>
+      <!-- ── แท็บข้อสอบ ── -->
+      <template v-if="tab === 'quiz'">
+        <div class="sv-modes">
+          <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
+          <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
+          <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
+          <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
+          <QuizModeCard emoji="🧮" title="ฝึกคำนวณ CrCl" subtitle="ฝึกสูตร Cockcroft-Gault · ทำกี่ข้อก็ได้" to="/study/crcl" />
+        </div>
+        <!-- ยังไม่เปิด = แถบประบาง ไม่กินที่แถวแรกเหมือนเดิม -->
+        <div class="sv-soon"><Emoji char="🗓️" /> ข้อสอบประจำวัน ชุดเดียวกันทั้งรุ่น · เร็วๆ นี้</div>
+
+        <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ -->
+        <RouterLink v-if="authStore.isQuestionEditor" to="/questions" class="sv-quizlink sv-acadlink">
+          <span class="sv-quizlink-emoji"><Emoji char="🛠️" /></span>
+          <span class="sv-quizlink-text">
+            <b>จัดการคลังข้อสอบ</b>
+            <small>เพิ่ม/แก้/เผยแพร่ข้อสอบ · เฉพาะทีมวิชาการ</small>
+          </span>
+          <span class="sv-quizlink-go">›</span>
+        </RouterLink>
+
+        <RouterLink v-if="authStore.isQuestionEditor" to="/review" class="sv-quizlink sv-acadlink">
+          <span class="sv-quizlink-emoji"><Emoji char="🔍" /></span>
+          <span class="sv-quizlink-text">
+            <b>ตรวจข้อสอบ (วิชาการ)</b>
+            <small>ระบบสุ่มข้อให้ช่วยตรวจความถูกต้อง · เฉพาะทีมวิชาการ</small>
+          </span>
+          <span class="sv-quizlink-go">›</span>
+        </RouterLink>
+      </template>
+
+      <!-- ── แท็บแฟลชการ์ด ── -->
+      <div v-else class="sv-flash">
+        <!-- คนยังไม่เคยเปิดเลย: บอกก่อนว่ามันคืออะไร ใช้เวลาแค่ไหน (เดิมเจอแต่ตัวเลข 0 สามช่อง) -->
+        <p v-if="!seenCount" class="sv-intro">
+          การ์ดตัวยา {{ DECK.length }} ตัว ทายกลุ่มยา ข้อบ่งใช้ และขนาดยา ·
+          ระบบเลือกใบที่ใกล้ลืมมาให้เองทุกวัน ใช้เวลาวันละไม่กี่นาที
+        </p>
+
+        <div class="sv-donut" role="img" :aria-label="`เรียนไปแล้ว ${seenCount} จาก ${DECK.length} ตัวยา`">
+          <svg viewBox="0 0 150 150" aria-hidden="true">
+            <circle cx="75" cy="75" :r="DONUT_R" class="sv-donut-bg" />
+            <circle cx="75" cy="75" :r="DONUT_R" class="sv-donut-fg" :stroke-dasharray="DONUT_C" :stroke-dashoffset="DONUT_C * (1 - seenPct / 100)" />
+          </svg>
+          <div class="sv-donut-c"><b>{{ seenPct }}%</b><small>{{ seenCount }}/{{ DECK.length }} ตัวยา</small></div>
+        </div>
+
+        <div class="sv-pills">
+          <span class="sv-pill due">ครบกำหนด {{ dueCount }}</span>
+          <span class="sv-pill new">ยังไม่เคยเรียน {{ newCount }}</span>
+          <span class="sv-pill mast">แม่นแล้ว {{ masteredCount }}</span>
+        </div>
+
+        <template v-if="queueSize">
+          <button class="sv-start" @click="beginReview()">
+            เริ่มทบทวน {{ queueSize }} ใบ
+            <small class="sv-start-sub">ประมาณ {{ estMin(queueSize) }} นาที</small>
+          </button>
+          <!-- กองใหญ่ = คนไม่กล้าเริ่ม · ให้ทางเลือกทำสั้นๆ ก่อน (ใบที่ครบกำหนดมาก่อน ที่เหลือรอพรุ่งนี้) -->
+          <button v-if="queueSize > QUICK_SIZE" class="sv-freebtn" @click="beginReview(QUICK_SIZE)">
+            มีเวลาน้อย? ทำแค่ {{ QUICK_SIZE }} ใบ (~{{ estMin(QUICK_SIZE) }} นาที)
+          </button>
+        </template>
+        <template v-else>
+          <button class="sv-start" disabled><Emoji char="🎉" /> วันนี้ทบทวนครบแล้ว</button>
+          <div class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือฝึกแบบสุ่มด้านล่าง</div>
+          <button class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (สุ่มทั้งเด็ค · นับความคืบหน้าตามปกติ) <Emoji char="🎲" /></button>
+        </template>
+
+        <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
+        <button class="sv-howto" @click="openCoach()"><Emoji char="💡" /> ดูวิธีใช้แฟลชการ์ดอีกครั้ง</button>
       </div>
-
-      <div class="sv-progress">
-        <div class="sv-progress-bar"><div class="sv-progress-fill" :style="{ width: seenPct + '%' }"></div></div>
-        <div class="sv-progress-txt">เรียนไปแล้ว {{ seenCount }}/{{ DECK.length }} ตัว</div>
-      </div>
-
-      <button class="sv-start" :disabled="!queueSize" @click="beginReview()">
-        {{ queueSize ? `เริ่มทบทวน ${queueSize} ใบ` : '🎉 วันนี้ทบทวนครบแล้ว!' }}
-      </button>
-      <div v-if="!queueSize" class="sv-allclear">กลับมาใหม่พรุ่งนี้ หรือกดด้านล่างเพื่อฝึกแบบสุ่ม</div>
-      <button v-if="!queueSize" class="sv-freebtn" @click="startSession(true)">ฝึกอิสระ (สุ่มทั้งเด็ค · นับความคืบหน้าตามปกติ) <Emoji char="🎲" /></button>
-
-      <div class="sv-caphint">ทบทวนได้เหรียญ +{{ COIN_PER_CARD }}/ใบ (สูงสุด {{ STUDY_DAILY_CAP }}<Emoji char="🪙" />/วัน)</div>
-      <button class="sv-howto" @click="openCoach()"><Emoji char="💡" /> ดูวิธีใช้แฟลชการ์ดอีกครั้ง</button>
-
-      <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ -->
-      <RouterLink v-if="authStore.isQuestionEditor" to="/questions" class="sv-quizlink sv-acadlink">
-        <span class="sv-quizlink-emoji"><Emoji char="🛠️" /></span>
-        <span class="sv-quizlink-text">
-          <b>จัดการคลังข้อสอบ</b>
-          <small>เพิ่ม/แก้/เผยแพร่ข้อสอบ · เฉพาะทีมวิชาการ</small>
-        </span>
-        <span class="sv-quizlink-go">›</span>
-      </RouterLink>
-
-      <RouterLink v-if="authStore.isQuestionEditor" to="/review" class="sv-quizlink sv-acadlink">
-        <span class="sv-quizlink-emoji"><Emoji char="🔍" /></span>
-        <span class="sv-quizlink-text">
-          <b>ตรวจข้อสอบ (วิชาการ)</b>
-          <small>ระบบสุ่มข้อให้ช่วยตรวจความถูกต้อง · เฉพาะทีมวิชาการ</small>
-        </span>
-        <span class="sv-quizlink-go">›</span>
-      </RouterLink>
     </template>
 
     <!-- ── COACH: วิธีใช้แฟลชการ์ด (โหมดในหน้า ไม่ใช่ overlay — StudyView อยู่ใต้ RouterView ดู CLAUDE.md ข้อ 6) ── -->
@@ -177,7 +210,6 @@
 <script setup>
 import { useEscapeKey } from '../composables/useEscapeKey.js'
 import Emoji from '../components/shared/Emoji.vue'
-import SectionTitle from '../components/shared/SectionTitle.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import { ref, computed, onUnmounted } from 'vue'
@@ -222,6 +254,17 @@ const masteredCount = computed(() =>
 )
 const queueSize = computed(() => dueCount.value + Math.min(newCount.value, NEW_PER_SESSION))
 
+// ── แท็บหน้าหลัก (ข้อสอบ | แฟลชการ์ด) — จำแท็บล่าสุดไว้ในเครื่อง (ของสะดวกล้วน อ่าน/เขียนพังก็ไม่เป็นไร) ──
+const TAB_KEY = 'rxtu.studyTab'
+const tab = ref((() => { try { return localStorage.getItem(TAB_KEY) === 'flash' ? 'flash' : 'quiz' } catch { return 'quiz' } })())
+function setTab(t) { tab.value = t; try { localStorage.setItem(TAB_KEY, t) } catch { /* private mode */ } }
+
+const QUICK_SIZE = 10               // รอบสั้น "มีเวลาน้อย"
+const SEC_PER_CARD = 12             // เวลาเฉลี่ยต่อใบ (นึก+พลิก+ให้คะแนน) ใช้โชว์ประมาณการเท่านั้น
+const estMin = (n) => Math.max(1, Math.round(n * SEC_PER_CARD / 60))
+const DONUT_R = 63
+const DONUT_C = 2 * Math.PI * DONUT_R
+
 // ── session state ──
 const mode = ref('home')          // home | coach | review | done
 const queue = ref([])             // array of drug names left to review
@@ -252,14 +295,17 @@ const coachStep = ref(1)          // 1..3
 const coachThenStart = ref(false) // จบจอสอนแล้วเข้าเซสชันต่อไหม (ครั้งแรกเท่านั้น · เปิดดูซ้ำ = กลับหน้าหลัก)
 
 // เข้าเซสชันปกติ — คนที่ยังไม่เคยเห็นวิธีใช้ ให้ดูจอสอนก่อนแล้วค่อยเข้าเซสชันต่อ
-function beginReview() {
+// limit = รอบสั้น (null = ทั้งคิว)
+let pendingLimit = null
+function beginReview(limit = null) {
+  pendingLimit = limit
   if (!authStore.userData?.seenStudyCoach) {
     coachStep.value = 1
     coachThenStart.value = true
     mode.value = 'coach'
     return
   }
-  startSession()
+  startSession(false, limit)
 }
 
 // เปิดดูวิธีใช้ซ้ำจากหน้าหลัก — จบแล้วกลับหน้าหลัก ไม่เข้าเซสชัน
@@ -273,7 +319,7 @@ function openCoach() {
 async function finishCoach() {
   const wasFirstRun = coachThenStart.value
   if (wasFirstRun) {
-    startSession()
+    startSession(false, pendingLimit)
     if (mode.value === 'coach') mode.value = 'home'   // คิวว่างระหว่างเปิดจอสอน → อย่าค้างบนจอสอน
   }
   else mode.value = 'home'
@@ -292,7 +338,7 @@ function shuffle(arr) {
   return a
 }
 
-function startSession(free = false) {
+function startSession(free = false, limit = null) {
   let ids
   if (free) {
     ids = shuffle(DECK.map(d => d.n)).slice(0, 20)
@@ -300,6 +346,7 @@ function startSession(free = false) {
     const due = shuffle(dueList.value.map(d => d.n))
     const fresh = shuffle(newList.value.map(d => d.n)).slice(0, NEW_PER_SESSION)
     ids = [...due, ...fresh]
+    if (limit) ids = ids.slice(0, limit)   // ครบกำหนดมาก่อนใบใหม่เสมอ · ที่เหลือยังครบกำหนดอยู่ พรุ่งนี้มาต่อ
   }
   if (!ids.length) return
   queue.value = ids
@@ -445,19 +492,31 @@ async function sendReport() {
 .sv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 36px 0; font-size: .85rem; }
 
 /* home */
-.sv-section-flash { margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--border); }
 .sv-modes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
-.sv-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
-.sv-stat { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 14px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.sv-stat-n { font-size: 1.5rem; font-weight: 800; line-height: 1; }
-.sv-stat-l { font-size: .7rem; color: rgba(0,0,0,.5); font-weight: 600; }
-.sv-stat.due  .sv-stat-n { color: #d97706; }
-.sv-stat.new  .sv-stat-n { color: #2563eb; }
-.sv-stat.mast .sv-stat-n { color: #16a34a; }
-.sv-progress { margin-bottom: 18px; }
-.sv-progress-bar { height: 8px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
-.sv-progress-fill { height: 100%; background: linear-gradient(90deg,#84cc16,#16a34a); transition: width .4s; }
-.sv-progress-txt { font-size: .7rem; color: rgba(0,0,0,.5); margin-top: 5px; text-align: center; }
+/* ── แท็บ ข้อสอบ | แฟลชการ์ด ── */
+.sv-tabs { display: flex; gap: 4px; padding: 4px; margin-bottom: 14px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); }
+.sv-tabs button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; background: none; border-radius: 10px; padding: 10px 6px; font-family: inherit; font-size: .88rem; font-weight: 800; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; }
+.sv-tabs button.on { background: var(--primary); color: #fff; }
+.sv-tabs button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.sv-tab-n { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: #ef4444; color: #fff; font-size: .7rem; font-weight: 800; line-height: 1.4; }
+.sv-soon { margin-top: 10px; padding: 10px 14px; border-radius: 14px; border: 1px dashed rgba(43,53,80,.25); font-size: .78rem; color: var(--muted); }
+
+/* ── แท็บแฟลชการ์ด ── */
+.sv-flash { background: #fff; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop); padding: 18px 16px; text-align: center; }
+.sv-intro { margin: 0 0 14px; font-size: .8rem; line-height: 1.5; color: var(--muted); background: var(--primary-light); border-radius: 12px; padding: 10px 12px; text-align: left; }
+.sv-donut { position: relative; width: 150px; height: 150px; margin: 0 auto 12px; }
+.sv-donut svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.sv-donut-bg { fill: none; stroke: rgba(43,53,80,.08); stroke-width: 12; }
+.sv-donut-fg { fill: none; stroke: var(--mint); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset .5s; }
+.sv-donut-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.sv-donut-c b { font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.sv-donut-c small { font-size: .72rem; color: var(--muted); margin-top: 3px; }
+.sv-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 16px; }
+.sv-pill { font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.sv-pill.due  { background: #ffe8ef; color: #b8326a; }
+.sv-pill.new  { background: var(--primary-light); color: var(--primary-dark); }
+.sv-pill.mast { background: var(--mint-light); color: #1f7a5c; }
+.sv-start-sub { display: block; font-size: .72rem; font-weight: 600; opacity: .85; margin-top: 2px; }
 .sv-start { width: 100%; border: var(--bw) solid var(--line); border-radius: 14px; padding: 16px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .sv-start:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .sv-start:disabled { background: #cbd5e1; cursor: default; color: #fff; box-shadow: none; }

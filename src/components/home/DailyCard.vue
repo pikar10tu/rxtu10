@@ -1,21 +1,23 @@
 <template>
+  <!-- การ์ดหัวหน้า Home (แบบ A — user เลือก 25 ก.ย. 2026): เหรียญ + วงแหวนรายได้ + ปุ่มเก็บ อยู่จอแรกเลย -->
   <div class="daily-card">
-    <div class="dc-coins">
-      <span class="dc-coins-label">เหรียญของคุณ</span>
-      <span class="dc-coins-val">{{ coins.toLocaleString() }} <Emoji char="🪙" /></span>
-    </div>
-
-    <!-- accruing pool -->
-    <div class="dc-pool">
-      <div class="dc-pool-top">
-        <span><Emoji char="💰" /> รายได้สะสม</span>
-        <b>{{ accrued.toLocaleString() }}<Emoji char="🪙" /></b>
+    <div class="dc-hi">สวัสดี {{ nickname }} <Emoji char="👋" /></div>
+    <div class="dc-top">
+      <div class="dc-coins">
+        <span class="dc-coins-label">เหรียญของคุณ</span>
+        <span class="dc-coins-val">{{ coins.toLocaleString() }}<Emoji char="🪙" /></span>
+        <span class="dc-rate">{{ ratePerHour.toLocaleString() }}<Emoji char="🪙" />/ชม. · เต็มวันละ {{ ratePerDay.toLocaleString() }}</span>
       </div>
-      <div class="dc-bar"><div class="dc-fill" :class="{ full: isFull }" :style="{ width: fillPct + '%' }"></div></div>
-      <div class="dc-pool-sub">
-        <span>{{ ratePerHour.toLocaleString() }}<Emoji char="🪙" />/ชม.</span>
-        <span v-if="isFull"><Emoji char="⚠️" /> เต็มแล้ว! รีบเก็บ</span>
-        <span v-else>เต็มใน {{ fmtRemain }}</span>
+      <!-- วงแหวน = หลอดรายได้สะสม 24 ชม. (เดิมเป็นแถบตรง) -->
+      <div class="dc-ring" :class="{ full: isFull }" role="img" :aria-label="`รายได้สะสม ${Math.floor(fillPct)}%`">
+        <svg viewBox="0 0 92 92" aria-hidden="true">
+          <circle cx="46" cy="46" :r="R" class="dc-ring-bg" />
+          <circle cx="46" cy="46" :r="R" class="dc-ring-fg" :stroke-dasharray="CIRC" :stroke-dashoffset="CIRC * (1 - fillPct / 100)" />
+        </svg>
+        <div class="dc-ring-c">
+          <b>{{ Math.floor(fillPct) }}%</b>
+          <small>{{ isFull ? 'เต็มแล้ว' : `เต็มใน ${fmtRemain}` }}</small>
+        </div>
       </div>
     </div>
 
@@ -26,21 +28,23 @@
       <span v-if="fillPct >= DAILY_DOT_PCT && accrued >= 1" class="nav-dot dc-dot" aria-hidden="true"></span>
     </button>
 
-    <!-- breakdown -->
-    <div class="dc-breakdown">
+    <!-- ป้ายชี้ทางหอคอย "ต้องโผล่เสมอ" สำหรับคนยังไม่เคยไต่ — ห้ามพับไว้ใน details
+         (เดิม v-if="towerBonus" ซ่อนป้ายนี้จากคนที่ต้องการมันที่สุด · เพื่อนหลายคนไม่รู้ว่าหอคอยให้รายได้รายวัน) -->
+    <RouterLink v-if="!towerBonus" to="/tower" class="dc-cta">
+      <span><Emoji char="🏯" /> หอคอย · ยังไม่ได้ไต่</span>
+      <b>ถึงชั้น {{ TOWER_HINT_FLOOR }} = +{{ towerHintBonus.toLocaleString() }}/วัน ›</b>
+    </RouterLink>
+
+    <!-- ที่มาของรายได้ — พับไว้ (ดูไม่บ่อย) -->
+    <details class="dc-breakdown">
+      <summary>รายได้มาจากไหน</summary>
       <div class="dc-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
       <div class="dc-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
-      <!-- แถวหอคอยต้องโผล่ "เสมอ" — เดิม v-if="towerBonus" ซ่อนแถวนี้จากคนที่ยังไม่เคยไต่
-           คือซ่อนป้ายชี้ทางจากคนที่ต้องการมันที่สุด (เพื่อนหลายคนไม่รู้ว่าหอคอยให้รายได้รายวัน) -->
       <div v-if="towerBonus" class="dc-row"><span><Emoji char="🏯" /> หอคอย</span><b>{{ towerBonus.toLocaleString() }}/วัน</b></div>
-      <RouterLink v-else to="/tower" class="dc-row dc-cta">
-        <span><Emoji char="🏯" /> หอคอย · ยังไม่ได้ไต่</span>
-        <b>ถึงชั้น {{ TOWER_HINT_FLOOR }} = +{{ towerHintBonus.toLocaleString() }}/วัน ›</b>
-      </RouterLink>
       <div v-if="bonusPct" class="dc-row dc-bonus"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
       <div v-if="buffActive" class="dc-row dc-bonus"><span><Emoji char="⚡" /> โบนัสเควสต์รายวัน</span><b>+50%</b></div>
       <div class="dc-row dc-total"><span>รวมเต็ม (24 ชม.)</span><b>{{ ratePerDay.toLocaleString() }}<Emoji char="🪙" /></b></div>
-    </div>
+    </details>
   </div>
 </template>
 
@@ -55,6 +59,9 @@ import { DAILY_DOT_PCT } from '../../composables/useNavDots.js'
 
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
+const nickname = computed(() => auth.userData?.nickname || auth.userData?.name?.split(' ')[0] || '')
+const R = 40
+const CIRC = 2 * Math.PI * R
 const { baseIncome, petIncome, towerBonus, bonusPct, buffActive, ratePerDay, ratePerHour, accrued, fillPct, isFull, remainingMs, claim } = useDaily()
 
 // เป้าหมายที่ยกมาล่อคนยังไม่เคยไต่ — ชั้น 10 ไปถึงได้ในวันเดียวและตัวเลขใหญ่พอให้สนใจ
@@ -71,40 +78,47 @@ const fmtRemain = computed(() => {
 
 <style scoped>
 .daily-card {
-  background: #fff;
-  border: var(--bw) solid var(--line);
-  border-radius: 18px;
-  padding: 14px;
-  margin-bottom: 14px;
-  box-shadow: var(--pop);
+  background: linear-gradient(150deg, #fff 0%, #f3faff 60%, #fff4f9 100%);
+  border: var(--bw) solid var(--line); border-radius: 20px;
+  padding: 16px; margin-bottom: 14px; box-shadow: var(--pop);
 }
-.dc-coins { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
-.dc-coins-label { font-size: .72rem; color: rgba(0,0,0,.5); }
-.dc-coins-val { font-size: 1.4rem; font-weight: 800; color: #b45309; }
-.dc-pool { margin-bottom: 10px; }
-.dc-pool-top { display: flex; justify-content: space-between; align-items: baseline; font-size: .78rem; color: rgba(0,0,0,.6); margin-bottom: 5px; }
-.dc-pool-top b { font-size: 1rem; color: #b45309; }
-.dc-bar { height: 8px; background: rgba(0,0,0,.08); border-radius: 999px; overflow: hidden; }
-.dc-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width .8s linear; }
-.dc-fill.full { background: linear-gradient(90deg, var(--gold), var(--accent)); }
-.dc-pool-sub { display: flex; justify-content: space-between; font-size: .7rem; color: rgba(0,0,0,.45); margin-top: 4px; }
+.dc-hi { font-size: .8rem; color: var(--muted); font-weight: 600; }
+.dc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
+.dc-coins { display: flex; flex-direction: column; min-width: 0; }
+.dc-coins-label { font-size: .72rem; color: var(--muted); }
+.dc-coins-val { font-size: 1.9rem; font-weight: 800; color: #b45309; line-height: 1.1; font-variant-numeric: tabular-nums; word-break: break-all; }
+.dc-rate { font-size: .7rem; color: var(--muted); margin-top: 2px; }
+
+.dc-ring { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+.dc-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dc-ring-bg { fill: none; stroke: rgba(43,53,80,.08); stroke-width: 9; }
+.dc-ring-fg { fill: none; stroke: var(--primary); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset .8s linear; }
+.dc-ring.full .dc-ring-fg { stroke: var(--gold); }
+.dc-ring-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
+.dc-ring-c b { font-size: 1.05rem; color: #b45309; font-variant-numeric: tabular-nums; }
+.dc-ring-c small { font-size: .7rem; color: var(--muted); }
+
 .dc-claim {
-  width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px;
-  font-family: inherit; font-size: .86rem; font-weight: 800; color: #fff;
+  width: 100%; border: var(--bw) solid var(--line); border-radius: 13px; padding: 12px;
+  font-family: inherit; font-size: .9rem; font-weight: 800; color: #fff;
   position: relative;
-  background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; margin-bottom: 12px;
+  background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s;
 }
 .dc-claim.ready { background: var(--mint); box-shadow: var(--pop); }
 .dc-claim.ready:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 .dc-dot { top: -6px; right: -6px; }
 .dc-claim:disabled { cursor: default; opacity: .6; box-shadow: none; }
-.dc-breakdown { background: rgba(0,0,0,.03); border-radius: 10px; padding: 8px 12px; }
+
+.dc-cta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: #fff8ec; font-size: .74rem; color: rgba(0,0,0,.6); text-decoration: none; }
+.dc-cta b { color: #b45309; }
+.dc-cta:active { opacity: .6; }
+
+.dc-breakdown { background: rgba(0,0,0,.03); border-radius: 10px; padding: 8px 12px; margin-top: 10px; }
+.dc-breakdown summary { font-size: .74rem; font-weight: 700; color: var(--primary-dark); cursor: pointer; }
+.dc-breakdown[open] summary { margin-bottom: 4px; }
 .dc-row { display: flex; justify-content: space-between; align-items: center; font-size: .74rem; color: rgba(0,0,0,.6); padding: 3px 0; }
 .dc-row b { color: #059669; }
 .dc-bonus b { color: #ec4899; }
-.dc-cta { text-decoration: none; }
-.dc-cta b { color: #b45309; }
-.dc-cta:active { opacity: .6; }
 .dc-total { border-top: 1px dashed rgba(0,0,0,.12); margin-top: 4px; padding-top: 6px; font-weight: 800; color: rgba(0,0,0,.8); }
 .dc-total b { color: #b45309; }
 </style>
