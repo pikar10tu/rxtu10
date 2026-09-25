@@ -3,6 +3,7 @@
 // รัน: node --test src/utils/emoji.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readdirSync } from 'node:fs'
 import { emojiCodepoint, fluentFile, emojifyHtml } from './emoji.js'
 
 test('emoji ธรรมดา (surrogate pair) → hex ตัวเดียว', () => {
@@ -27,9 +28,9 @@ test('ค่าว่าง → ""', () => {
   assert.equal(emojiCodepoint(undefined), '')
 })
 
-test('fluentFile: path สัมพัทธ์ emoji/fluent/<cp>.svg, ว่าง → ""', () => {
-  assert.equal(fluentFile('🐱'), 'emoji/fluent/1f431.svg')
-  assert.equal(fluentFile('🛠️'), 'emoji/fluent/1f6e0.svg') // VS16 strip
+test('fluentFile: path สัมพัทธ์ emoji/fluent/<cp>.webp, ว่าง → ""', () => {
+  assert.equal(fluentFile('🐱'), 'emoji/fluent/1f431.webp')
+  assert.equal(fluentFile('🛠️'), 'emoji/fluent/1f6e0.webp') // VS16 strip
   assert.equal(fluentFile(''), '')
 })
 
@@ -54,12 +55,12 @@ test('escape & และ " ด้วย (กันหลุดออกจาก
 
 test('escape ไม่กระทบการแปลง emoji เป็น <img> (ยังทำงานเหมือนเดิม)', () => {
   const out = emojifyHtml('ขาย 🐱 แล้ว')
-  assert.ok(out.includes('<img src="emoji/fluent/1f431.svg"'), out)
+  assert.ok(out.includes('<img src="emoji/fluent/1f431.webp"'), out)
   assert.ok(out.startsWith('ขาย ') && out.endsWith(' แล้ว'))
 })
 
 test('base ถูกเติมหน้า path ตามเดิม', () => {
-  assert.ok(emojifyHtml('🐱', '/rxtu10/').includes('src="/rxtu10/emoji/fluent/1f431.svg"'))
+  assert.ok(emojifyHtml('🐱', '/rxtu10/').includes('src="/rxtu10/emoji/fluent/1f431.webp"'))
 })
 
 test('emoji ที่ไม่มีไฟล์ → คงตัวเดิม ไม่แตะ', () => {
@@ -70,5 +71,16 @@ test('emoji ที่ไม่มีไฟล์ → คงตัวเดิม
 test('ข้อความปนทั้ง emoji และแท็ก → emoji แปลง แท็กถูก escape', () => {
   const out = emojifyHtml('<b>ขาย</b> 🐱')
   assert.ok(out.includes('&lt;b&gt;ขาย&lt;/b&gt;'))
-  assert.ok(out.includes('<img src="emoji/fluent/1f431.svg"'))
+  assert.ok(out.includes('<img src="emoji/fluent/1f431.webp"'))
+})
+
+// ── WebP คู่กับ SVG ทุกตัว ──
+// 🔑 iPhone Safari raster SVG Fluent ใหม่ทุกครั้งที่การ์ด repaint = ต้นเหตุรีเพลย์กระตุก
+//    (ห้องเทียบ v5 26 ก.ย. 2026: <30fps 119+ → 7 เฟรม/ไฟต์) ⇒ แอปเสิร์ฟ WebP · SVG เก็บไว้เป็นต้นฉบับ
+//    เพิ่มอีโมจิใหม่ด้วย fetch-fluent แล้วลืมรัน fluent-webp = รูปหายกลายเป็นอีโมจิเครื่อง → เทสนี้จับ
+test('ทุกไฟล์ SVG ใน public/emoji/fluent มี WebP คู่กัน (รัน node scripts/fluent-webp.mjs)', () => {
+  const dir = new URL('../../public/emoji/fluent/', import.meta.url)
+  const files = new Set(readdirSync(dir))
+  const missing = [...files].filter(f => f.endsWith('.svg') && !files.has(f.replace(/\.svg$/, '.webp')))
+  assert.deepEqual(missing, [])
 })

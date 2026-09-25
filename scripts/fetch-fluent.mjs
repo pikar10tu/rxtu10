@@ -1,6 +1,7 @@
 // ดาวน์โหลด Fluent Emoji (สไตล์ Color SVG) เฉพาะ emoji ที่แอปใช้จริง → self-host
 // เหตุผล: jsDelivr เสิร์ฟ fluentui-emoji ไม่ได้ (repo >50MB) ต้องโฮสต์เอง
 // รัน: node scripts/fetch-fluent.mjs   (ต่อเน็ต) · ผล → public/emoji/fluent/<codepoint>.svg
+//      แล้วต่อด้วย node scripts/fluent-webp.mjs เสมอ (แอปเสิร์ฟ .webp)
 //
 // map: emoji → ชื่อ CLDR (จาก unicode-emoji-json) → โฟลเดอร์ Fluent (ขึ้นต้นใหญ่) + ไฟล์ <slug>_color.svg
 // ชื่อไฟล์ผลลัพธ์ = codepoint (เดียวกับ emojiCodepoint) ให้ <Emoji> ชี้ได้ตรง
@@ -76,3 +77,4 @@ if (missing.length) {
     console.log(`\n⚠️ ไม่ได้ ${missing.length} ตัว (จะ fallback เป็น emoji เครื่องตอนรัน):`)
     for (const [e, cp, why] of missing) console.log(`   ${e}  ${cp}  — ${why}`)
 }
+console.log('\n👉 ต่อด้วย: node scripts/fluent-webp.mjs  (แอปเสิร์ฟ WebP — ไม่รัน = อีโมจิใหม่หาย)')

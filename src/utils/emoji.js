@@ -2,6 +2,7 @@
 //  Emoji helper — แสดง emoji เป็น "รูปเดียวกันทุกเครื่อง"
 //  (iOS / Android / Windows render emoji ต่างกัน → ใช้ภาพชุดเดียว)
 //  ใช้ Fluent Emoji (Microsoft, สไตล์ Color SVG) self-host ใน public/emoji/fluent/
+//  แอปเสิร์ฟ .webp 256px ที่แปลงจาก SVG ด้วย scripts/fluent-webp.mjs (รันหลัง fetch-fluent ทุกครั้ง)
 //  ดาวน์โหลด subset เฉพาะที่ใช้ด้วย scripts/fetch-fluent.mjs (jsDelivr เสิร์ฟ repo
 //  >50MB ไม่ได้) · ไฟล์ตั้งชื่อตาม codepoint ให้ตรงกับ emojiCodepoint()
 //  License: Fluent Emoji = MIT (เครดิตใน README)
@@ -35,10 +36,12 @@ export function emojiCodepoint(emoji) {
   return toCodePoint(e)
 }
 
-/** emoji string → path ไฟล์ Fluent (สัมพัทธ์ต่อ BASE_URL) · '' ถ้า input ว่าง */
+/** emoji string → path ไฟล์ Fluent (สัมพัทธ์ต่อ BASE_URL) · '' ถ้า input ว่าง
+ *  🔑 เสิร์ฟ WebP ไม่ใช่ SVG — iPhone Safari raster SVG ใหม่ทุกครั้งที่ layer ถูกวาดใหม่
+ *     (รีเพลย์: <30fps 119+ → 7 เฟรม/ไฟต์ วัด 26 ก.ย. 2026) · SVG เป็นต้นฉบับ แปลงด้วย scripts/fluent-webp.mjs */
 export function fluentFile(emoji) {
   const cp = emojiCodepoint(emoji)
-  return cp ? `emoji/fluent/${cp}.svg` : ''
+  return cp ? `emoji/fluent/${cp}.webp` : ''
 }
 
 // emoji ดิบ (base pictographic + VS16/ZWJ/skin-tone) — เดียวกับ scripts/fetch-fluent
