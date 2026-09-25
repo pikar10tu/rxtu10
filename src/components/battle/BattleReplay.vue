@@ -45,10 +45,11 @@
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
              class="br-unit foe" @click="inspect('B'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
-          <span v-if="!badgeRow && skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['B'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['B'+i] > 1">×{{ skillCount['B'+i] }}</i></span>
-          <span v-if="(badgeRow && skillIcon(p)) || statusOf('B'+i).length" class="br-status" :class="{ row: badgeRow }">
-            <b v-if="badgeRow && skillIcon(p)" class="own" :class="{ lit: skillCount['B'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['B'+i] > 1">×{{ skillCount['B'+i] }}</i></b>
-            <em v-if="badgeRow && skillIcon(p) && statusOf('B'+i).length" class="sep"></em>
+          <!-- แถวป้ายเดียว (user เลือก 26 ก.ย.): ทักษะตัวเอง │ บัฟที่ได้รับ — ลำดับเดียวกับหน้าต่างอ่าน
+               เลขบนทักษะ = ชั้นสะสม/ที่เหลือเท่านั้น (ownCounter) ไม่ใช่จำนวนครั้งที่ทำงาน -->
+          <span v-if="skillIcon(p) || statusOf('B'+i).length" class="br-status">
+            <b v-if="skillIcon(p)" class="own" :class="{ lit: skillFired['B'+i], spent: counters['B'+i]?.spent }"><Emoji :char="skillIcon(p)" /><i v-if="counters['B'+i] && !counters['B'+i].spent">{{ counters['B'+i].n }}</i></b>
+            <em v-if="skillIcon(p) && statusOf('B'+i).length" class="sep"></em>
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
           <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out }">
@@ -70,10 +71,11 @@
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
              class="br-unit me" @click="inspect('A'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
-          <span v-if="!badgeRow && skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['A'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['A'+i] > 1">×{{ skillCount['A'+i] }}</i></span>
-          <span v-if="(badgeRow && skillIcon(p)) || statusOf('A'+i).length" class="br-status" :class="{ row: badgeRow }">
-            <b v-if="badgeRow && skillIcon(p)" class="own" :class="{ lit: skillCount['A'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['A'+i] > 1">×{{ skillCount['A'+i] }}</i></b>
-            <em v-if="badgeRow && skillIcon(p) && statusOf('A'+i).length" class="sep"></em>
+          <!-- แถวป้ายเดียว (user เลือก 26 ก.ย.): ทักษะตัวเอง │ บัฟที่ได้รับ — ลำดับเดียวกับหน้าต่างอ่าน
+               เลขบนทักษะ = ชั้นสะสม/ที่เหลือเท่านั้น (ownCounter) ไม่ใช่จำนวนครั้งที่ทำงาน -->
+          <span v-if="skillIcon(p) || statusOf('A'+i).length" class="br-status">
+            <b v-if="skillIcon(p)" class="own" :class="{ lit: skillFired['A'+i], spent: counters['A'+i]?.spent }"><Emoji :char="skillIcon(p)" /><i v-if="counters['A'+i] && !counters['A'+i].spent">{{ counters['A'+i].n }}</i></b>
+            <em v-if="skillIcon(p) && statusOf('A'+i).length" class="sep"></em>
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
           <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out }">
@@ -93,16 +95,18 @@
       <!-- สปอตไลต์สกิล — หรี่ฉากแล้วชูแบนเนอร์ให้อ่านก่อน ผลค่อยลงทีหลัง
            🚫 ห้ามใช้ backdrop-filter/blur ตรงนี้เด็ดขาด — เป็นตัวฆ่าเฟรมบน iOS Safari (ดูเคสกระตุก v3)
            อยู่ "ใต้" fx layer เพื่อให้เลข/ประกายของผลที่ลงตามมาไม่ถูกฉากหรี่กลบ -->
-      <div v-if="spot" class="br-spot" :class="{ out: spotOut, foe: spot.side === 'B' }" :style="spotStyle" aria-hidden="true">
+      <!-- 🔑 อยู่ใน DOM ตลอดไฟต์ (spotView) · ขึ้น/ลงด้วยคลาส on — เดิม v-if สร้าง/ทิ้งทั้งก้อนทุกแบนเนอร์
+           = จัดหน้า + วาดใหม่ + จอง layer ม่านเต็มจอใหม่ทุกครั้ง ⇒ user เห็น fps ตกตอนแบนเนอร์ขึ้น (26 ก.ย. 2026) -->
+      <div v-if="spotView" ref="spotEl" class="br-spot" :class="{ on: !!spot, out: spotOut, foe: spotView.side === 'B' }" :style="spotStyle" aria-hidden="true">
         <div class="br-spot-dim"></div>
         <!-- คัทอิน (user เลือกแบบ 2 จากเดโม 25 ก.ย. 2026): แถบเฉียง + หน้าเพ็ทเจ้าของสกิลทุกครั้ง
              ทีมเราเข้าจากซ้าย (ฟ้า) · ศัตรูเข้าจากขวา (แดง) · จังหวะเดิม: spotlightPassive await จนจบ = ไม่มีใครตีระหว่างนี้ -->
         <div class="br-cut">
-          <span class="br-cut-face"><Emoji :char="spot.face" /></span>
+          <span class="br-cut-face"><Emoji :char="spotView.face" /></span>
           <span class="br-cut-t">
-            <span class="br-cut-who">{{ spot.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }}</span>
-            <b class="br-cut-name"><Emoji v-if="spot.skillIcon" :char="spot.skillIcon" /> {{ spot.name }}</b>
-            <span v-if="spot.desc" class="br-cut-desc">{{ spot.desc }}</span>
+            <span class="br-cut-who">{{ spotView.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }}</span>
+            <b class="br-cut-name"><Emoji v-if="spotView.skillIcon" :char="spotView.skillIcon" /> {{ spotView.name }}</b>
+            <span v-if="spotView.desc" class="br-cut-desc">{{ spotView.desc }}</span>
           </span>
         </div>
       </div>
@@ -183,9 +187,8 @@
         <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ GRADE_LABELS[Math.min(5, Math.max(0, insp.grade || 0))] }}</b></div>
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
         <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
-        <!-- ไอคอนหน้าชื่อ = ตัวเดียวกับป้ายทักษะบนการ์ด · "ทำงานแล้ว N ครั้ง" = ×N บนการ์ด (ให้สองที่โยงกันได้) -->
+        <!-- ไอคอนหน้าชื่อ = ตัวเดียวกับป้ายทักษะบนการ์ด · เลขบนการ์ด (ชั้น/ที่เหลือ) = "x ชั้น · ใช้ไปแล้ว" ใน "กำลังได้รับ" ด้านล่าง -->
         <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b><Emoji v-if="insp.passive?.icon" :char="insp.passive.icon" /> {{ insp.passive ? insp.passName : 'ตัวนี้ยังไม่มี' }}</b></div>
-        <div v-if="skillCount[inspectUid]" class="br-card-count"><span class="br-buff-tag">ทำงานแล้ว {{ skillCount[inspectUid] }} ครั้ง</span></div>
         <!-- เดิมโชว์แค่ชื่อ เปิดมาก็ยังไม่รู้อยู่ดีว่าสกิลทำอะไร — passiveText() เติมเลขจริงของขั้นให้แล้ว -->
         <div v-if="insp.passive" class="br-card-passdesc">{{ passiveText(insp.passive) }}</div>
 
@@ -227,7 +230,7 @@ import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, sparkOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
 import { passiveText, passiveTitle, effectText, STATUS_MAX } from '../../data/petPassives.js'
-import { buffSources, liveBuffs, badgesOf } from '../../utils/battleBuffs.js'
+import { buffSources, liveBuffs, badgesOf, ownCounter } from '../../utils/battleBuffs.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
 import { computeBattleSummary } from '../../utils/battleSummary.js'
@@ -350,6 +353,9 @@ const inspectUid = ref(null)
 let pausedBeforeInspect = false  // คนกด ⏸️ เองอยู่ก่อนแล้วหรือเปล่า — ปิด inspect แล้วต้องคืนสถานะนั้น ไม่ใช่เล่นต่อดื้อ ๆ
 // สปอตไลต์สกิล — แบนเนอร์ที่ขึ้นก่อน แล้วผลค่อยลง (ชั้น spotlight ของ battleBeats)
 const spot = ref(null)           // { icon, name, desc } · null = ไม่มีสปอตไลต์อยู่
+// เนื้อหาที่แบนเนอร์วาดอยู่ — ไม่ล้างตอนแบนเนอร์ลง (ให้ DOM/layer อยู่ต่อ) · reset() ตั้งตัวเปล่าไว้ตั้งแต่เริ่มไฟต์
+const spotView = ref(null)
+const spotEl = ref(null)
 const spotOut = ref(false)       // true = กำลังเลื่อนออก (เฟสผลลง)
 // ความยาวอนิเมชันผูกกับ beat.timing จริง (ไม่ใช่ค่าคงที่ใน CSS) — ไม่งั้นพอ pace ไม่ใช่ ×1
 // แบนเนอร์จะยังเลื่อนเข้าไม่เสร็จตอนช่วงค้างอ่านหมดแล้ว
@@ -451,7 +457,6 @@ function ticksFor(uid) {
 //    (ตัวที่เปลี่ยนได้ — 🧿 ใช้แล้วหมด, ⬆️ สแต็ก — ยังไม่ทำรอบนี้ ดู §5.5 ของสเปก)
 //
 // ต้นทุน: span static ในการ์ดที่ถูก promote เป็น layer อยู่แล้ว ⇒ 0 layer เพิ่ม 0 ต้นทุนต่อเฟรม
-// (แพทเทิร์นเดียวกับ .br-skill-dot ที่ใช้อยู่จริงในโปรดักชันแล้ว)
 // แหล่งความจริงเดียวของ "ใครติดบัฟอะไร มาจากใคร" (utils/battleBuffs.js)
 // ป้ายบนการ์ดคือก้อนนี้ที่ตัดที่มาทิ้ง — รายการเต็มพร้อมที่มาไปโผล่ในหน้าต่าง inspect
 const buffMap = computed(() => buffSources(props.data?.playerTeam || [], props.data?.botTeam || []))
@@ -559,11 +564,12 @@ function reset() {
   clearHighlights()                                                         // ล้างคลาส windup/acting/flash ค้าง
   idx.value = 0; round.value = 1
   paused.value = false; inspectUid.value = null; pausedBeforeInspect = false; clearSpot(); clearChips()
+  spotView.value = { face: '✨', skillIcon: null, name: '', desc: '', side: 'A' }   // สร้างแบนเนอร์ (ซ่อน) ไว้ก่อนไฟต์เริ่ม
   ffActive.value = false; holdHint.value = false                             // เคลียร์โหมดเร่ง/คำใบ้ค้างจากไฟต์ก่อน
   clearTimeout(holdTimer); clearTimeout(hintTimer)
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
   clearHpTicks()                                                             // ล้างเลข HP ไล่นับ/กระพริบค้างจากไฟต์ก่อน (tuning.hpTick)
-  skillCount.value = {}                                                      // ล้างตัวนับสกิลติดไฟค้างจากไฟต์ก่อน (tuning.skillMark)
+  skillFired.value = {}                                                      // ล้างตัวนับสกิลติดไฟค้างจากไฟต์ก่อน (tuning.skillMark)
   Object.keys(maxHp).forEach(setDead)                                       // ทุกตัว hp=100 → setDead ถอด class dead ค้างจากไฟต์ก่อน
   // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
   nextTick(() => { ensureFx(); fx?.reset() })                              // reset() ภายใน fx = invalidateCenters + cancelAll (ยกเลิก pop/callout/projectile ค้าง)
@@ -721,15 +727,19 @@ const chipOn = ref({})            // uid → { name, icon, out }
 const openEvents = []             // event ยกแรก (openQuiet) ที่รอลงผลพร้อมโชว์ของเพ็ทตัวเดียวกัน
 const CHIP_OUT_MS = 300
 
-// tuning.skillMark 'lit': ไอคอนมุมการ์ดขยาย + ×N เมื่อสกิลของใบนั้นโปรก (ค้างทั้งไฟต์ = อ่านย้อนได้)
-const skillCount = ref({})       // uid → จำนวนครั้งที่โปรก
-// tuning.badges: 'split' = ทักษะตัวเองมุมขวาบน · บัฟที่ได้รับซ้ายล่าง (เดิม)
-//                'row'   = แถวเดียวซ้ายล่าง เรียงตามหน้าต่างอ่าน: ทักษะเฉพาะ │ กำลังได้รับ (user: "สองมุมแล้วงง" 26 ก.ย.)
-const badgeRow = computed(() => (tuning.value.badges || 'split') === 'row')
+// ป้ายทักษะตัวเอง: วงส้ม = ทำงานแล้วอย่างน้อยครั้งนึง (ติดค้างทั้งไฟต์) · tuning.skillMark 'dot' = ปิดวง (ห้องแล็บเทียบของเดิม)
+const skillFired = ref({})       // uid → true
 function markSkill(uid) {
-  if ((tuning.value.skillMark || 'lit') !== 'lit' || !uid) return   // ดีฟอลต์ lit (user เลือก) · แล็บส่ง 'dot' ได้
-  skillCount.value = { ...skillCount.value, [uid]: (skillCount.value[uid] || 0) + 1 }
+  if ((tuning.value.skillMark || 'lit') !== 'lit' || !uid || skillFired.value[uid]) return
+  skillFired.value = { ...skillFired.value, [uid]: true }
 }
+// เลขบนป้ายทักษะ: ชั้นสะสม (🦖 🦍) หรือที่เหลือ (🐦‍🔥 🐱 🦣 🧞) — ต่อ beat · อ่านจาก liveBuffs ชุดเดียวกับหน้าต่างอ่าน
+// ⚠️ ค่าเปลี่ยนที่ขอบ beat (idx ขยับ) พร้อมเลข HP ที่เปลี่ยนอยู่แล้ว ⇒ ไม่เพิ่มจังหวะ repaint ใหม่ให้การ์ด
+const counters = computed(() => {
+  const out = {}
+  for (const uid of Object.keys(buffMap.value)) out[uid] = ownCounter(buffMap.value[uid], beats.value, idx.value, uid)
+  return out
+})
 
 function showChip(uid, e) {
   chipOn.value = { ...chipOn.value, [uid]: { name: skillTitle(e), icon: e.icon || '✨', out: false } }
@@ -762,11 +772,18 @@ async function spotlightPassive(e, t, g, opts = {}) {
     '--spot-in': `${Math.round(t.windup * 0.57)}ms`,
     '--spot-out': `${Math.round(t.tail) || 1}ms`,
   }
-  spot.value = {
+  // แบนเนอร์ก่อนหน้าอาจเพิ่งลงใน task เดียวกัน — ต้องให้เบราว์เซอร์เห็นสถานะ "ไม่มี on" หนึ่งครั้ง
+  // ไม่งั้น CSS animation ไม่เริ่มใหม่ (คลาสไม่เคยหายในสายตาเบราว์เซอร์) · offsetWidth = style/layout เล็กๆ ครั้งเดียว
+  if (spot.value) { spot.value = null; await nextTick() }
+  void spotEl.value?.offsetWidth
+  if (g !== gen) return
+  const view = {
     face: defForUid(e.uid)?.emoji || opts.icon || '✨',       // หน้าเจ้าของสกิลทุกครั้ง (เดิมมีแค่ยกแรก)
     skillIcon: e.icon || null, name: skillTitle(e),
     desc: opts.desc ?? passiveDescOf(e), side: opts.side || e.uid?.[0] || 'A',
   }
+  spotView.value = view
+  spot.value = view
   spotOut.value = false
   highlight(e.uid, 'spotlit')
   await wait(t.windup + t.motion); if (g !== gen) return clearSpot(e.uid)
@@ -1349,8 +1366,6 @@ onUnmounted(() => {
 .br-buffs-head { font-size: .74rem; font-weight: 800; color: #94a3b8; margin-bottom: 2px; }
 .br-buff { border-left: 3px solid #4ade80; border-radius: 0 10px 10px 0; background: rgba(34,197,94,.16); padding: 6px 9px; }
 .br-buff.dbf { border-left-color: #f87171; background: rgba(239,68,68,.16); }
-.br-card-count { text-align: right; margin-top: 3px; }
-.br-card-count .br-buff-tag { margin-left: 0; color: #451a03; background: #fbbf24; }
 /* ใช้ไปแล้ว = ไม่ได้ให้อะไรอีก ถ้ายังเขียวอยู่จะอ่านผิดว่ายังกันตายได้ */
 .br-buff.spent { border-left-color: #94a3b8; background: rgba(148,163,184,.14); opacity: .62; }
 .br-buff-src { font-size: .78rem; font-weight: 800; color: #f1f5f9; }
@@ -1382,20 +1397,24 @@ onUnmounted(() => {
    ⇒ การ์ดเจ้าของสว่างเหนือม่าน แต่ไม่บังตัวหนังสือบนแถบ · fx layer z6 อยู่บนสุดเหมือนเดิม */
 /* fixed = คลุมทั้งจอ (เดิม absolute คลุมแค่ .br-box ⇒ บนมือถือเห็นสี่เหลี่ยมมืดกลางจอ ขอบบน/ล่างสว่าง — user 26 ก.ย.)
    ยังอยู่ใน stacking context ของ .br-box (z4 < การ์ด spotlit z5) · ระหว่างจอสั่น .br-box มี transform ม่านจะขยับตามกล่อง 1 จังหวะ ยอมได้ */
-.br-spot-dim { position: fixed; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
+.br-spot-dim { position: fixed; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; }
+/* แบนเนอร์ถาวร: ไม่มี .on = ซ่อน (ม่านโปร่ง · แถบจาง) — อนิเมชันผูกกับ .on เท่านั้น จึงเริ่มใหม่ทุกครั้งที่ .on กลับมา */
+.br-spot.on .br-spot-dim { animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
 .br-cut { position: relative; z-index: 5; width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
   transform: skewY(-5deg); background: linear-gradient(90deg, #2563eb 0%, #2563eb 35%, rgba(15,23,42,.96) 100%); box-shadow: 0 0 0 3px #fff;
-  will-change: transform, opacity; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
+  will-change: transform, opacity; opacity: 0; }
+.br-spot.on .br-cut { opacity: 1; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
 .br-spot.foe .br-cut { flex-direction: row-reverse; text-align: right;
-  background: linear-gradient(270deg, #dc2626 0%, #dc2626 35%, rgba(15,23,42,.96) 100%); animation-name: br-cut-in-r; }
+  background: linear-gradient(270deg, #dc2626 0%, #dc2626 35%, rgba(15,23,42,.96) 100%); }
+.br-spot.on.foe .br-cut { animation-name: br-cut-in-r; }
 .br-cut-face { flex: none; width: 70px; height: 70px; display: grid; place-items: center; border-radius: 50%; font-size: 3rem; line-height: 1;
   background: rgba(255,255,255,.18); transform: skewY(5deg); }
 .br-cut-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; transform: skewY(5deg); }
 .br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 .br-cut-desc { font-size: .74rem; line-height: 1.35; color: rgba(255,255,255,.88); }
-.br-spot.out .br-spot-dim { animation: br-spot-dim-out var(--spot-out, 230ms) ease-in forwards; }
-.br-spot.out .br-cut { animation: br-cut-out var(--spot-out, 230ms) ease-in forwards; }
+.br-spot.on.out .br-spot-dim { animation: br-spot-dim-out var(--spot-out, 230ms) ease-in forwards; }
+.br-spot.on.out .br-cut { animation: br-cut-out var(--spot-out, 230ms) ease-in forwards; }
 @keyframes br-spot-dim-in  { to { opacity: .55; } }
 @keyframes br-spot-dim-out { from { opacity: .55; } to { opacity: 0; } }
 @keyframes br-cut-in-l { from { transform: skewY(-5deg) translateX(-110%); } to { transform: skewY(-5deg); } }
@@ -1406,22 +1425,15 @@ onUnmounted(() => {
 /* fade สำรองของสปอตไลต์ (เดิมใช้ตอนเครื่องขอลดการเคลื่อนไหว — ตอนนี้ bypass แล้ว ดู utils/motionPref.js) */
 @keyframes br-spot-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* จุดไอคอนสกิลมุมการ์ด — บอกว่าตัวนี้มีทักษะเฉพาะ (เดิมต้องไล่แตะทีละใบถึงจะรู้) */
-.br-skill-dot { position: absolute; top: 2px; right: 4px; font-size: .72rem; line-height: 1; opacity: .85; pointer-events: none; }
-/* tuning.skillMark 'lit' — ขนาดคงที่หลังติดไฟ (ไม่วิ่งอนิเมชันระหว่างการ์ดพุ่ง) */
-.br-skill-dot.lit { opacity: 1; border-radius: 999px; box-shadow: 0 0 0 1.5px #fbbf24, 0 0 6px 1px rgba(251,191,36,.55); }
-/* ×N ห้อยนอกมุมการ์ด — เดิมขยายเป็นเม็ดยาเข้าหากลางการ์ด ชนป้ายชั้นเชื้อ 🦠 ของ fx layer + บังหน้าเพ็ท (เห็นจริงใน Chrome 26 ก.ย.) */
-.br-skill-dot i { position: absolute; top: -9px; right: -10px; font-style: normal; font-size: .7rem; font-weight: 800; line-height: 1;
-  color: #451a03; background: #fbbf24; border-radius: 999px; padding: 1px 4px; }
-
 /* ── ป้ายสถานะที่ติดอยู่บนการ์ดใบนี้ (สเปก §5) ──
    static ล้วน: ไม่มี will-change ไม่มี animation ไม่มี transition
    วาดตอนไฟต์เริ่มแล้วไม่แตะอีก ⇒ ไม่มีทางไปเปลี่ยน paint ระหว่างการ์ดพุ่ง (ข้อบังคับ v3) */
 .br-status { position: absolute; left: 3px; bottom: 3px; display: flex; gap: 3px; pointer-events: none; z-index: 2; }
 .br-status b { font-size: .72rem; line-height: 1; font-weight: 400; padding-bottom: 1px; border-bottom: 1.5px solid #34d399; }
 .br-status b.dbf { border-bottom-color: #f87171; }
-/* แถวเดียว (tuning.badges 'row'): ทักษะตัวเองมาก่อน ไม่มีขีด (ไม่ใช่บัฟ) · ติดไฟ = วงส้ม · เส้นคั่นแล้วค่อยบัฟที่ได้รับ */
-.br-status.row { align-items: center; }
+/* แถวเดียว: ทักษะตัวเองมาก่อน ไม่มีขีด (ไม่ใช่บัฟ) · ทำงานแล้ว = วงส้ม · ใช้หมด = จาง · เส้นคั่นแล้วค่อยบัฟที่ได้รับ */
+.br-status { align-items: center; }
+.br-status b.own.spent { opacity: .35; box-shadow: none; }
 .br-status b.own { border-bottom: 0; padding: 1px; border-radius: 999px; display: flex; align-items: center; opacity: .8; }
 .br-status b.own.lit { opacity: 1; box-shadow: 0 0 0 1.5px #fbbf24, 0 0 5px 1px rgba(251,191,36,.5); }
 .br-status b.own i { font-style: normal; font-size: .7rem; font-weight: 800; color: #fde68a; margin-left: 1px; line-height: 1; }

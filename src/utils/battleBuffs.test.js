@@ -1,7 +1,7 @@
 // เทสที่มาของบัฟ + สถานะสด — pure ทั้งหมด · รัน: node --test src/utils/battleBuffs.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buffSources, liveBuffs, badgesOf } from './battleBuffs.js'
+import { buffSources, liveBuffs, badgesOf, ownCounter } from './battleBuffs.js'
 import { STATUS_MAX, PET_PASSIVES } from '../data/petPassives.js'
 
 const p = (id, over = {}) => ({ id, rarity: 'legendary', element: 'fist', grade: 0, ...over })
@@ -204,4 +204,52 @@ test('คู่หูอยู่ฝั่งศัตรู: ชื่อร่
   const s = buffSources([p('turtle')], [p('owl'), p('seal'), p('whale')])
   assert.equal(find(s.A0, 'enemyVuln').skillName, PET_PASSIVES.owl.name, 'นกฮูกไม่ได้อยู่ในคู่ ชื่อต้องไม่เปลี่ยน')
   assert.equal(find(s.B1, 'teamAtk').skillName, 'รางวัลคนเก่ง')
+})
+
+// ── ownCounter: เลขบนป้ายทักษะตัวเองในการ์ด ──
+// user 26 ก.ย. 2026: "ไม่ต้องนับว่าทำงานกี่ครั้ง (เลขขึ้นแต่ตีแรงเท่าเดิม = งง)
+//   นับเฉพาะสกิลที่สะสมชั้น (ทีเร็กซ์ กอริลลา) หรือจำนวนที่เหลือ (ฟีนิกซ์ แมว แมมมอธ)"
+const pas = (uid, effect, extra = {}) => ({ t: 'passive', uid, effect, ...extra })
+const counterAt = (team, beats, idx = beats.length - 1) => {
+  const s = buffSources(team, [p('panda')])
+  return ownCounter(s.A0, beats, idx, 'A0')
+}
+
+test('ownCounter: สกิลที่ไม่มีอะไรให้นับ → null (ไม่มีเลขบนการ์ด)', () => {
+  assert.equal(counterAt([p('panda')], []), null)
+  assert.equal(counterAt([p('owl')], []), null)
+})
+
+test('ownCounter: ชั้นสะสม — ทีเร็กซ์/กอริลลา โชว์ชั้นล่าสุด · ยังไม่มีชั้น = ไม่โชว์', () => {
+  assert.equal(counterAt([p('gorilla')], []), null)
+  assert.deepEqual(counterAt([p('gorilla')], [pas('A0', 'atkOnHit', { amount: 2 })]), { n: 2, kind: 'stack', spent: false })
+  const t = counterAt([p('trex')], [pas('A0', 'stackAtk', { amount: 3 }), pas('A0', 'stackAtk', { amount: 4 })])
+  assert.deepEqual(t, { n: 4, kind: 'stack', spent: false })
+})
+
+test('ownCounter: ครั้งที่เหลือ — ฟีนิกซ์ 1 → ใช้แล้ว 0', () => {
+  assert.deepEqual(counterAt([p('phoenix')], []), { n: 1, kind: 'left', spent: false })
+  assert.deepEqual(counterAt([p('phoenix')], [pas('A0', 'revive')]), { n: 0, kind: 'left', spent: true })
+})
+
+test('ownCounter: แมว = รอดตาย 1 + ทนต่อ 2 = 3 แล้วนับลงตาม grit ที่เอนจินส่งมา', () => {
+  assert.deepEqual(counterAt([p('cat')], []), { n: 3, kind: 'left', spent: false })
+  const b = [pas('A0', 'cheatDeath')]
+  assert.deepEqual(counterAt([p('cat')], b), { n: 2, kind: 'left', spent: false })
+  b.push(pas('A0', 'grit', { amount: 1 }))
+  assert.deepEqual(counterAt([p('cat')], b), { n: 1, kind: 'left', spent: false })
+  b.push(pas('A0', 'grit', { amount: 0 }))
+  assert.deepEqual(counterAt([p('cat')], b), { n: 0, kind: 'left', spent: true })
+})
+
+test('ownCounter: แมมมอธ = เกราะที่เหลือ (เริ่มเต็มตามค่า count)', () => {
+  const full = PET_PASSIVES.mammoth.parts[0].value.count
+  assert.deepEqual(counterAt([p('mammoth')], []), { n: full, kind: 'left', spent: false })
+  assert.deepEqual(counterAt([p('mammoth')], [pas('A0', 'armorStack', { armorLeft: 0 })]), { n: 0, kind: 'left', spent: true })
+})
+
+test('ownCounter: นับเฉพาะ beat ที่เล่นไปแล้ว (idx) · event ของตัวอื่นไม่ปน', () => {
+  const b = [pas('A0', 'revive'), pas('A1', 'revive')]
+  assert.deepEqual(counterAt([p('phoenix')], b, -1), { n: 1, kind: 'left', spent: false })
+  assert.deepEqual(counterAt([p('phoenix'), p('phoenix')], [pas('A1', 'revive')]), { n: 1, kind: 'left', spent: false })
 })

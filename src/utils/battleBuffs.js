@@ -192,6 +192,38 @@ export function liveBuffs(sources, beats, idx, uid = null) {
   return out
 }
 
+/** เลขบนป้ายทักษะตัวเองในการ์ด (แถวป้ายซ้ายล่าง) — null = ไม่มีเลข
+ *  user 26 ก.ย. 2026: "ไม่ต้องนับว่าทำงานกี่ครั้ง (เลขขึ้นแต่ตีแรงเท่าเดิม = งง)
+ *  นับเฉพาะสกิลที่สะสมชั้น หรือจำนวนที่เหลือ" ⇒ kind 'stack' = ชั้นตอนนี้ · 'left' = ที่เหลือ (0 = spent ใช้หมดแล้ว)
+ *  อ่านจาก liveBuffs ชุดเดียวกับหน้าต่างอ่าน ⇒ เลขบนการ์ดกับ "x/max ชั้น · ใช้ไปแล้ว" ในหน้าต่างไม่มีทางขัดกัน */
+export function ownCounter(sources, beats, idx, uid) {
+  const live = liveBuffs(sources, beats, idx, uid)
+  const b = live.find(x => x.self && x.ownerUid === uid && COUNTER_EFFECTS.has(x.effect))
+  if (!b) return null
+  const v = partWithEffect(PET_PASSIVES[b.petId], b.effect)?.value || {}
+  const left = (n) => ({ n: Math.max(0, n), kind: 'left', spent: n <= 0 })
+  switch (b.effect) {
+    case 'stackAtk':
+    case 'atkOnHit': {
+      const n = Math.max(b.stacks || 0, v.start || 0)
+      return n > 0 ? { n, kind: 'stack', spent: false } : null
+    }
+    case 'armorStack': return left(b.stacks ?? v.count ?? 0)
+    case 'revive':
+    case 'saveAlly': return left(b.spent ? 0 : (v.times ?? 1))
+    case 'cheatDeath': {
+      // แมว: รอดตาย {times} + ทนต่อ {grit} · หลังรอดตาย เอนจินยิง 'grit' พร้อม amount = ที่เหลือหลังหัก
+      if (!b.spent) return left((v.times ?? 1) + (v.grit ?? 0))
+      let grit = v.grit ?? 0
+      const played = (beats || []).slice(0, Math.max(0, (idx ?? -1) + 1))
+      for (const e of played) if (e?.t === 'passive' && e.effect === 'grit' && e.uid === uid) grit = e.amount ?? grit
+      return left(grit)
+    }
+    default: return null
+  }
+}
+const COUNTER_EFFECTS = new Set(['stackAtk', 'atkOnHit', 'armorStack', 'revive', 'saveAlly', 'cheatDeath'])
+
 /** ย่อเป็นรูปที่ป้ายไอคอนเล็กบนการ์ดใช้ — ตัดที่มาทิ้ง + ตัดที่ max
  *  ⚠️ ต้องไม่มี effect ซ้ำ (ป้าย 💨 สองอันบนการ์ดเดียวอ่านไม่รู้เรื่อง) */
 export function badgesOf(list, max) {
