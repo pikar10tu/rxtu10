@@ -515,7 +515,10 @@ test('HIT_SPREAD ดีฟอลต์ = 0 ⇒ ทุกหมัดปกติ
   assert.equal(HIT_SPREAD, 0)
   const { log, mh } = realFight(424242)
   for (const b of buildBeats(log, mh)) {
-    if (b.kind === 'hit') assert.equal(Math.round(beatDuration(b)), BEAT)
+    if (b.kind === 'hit') {
+      assert.equal(Math.round(beatDuration(b)), BEAT)
+      assert.equal(b.hitMult, 1, 'hit beat ต้องมี hitMult === 1 เมื่อ hitSpread=0')
+    }
   }
 })
 

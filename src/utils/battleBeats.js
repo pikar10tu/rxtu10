@@ -336,11 +336,13 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
 
 /** แบ่งเวลาของหมัดปกติใหม่ตาม weight — ผลรวมเวลาของหมัดปกติทั้งไฟต์เท่าเดิมเป๊ะ (ไม่แก้ array เดิม) */
 export function spreadHits(beats, s) {
-  if (!(s > 0)) return beats  // s=0 หรือเลขติดลบ คืนของเดิมโดยไม่แก้
+  // เส้นปกติ (s=0 หรือ W=0): hitMult ต้องมี = 1 เสมอ ตามสเปก "hit ได้ฟิลด์ hitMult (1 เมื่อ s=0)"
+  if (!(s > 0)) return beats.map(b => (b.kind === 'hit' ? { ...b, hitMult: 1 } : b))
   const hits = beats.filter(b => b.kind === 'hit')
   const W = hits.reduce((sum, b) => sum + (b.weight || 0), 0) / (hits.length || 1)
   if (!(W > 0)) return beats.map(b => (b.kind === 'hit' ? { ...b, hitMult: 1 } : b))
   const raw = new Map()
+  // ⚠️ clamp ล่างใช้ก่อนการปรับขนาด → หลังจาก k×m อาจตกต่ำกว่า HIT_MIN_MULT ได้ ถ้า k<1
   for (const b of hits) raw.set(b, Math.max(HIT_MIN_MULT, (1 - s) + s * ((b.weight || 0) / W)))
   const k = hits.length / [...raw.values()].reduce((a, v) => a + v, 0)
   return beats.map(b => {
