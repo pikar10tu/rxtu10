@@ -15,8 +15,8 @@
     <template v-if="authStore.isLoggedIn">
       <ArenaStatus
         :rating="rating" :wins="wins" :losses="losses" :attacks-left="attacksLeft"
-        :my-rank="rivals.myRank" :total="rivals.total" :team="myTeam"
-        @pick="pickOpen = true"
+        :my-rank="rivals.myRank" :total="rivals.total" :team="myTeam" :arena-ref="myArena"
+        @pick="pickOpen = true" @arena="arenaOpen = true"
       />
 
       <!-- กระดานคู่ต่อสู้ — โซน "ของกดได้" หัวโซนชัดเพื่อแยกจากแผงสถานะด้านบน -->
@@ -29,6 +29,11 @@
       <div class="ar-board-hint">ตีเสร็จได้คู่ใหม่ทันที</div>
       <div class="ar-list">
         <div v-for="opp in opponents" :key="opp.uid" class="ar-opp">
+          <!-- สนามของคู่ต่อสู้ = ครึ่งบนตอนเราบุก — เห็นก่อนกดบุก (user ขอ ให้สนามสวยมีคนเห็น) -->
+          <div class="ar-opp-arena">
+            <ArenaFloor mode="thumb" :arena-ref="oppArena(opp)" />
+            <span class="ar-opp-arena-name">{{ oppArenaName(opp) }}</span>
+          </div>
           <div class="ar-opp-top">
             <span class="ar-opp-info">
               <span class="ar-opp-name">
@@ -62,6 +67,7 @@
     <div v-else class="ar-login">เข้าสู่ระบบเพื่อเล่น</div>
 
     <TeamPicker v-model:open="pickOpen" />
+    <ArenaSheet v-model:open="arenaOpen" />
     <BattleReplay :data="replay" theme="arena" @close="replay = null" />
     <PetScoutCard :pet="scout" @close="scout = null" />
   </div>
@@ -86,7 +92,10 @@ import PetThumb from '../components/shared/PetThumb.vue'
 import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import { getPetDef } from '../data/index.js'
 import HelpButton from '../components/help/HelpButton.vue'
-import { rosterArena } from '../utils/arenas.js'
+import { rosterArena, parseArenaRef } from '../utils/arenas.js'
+import { getArena } from '../data/arenas.js'
+import ArenaFloor from '../components/battle/ArenaFloor.vue'
+import ArenaSheet from '../components/battle/ArenaSheet.vue'
 
 const authStore = useAuthStore()
 const members = useMembersStore()
@@ -94,6 +103,11 @@ const { pvpOpen } = useAppConfig()
 const { rating, wins, losses, attacksLeft, myTeam, opponents, fight, refreshBoard, refreshLeft, coinPreview } = useArena()
 
 const pickOpen = ref(false)
+const arenaOpen = ref(false)
+const myArena = computed(() => rosterArena(authStore.userData))
+// บอทไม่มีแถว roster = สนามฟรี
+const oppArena = (opp) => (opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null))
+const oppArenaName = (opp) => getArena(parseArenaRef(oppArena(opp)).id)?.name || ''
 const replay = ref(null)
 const busy = ref(false)
 
@@ -163,7 +177,10 @@ onMounted(() => { members.loadRoster() })
 .ar-head-r { display: flex; align-items: center; gap: 8px; }
 .ar-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
 .ar-list { display: flex; flex-direction: column; gap: 8px; }
-.ar-opp { display: flex; flex-direction: column; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 10px; }
+.ar-opp { position: relative; display: flex; flex-direction: column; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 10px 10px 10px 92px; overflow: hidden; min-height: 108px; }
+/* แถบซ้ายเต็มความสูงการ์ด = ภาพย่อสนามของคู่ต่อสู้ */
+.ar-opp-arena { position: absolute; left: 0; top: 0; bottom: 0; width: 82px; }
+.ar-opp-arena-name { position: absolute; left: 4px; right: 4px; bottom: 5px; z-index: 2; font-size: .7rem; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); border-radius: 6px; padding: 1px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ar-opp-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .ar-opp-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ar-opp-name { font-size: .78rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

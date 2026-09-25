@@ -45,6 +45,16 @@
         <Emoji char="🛡️" /> จัดทีม
       </button>
     </div>
+
+    <!-- สนามของฉัน = ครึ่งล่างตอนเราบุก และครึ่งบนตอนคนอื่นมาบุกเรา -->
+    <div class="as-arena">
+      <span class="as-arena-thumb"><ArenaFloor mode="thumb" :arena-ref="arenaRef" /></span>
+      <span class="as-team-l">
+        <span class="as-team-cap">สนามของฉัน</span>
+        <span class="as-arena-name">{{ arenaName }}</span>
+      </span>
+      <button class="as-pick" @click="$emit('arena')"><Emoji char="🏟️" /> เปลี่ยนสนาม</button>
+    </div>
   </div>
 </template>
 
@@ -55,6 +65,9 @@ import PetThumb from '../shared/PetThumb.vue'
 import { PVP_DAILY_ATTACKS } from '../../utils/pvpRating.js'
 import { currentSeasonId, seasonMonthLabel } from '../../utils/pvpSeason.js'
 import SeasonCountdown from '../shared/SeasonCountdown.vue'
+import ArenaFloor from './ArenaFloor.vue'
+import { getArena } from '../../data/arenas.js'
+import { parseArenaRef } from '../../utils/arenas.js'
 
 const props = defineProps({
   rating: { type: Number, default: 0 },
@@ -64,8 +77,10 @@ const props = defineProps({
   myRank: { type: Number, default: null },
   total: { type: Number, default: 0 },
   team: { type: Array, default: () => [] },   // หน่วยรบจาก resolveBattleTeam
+  arenaRef: { type: String, default: null },   // สนามที่ใส่อยู่ (rosterArena) — null = สนามฟรี
 })
-defineEmits(['pick'])
+defineEmits(['pick', 'arena'])
+const arenaName = computed(() => getArena(parseArenaRef(props.arenaRef).id)?.name || '')
 
 const max = PVP_DAILY_ATTACKS
 
@@ -108,6 +123,10 @@ const seasonLabel = computed(() => seasonMonthLabel(currentSeasonId()))
 .as-sep { height: 1px; background: rgba(255,255,255,.22); margin: 12px 0 10px; }
 
 .as-team { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.as-arena { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.15); }
+.as-arena .as-team-l { flex: 1; }
+.as-arena-thumb { position: relative; flex: none; width: 72px; height: 44px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,.3); }
+.as-arena-name { font-size: .84rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .as-team-l { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .as-team-cap { font-size: .72rem; font-weight: 800; color: rgba(255,255,255,.7); }
 .as-thumbs { display: flex; gap: 5px; }
