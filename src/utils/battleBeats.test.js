@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {
   buildBeats, scaleTiming, beatDuration, totalDuration, weightOf, timingOf,
   BEAT, KO_MULT, FINISH_MULT, SKILL_PAUSE, OPEN_SHOW_MS, SKILL_SHOW_MS, SHAPE, FF_SCALE, WEIGHT_CFG, OPENING_EFFECTS,
-  CLUTCH_EFFECTS,
+  CLUTCH_EFFECTS, spreadHits, HIT_SPREAD,
 } from './battleBeats.js'
 // battleBeats.js ไม่ import อะไรโดยตั้งใจ — เทสจึงเป็นที่เดียวที่เอาสองฝั่งมาชนกันได้
 import { PET_PASSIVES, partsOf, TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS } from '../data/petPassives.js'
@@ -498,4 +498,60 @@ test('passive หลังบีตปิดเกมต้องเงียบ
       `passive '${bs[i].effect}' เล่นต่อ ${beatDuration(bs[i])}ms หลังไฟต์จบแล้ว — ไฟต์จบแล้วไม่มีอะไรเล่นต่อ`)
   }
   assert.ok(checked > 0, 'ไม่เจอ passive หลังบีตปิดเกมเลย — เทสนี้ไม่ได้ทดสอบอะไร (เปลี่ยนเพ็ท/ซีด)')
+})
+
+// ── hitSpread: หมัดหนักยาว หมัดเบาสั้น ความยาวรวมเท่าเดิม ──────────────
+const realFight = (seed) => {
+  const mk = ids => ids.map(id => ({ id, grade: 3, passiveLv: 3 }))
+  const r = simulateBattle(mk(['virus', 'wolf', 'shark']), mk(['panda', 'seal', 'owl']), seed)
+  const mh = {}
+  for (const e of r.log) {
+    if (e.t === 'attack' && e.target && !(e.target in mh)) mh[e.target] = (e.targetHpAfter || 0) + (e.dmg || 0)
+  }
+  return { log: r.log, mh }
+}
+
+test('HIT_SPREAD ดีฟอลต์ = 0 ⇒ ทุกหมัดปกติยาว BEAT เท่าเดิม', () => {
+  assert.equal(HIT_SPREAD, 0)
+  const { log, mh } = realFight(424242)
+  for (const b of buildBeats(log, mh)) {
+    if (b.kind === 'hit') assert.equal(Math.round(beatDuration(b)), BEAT)
+  }
+})
+
+test('hitSpread: ความยาวไฟต์รวมเท่า s=0 (±1ms) ทุก seed', () => {
+  for (let seed = 1; seed <= 40; seed++) {
+    const { log, mh } = realFight(seed * 7919)
+    const base = totalDuration(buildBeats(log, mh, { hitSpread: 0 }))
+    for (const s of [0.3, 0.6, 1]) {
+      const got = totalDuration(buildBeats(log, mh, { hitSpread: s }))
+      assert.ok(Math.abs(got - base) <= 1, `seed ${seed} s=${s}: ${got} vs ${base}`)
+    }
+  }
+})
+
+test('hitSpread: หมัด weight มากกว่า ได้เวลามากกว่า · ไม่มีหมัดไหนต่ำกว่า HIT_MIN_MULT มากเกิน', () => {
+  const { log, mh } = realFight(424242)
+  const hits = buildBeats(log, mh, { hitSpread: 0.6 }).filter(b => b.kind === 'hit')
+  const sorted = [...hits].sort((a, b) => a.weight - b.weight)
+  assert.ok(beatDuration(sorted[sorted.length - 1]) > beatDuration(sorted[0]))
+  for (const b of hits) assert.ok(b.hitMult > 0.4, `hitMult ${b.hitMult}`)
+})
+
+test('spreadHits: kind อื่นไม่ถูกแตะ · ไม่แก้ array เดิม', () => {
+  const beats = [
+    { kind: 'hit', weight: 0.1, timing: timingOf('hit') },
+    { kind: 'hit', weight: 0.9, timing: timingOf('hit') },
+    { kind: 'ko', weight: 1, timing: timingOf('ko') },
+  ]
+  const snap = JSON.stringify(beats)
+  const out = spreadHits(beats, 1)
+  assert.equal(JSON.stringify(beats), snap)
+  assert.deepEqual(out[2].timing, timingOf('ko'))
+  assert.ok(beatDuration(out[1]) > beatDuration(out[0]))
+})
+
+test('spreadHits: weight เฉลี่ย 0 (ทุกหมัดเบาหวิว) ⇒ ไม่หารศูนย์ ทุกหมัดเท่าเดิม', () => {
+  const beats = [{ kind: 'hit', weight: 0, timing: timingOf('hit') }, { kind: 'hit', weight: 0, timing: timingOf('hit') }]
+  for (const b of spreadHits(beats, 1)) assert.equal(Math.round(beatDuration(b)), BEAT)
 })

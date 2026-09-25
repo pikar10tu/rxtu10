@@ -28,6 +28,13 @@ export const OPEN_SHOW_MS = 800
 /** เลเจนด์: ครั้งแรกที่สกิลโปรกได้แบนเนอร์เต็ม (โชว์ไทม์) แทนชิปเล็ก — user ขอ 25 ก.ย. 2026 */
 export const SKILL_SHOW_MS = 1000
 
+/** กระจายเวลาหมัดปกติตามความแรง (0 = ทุกหมัดยาว BEAT เท่ากัน) — ความยาวไฟต์รวมเท่าเดิมเสมอ
+ *  user: "เร็วจนตามไม่ทันว่าเลือดลด แต่ไม่อยากให้ยาน" (26 ก.ย. 2026) ⇒ เอาเวลาจากหมัดเบาไปให้หมัดหนัก
+ *  อ่าน weight เพื่อ "แบ่ง" เวลาภายใน kind hit เท่านั้น — kind ยังเป็นตัวตัดสินว่าได้เวลาแบบไหน */
+export const HIT_SPREAD = 0
+/** หมัดเบาสุดยังต้องเหลืออย่างน้อยเท่านี้ของ BEAT — ต่ำกว่านี้การ์ดพุ่งไม่ทันเห็น */
+export const HIT_MIN_MULT = 0.55
+
 /** สัดส่วนเฟส [windup, motion, hitstop, tail] — แต่ละชุดต้องรวมได้ 1 พอดี (มีเทสคุม) */
 export const SHAPE = {
   hit:    [0.28, 0.22, 0.08, 0.42],
@@ -139,7 +146,7 @@ function openCutOf(evts) {
  * @returns {Array} beat[] ยาวเท่า log เสมอ (1 event = 1 beat) เพื่อให้ index ตรงกับของเดิม
  */
 // showPets: Set ของ petId ที่ครั้งแรกของสกิลได้โชว์ไทม์ (skillShow) แทน skill · ครั้งเดียวต่อตัวต่อไฟต์
-export function buildBeats(log, maxHpByUid, { rng = null, showPets = null } = {}) {
+export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD } = {}) {
   const evts = Array.isArray(log) ? log : []
   const mh = maxHpByUid || {}
 
@@ -323,7 +330,24 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null } = {}
       danger, survive,
     }
   })
-  return rng ? shuffleOpening(out, openCut, rng) : out
+  const spread = spreadHits(out, hitSpread)
+  return rng ? shuffleOpening(spread, openCut, rng) : spread
+}
+
+/** แบ่งเวลาของหมัดปกติใหม่ตาม weight — ผลรวมเวลาของหมัดปกติทั้งไฟต์เท่าเดิมเป๊ะ (ไม่แก้ array เดิม) */
+export function spreadHits(beats, s) {
+  if (!(s > 0)) return beats  // s=0 หรือเลขติดลบ คืนของเดิมโดยไม่แก้
+  const hits = beats.filter(b => b.kind === 'hit')
+  const W = hits.reduce((sum, b) => sum + (b.weight || 0), 0) / (hits.length || 1)
+  if (!(W > 0)) return beats.map(b => (b.kind === 'hit' ? { ...b, hitMult: 1 } : b))
+  const raw = new Map()
+  for (const b of hits) raw.set(b, Math.max(HIT_MIN_MULT, (1 - s) + s * ((b.weight || 0) / W)))
+  const k = hits.length / [...raw.values()].reduce((a, v) => a + v, 0)
+  return beats.map(b => {
+    if (b.kind !== 'hit') return b
+    const m = raw.get(b) * k
+    return { ...b, hitMult: m, timing: phasesOf(BEAT * m, SHAPE.hit) }
+  })
 }
 
 /** สลับลำดับโชว์ของยกแรกทีละก้อน (ก้อน = เพ็ทหนึ่งตัว) — ทุกอย่างในยกแรกเกิดพร้อมกันอยู่แล้ว (aura)
