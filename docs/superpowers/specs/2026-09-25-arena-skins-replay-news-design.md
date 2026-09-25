@@ -87,7 +87,9 @@
 ### 3.6 กติกา perf (ห้ามละเมิด — ดู memory battle perf / CLAUDE.md)
 - ขยับได้แค่ transform/opacity · ห้าม blur/filter/เงาที่ขยับ/เขย่าทั้งจอ
 - ของขยับบนพื้นสนาม ≤ 2 ชิ้นต่อฝั่ง · แสงวิ่งป้ายที่ 1 นับเป็น 1 ชิ้น
-- `prefers-reduced-motion` ปิดของขยับบนพื้นทั้งหมด + ข้ามฉาก VS
+- เช็คโหมดลดการเคลื่อนไหวผ่าน `prefersReducedMotion()` เท่านั้น (CLAUDE.md ข้อ 11 — ตอนนี้คืน false ทั้งเว็บ) ห้ามเขียน `@media (prefers-reduced-motion)` เพิ่ม
+- ตัวอักษรทุกจุด ≥ .7rem (CLAUDE.md) — เดโมมีป้าย CRITICAL / เดือนใต้ป้ายสลัก / ป้ายระดับ ที่ต่ำกว่านี้ ต้องขยายตอนทำจริง
+- overlay ใหม่ (ชีตเปลี่ยนสนาม) ต้อง Teleport to body + z-index ตามบันได CLAUDE.md ข้อ 6 / 12
 - ⚠️ ต้องวัดบน iPhone จริงด้วย `?fps=1` ก่อน merge (Chrome บนคอมวัดไม่ได้)
 
 ## 4. หน้าสนามประลอง (ArenaView)
