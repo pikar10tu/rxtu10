@@ -42,16 +42,51 @@ test('อารีน่า: ใช้ผลจาก last ถ้าเจ้า
   assert.equal(r[0].arena.coins, 20000)
 })
 
-test('อารีน่า: ท็อป 3 เท่ากันที่เส้นตัดได้ทุกคน', () => {
+test('อารีน่า: achievement ท็อป 3 เท่ากันที่เส้นตัดได้ทุกคน', () => {
   const p = (uid, rating) => ({ uid, pvp: { seasonId: S, rating, wins: 1, losses: 0 } })
   const r = computeSeasonRewards([p('a', 1400), p('b', 1300), p('c', 1200), p('d', 1200), p('e', 1100)], S)
-  assert.deepEqual(r.filter(x => x.arena.top).map(x => x.uid), ['a', 'b', 'c', 'd'])
+  assert.deepEqual(r.filter(x => x.arena.ach).map(x => x.uid), ['a', 'b', 'c', 'd'])
+})
+
+const pv = (uid, rating) => ({ uid, pvp: { seasonId: S, rating, wins: 1, losses: 0 } })
+
+test('อารีน่า: ท็อป 10 ได้สนามแชมป์ · อันดับ = 1 + คนที่แต้มมากกว่า · เท่ากันได้อันดับเดียวกัน', () => {
+  const users = [...Array(12)].map((_, i) => pv('u' + i, 2000 - i * 10))
+  users.push(pv('tie', 2000 - 9 * 10))   // เสมออันดับ 10
+  const r = computeSeasonRewards(users, S)
+  const rank = (uid) => r.find(x => x.uid === uid).arena.rank
+  assert.equal(rank('u0'), 1)
+  assert.equal(rank('u2'), 3)
+  assert.equal(rank('u9'), 10)
+  assert.equal(rank('tie'), 10)
+  assert.equal(rank('u10'), 12)
+  const tops = r.filter(x => x.arena.top).map(x => x.uid)
+  assert.equal(tops.length, 11)
+  assert.ok(tops.includes('tie') && !tops.includes('u10'))
+  assert.deepEqual(r.filter(x => x.arena.ach).map(x => x.uid), ['u0', 'u1', 'u2'])
+})
+
+test('จดหมายอารีน่า: ท็อป 10 แนบสนามแชมป์ของซีซั่น + อันดับ · ท็อป 3 ได้ achievement ด้วย', () => {
+  const [a1] = seasonRewardMails({ arena: { rating: 2000, wins: 5, losses: 0, rank: 1, top: true, ach: true, coins: 20000 } }, S, 'ก.ย.')
+  assert.deepEqual(a1.arena, { id: 'ch-2026-09', rank: 1 })
+  assert.deepEqual(a1.achievement, { id: 'arena_champ', date: S })
+  const [a7] = seasonRewardMails({ arena: { rating: 1500, wins: 5, losses: 3, rank: 7, top: true, ach: false, coins: 20000 } }, S, 'ก.ย.')
+  assert.deepEqual(a7.arena, { id: 'ch-2026-09', rank: 7 })
+  assert.equal(a7.achievement, undefined)
+  const [out] = seasonRewardMails({ arena: { rating: 900, wins: 1, losses: 3, rank: 20, top: false, ach: false, coins: 20000 } }, S, 'ก.ย.')
+  assert.equal(out.arena, undefined)
+})
+
+test('จดหมายอารีน่า: ซีซั่นที่ยังไม่มีสนามแชมป์ในทะเบียน = ไม่แนบสนาม (ยังได้ achievement)', () => {
+  const [a] = seasonRewardMails({ arena: { rating: 2000, wins: 5, losses: 0, rank: 1, top: true, ach: true, coins: 20000 } }, '2031-01', 'ม.ค.')
+  assert.equal(a.arena, undefined)
+  assert.deepEqual(a.achievement, { id: 'arena_champ', date: '2031-01' })
 })
 
 test('จดหมาย: หอคอย+อารีน่าแยกใบ · achievement ติดวันที่ซีซั่น · ไม่ติดท็อปไม่มี achievement', () => {
   const [t, a] = seasonRewardMails({
     tower: { best: 60, top: true, coins: 60000, tickets: 50 },
-    arena: { rating: 1100, wins: 1, losses: 2, top: false, coins: 20000 },
+    arena: { rating: 1100, wins: 1, losses: 2, rank: 15, top: false, ach: false, coins: 20000 },
   }, S, 'ก.ย.')
   assert.deepEqual(t.achievement, { id: 'tower_champ', date: S })
   assert.equal(t.tickets, 50)

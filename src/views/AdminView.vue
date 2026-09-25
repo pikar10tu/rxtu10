@@ -171,13 +171,17 @@
           </div>
           <div class="admin-hint">
             หอคอย {{ spPreview.tower }} คน (ท็อป {{ spPreview.towerTop }} · ได้ตั๋ว {{ spPreview.tickets }}) ·
-            อารีน่า {{ spPreview.arena }} คน (ท็อป {{ spPreview.arenaTop }}) · จดหมาย {{ spPreview.mails }} ฉบับ
+            อารีน่า {{ spPreview.arena }} คน (ได้สนาม {{ spPreview.arenaTop }} · achievement {{ spPreview.arenaAch }}) · จดหมาย {{ spPreview.mails }} ฉบับ
+          </div>
+          <!-- สนามแชมป์ต้องอยู่ใน data/arenas.js ก่อนกดแจก ไม่งั้นจดหมายไม่แนบสนาม (ยังแจกเหรียญ/achievement ได้) -->
+          <div class="admin-hint" :class="{ 'sp-paid': !spPreview.champArena }">
+            {{ spPreview.champArena ? `🏟️ สนามแชมป์ซีซั่นนี้: ${spPreview.champArena}` : `❌ ยังไม่มีสนามแชมป์ ch-${spSeason} ในโค้ด — กดแจกตอนนี้จะไม่ได้สนาม` }}
           </div>
           <ul class="sp-list">
             <li v-for="r in spPreview.rows" :key="r.uid">
               <b>{{ r.nickname }}</b>
               <span v-if="r.tower"> · 🏯 ชั้น {{ r.tower.best }}{{ r.tower.top ? ' 👑' : '' }} → {{ r.tower.coins.toLocaleString() }}{{ r.tower.tickets ? ` + ตั๋ว ${r.tower.tickets}` : '' }}</span>
-              <span v-if="r.arena"> · ⚔️ {{ r.arena.rating }} แต้ม{{ r.arena.top ? ' 👑' : '' }} → {{ r.arena.coins.toLocaleString() }}</span>
+              <span v-if="r.arena"> · ⚔️ #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม{{ r.arena.ach ? ' 👑' : '' }}{{ r.arena.top && spPreview.champArena ? ' 🏟️' : '' }} → {{ r.arena.coins.toLocaleString() }}</span>
             </li>
           </ul>
           <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
@@ -449,6 +453,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { computeSeasonRewards, seasonRewardMails } from '../utils/seasonRewards.js'
+import { getArena } from '../data/arenas.js'
 import { currentSeasonId, seasonMonthLabel } from '../utils/pvpSeason.js'
 import { TAG_LIST } from '../data/tags.js'
 import { getPetDef } from '../data/index.js'
@@ -611,7 +616,8 @@ async function previewSeason() {
       paid: paidSnap.exists() ? paidSnap.data()[spSeason.value] || null : null,
       tower: rows.filter(r => r.tower).length, towerTop: rows.filter(r => r.tower?.top).length,
       tickets: rows.filter(r => r.tower?.tickets).length,
-      arena: rows.filter(r => r.arena).length, arenaTop: rows.filter(r => r.arena?.top).length,
+      arena: rows.filter(r => r.arena).length, arenaTop: rows.filter(r => r.arena?.top).length, arenaAch: rows.filter(r => r.arena?.ach).length,
+      champArena: getArena('ch-' + spSeason.value)?.name || null,
       mails: rows.reduce((n, r) => n + (r.tower ? 1 : 0) + (r.arena ? 1 : 0), 0),
     }
   } catch (e) { console.error('[season preview]', e); toast('โหลดไม่สำเร็จ', 'error') }

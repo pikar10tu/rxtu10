@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { collection, getDocs, doc, updateDoc, query, orderBy, runTransaction, increment, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, query, orderBy, runTransaction, increment, serverTimestamp, arrayUnion } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from './auth.js'
 import { useUsageStore } from './usage.js'
-import { attentionCount, canClaim, rewardCoins, rewardTickets } from '../utils/mailbox.js'
+import { attentionCount, canClaim, rewardCoins, rewardTickets, rewardArena } from '../utils/mailbox.js'
+import { getArena } from '../data/arenas.js'
 import { announceAchievement, addEarned } from '../composables/useAchievements.js'
 import { achievementDocId } from '../utils/achievements.js'
 
@@ -55,11 +56,12 @@ export const useMailbox = defineStore('mailbox', () => {
       const result = await runTransaction(db, async (tx) => {
         const ref = doc(db, 'users', uid, 'mail', id)
         const snap = await tx.get(ref)
-        if (!snap.exists() || snap.data().claimed) return { coins: 0, tickets: 0, ach: null }
+        if (!snap.exists() || snap.data().claimed) return { coins: 0, tickets: 0, ach: null, arena: null }
         const data = snap.data()
         const c = rewardCoins(data)
         const t = rewardTickets(data)
         const ach = data.reward?.achievement || null
+        const arena = rewardArena(data)
         tx.update(ref, { claimed: true, read: true })
         const userPatch = {}
         if (c > 0) userPatch.coins = increment(c)
@@ -69,17 +71,22 @@ export const useMailbox = defineStore('mailbox', () => {
             { achId: ach.id, ...(ach.date ? { date: ach.date } : {}), earnedAt: serverTimestamp() })
           userPatch.achievementCount = increment(1)
         }
+        // สนามแชมป์: เพิ่มเข้าคลัง + จดอันดับของซีซั่นนั้น (ป้ายสลักอ่านจากนี่) · ไม่ใส่ให้เอง ให้เจ้าตัวเลือก
+        if (arena) {
+          userPatch['arenas.owned'] = arrayUnion(arena.id)
+          userPatch[`arenas.champ.${getArena(arena.id).season}`] = arena.rank
+        }
         if (ach?.id === 'tower_champ') userPatch.towerChampTotal = increment(1)
         if (ach?.id === 'arena_champ') userPatch.arenaChampTotal = increment(1)
         // จดหมายรางวัลแจ้งข้อผิด (kind ใหม่ · ของเก่าดูจากหัวข้อ)
         if (data.kind === 'report' || data.title === 'รางวัลแจ้งข้อสอบผิด') userPatch.reportsConfirmed = increment(1)
         if (Object.keys(userPatch).length) tx.update(doc(db, 'users', uid), userPatch)
-        return { coins: c, tickets: t, ach }
+        return { coins: c, tickets: t, ach, arena }
       })
       usage.track(0, 1)
-      if (result.coins > 0 || result.tickets > 0 || result.ach) { m.claimed = true; m.read = true } // optimistic local (coins/tickets อัปเดตผ่าน auth onSnapshot)
+      if (result.coins > 0 || result.tickets > 0 || result.ach || result.arena) { m.claimed = true; m.read = true } // optimistic local (coins/tickets อัปเดตผ่าน auth onSnapshot)
       if (result.ach) { addEarned(result.ach.id); await announceAchievement(result.ach.id, result.ach.date || null) }
-      return { coins: result.coins, tickets: result.tickets }
+      return { coins: result.coins, tickets: result.tickets, arena: result.arena }
     } catch (e) { console.error('[mail claim]', e); return false }
   }
 

@@ -4,10 +4,12 @@
 //  อันดับเท่ากันที่เส้นตัด = ได้ทุกคน (user สั่ง 24 ก.ย. 2026: เกินจำนวนได้)
 // ════════════════════════════════════════════════════════════
 import { pvpOfSeason } from './pvpSeason.js'
+import { getArena } from '../data/arenas.js'
 
 export const SEASON_REWARDS = {
   tower: { topN: 10, topCoins: 50000, ticketFloor: 50, tickets: 50, joinCoins: 10000, ach: 'tower_champ' },
-  arena: { topN: 3, joinCoins: 20000, ach: 'arena_champ' },
+  // topN = ได้สนามแชมป์ (user ขอ 25 ก.ย. 2026: ท็อป 10 ใช้พื้นเดียวกัน ป้ายต่างกันตามอันดับ) · achTopN = achievement เดิม
+  arena: { topN: 10, achTopN: 3, joinCoins: 20000, ach: 'arena_champ' },
 }
 
 // คะแนนของคนที่ n (เรียงมาก→น้อย) = เส้นตัด · คนที่ >= เส้นนี้ติดท็อปทั้งหมด (เท่ากันได้ทุกคน)
@@ -30,7 +32,9 @@ export function computeSeasonRewards(users, season, R = SEASON_REWARDS) {
     .map(u => ({ u, p: pvpOfSeason(u.pvp, season) }))
     .filter(x => x.p && ((x.p.wins || 0) + (x.p.losses || 0)) > 0)
   const tCut = cutoff(towerIn.map(u => u.towerBest), R.tower.topN)
-  const aCut = cutoff(arenaIn.map(x => x.p.rating || 0), R.arena.topN)
+  const aScores = arenaIn.map(x => x.p.rating || 0)
+  const aCut = cutoff(aScores, R.arena.topN)
+  const achCut = cutoff(aScores, R.arena.achTopN ?? R.arena.topN)
 
   const out = new Map()
   const row = (u) => {
@@ -46,9 +50,11 @@ export function computeSeasonRewards(users, season, R = SEASON_REWARDS) {
     }
   }
   for (const { u, p } of arenaIn) {
+    const rating = p.rating || 0
     row(u).arena = {
-      rating: p.rating || 0, wins: p.wins || 0, losses: p.losses || 0,
-      top: (p.rating || 0) >= aCut, coins: R.arena.joinCoins,
+      rating, wins: p.wins || 0, losses: p.losses || 0,
+      rank: 1 + aScores.filter(s => s > rating).length,   // เท่ากัน = อันดับเดียวกัน
+      top: rating >= aCut, ach: rating >= achCut, coins: R.arena.joinCoins,
     }
   }
   return [...out.values()]
@@ -71,13 +77,18 @@ export function seasonRewardMails(r, season, monthLabel, R = SEASON_REWARDS) {
   }
   if (r.arena) {
     const a = r.arena
+    // สนามแชมป์ของซีซั่นต้องอยู่ในทะเบียนก่อน ไม่งั้นไม่แนบ (ยังได้เหรียญ/achievement ตามปกติ)
+    const champ = a.top && getArena('ch-' + season) ? { id: 'ch-' + season, rank: a.rank } : undefined
     mails.push({
       title: `รางวัลอารีน่า ซีซั่น ${monthLabel}`,
-      body: a.top
-        ? `จบซีซั่นที่ ${a.rating.toLocaleString()} แต้ม ติดท็อป ${R.arena.topN} ได้ achievement "ผู้ครอบครองอารีน่า ซีซั่น ${monthLabel}"`
-        : `ซีซั่นนี้ลงสนามไป ${a.wins + a.losses} ไฟต์ ขอบคุณที่มาประลองด้วยกัน`,
+      body: a.ach
+        ? `จบซีซั่นที่อันดับ ${a.rank} (${a.rating.toLocaleString()} แต้ม) ได้ achievement "ผู้ครอบครองอารีน่า ซีซั่น ${monthLabel}"${champ ? ' และสนามแชมป์ประจำซีซั่น' : ''}`
+        : a.top
+          ? `จบซีซั่นที่อันดับ ${a.rank} (${a.rating.toLocaleString()} แต้ม) ติดท็อป ${R.arena.topN}${champ ? ' ได้สนามแชมป์ประจำซีซั่น' : ''}`
+          : `ซีซั่นนี้ลงสนามไป ${a.wins + a.losses} ไฟต์ ขอบคุณที่มาประลองด้วยกัน`,
       coins: a.coins,
-      achievement: a.top ? { id: R.arena.ach, date: season } : undefined,
+      achievement: a.ach ? { id: R.arena.ach, date: season } : undefined,
+      arena: champ,
     })
   }
   return mails

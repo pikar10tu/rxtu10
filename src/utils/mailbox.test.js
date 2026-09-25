@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/mailbox.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rewardCoins, rewardTickets, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildReportResultMail, buildBroadcastMail, buildWelcomeGiftMail, pendingAnnounce } from './mailbox.js'
+import { rewardCoins, rewardTickets, rewardArena, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildReportResultMail, buildBroadcastMail, buildWelcomeGiftMail, pendingAnnounce } from './mailbox.js'
 
 test('rewardCoins: คืนจำนวนเหรียญถ้า reward.coins เป็นบวก, ไม่งั้น 0', () => {
   assert.equal(rewardCoins({ reward: { coins: 50 } }), 50)
@@ -182,4 +182,15 @@ test('buildReportResultMail: notice ไม่มีรางวัล + เห�
   assert.equal(m.createdAt, 'TS')
   assert.equal(m.claimed, false)
   assert.ok(!buildReportResultMail(r, '', 'TS').body.includes('เหตุผล'))
+})
+
+test('สนามแชมป์ในจดหมาย: rewardArena · canClaim นับเป็นรางวัล · buildBroadcastMail แนบได้', () => {
+  const m = buildBroadcastMail({ title: 'รางวัลอารีน่า', arena: { id: 'ch-2026-09', rank: 7 } }, 'T')
+  assert.equal(m.type, 'reward')
+  assert.deepEqual(m.reward, { arena: { id: 'ch-2026-09', rank: 7 } })
+  assert.deepEqual(rewardArena(m), { id: 'ch-2026-09', rank: 7 })
+  assert.equal(canClaim(m), true)
+  assert.equal(canClaim({ ...m, claimed: true }), false)
+  assert.equal(rewardArena({ reward: { arena: { id: 'zz-unknown', rank: 1 } } }), null)   // ไม่อยู่ในทะเบียน
+  assert.equal(rewardArena({ reward: { coins: 5 } }), null)
 })

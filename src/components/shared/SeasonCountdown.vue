@@ -42,7 +42,7 @@ const hms = computed(() => {
 })
 const k = (n) => n.toLocaleString()
 const reward = computed(() => props.kind === 'arena'
-  ? `ท็อป ${R.arena.topN} ได้ achievement ผู้ครอบครองอารีน่า · ลงสนามแค่ 1 ไฟต์ก็รับ ${k(R.arena.joinCoins)} เหรียญ`
+  ? `ท็อป ${R.arena.topN} ได้สนามแชมป์ · ท็อป ${R.arena.achTopN} ได้ achievement ผู้ครอบครองอารีน่าด้วย · ลงสนามแค่ 1 ไฟต์ก็รับ ${k(R.arena.joinCoins)} เหรียญ`
   : `ท็อป ${R.tower.topN} รับ ${k(R.tower.topCoins)} + achievement · ถึงชั้น ${R.tower.ticketFloor} รับตั๋ว ${R.tower.tickets} ใบ · ไต่แค่ชั้นเดียวก็รับ ${k(R.tower.joinCoins)}`)
 </script>
 
