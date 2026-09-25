@@ -1116,7 +1116,7 @@ onUnmounted(() => {
 /* ไม่ตั้ง will-change ถาวร — melee lunge วิ่งผ่าน fx.lunge (WAAPI el.animate ตรง ไม่ใช่ CSS transition)
    browser promote เฉพาะช่วง animation รัน แล้ว release เอง (fill:none คืน layer ทันทีที่จบ) — ไม่มี transition: transform บน .br-unit แล้ว
    เดิม promote ถาวรทั้ง 8 การ์ด = layer เปล่าค้างตลอด → WebKit thrash */
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 16px; transition: border-color .15s; cursor: pointer; }
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(12,16,30,.62); border: 2px solid transparent; border-radius: 16px; transition: border-color .15s; cursor: pointer; }
 .br-unit.foe { border-color: rgba(248,113,113,.35); }
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
