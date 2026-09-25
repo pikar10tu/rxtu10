@@ -1,0 +1,57 @@
+/* ════════════════════════════════════════════════════════════
+   พื้นสนามประลอง (data/arenas.js · components/battle/ArenaFloor.vue)
+   🔑 มุมมองจากด้านบน · var(--far) = ทิศขอบจอ (ครึ่งบน to top · ครึ่งล่าง to bottom) ตั้งที่ .arf-host
+   🔑 perf iOS: พื้นเป็น gradient นิ่ง · ของขยับได้แค่ transform/opacity · ห้าม blur/filter
+   ⚠️ ห้ามให้สีธีมเว็บ (--primary ฯลฯ) ลามเข้ามาที่นี่ — สนามมีสีของตัวเอง
+   ════════════════════════════════════════════════════════════ */
+.arf-host { --far: to top; }
+.arf-host.bot { --far: to bottom; }
+
+.arf-floor { position: absolute; inset: 0; }
+.arf-sand { background: radial-gradient(140% 90% at 50% 0%, transparent 55%, rgba(0,0,0,.35)), repeating-radial-gradient(circle at 50% 120%, rgba(255,220,150,.06) 0 2px, transparent 2px 38px), linear-gradient(#5a4526, #3b2d18); }
+.arf-tower { background: radial-gradient(120% 80% at 50% 0%, rgba(76,29,149,.55), transparent 60%), radial-gradient(80% 55% at 50% 100%, rgba(217,119,6,.22), transparent 70%), linear-gradient(180deg, #1e1b4b, #0f172a 70%); }
+.arf-grass { background: repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 34px, transparent 34px 68px), linear-gradient(var(--far), #2f7a36, #1c4d22); }
+.arf-lab { background: linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px) 0 0/30px 30px, linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px) 0 0/30px 30px, linear-gradient(var(--far), #1f6571, #0f3540); }
+.arf-sakura { background: repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 40px), linear-gradient(var(--far), #7e3a5d 0%, #5b2644 70%, #3e1a31); }
+.arf-beach { background: linear-gradient(var(--far), #c9a36b 0%, #b48c55 52%, #f1e6cf 58%, #4aa7c4 64%, #1f6d96 100%); }
+.arf-apoth { background: repeating-linear-gradient(90deg, rgba(0,0,0,.25) 0 2px, transparent 2px 46px), repeating-linear-gradient(0deg, rgba(255,220,170,.05) 0 1px, transparent 1px 14px), linear-gradient(var(--far), #5a3820, #2f1c0d); }
+.arf-volcano { background: radial-gradient(60% 30% at 20% 100%, rgba(251,113,33,.35), transparent 70%), radial-gradient(50% 25% at 85% 100%, rgba(251,113,33,.3), transparent 70%), linear-gradient(var(--far), #3a1712, #1f0a08); }
+.arf-host:not(.bot) .arf-volcano { transform: scaleY(-1); }   /* ลาวาอยู่ฝั่งขอบจอเสมอ */
+.arf-space { background: radial-gradient(40% 40% at 20% 40%, rgba(168,85,247,.4), transparent 70%), radial-gradient(45% 45% at 85% 60%, rgba(56,189,248,.3), transparent 70%), linear-gradient(#0b0826, #05030f); }
+.arf-gold { background: linear-gradient(45deg, rgba(255,236,170,.08) 25%, transparent 25% 75%, rgba(255,236,170,.08) 75%) 0 0/48px 48px, linear-gradient(-45deg, rgba(255,236,170,.08) 25%, transparent 25% 75%, rgba(255,236,170,.08) 75%) 0 0/48px 48px, linear-gradient(var(--far), #7a4f10, #3a2506); }
+.arf-exam { background: linear-gradient(rgba(96,165,250,.16) 1px, transparent 1px) 0 0/100% 26px, linear-gradient(90deg, transparent 30px, rgba(248,113,113,.35) 30px 32px, transparent 32px), linear-gradient(#1b2440, #141b33); }
+.arf-loy { background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 2px, transparent 2px 18px), linear-gradient(var(--far), #123560, #0a1c38); }
+.arf-jungle { background:
+  radial-gradient(22% 28% at 12% 30%, rgba(22,101,52,.9), transparent 70%), radial-gradient(26% 30% at 88% 70%, rgba(21,128,61,.85), transparent 70%),
+  radial-gradient(18% 22% at 60% 20%, rgba(20,83,45,.9), transparent 70%), radial-gradient(16% 20% at 35% 80%, rgba(22,101,52,.8), transparent 70%),
+  repeating-radial-gradient(circle at 50% 50%, rgba(250,204,21,.05) 0 3px, transparent 3px 28px), linear-gradient(var(--far), #2d5a1e, #12300c); }
+
+/* ของตกแต่ง — วางด้วย left/top (px) จาก utils/arenaLayout.js · ภาพย่อใช้ % */
+.arf-deco { position: absolute; line-height: 1; pointer-events: none; translate: -50% -50%; }
+.arf-bob { animation: arf-bob 3s ease-in-out infinite; }
+.arf-pulse { animation: arf-pulse 2.6s ease-in-out infinite; }
+.arf-twk { animation: arf-twk 2.4s ease-in-out infinite; }
+@keyframes arf-bob { 50% { transform: translateY(-6px); } }
+@keyframes arf-pulse { 50% { opacity: .4; } }
+@keyframes arf-twk { 50% { opacity: .25; } }
+.arf-petal { position: absolute; top: -6%; font-size: 1rem; line-height: 1; pointer-events: none; animation: arf-fall linear infinite; }
+@keyframes arf-fall { to { transform: translate(-30px, 110vh) rotate(260deg); } }
+
+/* ป้ายสลักสนามแชมป์ — r1 ทองมีมงกุฎ+แสงวิ่ง · r2 เงิน · r3 ทองแดง · r10 หิน (user เคาะ 25 ก.ย.) */
+.arf-plaque { position: absolute; translate: -50% -50%; overflow: hidden; white-space: nowrap; text-align: center; line-height: 1.35;
+  font-family: 'Cinzel', Georgia, serif; font-weight: 700; letter-spacing: .12em; font-size: .78rem; padding: 5px 14px 6px; border-radius: 6px; pointer-events: none; }
+.arf-plaque small { display: block; font-size: .7rem; letter-spacing: .18em; opacity: .9; }
+.arf-plaque .arf-crown { display: block; font-size: 1.1rem; line-height: 1; margin: -2px 0 1px; letter-spacing: 0; }
+.arf-plaque.r1 { color: #fff7cc; background: linear-gradient(#b8860b, #6b4604); border: 2px solid #fde68a; text-shadow: 0 1px 0 #000;
+  box-shadow: 0 0 0 3px #5a3a08, 0 0 0 4px rgba(253,230,138,.8), 0 6px 16px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.4); }
+.arf-plaque.r1::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-150%) skewX(-20deg); animation: arf-shine 3.2s ease-in-out infinite; }
+@keyframes arf-shine { 0%, 55% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(420%) skewX(-20deg); } }
+.arf-plaque.r2 { color: #f8fafc; background: linear-gradient(#94a3b8, #475569); border: 2px solid #e2e8f0; text-shadow: 0 1px 0 #000;
+  box-shadow: 0 0 0 3px #334155, 0 5px 12px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.45); }
+.arf-plaque.r3 { color: #fff1e6; background: linear-gradient(#b45f2a, #6b3413); border: 2px solid #fdba74; text-shadow: 0 1px 0 #000;
+  box-shadow: 0 0 0 2px #4a230c, 0 4px 10px rgba(0,0,0,.4); }
+.arf-plaque.r10 { color: #e2e8f0; background: linear-gradient(#475569, #1e293b); border: 1px solid rgba(226,232,240,.35); box-shadow: 0 3px 8px rgba(0,0,0,.35); }
+.arf-plaque.mini { font-size: .7rem; padding: 2px 6px; letter-spacing: .06em; box-shadow: none; }
+.arf-plaque.mini::after { display: none; }
