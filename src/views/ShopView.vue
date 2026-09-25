@@ -35,27 +35,27 @@
       <FarmStore v-else-if="tab === 'farm'" />
       <template v-else>
       <div class="shop-storage">
-        <Emoji char="🐾" /> สัตว์เลี้ยง {{ pets.length }}/{{ ownable.length }} ชนิด
+        <span><Emoji char="🐾" /> สะสมแล้ว {{ pets.length }}/{{ ownable.length }} ชนิด</span>
+        <span v-if="tickets > 0" class="shop-ticket"><Emoji char="🎟️" /> ตั๋ว {{ tickets }} ใบ · ใช้ก่อนเหรียญ</span>
       </div>
 
       <!-- ตู้อีเวนต์อยู่บน ตู้ปกติอยู่ล่าง (แบบเกมกาชาทั่วไป — user เคาะ 11 ก.ย.)
            ตู้อีเวนต์โผล่/หายเองตามนาฬิกา ไม่ต้องรีโหลดหน้า -->
       <GachaBanner
         v-if="ev.active"
-        :title="ev.name" icon="✨" event :time-left="evLeft" :featured="featuredPets"
+        :title="ev.name" event :time-left="evLeft" :featured="featuredPets"
         :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
         @pull="(n) => pull(n, true)"
       />
       <GachaBanner
-        title="อัญเชิญประจำ" icon="🎰"
+        title="อัญเชิญประจำ"
         :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
         show-target :target-pet="targetPet" :guaranteed="guaranteed"
         @pull="(n) => pull(n)" @open-target="pickerOpen = true"
       />
-      <div class="shop-note">สุ่ม 10 ได้ 11 ตัว · ได้ตัวเดิมซ้ำ → +1 ตัวซ้ำ (ใช้วิวัฒน์หรือหลอม)</div>
-      <div class="lab-sec"><Emoji char="🧪" /> ห้องทดลอง</div>
+      <div class="shop-note">ได้เพ็ทที่มีแล้ว = ได้ตัวซ้ำ 1 ชิ้น เอาไปใช้ที่โรงหลอมด้านล่าง</div>
       <LabTab />
       </template>
     </template>
@@ -96,37 +96,8 @@
       </div>
     </Teleport>
 
-    <!-- reveal: anticipate (ลุ้น) → show (เผย) -->
-    <Teleport to="body">
-      <div v-if="reveal" class="rv-ov"
-        :class="[`r-${reveal.phase === 'anticipate' ? TIERS[climb] : reveal.best}`, reveal.phase]"
-        @click.self="onRevealBackdrop">
-        <!-- จังหวะลุ้น: ลูกแก้วเรืองแสงสี rarity สูงสุด -->
-        <div v-if="reveal.phase === 'anticipate'" class="anti" role="button" tabindex="0"
-          aria-label="ข้ามการอัญเชิญ" :class="`c${climb}`" :style="{ '--glow': rarityColor(TIERS[climb]) }"
-          @click="skipReveal" @keydown.enter.prevent="skipReveal" @keydown.space.prevent="skipReveal">
-          <div class="orb"><span class="orb-core"></span></div>
-          <div class="anti-txt">กำลังอัญเชิญ…</div>
-          <div class="anti-skip">แตะเพื่อข้าม</div>
-        </div>
-        <!-- จังหวะเผย -->
-        <div v-else class="rv-box" :class="{ legend: reveal.best === 'legendary' }" @click.stop>
-          <div v-if="reveal.best === 'legendary'" class="legend-rays" aria-hidden="true"></div>
-          <div class="rv-inner">
-            <div class="rv-label">คุณได้รับ!</div>
-            <div class="rv-grid" :class="{ single: !reveal.multi }">
-              <div v-for="(s, i) in reveal.summary" :key="i" class="rv-cell"
-                :style="{ borderColor: rarityColor(s.rarity), '--rc': rarityColor(s.rarity), animationDelay: (reveal.multi ? i * 65 : 0) + 'ms' }">
-                <span class="rv-emoji"><Emoji :char="s.emoji" /></span>
-                <span class="rv-nm">{{ s.name }}</span>
-                <span class="rv-badge" :style="{ background: rarityColor(s.rarity) }">{{ s.isNew ? 'ใหม่!' : '+1' }}</span>
-              </div>
-            </div>
-            <button class="rv-ok" @click="closeReveal">เยี่ยม!</button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <!-- ฉากเปิดแคปซูล (user เลือกจากเดโม 25 ก.ย. 2026) — ตู้หมุน · แสงใบ้หลังตู้ · แคปซูลแตก / ถาด 11 ลูก -->
+    <CapsuleReveal v-if="reveal" :summary="reveal.summary" :multi="reveal.multi" @close="reveal = null" />
   </div>
 </template>
 
@@ -145,15 +116,14 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
-import { prefersReducedMotion } from '../utils/motionPref.js'
 import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
 import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent.js'
 import GachaBanner from '../components/shop/GachaBanner.vue'
+import CapsuleReveal from '../components/shop/CapsuleReveal.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import CosmeticShop from '../components/shop/CosmeticShop.vue'
 import FarmStore from '../components/shop/FarmStore.vue'
 import { useRoute } from 'vue-router'
-import { sfx } from '../utils/sfx.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -164,7 +134,7 @@ const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 const { postNews, myName } = useNewsPost()
 // ?tab=style = ลิงก์ "ตกแต่ง" จากหน้าฉัน
 const STORES = [
-  { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · ห้องทดลอง' },
+  { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · โรงหลอม' },
   { k: 'farm', icon: '🌱', name: 'ร้านฟาร์ม', sub: 'ปลดแปลงเพิ่ม' },
   { k: 'style', icon: '🎀', name: 'ร้านตกแต่ง', sub: 'สีชื่อ · กรอบ · ป้าย' },
 ]
@@ -211,41 +181,6 @@ const buying = ref(false)
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const ownedLegendaryIds = () => pets.value.filter((p) => p.rarity === 'legendary').map((p) => p.id)
 
-// reveal animation: จังหวะ "ลุ้น" (anticipate, สีลูกแก้ว = rarity สูงสุด) → "เผย" (show)
-const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
-const TIERS = ['common', 'rare', 'epic', 'legendary']
-const reduceMotion = () => prefersReducedMotion()
-// 🔴 ของเดิมเรืองแสงสีของผลจริงตั้งแต่วินาทีแรก ⇒ 1.3 วิที่ควรลุ้น บอกคำตอบไปแล้ว (สเปกแม่ §6)
-//    ใหม่: ไต่สีทีละขั้น ขาว→ฟ้า→ม่วง→ทอง แล้วหยุดที่ขั้นของผลจริง · ขั้นสูงกว่าใช้เวลาสั้นลง = เร่งจังหวะ
-//    🔒 งบเวลารวมเท่าเดิม 1,300ms ห้ามยืด · ไม่แตะตรรกะสุ่มเลย อ่านผลที่สุ่มเสร็จแล้วอย่างเดียว
-const ANTICIPATE_MS = 1300
-const climb = ref(0)                    // ขั้นสีที่ลูกแก้วไต่ถึงตอนนี้ (0..RANK[best])
-const revealTimers = []
-function clearRevealTimers() { while (revealTimers.length) clearTimeout(revealTimers.pop()) }
-function showReveal(summary, multi) {
-  const best = summary.reduce((b, s) => (RANK[s.rarity] > RANK[b] ? s.rarity : b), 'common')
-  clearRevealTimers()
-  climb.value = 0
-  reveal.value = { summary, multi, best, phase: reduceMotion() ? 'show' : 'anticipate' }
-  if (reveal.value.phase !== 'anticipate') { sfx('reveal_' + best); return }
-  sfx('roll')
-  const steps = RANK[best]
-  // แบ่งเวลาแบบเร่งขึ้น: ขั้นแรกอยู่นานสุด ขั้นท้ายวูบเดียวก่อนแตกเป็นผล
-  const marks = []
-  for (let i = 1; i <= steps; i++) marks.push(Math.round(ANTICIPATE_MS * (0.35 + 0.5 * (i / (steps + 1)))))
-  marks.forEach((ms, i) => revealTimers.push(setTimeout(() => { climb.value = i + 1; sfx('climb') }, ms)))
-  revealTimers.push(setTimeout(() => { if (reveal.value) { reveal.value = { ...reveal.value, phase: 'show' }; sfx('reveal_' + best) } }, ANTICIPATE_MS))
-}
-function skipReveal() { clearRevealTimers(); if (reveal.value) reveal.value = { ...reveal.value, phase: 'show' } }
-function closeReveal() { clearRevealTimers(); reveal.value = null }
-// แตะที่ว่างระหว่าง "ลุ้น" = ข้ามไปดูผล ไม่ใช่ปิดจอทิ้ง
-// (เดิมผูก closeReveal ตรงๆ ⇒ แตะพลาดนอกลูกแก้ว = เหรียญหักแล้วแต่ไม่มีทางรู้ว่าได้อะไร)
-function onRevealBackdrop() {
-  if (!reveal.value) return
-  if (reveal.value.phase === 'anticipate') skipReveal()
-  else closeReveal()
-}
-
 const rateList = ['legendary', 'epic', 'rare', 'common'].map((k) => ({ key: k, pct: GACHA_RATES[k], color: RARITY[k]?.color, label: RARITY[k]?.label }))
 
 async function pull(n, isEvent = false) {
@@ -290,7 +225,7 @@ async function pull(n, isEvent = false) {
   const ok = await authStore.patchUser(optimistic, server)
   buying.value = false
   if (ok) {
-    showReveal(summary, rolls > 1)
+    reveal.value = { summary, multi: rolls > 1 }
     // ข่าวกระดาน (เลนอยู่ยาว): เปิด 10 ครั้งได้ legendary 2 ตัว = ข่าวเดียว ยิงตัวแรกที่เจอ
     const leg = results.find((r) => r.rarity === 'legendary')
     if (leg) {
@@ -310,7 +245,7 @@ async function chooseTarget(id) {
 
 <style scoped>
 .shop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
-.shop-coins { font-size: 1rem; font-weight: 800; color: #b45309; }
+.shop-coins { font-size: .92rem; font-weight: 800; color: #b45309; background: #fff; border: var(--bw) solid var(--line); border-radius: 999px; padding: 3px 12px; margin-left: auto; }
 .stores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0 14px; }
 .store { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; border: var(--bw) solid var(--line); background: #fff; box-shadow: var(--pop); cursor: pointer; color: var(--ink); transition: transform .12s; }
 .store-emoji { font-size: 1.6rem; line-height: 1.1; }
@@ -323,9 +258,9 @@ async function chooseTarget(id) {
 .style-note { font-size: .76rem; line-height: 1.55; color: var(--muted); background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 10px 12px; margin-bottom: 12px; }
 .style-note > b { color: var(--ink); }
 .style-where { display: block; margin-top: 4px; }
-.lab-sec { font-size: .95rem; font-weight: 800; margin: 22px 0 8px; display: flex; align-items: center; gap: 6px; }
-.shop-storage { font-size: .72rem; color: rgba(0,0,0,.55); margin-bottom: 14px; }
-.shop-note { font-size: .7rem; color: rgba(0,0,0,.4); text-align: center; margin-top: 14px; }
+.shop-storage { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: .72rem; color: var(--muted); margin-bottom: 12px; }
+.shop-ticket { font-weight: 800; color: #b45309; background: #fff8ec; border-radius: 999px; padding: 1px 10px; }
+.shop-note { font-size: .72rem; color: var(--muted); text-align: center; margin: 14px 0 18px; }
 .shop-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 .shop-maint { text-align: center; padding: 48px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .shop-maint-emoji { font-size: 3rem; }
@@ -355,54 +290,6 @@ async function chooseTarget(id) {
 .info-flavor { font-size: .8rem; color: rgba(0,0,0,.65); line-height: 1.6; margin: 12px 4px; font-style: italic; } */
 .info-passive { margin-top: 12px; font-size: .7rem; color: rgba(0,0,0,.45); background: rgba(0,0,0,.04); border-radius: 9px; padding: 7px; }
 .info-target { width: 100%; margin-top: 14px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 10px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
-/* ── reveal: ลุ้น (anticipate) → เผย (show) ── */
-.rv-ov { position: fixed; inset: 0; z-index: 410; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(10,8,20,.74); overscroll-behavior: contain; }
-.rv-ov.anticipate { cursor: pointer; }
-
-.anti { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.orb { position: relative; width: 128px; height: 128px; border-radius: 50%; display: grid; place-items: center;
-  background: radial-gradient(circle at 50% 42%, #fff 0%, var(--glow) 52%, rgba(0,0,0,.42) 108%);
-  box-shadow: 0 0 58px 8px var(--glow), inset 0 0 22px rgba(255,255,255,.55);
-  animation: orb-pulse .62s ease-in-out infinite alternate; }
-.orb::before { content: ''; position: absolute; inset: -32px; border-radius: 50%; pointer-events: none;
-  background: conic-gradient(from 0deg, transparent 0 16%, var(--glow) 24%, transparent 33% 66%, var(--glow) 76%, transparent 84%);
-  opacity: .5; filter: blur(2px); animation: orb-spin 2.4s linear infinite; }
-.orb-core { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 0 20px #fff; animation: orb-core .62s ease-in-out infinite alternate; }
-.anti-txt { color: #fff; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; letter-spacing: .03em; text-shadow: 0 0 16px var(--glow); }
-.anti-skip { color: rgba(255,255,255,.5); font-size: .7rem; }
-/* ยิ่งไต่สูงยิ่งเร่ง — "จังหวะ" เป็นตัวบอกว่ากำลังจะดี โดยที่สียังไม่เฉลยว่าได้อะไร
-   (สีเปลี่ยนผ่าน --glow ที่ผูกกับขั้นการไต่อยู่แล้ว · ไม่แตะเวลารวม 1.3 วิ) */
-.anti.c2 .orb, .anti.c2 .orb-core { animation-duration: .46s; }
-.anti.c3 .orb, .anti.c3 .orb-core { animation-duration: .3s; }
-.anti.c3 .anti-txt { letter-spacing: .14em; }
-
-.rv-box { position: relative; background: #fff; border: var(--bw) solid var(--line); border-radius: 22px; box-shadow: var(--pop-lg); padding: 22px; text-align: center; max-width: 340px; width: 100%; overflow: hidden; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
-.rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 40px 4px rgba(245,158,11,.5), var(--pop-lg); }
-.rv-inner { position: relative; z-index: 1; }
-.legend-rays { position: absolute; left: 50%; top: 42%; width: 220%; height: 220%; transform: translate(-50%,-50%); z-index: 0; pointer-events: none;
-  background: repeating-conic-gradient(from 0deg, rgba(245,158,11,.5) 0deg 7deg, transparent 7deg 22deg);
-  animation: ray-spin 9s linear infinite, ray-fade 2.4s ease-out both; }
-.rv-label { font-size: .8rem; color: rgba(0,0,0,.5); margin-bottom: 10px; }
-.rv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.rv-grid.single { grid-template-columns: 1fr; }
-.rv-cell { position: relative; border: var(--bw) solid var(--line); border-radius: 11px; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: #fff; animation: cell-in .42s cubic-bezier(.2,1.3,.45,1) both; }
-.rv-grid.single .rv-cell { animation: cell-pop .52s cubic-bezier(.2,1.45,.4,1) both; box-shadow: 0 0 22px -2px var(--rc); }
-.rv-grid.single .rv-emoji { font-size: 3.4rem; }
-.rv-emoji { font-size: 1.7rem; }
-.rv-nm { font-size: .7rem; font-weight: 700; }
-.rv-grid.single .rv-nm { font-size: .9rem; }
-.rv-badge { color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 5px; border-radius: 999px; }
-.rv-ok { position: relative; z-index: 1; display: block; width: 100%; margin-top: 16px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
-
-@keyframes orb-pulse { from { transform: scale(.92); } to { transform: scale(1.08); box-shadow: 0 0 80px 14px var(--glow), inset 0 0 22px rgba(255,255,255,.6); } }
-@keyframes orb-core { from { transform: scale(.78); opacity: .78; } to { transform: scale(1.16); opacity: 1; } }
-@keyframes orb-spin { to { transform: rotate(360deg); } }
-@keyframes rv-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes cell-in { from { transform: translateY(14px) scale(.82); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes cell-pop { 0% { transform: scale(.4); opacity: 0; } 62% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
-@keyframes ray-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
-@keyframes ray-fade { from { opacity: .85; } to { opacity: .4; } }
-
 .shop-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
 .shop-tab { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; font-size: .82rem; background: #fff; color: var(--ink); cursor: pointer; }
 .shop-tab.on { background: var(--gold); }

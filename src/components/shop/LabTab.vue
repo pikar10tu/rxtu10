@@ -1,71 +1,55 @@
 <template>
   <div class="lab">
-    <!-- เพื่อนบอกว่าห้องทดลองเดิมเข้าใจยาก (25 ก.ย. 2026) ⇒ อธิบาย "ตัวซ้ำ" ก่อน แล้วแต่ละปุ่มบอกชัดว่าใช้อะไร ได้อะไร -->
-    <div class="lab-intro">
-      <div class="lab-intro-h"><Emoji char="🧪" /> ห้องทดลอง · ใช้ตัวซ้ำ</div>
-      <p>อัญเชิญได้เพ็ทที่มีอยู่แล้ว = ได้ <b>"ตัวซ้ำ"</b> 1 ชิ้น เก็บไว้ใช้ที่นี่ได้ 2 ทาง
-        <b>หลอม</b> ตัวซ้ำหลายชิ้นเป็นเพ็ทระดับสูงขึ้น หรือ <b>ขาย</b> เป็นเหรียญ · กดแล้วเลือกได้ว่าจะใช้ตัวซ้ำของตัวไหน</p>
-      <div class="lab-bal">
-        <div v-for="r in RARITIES" :key="r" class="lab-bal-cell" :style="{ '--rc': rarityColor(r) }">
-          <span class="lab-bal-n">{{ copyTotal(r) }}</span>
-          <span class="lab-bal-l">ตัวซ้ำ {{ RARITY[r]?.label }}</span>
-        </div>
+    <!-- โรงหลอม (เดิม "ห้องทดลอง") — หน้าตาใหม่ 25 ก.ย. 2026 จากเดโมที่ user เลือก
+         บอกก่อนว่าตัวซ้ำคืออะไร + ใช้ได้ 3 ทาง (เดิมไม่บอกว่าเอาไปอัปเกรดเกรดได้) → สูตรเป็นภาพ [ใส่] → [ได้] -->
+    <div class="fg-head">
+      <h2><Emoji char="⚒️" /> โรงหลอม</h2>
+      <p>อัญเชิญได้เพ็ทที่มีอยู่แล้ว จะได้ <b>"ตัวซ้ำ"</b> 1 ชิ้นแทน ตัวซ้ำใช้ได้ 3 ทาง</p>
+      <div class="fg-uses">
+        <div><b><Emoji char="⬆️" /> อัปเกรด</b>เพิ่มเกรดเพ็ทตัวนั้น (หน้าเพ็ท)</div>
+        <div><b><Emoji char="⚒️" /> หลอม</b>รวมหลายชิ้นเป็นเพ็ทระดับสูงขึ้น</div>
+        <div><b><Emoji char="🪙" /> ขาย</b>แลกเป็นเหรียญ</div>
       </div>
     </div>
 
-    <!-- หลอม -->
-    <div class="lab-card">
-      <div class="lab-card-h"><Emoji char="⚗️" /> หลอมไต่ระดับ</div>
-      <div class="lab-card-sub">ใช้ตัวซ้ำระดับเดียวกันตามจำนวน → สุ่มได้เพ็ทระดับถัดไป 1 ตัว (ได้ตัวที่มีแล้วก็กลายเป็นตัวซ้ำระดับสูงขึ้น)</div>
-      <div v-for="src in FUSE_SRC" :key="src" class="lab-row">
-        <div class="lab-row-main">
-          <div class="lab-row-t">
-            <span class="lab-chip" :style="{ background: rarityColor(src) }">{{ RARITY[src]?.label }}</span>
-            <span class="lab-x">{{ FUSION_COST[src] }} ตัว</span>
-            <span class="lab-arrow">→</span>
-            <span class="lab-chip" :style="{ background: rarityColor(nextRarity(src)) }">{{ RARITY[nextRarity(src)]?.label }}</span>
-            <span class="lab-x">1 ตัว</span>
-          </div>
-          <div class="lab-prog" :aria-label="`มี ${copyTotal(src)} จาก ${FUSION_COST[src]}`">
-            <i :style="{ width: Math.min(100, copyTotal(src) / FUSION_COST[src] * 100) + '%', background: rarityColor(src) }"></i>
-          </div>
-          <div class="lab-have">มี {{ copyTotal(src) }}/{{ FUSION_COST[src] }}{{ copyTotal(src) >= FUSION_COST[src] ? ` · หลอมได้ ${Math.floor(copyTotal(src) / FUSION_COST[src])} ครั้ง` : ` · ขาดอีก ${FUSION_COST[src] - copyTotal(src)}` }}</div>
-        </div>
-        <button class="lab-btn" :class="{ ok: copyTotal(src) >= FUSION_COST[src] }"
-          :disabled="busy || copyTotal(src) < FUSION_COST[src]" @click="openFusion(src)">หลอม</button>
+    <div class="fg-bal">
+      <div v-for="r in RARITIES" :key="r" :style="{ '--rc': rarityColor(r) }">
+        <b>{{ copyTotal(r) }}</b><span>{{ RARITY[r]?.label }}</span>
       </div>
     </div>
 
-    <!-- หลอมตำนาน (user ขอ 25 ก.ย. 2026): ตำนานซ้ำ 3 → ตำนานตัวอื่น 1 (ไม่ได้ตัวที่ใส่ไป) -->
-    <div class="lab-card lab-swap">
-      <div class="lab-card-h"><Emoji char="🌟" /> หลอมตำนานเป็นตัวอื่น</div>
-      <div class="lab-card-sub">ใช้ตัวซ้ำตำนาน {{ LEGEND_SWAP_COST }} ชิ้น → สุ่มได้ตำนาน 1 ตัวจากตัว<b>อื่น</b> (ไม่มีทางได้ตัวที่ใส่ลงไป · ได้ตัวที่มีแล้วก็กลายเป็นตัวซ้ำ)</div>
-      <div class="lab-row">
-        <div class="lab-row-main">
-          <div class="lab-prog" :aria-label="`มี ${copyTotal('legendary')} จาก ${LEGEND_SWAP_COST}`">
-            <i :style="{ width: Math.min(100, copyTotal('legendary') / LEGEND_SWAP_COST * 100) + '%', background: rarityColor('legendary') }"></i>
-          </div>
-          <div class="lab-have">มี {{ copyTotal('legendary') }}/{{ LEGEND_SWAP_COST }}{{ copyTotal('legendary') >= LEGEND_SWAP_COST ? ` · หลอมได้ ${Math.floor(copyTotal('legendary') / LEGEND_SWAP_COST)} ครั้ง` : ` · ขาดอีก ${LEGEND_SWAP_COST - copyTotal('legendary')}` }}</div>
+    <div class="fg-sec">สูตรหลอม</div>
+    <div v-for="rc in RECIPES" :key="rc.key" class="fg-recipe" :class="{ special: rc.swap }"
+      :style="{ '--rc': rarityColor(rc.src), '--oc': rarityColor(rc.out) }">
+      <span v-if="rc.swap" class="fg-new">ใหม่</span>
+      <div class="fg-eq">
+        <div class="fg-ing">
+          <span class="fg-capdot" aria-hidden="true"></span>
+          <span class="fg-ing-t"><b>ตัวซ้ำ{{ RARITY[rc.src]?.label }} ×{{ rc.cost }}</b><small>ของตัวไหนก็ได้ผสมกัน</small></span>
         </div>
-        <button class="lab-btn" :class="{ ok: copyTotal('legendary') >= LEGEND_SWAP_COST }"
-          :disabled="busy || copyTotal('legendary') < LEGEND_SWAP_COST" @click="openSwap">หลอม</button>
+        <span class="fg-arrow" aria-hidden="true">→</span>
+        <div class="fg-out"><span class="fg-q"><Emoji char="❓" /></span>{{ RARITY[rc.out]?.label }} 1 ตัว</div>
+      </div>
+      <div v-if="rc.swap" class="fg-swapnote">สุ่มจากตำนานตัว<b>อื่น</b> ไม่มีทางได้ตัวที่ใส่ลงไป · ได้ตัวที่มีแล้วก็กลายเป็นตัวซ้ำ</div>
+      <div class="fg-bar" :aria-label="`มี ${copyTotal(rc.src)} จาก ${rc.cost}`">
+        <i :style="{ width: Math.min(100, copyTotal(rc.src) / rc.cost * 100) + '%' }"></i>
+      </div>
+      <div class="fg-foot">
+        <span class="fg-have">{{ copyTotal(rc.src) >= rc.cost
+          ? `มี ${copyTotal(rc.src)} ชิ้น · หลอมได้ ${Math.floor(copyTotal(rc.src) / rc.cost)} ครั้ง`
+          : `มี ${copyTotal(rc.src)}/${rc.cost} · ขาดอีก ${rc.cost - copyTotal(rc.src)} ชิ้น` }}</span>
+        <button class="fg-btn" :class="{ ok: copyTotal(rc.src) >= rc.cost }"
+          :disabled="busy || copyTotal(rc.src) < rc.cost" @click="rc.swap ? openSwap() : openFusion(rc.src)">หลอม</button>
       </div>
     </div>
 
-    <!-- ขาย -->
-    <div class="lab-card">
-      <div class="lab-card-h"><Emoji char="🪙" /> ขายตัวซ้ำเป็นเหรียญ</div>
-      <div class="lab-card-sub">ไม่อยากหลอม ขายได้เลย · เพ็ทตัวหลักไม่หาย ขายแค่ตัวซ้ำ</div>
-      <div v-for="r in RARITIES" :key="r" class="lab-row">
-        <div class="lab-row-main">
-          <div class="lab-row-t">
-            <span class="lab-chip" :style="{ background: rarityColor(r) }">{{ RARITY[r]?.label }}</span>
-            <span class="lab-x">ชิ้นละ {{ REDEEM_COIN[r].toLocaleString() }} 🪙</span>
-          </div>
-          <div class="lab-have">มี {{ copyTotal(r) }} ชิ้น{{ copyTotal(r) ? ` · ขายหมดได้ ${(copyTotal(r) * REDEEM_COIN[r]).toLocaleString()} 🪙` : '' }}</div>
-        </div>
-        <button class="lab-btn" :class="{ ok: copyTotal(r) > 0 }"
-          :disabled="busy || copyTotal(r) === 0" @click="openRedeem(r)">ขาย</button>
+    <div class="fg-sec">ขายตัวซ้ำ</div>
+    <div class="fg-sell">
+      <div v-for="r in RARITIES" :key="r" class="fg-sell-row">
+        <span class="fg-chip" :style="{ background: rarityColor(r) }">{{ RARITY[r]?.label }}</span>
+        <span>ชิ้นละ {{ REDEEM_COIN[r].toLocaleString() }} <Emoji char="🪙" /></span>
+        <span class="fg-have">มี {{ copyTotal(r) }}</span>
+        <button class="fg-sbtn" :disabled="busy || copyTotal(r) === 0" @click="openRedeem(r)">ขาย</button>
       </div>
     </div>
 
@@ -73,21 +57,8 @@
     <SpendCopiesModal v-if="pending" :rarity="pending.rarity" :mode="pending.mode" :required="pending.required"
       @confirm="onConfirm" @cancel="pending = null" />
 
-    <!-- fusion reveal -->
-    <Teleport to="body">
-      <div v-if="reveal" class="ov" @click.self="reveal = null">
-        <div class="rv-box" :class="{ legend: reveal.rarity === 'legendary' }" :style="{ '--rc': rarityColor(reveal.rarity) }">
-          <div class="rv-label">หลอมสำเร็จ!</div>
-          <div class="rv-emoji-wrap">
-            <span class="fuse-aura" aria-hidden="true"></span>
-            <div class="rv-emoji"><Emoji :char="reveal.emoji" /></div>
-          </div>
-          <div class="rv-nm">{{ reveal.name }}</div>
-          <div class="rv-badge" :style="{ background: rarityColor(reveal.rarity) }">{{ reveal.isNew ? 'ใหม่!' : '+1 ตัวซ้ำ' }}</div>
-          <button class="rv-ok" @click="reveal = null">เยี่ยม!</button>
-        </div>
-      </div>
-    </Teleport>
+    <!-- ผลหลอม — ฉากแคปซูลเดียวกับอัญเชิญ (หลอมได้ตำนาน = แสงรุ้งหลังตู้ด้วย) -->
+    <CapsuleReveal v-if="reveal" :summary="[reveal]" label="หลอมสำเร็จ!" @close="reveal = null" />
 
     <!-- redeem coin-burst -->
     <Teleport to="body">
@@ -102,7 +73,6 @@
 </template>
 
 <script setup>
-import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import { ref, computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import { increment } from 'firebase/firestore'
@@ -114,20 +84,23 @@ import { useAppConfig } from '../../composables/useAppConfig.js'
 import { mergeRolls } from '../../utils/gachaMerge.js'
 import { FUSION_COST, REDEEM_COIN, LEGEND_SWAP_COST, nextRarity, rarityCopyTotal, applyCopySpend, fuseRoll, legendSwapRoll, redeemValue } from '../../utils/lab.js'
 import SpendCopiesModal from './SpendCopiesModal.vue'
+import CapsuleReveal from './CapsuleReveal.vue'
 
 const auth = useAuthStore()
 const { rawConfig } = useAppConfig()
 const { toast } = useToast()
 
 const RARITIES = ['common', 'rare', 'epic', 'legendary']
-const FUSE_SRC = ['common', 'rare', 'epic']
+const RECIPES = [
+  ...['common', 'rare', 'epic'].map((src) => ({ key: src, src, out: nextRarity(src), cost: FUSION_COST[src] })),
+  { key: 'swap', src: 'legendary', out: 'legendary', cost: LEGEND_SWAP_COST, swap: true },
+]
 const pets = computed(() => auth.userData?.pets || [])
 const copyTotal = (r) => rarityCopyTotal(pets.value, r)
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 
 const pending = ref(null) // { mode, rarity, required }
-const reveal = ref(null)  // summary entry
-useEscapeKey(reveal, () => { reveal.value = null })
+const reveal = ref(null)  // summary entry (CapsuleReveal จัดการ Esc เอง)
 const coinBurst = ref(null) // จำนวนเหรียญที่เพิ่งแลก (trigger animation)
 const busy = ref(false)
 let cbTimer = null
@@ -176,69 +149,54 @@ async function onConfirm(allocation) {
 </script>
 
 <style scoped>
-.lab { display: flex; flex-direction: column; gap: 12px; }
-.lab-bal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.lab-bal-cell { display: flex; flex-direction: column; align-items: center; border: 2px solid; border-radius: 11px; padding: 8px 2px; background: #fff; }
-.lab-bal-n { font-size: 1.2rem; font-weight: 800; }
-.lab-bal-l { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); }
-.lab-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 12px; box-shadow: var(--pop); }
-.lab-card-h { font-weight: 800; font-size: .9rem; margin-bottom: 10px; }
-.lab-fuse { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(0,0,0,.06); }
-.lab-fuse:first-of-type { border-top: none; }
-.lab-fuse-txt { flex: 1; font-size: .78rem; font-weight: 700; }
-.lab-fuse-cost { font-size: .7rem; color: rgba(0,0,0,.5); font-weight: 700; }
-.lab-btn { border: var(--bw) solid var(--line); border-radius: 10px; padding: 7px 14px; font-family: inherit; font-weight: 800; font-size: .76rem; color: #fff; background: #c9c2d4; cursor: pointer; }
-.lab-btn.ok { background: var(--primary); box-shadow: var(--pop); }
-.lab-btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
-.ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.rv-box { position: relative; overflow: hidden; background: #fff; border: var(--bw) solid var(--line); border-radius: 22px; box-shadow: var(--pop-lg); padding: 26px 22px; text-align: center; max-width: 300px; width: 100%; max-height: 88vh; overflow-y: auto; animation: rv-pop .34s cubic-bezier(.2,1.3,.45,1); }
-.rv-box.legend { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 38px 4px rgba(245,158,11,.5), var(--pop-lg); }
-.rv-label { font-size: .8rem; color: rgba(0,0,0,.5); }
-.rv-emoji-wrap { position: relative; display: grid; place-items: center; width: 110px; height: 110px; margin: 10px auto; }
-.fuse-aura { position: absolute; width: 108px; height: 108px; border-radius: 50%; pointer-events: none;
-  background: conic-gradient(from 0deg, transparent 0 18%, var(--rc) 28%, transparent 38% 68%, var(--rc) 78%, transparent 88%);
-  opacity: .5; filter: blur(1px); animation: fa-spin 1.1s linear infinite, fa-fade 1.6s ease-out both; }
-.rv-emoji { position: relative; z-index: 1; font-size: 4rem; filter: drop-shadow(0 0 12px var(--rc)); animation: emoji-pop .5s cubic-bezier(.2,1.45,.4,1) both; }
-.rv-nm { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
-.rv-badge { display: inline-block; color: #fff; font-size: .7rem; font-weight: 800; padding: 3px 12px; border-radius: 999px; margin-top: 8px; }
-.rv-ok { display: block; width: 100%; margin-top: 16px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 11px; font-family: inherit; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
+.lab { display: flex; flex-direction: column; gap: 10px; }
+.fg-head { border-radius: 20px; padding: 14px; color: #fff; background: linear-gradient(140deg, #3b2a6e, #6d4fd0 70%, #a36bd8); box-shadow: var(--pop-lg); }
+.fg-head h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
+.fg-head p { margin: 6px 0 10px; font-size: .76rem; line-height: 1.55; color: rgba(255,255,255,.88); }
+.fg-uses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.fg-uses div { background: rgba(255,255,255,.12); border-radius: 12px; padding: 7px 6px; font-size: .7rem; line-height: 1.35; text-align: center; }
+.fg-uses b { display: block; font-size: .78rem; }
+.fg-bal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.fg-bal div { display: flex; flex-direction: column; align-items: center; background: #fff; border: 1.5px solid var(--rc); border-radius: 12px; padding: 6px 2px; }
+.fg-bal b { font-size: 1.15rem; color: var(--rc); font-variant-numeric: tabular-nums; }
+.fg-bal span { font-size: .7rem; color: var(--muted); font-weight: 700; }
+.fg-sec { font-weight: 800; font-size: .92rem; margin: 8px 2px 0; }
+
+.fg-recipe { position: relative; display: flex; flex-direction: column; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 12px; }
+.fg-recipe.special { background: linear-gradient(160deg, #fffbea, #fff); border-color: #f5c451; }
+.fg-new { position: absolute; top: -9px; left: 12px; background: var(--accent); color: #fff; font-size: .7rem; font-weight: 800; border-radius: 999px; padding: 1px 9px; }
+.fg-eq { display: flex; align-items: center; gap: 8px; }
+.fg-ing { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 12px; background: color-mix(in srgb, var(--rc) 12%, #fff); }
+.fg-ing-t { display: flex; flex-direction: column; min-width: 0; }
+.fg-ing b { font-size: .82rem; }
+.fg-ing small { font-size: .7rem; color: var(--muted); }
+.fg-capdot { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(#fff 0 50%, var(--rc) 50%); border: 1.5px solid rgba(43,53,80,.18); }
+.fg-arrow { font-weight: 800; color: var(--muted); }
+.fg-out { width: 84px; flex-shrink: 0; text-align: center; padding: 8px 4px; border-radius: 12px; background: color-mix(in srgb, var(--oc) 16%, #fff); border: 1.5px dashed var(--oc); font-size: .72rem; font-weight: 800; }
+.fg-q { display: block; font-size: 1.3rem; }
+.fg-swapnote { font-size: .72rem; color: #8a5a00; line-height: 1.45; }
+.fg-bar { height: 7px; border-radius: 999px; overflow: hidden; background: rgba(43,53,80,.08); }
+.fg-bar i { display: block; height: 100%; border-radius: inherit; background: var(--rc); transition: width .3s; }
+.fg-foot { display: flex; align-items: center; gap: 8px; }
+.fg-have { flex: 1; font-size: .72rem; color: var(--muted); }
+.fg-btn { border: 0; border-radius: 12px; padding: 9px 18px; font-family: inherit; font-weight: 800; font-size: .84rem; background: #eef0f5; color: var(--muted); cursor: default; }
+.fg-btn.ok { background: linear-gradient(135deg, #7c5cd6, #b07ce8); color: #fff; cursor: pointer; box-shadow: 0 6px 14px -6px rgba(124,92,214,.8); }
+.fg-recipe.special .fg-btn.ok { background: linear-gradient(135deg, #f59e0b, #f7b93e); box-shadow: 0 6px 14px -6px rgba(200,120,0,.8); }
+.fg-btn:disabled { opacity: .7; }
+
+.fg-sell { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 2px 12px; }
+.fg-sell-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dashed var(--line); font-size: .8rem; }
+.fg-sell-row:first-child { border-top: 0; }
+.fg-sell-row .fg-have { flex: 0 1 auto; }
+.fg-chip { color: #fff; font-size: .7rem; font-weight: 800; border-radius: 6px; padding: 1px 7px; }
+.fg-sbtn { margin-left: auto; border: var(--bw) solid var(--line); background: #fff; border-radius: 10px; padding: 6px 12px; font-family: inherit; font-weight: 800; font-size: .78rem; color: #b45309; cursor: pointer; }
+.fg-sbtn:disabled { color: var(--muted); opacity: .6; cursor: default; }
 
 /* redeem coin-burst */
 .cb-ov { position: fixed; inset: 0; z-index: 420; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .cb { position: relative; width: 0; height: 0; }
 .cb-coin { position: absolute; font-size: 1.4rem; left: calc((var(--i) - 3.5) * 16px); top: 0; animation: cb-fly .95s ease-out forwards; animation-delay: calc(var(--i) * 40ms); }
 .cb-amt { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; font-weight: 800; color: #b45309; font-size: 1.5rem; text-shadow: 0 1px 0 #fff, 0 0 10px rgba(245,158,11,.5); animation: cb-amt 1s ease-out forwards; }
-
-@keyframes rv-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes emoji-pop { 0% { transform: scale(.3) rotate(-12deg); opacity: 0; } 60% { transform: scale(1.18) rotate(4deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
-@keyframes fa-spin { to { transform: rotate(360deg); } }
-@keyframes fa-fade { from { opacity: .6; } to { opacity: .28; } }
 @keyframes cb-fly { 0% { opacity: 0; transform: translateY(12px) scale(.4); } 22% { opacity: 1; } 100% { opacity: 0; transform: translateY(-74px) scale(1.1); } }
 @keyframes cb-amt { 0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.7); } 28% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-22px); } }
-
-
-/* ── rework 25 ก.ย. 2026 ── */
-.lab { display: flex; flex-direction: column; gap: 12px; }
-.lab-intro { background: linear-gradient(150deg, var(--primary-light), #fff); border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 12px 14px; }
-.lab-intro-h { font-weight: 800; font-size: .95rem; }
-.lab-intro p { margin: 4px 0 10px; font-size: .76rem; line-height: 1.55; color: var(--muted); }
-.lab-bal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; }
-.lab-bal-cell { display: flex; flex-direction: column; align-items: center; padding: 6px 2px; background: #fff; border: 1.5px solid var(--rc); border-radius: 12px; }
-.lab-bal-n { font-size: 1.15rem; font-weight: 800; color: var(--rc); font-variant-numeric: tabular-nums; }
-.lab-bal-l { font-size: .7rem; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
-.lab-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 12px 14px; margin: 0; }
-.lab-card-h { font-weight: 800; font-size: .92rem; }
-.lab-card-sub { font-size: .72rem; color: var(--muted); line-height: 1.5; margin: 2px 0 6px; }
-.lab-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dashed var(--line); }
-.lab-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.lab-row-t { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; font-size: .78rem; font-weight: 700; }
-.lab-chip { color: #fff; font-size: .7rem; font-weight: 800; border-radius: 6px; padding: 1px 7px; }
-.lab-x { color: var(--ink); }
-.lab-arrow { color: var(--muted); }
-.lab-prog { height: 7px; border-radius: 999px; background: rgba(43,53,80,.08); overflow: hidden; }
-.lab-prog i { display: block; height: 100%; border-radius: inherit; transition: width .3s; }
-.lab-have { font-size: .7rem; color: var(--muted); }
-.lab-btn { flex: none; min-width: 64px; font: inherit; font-size: .82rem; font-weight: 800; border: var(--bw) solid var(--line); background: #f1f5f9; color: var(--muted); border-radius: 12px; padding: 9px 12px; cursor: pointer; }
-.lab-btn.ok { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border-color: transparent; }
-.lab-btn:disabled { cursor: default; }
 </style>
