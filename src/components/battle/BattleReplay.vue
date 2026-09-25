@@ -1262,7 +1262,9 @@ onUnmounted(() => {
 /* pop/call/puff/proj (เลขดาเมจ, callout สาย, 💀, projectile) ย้ายไป fx pool (.brfx- ท้ายไฟล์ ไม่ scoped) แล้ว —
    CSS เดิม (br-pop, br-call, br-puff, br-proj และตัวแปรย่อย) + keyframes br-pop-rise, br-rise, br-fly ตัดทิ้ง (ไม่มี markup ใช้แล้ว) */
 
-.br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 0; }
+.br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 12px;
+  /* เส้นกลางสนาม (.br-seam) วิ่งผ่านกลางแถวนี้พอดี ⇒ ป้ายต้องมีพื้นรอง ไม่งั้นเส้นขีดทับตัวอักษร · padding บน/ล่างคงเดิม = เส้นกลางไม่ขยับ */
+  align-self: center; background: rgba(15,23,42,.82); border-radius: 999px; }
 
 .br-ctrl { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .br-btn { border: 2px solid #fff; background: rgba(255,255,255,.14); color: #fff; border-radius: 12px; padding: 10px 22px; font-family: inherit; font-weight: 800; cursor: pointer; transition: background .12s; }
@@ -1367,7 +1369,9 @@ onUnmounted(() => {
 .br-spot { position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
 /* ⚠️ .br-spot ไม่มี z-index (ไม่สร้าง stacking context) — ม่าน z4 < การ์ดเจ้าของ .spotlit z5 ≤ แถบคัทอิน z5 (มาทีหลังใน DOM จึงอยู่บน)
    ⇒ การ์ดเจ้าของสว่างเหนือม่าน แต่ไม่บังตัวหนังสือบนแถบ · fx layer z6 อยู่บนสุดเหมือนเดิม */
-.br-spot-dim { position: absolute; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
+/* fixed = คลุมทั้งจอ (เดิม absolute คลุมแค่ .br-box ⇒ บนมือถือเห็นสี่เหลี่ยมมืดกลางจอ ขอบบน/ล่างสว่าง — user 26 ก.ย.)
+   ยังอยู่ใน stacking context ของ .br-box (z4 < การ์ด spotlit z5) · ระหว่างจอสั่น .br-box มี transform ม่านจะขยับตามกล่อง 1 จังหวะ ยอมได้ */
+.br-spot-dim { position: fixed; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
 .br-cut { position: relative; z-index: 5; width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
   transform: skewY(-5deg); background: linear-gradient(90deg, #2563eb 0%, #2563eb 35%, rgba(15,23,42,.96) 100%); box-shadow: 0 0 0 3px #fff;
   will-change: transform, opacity; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
@@ -1394,8 +1398,10 @@ onUnmounted(() => {
 /* จุดไอคอนสกิลมุมการ์ด — บอกว่าตัวนี้มีทักษะเฉพาะ (เดิมต้องไล่แตะทีละใบถึงจะรู้) */
 .br-skill-dot { position: absolute; top: 2px; right: 4px; font-size: .72rem; line-height: 1; opacity: .85; pointer-events: none; }
 /* tuning.skillMark 'lit' — ขนาดคงที่หลังติดไฟ (ไม่วิ่งอนิเมชันระหว่างการ์ดพุ่ง) */
-.br-skill-dot.lit { font-size: 1rem; opacity: 1; background: rgba(15,23,42,.72); border-radius: 999px; padding: 1px 4px; box-shadow: 0 0 0 1.5px #fbbf24; display: flex; align-items: center; gap: 1px; }
-.br-skill-dot i { font-style: normal; font-size: .7rem; font-weight: 800; color: #fde68a; }
+.br-skill-dot.lit { opacity: 1; border-radius: 999px; box-shadow: 0 0 0 1.5px #fbbf24, 0 0 6px 1px rgba(251,191,36,.55); }
+/* ×N ห้อยนอกมุมการ์ด — เดิมขยายเป็นเม็ดยาเข้าหากลางการ์ด ชนป้ายชั้นเชื้อ 🦠 ของ fx layer + บังหน้าเพ็ท (เห็นจริงใน Chrome 26 ก.ย.) */
+.br-skill-dot i { position: absolute; top: -9px; right: -10px; font-style: normal; font-size: .7rem; font-weight: 800; line-height: 1;
+  color: #451a03; background: #fbbf24; border-radius: 999px; padding: 1px 4px; }
 
 /* ── ป้ายสถานะที่ติดอยู่บนการ์ดใบนี้ (สเปก §5) ──
    static ล้วน: ไม่มี will-change ไม่มี animation ไม่มี transition
