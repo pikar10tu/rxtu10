@@ -45,8 +45,10 @@
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
              class="br-unit foe" @click="inspect('B'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
-          <span v-if="skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['B'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['B'+i] > 1">×{{ skillCount['B'+i] }}</i></span>
-          <span v-if="statusOf('B'+i).length" class="br-status">
+          <span v-if="!badgeRow && skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['B'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['B'+i] > 1">×{{ skillCount['B'+i] }}</i></span>
+          <span v-if="(badgeRow && skillIcon(p)) || statusOf('B'+i).length" class="br-status" :class="{ row: badgeRow }">
+            <b v-if="badgeRow && skillIcon(p)" class="own" :class="{ lit: skillCount['B'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['B'+i] > 1">×{{ skillCount['B'+i] }}</i></b>
+            <em v-if="badgeRow && skillIcon(p) && statusOf('B'+i).length" class="sep"></em>
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
           <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out }">
@@ -68,8 +70,10 @@
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
              class="br-unit me" @click="inspect('A'+i)">
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
-          <span v-if="skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['A'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['A'+i] > 1">×{{ skillCount['A'+i] }}</i></span>
-          <span v-if="statusOf('A'+i).length" class="br-status">
+          <span v-if="!badgeRow && skillIcon(p)" class="br-skill-dot" :class="{ lit: skillCount['A'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['A'+i] > 1">×{{ skillCount['A'+i] }}</i></span>
+          <span v-if="(badgeRow && skillIcon(p)) || statusOf('A'+i).length" class="br-status" :class="{ row: badgeRow }">
+            <b v-if="badgeRow && skillIcon(p)" class="own" :class="{ lit: skillCount['A'+i] }"><Emoji :char="skillIcon(p)" /><i v-if="skillCount['A'+i] > 1">×{{ skillCount['A'+i] }}</i></b>
+            <em v-if="badgeRow && skillIcon(p) && statusOf('A'+i).length" class="sep"></em>
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
           <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out }">
@@ -179,7 +183,9 @@
         <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ GRADE_LABELS[Math.min(5, Math.max(0, insp.grade || 0))] }}</b></div>
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
         <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
-        <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b>{{ insp.passive ? insp.passName : 'ตัวนี้ยังไม่มี' }}</b></div>
+        <!-- ไอคอนหน้าชื่อ = ตัวเดียวกับป้ายทักษะบนการ์ด · "ทำงานแล้ว N ครั้ง" = ×N บนการ์ด (ให้สองที่โยงกันได้) -->
+        <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b><Emoji v-if="insp.passive?.icon" :char="insp.passive.icon" /> {{ insp.passive ? insp.passName : 'ตัวนี้ยังไม่มี' }}</b></div>
+        <div v-if="skillCount[inspectUid]" class="br-card-count"><span class="br-buff-tag">ทำงานแล้ว {{ skillCount[inspectUid] }} ครั้ง</span></div>
         <!-- เดิมโชว์แค่ชื่อ เปิดมาก็ยังไม่รู้อยู่ดีว่าสกิลทำอะไร — passiveText() เติมเลขจริงของขั้นให้แล้ว -->
         <div v-if="insp.passive" class="br-card-passdesc">{{ passiveText(insp.passive) }}</div>
 
@@ -717,6 +723,9 @@ const CHIP_OUT_MS = 300
 
 // tuning.skillMark 'lit': ไอคอนมุมการ์ดขยาย + ×N เมื่อสกิลของใบนั้นโปรก (ค้างทั้งไฟต์ = อ่านย้อนได้)
 const skillCount = ref({})       // uid → จำนวนครั้งที่โปรก
+// tuning.badges: 'split' = ทักษะตัวเองมุมขวาบน · บัฟที่ได้รับซ้ายล่าง (เดิม)
+//                'row'   = แถวเดียวซ้ายล่าง เรียงตามหน้าต่างอ่าน: ทักษะเฉพาะ │ กำลังได้รับ (user: "สองมุมแล้วงง" 26 ก.ย.)
+const badgeRow = computed(() => (tuning.value.badges || 'split') === 'row')
 function markSkill(uid) {
   if ((tuning.value.skillMark || 'lit') !== 'lit' || !uid) return   // ดีฟอลต์ lit (user เลือก) · แล็บส่ง 'dot' ได้
   skillCount.value = { ...skillCount.value, [uid]: (skillCount.value[uid] || 0) + 1 }
@@ -1340,6 +1349,8 @@ onUnmounted(() => {
 .br-buffs-head { font-size: .74rem; font-weight: 800; color: #94a3b8; margin-bottom: 2px; }
 .br-buff { border-left: 3px solid #4ade80; border-radius: 0 10px 10px 0; background: rgba(34,197,94,.16); padding: 6px 9px; }
 .br-buff.dbf { border-left-color: #f87171; background: rgba(239,68,68,.16); }
+.br-card-count { text-align: right; margin-top: 3px; }
+.br-card-count .br-buff-tag { margin-left: 0; color: #451a03; background: #fbbf24; }
 /* ใช้ไปแล้ว = ไม่ได้ให้อะไรอีก ถ้ายังเขียวอยู่จะอ่านผิดว่ายังกันตายได้ */
 .br-buff.spent { border-left-color: #94a3b8; background: rgba(148,163,184,.14); opacity: .62; }
 .br-buff-src { font-size: .78rem; font-weight: 800; color: #f1f5f9; }
@@ -1409,6 +1420,12 @@ onUnmounted(() => {
 .br-status { position: absolute; left: 3px; bottom: 3px; display: flex; gap: 3px; pointer-events: none; z-index: 2; }
 .br-status b { font-size: .72rem; line-height: 1; font-weight: 400; padding-bottom: 1px; border-bottom: 1.5px solid #34d399; }
 .br-status b.dbf { border-bottom-color: #f87171; }
+/* แถวเดียว (tuning.badges 'row'): ทักษะตัวเองมาก่อน ไม่มีขีด (ไม่ใช่บัฟ) · ติดไฟ = วงส้ม · เส้นคั่นแล้วค่อยบัฟที่ได้รับ */
+.br-status.row { align-items: center; }
+.br-status b.own { border-bottom: 0; padding: 1px; border-radius: 999px; display: flex; align-items: center; opacity: .8; }
+.br-status b.own.lit { opacity: 1; box-shadow: 0 0 0 1.5px #fbbf24, 0 0 5px 1px rgba(251,191,36,.5); }
+.br-status b.own i { font-style: normal; font-size: .7rem; font-weight: 800; color: #fde68a; margin-left: 1px; line-height: 1; }
+.br-status .sep { width: 1px; height: 10px; background: rgba(255,255,255,.3); }
 
 /* ── ชิปชื่อสกิลตอนโปรก ──
    ขึ้นเร็ว (110ms) ค้างระหว่าง SKILL_PAUSE แล้ว .out สั่งให้เลือน 300ms
