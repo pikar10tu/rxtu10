@@ -48,7 +48,7 @@ const progressOf = (u) => ({
 // balloon + กระดานข่าว (ใช้ร่วม self-grant + claim) — best effort
 // ข่าวไปเลน roster (`ev` k:'ac') ไม่ใช่ collection news แล้ว (25 ก.ย. 2026):
 //   เดิม 1 ความสำเร็จ = 1 doc ใน news · กระดานดึงแค่ 5 doc ⇒ คนปลดรวด 5 อันดันข่าวตำนาน/หอคอย 100 ตกหมด
-//   ตอนนี้ปลดรวดภายใน 30 นาที = รวมเป็นบรรทัดเดียว (pushAchievementEvent) · คนหนึ่งกินได้ไม่เกิน 3 ช่องอยู่แล้ว
+//   ตอนนี้ปลดรวดภายใน 30 นาที = รวมเป็นบรรทัดเดียว (pushAchievementEvent) · คนหนึ่งกินได้ไม่เกิน EVENT_MAX (10) ช่องอยู่แล้ว
 export async function announceAchievement(achId, date = null) {
   return announceMany([{ achId, date }])
 }

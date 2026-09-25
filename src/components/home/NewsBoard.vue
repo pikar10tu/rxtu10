@@ -1,6 +1,6 @@
 <template>
   <!-- ซ่อนทั้งแถบถ้าไม่มีข่าว (และโหลดเสร็จแล้ว) -->
-  <div v-if="loading || items.length" class="news">
+  <div v-if="loading || heads.length" class="news">
     <!-- collapsed: บรรทัดเดียวสลับข่าวเองทุก 3.5 วิ · กดเพื่อกาง log -->
     <button class="news-latest" :aria-expanded="open" @click="open = !open">
       <span class="news-icon"><Emoji :char="open || !current ? '📢' : current.icon" /></span>
@@ -13,13 +13,29 @@
     </button>
 
     <!-- expanded: log เต็มพร้อมเวลา (accordion กางในหน้า) -->
-    <ul v-if="open && items.length" class="news-list">
-      <li v-for="n in items" :key="n.id" class="news-item">
-        <span class="news-icon"><Emoji :char="n.icon" /></span>
-        <div class="news-body">
-          <div class="news-msg">{{ n.text }}</div>
-          <div class="news-time">{{ timeAgo(n.t, now) }}</div>
+    <!-- รวมข่าวต่อคน: หัวกลุ่ม = ข่าวล่าสุด ที่เหลือพับไว้ใต้ปุ่ม (user ขอ 25 ก.ย. 2026 — อยากเห็นครบแต่ไม่รก) -->
+    <ul v-if="open && groups.length" class="news-list">
+      <li v-for="g in groups" :key="g.key" class="news-group">
+        <div class="news-item">
+          <span class="news-icon"><Emoji :char="g.head.icon" /></span>
+          <div class="news-body">
+            <div class="news-msg">{{ g.head.text }}</div>
+            <div class="news-time">{{ timeAgo(g.head.t, now) }}</div>
+            <button v-if="g.rest.length" type="button" class="news-more"
+                    :aria-expanded="expanded.has(g.key)" @click="toggle(g.key)">
+              {{ expanded.has(g.key) ? '▴ ย่อ' : `▾ อีก ${g.rest.length} ข่าวจาก ${whoOf(g)}` }}
+            </button>
+          </div>
         </div>
+        <ul v-if="expanded.has(g.key)" class="news-sub">
+          <li v-for="n in g.rest" :key="n.id" class="news-item">
+            <span class="news-icon"><Emoji :char="n.icon" /></span>
+            <div class="news-body">
+              <div class="news-msg">{{ n.text }}</div>
+              <div class="news-time">{{ timeAgo(n.t, now) }}</div>
+            </div>
+          </li>
+        </ul>
       </li>
     </ul>
   </div>
@@ -41,7 +57,7 @@ import { db } from '../../firebase/config.js'
 import { useUsageStore } from '../../stores/usage.js'
 import { useMembersStore } from '../../stores/members.js'
 import { useAuthStore } from '../../stores/auth.js'
-import { buildFeed, timeAgo } from '../../utils/newsFeed.js'
+import { buildFeed, groupFeed, timeAgo } from '../../utils/newsFeed.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
 
 const usage = useUsageStore()
@@ -56,10 +72,21 @@ const open = ref(props.startOpen)     // collapsed by default — กดบร�
 const idx = ref(0)          // บรรทัดที่โชว์อยู่ตอนพับ
 const now = ref(Date.now()) // ให้ "x นาทีที่แล้ว" ขยับตามเวลาจริง
 
-const items = computed(() => buildFeed(members.rosterRows || {}, newsDocs.value,
-  { now: now.value, myUid: auth.currentUser?.uid || null }))
+const groups = computed(() => groupFeed(buildFeed(members.rosterRows || {}, newsDocs.value,
+  { now: now.value, myUid: auth.currentUser?.uid || null })))
+// แถบวิ่งบรรทัดเดียว = หัวกลุ่มเท่านั้น (ไม่งั้นคนที่มี 10 ข่าวยึดแถบวิ่งไปทั้งรอบ)
+const heads = computed(() => groups.value.map(g => g.head))
 
-const current = computed(() => items.value[idx.value % (items.value.length || 1)] || null)
+const current = computed(() => heads.value[idx.value % (heads.value.length || 1)] || null)
+
+const expanded = ref(new Set())
+function toggle(key) {
+  const s = new Set(expanded.value)
+  if (s.has(key)) s.delete(key); else s.add(key)
+  expanded.value = s
+}
+// ชื่อในปุ่ม "อีก N ข่าวจาก X" — ข่าวไม่มีเจ้าของไม่มี rest อยู่แล้ว จึงไม่ถึงตรงนี้
+const whoOf = (g) => g.head.uid === auth.currentUser?.uid ? 'คุณ' : (members.rosterRows?.[g.head.uid]?.n || '?')
 
 // ── ตัวสลับบรรทัด ──
 // ใช้แค่ opacity/transform (ดู style) — ห้าม backdrop-filter/blur เด็ดขาด (iOS Safari paint)
@@ -70,9 +97,9 @@ function stop() { if (timer) { clearInterval(timer); timer = null } }
 function start() {
   stop()
   // ไม่สลับเมื่อ: ผู้ใช้ปิดอนิเมชัน · กางกระดานอยู่ · แท็บไม่ได้อยู่หน้าจอ · มีข่าวเดียว
-  if (reduced || open.value || document.hidden || items.value.length < 2) return
+  if (reduced || open.value || document.hidden || heads.value.length < 2) return
   timer = setInterval(() => {
-    idx.value = (idx.value + 1) % items.value.length
+    idx.value = (idx.value + 1) % heads.value.length
     now.value = Date.now()
   }, 3500)
 }
@@ -104,10 +131,16 @@ watch(open, (v) => { if (v) { stop(); now.value = Date.now() } else start() })
 .news-latest-msg { flex: 1; min-width: 0; text-align: left; font-size: .8rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .news-chevron { flex-shrink: 0; color: rgba(0,0,0,.4); font-size: .9rem; transition: transform .2s; }
 .news-chevron.open { transform: rotate(180deg); }
-.news-list { list-style: none; margin: 10px 0 0; padding: 8px 0 0; border-top: 1px solid rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; overscroll-behavior: contain; }
+.news-list { list-style: none; margin: 10px 0 0; padding: 8px 0 0; border-top: 1px solid rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; overscroll-behavior: contain; }
 .news-item { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,.05); }
 .news-item:last-child { border-bottom: none; padding-bottom: 0; }
 .news-icon { font-size: 1.2rem; flex-shrink: 0; }
+.news-group { border-bottom: 1px solid rgba(0,0,0,.05); padding-bottom: 8px; }
+.news-group:last-child { border-bottom: none; padding-bottom: 0; }
+.news-group > .news-item, .news-sub .news-item { border-bottom: none; padding-bottom: 0; }
+.news-more { all: unset; cursor: pointer; margin-top: 4px; font-size: .72rem; font-weight: 700; color: var(--primary); }
+.news-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+.news-sub { list-style: none; margin: 6px 0 0 12px; padding: 0 0 0 10px; border-left: 2px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
 .news-body { flex: 1; min-width: 0; }
 .news-msg { font-size: .8rem; color: rgba(0,0,0,.75); line-height: 1.4; word-break: break-word; }
 .news-time { font-size: .7rem; color: rgba(0,0,0,.4); margin-top: 2px; }
