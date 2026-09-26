@@ -297,10 +297,11 @@ export const PET_PASSIVES = {
   // ── ต.ค. 2569 ฟากฟ้า ─────────────────────────────────────────
   sol: {
     name: 'แสงนำทาง', icon: '🌟',
-    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { rarity: 'common', pct: 40 }, step: { pct: 5 } }],
-    // 40 (user เคาะ 27 ก.ย. จาก sim): ซอล+common เปล่า 2 ตัว = ทีม L เปล่าพอดี (49.7%) · มีพาสสีฟ common จริง ⇒ เก่งกว่า L นิดๆ (57.7% vs 🦁🐳👾) · 50 เดิมได้ 77%
-    desc: 'เพื่อนระดับธรรมดา (common) ทุกตัวในทีม พลังโจมตีและเลือดสูงสุด +{pct}%',
-    short: 'common ในทีม แรง+เลือด +{pct}%',
+    // ขั้นบันไดตามระดับ (27 ก.ย. 2026): ธรรมดา 50 · หายาก 40 · เอพิค 30 · ตำนาน 0 (กันซอลครองเมต้าด้วยทีมตำนานล้วน)
+    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { common: 50, rare: 40, epic: 30, legendary: 0 },
+              step: { common: 0, rare: 0, epic: 0, legendary: 0 } }],
+    desc: 'เพื่อนในทีมได้พลังโจมตีและเลือด +% ตามระดับ: ธรรมดา {common}% · หายาก {rare}% · เอพิค {epic}% · ตำนาน {legendary}%',
+    short: 'เพื่อนแรง+อึด: ธรรมดา {common}% · หายาก {rare}% · เอพิค {epic}% · ตำนาน {legendary}%',
   },
   earth: {
     name: 'ฤดูกาลหมุนเวียน', icon: '🌏',

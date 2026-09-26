@@ -124,8 +124,8 @@ export function buffSources(playerTeam, botTeam) {
       }
       // 2) aura จากทีมตัวเอง (รวมของตัวเอง) + คู่หู
       for (const a of [...own.mine, ...own.duo]) {
-        // ☀️ แสงนำทาง — ป้ายขึ้นเฉพาะตัวที่ "นับเป็น" common จริง (Earth ในร่างองศานับด้วย) · Sol เองไม่ได้
-        if (a.effect === 'rarityBoost' && effectiveRarity(pet, teams[side]) !== partWithEffect(a.passive, 'rarityBoost').value.rarity) continue
+        // ☀️ ขั้นบันไดตามระดับ — ป้ายขึ้นเฉพาะตัวที่ "นับเป็น" ระดับที่ได้ % จริง (Earth ในร่างองศานับเป็น common) · Sol เองไม่ได้ (legendary = 0%)
+        if (a.effect === 'rarityBoost' && !partWithEffect(a.passive, 'rarityBoost').value[effectiveRarity(pet, teams[side])]) continue
         const b = makeBuff(a.effect, a.owner, a.uid, {
           passive: a.passive,
           teamIds: own.ids,

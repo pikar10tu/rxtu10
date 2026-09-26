@@ -230,12 +230,13 @@ export function applyAuras(team, foes) {
           u.teamDrPct = (u.teamDrPct || 0) + v.pct      // เจ้าของได้อีกรอบ = 2 เท่า (user เคาะ 3 ก.ย.)
           break
         case 'rarityBoost':
-          // ☀️ แสงนำทาง — ตัวที่ "นับเป็น" rarity นั้น (Earth ในร่างองศานับเป็น common) · Sol เองไม่ได้
+          // ☀️ ขั้นบันไดตามระดับ (27 ก.ย. 2026) — ตัวที่ "นับเป็น" ระดับนั้น (เอิร์ธร่างองศา = common) · ซอลเองไม่ได้
           for (const t of team) {
             if (t === u) continue
-            if ((t.countsAs || t.rarity) !== v.rarity) continue
-            t.atk *= 1 + v.pct / 100
-            t.maxHp *= 1 + v.pct / 100
+            const pct = v[t.countsAs || t.rarity] || 0
+            if (!pct) continue
+            t.atk *= 1 + pct / 100
+            t.maxHp *= 1 + pct / 100
             t.hp = t.maxHp
           }
           break
