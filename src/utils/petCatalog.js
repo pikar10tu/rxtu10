@@ -17,24 +17,33 @@ function endsAtMs(gachaEvent) {
   return null
 }
 
-/** เพ็ทรุ่นแรก 27 ตัว — คลังที่ต้องนิ่งตลอดกาล */
-export const wave1Pets = () => PETS.filter(p => p.wave !== 2)
-
-/** เพ็ทที่ "แจกให้ผู้เล่นได้" ตอนนี้ · อีเวนต์หมดเวลาแล้ว = ไหลเข้าคลังปกติเองโดยไม่ต้องกดปุ่ม */
-export function releasedPets(gachaEvent = null, now = Date.now()) {
-  const ends = endsAtMs(gachaEvent)
-  if (ends !== null && now > ends) return PETS.slice()
-  return wave1Pets()
+/** wave ของอีเวนต์ใน config — config ก.ย. เขียนก่อนมีฟิลด์นี้ (มีแต่ endsAt) ⇒ ถือเป็น 2
+ *  ไม่มี config/อ่าน endsAt ไม่ออก = 1 (fail-closed: ไม่ปล่อยรุ่นใหม่) */
+export function eventWave(gachaEvent) {
+  if (endsAtMs(gachaEvent) === null) return 1
+  const w = Number(gachaEvent.wave)
+  return Number.isInteger(w) && w >= 2 ? w : 2
 }
 
-/** เพ็ทที่ "ผู้เล่นหาได้จริงตอนนี้" — รวมของที่อยู่ในตู้อีเวนต์ด้วย
- *  🔑 ต่างจาก releasedPets() ตรงที่อันนั้นตอบว่า "ตู้ปกติมีอะไร" ส่วนอันนี้ตอบว่า "ยังเก็บอะไรได้อีก"
- *     ⇒ ใช้กับตัวหาร "x/y ชนิด" · รายการที่ยังไม่ปลดล็อก · และเควสเก็บครบ
- *     ถ้าใช้ releasedPets() กับสามที่นั้น พอเปิดอีเวนต์ตัวหารจะค้างที่ 27 ทั้งที่หมุนได้ 33
- *     แล้วเควส "เก็บครบทุกชนิด" จะติ๊กผ่านตั้งแต่ยังไม่ครบจริง
- */
+const waveOf = (p) => p.wave || 1
+
+/** เพ็ทรุ่นแรก — คลังที่ต้องนิ่งตลอดกาล (บอทหอคอย) */
+export const wave1Pets = () => PETS.filter(p => waveOf(p) === 1)
+
+/** "ตู้ปกติ" แจกอะไรได้ตอนนี้ — รุ่นของอีเวนต์ปัจจุบันเข้าตู้ปกติเมื่ออีเวนต์จบเท่านั้น
+ *  (user: ตู้คงที่เลือกได้ทุกตัว ยกเว้นตัวใหม่ของเดือนนั้น) · รุ่นที่ใหม่กว่าอีเวนต์ = ยังไม่เปิดตัว ไม่มีทางหลุด */
+export function releasedPets(gachaEvent = null, now = Date.now()) {
+  const w = eventWave(gachaEvent)
+  const ends = endsAtMs(gachaEvent)
+  const max = ends !== null && now > ends ? w : w - 1
+  return PETS.filter(p => waveOf(p) <= Math.max(1, max))
+}
+
+/** "หาได้จริงตอนนี้" = ตู้ปกติ + รุ่นของอีเวนต์ถ้าตู้ธีมยังเปิด — ใช้กับตัวหาร x/y · เควสเก็บครบ */
 export function obtainablePets(gachaEvent = null, now = Date.now()) {
-  return eventOpen(gachaEvent, now) ? PETS.slice() : releasedPets(gachaEvent, now)
+  if (!eventOpen(gachaEvent, now)) return releasedPets(gachaEvent, now)
+  const w = eventWave(gachaEvent)
+  return PETS.filter(p => waveOf(p) <= w)
 }
 
 /** ตู้อีเวนต์ยังเปิดอยู่ไหม — ตรรกะเดียวกับ gachaEvent.eventState() แต่เก็บไว้ที่นี่เพื่อไม่ให้สองไฟล์อ้างวนกัน */

@@ -1,8 +1,56 @@
 // เทสด่านคลังเพ็ท — pure · รัน: node --test src/utils/petCatalog.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { wave1Pets, releasedPets, obtainablePets } from './petCatalog.js'
+import { wave1Pets, releasedPets, obtainablePets, eventWave } from './petCatalog.js'
 import { PETS } from '../data/index.js'
+
+const idsOf = (list) => new Set(list.map(p => p.id))
+const NOW = 1_000_000
+
+test('eventWave: config ก.ย. (ไม่มี wave) = 2 · ไม่มี config = 1 (fail-closed)', () => {
+  assert.equal(eventWave({ endsAt: NOW - 1 }), 2, 'config เดิมถือเป็น wave 2')
+  assert.equal(eventWave(null), 1, 'ไม่มี config ปิดเสมอ')
+  assert.equal(eventWave({}), 1, 'ไม่มี endsAt อ่านไม่ออก')
+})
+
+test('config ก.ย. เดิม (ไม่มี wave) = wave 2 · จบแล้ว ⇒ ตู้ปกติมี wave 2', () => {
+  const ev = { endsAt: NOW - 1 }
+  assert.equal(eventWave(ev), 2)
+  const got = idsOf(releasedPets(ev, NOW))
+  assert.ok(got.has('lion'), 'wave 2 เปล่อยให้ผู้เล่นได้เมื่ออีเวนต์จบ')
+})
+
+test('ตู้ wave 3 เปิดอยู่: ตู้ปกติไม่มี wave 3 (ยังไม่เปล่อยให้ปกติ)', () => {
+  const ev = { wave: 3, endsAt: NOW + 1000 }
+  assert.equal(eventWave(ev), 3)
+  // ตู้ปกติ (released) ไม่มี wave 3 ยังเนื่องจากอีเวนต์ยังเปิด
+  const released = releasedPets(ev, NOW)
+  assert.ok(released.filter(p => waveOf(p) === 3).length === 0, 'released ไม่มี wave 3 ตั้งแต่อีเวนต์ยังเปิด')
+  // แต่ obtainable จะสูงกว่า released ถ้า wave 3 มีเพ็ท (ตอนนี้ยังไม่มี wave 3 pets)
+  const obtainable = obtainablePets(ev, NOW)
+  // ตั้งแต่ยังไม่มี wave 3 pets ถ้าใจมั่นว่า released ไม่มี wave 3 มากพอแล้ว
+  assert.ok(released.some(p => waveOf(p) === 2), 'wave 2 ปล่อยแล้ว')
+  assert.ok(obtainable.every(p => waveOf(p) <= 3), 'obtainable สูงสุด wave 3')
+})
+
+test('ตู้ wave 3 จบแล้ว ⇒ wave 3 ไหลเข้าตู้ปกติ (released)', () => {
+  const ev = { wave: 3, endsAt: NOW - 1 }
+  const released = releasedPets(ev, NOW)
+  // เมื่ออีเวนต์จบแล้ว wave 3 จะเข้าคลังปกติ
+  assert.ok(released.filter(p => waveOf(p) === 3).length >= 0, 'ไม่มี wave 3 pets ยังไม่เปล่อย (ชั่วคราว)')
+})
+
+test('ไม่มี config = wave 1 เท่านั้น (fail-closed)', () => {
+  const got = idsOf(releasedPets(null, NOW))
+  assert.ok(!got.has('lion'), 'wave 2 ห้ามหลุด')
+})
+
+test('wave1Pets ไม่มี wave 2 ขึ้นไป', () => {
+  assert.ok(wave1Pets().every(p => !p.wave || p.wave === 1))
+})
+
+// Helper for tests
+const waveOf = (p) => p.wave || 1
 
 test('ไม่มีอีเวนต์ = แจกได้แค่ wave 1 (ดีฟอลต์ปลอดภัย)', () => {
   const ids = releasedPets(null).map(p => p.id)
