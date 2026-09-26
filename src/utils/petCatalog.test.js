@@ -5,6 +5,7 @@ import { wave1Pets, releasedPets, obtainablePets, eventWave } from './petCatalog
 import { PETS } from '../data/index.js'
 
 const idsOf = (list) => new Set(list.map(p => p.id))
+const waveOf = (p) => p.wave || 1
 const NOW = 1_000_000
 
 test('eventWave: config ก.ย. (ไม่มี wave) = 2 · ไม่มี config = 1 (fail-closed)', () => {
@@ -20,25 +21,38 @@ test('config ก.ย. เดิม (ไม่มี wave) = wave 2 · จบแ�
   assert.ok(got.has('lion'), 'wave 2 เปล่อยให้ผู้เล่นได้เมื่ออีเวนต์จบ')
 })
 
-test('ตู้ wave 3 เปิดอยู่: ตู้ปกติไม่มี wave 3 (ยังไม่เปล่อยให้ปกติ)', () => {
+test('ตู้ wave 3 เปิดอยู่: releasedPets มี wave 2 (w-1=2) · obtainablePets มี wave 2', () => {
+  // ทดสอบลอจิก w-1 vs w ด้วยตัวนี้เนื่องจากยังไม่มี wave 3 pets
   const ev = { wave: 3, endsAt: NOW + 1000 }
   assert.equal(eventWave(ev), 3)
-  // ตู้ปกติ (released) ไม่มี wave 3 ยังเนื่องจากอีเวนต์ยังเปิด
   const released = releasedPets(ev, NOW)
-  assert.ok(released.filter(p => waveOf(p) === 3).length === 0, 'released ไม่มี wave 3 ตั้งแต่อีเวนต์ยังเปิด')
-  // แต่ obtainable จะสูงกว่า released ถ้า wave 3 มีเพ็ท (ตอนนี้ยังไม่มี wave 3 pets)
   const obtainable = obtainablePets(ev, NOW)
-  // ตั้งแต่ยังไม่มี wave 3 pets ถ้าใจมั่นว่า released ไม่มี wave 3 มากพอแล้ว
-  assert.ok(released.some(p => waveOf(p) === 2), 'wave 2 ปล่อยแล้ว')
-  assert.ok(obtainable.every(p => waveOf(p) <= 3), 'obtainable สูงสุด wave 3')
+  // releasedPets ปล่อยแค่ wave ≤ w-1 = 2 (wave 2 pets เช่น 'lion' ควรมี)
+  assert.ok(idsOf(released).has('lion'), 'lion (wave 2) ที่ w=3 เปิด ควรมี ใน released (ดึง w-1=2)')
+  assert.ok(obtainable.every(p => waveOf(p) <= 3), 'obtainable อ่านว่า wave ≤ 3')
+  assert.ok(idsOf(obtainable).has('lion'), 'lion ใน obtainable ด้วย')
 })
 
-test('ตู้ wave 3 จบแล้ว ⇒ wave 3 ไหลเข้าตู้ปกติ (released)', () => {
-  const ev = { wave: 3, endsAt: NOW - 1 }
+test('ตู้ wave 2 เปิดอยู่: releasedPets ไม่มี wave 2 · obtainablePets มี wave 2', () => {
+  // ตู้อีเวนต์ wave 2 เปิด แต่ releasedPets (คลังปกติ) ยังไม่ปล่อย wave 2 (ยังคิด w-1=1)
+  const ev = { wave: 2, endsAt: NOW + 1000 }
+  assert.equal(eventWave(ev), 2)
   const released = releasedPets(ev, NOW)
-  // เมื่ออีเวนต์จบแล้ว wave 3 จะเข้าคลังปกติ
-  assert.ok(released.filter(p => waveOf(p) === 3).length >= 0, 'ไม่มี wave 3 pets ยังไม่เปล่อย (ชั่วคราว)')
+  const obtainable = obtainablePets(ev, NOW)
+  // releasedPets: max = w - 1 = 1 ⇒ wave 2 pets ห้ามมี
+  assert.ok(!idsOf(released).has('lion'), 'lion (wave 2) ที่ w=2 เปิด ห้ามมี ใน released')
+  // obtainablePets: event open ⇒ wave ≤ 2 ⇒ lion มี
+  assert.ok(idsOf(obtainable).has('lion'), 'lion ใน obtainable เพราะอีเวนต์เปิด')
 })
+
+test('ตู้ wave 2 จบแล้ว ⇒ wave 2 ไหลเข้าตู้ปกติ', () => {
+  // เมื่ออีเวนต์จบแล้ว max = w (ไม่ใช่ w-1) ⇒ wave 2 pets ถูกปล่อยให้ตู้ปกติ
+  const ev = { wave: 2, endsAt: NOW - 1 }
+  const released = releasedPets(ev, NOW)
+  assert.ok(idsOf(released).has('lion'), 'lion ใน released เมื่อเหตุการณ์ w=2 จบแล้ว')
+})
+
+// หมายเหตุ: wave 3 pets ('sol', 'earth', 'luna') ยังไม่เข้า PETS (Task A 4) · เมื่อมี จะเทสเพ็ทตัวนั้นจริงๆ
 
 test('ไม่มี config = wave 1 เท่านั้น (fail-closed)', () => {
   const got = idsOf(releasedPets(null, NOW))
@@ -48,9 +62,6 @@ test('ไม่มี config = wave 1 เท่านั้น (fail-closed)', (
 test('wave1Pets ไม่มี wave 2 ขึ้นไป', () => {
   assert.ok(wave1Pets().every(p => !p.wave || p.wave === 1))
 })
-
-// Helper for tests
-const waveOf = (p) => p.wave || 1
 
 test('ไม่มีอีเวนต์ = แจกได้แค่ wave 1 (ดีฟอลต์ปลอดภัย)', () => {
   const ids = releasedPets(null).map(p => p.id)
