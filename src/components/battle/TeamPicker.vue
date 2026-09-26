@@ -32,6 +32,12 @@
       </div>
     </div>
 
+    <div v-if="synergy.length" class="tp-syn">
+      <span v-for="s in synergy" :key="s.key" class="tp-syn-chip" :class="{ off: !s.ok }">
+        <Emoji :char="s.icon" /> {{ s.text }}
+      </span>
+    </div>
+
     <div class="tp-status" :class="{ warn: statusWarn }">{{ status }}</div>
     <div class="tp-status sub">ช่อง 1 ออกตีก่อน · แตะช่องหนึ่งแล้วแตะอีกช่อง = สลับลำดับ</div>
 
@@ -75,6 +81,7 @@ import { BATTLE_SLOTS } from '../../data/residence.js'
 import { toSlots } from '../../utils/teamSlots.js'
 import { tapSlot, tapItem, removeAt, compact } from '../../utils/slotEdit.js'
 import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForms.js'
+import { teamSynergy } from '../../utils/teamSynergy.js'
 
 const props = defineProps({ open: { type: Boolean, default: false } })
 defineEmits(['update:open'])
@@ -129,6 +136,7 @@ const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({
   rarity: slotPetOf(id)?.rarity || defOf(id).rarity || 'common'
 })))
 const formOn = computed(() => degreeFormActive(teamNow.value))
+const synergy = computed(() => teamSynergy(edit.value.slots))
 
 /** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา */
 function earthTag(i) {
@@ -185,6 +193,9 @@ function pick(id) {
 .tp-x, .tp-more { position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #fff; font-family: inherit; font-size: .7rem; font-weight: 800; cursor: pointer; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(43,53,80,.25); z-index: 2; }
 .tp-x { top: -7px; right: -7px; background: #e0719a; color: #fff; }
 .tp-more { bottom: -7px; right: -7px; background: #fff; color: var(--primary-dark); }
+.tp-syn { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0 2px; }
+.tp-syn-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 600; color: var(--ink); padding: 3px 9px; border-radius: 999px; background: var(--mint-light); border: var(--bw) solid var(--line); }
+.tp-syn-chip.off { background: transparent; color: var(--muted); opacity: .85; border-style: dashed; }
 .tp-status { font-size: .76rem; font-weight: 600; color: var(--ink); text-align: center; margin-top: 16px; padding: 7px 10px; background: var(--primary-light); border-radius: 12px; transition: background .2s; }
 .tp-status.warn { background: #fde7ef; color: #b0386a; }
 .tp-status.sub { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 4px 0 12px; padding: 0; }
