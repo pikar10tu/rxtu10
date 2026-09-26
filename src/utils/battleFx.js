@@ -204,11 +204,11 @@ export function createBattleFx() {
   // kind: 'super' | 'weak' | 'survive' | 'miss' | 'block'
   // 🔴 'miss'/'block' แยกออกมา 26 ก.ย. — เดิมหลบ (dodge) ยืมป้าย 'weak' ตอนที่มันยังเป็นป้ายเทา "ไม่โดน"
   //    พอ 'weak' ถูกเปลี่ยนคำเป็น "ชนะทาง" ⇒ จิ้งจอกหลบแล้วจอขึ้นว่าชนะทางธาตุ (ผิดความหมาย) · CSS ใช้สีของ weak
-  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️' }
+  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️', frozen: 'แข็ง! ❄️' }
   function callout(uid, kind) {
     const el = take('call')
     el.getAnimations?.().forEach(a => a.cancel())
-    el.className = 'brfx brfx-call ' + (kind === 'miss' || kind === 'block' ? 'weak' : kind)
+    el.className = 'brfx brfx-call ' + (kind === 'miss' || kind === 'block' || kind === 'frozen' ? 'weak' : kind)
     // คู่คำที่ user เลือก 28 ส.ค.: แพ้ทาง / ชนะทาง (เดิมใช้ 'ต้านทาน' ซึ่งไม่เข้าคู่กับ 'แพ้ทาง')
     el.textContent = CALL_TEXT[kind] || CALL_TEXT.weak
     const base = baseXform(uid, 0, -16); if (!base) return
@@ -350,13 +350,17 @@ export function createBattleFx() {
   }
 
   // ── โซนอันตราย: วงแหวนเต้นค้างบน FX pool (ห้ามทำบนการ์ด = layer ค้างถาวร ตามข้อบังคับ v3) ──
-  /** ป้ายสถานะค้างบนการ์ด (วันนี้มีแค่ชั้นเชื้อ) — n = 0/ไม่ส่ง ⇒ เอาป้ายออก
+  /** ป้ายสถานะค้างบนการ์ด (ชั้นเชื้อ 🦠 / ตราแช่แข็ง ❄️ ฯลฯ) — n = 0/ไม่ส่ง ⇒ เอาป้ายออก
    *  🔒 อยู่ชั้น FX ไม่ใช่ DOM ของการ์ด: การ์ดเป็น static ตลอดไฟต์ตามสถาปัตยกรรม v3
-   *     ถ้าเอาตัวเลขนี้ไปไว้ในการ์ด การ์ดจะ re-raster ทุกครั้งที่ชั้นเปลี่ยน = อาการกระตุกเดิมกลับมา */
+   *     ถ้าเอาตัวเลขนี้ไปไว้ในการ์ด การ์ดจะ re-raster ทุกครั้งที่ชั้นเปลี่ยน = อาการกระตุกเดิมกลับมา
+   *  🔑 คีย์เป็น uid+icon (ไม่ใช่ uid เฉยๆ) — ตัวเดียวกันอาจติดทั้ง 🦠 (ชั้นเชื้อ) และ ❄️ (แช่แข็ง)
+   *     พร้อมกัน ถ้าคีย์แค่ uid ตัวหลังจะเขียนทับช่องของตัวแรกแล้วมันหายไป (26 ก.ย. — ฤดูหนาว/luna) */
+  function markKey(uid, char) { return uid + '#' + char }
   function stateMark(uid, char, n) {
-    const cur = markOn.get(uid)
+    const key = markKey(uid, char)
+    const cur = markOn.get(key)
     if (!n) {
-      if (cur) { cur.style.opacity = '0'; markOn.delete(uid) }
+      if (cur) { cur.style.opacity = '0'; markOn.delete(key) }
       return
     }
     const el = cur || pool.mark.find(e => !Array.from(markOn.values()).includes(e))
@@ -367,7 +371,7 @@ export function createBattleFx() {
     const ico = el.firstChild
     if (ico && ico.dataset.char !== char) { imgSrc(ico, char); ico.dataset.char = char }
     el.lastChild.textContent = String(n)
-    markOn.set(uid, el)
+    markOn.set(key, el)
   }
   function stateMarkClearAll() {
     for (const el of markOn.values()) el.style.opacity = '0'

@@ -102,9 +102,9 @@
         <!-- คัทอิน (user เลือกแบบ 2 จากเดโม 25 ก.ย. 2026): แถบเฉียง + หน้าเพ็ทเจ้าของสกิลทุกครั้ง
              ทีมเราเข้าจากซ้าย (ฟ้า) · ศัตรูเข้าจากขวา (แดง) · จังหวะเดิม: spotlightPassive await จนจบ = ไม่มีใครตีระหว่างนี้ -->
         <div class="br-cut">
-          <span class="br-cut-face"><Emoji :char="spotView.face" /></span>
+          <span class="br-cut-face" :class="{ duo: spotView.face2 }"><Emoji :char="spotView.face" /><Emoji v-if="spotView.face2" class="br-cut-face2" :char="spotView.face2" /></span>
           <span class="br-cut-t">
-            <span class="br-cut-who">{{ spotView.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }}</span>
+            <span class="br-cut-who">{{ spotView.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }} · {{ spotView.who }}</span>
             <b class="br-cut-name"><Emoji v-if="spotView.skillIcon" :char="spotView.skillIcon" /> {{ spotView.name }}</b>
             <span v-if="spotView.desc" class="br-cut-desc">{{ spotView.desc }}</span>
           </span>
@@ -182,7 +182,7 @@
     <div v-if="inspectUid && insp" class="br-inspect" @click.self="closeInspect">
       <div class="br-card">
         <div class="br-card-emoji"><Emoji :char="insp.def.emoji" /></div>
-        <div class="br-card-name">{{ insp.def.name }}</div>
+        <div class="br-card-name">{{ petNameOf(inspectUid) }}</div>
         <div class="br-card-row"><span>สาย</span><b><Emoji :char="insp.elEmoji" /> {{ insp.elName }}</b></div>
         <div class="br-card-row"><span>ระดับ</span><b>{{ rarityLabel(insp.def.rarity) }} · เกรด {{ GRADE_LABELS[Math.min(5, Math.max(0, insp.grade || 0))] }}</b></div>
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
@@ -241,6 +241,7 @@ import { readPrefs, fxFlags, paceMult, FX_LABEL, PACE_LABEL } from '../../utils/
 import { createFrameMeter, FALLBACK_BASE, DROP_RATIO } from '../../utils/frameMeter.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
 import { sfx } from '../../utils/sfx.js'
+import { displayName, duoPartnerOf } from '../../utils/petForms.js'
 
 const props = defineProps({
   data: { type: Object, default: null },
@@ -475,6 +476,7 @@ const rawLog = computed(() => props.data?.result?.log || [])
 const LEGEND_SFX = {
   bahamut: 'dragon_roar', lion: 'roar', whale: 'whale', phoenix: 'phoenix', kirin: 'kirin', trex: 'trex',
   ouroboros: 'ouroboros', simurgh: 'simurgh', qilin: 'qilin', virus: 'virus_big', gorilla: 'gorilla', mammoth: 'mammoth',
+  sol: 'sol', earth: 'earth', luna: 'luna',
 }
 const LEGEND_SHOW = new Set(Object.keys(LEGEND_SFX))
 
@@ -564,7 +566,7 @@ function reset() {
   clearHighlights()                                                         // ล้างคลาส windup/acting/flash ค้าง
   idx.value = 0; round.value = 1
   paused.value = false; inspectUid.value = null; pausedBeforeInspect = false; clearSpot(); clearChips()
-  spotView.value = { face: '✨', skillIcon: null, name: '', desc: '', side: 'A' }   // สร้างแบนเนอร์ (ซ่อน) ไว้ก่อนไฟต์เริ่ม
+  spotView.value = { face: '✨', skillIcon: null, name: '', desc: '', side: 'A', face2: null, who: '' }   // สร้างแบนเนอร์ (ซ่อน) ไว้ก่อนไฟต์เริ่ม
   ffActive.value = false; holdHint.value = false                             // เคลียร์โหมดเร่ง/คำใบ้ค้างจากไฟต์ก่อน
   clearTimeout(holdTimer); clearTimeout(hintTimer)
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
@@ -609,6 +611,14 @@ function defForUid(uid) {
   const i = parseInt(uid.slice(1), 10)
   const arr = uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam
   return getPetDef(arr?.[i]?.id) || { emoji: '❓' }
+}
+// ── ชื่อ ซัน/องศา (ร่างองศา) + หน้าคู่แบนเนอร์ (☀️🌍 / 🐳🦭) ──
+// team = อาเรย์ {id, rarity} ของฝั่งนั้น (playerTeam/botTeam) — ตรงกับสิ่งที่ petForms.js ต้องการ
+const sideTeam = (side) => (side === 'A' ? props.data?.playerTeam : props.data?.botTeam) || []
+/** ชื่อเพ็ทบนจอ (ซัน/องศา ในร่างพิเศษ) — log แบกชื่อจริงเสมอ */
+function petNameOf(uid) {
+  const def = defForUid(uid)
+  return displayName(def.id, def.name, sideTeam(uid[0]))
 }
 // ── event dispatch — เพิ่ม handler ใหม่ที่นี่ (passive/heal/…) ──
 const handlers = {
@@ -661,7 +671,8 @@ async function applyPassive(e) {
 
   if (e.kind === 'skillMoment') {
     if (LEGEND_SFX[e.petId]) sfx(LEGEND_SFX[e.petId])      // 🐦‍🔥 เกิดใหม่ ฯลฯ
-    await spotlightPassive(e, t, g); return
+    const opts = e.effect === 'fullMoon' ? { desc: `🌕 จันทร์เต็มดวง · หมัดนี้แรง ${e.amount}%` } : {}
+    await spotlightPassive(e, t, g, opts); return
   }
   if (e.kind === 'skillShow') {
     sfx(LEGEND_SFX[e.petId] || 'skill')
@@ -781,6 +792,9 @@ async function spotlightPassive(e, t, g, opts = {}) {
     face: defForUid(e.uid)?.emoji || opts.icon || '✨',       // หน้าเจ้าของสกิลทุกครั้ง (เดิมมีแค่ยกแรก)
     skillIcon: e.icon || null, name: skillTitle(e),
     desc: opts.desc ?? passiveDescOf(e), side: opts.side || e.uid?.[0] || 'A',
+    // หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ขึ้นเฉพาะตอนคู่นั้นทำงานอยู่จริงในทีม (duoPartnerOf เช็คให้แล้ว)
+    face2: (() => { const d = defForUid(e.uid); const id = duoPartnerOf(d.id, sideTeam(e.uid[0])); return id ? getPetDef(id)?.emoji || null : null })(),
+    who: petNameOf(e.uid),
   }
   spotView.value = view
   spot.value = view
@@ -845,8 +859,14 @@ function firePassiveFx(e) {
     sfx('virus')
   }
 
+  // ❄️ ฤดูหนาว: ตราแช่แข็งค้างบนการ์ดที่โดน จนกว่าจะถึงตาที่ถูกข้าม
+  if (e.fxKind === 'freeze') { for (const t of on) fx?.stateMark(t, '❄️', 1); sfx('freeze') }
+  // ⏸️ ถึงตาที่ถูกแช่แข็ง: ป้าย "แข็ง!" แล้วเอาตราออก
+  if (e.fxKind === 'skip') { fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', 0) }
+
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
-    thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim' }
+    thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim',
+    moon: 'p_buff', fullMoon: 'p_fire' }
   // เสียงประจำสกิล (สัตว์ใหญ่) ทับเสียงกลางตาม fxKind
   // 🐉 ไฟลงจริงมีเสียงพ่นไฟของตัวเอง · 🐦‍🔥 เสียงเกิดใหม่ดังตอนแบนเนอร์แล้ว ไม่ซ้อนเสียงกลาง
   // (เลเจนด์ตัวอื่นเสียงประจำตัวดังตอนโชว์ไทม์ — ตอนผลลงใช้เสียงกลางตาม fxKind เป็นฟีดแบ็กสั้นๆ)
@@ -870,6 +890,9 @@ function firePassiveFx(e) {
     case 'chain':
     case 'buff':    fx?.ring(e.uid, 'windup', 260); break
     case 'aim':     fx?.ring(e.uid, 'windup', 200); break
+    case 'moon':     fx?.ring(e.uid, 'windup', 200); break
+    case 'fullMoon': fx?.sweep(on, '🌕', 0); break
+    case 'freeze':   fx?.sweep(on, '❄️', 40); break
     case 'aura':    break                                    // ตอนเริ่มไฟต์มีป้ายหลายอันพร้อมกัน ยิงประกายด้วยจะรกและหนัก
     case 'reduce':  break                                    // ป้ายชื่ออย่างเดียวพอ ไม่งั้นรกทุกหมัด
     default: break
@@ -1436,6 +1459,9 @@ onUnmounted(() => {
 .br-spot.on.foe .br-cut { animation-name: br-cut-in-r; }
 .br-cut-face { flex: none; width: 70px; height: 70px; display: grid; place-items: center; border-radius: 50%; font-size: 3rem; line-height: 1;
   background: rgba(255,255,255,.18); transform: skewY(5deg); }
+/* หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ตัวที่สองเล็กลงเยื้องซ้อนแทนที่จะขยายวงกลม กันล้นแบนเนอร์ที่ 360px */
+.br-cut-face.duo { display: inline-flex; align-items: center; }
+.br-cut-face2 { margin-left: -.45em; transform: scale(.82); filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
 .br-cut-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; transform: skewY(5deg); }
 .br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
