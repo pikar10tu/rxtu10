@@ -31,8 +31,8 @@
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="✨" /> ตู้อัญเชิญพิเศษ</span></div>
         <div class="admin-hint">
-          เปิดตู้จำกัดเวลาที่มีเพ็ทรุ่นใหม่ 6 ตัว (ดัน 🦁 สิงโต · 👾 ไวรัส · 🦍 กอริลลา ก่อน) ·
-          <b>หมดเวลาแล้วตู้หายเอง และเพ็ทใหม่ไหลเข้าตู้ปกติทันทีโดยไม่ต้องกดอะไรอีก</b>
+          ตู้ถัดไป: <b>{{ nextTheme.name }}</b> ({{ nextTheme.featured.length }} ตัวเด่น) ·
+          <b>หมดเวลาแล้วตู้หายเอง และตัวเด่นไหลเข้าตู้ปกติทันที</b>
         </div>
         <div class="maint-toggle">
           <span class="maint-state" :class="gachaEv.active ? 'on' : 'off'">
@@ -41,6 +41,7 @@
           <div class="ev-btns">
             <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(7)">เริ่ม 7 วัน</button>
             <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(14)">เริ่ม 14 วัน</button>
+            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(30)">เริ่ม 30 วัน</button>
             <button v-if="gachaEv.active" class="btn-mini btn-gray" :disabled="savingEvent" @click="endGachaEvent">จบตอนนี้</button>
           </div>
         </div>
@@ -447,6 +448,7 @@ import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { eventState, timeLeftText } from '../utils/gachaEvent.js'
+import { LATEST_THEME_WAVE, themeOf } from '../data/gachaThemes.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
@@ -482,6 +484,7 @@ const { maintenance, rawConfig } = useAppConfig()
 const { toast } = useToast()
 const { confirm } = useConfirm()
 const { addTopics } = useTopics()
+const nextTheme = themeOf(LATEST_THEME_WAVE)
 
 // ซิงก์ระบบตรวจข้อสอบ: เติม reviewStatus ให้ข้อเก่า (ก่อนมีระบบตรวจ — query หน้า /review
 // มองไม่เห็นข้อที่ไม่มี field นี้) + ซ่อมสถานะที่ drift
@@ -813,19 +816,17 @@ async function writeGachaEvent(payload, okMsg) {
   }
 }
 async function startGachaEvent(days) {
-  const ok = await confirm(`เปิดตู้อัญเชิญพิเศษ ${days} วัน?
-• ทั้งชั้นปีเห็นทันที
-• เพ็ทใหม่ 6 ตัวหมุนได้เฉพาะตู้นี้
-• หมดเวลาแล้วไหลเข้าตู้ปกติเอง`)
+  const ok = await confirm(`เปิดตู้ธีม "${nextTheme.name}" ${days} วัน?
+• ทั้งชั้นปีเห็นทันที · ตัวเด่น ${nextTheme.featured.length} ตัวมีในตู้นี้เท่านั้น
+• หมดเวลาแล้วตัวเด่นไหลเข้าตู้ปกติเอง`)
   if (!ok) return
-  await writeGachaEvent(
-    { name: 'อัญเชิญพิเศษ · King of the Jungle', endsAt: Date.now() + days * 86400000 },
-    `เปิดตู้พิเศษ ${days} วันแล้ว`,
-  )
+  // 🔑 wave ต้องเขียนเสมอ — คลัง (petCatalog) ใช้ตัดว่าเพ็ทรุ่นไหนปล่อยแล้ว
+  await writeGachaEvent({ wave: LATEST_THEME_WAVE, name: nextTheme.name, endsAt: Date.now() + days * 86400000 },
+    `เปิดตู้ ${nextTheme.name} ${days} วันแล้ว`)
 }
 async function endGachaEvent() {
   const ok = await confirm(`จบตู้อัญเชิญพิเศษตอนนี้?
-• เพ็ทใหม่ 6 ตัวจะไหลเข้าตู้ปกติทันที
+• ตัวเด่น ${gachaEv.value.featured.length} ตัวจะไหลเข้าตู้ปกติทันที
 • ย้อนกลับไม่ได้ (เปิดใหม่ได้ แต่ของจะอยู่ในตู้ปกติแล้ว)`)
   if (!ok) return
   await writeGachaEvent({ ...(rawConfig.value?.gachaEvent || {}), endsAt: Date.now() }, 'จบอีเวนต์แล้ว')
