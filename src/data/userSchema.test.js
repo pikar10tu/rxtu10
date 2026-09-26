@@ -22,6 +22,11 @@ test('normalizeUserData keeps existing gacha values', () => {
   assert.equal(d.gachaGuaranteed, true)
 })
 
+test('ค่าเริ่มตู้ธีม', () => {
+  const d = normalizeUserData({})
+  assert.equal(d.gachaThemeTarget, null)
+})
+
 test('USER_DEFAULTS มี welcome gift flags = false', () => {
   assert.equal(USER_DEFAULTS.welcomeGiftV1, false)
   assert.equal(USER_DEFAULTS.welcomeBoxSeen, false)

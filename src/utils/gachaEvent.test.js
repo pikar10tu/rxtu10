@@ -1,7 +1,7 @@
 // เทสสถานะตู้อัญเชิญพิเศษ — pure · รัน: node --test src/utils/gachaEvent.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { eventState, eventLegendaryIds, timeLeftText, EVENT_FEATURED } from './gachaEvent.js'
+import { eventState, timeLeftText, EVENT_FEATURED } from './gachaEvent.js'
 import { releasedPets } from './petCatalog.js'
 import { PETS } from '../data/index.js'
 
@@ -28,23 +28,14 @@ test('endsAt แบบ Firestore Timestamp อ่านได้ · รูปพ
   assert.equal(eventState({ endsAt: null }, 1000).active, false)
 })
 
-test('ตัวเด่นดีฟอลต์มาจากโค้ด · คอนฟิกทับได้', () => {
+test('ตัวเด่นดีฟอลต์มาจากโค้ด (wave 2 = ทะเบียนธีม)', () => {
   assert.deepEqual(eventState({ endsAt: 9e12 }, 0).featured, EVENT_FEATURED)
-  assert.deepEqual(eventState({ endsAt: 9e12, featured: ['bahamut'] }, 0).featured, ['bahamut'])
 })
 
-test('legendary ในตู้อีเวนต์: ดันตัวเด่นที่ยังไม่มีก่อนเสมอ', () => {
-  assert.deepEqual(eventLegendaryIds(EVENT_FEATURED, ['lion'], PETS), ['virus', 'gorilla'])
-})
-
-test('มีตัวเด่นครบแล้ว = ตกไปคลัง legendary ทั้งกอง', () => {
-  const ids = eventLegendaryIds(EVENT_FEATURED, EVENT_FEATURED, PETS)
-  assert.equal(ids.length, PETS.filter(p => p.rarity === 'legendary').length)
-  assert.ok(ids.includes('bahamut'))
-})
-
-test('ตัวเด่นที่พิมพ์ผิด/ไม่มีในคลัง ต้องถูกกรองทิ้ง ไม่ใช่แจกของที่ไม่มีจริง', () => {
-  assert.deepEqual(eventLegendaryIds(['lion', 'ไม่มีตัวนี้'], [], PETS), ['lion'])
+// wave ที่ไม่มีในทะเบียนธีม (GACHA_THEMES) = ตกไปใช้ featured จากคอนฟิก/ดีฟอลต์ตามเดิม
+// (wave ที่มีธีมแล้ว เช่น 2/3 ทะเบียนธีมชนะคอนฟิกเสมอ — ดูเทส eventState ด้านล่าง)
+test('wave ที่ไม่มีธีมในทะเบียน = คอนฟิกทับได้เหมือนเดิม', () => {
+  assert.deepEqual(eventState({ endsAt: 9e12, wave: 99, featured: ['bahamut'] }, 0).featured, ['bahamut'])
 })
 
 test('ตัวเด่นตั้งต้นทั้งสามตัวเป็น legendary รุ่น 2 จริง (ไม่ใช่ id ที่พิมพ์ไว้ลอยๆ)', () => {
@@ -64,6 +55,18 @@ test('เส้นเวลาต่อกันสนิทกับคลั�
   // วินาทีที่ปิด = เพ็ทไหลเข้าคลังปกติทันที ไม่ต้องกดอะไร
   assert.equal(eventState(ev, 1001).active, false)
   assert.equal(releasedPets(ev, 1001).length, 33)
+})
+
+test('eventState: wave 3 เอาชื่อ/ตัวเด่นจากทะเบียนธีม', () => {
+  const s = eventState({ wave: 3, endsAt: 9e12 }, 0)
+  assert.equal(s.name, 'My Earth tilted for you')
+  assert.deepEqual(s.featured, ['sol', 'earth', 'luna'])
+  assert.equal(s.wave, 3)
+})
+test('eventState: config ก.ย. เดิม = wave 2 King of the Jungle', () => {
+  const s = eventState({ endsAt: 9e12, name: 'อัญเชิญพิเศษ · King of the Jungle' }, 0)
+  assert.equal(s.wave, 2)
+  assert.deepEqual(s.featured, ['lion', 'virus', 'gorilla'])
 })
 
 test('timeLeftText: อ่านง่ายและไม่ติดลบ', () => {

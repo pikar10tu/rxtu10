@@ -77,6 +77,7 @@ export const USER_DEFAULTS = {
   gachaPity: 0,            // จำนวน pull ตั้งแต่ legendary ล่าสุด (soft 76 / hard 100)
   gachaTarget: null,       // species id ของ legendary ที่เลือกเป็นเป้า (null = ไม่เลือก → new-first)
   gachaGuaranteed: false,  // true = legendary ครั้งหน้าการันตีตัวเป้า (จาก lose 50/50)
+  gachaThemeTarget: null,  // ตู้ธีม: ตัวเด่นที่เลือกไว้ ⇒ L จาก hard pity ของตู้ธีมได้ตัวนี้แน่นอน
   incomeBuffUntil: null,
   incomeBuffFrom: null,    // ms เริ่มบัฟ (คู่กับ incomeBuffUntil) — รองรับสแตคต่อเวลา
   // ── PvP (สนามประลอง) ──

@@ -41,6 +41,23 @@ export function pickLegendary({ target, guaranteed, ownedLegendaryIds, legendary
   return { id: pool[Math.floor(rng() * pool.length)], won: null, newGuaranteed: false }
 }
 
+/** ตู้ธีม: ตัวเด่นของเดือนมีน้ำหนักเท่านี้เทียบกับ L ตัวอื่น (user เคาะ 26 ก.ย. 2026) */
+export const THEME_FEATURED_WEIGHT = 3
+
+/** legendary ของตู้ธีม — อัตรา L รวมไม่เปลี่ยน (ตัดสินแล้วใน rollRarity) เปลี่ยนแค่ "ได้ตัวไหน"
+ *  ทุกครั้ง: ตัวเด่น ×THEME_FEATURED_WEIGHT · L ที่มาจาก hard pity + เลือกเป้าไว้ = ได้เป้าแน่นอน (user เคาะ 26 ก.ย.)
+ *  ไม่มี 50/50 และไม่มีธงการันตีข้ามครั้ง — newGuaranteed คืน false เสมอเพื่อให้รูปเดียวกับ pickLegendary */
+export function pickThemeLegendary({ target, atHardPity, legendaryIds, featured, rng = Math.random }) {
+  if (target && atHardPity) return { id: target, won: true, newGuaranteed: false }
+  const feat = new Set(featured || [])
+  const w = (id) => (feat.has(id) ? THEME_FEATURED_WEIGHT : 1)
+  const total = legendaryIds.reduce((s, id) => s + w(id), 0)
+  let r = rng() * total
+  let id = legendaryIds[legendaryIds.length - 1]
+  for (const x of legendaryIds) { r -= w(x); if (r < 0) { id = x; break } }
+  return { id, won: target ? id === target : null, newGuaranteed: false }
+}
+
 export const rarityPool = (catalog, rarity) => catalog.filter((p) => p.rarity === rarity).map((p) => p.id)
 
 const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
@@ -52,10 +69,9 @@ export function rollOne(state, catalog, rng = Math.random, opts = {}) {
   const legendaryIds = opts.legendaryIds?.length ? opts.legendaryIds : rarityPool(catalog, 'legendary')
   const rarity = rollRarity(state.pity, rng)
   if (rarity === 'legendary') {
-    const pick = pickLegendary({
-      target: state.target, guaranteed: state.guaranteed,
-      ownedLegendaryIds: state.ownedLegendaryIds, legendaryIds, rng,
-    })
+    const pick = opts.theme
+      ? pickThemeLegendary({ target: state.target, atHardPity: state.pity + 1 >= HARD_PITY, legendaryIds, featured: opts.theme.featured, rng })
+      : pickLegendary({ target: state.target, guaranteed: state.guaranteed, ownedLegendaryIds: state.ownedLegendaryIds, legendaryIds, rng })
     const nextOwned = state.ownedLegendaryIds.includes(pick.id)
       ? state.ownedLegendaryIds : [...state.ownedLegendaryIds, pick.id]
     return { rarity, id: pick.id, won: pick.won, nextPity: 0, nextGuaranteed: pick.newGuaranteed, nextOwned }

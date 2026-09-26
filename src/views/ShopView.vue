@@ -46,14 +46,15 @@
         :title="ev.name" event :time-left="evLeft" :featured="featuredPets"
         :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
-        @pull="(n) => pull(n, true)"
+        show-target :target-pet="themeTargetPet"
+        @pull="(n) => pull(n, true)" @open-target="openPicker('theme')"
       />
       <GachaBanner
         title="อัญเชิญประจำ"
         :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
         show-target :target-pet="targetPet" :guaranteed="guaranteed"
-        @pull="(n) => pull(n)" @open-target="pickerOpen = true"
+        @pull="(n) => pull(n)" @open-target="openPicker('normal')"
       />
       <div class="shop-note">ได้เพ็ทที่มีแล้ว = ได้ตัวซ้ำ 1 ชิ้น เอาไปใช้ที่โรงหลอมด้านล่าง</div>
       <LabTab />
@@ -65,17 +66,17 @@
     <Teleport to="body">
       <div v-if="pickerOpen" class="ov" @click.self="pickerOpen = false">
         <div class="picker">
-          <div class="picker-head">เลือกเป้าหมาย legendary</div>
+          <div class="picker-head">{{ pickerMode === 'theme' ? 'เลือกเป้าหมายตู้ ' + ev.name : 'เลือกเป้าหมาย legendary' }}</div>
           <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด ℹ️ = ดูรายละเอียด</div>
           <div class="picker-grid">
-            <div v-for="p in legendaries" :key="p.id" class="picker-cell" :class="{ on: p.id === target }" @click="chooseTarget(p.id)">
+            <div v-for="p in pickerList" :key="p.id" class="picker-cell" :class="{ on: p.id === pickerOn }" @click="chooseTarget(p.id)">
               <button class="picker-info" @click.stop="infoPet = p" aria-label="ดูรายละเอียด"><Emoji char="ℹ️" /></button>
               <span class="picker-emoji"><Emoji :char="p.emoji" /></span>
               <span class="picker-name">{{ p.name }}</span>
               <span v-if="pets.find((x) => x.id === p.id)" class="picker-have">มีแล้ว</span>
             </div>
           </div>
-          <button class="picker-clear" @click="chooseTarget(target)">{{ target ? 'ล้างเป้าหมาย' : 'ปิด' }}</button>
+          <button class="picker-clear" @click="chooseTarget(pickerOn)">{{ pickerOn ? 'ล้างเป้าหมาย' : 'ปิด' }}</button>
         </div>
       </div>
     </Teleport>
@@ -91,7 +92,7 @@
           <div v-if="passiveOf(infoPet)" class="info-passive">
             <b><Emoji :char="passiveOf(infoPet).icon" /> {{ passiveOf(infoPet).name }}</b> — {{ passiveText(passiveOf(infoPet)) }}
           </div>
-          <button class="info-target" @click="chooseTarget(infoPet.id); infoPet = null">ตั้งเป็นเป้าหมาย</button>
+          <button v-if="!(pickerMode === 'theme' && !ev.featured.includes(infoPet.id))" class="info-target" @click="chooseTarget(infoPet.id); infoPet = null">ตั้งเป็นเป้าหมาย</button>
         </div>
       </div>
     </Teleport>
@@ -117,7 +118,8 @@ import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TE
 import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
-import { eventState, eventLegendaryIds, timeLeftText } from '../utils/gachaEvent.js'
+import { eventState, timeLeftText } from '../utils/gachaEvent.js'
+import { useConfirm } from '../composables/useConfirm.js'
 import GachaBanner from '../components/shop/GachaBanner.vue'
 import CapsuleReveal from '../components/shop/CapsuleReveal.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
@@ -127,6 +129,7 @@ import { useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
+const { confirm } = useConfirm()
 
 // ร้านค้าเปิดให้นักศึกษาแล้ว (21 มิ.ย. 2026) — flip false เพื่อปิดปรับปรุง (admin เห็นร้านปกติเสมอ)
 const SHOP_OPEN = true
@@ -171,6 +174,17 @@ const pityLeft  = computed(() => Math.max(0, HARD_PITY - pity.value))
 const pay1  = computed(() => resolvePullPayment(1, tickets.value))
 const pay10 = computed(() => resolvePullPayment(10, tickets.value))
 
+// ตู้ธีม: เป้าของตัวเองแยกจากตู้ปกติ (gachaThemeTarget) — เป้าของเดือนก่อนที่ยังค้างไว้ = ถือว่าไม่มี
+const themeTarget = computed(() => {
+  const t = authStore.userData?.gachaThemeTarget || null
+  return ev.value.featured.includes(t) ? t : null
+})
+const themeTargetPet = computed(() => featuredPets.value.find(p => p.id === themeTarget.value) || null)
+const pickerMode = ref('normal')          // 'normal' | 'theme' — ตัวเลือกเป้าชุดเดียวกัน แต่รายการคนละชุด
+const pickerList = computed(() => (pickerMode.value === 'theme' ? featuredPets.value : legendaries.value))
+const pickerOn = computed(() => (pickerMode.value === 'theme' ? themeTarget.value : target.value))
+function openPicker(mode) { pickerMode.value = mode; pickerOpen.value = true }
+
 const reveal = ref(null)       // { summary, multi }
 const pickerOpen = ref(false)
 useEscapeKey(pickerOpen, () => { pickerOpen.value = false })
@@ -187,17 +201,26 @@ async function pull(n, isEvent = false) {
   if (buying.value) return
   // กันเคสกดปุ่มตู้อีเวนต์พอดีวินาทีที่มันหมดเวลา — ถือว่าปิดแล้ว ไม่หมุนให้
   if (isEvent && !ev.value.active) { toast('ตู้พิเศษปิดแล้ว', 'error'); return }
+
+  if (isEvent && !themeTarget.value) {
+    const go = await confirm(`ยังไม่ได้เลือกตัวหน้าตู้
+ถ้าถึงการันตี (ครั้งที่ ${HARD_PITY}) จะได้ตัวเด่นที่เลือกไว้แน่นอน
+ถ้าไม่เลือก การันตีจะสุ่มแบบธรรมดาแทน
+
+สุ่มต่อโดยไม่เลือกเลยไหม?`)
+    if (!go) { openPicker('theme'); return }
+  }
+
   const { rolls, pay, amount } = resolvePullPayment(n, tickets.value)
   if (pay === 'coin' && coins.value < amount) { toast(`เหรียญไม่พอ! ต้องการ ${amount.toLocaleString()}`, 'error'); return }
 
-  // 🔴 ตู้อีเวนต์ห้ามแตะการันตี 50/50 ของตู้ปกติ (ผู้เล่นสะสมไว้กับตู้ปกติ) ⇒ ส่งเป้า/ธงเป็นค่าว่างเข้าไป
-  //    แล้วตอนเขียนกลับก็เขียนแค่ pity · pity ยังแชร์กระเป๋าเดียวตามสเปก §6 ข้อ 5
+  // 🔴 ตู้ธีมห้ามแตะการันตี 50/50 ของตู้ปกติ ⇒ ใช้เป้าของตัวเอง ไม่มีธง · pity แชร์กระเป๋าเดียว (สเปก §6 ข้อ 5 เดิม)
   const state = isEvent
-    ? { pity: pity.value, target: null, guaranteed: false, ownedLegendaryIds: ownedLegendaryIds() }
+    ? { pity: pity.value, target: themeTarget.value, guaranteed: false, ownedLegendaryIds: ownedLegendaryIds() }
     : { pity: pity.value, target: target.value, guaranteed: guaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
-  // ตู้อีเวนต์ = คลังเต็ม 33 ตัว · legendary ดันตัวเด่นที่ยังไม่มีก่อน
-  const rollCatalog = isEvent ? PETS : catalog.value
-  const opts = isEvent ? { legendaryIds: eventLegendaryIds(ev.value.featured, ownedLegendaryIds(), PETS) } : {}
+  // ตู้ธีม = ของที่หาได้ตอนนี้ (ปล่อยแล้ว + รุ่นของเดือน) — ห้ามใช้ PETS เต็ม ไม่งั้นรุ่นที่ยังไม่เปิดหลุด
+  const rollCatalog = isEvent ? ownable.value : catalog.value
+  const opts = isEvent ? { theme: { featured: ev.value.featured } } : {}
   const { results, nextState } = rollMany(rolls, state, rollCatalog, undefined, opts)
   const { pets: newPets, summary } = mergeRolls(pets.value, results, PETS)
   const today = new Date().toISOString().slice(0, 10)
@@ -237,8 +260,11 @@ async function pull(n, isEvent = false) {
 }
 
 async function chooseTarget(id) {
-  const next = target.value === id ? null : id
-  await authStore.patchUser({ gachaTarget: next }, { gachaTarget: next })
+  const theme = pickerMode.value === 'theme'
+  const cur = theme ? themeTarget.value : target.value
+  const next = cur === id ? null : id
+  const field = theme ? 'gachaThemeTarget' : 'gachaTarget'
+  await authStore.patchUser({ [field]: next }, { [field]: next })
   pickerOpen.value = false
 }
 </script>
