@@ -767,17 +767,17 @@ test('hunt (trex): initHunt ใส่ชั้นตั้งต้นหลั�
   const t = u('trex')                    // atk เริ่ม 100 — สมมุติเป็น "หลัง aura" แล้ว (เทสนี้ไม่มี aura จริง)
   initHunt([t])
   assert.equal(psOf(t).huntBase, 100, 'ฐานจับตอน initHunt (ในไฟต์จริงคือ atk หลัง aura)')
-  assert.equal(psOf(t).huntStacks, 2, 'เข้าไฟต์พร้อม 2 ชั้นตามค่า start')
-  assert.equal(t.atk, 140, 'atk = ฐาน × (1 + 2×20%)')
+  assert.equal(psOf(t).huntStacks, 1, 'เข้าไฟต์พร้อม 1 ชั้นตามค่า start')
+  assert.equal(t.atk, 120, 'atk = ฐาน × (1 + 1×20%)')
 
   const foe = { uid: 'B0', hp: 100, maxHp: 100 }
   runOnAttack(t, foe, [foe], () => 0.5)
-  assert.equal(psOf(t).huntStacks, 3, 'หมัดแรกจริงได้ชั้นที่ 3 ทันที (ชั้นเพิ่มก่อนคิดดาเมจของหมัดนั้นเอง)')
-  assert.equal(t.atk, 160, 'ชั้นที่ 3 = ฐาน × 1.6 (บวกจากฐาน ไม่ทบต้น)')
+  assert.equal(psOf(t).huntStacks, 2, 'หมัดแรกจริงได้ชั้นที่ 2 ทันที (ชั้นเพิ่มก่อนคิดดาเมจของหมัดนั้นเอง)')
+  assert.equal(t.atk, 140, 'ชั้นที่ 2 = ฐาน × 1.4 (บวกจากฐาน ไม่ทบต้น)')
 
   for (let i = 0; i < 29; i++) runOnAttack(t, foe, [foe], () => 0.5)
-  assert.equal(psOf(t).huntStacks, 32, '30 หมัด (1 + 29) รวมกับ 2 ชั้นตั้งต้น = 32 — ไม่มีเพดาน')
-  assert.equal(t.atk, 100 + 100 * 0.2 * 32, 'บวกจากฐานทุกชั้น ไม่ทบต้น (ครั้งที่ 32 ≠ 1.2^32)')
+  assert.equal(psOf(t).huntStacks, 31, '30 หมัด (1 + 29) รวมกับ 1 ชั้นตั้งต้น = 31 — ไม่มีเพดาน')
+  assert.equal(t.atk, 100 + 100 * 0.2 * 31, 'บวกจากฐานทุกชั้น ไม่ทบต้น (ครั้งที่ 31 ≠ 1.2^31)')
 })
 
 test('hunt: event ทุกใบเป็น fxKind buff, amount = ชั้นหลังเพิ่ม, และมี statsAfter', () => {
@@ -788,9 +788,9 @@ test('hunt: event ทุกใบเป็น fxKind buff, amount = ชั้น
   const e = r.events.find(x => x.effect === 'hunt')
   assert.ok(e, 'ต้องมี event hunt')
   assert.equal(e.fxKind, 'buff')
-  assert.equal(e.amount, 3, 'amount = ชั้นสะสมหลังหมัดนี้ (2 ตั้งต้น + 1)')
+  assert.equal(e.amount, 2, 'amount = ชั้นสะสมหลังหมัดนี้ (1 ตั้งต้น + 1)')
   assert.ok(e.statsAfter, 'ต้องแบก statsAfter — hunt ขยับ att.atk จริง ไม่ใช่แค่ atkMult ชั่วคราว')
-  assert.equal(e.statsAfter[t.uid].atk, 160)
+  assert.equal(e.statsAfter[t.uid].atk, 140)
 })
 
 test('ทีเร็กซ์: parts มีแค่ hunt hook onAttack เดียว ไม่เหลือ stackAtk', () => {
@@ -799,7 +799,7 @@ test('ทีเร็กซ์: parts มีแค่ hunt hook onAttack เด�
   assert.equal(parts[0].hook, 'onAttack')
   assert.equal(parts[0].effect, 'hunt')
   assert.equal(parts[0].value.pct, 20)
-  assert.equal(parts[0].value.start, 2)
+  assert.equal(parts[0].value.start, 1)
   assert.equal(parts[0].value.max, undefined, 'hunt ไม่มีเพดาน — ต้องไม่มีคีย์ max เลย')
 })
 
@@ -1804,14 +1804,14 @@ test('runOnKill: หมัดที่ปิดไฟต์ก็ต้องไ
 })
 
 // ── บาลานซ์รอบ 1 Task 5 (27 ก.ย. 2026): 🦖 ทีเร็กซ์ย้ายจาก onAnyDeath+stackAtk (เพดาน 3, start 1)
-//    ไปเป็น onAttack+hunt (ไม่มีเพดาน, start 2) — initHunt() แทนที่บล็อกชั้นตั้งต้นเดิมใน runSetup
+//    ไปเป็น onAttack+hunt (ไม่มีเพดาน, start 1) — initHunt() แทนที่บล็อกชั้นตั้งต้นเดิมใน runSetup
 //    เพราะต้องรันหลัง aura ทั้งหมด (ดูคอมเมนต์ยาวใน battlePassives.js initHunt())
 test('ทีเร็กซ์เข้าไฟต์ด้วย 2 ชั้นและแรงขึ้นทันที (initHunt หลัง aura)', () => {
   const t = u('trex')
   const base = t.atk
   initHunt([t])
-  assert.equal(psOf(t).huntStacks, 2, 'ต้องได้ 2 ชั้นฟรีตอนเข้าไฟต์')
-  assert.ok(Math.abs(t.atk / base - 1.4) < 1e-9, `atk ต้อง × 1.4 พอดี (ได้ ${t.atk / base})`)
+  assert.equal(psOf(t).huntStacks, 1, 'ต้องได้ 1 ชั้นฟรีตอนเข้าไฟต์')
+  assert.ok(Math.abs(t.atk / base - 1.2) < 1e-9, `atk ต้อง × 1.2 พอดี (ได้ ${t.atk / base})`)
 })
 
 test('ทีเร็กซ์ไม่มีเพดานอีกต่อไป — สะสมได้เรื่อยๆ ทุกหมัดของตัวเอง', () => {
@@ -1820,9 +1820,9 @@ test('ทีเร็กซ์ไม่มีเพดานอีกต่อ�
   const foe = u('mouse', { uid: 'B0', side: 'B' })
   initHunt([t])
   for (let i = 0; i < 10; i++) runOnAttack(t, foe, [foe], () => 0.5)
-  assert.equal(psOf(t).huntStacks, 12, '2 ชั้นตั้งต้น + 10 หมัด = 12 ชั้น ไม่มีเพดานมาหยุด')
-  assert.ok(Math.abs(t.atk / base - (1 + 12 * 0.2)) < 1e-9,
-    `บวกจากฐานทุกชั้น ไม่ทบต้น (ได้ ${(t.atk / base - 1) * 100}% ควรได้ ${12 * 20}%)`)
+  assert.equal(psOf(t).huntStacks, 11, '1 ชั้นตั้งต้น + 10 หมัด = 11 ชั้น ไม่มีเพดานมาหยุด')
+  assert.ok(Math.abs(t.atk / base - (1 + 11 * 0.2)) < 1e-9,
+    `บวกจากฐานทุกชั้น ไม่ทบต้น (ได้ ${(t.atk / base - 1) * 100}% ควรได้ ${11 * 20}%)`)
 })
 
 test('initHunt ไม่ยิง event ให้ชั้นแถม — เป็นสเตตัสตั้งต้น ไม่ใช่โมเมนต์', () => {

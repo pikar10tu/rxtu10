@@ -47,7 +47,7 @@ export const PET_PASSIVES = {
     // → ทุกหมัดที่ตี +pct% ของ atk ฐาน (หลัง aura) ไม่มีเพดาน · `start` = ชั้นแถมตอนเข้าไฟต์เหมือนเดิม
     // 🔴 บวกจากฐาน ไม่ทบต้น — ไม่มีเพดาน + ทบต้น = ระเบิดในไฟต์ยาว (world boss ในอนาคต)
     // step.start = 0 — ชั้นแถมไม่สเกลตามเกรด (เกรดสูงได้ % ต่อชั้นแรงขึ้นผ่าน step.pct อยู่แล้ว)
-    parts: [{ hook: 'onAttack', effect: 'hunt', value: { pct: 20, start: 2 }, step: { pct: 0, start: 0 } }],
+    parts: [{ hook: 'onAttack', effect: 'hunt', value: { pct: 20, start: 1 }, step: { pct: 0, start: 0 } }],
     desc: 'ทุกหมัดที่ตี พลังโจมตี +{pct}% สะสมไม่มีเพดาน · เข้าไฟต์พร้อม {start} ชั้น',
     short: 'ตีทีไรแรง +{pct}% สะสมไม่จำกัด · เริ่ม {start} ชั้น',
   },
