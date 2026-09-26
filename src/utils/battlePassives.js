@@ -467,6 +467,16 @@ export function runOnAttack(att, target, foes, rand) {
           amount: pct, phase: i, fxKind: full ? 'fullMoon' : 'moon' }))
         break
       }
+      case 'woundBonus': {
+        // 🦅 กริฟฟิน: คิดจากเป้าปัจจุบันของ res (หลัง targetLowest เปลี่ยนไปแล้ว ถ้ามี) — ทำงานตั้งแต่หมัดแรก
+        const tg = res.target
+        if (!tg || !tg.maxHp) break
+        const lost = Math.max(0, 1 - tg.hp / tg.maxHp)
+        if (lost <= 0) break
+        res.atkMult *= 1 + (v.pct / 100) * lost
+        res.events.push(ev(att, p, part, { targets: [tg.uid], amount: Math.round(lost * v.pct), fxKind: 'aim' }))
+        break
+      }
       // 🔴 healOnAttack ก็ hook: 'onAttack' ในข้อมูล แต่คำนวณใน runOnDealt (ข้างล่างนี้) — ดูคอมเมนต์ที่นั่น
     }
   }

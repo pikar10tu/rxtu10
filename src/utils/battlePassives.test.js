@@ -252,6 +252,15 @@ test('targetLowest (simurgh): เปลี่ยนเป้าไปตัว�
   assert.equal(r.target.uid, 'B1')
 })
 
+test('กริฟฟิน woundBonus: เป้าเลือดหาย 40% → หมัด ×1.4 และเล็งตัวเลือดน้อยสุด', () => {
+  const att = { id: 'simurgh', uid: 'A0', side: 'A', atk: 100, hp: 500, maxHp: 500 }
+  const full = { uid: 'B0', side: 'B', hp: 1000, maxHp: 1000 }
+  const hurt = { uid: 'B1', side: 'B', hp: 600, maxHp: 1000 }
+  const r = runOnAttack(att, full, [full, hurt], () => 0.5)
+  assert.equal(r.target, hurt)
+  assert.ok(Math.abs(r.atkMult - 1.4) < 1e-9)
+})
+
 test('cleave (dragon): เป้ารอง 1 ตัว (รวมเป้าหลักเป็น 2 ตามทะเบียนมังกร) และไม่ซ้ำเป้าหลัก', () => {
   const foes = [u('cat', { uid: 'B0' }), u('mouse', { uid: 'B1' }), u('turtle', { uid: 'B2' })]
   const r = runOnAttack(u('dragon'), foes[0], foes, () => 0.5)
@@ -1847,7 +1856,10 @@ test('🦍 กอริลลา: ท้าชนดึงเป้ามาท�
   const griffin = u('simurgh', { uid: 'A0' })
   const taunted = runOnAttack(griffin, gori, [gori, weak], () => 0.5)
   assert.equal(taunted.target.uid, 'B0', 'ถูกท้าชนอยู่ ห้ามลากไปเล็งตัวเลือดน้อย')
-  assert.equal(taunted.events.length, 0, 'ห้ามมี event เล็งเป้าตอนถูกท้าชน')
+  // targetLowest ห้ามยิง event เล็งเป้าตอนถูกท้าชน — แต่ woundBonus (Task 3) ยังทำงานกับเป้าที่ถูกบังคับได้ตามปกติ
+  // (gori เลือดหาย 10% ⇒ ยังได้ event โบนัสดาเมจ 1 อัน แค่ไม่มี event "เปลี่ยนเป้า")
+  assert.equal(taunted.events.length, 1, 'ต้องมีแค่ event ของ woundBonus ไม่มี event เล็งเป้า')
+  assert.equal(taunted.events[0].effect, 'woundBonus')
 
   // ไม่มีตัวท้าชนแล้ว กริฟฟินถึงจะลากไปที่ตัวเลือดน้อยตามปกติ
   const plump = u('blank', { uid: 'B2', side: 'B', hp: 900, maxHp: 1000 })
