@@ -571,6 +571,7 @@ function reset() {
   clearTimeout(holdTimer); clearTimeout(hintTimer)
   const h = {}; Object.keys(maxHp).forEach(uid => { h[uid] = 100 }); hp.value = h
   clearHpTicks()                                                             // ล้างเลข HP ไล่นับ/กระพริบค้างจากไฟต์ก่อน (tuning.hpTick)
+  moonNext.value = {}
   skillFired.value = {}                                                      // ล้างตัวนับสกิลติดไฟค้างจากไฟต์ก่อน (tuning.skillMark)
   Object.keys(maxHp).forEach(setDead)                                       // ทุกตัว hp=100 → setDead ถอด class dead ค้างจากไฟต์ก่อน
   // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
@@ -750,6 +751,9 @@ const CHIP_OUT_MS = 300
 
 // ป้ายทักษะตัวเอง: วงส้ม = ทำงานแล้วอย่างน้อยครั้งนึง (ติดค้างทั้งไฟต์) · tuning.skillMark 'dot' = ปิดวง (ห้องแล็บเทียบของเดิม)
 const skillFired = ref({})       // uid → true
+// 🌙 ข้างจันทร์ของหมัด "ถัดไป" ของลูน่า (uid → 0 ดับ · 1 เสี้ยว · 2 เต็ม) — ไอคอนบนการ์ดบอกล่วงหน้า (user ขอ 27 ก.ย.)
+const moonNext = ref({})
+const MOON_ICONS = ['🌑', '🌙', '🌕']
 function markSkill(uid) {
   if ((tuning.value.skillMark || 'lit') !== 'lit' || !uid || skillFired.value[uid]) return
   skillFired.value = { ...skillFired.value, [uid]: true }
@@ -869,6 +873,8 @@ function firePassiveFx(e) {
     sfx('virus')
   }
 
+  // 🌙 หมัดนี้ใช้ข้างไหนไปแล้ว ⇒ ไอคอนบนการ์ดเลื่อนไปข้างถัดไป
+  if (e.effect === 'moonPhase' || e.effect === 'fullMoon') moonNext.value = { ...moonNext.value, [e.uid]: ((e.phase ?? 0) + 1) % 3 }
   // ❄️ ฤดูหนาว: ตราแช่แข็งค้างบนการ์ดที่โดน จนกว่าจะถึงตาที่ถูกข้าม
   if (e.fxKind === 'freeze') { for (const t of on) fx?.stateMark(t, '❄️', 1); sfx('freeze') }
   // ⏸️ ถึงตาที่ถูกแช่แข็ง: ป้าย "แข็ง!" แล้วเอาตราออก
@@ -887,7 +893,7 @@ function firePassiveFx(e) {
   switch (e.fxKind) {
     case 'damage':  fx?.sweep(on, e.icon, 60); break        // bahamut สาดไฟใส่ทุกตัว
     case 'cleave':  fx?.sweep(on, e.icon, 45); break        // เขี้ยว/เปลวไฟลงหลายใบในจังหวะเดียว
-    case 'heal':    fx?.sweep(on, '✨', 70); break
+    case 'heal':    fx?.sweep(on, e.effect === 'seasonRain' ? '🌧️' : '✨', 70); break
     case 'guard':   fx?.ring(e.uid, 'windup', 320); break
     // armorStack — วงแหวนกันหมัดชุดเดียวกับ guard (ผู้เล่นอ่านทั้งคู่ว่า "หมัดนี้ไม่เข้า") แต่แยก fxKind
     // เพราะหน่วยของ amount คนละเรื่องกัน (ที่นี่ = ดาเมจสะท้อน, ของ guard = ดาเมจที่รับแทน) ·
@@ -898,7 +904,7 @@ function firePassiveFx(e) {
     case 'thorns':  fx?.sweep(on, e.icon, 0); break
     case 'dodge':   fx?.callout(e.uid, 'miss'); break        // "หลบ!" — เดิมยืม 'weak' ซึ่งตอนนี้อ่านว่า "ชนะทาง"
     case 'chain':
-    case 'buff':    fx?.ring(e.uid, 'windup', 260); break
+    case 'buff':    if (e.effect === 'seasonHot') fx?.sweep(on, '☀️', 60); else fx?.ring(e.uid, 'windup', 260); break
     case 'aim':     fx?.ring(e.uid, 'windup', 200); break
     case 'moon':     fx?.ring(e.uid, 'windup', 200); break
     case 'fullMoon': fx?.sweep(on, '🌕', 0); break
@@ -1130,6 +1136,7 @@ function closeInspect() {
 /** ไอคอนสกิลของเพ็ทตัวนี้ (static ต่อไฟต์ — อ่านจาก def ไม่ใช่ state ที่วิ่งทุกเฟรม) */
 // 🌍 ไอคอนทักษะบนการ์ด = ฤดูของช่อง (☀️/🌧️/❄️) · ร่างองศาไม่มีทักษะ = ไม่มีไอคอน (user ขอ 27 ก.ย.)
 const skillIcon = (p, uid) => {
+  if (p?.id === 'luna' && uid) return MOON_ICONS[moonNext.value[uid] ?? 0]
   if (p?.id === 'earth' && uid) {
     if (degreeFormActive(sideTeam(uid[0]))) return ''
     return seasonOfSlot(parseInt(uid.slice(1), 10)).icon

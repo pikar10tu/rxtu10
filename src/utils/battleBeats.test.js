@@ -581,3 +581,15 @@ test('spreadHits: weight เฉลี่ย 0 (ทุกหมัดเบาห
   const beats = [{ kind: 'hit', weight: 0, timing: timingOf('hit') }, { kind: 'hit', weight: 0, timing: timingOf('hit') }]
   for (const b of spreadHits(beats, 1)) assert.equal(Math.round(beatDuration(b)), BEAT)
 })
+
+test('🌍 ฤดูประกาศชิปทุกรอบ ไม่ใช่แค่ครั้งแรก (user เห็นทำงานครั้งเดียว 27 ก.ย.)', () => {
+  const log = [
+    atk({ dmg: 5 }),
+    pas({ effect: 'seasonHot', fxKind: 'buff', uid: 'A0', petId: 'earth' }),
+    atk({ dmg: 5 }),
+    pas({ effect: 'seasonHot', fxKind: 'buff', uid: 'A0', petId: 'earth' }),
+    atk({ dmg: 5 }),
+  ]
+  const kinds = buildBeats(log, MH).filter(b => b.effect === 'seasonHot').map(b => b.kind)
+  assert.deepEqual(kinds, ['skill', 'skill'])
+})

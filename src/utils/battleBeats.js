@@ -56,6 +56,10 @@ export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMo
 // เป๊ะ: จังหวะเป็น-ตายได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ — เดิมได้ skillQuiet 0ms ซึ่งขัดกับกฎบรรทัดนี้เอง
 export const CLUTCH_EFFECTS = new Set(['revive', 'cheatDeath', 'saveAlly', 'grit', 'fullMoon'])
 
+/** สกิลที่ต้องประกาศชิปทุกครั้ง (ไม่ใช่แค่ครั้งแรก) — 🌍 ฤดูทำงานรอบละครั้ง ถ้าเงียบตั้งแต่ครั้งที่สอง
+ *  คนดูนึกว่าทำงานครั้งเดียวต่อไฟต์ (user เจอ 27 ก.ย.) · จังหวะรอบละ 1 ครั้งไม่ทำให้ไฟต์ยืดเกินไป */
+export const EVERY_TIME_EFFECTS = new Set(['seasonHot', 'seasonRain', 'seasonCold'])
+
 /** effect ของ hook ที่ทำงาน "ก่อนไฟต์เริ่ม" (`setup` + `aura`) — ใช้ตัดกลุ่มยกแรก (ดู openCutOf)
  *  🔴 เพิ่ม effect ใหม่บน hook `aura`/`setup` เมื่อไหร่ ต้องมาเติมที่นี่ด้วยเสมอ — ไฟล์นี้ไม่ import อะไร
  *     จึงตรวจให้ไม่ได้ตอนคอมไพล์ · เทสข้ามไฟล์ใน battleBeats.test.js เป็นตัวคุมแทน
@@ -285,7 +289,7 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       if (CLUTCH_EFFECTS.has(e.effect)) pKind.set(i, 'skillMoment')
       else if (!lastOfGroup) pKind.set(i, 'skillQuiet')
       else if (first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
-      else pKind.set(i, first ? 'skill' : 'skillQuiet')
+      else pKind.set(i, first || EVERY_TIME_EFFECTS.has(e.effect) ? 'skill' : 'skillQuiet')
     }
   }
 
