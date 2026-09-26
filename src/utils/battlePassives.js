@@ -40,7 +40,7 @@ export function statsSnapshot(...teams) {
 }
 
 /** effect ที่ขยับ atk/maxHp จริง — teamCrit/enemyVuln ไม่ต้องแบก snapshot ไปด้วย */
-const STAT_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'stackAtk', 'elementTrinity', 'rarityBoost'])
+const STAT_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'stackAtk', 'hunt', 'elementTrinity', 'rarityBoost'])
 
 /** สร้าง event สำหรับ log — รูปเดียวกับที่ BattleReplay/battleBeats รับ
  *  🔴 ชนิดผลชื่อ `fxKind` ห้ามใช้ชื่อ `kind` เด็ดขาด — `kind` เป็นของ battleBeats (= เวลา)
@@ -130,24 +130,8 @@ export function runSetup(team, foes) {
       e.statsAfter = statsSnapshot(team, foes)
       out.push(e)
     }
-
-    // ── ชั้นตั้งต้นของ stackAtk (🦖 ทีเร็กซ์) ──────────────────────────────
-    // 🔴 อ่านจาก part เดิมของเพ็ทไม่ว่ามันแขวนอยู่ hook ไหน — จงใจ **ไม่** ให้เพ็ทเพิ่ม part hook
-    //    'setup' ตัวที่สอง เพราะเพ็ทที่ถือ stackAtk สอง part คือกับดักของหนี้ §7.6 ข้อ 2:
-    //    ทุก part ใช้ st.atkStacks ก้อนเดียวกันแต่เพดานคนละเลข (onRound 4 · onAnyDeath 3 · onKill 3)
-    //    ⇒ แหล่งที่เพดานต่ำกว่าจะเงียบไปโดยไม่มี event บอก (มีเทสกันไว้ใน petPassives.test.js)
-    // 🔇 ไม่ยิง event โดยตั้งใจ: ชั้นนี้เป็นสเตตัสตั้งต้น ไม่ใช่โมเมนต์ระหว่างไฟต์ · statsSnapshot()
-    //    ที่เอนจินเก็บหลัง aura แบกค่านี้ไปให้การ์ดอยู่แล้ว ⇒ ยิง event จะได้ป้ายที่เลขบนจอไม่ขยับตาม
-    for (const part of (p && p.parts) || []) {
-      if (part.effect !== 'stackAtk') continue
-      const v = valOf(part, u)
-      const start = v.start || 0
-      if (start <= 0) continue
-      const st = psOf(u)
-      const n = Math.min(start, v.max)          // ชั้นแถมห้ามทะลุเพดานของ part ตัวเอง
-      st.atkStacks = (st.atkStacks || 0) + n
-      u.atk *= (1 + v.pct / 100) ** n
-    }
+    // 🦖 ทีเร็กซ์ (hunt) ย้ายชั้นตั้งต้นไปที่ initHunt() ด้านล่าง — ต้องรันหลัง applyAuras
+    //    (ซอล/สิงโต/วาฬ) ไม่ใช่ที่นี่ ไม่งั้นฐานของ hunt จะไม่นับ atk ที่ aura คูณทีหลัง
   }
   return out
 }
@@ -251,6 +235,28 @@ export function applyAuras(team, foes) {
     }
   }
   return out
+}
+
+// ══════════════════════════════════════════════════════════════
+//  hunt init — หลัง aura ทั้งหมด (🦖 ทีเร็กซ์)
+// ══════════════════════════════════════════════════════════════
+/** 🔴 ต้องเรียก "หลัง" applyAuras เสมอ — huntBase จับ atk ณ ตอนนี้แล้วใช้เป็นฐานตลอดไฟต์
+ *     (ต่างจาก stealStats ที่ต้องจับ *ก่อน* aura) ไม่งั้นซอล/สิงโต/วาฬ/ขโมยของหนูที่คูณ atk ไปแล้ว
+ *     จะไม่ถูกนับรวมในฐานของชั้นที่ทุกหมัดจะบวกเพิ่มทั้งไฟต์ ⇒ ทีมที่มีออร่าคูณ atk จะได้ hunt อ่อนกว่าที่ควร
+ *  🔇 ไม่ยิง event โดยตั้งใจ (เหตุผลเดียวกับชั้นตั้งต้นเดิมของ stackAtk): เป็นสเตตัสตั้งต้นก่อนไฟต์เริ่ม
+ *     ไม่ใช่โมเมนต์ระหว่างไฟต์ · statsSnapshot() ที่เอนจินเก็บ "หลัง" ฟังก์ชันนี้ (ไม่ใช่หลัง aura ตรงๆ)
+ *     แบกค่านี้ไปให้การ์ดอยู่แล้ว ⇒ ยิง event ซ้ำจะได้ป้ายที่เลขบนจอไม่ขยับตาม */
+export function initHunt(team) {
+  for (const u of alive(team)) {
+    const p = passiveFor(u)
+    const part = partWithEffect(p, 'hunt')
+    if (!part) continue
+    const v = valOf(part, u)
+    const st = psOf(u)
+    st.huntBase = u.atk                      // ฐานหลัง aura — ทุกหมัดบวกเพิ่มจากตัวเลขนี้ตลอดไฟต์
+    st.huntStacks = v.start || 0
+    if (st.huntStacks > 0) u.atk += st.huntBase * v.pct / 100 * st.huntStacks
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -385,7 +391,7 @@ export function tauntTargetOf(foes) {
  *   extra   = [{ unit, pct }] เป้ารองของ cleave — โดนใน beat เดียวกัน
  *   strikes = จำนวนหมัดบนเป้าหลักใน beat เดียวกัน (multiStrike)
  */
-export function runOnAttack(att, target, foes, rand) {
+export function runOnAttack(att, target, foes, rand, attTeam = null) {
   const p = passiveFor(att)
   const res = { target, atkMult: 1, extra: [], strikes: 1, strikePct: 100, events: [] }
   for (const part of partsAt(p, 'onAttack')) {
@@ -482,6 +488,18 @@ export function runOnAttack(att, target, foes, rand) {
         break
       }
       // 🔴 healOnAttack ก็ hook: 'onAttack' ในข้อมูล แต่คำนวณใน runOnDealt (ข้างล่างนี้) — ดูคอมเมนต์ที่นั่น
+      case 'hunt': {
+        // 🦖 ทุกหมัดที่ตี +pct% ของ atk ฐาน (หลัง aura, จับไว้ตอน initHunt) บวกเพิ่มเสมอ ไม่เซ็ตทับ
+        // ⇒ ไม่ลบผลของขโมยสเตตัส/ฤดูร้อน/บัฟอื่นที่แตะ att.atk ไปก่อนหน้านี้แล้ว · ไม่มีเพดาน (บาลานซ์ 27 ก.ย. 2026)
+        // ℹ️ หมัดแรกจริงได้ 3 ชั้น (ฐาน 2 + ชั้นนี้อีก 1) เพราะชั้นเพิ่มก่อนคิดดาเมจของหมัดนั้นเอง (ตั้งใจ)
+        const st = psOf(att)
+        st.huntStacks = (st.huntStacks || 0) + 1
+        att.atk += (st.huntBase ?? att.atk) * v.pct / 100
+        const e = ev(att, p, part, { targets: [att.uid], amount: st.huntStacks, fxKind: 'buff' })
+        e.statsAfter = attTeam ? statsSnapshot(attTeam) : statsSnapshot([att])
+        res.events.push(e)
+        break
+      }
     }
   }
   // 🌍 บัฟร้อนจากฤดูกาลจบรอบก่อน (ตั้งไว้ใน runOnRound ต้นรอบนี้) — คูณทบกับตัวคูณอื่นทั้งหมดข้างบน

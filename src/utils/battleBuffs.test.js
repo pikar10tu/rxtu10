@@ -57,18 +57,20 @@ test('key ไม่ซ้ำในลิสต์เดียว (สอง pass
   assert.equal(new Set(keys).size, keys.length)
 })
 
-test('liveBuffs: stacks นับตาม idx — ก่อนถึง beat = 0 · หลัง 2 beat = 2', () => {
+// 🔧 บาลานซ์รอบ 1 Task 5 (27 ก.ย. 2026): ทีเร็กซ์ย้ายจาก stackAtk (เพดาน 3) ไปเป็น 'hunt' (ไม่มีเพดาน)
+//    เทสนี้ยังใช้ทีเร็กซ์เป็นตัวอย่างของ effect ที่ liveBuffs นับชั้นจาก amount ของ event — แค่เปลี่ยนชื่อ effect
+test('liveBuffs: stacks นับตาม idx — ก่อนถึง beat = 0 · หลัง 2 beat = 4', () => {
   const s = buffSources([p('trex')], [p('mouse'), p('mouse')])
   const beats = [
     { t: 'attack', attacker: 'A0', target: 'B0' },
-    { t: 'passive', uid: 'A0', effect: 'stackAtk', amount: 1 },
+    { t: 'passive', uid: 'A0', effect: 'hunt', amount: 3 },
     { t: 'attack', attacker: 'A0', target: 'B1' },
-    { t: 'passive', uid: 'A0', effect: 'stackAtk', amount: 2 },
+    { t: 'passive', uid: 'A0', effect: 'hunt', amount: 4 },
   ]
-  assert.equal(find(liveBuffs(s.A0, beats, 0), 'stackAtk').stacks, 0)
-  assert.equal(find(liveBuffs(s.A0, beats, 1), 'stackAtk').stacks, 1)
-  assert.equal(find(liveBuffs(s.A0, beats, 3), 'stackAtk').stacks, 2)
-  assert.equal(find(liveBuffs(s.A0, beats, 3), 'stackAtk').maxStacks, 3)
+  assert.equal(find(liveBuffs(s.A0, beats, 0), 'hunt').stacks, 0)
+  assert.equal(find(liveBuffs(s.A0, beats, 1), 'hunt').stacks, 3)
+  assert.equal(find(liveBuffs(s.A0, beats, 3), 'hunt').stacks, 4)
+  assert.equal(find(liveBuffs(s.A0, beats, 3), 'hunt').maxStacks, 0, 'hunt ไม่มีเพดาน (value ไม่มี max) ⇒ maxStacksOf คืน 0 = ไม่มีเพดาน')
 })
 
 test('liveBuffs: spent — เห็น event revive แล้วต้องเป็น true', () => {
@@ -223,7 +225,8 @@ test('ownCounter: สกิลที่ไม่มีอะไรให้น�
 test('ownCounter: ชั้นสะสม — ทีเร็กซ์/กอริลลา โชว์ชั้นล่าสุด · ยังไม่มีชั้น = ไม่โชว์', () => {
   assert.equal(counterAt([p('gorilla')], []), null)
   assert.deepEqual(counterAt([p('gorilla')], [pas('A0', 'atkOnHit', { amount: 2 })]), { n: 2, kind: 'stack', spent: false })
-  const t = counterAt([p('trex')], [pas('A0', 'stackAtk', { amount: 3 }), pas('A0', 'stackAtk', { amount: 4 })])
+  // 🔧 บาลานซ์รอบ 1 Task 5: ทีเร็กซ์ย้ายไป effect 'hunt' (ไม่มีเพดาน) — กลไก ownCounter เหมือนเดิมเป๊ะ
+  const t = counterAt([p('trex')], [pas('A0', 'hunt', { amount: 3 }), pas('A0', 'hunt', { amount: 4 })])
   assert.deepEqual(t, { n: 4, kind: 'stack', spent: false })
 })
 

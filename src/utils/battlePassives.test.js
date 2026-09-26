@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  applyForms, runSetup, applyAuras, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
+  applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
   tauntTargetOf,
 } from './battlePassives.js'
 import { PET_PASSIVES, passiveValueAt, passiveText, effectText, partsOf, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT, TEAM_AURA_EFFECTS } from '../data/petPassives.js'
@@ -759,36 +759,48 @@ test('saveAlly (genie): กันเพื่อนตาย 1 ครั้ง �
   assert.equal(runOnDeath(b, [g, b]).prevented, false, 'genie ใช้ได้ครั้งเดียว')
 })
 
-// 🔧 P2c-1 Task 4: ทีเร็กซ์ย้าย hook ไป onAnyDeath แล้ว (ได้ชั้นแม้ไม่ได้ลงมือฆ่าเอง) — ยิงผ่าน
-//    runOnAnyDeath ตรงๆ แทน runOnKill เดิม เพื่อพิสูจน์ว่าเพดาน 3 ชั้นยังคงเดิมหลังย้าย hook
-test('stackAtk (trex): สะสมได้ถึงเพดานแล้วหยุด', () => {
+// 🔧 บาลานซ์รอบ 1 Task 5 (27 ก.ย. 2026): ทีเร็กซ์ย้ายจาก onAnyDeath+stackAtk ("ศัตรูล้ม 1 ตัวได้ 1 ชั้น
+//    ไม่ว่าใครฆ่า") ไปเป็น onAttack+hunt ("ทุกหมัดที่ตัวเองตี +pct% ของ atk ฐาน ไม่มีเพดาน")
+//    ⇒ ไม่ต้องพึ่งการฆ่าของทีมอีกต่อไป (เทสเดิม "เพื่อนเป็นคนล้มศัตรู ทีเร็กซ์ก็ได้ชั้น" ไม่มีความหมายแล้ว
+//    เพราะ hunt ไม่ผูกกับ onAnyDeath เลย — ตัดทิ้ง แทนด้วยเทสที่วัดพฤติกรรมใหม่ตรงๆ)
+test('hunt (trex): initHunt ใส่ชั้นตั้งต้นหลัง aura แล้วทุกหมัดบวกเพิ่มจากฐานเดิม ไม่ทบต้น', () => {
+  const t = u('trex')                    // atk เริ่ม 100 — สมมุติเป็น "หลัง aura" แล้ว (เทสนี้ไม่มี aura จริง)
+  initHunt([t])
+  assert.equal(psOf(t).huntBase, 100, 'ฐานจับตอน initHunt (ในไฟต์จริงคือ atk หลัง aura)')
+  assert.equal(psOf(t).huntStacks, 2, 'เข้าไฟต์พร้อม 2 ชั้นตามค่า start')
+  assert.equal(t.atk, 140, 'atk = ฐาน × (1 + 2×20%)')
+
+  const foe = { uid: 'B0', hp: 100, maxHp: 100 }
+  runOnAttack(t, foe, [foe], () => 0.5)
+  assert.equal(psOf(t).huntStacks, 3, 'หมัดแรกจริงได้ชั้นที่ 3 ทันที (ชั้นเพิ่มก่อนคิดดาเมจของหมัดนั้นเอง)')
+  assert.equal(t.atk, 160, 'ชั้นที่ 3 = ฐาน × 1.6 (บวกจากฐาน ไม่ทบต้น)')
+
+  for (let i = 0; i < 29; i++) runOnAttack(t, foe, [foe], () => 0.5)
+  assert.equal(psOf(t).huntStacks, 32, '30 หมัด (1 + 29) รวมกับ 2 ชั้นตั้งต้น = 32 — ไม่มีเพดาน')
+  assert.equal(t.atk, 100 + 100 * 0.2 * 32, 'บวกจากฐานทุกชั้น ไม่ทบต้น (ครั้งที่ 32 ≠ 1.2^32)')
+})
+
+test('hunt: event ทุกใบเป็น fxKind buff, amount = ชั้นหลังเพิ่ม, และมี statsAfter', () => {
   const t = u('trex')
-  const base = t.atk
-  const dead = { uid: 'B0', side: 'B', id: 'blank', hp: 0, maxHp: 100, atk: 10 }
-  for (let i = 0; i < 6; i++) runOnAnyDeath(dead, [t], [dead])
-  assert.equal(psOf(t).atkStacks, 3, 'เพดาน 3 ชั้น')
-  assert.ok(t.atk > base)
+  initHunt([t])
+  const foe = { uid: 'B0', hp: 100, maxHp: 100 }
+  const r = runOnAttack(t, foe, [foe], () => 0.5, [t])
+  const e = r.events.find(x => x.effect === 'hunt')
+  assert.ok(e, 'ต้องมี event hunt')
+  assert.equal(e.fxKind, 'buff')
+  assert.equal(e.amount, 3, 'amount = ชั้นสะสมหลังหมัดนี้ (2 ตั้งต้น + 1)')
+  assert.ok(e.statsAfter, 'ต้องแบก statsAfter — hunt ขยับ att.atk จริง ไม่ใช่แค่ atkMult ชั่วคราว')
+  assert.equal(e.statsAfter[t.uid].atk, 160)
 })
 
-test('ทีเร็กซ์: เพื่อนเป็นคนล้มศัตรู ทีเร็กซ์ก็ได้ชั้น', () => {
-  const trex = { id: 'trex', rarity: 'legendary', element: 'fist', grade: 0 }   // อ่อนสุด จะได้ไม่ได้เป็นคนฆ่าเอง
-  const mate = { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 }
-  // 🔴 P2c-1 Task 8: grade 0 (hp 50) เคยพอสำหรับเทสนี้ตอนบาฮามุทเปิดไฟต์แค่ 12% — พอขึ้นเป็น 150%
-  //    (ตามเลขใหม่ของบาฮามุท) เปิดไฟต์ทีเดียวน็อกทั้งคู่ตายคาที่ (aoeOpener ลด hp ตรงๆ ไม่ผ่าน
-  //    onDeath/onAnyDeath เลย) ⇒ ทีเร็กซ์ไม่ได้ชั้นเพราะไม่มี "การฆ่า" ที่ระบบนับผ่านมันเลย ไม่ใช่บั๊กที่ตั้งใจทดสอบ
-  //    ยกเกรดเป็น 3 (hp ~76) ให้รอดจากอ๊อพเนอร์แล้วตายจริงกลางไฟต์ผ่านหมัดปกติแทน — คงเจตนาเทสเดิมไว้เป๊ะ
-  //    (ทีเร็กซ์ต้องได้ชั้นแม้ไม่ได้เป็นคนฆ่าเอง) แค่ไม่ให้ชนเคสขอบที่ไม่เกี่ยวกับสิ่งที่เทสนี้ตั้งใจวัด
-  const weak = { id: '__blank__', rarity: 'common', element: 'scissors', grade: 3 }
-  const r = simulateBattle([trex, mate], [weak, weak], 777)
-  const mine = r.log.filter(e => e.t === 'passive' && e.effect === 'stackAtk' && e.petId === 'trex')
-  assert.ok(mine.length > 0, 'ต้องได้ชั้นแม้ไม่ได้เป็นคนฆ่า')
-})
-
-test('ทีเร็กซ์: hook ย้ายไป onAnyDeath แล้ว ไม่เหลือ onKill', () => {
+test('ทีเร็กซ์: parts มีแค่ hunt hook onAttack เดียว ไม่เหลือ stackAtk', () => {
   const parts = partsOf(PET_PASSIVES.trex)
   assert.equal(parts.length, 1)
-  assert.equal(parts[0].hook, 'onAnyDeath')
-  assert.equal(parts[0].value.max, 3, 'เพดานชั้นเดิมต้องไม่เปลี่ยน')
+  assert.equal(parts[0].hook, 'onAttack')
+  assert.equal(parts[0].effect, 'hunt')
+  assert.equal(parts[0].value.pct, 20)
+  assert.equal(parts[0].value.start, 2)
+  assert.equal(parts[0].value.max, undefined, 'hunt ไม่มีเพดาน — ต้องไม่มีคีย์ max เลย')
 })
 
 test('killChain (kirin): ตีต่อได้จนถึงเพดาน แล้วหยุด (ไม่วนไม่รู้จบ)', () => {
@@ -1781,36 +1793,38 @@ test('runOnKill: หมัดที่ปิดไฟต์ก็ต้องไ
   } finally { delete PET_PASSIVES.__slayer }
 })
 
-// ── P2c-2: 🦖 ทีเร็กซ์เริ่มไฟต์ด้วย 1 ชั้น (user สั่ง 10 ก.ย. "จะได้เก่งสมเป็น legend") ──
-test('ทีเร็กซ์เข้าไฟต์ด้วย 1 ชั้นและแรงขึ้นทันที', () => {
+// ── บาลานซ์รอบ 1 Task 5 (27 ก.ย. 2026): 🦖 ทีเร็กซ์ย้ายจาก onAnyDeath+stackAtk (เพดาน 3, start 1)
+//    ไปเป็น onAttack+hunt (ไม่มีเพดาน, start 2) — initHunt() แทนที่บล็อกชั้นตั้งต้นเดิมใน runSetup
+//    เพราะต้องรันหลัง aura ทั้งหมด (ดูคอมเมนต์ยาวใน battlePassives.js initHunt())
+test('ทีเร็กซ์เข้าไฟต์ด้วย 2 ชั้นและแรงขึ้นทันที (initHunt หลัง aura)', () => {
   const t = u('trex')
   const base = t.atk
-  runSetup([t], [u('mouse', { uid: 'B0', side: 'B' })])
-  assert.equal(psOf(t).atkStacks, 1, 'ต้องได้ชั้นแรกฟรีตอนเข้าไฟต์')
-  assert.ok(Math.abs(t.atk / base - 1.12) < 1e-9, `atk ต้อง × 1.12 พอดี (ได้ ${t.atk / base})`)
+  initHunt([t])
+  assert.equal(psOf(t).huntStacks, 2, 'ต้องได้ 2 ชั้นฟรีตอนเข้าไฟต์')
+  assert.ok(Math.abs(t.atk / base - 1.4) < 1e-9, `atk ต้อง × 1.4 พอดี (ได้ ${t.atk / base})`)
 })
 
-test('ทีเร็กซ์ยังตันที่ 3 ชั้นเหมือนเดิม — ชั้นแถมไม่ขยับเพดาน', () => {
+test('ทีเร็กซ์ไม่มีเพดานอีกต่อไป — สะสมได้เรื่อยๆ ทุกหมัดของตัวเอง', () => {
   const t = u('trex')
   const base = t.atk
   const foe = u('mouse', { uid: 'B0', side: 'B' })
-  runSetup([t], [foe])
-  for (let i = 0; i < 5; i++) runOnAnyDeath(u('mouse', { uid: 'B9', side: 'B' }), [t], [foe], () => 0.5)
-  assert.equal(psOf(t).atkStacks, 3, 'เพดานยังเป็น 3 ชั้น')
-  assert.ok(Math.abs(t.atk / base - 1.12 ** 3) < 1e-9,
-    `ตัน 3 ชั้น = คูณทบ 1.12³ = +40.5% (ได้ ${(t.atk / base - 1) * 100}%)`)
+  initHunt([t])
+  for (let i = 0; i < 10; i++) runOnAttack(t, foe, [foe], () => 0.5)
+  assert.equal(psOf(t).huntStacks, 12, '2 ชั้นตั้งต้น + 10 หมัด = 12 ชั้น ไม่มีเพดานมาหยุด')
+  assert.ok(Math.abs(t.atk / base - (1 + 12 * 0.2)) < 1e-9,
+    `บวกจากฐานทุกชั้น ไม่ทบต้น (ได้ ${(t.atk / base - 1) * 100}% ควรได้ ${12 * 20}%)`)
 })
 
-test('setup ไม่ยิง event ให้ชั้นแถม — เป็นสเตตัสตั้งต้น ไม่ใช่โมเมนต์', () => {
-  assert.deepEqual(runSetup([u('trex')], [u('mouse', { uid: 'B0', side: 'B' })]), [],
-    'ถ้ายิง event จะได้ป้ายที่เลขบนจอไม่ขยับตาม (statsSnapshot หลัง aura แบกค่านี้ไปแล้ว)')
+test('initHunt ไม่ยิง event ให้ชั้นแถม — เป็นสเตตัสตั้งต้น ไม่ใช่โมเมนต์', () => {
+  assert.equal(initHunt([u('trex')]), undefined,
+    'ถ้ายิง event จะได้ป้ายที่เลขบนจอไม่ขยับตาม (statsSnapshot หลัง initHunt แบกค่านี้ไปแล้ว)')
 })
 
-test('เพ็ทที่ไม่มี start ไม่ได้ชั้นแถม (ยามกันเผลอแจกทั้งเกม)', () => {
+test('initHunt: เพ็ทที่ไม่มี hunt part ไม่ได้อะไร (ยามกันเผลอแจกทั้งเกม)', () => {
   const o = u('ouroboros')
   const base = o.atk
-  runSetup([o], [u('mouse', { uid: 'B0', side: 'B' })])
-  assert.equal(psOf(o).atkStacks || 0, 0)
+  initHunt([o])
+  assert.equal(psOf(o).huntBase, undefined)
   assert.equal(o.atk, base)
 })
 

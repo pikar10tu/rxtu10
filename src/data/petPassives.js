@@ -40,15 +40,13 @@ export const PET_PASSIVES = {
   },
   trex: {
     name: 'สัญชาตญาณนักล่า', icon: '🦖',
-    // `start` = ชั้นที่ได้ฟรีตอนเข้าไฟต์ (runSetup เป็นคนเติม) — user สั่ง 10 ก.ย. 2026 "จะได้เก่งสม legend"
-    // 🔴 จงใจอยู่บน part เดิม ไม่แตกเป็น part hook 'setup' ตัวที่สอง: เพ็ทที่ถือ stackAtk สอง part
-    //    คือกับดักของหนี้ §7.6 ข้อ 2 (ทุก part ใช้ st.atkStacks ก้อนเดียวกันแต่เพดานคนละเลข)
-    //    มีเทสใน petPassives.test.js กันไว้ว่าห้ามมีเพ็ทตัวไหนถือ stackAtk เกิน 1 part
+    // 27 ก.ย. 2026 (บาลานซ์รอบ 1 Task 5): เดิม onAnyDeath stackAtk (คนตายช้า ได้ชั้นตอนไฟต์จะจบ)
+    // → ทุกหมัดที่ตี +pct% ของ atk ฐาน (หลัง aura) ไม่มีเพดาน · `start` = ชั้นแถมตอนเข้าไฟต์เหมือนเดิม
+    // 🔴 บวกจากฐาน ไม่ทบต้น — ไม่มีเพดาน + ทบต้น = ระเบิดในไฟต์ยาว (world boss ในอนาคต)
     // step.start = 0 — ชั้นแถมไม่สเกลตามเกรด (เกรดสูงได้ % ต่อชั้นแรงขึ้นผ่าน step.pct อยู่แล้ว)
-    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3, start: 1 },
-              step: { pct: 4, max: 0, start: 0 } }],
-    desc: 'เข้าไฟต์พร้อม {start} ชั้น · ศัตรูล้ม 1 ตัว (ใครล้มก็ได้) เพิ่มอีก 1 ชั้น · ชั้นละ +{pct}% สะสมรวม {max} ชั้น',
-    short: 'เริ่มไฟต์ {start} ชั้น · ศัตรูล้ม 1 ตัว +1 ชั้น · ชั้นละ +{pct}% (รวม {max})',
+    parts: [{ hook: 'onAttack', effect: 'hunt', value: { pct: 20, start: 2 }, step: { pct: 0, start: 0 } }],
+    desc: 'ทุกหมัดที่ตี พลังโจมตี +{pct}% สะสมไม่มีเพดาน · เข้าไฟต์พร้อม {start} ชั้น',
+    short: 'ตีทีไรแรง +{pct}% สะสมไม่จำกัด · เริ่ม {start} ชั้น',
   },
   ouroboros: {
     name: 'วัฏจักรนิรันดร์', icon: '🐍',
@@ -438,6 +436,8 @@ export const STATUS_ICON = {
   guardian: '🛡️', damageReduction: '🧱', dodge: '💨', thorns: '⚡',
   revive: '🧿', saveAlly: '🧿', cheatDeath: '🧿', stackAtk: '⬆️',
   duoRegen: '💧',
+  // 🦖 ทีเร็กซ์ (27 ก.ย. 2026 บาลานซ์รอบ 1): ย้ายออกจาก stackAtk → effect ใหม่ 'hunt' (ไม่มีเพดาน)
+  hunt: '📈',
   // ── P2 ──
   elementTrinity: '🧩', teamLifesteal: '🩸', teamDamageReduction: '🧱', atkOnHit: '💢',
   berserk: '🔥', giantSlayer: '🗡️', healOnAttack: '💞', stealStats: '🫳',
@@ -469,6 +469,7 @@ export const STATUS_TEXT = {
   thorns: 'ตีแล้วเจ็บกลับ', revive: 'ตายแล้วฟื้นคืนชีพได้ 1 ครั้ง', saveAlly: 'กันเพื่อนตายได้ 1 ครั้ง',
   cheatDeath: 'รอดตายด้วยเลือด 1 ได้ 1 ครั้ง', stackAtk: 'ยิ่งฆ่ายิ่งแรง',
   duoRegen: 'ทีมฟื้นเลือดทุกรอบ',
+  hunt: 'ยิ่งตียิ่งแรง สะสมไม่มีเพดาน',
   // ── P2 ──
   elementTrinity: 'ทีมครบสายจึงแรงขึ้น', teamLifesteal: 'ตีแล้วดูดเลือด',
   teamDamageReduction: 'ทั้งทีมลดดาเมจที่ได้รับ', atkOnHit: 'ยิ่งโดนตียิ่งแรง',
@@ -490,7 +491,7 @@ export const FOE_AURA_EFFECTS = new Set(['enemyVuln'])
 /** สถานะติดตัวที่ไม่ต้องพึ่งใคร — ป้ายลงเฉพาะเจ้าตัว */
 export const SELF_STATUS_EFFECTS = new Set([
   'guardian', 'damageReduction', 'dodge', 'thorns', 'revive', 'saveAlly', 'cheatDeath', 'stackAtk',
-  'atkOnHit', 'berserk', 'giantSlayer', 'stealStats', 'healOnAttack',
+  'atkOnHit', 'berserk', 'giantSlayer', 'stealStats', 'healOnAttack', 'hunt',
   // ── P2b ── สถานะติดตัวเจ้าของสกิลเอง (คนละกลุ่มกับ infect ด้านล่าง ที่ลงบน "ตัวที่ถูกตี" แทน)
   'taunt', 'armorStack',
   // 'grit' ไม่อยู่ในกลุ่มนี้ (หรือกลุ่มไหนเลย) โดยตั้งใจ — ดูเหตุผลยาวที่คอมเมนต์ของ STATUS_ICON ด้านบน
@@ -518,7 +519,7 @@ export const PASSIVE_V2_CHANGED = ['cat', 'phoenix', 'cerberus', 'trex', 'wolf',
  *  ⚠️ ยังต้องมีแม้เพดานจะพอ เพราะป้ายชั้นเชื้อ (ชั้น FX) มาแย่งพื้นที่เดียวกันบนการ์ด */
 export const BADGE_PRIORITY = {
   infect: 0, armorStack: 1, taunt: 2, guardian: 3, cheatDeath: 4, revive: 4, saveAlly: 4,
-  stackAtk: 10, atkOnHit: 10, berserk: 11, giantSlayer: 11, stealStats: 12,
+  stackAtk: 10, atkOnHit: 10, hunt: 10, berserk: 11, giantSlayer: 11, stealStats: 12,
   elementTrinity: 20, enemyVuln: 21, teamDamageReduction: 22, dodge: 23, thorns: 23,
   teamLifesteal: 30, healOnAttack: 30, teamHp: 31, teamAtk: 31, teamAtkElement: 31,
   teamCrit: 32, duoRegen: 33,

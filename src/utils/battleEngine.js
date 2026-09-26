@@ -5,7 +5,7 @@
 // ════════════════════════════════════════════════════════════
 import { BATTLE_CFG, buildCombatant, elementMult } from '../data/battle.js'
 import {
-  applyForms, runSetup, applyAuras, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
+  applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
   tauntTargetOf, psOf,
 } from './battlePassives.js'
 
@@ -35,6 +35,9 @@ export function simulateBattle(teamA, teamB, seed) {
   for (const e of [...runSetup(A, B), ...runSetup(B, A)]) log.push(e)
   const auraEvents = [...applyAuras(A, B), ...applyAuras(B, A)]
   for (const e of auraEvents) log.push(e)
+  // 🦖 hunt (ทีเร็กซ์) ต้องจับฐาน atk "หลัง" aura ทั้งหมด — ไม่งั้นซอล/สิงโต/วาฬที่คูณ atk ทีหลัง
+  //    จะไม่ถูกนับรวมในฐานของชั้นที่สะสมทั้งไฟต์ (ดู initHunt ใน battlePassives.js)
+  initHunt(A); initHunt(B)
   // สเตตัสหลัง aura ก่อนหมัดแรก = "ตัวหารจริง" ของหลอดเลือดฝั่ง UI
   // (targetHpAfter ใน log อยู่บนสเกลนี้ ไม่ใช่ค่าดิบ — ใช้ค่าดิบแล้วทีมที่มีคุณวาฬหลอดจะเกิน 100%)
   const units = statsSnapshot(A, B)
@@ -228,7 +231,8 @@ export function simulateBattle(teamA, teamB, seed) {
     const forced = !!tauntTargetOf(foes)
     let tg = pick(foes)
     if (!tg) return false
-    const mod = runOnAttack(att, tg, foes, rand)
+    const attTeam = att.side === 'A' ? A : B
+    const mod = runOnAttack(att, tg, foes, rand, attTeam)
     for (const e of mod.events) log.push(e)
     tg = mod.target || tg
 

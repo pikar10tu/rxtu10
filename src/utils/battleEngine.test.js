@@ -129,11 +129,11 @@ test('statsAfter: ติดมากับ aura ที่เปลี่ยน�
   assert.equal(hp.statsAfter.A0.maxHp, r.units.A0.maxHp)
 })
 
-test('statsAfter: stackAtk ส่ง atk ใหม่มาทุกชั้นที่สะสม', () => {
+test('statsAfter: hunt (trex) ส่ง atk ใหม่มาทุกหมัดที่สะสมชั้น', () => {
   const weak = Array.from({ length: 3 }, () => ({ id: 'blank', rarity: 'common', element: 'scissors', grade: 0 }))
   const r = simulateBattle(teamOf('trex'), weak, 3)
-  const stacks = r.log.filter(e => e.t === 'passive' && e.effect === 'stackAtk')
-  assert.ok(stacks.length >= 1, 'ควรมี stackAtk อย่างน้อย 1 ครั้ง')
+  const stacks = r.log.filter(e => e.t === 'passive' && e.effect === 'hunt')
+  assert.ok(stacks.length >= 1, 'ควรมี hunt อย่างน้อย 1 ครั้ง (ทีเร็กซ์ตีทุกหมัดของตัวเอง)')
   for (const s of stacks) assert.ok(s.statsAfter.A0.atk > 0)
   if (stacks.length >= 2) assert.ok(stacks[1].statsAfter.A0.atk > stacks[0].statsAfter.A0.atk)
 })
@@ -205,12 +205,20 @@ test('guardian: ผู้พิทักษ์ที่ตายจากส่�
     parts: [{ hook: 'onRound', effect: 'taunt', value: { pct: 0 }, step: { pct: 0 } }],
     desc: 'ทดสอบ', short: 'ทดสอบ',
   }
+  // 🔧 บาลานซ์รอบ 1 Task 5 (27 ก.ย. 2026): ทีเร็กซ์ย้ายออกจาก onAnyDeath+stackAtk แล้ว (ตอนนี้เป็น
+  //    onAttack+hunt ที่ไม่ผูกกับการฆ่าเลย) ⇒ ใช้พยานสังเคราะห์แทนเพื่อคงเจตนาเดิมของเทสนี้: พิสูจน์ว่า
+  //    "ฝั่งผู้โจมตี" (ไม่ใช่ผู้พิทักษ์เอง) เป็นคนได้เครดิตการฆ่าตอนผู้พิทักษ์ตายจริงในรอบถัดมา
+  PET_PASSIVES.__anyDeathWitness = {
+    name: 'พยานฆ่าทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3 }, step: { pct: 0, max: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
   try {
     const A = [
       { id: '__catGuardian', rarity: 'common', element: 'fist', grade: 0 },
       { id: '__weakTaunt', rarity: 'common', element: 'scissors', grade: 0 },
     ]
-    const B = [{ id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 }]  // ทีเร็กซ์ = พยานเช็คว่าผู้ฆ่าคือฝั่งนี้จริง
+    const B = [{ id: '__anyDeathWitness', rarity: 'legendary', element: 'fist', grade: 5 }]
     const r = simulateBattle(A, B, 1)
 
     const guardEvents = r.log.filter(e => e.t === 'passive' && e.effect === 'guardian' && e.uid === 'A0')
@@ -221,38 +229,50 @@ test('guardian: ผู้พิทักษ์ที่ตายจากส่�
     assert.ok(cheat, 'ผู้พิทักษ์ต้องกิน cheatDeath ไม่ใช่ตายเงียบ')
     assert.ok(r.log.indexOf(cheat) > r.log.indexOf(lethalGuard), 'cheatDeath ต้องมาหลัง log ที่ทำให้ตาย (เหตุมาก่อนผล)')
 
-    // cheatDeath ใช้ได้ครั้งเดียว — ก้อนรับแทนที่ทำให้ตายรอบถัดมาต้องตายจริง แล้ว "ฝั่งผู้โจมตี" (ทีเร็กซ์)
+    // cheatDeath ใช้ได้ครั้งเดียว — ก้อนรับแทนที่ทำให้ตายรอบถัดมาต้องตายจริง แล้ว "ฝั่งผู้โจมตี" (พยาน)
     // ต้องได้ประโยชน์ (stackAtk) ไม่ใช่ทีมของผู้พิทักษ์เอง — พิสูจน์ว่าผู้ฆ่าคือคนที่สวนหมัดมา ไม่ใช่ผู้พิทักษ์
     const stack = r.log.find(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'B0')
-    assert.ok(stack, 'ทีเร็กซ์ (ฝั่งผู้โจมตี) ต้องได้ชั้นตอนผู้พิทักษ์ตายจริงในรอบถัดมา — ยืนยันว่าผู้ฆ่าคือผู้โจมตี ไม่ใช่ผู้พิทักษ์เอง')
+    assert.ok(stack, 'พยาน (ฝั่งผู้โจมตี) ต้องได้ชั้นตอนผู้พิทักษ์ตายจริงในรอบถัดมา — ยืนยันว่าผู้ฆ่าคือผู้โจมตี ไม่ใช่ผู้พิทักษ์เอง')
   } finally {
     delete PET_PASSIVES.__catGuardian
     delete PET_PASSIVES.__weakTaunt
+    delete PET_PASSIVES.__anyDeathWitness
   }
 })
 
-test('aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอบ 1 ได้ · ทีเร็กซ์ (ทีมเดียวกัน) ต้องได้ชั้น stackAtk (สเปก §7.6)', () => {
+test('aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอบ 1 ได้ · เพื่อนร่วมทีมที่ถือ onAnyDeath ต้องได้ชั้น stackAtk (สเปก §7.6)', () => {
   // 🔴 บาลานซ์ 27 ก.ย. 2026: บาฮามุทลดจาก 150% → 100% ⇒ ตัวเดียวไม่พอฆ่า B0 (hp 43) ก่อนรอบ 1 อีกต่อไป
-  //    (34 dmg เหลือ hp 9) ใช้ 2 ตัวรวมแรงแทน เพื่อคงเจตนาเดิมของเทส (ฆ่าก่อนรอบ 1 + ทีเร็กซ์ได้ชั้น)
-  //    ทีเร็กซ์เลื่อนไปเป็น uid 'A2' เพราะมีบาฮามุทแทรกก่อน 2 ตัว
-  const A = [
-    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
-    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
-    { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
-  ]
-  const B = [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }]
-  const r = simulateBattle(A, B, 1)
+  //    (34 dmg เหลือ hp 9) ใช้ 2 ตัวรวมแรงแทน เพื่อคงเจตนาเดิมของเทส (ฆ่าก่อนรอบ 1 + เพื่อนร่วมทีมได้ชั้น)
+  // 🔧 บาลานซ์รอบ 1 Task 5: ทีเร็กซ์ย้ายออกจาก onAnyDeath+stackAtk แล้ว (ตอนนี้เป็น onAttack+hunt
+  //    ที่ไม่ผูกกับการฆ่าเลย) ⇒ ใช้พยานสังเคราะห์แทนเพื่อยังคงพิสูจน์ว่า "การตายเงียบก่อนรอบ 1" ก็ยิง
+  //    onAnyDeath ให้เพื่อนร่วมทีมเหมือนการตายทางอื่นทุกทาง (เจตนาเดิมของเทสนี้ไม่เกี่ยวกับทีเร็กซ์เจาะจง)
+  PET_PASSIVES.__anyDeathWitness = {
+    name: 'พยานฆ่าทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3 }, step: { pct: 0, max: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  try {
+    const A = [
+      { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
+      { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
+      { id: '__anyDeathWitness', rarity: 'legendary', element: 'fist', grade: 5 },
+    ]
+    const B = [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }]
+    const r = simulateBattle(A, B, 1)
 
-  const opener = r.log.find(e => e.t === 'passive' && e.effect === 'aoeOpener')
-  assert.ok(opener, 'ต้องมี aoeOpener event')
-  assert.ok(opener.targets.includes('B0'), 'บาฮามุทต้องยิงโดน B0')
+    const opener = r.log.find(e => e.t === 'passive' && e.effect === 'aoeOpener')
+    assert.ok(opener, 'ต้องมี aoeOpener event')
+    assert.ok(opener.targets.includes('B0'), 'บาฮามุทต้องยิงโดน B0')
 
-  const stack = r.log.find(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A2')
-  assert.ok(stack, 'ทีเร็กซ์ต้องได้ชั้น stackAtk จากศัตรูที่ตายด้วย aoeOpener ก่อนรอบ 1')
-  assert.ok(r.log.indexOf(stack) > r.log.indexOf(opener), 'ต้องยิงหลัง event ของ aoeOpener เอง (เหตุมาก่อนผล)')
+    const stack = r.log.find(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A2')
+    assert.ok(stack, 'พยานต้องได้ชั้น stackAtk จากศัตรูที่ตายด้วย aoeOpener ก่อนรอบ 1')
+    assert.ok(r.log.indexOf(stack) > r.log.indexOf(opener), 'ต้องยิงหลัง event ของ aoeOpener เอง (เหตุมาก่อนผล)')
 
-  assert.equal(r.rounds, 0, 'B0 ตายหมดตั้งแต่ก่อนรอบ 1 — ไม่มีรอบไหนเกิดขึ้นจริง (สเปก: ล้มเพ็ทก่อนรอบ 1 ได้')
-  assert.equal(r.winner, 'A')
+    assert.equal(r.rounds, 0, 'B0 ตายหมดตั้งแต่ก่อนรอบ 1 — ไม่มีรอบไหนเกิดขึ้นจริง (สเปก: ล้มเพ็ทก่อนรอบ 1 ได้')
+    assert.equal(r.winner, 'A')
+  } finally {
+    delete PET_PASSIVES.__anyDeathWitness
+  }
 })
 
 test('killChain: ผู้ตีที่ตายจากหนามกลางหมัดของตัวเองต้องหยุดตี ไม่ตีต่อทั้งที่ตายไปแล้ว (สเปก §7.6 ข้อ 6)', () => {
@@ -426,27 +446,37 @@ test('ตายด้วยหนาม: มีใบบันทึกการ
 test('ตายด้วย aoeOpener: มีใบบันทึกการตาย โดยผู้ฆ่าคือบาฮามุท (สเปก §4)', () => {
   // 🔴 บาลานซ์ 27 ก.ย. 2026: บาฮามุทลดจาก 150% → 100% ⇒ ตัวเดียวไม่พอฆ่า B0 ก่อนรอบ 1 อีกต่อไป
   //    ใช้ 2 ตัวรวมแรงแทน (เหมือนเทส "aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอบ 1 ได้" ด้านบน)
-  //    ทีเร็กซ์เลื่อนไปเป็น uid 'A2'
-  const A = [
-    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
-    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
-    { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
-  ]
-  const B = [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }]
-  const r = simulateBattle(A, B, 1)
+  // 🔧 บาลานซ์รอบ 1 Task 5: ทีเร็กซ์ย้ายออกจาก onAnyDeath+stackAtk แล้ว — ใช้พยานสังเคราะห์แทน
+  //    (เจตนาเดิม: พิสูจน์ลำดับ log ของ "ผลต่อเนื่องจากการตายเงียบ" ไม่เกี่ยวกับทีเร็กซ์เจาะจง)
+  PET_PASSIVES.__anyDeathWitness = {
+    name: 'พยานฆ่าทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3 }, step: { pct: 0, max: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  try {
+    const A = [
+      { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
+      { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
+      { id: '__anyDeathWitness', rarity: 'legendary', element: 'fist', grade: 5 },
+    ]
+    const B = [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }]
+    const r = simulateBattle(A, B, 1)
 
-  const silent = r.log.filter(e => e.silent)
-  assert.equal(silent.length, 1, 'หนูที่ตายก่อนรอบ 1 ต้องมีใบบันทึก')
-  assertSilentShape(silent[0], 'ใบตายจาก aoeOpener')
-  assert.equal(silent[0].target, 'B0')
-  assert.equal(silent[0].attacker, 'A0', 'ผู้ฆ่าคือบาฮามุท')
+    const silent = r.log.filter(e => e.silent)
+    assert.equal(silent.length, 1, 'หนูที่ตายก่อนรอบ 1 ต้องมีใบบันทึก')
+    assertSilentShape(silent[0], 'ใบตายจาก aoeOpener')
+    assert.equal(silent[0].target, 'B0')
+    assert.equal(silent[0].attacker, 'A0', 'ผู้ฆ่าคือบาฮามุท')
 
-  // เหตุ (หมัดเปิด) → ผล (ตาย) → ผลต่อเนื่อง (ทีเร็กซ์ได้ชั้น) ต้องเรียงตามนี้ใน log
-  const opener = r.log.findIndex(e => e.t === 'passive' && e.effect === 'aoeOpener')
-  const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A2')
-  const death = r.log.indexOf(silent[0])
-  assert.ok(opener < death && death < stack,
-    `ลำดับต้องเป็น aoeOpener(${opener}) → ตาย(${death}) → ทีเร็กซ์ได้ชั้น(${stack})`)
+    // เหตุ (หมัดเปิด) → ผล (ตาย) → ผลต่อเนื่อง (พยานได้ชั้น) ต้องเรียงตามนี้ใน log
+    const opener = r.log.findIndex(e => e.t === 'passive' && e.effect === 'aoeOpener')
+    const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A2')
+    const death = r.log.indexOf(silent[0])
+    assert.ok(opener < death && death < stack,
+      `ลำดับต้องเป็น aoeOpener(${opener}) → ตาย(${death}) → พยานได้ชั้น(${stack})`)
+  } finally {
+    delete PET_PASSIVES.__anyDeathWitness
+  }
 })
 
 test('ตายด้วย guardian: ผู้พิทักษ์ที่ตายจริงมีใบบันทึก โดยผู้ฆ่าคือคนที่สวนหมัดมา (สเปก §4)', () => {
@@ -463,12 +493,18 @@ test('ตายด้วย guardian: ผู้พิทักษ์ที่ต
     parts: [{ hook: 'onRound', effect: 'taunt', value: { pct: 0 }, step: { pct: 0 } }],
     desc: 'ทดสอบ', short: 'ทดสอบ',
   }
+  // 🔧 บาลานซ์รอบ 1 Task 5: ทีเร็กซ์ย้ายออกจาก onAnyDeath+stackAtk แล้ว — ใช้พยานสังเคราะห์แทน
+  PET_PASSIVES.__anyDeathWitness = {
+    name: 'พยานฆ่าทดสอบ', icon: '🧪',
+    parts: [{ hook: 'onAnyDeath', effect: 'stackAtk', value: { pct: 12, max: 3 }, step: { pct: 0, max: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
   try {
     const A = [
       { id: '__catGuardian', rarity: 'common', element: 'fist', grade: 0 },
       { id: '__weakTaunt', rarity: 'common', element: 'scissors', grade: 0 },
     ]
-    const B = [{ id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 }]
+    const B = [{ id: '__anyDeathWitness', rarity: 'legendary', element: 'fist', grade: 5 }]
     const r = simulateBattle(A, B, 1)
 
     const guardDeath = r.log.find(e => e.silent && e.target === 'A0')
@@ -477,10 +513,11 @@ test('ตายด้วย guardian: ผู้พิทักษ์ที่ต
     assert.equal(guardDeath.attacker, 'B0', 'ผู้ฆ่าคือคนที่สวนหมัดมา ไม่ใช่ผู้พิทักษ์เอง (บากุไม่ได้สร้างดาเมจ แค่ย้ายเข้าตัว)')
 
     const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'B0')
-    assert.ok(r.log.indexOf(guardDeath) < stack, 'ตายก่อน ทีเร็กซ์ถึงได้ชั้น (เหตุมาก่อนผล)')
+    assert.ok(r.log.indexOf(guardDeath) < stack, 'ตายก่อน พยานถึงได้ชั้น (เหตุมาก่อนผล)')
   } finally {
     delete PET_PASSIVES.__catGuardian
     delete PET_PASSIVES.__weakTaunt
+    delete PET_PASSIVES.__anyDeathWitness
   }
 })
 
