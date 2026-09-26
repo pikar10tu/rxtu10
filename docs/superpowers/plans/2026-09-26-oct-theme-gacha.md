@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** ตู้ธีมรายเดือน (ตัวใหม่น้ำหนัก ×3 · การันตีตัวใหม่ที่เลือก) แทนตู้อีเวนต์เดิม และปิดช่องโหว่ที่เพ็ทรุ่นใหม่หลุดเข้าตู้ก่อนเปิดตัว
+**Goal:** ตู้ธีมรายเดือน (ตัวเด่นน้ำหนัก ×3 ตลอด · ถึงการันตี (hard pity) ได้ตัวเด่นที่เลือกไว้แน่นอน) แทนตู้อีเวนต์เดิม และปิดช่องโหว่ที่เพ็ทรุ่นใหม่หลุดเข้าตู้ก่อนเปิดตัว
 
-**Architecture:** `config/app.gachaEvent` ได้ฟิลด์ `wave` (ไม่มี = 2 เพื่อเข้ากับ config ก.ย. ที่อยู่ใน Firestore แล้ว) · คลังคิดจาก `wave` ของเพ็ทเทียบกับ wave ของอีเวนต์ · ชื่อ/ตัวเด่นของแต่ละ wave อยู่ในโค้ด (`src/data/gachaThemes.js`) แอดมินแค่กดเปิด · การันตีตู้ธีมใช้ฟิลด์ของตัวเอง ไม่แตะ 50/50 ของตู้ปกติ · pity แชร์กระเป๋าเดียวเหมือนเดิม
+**Architecture:** `config/app.gachaEvent` ได้ฟิลด์ `wave` (ไม่มี = 2 เพื่อเข้ากับ config ก.ย. ที่อยู่ใน Firestore แล้ว) · คลังคิดจาก `wave` ของเพ็ทเทียบกับ wave ของอีเวนต์ · ชื่อ/ตัวเด่นของแต่ละ wave อยู่ในโค้ด (`src/data/gachaThemes.js`) แอดมินแค่กดเปิด · ตู้ธีมมีเป้าของตัวเอง (`gachaThemeTarget`) ไม่มี 50/50 ไม่มีธงการันตี ไม่แตะของตู้ปกติ · pity แชร์กระเป๋าเดียวเหมือนเดิม
 
 **Tech Stack:** Vue 3 · Firestore (config/app, users) · `node --test`
 
@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- ตู้คงที่ = เลือกเป้า L ได้ทุกตัว **ยกเว้นตัวใหม่ของเดือนนั้น** · ตู้ธีม = อัตรา L รวมเท่าเดิม (`GACHA_RATES` + pity เดิม) · ตัวเด่นน้ำหนัก **×3** เทียบ L ตัวอื่น · การันตี = ตัวเด่นที่เลือกไว้หน้าตู้
+- ตู้คงที่ = เลือกเป้า L ได้ทุกตัว **ยกเว้นตัวใหม่ของเดือนนั้น** · ตู้ธีม = อัตรา L รวมเท่าเดิม (`GACHA_RATES` + pity เดิม) · ตัวเด่นน้ำหนัก **×3** เทียบ L ตัวอื่น **ทุกครั้งที่ได้ L** (ไม่มี 50/50) · **L ที่มาจาก hard pity (ครั้งที่ `HARD_PITY`) = ตัวเด่นที่เลือกไว้หน้าตู้แน่นอน** (user เคาะ 26 ก.ย.) · กดสุ่มตอนยังไม่เลือกเป้า = เตือนให้เลือกก่อน ยกเว้นยืนยันสุ่มต่อ
 - 🔴 ตู้ธีมห้ามเขียน `gachaTarget` / `gachaGuaranteed` ของตู้ปกติ (กฎเดิมจาก passive v2 P5)
 - 🔴 ดีฟอลต์ต้องปิด: ไม่มี config/รูปพัง = ไม่ปล่อยเพ็ทรุ่นที่ยังไม่เปิด (fail-closed)
 - เขียนเวลาเป็นมิลลิวินาที (number) ห้าม `serverTimestamp()` ใน config (CLAUDE.md ข้อ 10)
@@ -30,7 +30,7 @@
 | `src/utils/petCatalog.js` | คลังตาม wave (ตู้ปกติ / หาได้ตอนนี้ / wave 1 นิ่ง) |
 | `src/utils/gachaEvent.js` | `eventState` อ่าน wave+ธีม · เลิก `eventLegendaryIds` |
 | `src/utils/gacha.js` | `pickThemeLegendary` น้ำหนัก + การันตี · `rollOne` รับโหมดธีม |
-| `src/data/userSchema.js` | `gachaThemeTarget` · `gachaThemeGuaranteed` |
+| `src/data/userSchema.js` | `gachaThemeTarget` |
 | `src/views/ShopView.vue` | ตู้ธีม: เลือกเป้าจากตัวเด่น · สุ่มด้วยคลังที่ถูก |
 | `src/views/AdminView.vue` | ปุ่มเปิดตู้ธีม wave ล่าสุด |
 
@@ -153,7 +153,7 @@ git commit -m "Gacha: ปล่อยเพ็ทตาม wave ของอี�
 
 ---
 
-### Task 2: สุ่มตู้ธีม — น้ำหนัก ×3 + การันตีตัวเด่นที่เลือก
+### Task 2: สุ่มตู้ธีม — น้ำหนัก ×3 + hard pity ได้ตัวเด่นที่เลือก
 
 **Files:**
 - Modify: `src/utils/gacha.js`
@@ -164,12 +164,11 @@ git commit -m "Gacha: ปล่อยเพ็ทตาม wave ของอี�
 - Consumes: `themeOf`, `eventWave` (Task 1)
 - Produces:
   - `THEME_FEATURED_WEIGHT = 3`
-  - `pickThemeLegendary({ target, guaranteed, legendaryIds, featured, rng }) → { id, won: boolean|null, newGuaranteed: boolean }`
+  - `pickThemeLegendary({ target, atHardPity, legendaryIds, featured, rng }) → { id, won: boolean|null, newGuaranteed: false }`
   - `rollOne(state, catalog, rng, opts)` รับ `opts.theme = { featured: string[] }` ⇒ ใช้ `pickThemeLegendary` แทน `pickLegendary`
   - `eventState(gachaEvent, now)` คืน `{ active, name, endsAt, featured, msLeft, wave }` — name/featured มาจาก `themeOf(wave)` ก่อน config
 
-> ❓ **user ต้องยืนยันก่อนลงมือ:** กติกา "พลาดเป้า" ของตู้ธีม — ในแผนนี้ใช้ตามคำ user ตรงตัว: สุ่ม L แบบถ่วงน้ำหนัก (ตัวเด่น ×3) ได้ตัวไหนก็ตัวนั้น ถ้าไม่ใช่เป้า ครั้ง L ถัดไปการันตีเป้า
-> ⇒ ต.ค. (L 15 ตัว น้ำหนักรวม 12+9=21) โอกาสได้เป้าตรงๆ = 3/21 ≈ 14% ต่อ L · ทางเลือก: ใส่ 50/50 ก่อนแล้วค่อยถ่วงน้ำหนักเมื่อพลาด (≈ 50% + 50%×… ) — ถ้า user เลือกแบบนี้ ให้แก้บรรทัด `// 🎯 กติกาพลาดเป้า` ใน Step 3 เป็น `if (rng() < 0.5) return { id: target, won: true, newGuaranteed: false }` ก่อนสุ่มถ่วง
+> ✅ user เคาะ 26 ก.ย.: ×3 คงที่ทุกครั้งที่ได้ L · hard pity = ตัวเด่นที่เลือก · ไม่มี 50/50/ธงการันตี
 
 - [ ] **Step 1: เทสที่ต้องล้ม** — `src/utils/gacha.test.js`
 
@@ -181,26 +180,31 @@ const L = ['a', 'b', 'c', 'x', 'y']        // x, y = ตัวเด่น
 test('ตู้ธีม: ตัวเด่นน้ำหนัก ×3', () => {
   assert.equal(THEME_FEATURED_WEIGHT, 3)
   // น้ำหนักรวม 3 + 6 = 9 · rng 0.5 → 4.5 → ตก x (ช่วง 3..6)
-  const r = pickThemeLegendary({ target: null, guaranteed: false, legendaryIds: L, featured: ['x', 'y'], rng: () => 0.5 })
+  const r = pickThemeLegendary({ target: null, atHardPity: false, legendaryIds: L, featured: ['x', 'y'], rng: () => 0.5 })
   assert.equal(r.id, 'x')
   assert.equal(r.won, null)
 })
 
-test('ตู้ธีม: การันตีแล้ว = ได้เป้าเสมอ แล้วธงหาย', () => {
-  const r = pickThemeLegendary({ target: 'y', guaranteed: true, legendaryIds: L, featured: ['x', 'y'], rng: () => 0 })
+test('ตู้ธีม: hard pity = ได้เป้าเสมอ', () => {
+  const r = pickThemeLegendary({ target: 'y', atHardPity: true, legendaryIds: L, featured: ['x', 'y'], rng: () => 0 })
   assert.deepEqual(r, { id: 'y', won: true, newGuaranteed: false })
 })
 
-test('ตู้ธีม: พลาดเป้า ⇒ ครั้งหน้าการันตี', () => {
-  const r = pickThemeLegendary({ target: 'y', guaranteed: false, legendaryIds: L, featured: ['x', 'y'], rng: () => 0 })
+test('ตู้ธีม: ไม่ใช่ hard pity = ถ่วง ×3 ธรรมดา แม้มีเป้า (ไม่มี 50/50 ไม่มีธง)', () => {
+  const r = pickThemeLegendary({ target: 'y', atHardPity: false, legendaryIds: L, featured: ['x', 'y'], rng: () => 0 })
   assert.equal(r.id, 'a')
-  assert.equal(r.won, false)
-  assert.equal(r.newGuaranteed, true)
+  assert.equal(r.newGuaranteed, false)
+})
+
+test('ตู้ธีม: hard pity แต่ไม่ได้เลือกเป้า = ถ่วง ×3', () => {
+  const r = pickThemeLegendary({ target: null, atHardPity: true, legendaryIds: L, featured: ['x', 'y'], rng: () => 0.5 })
+  assert.equal(r.id, 'x')
 })
 
 test('rollOne โหมดธีม: legendary ใช้ pickThemeLegendary', () => {
   const cat = [{ id: 'a', rarity: 'legendary' }, { id: 'x', rarity: 'legendary' }, { id: 'c1', rarity: 'common' }]
-  const r = rollOne({ pity: 49, target: 'x', guaranteed: true, ownedLegendaryIds: [] }, cat, () => 0.5, { theme: { featured: ['x'] } })
+  // pity 49 ⇒ ครั้งนี้คือครั้งที่ 50 = hard pity ⇒ ได้เป้า
+  const r = rollOne({ pity: 49, target: 'x', guaranteed: false, ownedLegendaryIds: [] }, cat, () => 0.1, { theme: { featured: ['x'] } })
   assert.equal(r.id, 'x')
 })
 ```
@@ -231,20 +235,18 @@ test('eventState: config ก.ย. เดิม = wave 2 King of the Jungle', () 
 /** ตู้ธีม: ตัวเด่นของเดือนมีน้ำหนักเท่านี้เทียบกับ L ตัวอื่น (user เคาะ 26 ก.ย. 2026) */
 export const THEME_FEATURED_WEIGHT = 3
 
-/** legendary ของตู้ธีม — อัตรา L รวมไม่เปลี่ยน (ตัดสินก่อนหน้านี้แล้วใน rollRarity) เปลี่ยนแค่ "ได้ตัวไหน"
- *  เป้า (target) ต้องเป็นตัวเด่นตัวใดตัวหนึ่ง · พลาดเป้า ⇒ L ครั้งถัดไปของตู้ธีมการันตีเป้า */
-export function pickThemeLegendary({ target, guaranteed, legendaryIds, featured, rng = Math.random }) {
-  if (target && guaranteed) return { id: target, won: true, newGuaranteed: false }
-  // 🎯 กติกาพลาดเป้า — ถ่วงน้ำหนักตรงๆ (ดูกล่อง ❓ ในแผน ถ้า user เลือก 50/50 ให้เติมตรงนี้)
+/** legendary ของตู้ธีม — อัตรา L รวมไม่เปลี่ยน (ตัดสินแล้วใน rollRarity) เปลี่ยนแค่ "ได้ตัวไหน"
+ *  ทุกครั้ง: ตัวเด่น ×THEME_FEATURED_WEIGHT · L ที่มาจาก hard pity + เลือกเป้าไว้ = ได้เป้าแน่นอน (user เคาะ 26 ก.ย.)
+ *  ไม่มี 50/50 และไม่มีธงการันตีข้ามครั้ง — newGuaranteed คืน false เสมอเพื่อให้รูปเดียวกับ pickLegendary */
+export function pickThemeLegendary({ target, atHardPity, legendaryIds, featured, rng = Math.random }) {
+  if (target && atHardPity) return { id: target, won: true, newGuaranteed: false }
   const feat = new Set(featured || [])
   const w = (id) => (feat.has(id) ? THEME_FEATURED_WEIGHT : 1)
   const total = legendaryIds.reduce((s, id) => s + w(id), 0)
   let r = rng() * total
   let id = legendaryIds[legendaryIds.length - 1]
   for (const x of legendaryIds) { r -= w(x); if (r < 0) { id = x; break } }
-  if (!target) return { id, won: null, newGuaranteed: false }
-  const won = id === target
-  return { id, won, newGuaranteed: !won }
+  return { id, won: target ? id === target : null, newGuaranteed: false }
 }
 ```
 
@@ -252,7 +254,7 @@ export function pickThemeLegendary({ target, guaranteed, legendaryIds, featured,
 
 ```js
     const pick = opts.theme
-      ? pickThemeLegendary({ target: state.target, guaranteed: state.guaranteed, legendaryIds, featured: opts.theme.featured, rng })
+      ? pickThemeLegendary({ target: state.target, atHardPity: state.pity + 1 >= HARD_PITY, legendaryIds, featured: opts.theme.featured, rng })
       : pickLegendary({ target: state.target, guaranteed: state.guaranteed, ownedLegendaryIds: state.ownedLegendaryIds, legendaryIds, rng })
 ```
 
@@ -289,13 +291,12 @@ export function eventState(gachaEvent, now = Date.now()) {
 
 **Interfaces:**
 - Consumes: `eventState` (`wave`, `featured`) · `rollOne` `opts.theme` · `obtainablePets`
-- Produces: ฟิลด์ user `gachaThemeTarget: string|null` · `gachaThemeGuaranteed: boolean`
+- Produces: ฟิลด์ user `gachaThemeTarget: string|null`
 
 - [ ] **Step 1: schema** — `userSchema.js` ใต้ `gachaGuaranteed`
 
 ```js
-  gachaThemeTarget: null,       // ตู้ธีม: ตัวเด่นที่เลือกเป็นเป้า (ต้องเป็น featured ของเดือนนั้น)
-  gachaThemeGuaranteed: false,  // ตู้ธีม: พลาดเป้าแล้ว ⇒ L ถัดไปของตู้ธีมการันตีเป้า (แยกจาก 50/50 ตู้ปกติ)
+  gachaThemeTarget: null,       // ตู้ธีม: ตัวเด่นที่เลือกไว้ ⇒ L จาก hard pity ของตู้ธีมได้ตัวนี้แน่นอน
 ```
 
 เทสใน `userSchema.test.js`:
@@ -304,7 +305,6 @@ export function eventState(gachaEvent, now = Date.now()) {
 test('ค่าเริ่มตู้ธีม', () => {
   const d = normalizeUserData({})
   assert.equal(d.gachaThemeTarget, null)
-  assert.equal(d.gachaThemeGuaranteed, false)
 })
 ```
 
@@ -315,7 +315,6 @@ const themeTarget = computed(() => {
   const t = authStore.userData?.gachaThemeTarget || null
   return ev.value.featured.includes(t) ? t : null          // เป้าของเดือนก่อน = ถือว่าไม่มี
 })
-const themeGuaranteed = computed(() => !!authStore.userData?.gachaThemeGuaranteed && !!themeTarget.value)
 const themeTargetPet = computed(() => featuredPets.value.find(p => p.id === themeTarget.value) || null)
 const pickerMode = ref('normal')          // 'normal' | 'theme' — ตัวเลือกเป้าชุดเดียวกัน แต่รายการคนละชุด
 const pickerList = computed(() => (pickerMode.value === 'theme' ? featuredPets.value : legendaries.value))
@@ -326,9 +325,9 @@ function openPicker(mode) { pickerMode.value = mode; pickerOpen.value = true }
 ใน `pull()` แทนบล็อก `state` / `rollCatalog` / `opts` / `base`:
 
 ```js
-  // 🔴 ตู้ธีมห้ามแตะการันตี 50/50 ของตู้ปกติ ⇒ ใช้เป้า/ธงของตัวเอง · pity แชร์กระเป๋าเดียว (สเปก §6 ข้อ 5 เดิม)
+  // 🔴 ตู้ธีมห้ามแตะการันตี 50/50 ของตู้ปกติ ⇒ ใช้เป้าของตัวเอง ไม่มีธง · pity แชร์กระเป๋าเดียว (สเปก §6 ข้อ 5 เดิม)
   const state = isEvent
-    ? { pity: pity.value, target: themeTarget.value, guaranteed: themeGuaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
+    ? { pity: pity.value, target: themeTarget.value, guaranteed: false, ownedLegendaryIds: ownedLegendaryIds() }
     : { pity: pity.value, target: target.value, guaranteed: guaranteed.value, ownedLegendaryIds: ownedLegendaryIds() }
   // ตู้ธีม = ของที่หาได้ตอนนี้ (ปล่อยแล้ว + รุ่นของเดือน) — ห้ามใช้ PETS เต็ม ไม่งั้นรุ่นที่ยังไม่เปิดหลุด
   const rollCatalog = isEvent ? ownable.value : catalog.value
@@ -337,7 +336,7 @@ function openPicker(mode) { pickerMode.value = mode; pickerOpen.value = true }
 
 ```js
   const base = isEvent
-    ? { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaThemeGuaranteed: nextState.guaranteed }
+    ? { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity }
     : { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed }
 ```
 
@@ -354,14 +353,27 @@ async function chooseTarget(id) {
 }
 ```
 
-⚠️ เปลี่ยนเป้าตู้ธีมระหว่างที่ถือการันตีอยู่: การันตีตามไปที่เป้าใหม่ (เหมือนตู้ปกติ) — ไม่ต้องล้างธง
+**เตือนก่อนสุ่มตู้ธีมเมื่อยังไม่เลือกเป้า** (user ขอ 26 ก.ย.) — ต้นฟังก์ชัน `pull()` หลังเช็ค `ev.active`:
+
+```js
+  if (isEvent && !themeTarget.value) {
+    const go = await confirm(`ยังไม่ได้เลือกตัวหน้าตู้
+ถ้าถึงการันตี (ครั้งที่ ${HARD_PITY}) จะได้ตัวเด่นที่เลือกไว้แน่นอน
+ถ้าไม่เลือก การันตีจะสุ่มแบบธรรมดาแทน
+
+สุ่มต่อโดยไม่เลือกเลยไหม?`)
+    if (!go) { openPicker('theme'); return }
+  }
+```
+
+(`confirm` มาจาก `useConfirm` — ดูว่า ShopView import ไว้แล้วหรือยัง ถ้ายังให้ import แบบเดียวกับ AdminView)
 
 - [ ] **Step 3: ShopView template**
 
 ตู้ธีม (`GachaBanner` ตัวบน) เพิ่ม props เป้า:
 
 ```html
-        show-target :target-pet="themeTargetPet" :guaranteed="themeGuaranteed"
+        show-target :target-pet="themeTargetPet"
         @pull="(n) => pull(n, true)" @open-target="openPicker('theme')"
 ```
 
@@ -371,13 +383,13 @@ async function chooseTarget(id) {
 
 - [ ] **Step 4: build + เทส** — `npx vite build` ผ่าน · เทสผ่าน
 
-- [ ] **Step 5: ลองในเบราว์เซอร์ (dev + บัญชีทดสอบ localhost ตามกติกา)** — ถ้ายังไม่มีวิธีล็อกอินบน localhost ให้ข้ามและบอก user ว่าต้องเทสเองบนเว็บจริงหลัง deploy: เปิดตู้ธีม → ตั้งเป้า ☀️ → สุ่มจนได้ L → ธงการันตีขึ้นเมื่อพลาด
+- [ ] **Step 5: ลองในเบราว์เซอร์ (dev + บัญชีทดสอบ localhost ตามกติกา)** — ถ้ายังไม่มีวิธีล็อกอินบน localhost ให้ข้ามและบอก user ว่าต้องเทสเองบนเว็บจริงหลัง deploy: เปิดตู้ธีม → กดสุ่มโดยไม่เลือกเป้า ต้องเจอคำเตือน → ตั้งเป้า ☀️ → การ์ดตู้โชว์เป้า
 
 - [ ] **Step 6: Commit (รวม Task 2)**
 
 ```bash
 git add src/utils/gacha.js src/utils/gacha.test.js src/utils/gachaEvent.js src/utils/gachaEvent.test.js src/data/userSchema.js src/data/userSchema.test.js src/views/ShopView.vue
-git commit -m "Gacha: ตู้ธีมรายเดือน — ตัวเด่น ×3 + เป้า/การันตีของตัวเอง (ไม่แตะ 50/50 ตู้ปกติ) + สุ่มจากคลังที่ปล่อยแล้วเท่านั้น"
+git commit -m "Gacha: ตู้ธีมรายเดือน — ตัวเด่น ×3 ตลอด + hard pity ได้ตัวที่เลือก + เตือนถ้ายังไม่เลือก (ไม่แตะ 50/50 ตู้ปกติ)"
 ```
 
 ---
