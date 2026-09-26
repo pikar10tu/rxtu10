@@ -8,7 +8,7 @@
     <div class="arf-floor" :class="'arf-' + floor"></div>
     <template v-if="mode === 'battle'">
       <div v-if="plaque" ref="plaqueEl" class="arf-plaque" :class="'r' + plaque.rank" :style="posStyle('plaque')">
-        <span v-if="plaque.crown" class="arf-crown"><Emoji :char="plaque.crown" /></span>{{ plaque.big }}<small>{{ plaque.small }}</small>
+        <span v-if="plaque.crown" class="arf-crown"><Emoji :char="plaque.crown" /></span>{{ plaque.big }}<small class="arf-theme">{{ plaque.theme }}</small><small>{{ plaque.small }}</small>
       </div>
       <span v-for="(d, i) in deco" :key="i" :ref="el => (decoEls[i] = el)" class="arf-deco" :class="d.anim ? 'arf-' + d.anim : ''"
             :style="{ fontSize: d.size + 'rem', opacity: d.opacity, ...posStyle(i) }"><Emoji :char="d.ch" /></span>
@@ -55,6 +55,7 @@ const plaque = computed(() => {
     rank,
     crown: rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '',
     big: rank <= 3 ? `TOP ${rank} · ARENA CHAMPION` : 'TOP 10 · ARENA ELITE',
+    theme: a.name,                     // ชื่อธีมของเดือน (= ชื่อตู้ธีม) — user ขอ 26 ก.ย. · บรรทัดแยก เพราะชื่อยาวได้ถึง ~24 ตัว
     small: `${MONTHS_EN[Number(m) - 1]} ${y}`,
   }
 })
