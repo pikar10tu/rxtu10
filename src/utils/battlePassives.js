@@ -6,6 +6,7 @@
 //    (ยิงเป็น event `passive` ที่ battleBeats ให้ timing ZERO ⇒ ไม่กินเวลา)
 //    killChain เป็นข้อยกเว้นเดียวที่เพิ่ม beat จริง จึงมีเพดาน
 import { PET_PASSIVES, passiveValueAt, partsAt, partAt, partWithEffect } from '../data/petPassives.js'
+import { degreeFormActive } from './petForms.js'
 
 export const passiveFor = (unit) => PET_PASSIVES[unit?.id] || null
 
@@ -39,7 +40,7 @@ export function statsSnapshot(...teams) {
 }
 
 /** effect ที่ขยับ atk/maxHp จริง — teamCrit/enemyVuln ไม่ต้องแบก snapshot ไปด้วย */
-const STAT_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'stackAtk', 'elementTrinity'])
+const STAT_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'stackAtk', 'elementTrinity', 'rarityBoost'])
 
 /** สร้าง event สำหรับ log — รูปเดียวกับที่ BattleReplay/battleBeats รับ
  *  🔴 ชนิดผลชื่อ `fxKind` ห้ามใช้ชื่อ `kind` เด็ดขาด — `kind` เป็นของ battleBeats (= เวลา)
@@ -148,6 +149,20 @@ export function runSetup(team, foes) {
 }
 
 // ══════════════════════════════════════════════════════════════
+//  forms — ร่างพิเศษตามองค์ประกอบทีม (ก่อน setup/aura ทุกอย่าง)
+// ══════════════════════════════════════════════════════════════
+/** 🌍 ร่าง "องศา": ทีมมี Sol + Earth และไม่มี common ⇒ Earth นับเป็น common (ได้แสงนำทาง) แต่ไม่มีฤดู
+ *  🔑 เงื่อนไขอยู่ที่ utils/petForms.js ที่เดียว — ป้าย/รีเพลย์/หน้าจัดทีมอ่านตัวเดียวกัน */
+export function applyForms(team) {
+  if (!degreeFormActive(team)) return
+  for (const u of team) {
+    if (u.id !== 'earth') continue
+    u.countsAs = 'common'
+    psOf(u).formed = true
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
 //  aura — แก้ stat ก่อนไฟต์เริ่ม (ไม่มี event, ผู้เล่นเห็นผลผ่านตัวเลขบนการ์ด)
 // ══════════════════════════════════════════════════════════════
 /**
@@ -213,6 +228,16 @@ export function applyAuras(team, foes) {
         case 'teamDamageReduction':
           for (const t of team) t.teamDrPct = (t.teamDrPct || 0) + v.pct
           u.teamDrPct = (u.teamDrPct || 0) + v.pct      // เจ้าของได้อีกรอบ = 2 เท่า (user เคาะ 3 ก.ย.)
+          break
+        case 'rarityBoost':
+          // ☀️ แสงนำทาง — ตัวที่ "นับเป็น" rarity นั้น (Earth ในร่างองศานับเป็น common) · Sol เองไม่ได้
+          for (const t of team) {
+            if (t === u) continue
+            if ((t.countsAs || t.rarity) !== v.rarity) continue
+            t.atk *= 1 + v.pct / 100
+            t.maxHp *= 1 + v.pct / 100
+            t.hp = t.maxHp
+          }
           break
       }
       // ⚠️ ต้องเติม "หลัง" switch — event ถูก push ไปก่อนที่ stat จะเปลี่ยนจริง

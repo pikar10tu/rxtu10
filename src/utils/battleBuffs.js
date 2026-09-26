@@ -14,6 +14,7 @@ import {
   TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS, SELF_STATUS_EFFECTS,
   partsOf, partsAt, partWithEffect, passiveTitle,
 } from '../data/petPassives.js'
+import { effectiveRarity } from './petForms.js'
 
 const passiveOf = (pet) => PET_PASSIVES[pet?.id] || null
 const defOf = (pet) => getPetDef(pet?.id) || { name: '?', emoji: '❓' }
@@ -114,6 +115,8 @@ export function buffSources(playerTeam, botTeam) {
       }
       // 2) aura จากทีมตัวเอง (รวมของตัวเอง) + คู่หู
       for (const a of [...own.mine, ...own.duo]) {
+        // ☀️ แสงนำทาง — ป้ายขึ้นเฉพาะตัวที่ "นับเป็น" common จริง (Earth ในร่างองศานับด้วย) · Sol เองไม่ได้
+        if (a.effect === 'rarityBoost' && effectiveRarity(pet, teams[side]) !== a.passive.parts[0].value.rarity) continue
         const b = makeBuff(a.effect, a.owner, a.uid, {
           passive: a.passive,
           teamIds: own.ids,

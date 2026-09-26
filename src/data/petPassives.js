@@ -285,6 +285,28 @@ export const PET_PASSIVES = {
     desc: 'ทั้งทีมรับดาเมจน้อยลง {pct}% · ตัวเต่าเองได้สองเท่า',
     short: 'ทีมรับดาเมจน้อยลง {pct}% · เต่าเองสองเท่า',
   },
+
+  // ── ต.ค. 2569 ฟากฟ้า ─────────────────────────────────────────
+  sol: {
+    name: 'แสงนำทาง', icon: '🌟',
+    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { rarity: 'common', pct: 50 }, step: { pct: 5 } }],
+    desc: 'เพื่อนระดับธรรมดา (common) ทุกตัวในทีม พลังโจมตีและเลือดสูงสุด +{pct}%',
+    short: 'common ในทีม แรง+เลือด +{pct}%',
+  },
+  earth: {
+    name: 'ฤดูกาลหมุนเวียน', icon: '🌏',
+    parts: [{ hook: 'onRoundEnd', effect: 'season', value: { hot: 20, rain: 25, cold: 30 },
+              step: { hot: 5, rain: 5, cold: 5 } }],
+    desc: 'จบรอบทีไร ฤดูตามช่องทำงาน: ช่อง 1 ☀️ รอบหน้าทีมแรง +{hot}% · ช่อง 2 🌧️ ทีมฟื้น {rain}% ของเลือดที่หาย · ช่อง 3 ❄️ ศัตรูแต่ละตัว {cold}% โดนแช่แข็ง 1 ตา · ทีมมีซอลแต่ไม่มี common: กลายเป็นองศา (นับเป็น common ไม่มีฤดู)',
+    short: 'จบรอบ: ช่อง1 แรง +{hot}% · ช่อง2 ฟื้น {rain}% · ช่อง3 แช่แข็ง {cold}%',
+  },
+  luna: {
+    name: 'ข้างขึ้นข้างแรม', icon: '🌕',
+    parts: [{ hook: 'onAttack', effect: 'moonPhase', value: { dark: 75, half: 125, full: 175 },
+              step: { dark: 0, half: 0, full: 25 } }],
+    desc: 'หมัดวนตามข้างจันทร์: 🌑 จันทร์ดับ {dark}% → 🌙 เสี้ยว {half}% → 🌕 เต็มดวง {full}%',
+    short: 'หมัดวน 🌑 {dark}% → 🌙 {half}% → 🌕 {full}%',
+  },
 }
 
 /** ค่าของ part นั้นที่ขั้นนั้น (ขั้น 1 = ค่าตั้งต้น) · clamp ขั้นไว้ 1..PASSIVE_MAX_LEVEL
@@ -406,6 +428,8 @@ export const STATUS_ICON = {
   // ⚠️ ไม่ใช่ 🛡️ ของ guardian ด้วยเหตุผลเดียวกัน — armorStack กับ guardian คนละความหมาย
   //    (guardian = เพื่อนรับแทนให้, armorStack = เกราะของตัวเองกันหมัดทั้งดอก) จึงเลือกไอคอนคนละตัว
   infect: '🦠', taunt: '📢', armorStack: '🏰',
+  // ── ต.ค. 2569 ฟากฟ้า ──
+  rarityBoost: '🌟', season: '🌏', moonPhase: '🌕',
   // infectBurst ไม่ต้องมีป้ายของตัวเอง — เป็น fxKind: 'damage' (event ระเบิดครั้งเดียว ไม่ใช่สถานะติดตัว)
   // ไอคอนตอนระเบิดมาจาก p.icon ของพาสสีฟไวรัสเอง (ดู ev() ใน battlePassives.js) ไม่ผ่านทะเบียนนี้เลย
   // ป้าย 'infect' ด้านบนคือตัวแทนสถานะที่ยืนพักอยู่บนการ์ด — เทสความครบท้ายไฟล์ยกเว้น infectBurst ไว้ตรงๆ
@@ -435,11 +459,13 @@ export const STATUS_TEXT = {
   // ── P2b ──
   infect: 'ติดเชื้อ ยิ่งโดนตียิ่งเจ็บ', taunt: 'บังคับให้ศัตรูตีตัวเอง', armorStack: 'มีเกราะกันหมัดเต็มใบ',
   // 'grit' ไม่มีคำอธิบายป้ายที่นี่โดยตั้งใจ — เหตุผลเดียวกับที่ไม่มีใน STATUS_ICON ด้านบน
+  // ── ต.ค. 2569 ฟากฟ้า ──
+  rarityBoost: 'ตัวธรรมดาได้แสงนำทาง', season: 'ส่งฤดูกาลทุกจบรอบ', moonPhase: 'หมัดวนตามข้างจันทร์',
 }
 
 /** aura ที่แผ่ใส่ "ทีมตัวเอง" — ป้ายลงทุกใบในทีมนั้น */
 export const TEAM_AURA_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'teamCrit',
-  'elementTrinity', 'teamLifesteal', 'teamDamageReduction'])
+  'elementTrinity', 'teamLifesteal', 'teamDamageReduction', 'rarityBoost'])
 /** aura ที่แผ่ใส่ "ทีมศัตรู" — ป้ายลงฝั่งตรงข้าม (ดีบัฟ) ⚠️ เฉพาะ effect ที่มาจาก part hook 'aura' เท่านั้น
  *  (aurasOf() ใน battleBuffs.js หาแค่ partsAt(p, 'aura') — เป็นค่า % คงที่ที่แผ่ทั้งทีมศัตรูตั้งแต่ต้นไฟต์) */
 export const FOE_AURA_EFFECTS = new Set(['enemyVuln'])
@@ -450,6 +476,8 @@ export const SELF_STATUS_EFFECTS = new Set([
   // ── P2b ── สถานะติดตัวเจ้าของสกิลเอง (คนละกลุ่มกับ infect ด้านล่าง ที่ลงบน "ตัวที่ถูกตี" แทน)
   'taunt', 'armorStack',
   // 'grit' ไม่อยู่ในกลุ่มนี้ (หรือกลุ่มไหนเลย) โดยตั้งใจ — ดูเหตุผลยาวที่คอมเมนต์ของ STATUS_ICON ด้านบน
+  // ── ต.ค. 2569 ฟากฟ้า ── ทั้งสองเป็นสถานะติดตัวเจ้าของสกิลเอง (🌍 ฤดู · 🌙 ข้างจันทร์)
+  'season', 'moonPhase',
 ])
 /** ดีบัฟที่ลงบน "ตัวที่ถูกเล็ง" ทีละตัว ไม่ใช่ทั้งทีมพร้อมกัน — ต่างจาก FOE_AURA_EFFECTS ตรงที่
  *  ไม่ได้มาจาก part hook 'aura' (ค่าคงที่ตั้งแต่ต้นไฟต์) แต่มาจาก hook 'onAttack' ที่สะสมชั้นระหว่างไฟต์
@@ -476,4 +504,6 @@ export const BADGE_PRIORITY = {
   elementTrinity: 20, enemyVuln: 21, teamDamageReduction: 22, dodge: 23, thorns: 23,
   teamLifesteal: 30, healOnAttack: 30, teamHp: 31, teamAtk: 31, teamAtkElement: 31,
   teamCrit: 32, duoRegen: 33,
+  // ── ต.ค. 2569 ฟากฟ้า ──
+  rarityBoost: 31, season: 20, moonPhase: 11,
 }

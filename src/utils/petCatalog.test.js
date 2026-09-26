@@ -52,8 +52,6 @@ test('ตู้ wave 2 จบแล้ว ⇒ wave 2 ไหลเข้าตู
   assert.ok(idsOf(released).has('lion'), 'lion ใน released เมื่อเหตุการณ์ w=2 จบแล้ว')
 })
 
-// หมายเหตุ: wave 3 pets ('sol', 'earth', 'luna') ยังไม่เข้า PETS (Task A 4) · เมื่อมี จะเทสเพ็ทตัวนั้นจริงๆ
-
 test('ไม่มี config = wave 1 เท่านั้น (fail-closed)', () => {
   const got = idsOf(releasedPets(null, NOW))
   assert.ok(!got.has('lion'), 'wave 2 ห้ามหลุด')
@@ -67,7 +65,8 @@ test('ไม่มีอีเวนต์ = แจกได้แค่ wave 1 
   const ids = releasedPets(null).map(p => p.id)
   assert.deepEqual(ids, wave1Pets().map(p => p.id))
   assert.ok(ids.length > 0)
-  assert.ok(PETS.every(p => p.wave === 2 || ids.includes(p.id)))
+  // เพ็ท wave 1 ทุกตัวต้องหลุดออกมา — wave 2/3 (รวมฟากฟ้า Task A 4) ยังไม่ปล่อยจนกว่าอีเวนต์จะจบ
+  assert.ok(PETS.every(p => waveOf(p) !== 1 || ids.includes(p.id)))
 })
 
 test('อีเวนต์ยังไม่หมดเวลา = ตู้ปกติยังเป็น wave 1', () => {
@@ -75,14 +74,14 @@ test('อีเวนต์ยังไม่หมดเวลา = ตู้�
   assert.deepEqual(releasedPets(ev, 1_000).map(p => p.id), wave1Pets().map(p => p.id))
 })
 
-test('หมดเวลาแล้ว = ได้ครบทั้งคลังโดยไม่ต้องกดปุ่มแอดมิน', () => {
+test('หมดเวลาแล้ว (config เดิม ไม่มี wave = ถือเป็น wave 2) = ได้ wave 1+2 ครบ · wave 3 (ฟากฟ้า) ยังไม่ปล่อย', () => {
   const ev = { endsAt: 1_000 }
-  assert.equal(releasedPets(ev, 2_000).length, PETS.length)
+  assert.equal(releasedPets(ev, 2_000).length, 33)
 })
 
 test('endsAt แบบ Firestore Timestamp ({seconds}) อ่านได้เหมือนกัน', () => {
   const ev = { endsAt: { seconds: 1 } }                 // = 1,000ms
-  assert.equal(releasedPets(ev, 2_000).length, PETS.length)
+  assert.equal(releasedPets(ev, 2_000).length, 33)
   assert.deepEqual(releasedPets(ev, 500).map(p => p.id), wave1Pets().map(p => p.id))
 })
 
@@ -94,30 +93,52 @@ test('อีเวนต์รูปพัง/ไม่มี endsAt = ถือ
 
 test('ลำดับในคลังไม่สลับ — ผลสุ่มของทุกระบบอ่านด้วยดัชนี', () => {
   const ids = releasedPets(null).map(p => p.id)
-  assert.deepEqual(ids, PETS.filter(p => p.wave !== 2).map(p => p.id))
+  assert.deepEqual(ids, PETS.filter(p => waveOf(p) === 1).map(p => p.id))
 })
 
 const WAVE2 = ['lion', 'virus', 'gorilla', 'boar', 'badger', 'bat']
+const WAVE3 = ['sol', 'earth', 'luna']
 
-test('เพ็ทรุ่น 2 อยู่ในคลัง 33 ตัว แต่แจกไม่ได้จนกว่าอีเวนต์จะหมดเวลา', () => {
-  assert.equal(PETS.length, 33)
+test('เพ็ทรุ่น 2 อยู่ในคลัง แต่แจกไม่ได้จนกว่าอีเวนต์จะหมดเวลา · รุ่น 3 (ฟากฟ้า) เข้าคลังแล้วด้วย (Task A 4)', () => {
+  assert.equal(PETS.length, 36)
   const live = new Set(releasedPets(null).map(p => p.id))
-  for (const id of WAVE2) {
+  for (const id of [...WAVE2, ...WAVE3]) {
     assert.ok(PETS.some(p => p.id === id), `${id} ไม่อยู่ในคลัง`)
     assert.equal(live.has(id), false, `${id} หลุดออกมาแจกได้`)
   }
   assert.equal(releasedPets(null).length, 27)
 })
 
-test('สัดส่วนชั้น/สายของคลังเต็มตรงสเปก (11/11/11 · 12 legend · 9 epic)', () => {
+test('สัดส่วนชั้น/สายของคลังเต็มตรงสเปก (12/12/12 · 15 legend · 9 epic) — รวมฟากฟ้า wave 3', () => {
   const by = (k, v) => PETS.filter(p => p[k] === v).length
-  assert.equal(by('element', 'fist'), 11)
-  assert.equal(by('element', 'scissors'), 11)
-  assert.equal(by('element', 'paper'), 11)
-  assert.equal(by('rarity', 'legendary'), 12)
+  assert.equal(by('element', 'fist'), 12)
+  assert.equal(by('element', 'scissors'), 12)
+  assert.equal(by('element', 'paper'), 12)
+  assert.equal(by('rarity', 'legendary'), 15)
   assert.equal(by('rarity', 'epic'), 9)
   assert.equal(by('rarity', 'rare'), 6)
   assert.equal(by('rarity', 'common'), 6)
+})
+
+// ── wave 3 leak tests (Task A 4) — sol/earth/luna ต้องไม่หลุดออกจากตู้ก่อนเวลา ──────
+test('wave 3: config ไม่มี wave และหมดเวลาแล้ว ⇒ releasedPets ยังไม่มี sol (fallback wave 2)', () => {
+  const ev = { endsAt: NOW - 1 }
+  assert.ok(!idsOf(releasedPets(ev, NOW)).has('sol'))
+})
+
+test('wave 3: อีเวนต์ wave 3 เปิดอยู่ ⇒ releasedPets ไม่มี sol · obtainablePets มี sol', () => {
+  const ev = { wave: 3, endsAt: NOW + 1000 }
+  assert.ok(!idsOf(releasedPets(ev, NOW)).has('sol'), 'ตู้ปกติยังไม่ปล่อย wave 3 ระหว่างอีเวนต์เปิด')
+  assert.ok(idsOf(obtainablePets(ev, NOW)).has('sol'), 'ตู้พิเศษของอีเวนต์แจก sol ได้')
+})
+
+test('wave 3: อีเวนต์ wave 3 จบแล้ว ⇒ sol ไหลเข้าตู้ปกติ (releasedPets มี sol)', () => {
+  const ev = { wave: 3, endsAt: NOW - 1 }
+  assert.ok(idsOf(releasedPets(ev, NOW)).has('sol'))
+})
+
+test('wave 3: wave1Pets() ไม่มี sol', () => {
+  assert.ok(!idsOf(wave1Pets()).has('sol'))
 })
 
 test('เพ็ทรุ่น 2 ห้ามมี atkStyle/projectile (ทุกตัวเป็น melee หมดแล้ว)', () => {

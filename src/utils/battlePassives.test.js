@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  runSetup, applyAuras, runOnStart, runOnRound, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
+  applyForms, runSetup, applyAuras, runOnStart, runOnRound, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
   tauntTargetOf,
 } from './battlePassives.js'
 import { PET_PASSIVES, passiveValueAt, passiveText, effectText, partsOf, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT, TEAM_AURA_EFFECTS } from '../data/petPassives.js'
@@ -39,7 +39,8 @@ test('เพ็ททุกตัวในแค็ตตาล็อกมี p
 
 test('passive ทุกอันมีฟิลด์ครบและ hook ที่รู้จัก', () => {
   // 'setup' เข้ามาตอน P3a (🐭 หนูเป็นเพ็ทจริงตัวแรกที่ใช้ — เอนจินรองรับตั้งแต่ P2a แล้ว)
-  const HOOKS = ['setup', 'aura', 'onStart', 'onRound', 'onAttack', 'onHit', 'onKill', 'onDeath', 'onAnyDeath']
+  // 'onRoundEnd' เข้ามา ต.ค. 2569 ฟากฟ้า (🌍 เอิร์ธ — runOnRoundEnd ยังเป็นโครงเปล่า Task 5 เป็นคนเติมตรรกะ)
+  const HOOKS = ['setup', 'aura', 'onStart', 'onRound', 'onRoundEnd', 'onAttack', 'onHit', 'onKill', 'onDeath', 'onAnyDeath']
   for (const [id, p] of Object.entries(PET_PASSIVES)) {
     assert.ok(p.name && p.icon && p.desc, `${id} ฟิลด์ไม่ครบ`)
     const parts = partsOf(p)
@@ -2113,4 +2114,35 @@ test('👾 ไวรัส: log ของไฟต์จริงต้องม
     const sum = e.pierceHits.reduce((s, n) => s + n, 0)
     assert.ok(sum <= e.dmg + 1, `เลขย่อยรวม ${sum} ต้องไม่เกินดาเมจของหมัดนั้น (${e.dmg})`)
   }
+})
+
+// ── ต.ค. 2569 ฟากฟ้า: applyForms + ☀️ rarityBoost ─────────────────────────
+const U = (id, rarity, slot, side = 'A') => ({ id, rarity, slot, uid: side + slot, side, element: 'fist', atk: 10, maxHp: 100, hp: 100 })
+
+test('rarityBoost: ☀️ บัฟเฉพาะ common +50% ทั้งแรงและเลือด', () => {
+  const team = [U('sol', 'legendary', 0), U('cat', 'common', 1), U('lion', 'legendary', 2)]
+  applyForms(team)
+  applyAuras(team, [])
+  assert.equal(Math.round(team[1].atk), 15)
+  assert.equal(Math.round(team[1].maxHp), 150)
+  assert.equal(team[1].hp, team[1].maxHp)
+  assert.equal(Math.round(team[2].atk), 10, 'L ไม่ได้')
+  assert.equal(Math.round(team[0].atk), 10, 'Sol เองไม่ได้')
+})
+
+test('ร่างองศา: Earth นับเป็น common ได้บัฟ + ถูกปิดฤดู', () => {
+  const team = [U('sol', 'legendary', 0), U('earth', 'legendary', 1), U('lion', 'legendary', 2)]
+  applyForms(team)
+  applyAuras(team, [])
+  assert.equal(team[1].countsAs, 'common')
+  assert.equal(psOf(team[1]).formed, true)
+  assert.equal(Math.round(team[1].atk), 15)
+})
+
+test('มี common ในทีม ⇒ Earth ไม่แปลงร่าง ไม่ได้บัฟ', () => {
+  const team = [U('sol', 'legendary', 0), U('earth', 'legendary', 1), U('cat', 'common', 2)]
+  applyForms(team)
+  applyAuras(team, [])
+  assert.equal(team[1].countsAs, undefined)
+  assert.equal(Math.round(team[1].atk), 10)
 })

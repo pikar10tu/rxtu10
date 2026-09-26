@@ -65,6 +65,7 @@ export const OPENING_EFFECTS = new Set([
   'teamHp', 'teamAtk', 'teamAtkElement', 'teamCrit', 'enemyVuln',   // aura เดิม 5 ตัว
   'elementTrinity', 'teamLifesteal', 'teamDamageReduction',            // aura ใหม่ของ P2
   'stealStats',                                                        // hook setup — เอนจิน log ก่อน aura ทุกใบ
+  'rarityBoost',                                                       // ☀️ ต.ค. 2569
 ])
 
 export const DANGER_PCT = 0.25         // เลือดเหลือไม่เกินนี้ (ยังไม่ตาย) = โซนอันตราย

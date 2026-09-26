@@ -44,6 +44,16 @@ export const PETS = [
   { id:"lion",      emoji:"🦁", name:"สิงโต",     rarity:"legendary", element:"fist",     wave:2, flavor:"เจ้าป่าตัวจริงคุมได้ทั้งสามสาย เหมือนคุมยาครบสามมื้อ" },
   { id:"virus",     emoji:"👾", name:"ไวรัส",     rarity:"legendary", element:"scissors", wave:2, flavor:"ตัวจิ๋วที่เคยทำทั้งชั้นปีเลื่อนสอบมาแล้ว" },
   { id:"gorilla",   emoji:"🦍", name:"กอริลลา",   rarity:"legendary", element:"paper",    wave:2, flavor:"ตีอกดังลั่นให้ทุกคนหันมา แล้วยืนรับแทนเพื่อนทั้งกลุ่ม" },
+  // ── ต.ค. 2569 "My Earth tilted for you" — ฟากฟ้า (wave 3) ──
+  { id:"sol",   emoji:"☀️", name:"ซอล",   rarity:"legendary", element:"fist",     wave:3,
+    flavor:"ยืดอกไว้ ตราบใดที่ฉันยังส่องแสง ไม่มีใครในทีมนี้ตัวเล็กหรอก",
+    lore:"ดวงอาทิตย์แห่งมิติฟากฟ้า ผู้ส่องแสงให้ทุกชีวิตโดยไม่เลือกว่าใครตัวเล็กหรือใหญ่ พอประตูของผู้อัญเชิญเปิดออก เธอเป็นดวงแรกที่ก้าวข้ามมา เพราะเชื่อว่าแสงสว่างมีไว้ให้คนที่ยังไม่เชื่อในตัวเอง" },
+  { id:"earth", emoji:"🌍", name:"เอิร์ธ", rarity:"legendary", element:"paper",    wave:3,
+    flavor:"เงียบๆ แบบนี้แหละ สบายดี… อ้าว ถึงตาฉันแล้วเหรอ?",
+    lore:"ดาวดวงเล็กที่คิดมาตลอดว่าตัวเองธรรมดาเกินกว่าจะมีใครมองเห็น ความเอียง 23.5 องศาที่ทำให้เกิดฤดูกาล คือแรงเดียวกับที่เหวี่ยงเธอไปหาดวงอาทิตย์ ทุกครั้งที่โคจรครบรอบ เธอจะส่งฤดูกาลใหม่ให้เพื่อนๆ อย่างเงียบๆ" },
+  { id:"luna",  emoji:"🌙", name:"ลูน่า",  rarity:"legendary", element:"scissors", wave:3,
+    flavor:"คืนนี้พระจันทร์สวยนะ… เธอว่าไหม",
+    lore:"จันทราผู้เฝ้ามองโลกจากอีกฟากของคืน อบอุ่นกับทุกคน แต่สายตามักลอยไปหาดวงดาวที่ไกลเกินเอื้อม แสงของเธอขึ้นลงตามข้างจันทร์ และเมื่อเต็มดวงเมื่อไหร่ ไม่มีเงาไหนหลบพ้น" },
   // ── EPIC ──
   { id:"dragon",    emoji:"🐲", name:"มังกร",     rarity:"epic", element:"fist",     flavor:"พ่นไฟ purify impurity แต่เผา reactor ไปด้วย", atkStyle:"ranged", projectile:"🔥" },
   { id:"cerberus",  emoji:"🐕", name:"เซอร์เบอรัส", rarity:"epic", element:"fist",   flavor:"หมา 3 หัวเฝ้า drug interaction เห่าทุกครั้งที่เจอ grapefruit" },

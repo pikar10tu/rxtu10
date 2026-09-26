@@ -253,3 +253,10 @@ test('ownCounter: นับเฉพาะ beat ที่เล่นไปแ�
   assert.deepEqual(counterAt([p('phoenix')], b, -1), { n: 1, kind: 'left', spent: false })
   assert.deepEqual(counterAt([p('phoenix'), p('phoenix')], [pas('A1', 'revive')]), { n: 1, kind: 'left', spent: false })
 })
+
+// ── ต.ค. 2569 ฟากฟ้า: ป้าย ☀️ เฉพาะตัวที่นับเป็น common ─────────────────────
+test('ป้าย 🌟 ขึ้นเฉพาะ common (และองศา)', () => {
+  const s = buffSources([{ id: 'sol', rarity: 'legendary' }, { id: 'cat', rarity: 'common' }, { id: 'lion', rarity: 'legendary' }], [])
+  assert.ok(s.A1.some(b => b.effect === 'rarityBoost'))
+  assert.ok(!s.A2.some(b => b.effect === 'rarityBoost'))
+})

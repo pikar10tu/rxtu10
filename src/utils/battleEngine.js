@@ -5,7 +5,7 @@
 // ════════════════════════════════════════════════════════════
 import { BATTLE_CFG, buildCombatant, elementMult } from '../data/battle.js'
 import {
-  runSetup, applyAuras, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
+  applyForms, runSetup, applyAuras, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
   tauntTargetOf, psOf,
 } from './battlePassives.js'
 
@@ -29,7 +29,8 @@ export function simulateBattle(teamA, teamB, seed) {
   const B = (teamB || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `B${i}`, side: 'B' }))
   const log = []
 
-  // ── ลำดับ hook ที่ห้ามสลับ (สเปก §B): setup → aura → onStart → [onRound] → onAttack → onHit → onDeath → onKill ──
+  // ── ลำดับ hook ที่ห้ามสลับ (สเปก §B): forms → setup → aura → onStart → [onRound] → onAttack → onHit → onDeath → onKill ──
+  applyForms(A); applyForms(B)   // ร่างพิเศษตามองค์ประกอบทีม (🌍 องศา) — ต้องก่อน setup/aura
   // setup ต้องมาก่อน aura — stealStats เปลี่ยนเลขดิบที่ออร่าจะไปคูณต่อ
   for (const e of [...runSetup(A, B), ...runSetup(B, A)]) log.push(e)
   const auraEvents = [...applyAuras(A, B), ...applyAuras(B, A)]
