@@ -509,3 +509,36 @@ test('ศพหนึ่งใบมีบันทึกการตายใ�
     delete PET_PASSIVES.__armorTest
   }
 })
+
+// ── นิยามรอบใหม่ (26 ก.ย. 2026): "รอบ" = ทุกตัวที่ยังมีชีวิตได้ตาครบคนละ 1 ครั้ง ──
+const blank = (n, rarity = 'legendary', element = 'fist') =>
+  Array.from({ length: n }, () => ({ id: '__blank__', rarity, element, grade: 0 }))
+
+test('รอบ: 3v3 รอบแรก (ยังไม่มีใครตาย) มีหมัดหลัก 6 หมัดพอดี', () => {
+  const r = simulateBattle(blank(3), blank(3), 11)
+  const r1 = r.log.findIndex(e => e.t === 'round' && e.n === 1)
+  const r2 = r.log.findIndex(e => e.t === 'round' && e.n === 2)
+  assert.ok(r1 >= 0 && r2 > r1, 'ต้องมีรอบ 1 และรอบ 2')
+  const deaths = r.log.slice(r1, r2).filter(e => e.t === 'attack' && e.dead).length
+  assert.equal(deaths, 0, 'seed นี้รอบแรกต้องไม่มีใครตาย (ถ้าล้ม ให้เปลี่ยน seed)')
+  const mains = r.log.slice(r1, r2).filter(e => e.t === 'attack' && !e.sub)
+  assert.equal(mains.length, 6)
+  assert.equal(new Set(mains.map(e => e.attacker)).size, 6, 'ทุกตัวได้ตาคนละครั้ง')
+})
+
+test('รอบ: 3v1 ฝั่งตัวเดียวตีได้หลายตาในรอบเดียว แต่รอบจบเมื่อทุกตัวได้ตาครบ', () => {
+  const r = simulateBattle(blank(3), blank(1), 5)
+  const r1 = r.log.findIndex(e => e.t === 'round' && e.n === 1)
+  const r2 = r.log.findIndex(e => e.t === 'round' && e.n === 2)
+  const mains = r.log.slice(r1, r2).filter(e => e.t === 'attack' && !e.sub)
+  const a = new Set(mains.filter(e => e.side === 'A').map(e => e.attacker))
+  assert.equal(a.size, 3, 'ฝั่ง A ครบ 3 ตัว')
+  assert.ok(mains.filter(e => e.side === 'B').length >= 2, 'ฝั่ง B ตัวเดียวได้มากกว่า 1 ตา')
+})
+
+test('end.rounds = จำนวน round event', () => {
+  const r = simulateBattle(blank(3), blank(3), 3)
+  const n = r.log.filter(e => e.t === 'round').length
+  assert.equal(r.log.at(-1).rounds, n)
+  assert.equal(r.rounds, n)
+})

@@ -5,7 +5,7 @@
 // ════════════════════════════════════════════════════════════
 import { BATTLE_CFG, buildCombatant, elementMult } from '../data/battle.js'
 import {
-  runSetup, applyAuras, runOnStart, runOnRound, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
+  runSetup, applyAuras, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
   tauntTargetOf, psOf,
 } from './battlePassives.js'
 
@@ -25,8 +25,8 @@ const alive = (t) => t.filter(f => f.hp > 0)
 /** teamA/teamB = array ของ {id,rarity,element,grade} (≤4) · seed = int */
 export function simulateBattle(teamA, teamB, seed) {
   const rand = rng(seed)
-  const A = (teamA || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, uid: `A${i}`, side: 'A' }))
-  const B = (teamB || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, uid: `B${i}`, side: 'B' }))
+  const A = (teamA || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `A${i}`, side: 'A' }))
+  const B = (teamB || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `B${i}`, side: 'B' }))
   const log = []
 
   // ── ลำดับ hook ที่ห้ามสลับ (สเปก §B): setup → aura → onStart → [onRound] → onAttack → onHit → onDeath → onKill ──
@@ -273,37 +273,58 @@ export function simulateBattle(teamA, teamB, seed) {
   const first = ca > cb ? 'A' : cb > ca ? 'B' : (rand() < 0.5 ? 'A' : 'B')
   const cursor = { A: 0, B: 0 }
   let cur = first, round = 0, turns = 0
+  // 🔑 "รอบ" (user เคาะ 26 ก.ย. 2026) = ทุกตัวที่ยังมีชีวิตทั้งสองฝั่งได้ตาครบคนละ 1 ครั้ง
+  //    เดิม round++ ทุกครั้งที่วนกลับมาฝั่งที่ตีก่อน = ฝั่งละ 1 หมัด ⇒ 3v3 ต้อง 3 round กว่าทุกตัวจะตีครบ
+  //    pending = uid ที่ยังไม่ได้ตาในรอบนี้ · null = ต้องเปิดรอบใหม่ก่อนตาถัดไป
+  //    ตัวที่ตายกลางรอบไม่ต้องรอ · ตาที่ถูกข้าม (แช่แข็ง) นับเป็นตาแล้ว · ตีต่อของโอนิไม่ใช่ตาใหม่
+  let pending = null
+  const startRound = () => {
+    round++; log.push({ t: 'round', n: round })
+    for (const e of [...runOnRound(A), ...runOnRound(B)]) log.push(e)
+    pending = new Set([...alive(A), ...alive(B)].map(u => u.uid))
+  }
+  const endRoundIfDone = () => {
+    for (const uid of [...pending]) {
+      const u = (uid[0] === 'A' ? A : B).find(x => x.uid === uid)
+      if (!u || u.hp <= 0) pending.delete(uid)
+    }
+    if (pending.size) return
+    for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
+    pending = null
+  }
 
   while (alive(A).length && alive(B).length && turns < BATTLE_CFG.maxTurns) {
-    if (cur === first) {
-      round++; log.push({ t: 'round', n: round })
-      for (const e of [...runOnRound(A), ...runOnRound(B)]) log.push(e)
-    }
+    if (!pending) startRound()
     const team = cur === 'A' ? A : B
     const foes = cur === 'A' ? B : A
     const ai = nextAttacker(team, cursor[cur])
     if (ai !== -1) {
       const att = team[ai]
-      let killed = hit(att, foes)
-      // killChain — "ตัวเดียวที่เพิ่ม beat ได้" จึงมีเพดานจาก value.max
-      // 🔴 เรียก runOnKill ครั้งเดียวต่อการฆ่าหนึ่งครั้ง — เงื่อนไข "ศัตรูยังเหลือ" ย้ายมาไว้ใน
-      //    การตัดสินใจ "ตีต่อไหม" ไม่ใช่เงื่อนไขเข้าลูป · ของเดิมเข้าลูปไม่ได้ตอนศัตรูหมด
-      //    แล้วบรรทัดใต้ลูปยิงซ้ำ ⇒ ทีเร็กซ์ได้ 2 ชั้นต่อการล้ม 1 ตัว (บั๊กจริงตั้งแต่ ส.ค.)
-      // 🔴 สเปก §7.6 ข้อ 6: ต้องเช็ค att.hp > 0 ด้วย — ตั้งแต่หนาม/guardian ฆ่าผู้ตีกลางหมัดได้จริง
-      //    (ผ่าน resolveSilentDeath ด้านบน) ผู้ตีที่ตายกลาง hit() ของตัวเอง (เช่นโดนหนามสวนจนตายพอดี
-      //    ตอนฆ่าศัตรูตัวที่กำลังจะน็อก) ต้องหยุดตีทันที ไม่ใช่ตีต่อทั้งที่ตายไปแล้ว
-      let chain = 0
-      while (killed && att.hp > 0 && turns < BATTLE_CFG.maxTurns) {
-        const k = runOnKill(att, chain, team, foes)
-        for (const e of k.events) log.push(e)
-        if (!k.extraAttack || !alive(foes).length) break
-        chain++; turns++
-        killed = hit(att, foes)
+      const st = psOf(att)
+      if (st.skip > 0) {
+        // ⏸️ ข้ามตา (❄️ แช่แข็ง · 🛸 สตั๊นในอนาคต) — ตานี้หายไปทั้งตา แต่นับว่าได้ตาในรอบนี้แล้ว
+        st.skip -= 1
+        log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id,
+          name: st.skipName || 'แช่แข็ง', icon: st.skipIcon || '❄️', effect: 'frozen', targets: [att.uid], fxKind: 'skip' })
+      } else {
+        let killed = hit(att, foes)
+        // killChain — ยังมีเพดานจาก value.max (กฎ "ห้ามเพิ่ม beat" เลิกแล้ว แต่ตีต่อไม่รู้จบไม่ได้)
+        // 🔴 เรียก runOnKill ครั้งเดียวต่อการฆ่าหนึ่งครั้ง · เช็ค att.hp > 0 (โดนหนามสวนตายกลางหมัดได้)
+        let chain = 0
+        while (killed && att.hp > 0 && turns < BATTLE_CFG.maxTurns) {
+          const k = runOnKill(att, chain, team, foes)
+          for (const e of k.events) log.push(e)
+          if (!k.extraAttack || !alive(foes).length) break
+          chain++; turns++
+          killed = hit(att, foes)
+        }
       }
+      pending.delete(att.uid)
       cursor[cur] = (ai + 1) % team.length
     }
     turns++
     cur = cur === 'A' ? 'B' : 'A'   // สลับฝั่งเสมอ
+    if (alive(A).length && alive(B).length) endRoundIfDone()
   }
 
   const pct = (t) => { const max = t.reduce((s, f) => s + f.maxHp, 0); return max ? t.reduce((s, f) => s + Math.max(0, f.hp), 0) / max : 0 }
