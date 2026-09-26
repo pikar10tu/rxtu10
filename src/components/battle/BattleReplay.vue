@@ -1007,8 +1007,10 @@ function applyImpact(beat, g, t) {
     // ⚠️ rAF หยุดสนิทเมื่อแท็บถูกพับไปหลัง แต่ setTimeout ยังเดิน → กลับมาแล้วเฟรมนี้อาจมาช้าไปหลาย beat
     if (idx.value !== myIdx) { flashOff(); return }
     let targetAnim = null                       // null = ไม่มีอนิเมชันจริง (preset ปิด/ไม่มี el)
-    // ตายแล้วป้ายสถานะค้างต้องหายไปกับการ์ด (เชื้อที่เหลือถูกโยนไปโฮสต์ใหม่ผ่าน event ของตัวเองอยู่แล้ว)
-    if (beat.kill) { fx?.stateMark(beat.target, '🦠', 0); targetAnim = fx?.ko(beat.target, tgtEl, Math.min(KO_MS, cardMs)) }
+    // ตายแล้วป้ายสถานะค้างทุกชนิดต้องหายไปกับการ์ด (เชื้อที่เหลือถูกโยนไปโฮสต์ใหม่ผ่าน event ของตัวเองอยู่แล้ว)
+    // 🔑 ต้องเป็น "ทุกชนิด" ไม่ใช่แค่ 🦠 — ตัวที่ถูกแช่แข็ง (❄️) แล้วตายก่อนถึงตาที่ถูกข้าม ก็ต้องไม่เหลือตราค้างบนการ์ดที่ตายแล้ว
+    // (ใช้ path เดียวกันทั้งการตายปกติและ beat.silent — เช็คแค่ beat.kill ไม่แยก silent อยู่แล้ว)
+    if (beat.kill) { fx?.stateMarkClear(beat.target); targetAnim = fx?.ko(beat.target, tgtEl, Math.min(KO_MS, cardMs)) }
     else targetAnim = fx?.squashTarget(tgtEl, beat.kind, w, Math.min(SQUASH_MS, cardMs), beat.attacker, beat.target)
     if (targetAnim) targetAnim.then(flashOff)
     else later(flashOff, Math.min(FLASH_MS, Math.max(cardMs, 120)))

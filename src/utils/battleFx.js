@@ -356,6 +356,11 @@ export function createBattleFx() {
    *  🔑 คีย์เป็น uid+icon (ไม่ใช่ uid เฉยๆ) — ตัวเดียวกันอาจติดทั้ง 🦠 (ชั้นเชื้อ) และ ❄️ (แช่แข็ง)
    *     พร้อมกัน ถ้าคีย์แค่ uid ตัวหลังจะเขียนทับช่องของตัวแรกแล้วมันหายไป (26 ก.ย. — ฤดูหนาว/luna) */
   function markKey(uid, char) { return uid + '#' + char }
+  // ตำแหน่งของแต่ละไอคอน — 🦠 อยู่จุดเดิม (บนกลางการ์ด) ห้ามขยับ (มีอยู่ก่อนแล้ว/ผ่านตาผู้ใช้มานาน)
+  // ❄️ ขยับไปมุมตรงข้าม (บนขวา) กันทับ 🦠 สนิทเวลาการ์ดเดียวกันติดทั้งคู่พร้อมกัน (ฤดูหนาว/luna)
+  // ไอคอนใหม่ที่ยังไม่ได้กำหนด = ใช้ตำแหน่งเดิม (ไม่ทำ default พัง)
+  const MARK_OFFSET = { '❄️': { dx: 24, dy: -14 } }
+  const DEFAULT_MARK_OFFSET = { dx: 0, dy: -30 }
   function stateMark(uid, char, n) {
     const key = markKey(uid, char)
     const cur = markOn.get(key)
@@ -365,13 +370,24 @@ export function createBattleFx() {
     }
     const el = cur || pool.mark.find(e => !Array.from(markOn.values()).includes(e))
     if (!el) return
-    const base = baseXform(uid, 0, -30); if (!base) return
+    const { dx, dy } = MARK_OFFSET[char] || DEFAULT_MARK_OFFSET
+    const base = baseXform(uid, dx, dy); if (!base) return
     el.style.transform = base
     el.style.opacity = '1'
     const ico = el.firstChild
     if (ico && ico.dataset.char !== char) { imgSrc(ico, char); ico.dataset.char = char }
     el.lastChild.textContent = String(n)
     markOn.set(key, el)
+  }
+  /** เอาป้ายสถานะ "ทุกชนิด" ของ uid นี้ออก — ใช้ตอนการ์ดตาย (🦠 + ❄️ + ไอคอนใหม่ในอนาคต ต้องหายไปพร้อมกัน)
+   *  🔑 ต่างจาก stateMark(uid, char, 0) ที่ล้างได้ทีละไอคอน — จุดตายไม่รู้ล่วงหน้าว่าติดอะไรอยู่บ้าง */
+  function stateMarkClear(uid) {
+    const prefix = uid + '#'
+    for (const [key, el] of Array.from(markOn.entries())) {
+      if (!key.startsWith(prefix)) continue
+      el.style.opacity = '0'
+      markOn.delete(key)
+    }
   }
   function stateMarkClearAll() {
     for (const el of markOn.values()) el.style.opacity = '0'
@@ -453,6 +469,6 @@ export function createBattleFx() {
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,
     lunge, squashTarget, targetReacts, shake, ko, dangerRing, dangerClearAll,
-    stateMark, stateMarkClearAll,
+    stateMark, stateMarkClear, stateMarkClearAll,
   }
 }
