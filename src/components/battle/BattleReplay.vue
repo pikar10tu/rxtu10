@@ -808,6 +808,20 @@ function firePassiveFx(e) {
   //    ถ้าไม่อัปเดตตรงนี้ หลอดจะค้างค่าเดิมทั้งที่เลขเด้งขึ้นแล้ว (ผู้เล่นเห็นขัดกันทันที)
   if (typeof e.hpPct === 'number' && on[0]) hp.value = { ...hp.value, [on[0]]: e.hpPct }
   if (e.guardUid && typeof e.guardHpPct === 'number') hp.value = { ...hp.value, [e.guardUid]: e.guardHpPct }
+  // ดาเมจจาก passive (ไฟเปิดไฟต์ของบาฮามุท) หักเลือดทุกเป้าในเอนจินแต่ไม่มี attack event ของตัวเอง
+  // event แบกแค่ amount (ดาเมจต่อตัว) ⇒ คิดหลอดจากเลือดปัจจุบันบนจอเอง ใช้ได้กับ log เก่าที่เก็บไว้ด้วย
+  // (user: "บาฮามุทพ่นไฟเปิด ไม่เห็นเลือดลด") · ตัวที่ตายมีใบ silent ตามมาปิดหลอดเป็น 0 + KO ให้อยู่แล้ว
+  // 🔴 เฉพาะ aoeOpener — infectBurst ก็ fxKind 'damage' แต่ดาเมจนั้นรวมอยู่ใน dmg ของหมัดหลักแล้ว (pierce) ใส่ด้วย = หักซ้ำ
+  if (e.effect === 'aoeOpener' && e.amount > 0) {
+    const next = { ...hp.value }
+    for (const t of on) {
+      const max = maxHp[t] || 0
+      if (!max) continue
+      next[t] = Math.max(0, Math.round((next[t] ?? 100) - (e.amount / max) * 100))   // ตัวหารเดียวกับ applyImpact
+      fx?.pop(t, { dmg: e.amount, weight: 0.55 })
+    }
+    hp.value = next
+  }
   // เลขเขียว +N ที่ตัวที่ได้รับ — ใช้เลือดจริงที่ฟื้นได้ ไม่ใช่ % ของสูตร
   // ⚠️ อ่าน fxKind (ชนิดผล) ไม่ใช่ kind — kind ของ beat คือ "เวลา" (skill/skillQuiet/openGroup/…)
   //    ทับชนิดผลไปตั้งแต่ f32b519 ⇒ ทั้งบล็อกนี้เงียบสนิท (user: "ตอนฮีล เลขไม่ขึ้น")
