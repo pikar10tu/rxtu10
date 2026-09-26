@@ -22,7 +22,8 @@
           <span class="tp-slotno">{{ i + 1 }}</span>
           <template v-if="id">
             <PetThumb :pet="slotPetOf(id)" />
-            <span class="tp-slotname">{{ defOf(id).name }}</span>
+            <span class="tp-slotname">{{ displayName(id, defOf(id).name, teamNow) }}</span>
+            <span v-if="earthTag(i)" class="tp-season">{{ earthTag(i) }}</span>
           </template>
           <span v-else class="tp-empty">＋</span>
         </button>
@@ -73,6 +74,7 @@ import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
 import { BATTLE_SLOTS } from '../../data/residence.js'
 import { toSlots } from '../../utils/teamSlots.js'
 import { tapSlot, tapItem, removeAt, compact } from '../../utils/slotEdit.js'
+import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForms.js'
 
 const props = defineProps({ open: { type: Boolean, default: false } })
 defineEmits(['update:open'])
@@ -120,6 +122,19 @@ const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
 const rarityColor = (id) => RARITY[defOf(id).rarity]?.color || '#94a3b8'
 const elEmoji = (id) => ELEMENTS[defOf(id).element]?.emoji || '✊'
 
+// ทีมตามลำดับออกตีจริง = ช่องที่มีเพ็ท เรียงตามช่อง
+const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({ id, rarity: defOf(id).rarity })))
+const formOn = computed(() => degreeFormActive(teamNow.value))
+
+/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา */
+function earthTag(i) {
+  if (edit.value.slots[i] !== 'earth') return null
+  if (formOn.value) return '🌗 องศา · นับเป็น common'
+  const pos = edit.value.slots.slice(0, i).filter(Boolean).length
+  const s = seasonOfSlot(pos)
+  return `${s.icon} ${s.label}`
+}
+
 // เรียง legendary→common → เกรดสูงก่อน → ชื่อ (เหมือนหน้าเพ็ท)
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
 const sortedOwned = computed(() => owned.value.slice().sort((a, b) => {
@@ -161,6 +176,7 @@ function pick(id) {
 .tp-slot.sel::after { content: 'เลือกอยู่'; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); font-size: .7rem; font-weight: 800; color: #fff; background: var(--accent); border-radius: 999px; padding: 0 7px; white-space: nowrap; }
 .tp-slotno { position: absolute; top: 5px; left: 7px; font-size: .7rem; font-weight: 800; color: var(--muted); }
 .tp-slotname { font-size: .7rem; font-weight: 700; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-season { display: block; font-size: .7rem; font-weight: 700; color: var(--primary); margin-top: 2px; white-space: nowrap; }
 .tp-empty { color: #8ec6e8; font-size: 1.5rem; }
 .tp-x, .tp-more { position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #fff; font-family: inherit; font-size: .7rem; font-weight: 800; cursor: pointer; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(43,53,80,.25); z-index: 2; }
 .tp-x { top: -7px; right: -7px; background: #e0719a; color: #fff; }
