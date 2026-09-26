@@ -123,7 +123,11 @@ const rarityColor = (id) => RARITY[defOf(id).rarity]?.color || '#94a3b8'
 const elEmoji = (id) => ELEMENTS[defOf(id).element]?.emoji || '✊'
 
 // ทีมตามลำดับออกตีจริง = ช่องที่มีเพ็ท เรียงตามช่อง
-const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({ id, rarity: defOf(id).rarity })))
+// rarity อ่านแบบเดียวกับเอนจิน: inst.rarity || def.rarity || 'common' (resolveBattleTeam)
+const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({
+  id,
+  rarity: slotPetOf(id)?.rarity || defOf(id).rarity || 'common'
+})))
 const formOn = computed(() => degreeFormActive(teamNow.value))
 
 /** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา */
