@@ -183,11 +183,17 @@ export function liveBuffs(sources, beats, idx, uid = null) {
   // เชื้อไม่ได้อยู่ใน sources (ไม่ใช่ค่าคงที่ก่อนไฟต์ — state จริงอยู่ที่ psOf(target).infect)
   // ⇒ ต้องอ่านจาก event ที่ "ลงบนตัวนี้" · ต้องรับทั้ง infect (แปะ) และ infectSpread (ย้ายมาจากศพ)
   //   ไม่งั้นโฮสต์ใหม่ที่รับเชื้อต่อจะไม่มีอะไรบอกเลยว่ากำลังติดเชื้ออยู่
+  // ⚠️ 27 ก.ย. 2026: `infect` (ตอนแปะ) อาจเป็น event เดียวหลายเป้า — ชั้นจริงต่อเป้าต้องอ่านจาก
+  //    `e.stacks[uid]` ก่อนเสมอ ห้ามอ่าน `e.amount` ตรงๆ (นั่นคือชั้นสูงสุดของก้อน ไม่ใช่ของ uid นี้)
+  //    `infectSpread` ยังเป็นเป้าเดียวเสมอ ไม่มี `stacks` เลย fallback ไป amount ได้ตามเดิม
   if (uid) {
     let n = 0, from = null
     for (const e of played) {
       if (e?.t !== 'passive') continue
-      if ((e.effect === 'infect' || e.effect === 'infectSpread') && (e.targets || []).includes(uid)) { n = e.amount || 0; from = e }
+      if ((e.effect === 'infect' || e.effect === 'infectSpread') && (e.targets || []).includes(uid)) {
+        n = (e.stacks && e.stacks[uid] != null) ? e.stacks[uid] : (e.amount || 0)
+        from = e
+      }
     }
     if (n > 0) {
       // ที่มาอ่านจาก event ตรงๆ (`petId`/`name`/`icon` ที่ ev() แนบมาให้) ไม่ใช่เดาจากทะเบียน —

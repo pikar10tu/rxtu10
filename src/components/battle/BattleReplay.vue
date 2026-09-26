@@ -874,8 +874,11 @@ function firePassiveFx(e) {
 
   // ชั้นเชื้อ — ป้ายค้างบนการ์ด "เป้า" อยู่ชั้น FX ไม่ใช่ในการ์ด (การ์ดต้อง static ตลอดไฟต์)
   // event ทั้งตอนแปะและตอนย้ายเชื้อส่ง amount = ชั้นสะสมของเป้าหลังเหตุการณ์นั้น
+  // ⚠️ 27 ก.ย. 2026: ตอนแปะ (infect) หมัดเดียวแพร่ได้หลายเป้าพร้อมกัน — แต่ละเป้าอาจอยู่คนละชั้น
+  //    (เช่นตัวหนึ่งชนเพดานก่อน) ⇒ ต้องอ่านชั้นต่อเป้าจาก e.stacks[uid] ก่อนเสมอ ห้ามใช้ e.amount
+  //    ทั้งก้อน (นั่นคือชั้นสูงสุดในก้อน ไม่ใช่ของ t ตัวนี้) · infectSpread ยังเป้าเดียวเสมอ ไม่มี stacks
   if (e.effect === 'infect' || e.effect === 'infectSpread') {
-    for (const t of on) fx?.stateMark(t, '🦠', e.amount || 0)
+    for (const t of on) fx?.stateMark(t, '🦠', (e.stacks && e.stacks[t] != null) ? e.stacks[t] : (e.amount || 0))
     sfx('virus')
   }
 

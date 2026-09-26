@@ -59,6 +59,10 @@ const STAT_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement', 'stackAtk',
  *       ⚠️ `giantSlayer` ส่งเป็น % คงที่ของธรณีประตู (ไม่มีขั้น ไม่มีเพดานตั้งแต่ 10 ก.ย. 2026)
  *     - `fxKind: 'debuff'` (`infect` ทั้งตอนแปะชั้นและตอนย้ายเชื้อไปโฮสต์ใหม่) → targets = เป้าที่ติด ·
  *       amount = จำนวนชั้นสะสมของเป้านั้นหลังเหตุการณ์นี้ (`st.infect.n`) ไม่ใช่ดาเมจ
+ *       ⚠️ 27 ก.ย. 2026: ตอนแปะชั้น (`infect`) ตี "ทีมเดียว" อาจมีหลายเป้าพร้อมกัน (event เดียวหลายเป้า) ·
+ *       amount ตอนนั้น = ชั้นสูงสุดในก้อน (เก็บไว้เพื่อผู้อ่านเก่า) — ชั้นจริง "ต่อเป้า" อยู่ใน `stacks: {uid: n}`
+ *       ผู้อ่านต้องเช็ค `stacks[uid]` ก่อนเสมอ ไม่งั้นเป้าที่ชั้นน้อยกว่าจะโชว์เลขผิด (ตอนย้ายเชื้อ/infectSpread
+ *       ยังเป็นเป้าเดียวเสมอ ไม่มี `stacks` ก็ fallback amount ได้ตามปกติ)
  *     - `fxKind: 'guard'` (`guardian` ของบากุ) → targets = เพื่อนที่ถูกรับแทน · amount = ดาเมจที่ผู้พิทักษ์กินไปแทน
  *     - `fxKind: 'armor'` (`armorStack`) → targets = ตัวที่มีเกราะ · **amount = ดาเมจที่สะท้อนกลับไป**
  *       และ **สแตคที่เหลืออยู่ในฟิลด์แยก `armorLeft`** (0 ได้)
@@ -715,19 +719,29 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
   for (const part of partsAt(ap, 'onAttack')) {
     if (part.effect !== 'infect') continue
     const v = valOf(part, attacker)
-    const st = psOf(defender)
-    const cur = st.infect || { n: 0, from: attacker }
-    if (cur.n < v.max) {
+    // 🦠 แพร่ทั้งทีม (27 ก.ย. 2026 บาลานซ์รอบ 1): หมัดเดียว = ทั้งทีมของเป้าที่ยังไม่ชนเพดานได้ +1 ชั้น
+    //    พร้อมกัน · รวมเป็น **event เดียวหลายเป้า** กันรีเพลย์รก (user อนุมัติแนวทางนี้ใน brief)
+    //    ⚠️ เมื่อ team มีแค่ตัวเดียว (เช่นเทสเก่าที่ส่ง [defender]) พฤติกรรม/จำนวน event เท่าของเดิมเป๊ะ
+    const hit = []
+    const stacks = {}
+    for (const d of (team ? alive(team) : [defender])) {
+      const st = psOf(d)
+      const cur = st.infect || { n: 0, from: attacker }
+      if (cur.n >= v.max) { st.infect = cur; continue }
       // 🔴 กฎ "ไวรัสตัวแรกเป็นเจ้าของสแตค": from ต้องมาจาก cur.from ไม่ใช่ attacker ตรงๆ
       //    ถ้าทีมมีไวรัส 2 ตัว (คนละเกรด/atk) แล้วให้ attacker ทับทุกครั้งที่ตี เจ้าของดาเมจตอนระเบิด
       //    (งานย่อย 6 อ่าน from.atk) และตอนย้ายเชื้อตอนตาย (งานย่อย 7) จะเปลี่ยนไปเงียบๆ ตามว่าใครตีล่าสุด
       //    ทั้งที่ไม่มี event บอกผู้เล่นเลย — cur.from เมื่อยังไม่เคยติดเชื้อ (st.infect ไม่มี) จะ fallback
       //    เป็น attacker ของหมัดนี้พอดี (ผู้ติดเชื้อคนแรก) แล้วค้างค่าเดิมไว้ทุกหมัดถัดไปจนกว่าเชื้อจะหาย
       st.infect = { n: cur.n + 1, from: cur.from }
-      res.events.push(ev(attacker, ap, part, { targets: [defender.uid],
-        amount: st.infect.n, fxKind: 'debuff' }))
-    } else {
-      st.infect = cur
+      hit.push(d.uid)
+      stacks[d.uid] = st.infect.n
+    }
+    if (hit.length) {
+      // amount = ชั้นสูงสุดในก้อนนี้ (คงไว้เพื่อผู้อ่านเก่าที่ยังไม่รองรับ stacks ต่อเป้า) ·
+      // stacks = ชั้นจริงต่อเป้า — ผู้อ่านต้องเช็ค stacks[uid] ก่อนเสมอ (battleBuffs.js/BattleReplay.vue)
+      res.events.push(ev(attacker, ap, part, { targets: hit,
+        amount: Math.max(...hit.map(uid => stacks[uid])), stacks, fxKind: 'debuff' }))
     }
   }
 

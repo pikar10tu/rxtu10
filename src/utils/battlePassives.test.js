@@ -1443,6 +1443,67 @@ test('infect: ไวรัสตีแล้วเป้าได้ชั้น
   } finally { delete PET_PASSIVES.__virus }
 })
 
+// 🦠 บาลานซ์รอบ 27 ก.ย. 2026 — ไวรัสตีทีไร ศัตรูทุกตัวที่ยังอยู่ในทีมเป้าติด/ขึ้นชั้น +1 พร้อมกัน
+//    (ทั้ง event เดียวหลายเป้า กันรีเพลย์รก — ดู task-4-brief.md)
+test('infect: ตีเป้าเดียว แต่ทั้งทีมเป้าติดเชื้อ +1 ชั้นพร้อมกัน เป็น event เดียว', () => {
+  PET_PASSIVES.__virus = {
+    name: 'ทดสอบเชื้อ', icon: '🧪',
+    parts: [{ hook: 'onAttack', effect: 'infect', value: { pct: 15, max: 5 }, step: { pct: 0, max: 0 } }],
+    desc: 'เชื้อ {pct}% ต่อชั้น สูงสุด {max}', short: 'เชื้อ {pct}% ต่อชั้น',
+  }
+  try {
+    const virus = { uid: 'A0', side: 'A', id: '__virus', hp: 100, maxHp: 100, atk: 100 }
+    const b0 = { uid: 'B0', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
+    const b1 = { uid: 'B1', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
+    const b2 = { uid: 'B2', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
+    const team = [b0, b1, b2]
+
+    const r1 = runOnHit(b0, 10, virus, team, () => 0.5)
+    const tagged1 = r1.events.filter(e => e.effect === 'infect')
+    assert.equal(tagged1.length, 1, 'ต้องเป็น event เดียว ไม่ใช่ 1 ต่อเป้า')
+    assert.equal(psOf(b0).infect.n, 1)
+    assert.equal(psOf(b1).infect.n, 1)
+    assert.equal(psOf(b2).infect.n, 1)
+    assert.deepEqual(new Set(tagged1[0].targets), new Set(['B0', 'B1', 'B2']))
+    assert.equal(tagged1[0].fxKind, 'debuff')
+    assert.equal(psOf(b0).infect.from, virus, 'เจ้าของสแตคคือไวรัสตัวแรก')
+    assert.equal(psOf(b1).infect.from, virus)
+    assert.equal(psOf(b2).infect.from, virus)
+
+    const r2 = runOnHit(b1, 10, virus, team, () => 0.5)
+    const tagged2 = r2.events.filter(e => e.effect === 'infect')
+    assert.equal(tagged2.length, 1)
+    assert.equal(psOf(b0).infect.n, 2)
+    assert.equal(psOf(b1).infect.n, 2)
+    assert.equal(psOf(b2).infect.n, 2)
+
+    // ตัวตายไม่ติด
+    b2.hp = 0
+    const r3 = runOnHit(b0, 10, virus, team, () => 0.5)
+    assert.equal(psOf(b0).infect.n, 3)
+    assert.equal(psOf(b1).infect.n, 3)
+    assert.equal(psOf(b2).infect.n, 2, 'ตัวตายไม่ได้รับชั้นเพิ่ม')
+    const tagged3 = r3.events.filter(e => e.effect === 'infect')
+    assert.deepEqual(new Set(tagged3[0].targets), new Set(['B0', 'B1']))
+
+    // เพดาน max=5: เลี้ยงจนถึงเพดานแล้วต้องไม่เกิน และ target ที่ชนเพดานหลุดออกจาก event ต่อไป
+    // ก่อนหน้านี้ b0/b1 = n3, b2 = n2 (พลาดตอนตาย) — เลี้ยง b0/b1 ไปชนเพดาน 5 ก่อน b2
+    b2.hp = 100
+    runOnHit(b0, 10, virus, team, () => 0.5) // n=4/4/3
+    const r5 = runOnHit(b0, 10, virus, team, () => 0.5) // n=5/5/4 — b0,b1 ชนเพดานแล้ว
+    assert.equal(psOf(b0).infect.n, 5)
+    assert.equal(psOf(b1).infect.n, 5)
+    assert.equal(psOf(b2).infect.n, 4)
+    assert.deepEqual(new Set(r5.events.filter(e => e.effect === 'infect')[0].targets), new Set(['B0', 'B1', 'B2']))
+    const r5b = runOnHit(b0, 10, virus, team, () => 0.5) // n=5/5/5 — เฉพาะ b2 ยังขึ้นชั้นได้
+    assert.equal(psOf(b2).infect.n, 5)
+    assert.deepEqual(r5b.events.filter(e => e.effect === 'infect')[0].targets, ['B2'],
+      'b0/b1 ชนเพดานแล้วต้องหลุดจาก event นี้ เหลือแค่ b2 ที่ยังขึ้นชั้นได้')
+    const r6 = runOnHit(b0, 10, virus, team, () => 0.5) // ทุกตัวชนเพดานแล้ว → ไม่มี event
+    assert.equal(r6.events.filter(e => e.effect === 'infect').length, 0, 'ทุกตัวชนเพดานแล้วต้องเงียบ')
+  } finally { delete PET_PASSIVES.__virus }
+})
+
 test('infect: เพ็ทที่ไม่ใช่ไวรัสตี ไม่แปะเชื้อ', () => {
   const att = { uid: 'A0', side: 'A', id: 'turtle', hp: 100, maxHp: 100, atk: 100 }
   const tgt = { uid: 'B0', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
