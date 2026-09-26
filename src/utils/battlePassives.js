@@ -453,6 +453,18 @@ export function runOnAttack(att, target, foes, rand) {
         res.events.push(ev(att, p, part, { targets: [att.uid], amount: Math.round(v.pct), fxKind: 'buff' }))
         break
       }
+      case 'moonPhase': {
+        // 🌙 วนตามหมัดของตัวเอง: ดับ → เสี้ยว → เต็มดวง · เต็มดวงได้แบนเนอร์ (fullMoon อยู่ใน CLUTCH_EFFECTS)
+        const st = psOf(att)
+        const i = st.moon || 0
+        st.moon = (i + 1) % 3
+        const pct = [v.dark, v.half, v.full][i]
+        res.atkMult *= pct / 100
+        const full = i === 2
+        res.events.push(ev(att, p, part, { effect: full ? 'fullMoon' : 'moonPhase', targets: [att.uid],
+          amount: pct, phase: i, fxKind: full ? 'fullMoon' : 'moon' }))
+        break
+      }
       // 🔴 healOnAttack ก็ hook: 'onAttack' ในข้อมูล แต่คำนวณใน runOnDealt (ข้างล่างนี้) — ดูคอมเมนต์ที่นั่น
     }
   }

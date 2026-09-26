@@ -2147,6 +2147,15 @@ test('มี common ในทีม ⇒ Earth ไม่แปลงร่าง 
   assert.equal(Math.round(team[1].atk), 10)
 })
 
+test('ลูน่า: หมัดวน 75 → 125 → 175 → 75', () => {
+  const luna = U('luna', 'legendary', 0)
+  const foe = U('x', 'common', 0, 'B')
+  const got = [0, 1, 2, 3].map(() => runOnAttack(luna, foe, [foe], () => 0.99))
+  assert.deepEqual(got.map(r => Math.round(r.atkMult * 100)), [75, 125, 175, 75])
+  assert.equal(got[2].events[0].effect, 'fullMoon')
+  assert.equal(got[0].events[0].effect, 'moonPhase')
+})
+
 // ── ต.ค. 2569 ฟากฟ้า: 🌍 ฤดูกาลตอนจบรอบ (Task 5) ─────────────────────────
 test('ฤดูร้อน (ช่อง 0): จบรอบ → รอบหน้าหมัดแรง +20%', () => {
   const team = [U('earth', 'legendary', 0), U('cat', 'common', 1)]
