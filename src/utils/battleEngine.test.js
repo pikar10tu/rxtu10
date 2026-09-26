@@ -542,3 +542,23 @@ test('end.rounds = จำนวน round event', () => {
   assert.equal(r.log.at(-1).rounds, n)
   assert.equal(r.rounds, n)
 })
+
+// ── ต.ค. 2569 ฟากฟ้า: 🌍 ฤดูหนาว (ช่อง 2) → แช่แข็ง (Task 5) ─────────────────
+test('แช่แข็ง: เป้าที่โดน ตาถัดไปของมันคือ frozen ไม่ใช่หมัด', () => {
+  const A = [{ id: 'cat', rarity: 'common', element: 'fist', grade: 3 }, { id: 'lion', rarity: 'legendary', element: 'fist', grade: 3 },
+             { id: 'earth', rarity: 'legendary', element: 'paper', grade: 3 }]
+  const B = blank(3)
+  let checked = 0
+  for (let seed = 1; seed < 300 && checked < 3; seed++) {
+    const log = simulateBattle(A, B, seed).log
+    const ci = log.findIndex(e => e.effect === 'seasonCold')
+    if (ci < 0) continue
+    for (const uid of log[ci].targets) {
+      const next = log.slice(ci + 1).find(e => (e.t === 'attack' && e.attacker === uid && !e.sub) || (e.effect === 'frozen' && e.uid === uid))
+      if (!next) continue                            // ไฟต์จบก่อนถึงตา
+      assert.equal(next.effect, 'frozen', `seed ${seed}: ${uid} ต้องข้ามตา`)
+      checked++
+    }
+  }
+  assert.ok(checked > 0, 'ต้องเจอเคสแช่แข็งอย่างน้อย 1')
+})

@@ -6,7 +6,7 @@
 //    (ยิงเป็น event `passive` ที่ battleBeats ให้ timing ZERO ⇒ ไม่กินเวลา)
 //    killChain เป็นข้อยกเว้นเดียวที่เพิ่ม beat จริง จึงมีเพดาน
 import { PET_PASSIVES, passiveValueAt, partsAt, partAt, partWithEffect } from '../data/petPassives.js'
-import { degreeFormActive } from './petForms.js'
+import { degreeFormActive, seasonOfSlot } from './petForms.js'
 
 export const passiveFor = (unit) => PET_PASSIVES[unit?.id] || null
 
@@ -283,6 +283,8 @@ export function runOnStart(team, foes) {
 export function runOnRound(team) {
   const out = []
   for (const u of alive(team)) {
+    // ☀️ ฤดูร้อนจากจบรอบก่อน มีผลทั้งรอบนี้ แล้วหมดอายุ (จบรอบนี้ถ้า Earth ยังอยู่จะตั้งใหม่)
+    { const st = psOf(u); st.hotActive = st.hotNext || 0; st.hotNext = 0 }
     const p = passiveFor(u)
     // regen จากคู่หู whale🔗seal ติดมากับ unit ไม่ได้มาจาก passive ของตัวเอง
     // คู่หู whale🔗seal — เดิมฟื้นเงียบไม่มี event เลย ผู้เล่นไม่เห็นว่าคู่หูทำงานอยู่
@@ -322,8 +324,38 @@ export function runOnRound(team) {
 // ══════════════════════════════════════════════════════════════
 //  onRoundEnd — จบรอบ (ทุกตัวได้ตาครบแล้ว) · 🌍 ฤดูกาล (Task 5)
 // ══════════════════════════════════════════════════════════════
+/** 🌍 ฤดูกาลตามช่องของ Earth — ยิงเมื่อทุกตัวในไฟต์ได้ตาครบ 1 รอบ (ร่างองศาไม่มีฤดู)
+ *  ช่อง 0 ☀️ ร้อน = รอบหน้าทีมแรง +hot% (ตั้ง hotNext ไว้ก่อน runOnRound ต้นรอบหน้าจะสลับเป็น hotActive)
+ *  ช่อง 1 🌧️ ฝน = ฟื้น rain% ของเลือดที่หายไปให้ทุกตัว 1 event ต่อ 1 เป้าที่ได้ฟื้นจริง (> 0)
+ *  ช่อง 2 ❄️ หนาว = ทอย rand ศัตรูที่ยังไม่ตายทีละตัวตามลำดับช่อง (deterministic) — โดน cold% ⇒ skip ตาถัดไป */
 export function runOnRoundEnd(team, foes, rand) {
-  return []
+  const out = []
+  for (const u of alive(team)) {
+    const p = passiveFor(u)
+    for (const part of partsAt(p, 'onRoundEnd')) {
+      if (part.effect !== 'season' || psOf(u).formed) continue   // ร่างองศาไม่มีฤดู
+      const v = valOf(part, u)
+      const s = seasonOfSlot(u.slot)
+      if (s.key === 'hot') {
+        for (const t of alive(team)) psOf(t).hotNext = v.hot
+        out.push(ev(u, p, part, { effect: 'seasonHot', targets: alive(team).map(t => t.uid), amount: v.hot, fxKind: 'buff' }))
+      } else if (s.key === 'rain') {
+        for (const t of alive(team)) {
+          const before = t.hp
+          t.hp = Math.min(t.maxHp, t.hp + (t.maxHp - t.hp) * v.rain / 100)
+          const amount = Math.round(t.hp - before)
+          if (amount > 0) out.push(ev(u, p, part, { effect: 'seasonRain', targets: [t.uid], amount,
+            hpPct: Math.round((t.hp / t.maxHp) * 100), fxKind: 'heal' }))
+        }
+      } else {
+        // 🎲 ดึง rand ศัตรูละ 1 ครั้ง ตามลำดับช่อง (deterministic)
+        const hit = alive(foes).filter(() => rand() * 100 < v.cold)
+        for (const f of hit) { const st = psOf(f); st.skip = 1; st.skipName = 'แช่แข็ง'; st.skipIcon = '❄️' }
+        if (hit.length) out.push(ev(u, p, part, { effect: 'seasonCold', targets: hit.map(f => f.uid), amount: hit.length, fxKind: 'freeze' }))
+      }
+    }
+  }
+  return out
 }
 
 /** ตัวที่ถูกบังคับให้เป็นเป้าในรอบนี้ (taunt) — คืน null ถ้าไม่มีใครบังคับ
@@ -424,6 +456,9 @@ export function runOnAttack(att, target, foes, rand) {
       // 🔴 healOnAttack ก็ hook: 'onAttack' ในข้อมูล แต่คำนวณใน runOnDealt (ข้างล่างนี้) — ดูคอมเมนต์ที่นั่น
     }
   }
+  // 🌍 บัฟร้อนจากฤดูกาลจบรอบก่อน (ตั้งไว้ใน runOnRound ต้นรอบนี้) — คูณทบกับตัวคูณอื่นทั้งหมดข้างบน
+  const hot = psOf(att).hotActive || 0
+  if (hot > 0) res.atkMult *= 1 + hot / 100
   return res
 }
 

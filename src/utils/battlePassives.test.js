@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  applyForms, runSetup, applyAuras, runOnStart, runOnRound, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
+  applyForms, runSetup, applyAuras, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
   tauntTargetOf,
 } from './battlePassives.js'
 import { PET_PASSIVES, passiveValueAt, passiveText, effectText, partsOf, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT, TEAM_AURA_EFFECTS } from '../data/petPassives.js'
@@ -2145,4 +2145,40 @@ test('มี common ในทีม ⇒ Earth ไม่แปลงร่าง 
   applyAuras(team, [])
   assert.equal(team[1].countsAs, undefined)
   assert.equal(Math.round(team[1].atk), 10)
+})
+
+// ── ต.ค. 2569 ฟากฟ้า: 🌍 ฤดูกาลตอนจบรอบ (Task 5) ─────────────────────────
+test('ฤดูร้อน (ช่อง 0): จบรอบ → รอบหน้าหมัดแรง +20%', () => {
+  const team = [U('earth', 'legendary', 0), U('cat', 'common', 1)]
+  const out = runOnRoundEnd(team, [], () => 0)
+  assert.equal(out[0].effect, 'seasonHot')
+  runOnRound(team)                                  // ต้นรอบถัดไป: hotNext → hotActive
+  const r = runOnAttack(team[1], U('x', 'common', 0, 'B'), [U('x', 'common', 0, 'B')], () => 0.99)
+  assert.equal(Math.round(r.atkMult * 100), 120)
+})
+
+test('ฤดูฝน (ช่อง 1): ฟื้น 25% ของเลือดที่หาย · event ต่อเป้า', () => {
+  const team = [U('cat', 'common', 0), U('earth', 'legendary', 1)]
+  team[0].hp = 60                                   // หาย 40 → ฟื้น 10
+  const out = runOnRoundEnd(team, [], () => 0)
+  const e = out.find(x => x.targets[0] === 'A0')
+  assert.equal(e.effect, 'seasonRain')
+  assert.equal(team[0].hp, 70)
+  assert.equal(e.hpPct, 70)
+})
+
+test('ฤดูหนาว (ช่อง 2): rand < 30% → ศัตรูได้ skip 1', () => {
+  const team = [U('cat', 'common', 0), U('lion', 'legendary', 1), U('earth', 'legendary', 2)]
+  const foes = [U('a', 'common', 0, 'B'), U('b', 'common', 1, 'B')]
+  const rolls = [0.1, 0.9]
+  const out = runOnRoundEnd(team, foes, () => rolls.shift())
+  assert.equal(foes[0].ps.skip, 1)
+  assert.ok(!foes[1].ps?.skip)
+  assert.deepEqual(out[0].targets, ['B0'])
+})
+
+test('ร่างองศา: ไม่มีฤดู', () => {
+  const team = [U('sol', 'legendary', 0), U('earth', 'legendary', 1)]
+  applyForms([...team, U('lion', 'legendary', 2)])
+  assert.deepEqual(runOnRoundEnd(team, [], () => 0), [])
 })
