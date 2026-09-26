@@ -605,5 +605,16 @@ test('🌍 ฤดูประกาศชิปทุกรอบ ไม่ใ�
     atk({ dmg: 5 }),
   ]
   const kinds = buildBeats(log, MH).filter(b => b.effect === 'seasonHot').map(b => b.kind)
-  assert.deepEqual(kinds, ['skill', 'skill'])
+  assert.deepEqual(kinds, ['skillShow', 'skillShow'], 'แบนเนอร์ใหญ่ทุกรอบ (user เคาะ 27 ก.ย.)')
+})
+
+test('🌧️ ฤดูฝนฟื้นหลายเพื่อนในก้อนเดียว: ใบท้ายได้แบนเนอร์ ใบอื่นพักผลไว้ (bannerQuiet)', () => {
+  const log = [
+    atk({ dmg: 5 }),
+    pas({ effect: 'seasonRain', fxKind: 'heal', uid: 'A1', petId: 'earth', targets: ['A0'] }),
+    pas({ effect: 'seasonRain', fxKind: 'heal', uid: 'A1', petId: 'earth', targets: ['A1'] }),
+    atk({ dmg: 5 }),
+  ]
+  const kinds = buildBeats(log, MH).filter(b => b.effect === 'seasonRain').map(b => b.kind)
+  assert.deepEqual(kinds, ['bannerQuiet', 'skillShow'])
 })

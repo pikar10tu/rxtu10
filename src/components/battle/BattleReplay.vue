@@ -685,7 +685,10 @@ async function applyPassive(e) {
     const opts = e.effect === 'fullMoon' ? { desc: `🌕 จันทร์เต็มดวง · หมัดนี้แรง ${e.amount}%` } : {}
     await spotlightPassive(e, t, g, opts); return
   }
+  // 🌍 ฤดู: ใบอื่นในก้อน (🌧️ ฟื้นทีละเพื่อน) พักผลไว้ลงพร้อมแบนเนอร์ของใบท้าย — เหตุก่อนผล
+  if (e.kind === 'bannerQuiet') { bannerEvents.push(e); return }
   if (e.kind === 'skillShow') {
+    const bchunk = bannerEvents.splice(0)
     sfx(LEGEND_SFX[e.petId] || 'skill')
     const pet = defForUid(e.uid)
     const p = passiveOf(pet)
@@ -693,6 +696,7 @@ async function applyPassive(e) {
       icon: pet.emoji || e.icon || '✨',
       desc: seasonDescOf(e) ?? (p && p.name === e.name ? effectText(p, entryForUid(e.uid)?.passiveLv) : ''),
       side: e.uid[0],
+      ...(bchunk.length ? { fire: () => [...bchunk, e].forEach(firePassiveFx) } : {}),
     })
     return
   }
@@ -748,6 +752,7 @@ function openSfx(e) {
 //    (อาการเดียวกับเลขดาเมจที่ user รายงานว่า "ป้ายขึ้นมั่ว") · ชิปผูกกับการ์ดตรงๆ ไม่มีพูลให้ยึด
 const chipOn = ref({})            // uid → { name, icon, out }
 const openEvents = []             // event ยกแรก (openQuiet) ที่รอลงผลพร้อมโชว์ของเพ็ทตัวเดียวกัน
+const bannerEvents = []           // event ฤดู (bannerQuiet) ที่รอลงผลพร้อมแบนเนอร์ใบท้ายก้อน
 const CHIP_OUT_MS = 300
 
 // ป้ายทักษะตัวเอง: วงส้ม = ทำงานแล้วอย่างน้อยครั้งนึง (ติดค้างทั้งไฟต์) · tuning.skillMark 'dot' = ปิดวง (ห้องแล็บเทียบของเดิม)
@@ -781,7 +786,7 @@ function hideChip(uid) {
     chipOn.value = next
   }, CHIP_OUT_MS)
 }
-function clearChips() { chipOn.value = {}; openEvents.length = 0 }
+function clearChips() { chipOn.value = {}; openEvents.length = 0; bannerEvents.length = 0 }
 
 function clearSpot(uid) {
   spot.value = null

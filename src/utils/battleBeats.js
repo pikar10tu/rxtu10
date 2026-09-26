@@ -56,9 +56,12 @@ export const FF_SCALE = { hit: 0.45, ko: 1, finish: 1, sub: 1, skill: 1, skillMo
 // เป๊ะ: จังหวะเป็น-ตายได้โมเมนต์เต็มเสมอ แม้เป็นครั้งซ้ำ — เดิมได้ skillQuiet 0ms ซึ่งขัดกับกฎบรรทัดนี้เอง
 export const CLUTCH_EFFECTS = new Set(['revive', 'cheatDeath', 'saveAlly', 'grit', 'fullMoon'])
 
-/** สกิลที่ต้องประกาศชิปทุกครั้ง (ไม่ใช่แค่ครั้งแรก) — 🌍 ฤดูทำงานรอบละครั้ง ถ้าเงียบตั้งแต่ครั้งที่สอง
- *  คนดูนึกว่าทำงานครั้งเดียวต่อไฟต์ (user เจอ 27 ก.ย.) · จังหวะรอบละ 1 ครั้งไม่ทำให้ไฟต์ยืดเกินไป */
-export const EVERY_TIME_EFFECTS = new Set(['seasonHot', 'seasonRain', 'seasonCold'])
+/** สกิลที่ได้ "แบนเนอร์ใหญ่ทุกครั้ง" (ไม่ใช่แค่ครั้งแรก) — ผลใหญ่ที่นานๆ มาที (user เคาะ 27 ก.ย.:
+ *  "ให้แบนเนอร์แสดงซ้ำได้ถ้าอิมแพคจริง แบบ earth/lunar · เปิดไฟต์ควรมีอันเดียว")
+ *  🌍 ฤดูทำงานรอบละครั้ง ⇒ ใบท้ายก้อนได้ skillShow · ใบอื่นในก้อนเดียวกัน (🌧️ ฟื้นทีละเพื่อน) ได้ bannerQuiet
+ *  = พักผลไว้ลงพร้อมแบนเนอร์ (แพทเทิร์นเดียวกับ openQuiet→openShow) ไม่งั้นเลขฟื้นเด้งก่อนแบนเนอร์ขึ้น
+ *  (🌙 เต็มดวงอยู่ใน CLUTCH_EFFECTS ได้แบนเนอร์ทุกครั้งอยู่แล้ว) */
+export const BANNER_EVERY_TIME_EFFECTS = new Set(['seasonHot', 'seasonRain', 'seasonCold'])
 
 /** effect ของ hook ที่ทำงาน "ก่อนไฟต์เริ่ม" (`setup` + `aura`) — ใช้ตัดกลุ่มยกแรก (ดู openCutOf)
  *  🔴 เพิ่ม effect ใหม่บน hook `aura`/`setup` เมื่อไหร่ ต้องมาเติมที่นี่ด้วยเสมอ — ไฟล์นี้ไม่ import อะไร
@@ -294,9 +297,10 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       //    (ตัวเองยังไม่ได้โชว์ไทม์จริง — ครั้งหน้าที่สกิลจริงทำงานต้องยังมีสิทธิ์ได้ skillShow)
       const isFreezeSkip = e.fxKind === 'skip'
       if (CLUTCH_EFFECTS.has(e.effect)) pKind.set(i, 'skillMoment')
+      else if (BANNER_EVERY_TIME_EFFECTS.has(e.effect)) { pKind.set(i, lastOfGroup ? 'skillShow' : 'bannerQuiet'); if (lastOfGroup) shown.add(uid) }
       else if (!lastOfGroup) pKind.set(i, 'skillQuiet')
       else if (!isFreezeSkip && first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
-      else pKind.set(i, first || EVERY_TIME_EFFECTS.has(e.effect) ? 'skill' : 'skillQuiet')
+      else pKind.set(i, first ? 'skill' : 'skillQuiet')
     }
   }
 

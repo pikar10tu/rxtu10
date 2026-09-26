@@ -289,7 +289,8 @@ export const PET_PASSIVES = {
   // ── ต.ค. 2569 ฟากฟ้า ─────────────────────────────────────────
   sol: {
     name: 'แสงนำทาง', icon: '🌟',
-    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { rarity: 'common', pct: 50 }, step: { pct: 5 } }],
+    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { rarity: 'common', pct: 40 }, step: { pct: 5 } }],
+    // 40 (user เคาะ 27 ก.ย. จาก sim): ซอล+common เปล่า 2 ตัว = ทีม L เปล่าพอดี (49.7%) · มีพาสสีฟ common จริง ⇒ เก่งกว่า L นิดๆ (57.7% vs 🦁🐳👾) · 50 เดิมได้ 77%
     desc: 'เพื่อนระดับธรรมดา (common) ทุกตัวในทีม พลังโจมตีและเลือดสูงสุด +{pct}%',
     short: 'common ในทีม แรง+เลือด +{pct}%',
   },

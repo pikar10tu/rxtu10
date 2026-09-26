@@ -2123,8 +2123,8 @@ test('rarityBoost: ☀️ บัฟเฉพาะ common +50% ทั้งแ�
   const team = [U('sol', 'legendary', 0), U('cat', 'common', 1), U('lion', 'legendary', 2)]
   applyForms(team)
   applyAuras(team, [])
-  assert.equal(Math.round(team[1].atk), 15)
-  assert.equal(Math.round(team[1].maxHp), 150)
+  assert.equal(Math.round(team[1].atk), 14)
+  assert.equal(Math.round(team[1].maxHp), 140)
   assert.equal(team[1].hp, team[1].maxHp)
   assert.equal(Math.round(team[2].atk), 10, 'L ไม่ได้')
   assert.equal(Math.round(team[0].atk), 10, 'Sol เองไม่ได้')
@@ -2136,7 +2136,7 @@ test('ร่างองศา: Earth นับเป็น common ได้บ�
   applyAuras(team, [])
   assert.equal(team[1].countsAs, 'common')
   assert.equal(psOf(team[1]).formed, true)
-  assert.equal(Math.round(team[1].atk), 15)
+  assert.equal(Math.round(team[1].atk), 14)
 })
 
 test('มี common ในทีม ⇒ Earth ไม่แปลงร่าง ไม่ได้บัฟ', () => {
