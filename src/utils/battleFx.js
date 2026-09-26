@@ -201,12 +201,16 @@ export function createBattleFx() {
     })
   }
 
-  function callout(uid, kind) {              // kind: 'super' | 'weak' | 'survive'
+  // kind: 'super' | 'weak' | 'survive' | 'miss' | 'block'
+  // 🔴 'miss'/'block' แยกออกมา 26 ก.ย. — เดิมหลบ (dodge) ยืมป้าย 'weak' ตอนที่มันยังเป็นป้ายเทา "ไม่โดน"
+  //    พอ 'weak' ถูกเปลี่ยนคำเป็น "ชนะทาง" ⇒ จิ้งจอกหลบแล้วจอขึ้นว่าชนะทางธาตุ (ผิดความหมาย) · CSS ใช้สีของ weak
+  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️' }
+  function callout(uid, kind) {
     const el = take('call')
     el.getAnimations?.().forEach(a => a.cancel())
-    el.className = 'brfx brfx-call ' + kind
+    el.className = 'brfx brfx-call ' + (kind === 'miss' || kind === 'block' ? 'weak' : kind)
     // คู่คำที่ user เลือก 28 ส.ค.: แพ้ทาง / ชนะทาง (เดิมใช้ 'ต้านทาน' ซึ่งไม่เข้าคู่กับ 'แพ้ทาง')
-    el.textContent = kind === 'super' ? 'แพ้ทาง! ⚡' : kind === 'survive' ? 'รอด!' : 'ชนะทาง 🛡️'
+    el.textContent = CALL_TEXT[kind] || CALL_TEXT.weak
     const base = baseXform(uid, 0, -16); if (!base) return
     el.style.opacity = '1'
     const a = el.animate([

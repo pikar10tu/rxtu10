@@ -806,19 +806,28 @@ function firePassiveFx(e) {
 
   // ── หลอดเลือด: ฮีล/ฟื้น/รับแทน ทำให้เลือดเปลี่ยนโดยไม่มี attack event
   //    ถ้าไม่อัปเดตตรงนี้ หลอดจะค้างค่าเดิมทั้งที่เลขเด้งขึ้นแล้ว (ผู้เล่นเห็นขัดกันทันที)
-  if (typeof e.hpPct === 'number' && on[0]) hp.value = { ...hp.value, [on[0]]: e.hpPct }
-  if (e.guardUid && typeof e.guardHpPct === 'number') hp.value = { ...hp.value, [e.guardUid]: e.guardHpPct }
+  if (typeof e.hpPct === 'number' && on[0]) { hp.value = { ...hp.value, [on[0]]: e.hpPct }; setDead(on[0]) }
+  if (e.guardUid && typeof e.guardHpPct === 'number') {
+    hp.value = { ...hp.value, [e.guardUid]: e.guardHpPct }
+    if (e.amount > 0) fx?.pop(e.guardUid, { dmg: e.amount, weight: 0.3 })   // หลอดผู้พิทักษ์ลด ต้องมีเลขบอกว่ารับไปเท่าไร
+  }
+  // ↑ setDead: หมัดที่ "เกือบฆ่า" ลงหลอดถึง 0 ก่อนแล้ว (เอนจิน log หมัดก่อนฟื้นชีพ/กันตาย ตั้งแต่ 26 ก.ย.)
+  //   ⇒ applyImpact ใส่คลาส dead ไป · ฟื้นแล้วต้องถอด ไม่งั้นการ์ดเทาค้างทั้งที่ยังสู้อยู่
   // ดาเมจจาก passive (ไฟเปิดไฟต์ของบาฮามุท) หักเลือดทุกเป้าในเอนจินแต่ไม่มี attack event ของตัวเอง
   // event แบกแค่ amount (ดาเมจต่อตัว) ⇒ คิดหลอดจากเลือดปัจจุบันบนจอเอง ใช้ได้กับ log เก่าที่เก็บไว้ด้วย
   // (user: "บาฮามุทพ่นไฟเปิด ไม่เห็นเลือดลด") · ตัวที่ตายมีใบ silent ตามมาปิดหลอดเป็น 0 + KO ให้อยู่แล้ว
-  // 🔴 เฉพาะ aoeOpener — infectBurst ก็ fxKind 'damage' แต่ดาเมจนั้นรวมอยู่ใน dmg ของหมัดหลักแล้ว (pierce) ใส่ด้วย = หักซ้ำ
-  if (e.effect === 'aoeOpener' && e.amount > 0) {
+  // หนามก็เหมือนกัน: เอนจินหัก att.hp ใน strike() (battleEngine) แต่ attack event แบกเลือดของ "เป้า" เท่านั้น
+  //    ⇒ เดิมหลอดคนตีค้างจนเขาโดนหมัดถัดไป · targets ของหนาม = [คนตี]
+  // 🔴 ห้ามใช้ fxKind 'damage' ทั้งก้อน — infectBurst ก็ 'damage' แต่ดาเมจนั้นรวมใน dmg ของหมัดหลักแล้ว (pierce) = หักซ้ำ
+  const SELF_DMG = e.effect === 'aoeOpener' || e.fxKind === 'thorns'
+  if (SELF_DMG && e.amount > 0) {
     const next = { ...hp.value }
     for (const t of on) {
       const max = maxHp[t] || 0
       if (!max) continue
-      next[t] = Math.max(0, Math.round((next[t] ?? 100) - (e.amount / max) * 100))   // ตัวหารเดียวกับ applyImpact
-      fx?.pop(t, { dmg: e.amount, weight: 0.55 })
+      const raw = (next[t] ?? 100) - (e.amount / max) * 100                          // ตัวหารเดียวกับ applyImpact
+      next[t] = raw > 0 ? Math.max(1, Math.round(raw)) : 0   // เหลือนิดเดียวห้ามปัดเป็น 0 (= การ์ดเทาทั้งที่ยังไม่ตาย)
+      fx?.pop(t, { dmg: e.amount, weight: e.fxKind === 'thorns' ? 0.3 : 0.55 })   // หนามเป็นเลขรอง ห้ามแย่งหมัดหลัก
     }
     hp.value = next
   }
@@ -857,7 +866,7 @@ function firePassiveFx(e) {
     case 'revive':  fx?.sweep(on, e.icon, 0); break
     case 'save':    fx?.sweep(on, '🛡️', 0); break
     case 'thorns':  fx?.sweep(on, e.icon, 0); break
-    case 'dodge':   fx?.callout(e.uid, 'weak'); break        // ใช้ป้ายเทาเดิม = "ไม่โดน"
+    case 'dodge':   fx?.callout(e.uid, 'miss'); break        // "หลบ!" — เดิมยืม 'weak' ซึ่งตอนนี้อ่านว่า "ชนะทาง"
     case 'chain':
     case 'buff':    fx?.ring(e.uid, 'windup', 260); break
     case 'aim':     fx?.ring(e.uid, 'windup', 200); break
@@ -896,7 +905,9 @@ function applyImpact(beat, g, t) {
   // ── 1) paint บนการ์ดเป้า + Vue patch ลงให้ครบก่อน (ยังไม่มีอนิเมชันการ์ดวิ่งตอนนี้) ──
   highlight(beat.target, 'flash')
   const hpBefore = shownHp(beat.target)   // โดนซ้ำกลางการไล่นับ = นับต่อจากเลขที่เห็นอยู่ ไม่กระโดด
-  hp.value = { ...hp.value, [beat.target]: Math.max(0, Math.round((beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100)) }
+  const hpRaw = (beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100
+  // เลือดเหลือแต่ไม่ถึง 0.5% ห้ามปัดเป็น 0 — setDead อ่าน hp<=0 เป็น "ตาย" แล้วทำการ์ดเทาทั้งที่ยังสู้อยู่
+  hp.value = { ...hp.value, [beat.target]: hpRaw > 0 ? Math.max(1, Math.round(hpRaw)) : 0 }
   tickHp(beat.target, hpBefore)
 
   // ── 2) ของที่ไม่ได้แตะการ์ดเป้า ยิงที่จังหวะ impact ตรงๆ (จังหวะที่คนดูรู้สึกว่า "โดน") ──
@@ -941,7 +952,9 @@ function applyImpact(beat, g, t) {
   // โดยตั้งใจ (dmg: 0 คือค่าคงที่ที่หน้าสรุปพึ่งอยู่) ⇒ เด้ง "-0" ลอยบนจอจะเป็นขยะล้วน
   // ประกายน็อก + หลอดเลือดลง 0 + การ์ดจางเทา ยังทำงานครบตามปกติจาก beat.kill/targetHpAfter
   // เหตุผลเดียวกันกับหมัดที่ถูกหลบจนเหลือแต่เชื้อ (dodge ไม่กันเชื้อ) — เลขหลักเป็น 0 ก็ไม่ต้องเด้ง
-  if (!beat.silent && (mainDmg > 0 || !infSum)) fx?.pop(beat.target, { dmg: mainDmg, crit: beat.crit, eff: beat.eff, weight: w })
+  // หมัดที่ถูกหลบ/เกราะกันจนเหลือ 0 ก็เหมือนกัน — ป้าย "หลบ!"/วงแหวนเกราะบอกเรื่องไปแล้ว "-0" ซ้อนเป็นขยะ
+  if (!beat.silent && mainDmg > 0) fx?.pop(beat.target, { dmg: mainDmg, crit: beat.crit, eff: beat.eff, weight: w })
+  else if (!beat.silent && !infSum && !beat.dodged && beat.eff !== 'super' && beat.eff !== 'weak') fx?.callout(beat.target, 'block')   // 0 โดยไม่ได้หลบ = กันไว้ได้ (เกราะ/ลดดาเมจ)
   // เด้งไล่ทีละชั้น 90ms ให้ตาอ่านได้ว่า "3 ชั้น = 3 ก้อน" — later() ผูก pendingTimers จึงถูกล้างตอน reset เสมอ
   // (เช็ค gen ซ้ำอีกชั้นกันไฟต์ใหม่ที่เริ่มก่อน timer ครบ)
   infHits.forEach((n, k) => {

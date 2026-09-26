@@ -164,11 +164,16 @@ test('บีตปิดเกมอยู่ที่หมัดที่ป�
   assert.equal(bs[at].attacker, 'A0', 'คือหมัดสวนของฟีนิกซ์')
   assert.equal(bs[at].sub, true)
 
-  const parent = bs[at + 1]
-  assert.equal(parent.t, 'attack', 'ถัดไปคือหมัดแม่ที่ถูก log ทีหลัง')
-  assert.equal(parent.dead, false, 'หมัดแม่ไม่ได้ฆ่าใคร (และดาเมจติดลบเพราะฟีนิกซ์ฟื้นเลือด)')
-  assert.equal(parent.kind, 'sub', 'อยู่บีตเดียวกัน ⇒ ยกเวลาให้ใบที่ปิดไฟต์')
-  assert.equal(beatDuration(parent), 0, 'ห้ามมีหมัดกินเวลาต่อท้ายบีตปิดเกม')
+  // 🔴 26 ก.ย.: เอนจินเลิก log หมัดแม่ทีหลังแล้ว (battleEngine.strike push ก่อน resolveSilentDeath)
+  //    ลำดับตอนนี้ = เหตุ → ผล: หมัดแม่ (เลือด 0) → ฟื้นชีพ → หมัดสวนปิดไฟต์ · ไม่มีอะไรต่อท้ายบีตปิดเกม
+  const parentAt = bs.findLastIndex((b, i) => i < at && b.t === 'attack')
+  const parent = bs[parentAt]
+  assert.equal(parent.attacker, 'B0', 'หมัดแม่ = บาฮามุทตีฟีนิกซ์ มาก่อนหมัดสวน')
+  assert.equal(parent.dead, false, 'หมัดแม่ไม่ได้ฆ่าจริง (ฟีนิกซ์ฟื้น)')
+  assert.equal(parent.targetHpAfter, 0, 'หลอดต้องลงถึง 0 ก่อนฟื้น — ไม่ใช่เลือดหลังฟื้น')
+  assert.ok(parent.dmg > 0, 'ดาเมจต้องเป็นบวก (เดิมติดลบเพราะคิดจากเลือดหลังฟื้น)')
+  assert.ok(bs.slice(parentAt + 1, at).some(b => b.effect === 'revive'), 'ฟื้นชีพอยู่ระหว่างหมัดแม่กับหมัดสวน')
+  assert.ok(!bs.slice(at + 1).some(b => b.t === 'attack'), 'ห้ามมีหมัดต่อท้ายบีตปิดเกม')
 })
 
 test('หมัดสวนที่ล้างทีมศัตรู ได้บีตปิดเกม (รูปเดียวกับที่เอนจินผลิต)', () => {

@@ -108,13 +108,14 @@ export function simulateBattle(teamA, teamB, seed) {
     //    ตอนมาถึงบรรทัดนี้ ⇒ ต้องเรียก resolveSilentDeath ตัวเดียวกัน (ไม่ใช่ลอจิกซ้ำ) เพื่อให้ธงกันซ้ำ
     //    (_deathDone ใน resolveSilentDeath) ทำงาน ไม่งั้นทีเร็กซ์ได้ 2 ชั้นจากศพเดียว (บั๊กเดิมของ P2c-1
     //    ที่เพิ่งแก้ไปแล้วครั้งหนึ่ง — คนละจุดแต่รูปแบบเดียวกัน)
-    let dead = tg.hp <= 0
-    // announced: true — ใบ 'attack' ที่ push อยู่ข้างล่างนี้แบก dead ของเป้าหลักเองอยู่แล้ว
-    // ไม่ต้องมีใบการตายเงียบซ้อนอีกใบ (สเปก §4.1) · อีก 3 จุดที่เรียกใช้ค่าเริ่มต้น false ถูกต้องแล้ว
-    if (dead) dead = resolveSilentDeath(tg, att, { announced: true })
-    log.push({
+    // 🔴 26 ก.ย. (user เห็นในรีเพลย์): ใบหมัดต้อง push "ก่อน" resolveSilentDeath — เดิม push หลัง ⇒
+    //    ฟื้นชีพ/หมัดสวนของฟีนิกซ์ · กันตายของแมว/ภูต · ชั้นทีเร็กซ์ ไปนั่ง "ก่อน" หมัดที่ฆ่าใน log (ผลก่อนเหตุ)
+    //    และ dmg = before − เลือดหลังฟื้น ติดลบ (ฟีนิกซ์ -19 บนจอเป็น "-0" + หลอดขึ้น)
+    //    เลือดที่บันทึกคือ "ตอนโดน" (hpAtHit) · dead ใส่ทีหลังเพราะต้องรู้ผลของ runOnDeath ก่อน
+    const hpAtHit = tg.hp
+    const entry = {
       t: 'attack', side: att.side, attacker: att.uid, target: tg.uid,
-      dmg: Math.round(before - tg.hp), crit: !!tier?.crit, eff: tier?.eff || 'neutral',
+      dmg: Math.round(before - hpAtHit), crit: !!tier?.crit, eff: tier?.eff || 'neutral',
       dodged: hitRes.dodged,
       // 🔒 sub = หมัดลูกใน beat เดียวกัน (cleave/multiStrike) — battleBeats ให้ timing ZERO
       //    ถ้าไม่ตั้ง flag นี้ ทุกเป้ารองจะกลายเป็น "จังหวะหมัด" ใหม่ = ไฟต์ยืดทันที (กฎเหล็กพัง)
@@ -122,8 +123,15 @@ export function simulateBattle(teamA, teamB, seed) {
       // ดาเมจเชื้อที่ทะลุมาในหมัดนี้ แตกเป็นชั้นละก้อน — **ของฝั่งจอล้วน** (BattleReplay เด้งเลขย่อย
       // แล้วหักออกจากเลขหลัก เพื่อให้ผลรวมบนจอ = เลือดที่หายจริง) · ไม่มีใครเอาไปคิดดาเมจต่อ
       ...(hitRes.pierceHits?.length ? { pierceHits: hitRes.pierceHits } : {}),
-      targetHpAfter: Math.max(0, Math.round(tg.hp)), dead,
-    })
+      // 🔴 ยังไม่ตาย (0 < hp < 0.5) ห้ามปัดเป็น 0 — จอใส่การ์ดเทา "ตาย" จาก hp 0 แล้วตัวนั้นตีต่อได้อีก (เจอ 26 ก.ย.)
+      targetHpAfter: hpAtHit > 0 ? Math.max(1, Math.round(hpAtHit)) : 0, dead: false,
+    }
+    log.push(entry)
+    // announced: true — ใบ 'attack' ข้างบนแบก dead ของเป้าหลักเองอยู่แล้ว
+    // ไม่ต้องมีใบการตายเงียบซ้อนอีกใบ (สเปก §4.1) · อีก 3 จุดที่เรียกใช้ค่าเริ่มต้น false ถูกต้องแล้ว
+    let dead = hpAtHit <= 0
+    if (dead) dead = resolveSilentDeath(tg, att, { announced: true })
+    entry.dead = dead
     // 🔴 สเปก §7.6: ตายเงียบ 2 ทางที่เหลือของ strike() นี้ — หนาม (att โดนสวนตอนบรรทัด 81) และ guardian
     //    (ผู้พิทักษ์ hitRes.guard โดนหักตอนอยู่ใน runOnHit) ต้องแก้ "หลัง" log เหตุการณ์ของหมัดนี้ (ก้อน
     //    'attack' ข้างบน) เท่านั้น — เหตุต้องมาก่อนผลเสมอ (battleBeats.js อนุมานใครปิดไฟต์จาก log ล้วน)
