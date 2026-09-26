@@ -38,6 +38,10 @@ test('wave ที่ไม่มีธีมในทะเบียน = คอ
   assert.deepEqual(eventState({ endsAt: 9e12, wave: 99, featured: ['bahamut'] }, 0).featured, ['bahamut'])
 })
 
+test('wave ที่มีธีมลงทะเบียนแล้ว = ทะเบียนธีมชนะคอนฟิกที่ขัดกัน (ป้องกันคอนฟิกพิมพ์ผิดทับธีมเงียบๆ)', () => {
+  assert.deepEqual(eventState({ wave: 2, endsAt: 9e12, featured: ['bahamut'] }, 0).featured, ['lion', 'virus', 'gorilla'])
+})
+
 test('ตัวเด่นตั้งต้นทั้งสามตัวเป็น legendary รุ่น 2 จริง (ไม่ใช่ id ที่พิมพ์ไว้ลอยๆ)', () => {
   for (const id of EVENT_FEATURED) {
     const def = PETS.find(p => p.id === id)

@@ -8,7 +8,7 @@
       <div class="bn-kicker">{{ event ? 'ตู้อีเวนต์' : 'ตู้ประจำ' }}</div>
       <div class="bn-name">{{ title }}</div>
       <template v-if="event">
-        <!-- ตัวเด่นของอีเวนต์ — บอกตรงๆ ว่าดันตัวไหนก่อน ไม่ต้องให้เดาจากเรต -->
+        <!-- ตัวเด่นของอีเวนต์ — บอกตรงๆ ว่าน้ำหนัก ×3 ทุกครั้งที่ได้ตำนาน ไม่ต้องให้เดาจากเรต -->
         <div v-if="featured.length" class="bn-feat">
           <span v-for="p in featured" :key="p.id" :title="p.name"><Emoji :char="p.emoji" /></span>
         </div>
@@ -40,7 +40,7 @@
           <span class="target-ic"><Emoji :char="targetPet ? targetPet.emoji : '🎯'" /></span>
           <span class="target-txt">
             <small>เป้าหมาย</small>
-            <b>{{ targetPet ? targetPet.name : 'ยังไม่เลือก (ออกตัวที่ยังไม่มีก่อน)' }}</b>
+            <b>{{ targetPet ? targetPet.name : (event ? 'ยังไม่เลือก · แตะเลือกตัวหน้าตู้' : 'ยังไม่เลือก (ออกตัวที่ยังไม่มีก่อน)') }}</b>
           </span>
           <span class="target-ch">{{ targetPet ? 'เปลี่ยน' : 'เลือก' }} ›</span>
         </button>
