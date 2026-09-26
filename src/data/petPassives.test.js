@@ -276,8 +276,8 @@ test('ชื่อพาสสีฟห้ามซ้ำกัน — battleBuf
 
 test('🐹 แฮมสเตอร์: หมัดเปิดตอนเลือดเต็มแรงตามที่ user เคาะ', () => {
   const part = partsOf(PET_PASSIVES.hamster)[0]
-  assert.equal(part.value.pct, 200)
-  assert.equal(passiveValueAt(part, 3).pct, 320)    // ขั้น 3 ≈ 1.6 เท่าของขั้น 1
+  assert.equal(part.value.pct, 300)   // ขึ้นจาก 200 ตามเมต้าซิม 27 ก.ย. 2026
+  assert.equal(passiveValueAt(part, 3).pct, 420)    // ขั้น 3 = 300 + 60*2
 })
 
 test('ทุก effect ที่มีเพ็ทถือจริง ต้องมีป้าย + คำอธิบาย + อยู่ในกลุ่มป้ายสักกลุ่ม', () => {
@@ -348,4 +348,20 @@ test('DUO_TITLES: ทุก id ต้องมีตัวตนจริง แ
       .some(part => d.ids.includes(part.value?.duoWith)))
     assert.ok(linked, `${d.ids.join('+')}: ไม่มี duoWith เชื่อมกันจริงในทะเบียน`)
   }
+})
+
+test('บาลานซ์รอบ 1 (27 ก.ย. 2026): ค่าขั้น 1 ตามที่ user เคาะ', () => {
+  const v = (id, eff) => passiveValueAt(partWithEffect(PET_PASSIVES[id], eff), 1)
+  assert.equal(v('bahamut', 'aoeOpener').pct, 100)
+  assert.deepEqual(v('earth', 'season'), { hot: 20, rain: 12, cold: 30 })
+  assert.equal(v('mammoth', 'armorStack').pct, 25)
+  assert.equal(v('mammoth', 'armorStack').count, 2)
+  assert.deepEqual(v('lion', 'elementTrinity'), { pct: 12, hpPct: 12 })
+  assert.deepEqual(v('luna', 'moonPhase'), { dark: 75, half: 200, full: 325 })
+  assert.equal(v('hamster', 'atkWhenFull').pct, 300)
+  assert.equal(v('hedgehog', 'thorns').pct, 60)
+  assert.equal(v('mouse', 'stealStats').pct, 5)
+  assert.equal(v('cat', 'cheatDeath').atkPct, 80)
+  assert.equal(v('butterfly', 'healLowestAlly').pct, 20)
+  assert.equal(v('turtle', 'teamDamageReduction').pct, 15)
 })

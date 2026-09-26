@@ -152,7 +152,8 @@ test('statsAfter: ทุก event ของแมวที่ขยับ atk �
   const base = r.units.A0.atk                    // ตัวเลขที่การ์ดตั้งต้น (หลังออร่า)
   const buffed = evs[0].statsAfter.A0.atk
   assert.ok(buffed > base, `ตอนได้สถานะ การ์ดต้องขึ้นเป็นเลขที่ใช้สู้จริง (${buffed} ควรมากกว่า ${base})`)
-  assert.ok(Math.abs(buffed - base * 1.5) <= 1, `+50% ตามพาสสีฟ (ได้ ${buffed} จากฐาน ${base})`)
+  // atkPct 80 (ขึ้นจาก 50 ตามเมต้าซิม 27 ก.ย. 2026)
+  assert.ok(Math.abs(buffed - base * 1.8) <= 1, `+80% ตามพาสสีฟ (ได้ ${buffed} จากฐาน ${base})`)
   assert.equal(evs[1].statsAfter.A0.atk, buffed, 'ระหว่างยังมีสถานะ เลขต้องค้างที่ค่าบัฟ')
   assert.equal(evs[2].statsAfter.A0.atk, base, 'ใบที่สถานะหมดพอดี ต้องคืนเลขเดิม ไม่ค้างบัฟ')
 })
@@ -231,7 +232,11 @@ test('guardian: ผู้พิทักษ์ที่ตายจากส่�
 })
 
 test('aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอบ 1 ได้ · ทีเร็กซ์ (ทีมเดียวกัน) ต้องได้ชั้น stackAtk (สเปก §7.6)', () => {
+  // 🔴 บาลานซ์ 27 ก.ย. 2026: บาฮามุทลดจาก 150% → 100% ⇒ ตัวเดียวไม่พอฆ่า B0 (hp 43) ก่อนรอบ 1 อีกต่อไป
+  //    (34 dmg เหลือ hp 9) ใช้ 2 ตัวรวมแรงแทน เพื่อคงเจตนาเดิมของเทส (ฆ่าก่อนรอบ 1 + ทีเร็กซ์ได้ชั้น)
+  //    ทีเร็กซ์เลื่อนไปเป็น uid 'A2' เพราะมีบาฮามุทแทรกก่อน 2 ตัว
   const A = [
+    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
     { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
     { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
   ]
@@ -242,7 +247,7 @@ test('aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอ
   assert.ok(opener, 'ต้องมี aoeOpener event')
   assert.ok(opener.targets.includes('B0'), 'บาฮามุทต้องยิงโดน B0')
 
-  const stack = r.log.find(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A1')
+  const stack = r.log.find(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A2')
   assert.ok(stack, 'ทีเร็กซ์ต้องได้ชั้น stackAtk จากศัตรูที่ตายด้วย aoeOpener ก่อนรอบ 1')
   assert.ok(r.log.indexOf(stack) > r.log.indexOf(opener), 'ต้องยิงหลัง event ของ aoeOpener เอง (เหตุมาก่อนผล)')
 
@@ -419,7 +424,11 @@ test('ตายด้วยหนาม: มีใบบันทึกการ
 })
 
 test('ตายด้วย aoeOpener: มีใบบันทึกการตาย โดยผู้ฆ่าคือบาฮามุท (สเปก §4)', () => {
+  // 🔴 บาลานซ์ 27 ก.ย. 2026: บาฮามุทลดจาก 150% → 100% ⇒ ตัวเดียวไม่พอฆ่า B0 ก่อนรอบ 1 อีกต่อไป
+  //    ใช้ 2 ตัวรวมแรงแทน (เหมือนเทส "aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอบ 1 ได้" ด้านบน)
+  //    ทีเร็กซ์เลื่อนไปเป็น uid 'A2'
   const A = [
+    { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
     { id: 'bahamut', rarity: 'legendary', element: 'fist', grade: 5 },
     { id: 'trex', rarity: 'legendary', element: 'fist', grade: 5 },
   ]
@@ -434,7 +443,7 @@ test('ตายด้วย aoeOpener: มีใบบันทึกการ�
 
   // เหตุ (หมัดเปิด) → ผล (ตาย) → ผลต่อเนื่อง (ทีเร็กซ์ได้ชั้น) ต้องเรียงตามนี้ใน log
   const opener = r.log.findIndex(e => e.t === 'passive' && e.effect === 'aoeOpener')
-  const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A1')
+  const stack = r.log.findIndex(e => e.t === 'passive' && e.effect === 'stackAtk' && e.uid === 'A2')
   const death = r.log.indexOf(silent[0])
   assert.ok(opener < death && death < stack,
     `ลำดับต้องเป็น aoeOpener(${opener}) → ตาย(${death}) → ทีเร็กซ์ได้ชั้น(${stack})`)

@@ -26,7 +26,8 @@ export const PET_PASSIVES = {
   // ── Legendary ───────────────────────────────────────────────
   bahamut: {
     name: 'ลมหายใจราชัน', icon: '🔥',
-    parts: [{ hook: 'onStart', effect: 'aoeOpener', value: { pct: 150 }, step: { pct: 4 } }],
+    // 100% (ลดจาก 150 ตามเมต้าซิม 27 ก.ย. 2026 — เดิมชนะเมต้า 95%/ติดทีม 24/30)
+    parts: [{ hook: 'onStart', effect: 'aoeOpener', value: { pct: 100 }, step: { pct: 4 } }],
     desc: 'เริ่มสู้ สาดเปลวไฟใส่ศัตรูทุกตัว {pct}% ของพลังโจมตี',
     short: 'เริ่มสู้ ยิงศัตรูทุกตัว {pct}% ของพลังโจมตี',
   },
@@ -91,7 +92,8 @@ export const PET_PASSIVES = {
   lion: {
     name: 'อาณัติเจ้าป่า', icon: '👑',
     // เลขรอบจูน 11 ก.ย.: วัดแยกได้ +47 เมื่อทีมครบ 3 สาย (สนามมาตรฐานวัดตัวนี้ไม่ได้เลย — ทีมเป็นสายเดียวกันหมด)
-    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 10, hpPct: 10 },
+    // 12/12 (ขึ้นจาก 10/10 ตามเมต้าซิม 27 ก.ย. 2026)
+    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 12, hpPct: 12 },
               step: { pct: 3, hpPct: 3 } }],
     desc: 'ทีมมีครบทั้ง 3 สาย → ทั้งทีมพลังโจมตี +{pct}% และเลือดสูงสุด +{hpPct}%',
     short: 'ครบ 3 สาย → ทั้งทีมแรง +{pct}% เลือด +{hpPct}%',
@@ -120,9 +122,9 @@ export const PET_PASSIVES = {
     name: 'เกราะปฐพี', icon: '🪨',
     // step.count = 0 — จำนวนสแตคเป็นของที่โตแล้วพัง (เกราะ 4 ชั้น = กันฟรี 4 หมัดเต็ม)
     // สิ่งที่โตตามขั้นคือ % สะท้อนเท่านั้น · ไม่มีการเติมสแตคระหว่างไฟต์ (สเปกแม่ §4.3)
-    // สะท้อน 50% (จูน 11 ก.ย. จาก 80%) — วัดแล้วตารางปะทะกันเองได้ 91.2% แรงกว่าอันดับสองแบบไม่เห็นฝุ่น
+    // สะท้อน 50% (จูน 11 ก.ย. จาก 80%) → ลดเป็น 25% ตามเมต้าซิม 27 ก.ย. 2026 (ยังแรงเกินตารางปะทะกันเอง)
     // กันหมัดเต็มสองครั้งคือความแรงหลักอยู่แล้ว · ถ้ายังเกินให้ลดจำนวนชั้นเป็น 1 ไม่ใช่ลด % ต่อ
-    parts: [{ hook: 'onHit', effect: 'armorStack', value: { count: 2, pct: 50 },
+    parts: [{ hook: 'onHit', effect: 'armorStack', value: { count: 2, pct: 25 },
               step: { count: 0, pct: 15 } }],
     desc: 'เข้าไฟต์พร้อมเกราะ {count} ชั้น · เกราะกันหมัดนั้นทั้งดอก แล้วสะท้อน {pct}% ใส่ศัตรูทุกตัว',
     short: 'เกราะ {count} ชั้น กันเต็มหมัด · สะท้อน {pct}%',
@@ -236,7 +238,8 @@ export const PET_PASSIVES = {
   // ── Common ──────────────────────────────────────────────────
   hedgehog: {
     name: 'เกราะหนาม', icon: '🦔',
-    parts: [{ hook: 'onHit', effect: 'thorns', value: { pct: 8 }, step: { pct: 3 } }],
+    // 60% (ขึ้นจาก 8% ตามเมต้าซิม 27 ก.ย. 2026 — common ตัวนี้แทบไม่มีที่ยืนที่ 8%)
+    parts: [{ hook: 'onHit', effect: 'thorns', value: { pct: 60 }, step: { pct: 3 } }],
     desc: 'สะท้อน {pct}% ของดาเมจที่รับกลับไปที่ผู้โจมตี',
     short: 'สะท้อน {pct}% ของดาเมจกลับไปที่ผู้โจมตี',
   },
@@ -244,14 +247,16 @@ export const PET_PASSIVES = {
     name: 'พลังกักตุน', icon: '🐹',
     // 🔴 200% = user เคาะเอง ("หมัดเปิดที่แรงมาก") · ส่งต่อให้ P4 ตรวจว่ามันไม่ได้ทำให้ "เปิดเกมแล้วจบเกม"
     //    ตัวนี้เป็น common ที่ทุกคนมีจากตั๋วฟรี 50 ใบ ⇒ ถ้าแรงเกิน ตู้อัพเรทจะไม่มีใครหมุน (สเปกแม่ §8)
-    parts: [{ hook: 'onAttack', effect: 'atkWhenFull', value: { pct: 200 }, step: { pct: 60 } }],
+    // 300% (ขึ้นจาก 200% ตามเมต้าซิม 27 ก.ย. 2026) — ช่อง 1 ⇒ ทีมได้ตีก่อนเสมอ เป็นงานแยกยังไม่ทำรอบนี้
+    parts: [{ hook: 'onAttack', effect: 'atkWhenFull', value: { pct: 300 }, step: { pct: 60 } }],
     desc: 'ตอนเลือดเต็ม พลังโจมตี +{pct}%',
     short: 'ตอนเลือดเต็ม พลังโจมตี +{pct}%',
   },
   mouse: {
     name: 'หัวขโมยตัวจิ๋ว', icon: '🫳',
     // 🔴 hook `setup` เท่านั้น — ห้ามขยับ maxHp กลางไฟต์เด็ดขาด (จะ re-compute แล้วพังทั้งไฟต์)
-    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 3 }, step: { pct: 1 } }],
+    // 5% (ขึ้นจาก 3% ตามเมต้าซิม 27 ก.ย. 2026)
+    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 5 }, step: { pct: 1 } }],
     desc: 'เริ่มไฟต์ ขโมยพลังโจมตีและเลือดสูงสุดจากศัตรูทุกตัว อย่างละ {pct}%',
     short: 'เริ่มไฟต์ ขโมยพลัง+เลือด {pct}% จากศัตรูทุกตัว',
   },
@@ -260,7 +265,8 @@ export const PET_PASSIVES = {
     //    แล้วได้สถานะ "ทนต่อ" ทนหมัดถึงตายอีก {grit} ครั้ง (เหลือเลือด 1 ทุกครั้ง) พร้อม atk +{atkPct}%
     //    ระหว่างมีสถานะ · รวมแล้วทนหมัดถึงตายได้ 3 ครั้ง (1 จาก cheatDeath + 2 จาก grit)
     name: 'เก้าชีวิต', icon: '🐱',
-    parts: [{ hook: 'onDeath', effect: 'cheatDeath', value: { times: 1, grit: 2, atkPct: 50 },
+    // atkPct 80 (ขึ้นจาก 50 ตามเมต้าซิม 27 ก.ย. 2026)
+    parts: [{ hook: 'onDeath', effect: 'cheatDeath', value: { times: 1, grit: 2, atkPct: 80 },
               step: { times: 0, grit: 0, atkPct: 0 } }],
     desc: 'รอดตายได้ {times} ครั้ง แล้วทนต่ออีก {grit} หมัด · ระหว่างนั้นพลังโจมตี +{atkPct}%',
     short: 'รอดตาย {times} ครั้ง แล้วทนต่ออีก {grit} หมัด (+{atkPct}%)',
@@ -271,7 +277,8 @@ export const PET_PASSIVES = {
     //    ลองเป็น teamRegen 2%/รอบ แล้ววัดได้ +53% — แรงเกินเพราะฟื้นทั้งทีมทุกรอบมันทบต้น
     //    ลงตัวที่ "รุ่นอ่อนของ unicorn" ตามแพทเทิร์นเดียวกับ dodge/damageReduction ที่ common ใช้
     name: 'ละอองเยียวยา', icon: '🦋',
-    parts: [{ hook: 'onRound', effect: 'healLowestAlly', value: { pct: 6 }, step: { pct: 3 } }],
+    // 20% (ขึ้นจาก 6% ตามเมต้าซิม 27 ก.ย. 2026)
+    parts: [{ hook: 'onRound', effect: 'healLowestAlly', value: { pct: 20 }, step: { pct: 3 } }],
     desc: 'ฟื้นเลือดเพื่อนที่บอบช้ำที่สุด {pct}% ทุกต้นรอบ',
     short: 'ฟื้นเลือดเพื่อนที่บอบช้ำสุด {pct}% ทุกต้นรอบ',
   },
@@ -281,7 +288,8 @@ export const PET_PASSIVES = {
     //    เลข common ต้องต่ำกว่าคู่เทียบ epic/legendary เสมอ · เลข 20% เป็นค่าที่ user เคาะเอง
     //    P3 ใส่ตามนั้นและให้ sim เป็นคนหั่น — ห้ามหั่นเงียบในเฟสนี้
     // "สองเท่า" ใน desc พิมพ์ตรงๆ ได้ เพราะเอนจินบวกให้เจ้าของรอบที่สองตายตัว ไม่ใช่ค่าที่จูนได้
-    parts: [{ hook: 'aura', effect: 'teamDamageReduction', value: { pct: 10 }, step: { pct: 3 } }],
+    // 15% (ขึ้นจาก 10% ตามเมต้าซิม 27 ก.ย. 2026)
+    parts: [{ hook: 'aura', effect: 'teamDamageReduction', value: { pct: 15 }, step: { pct: 3 } }],
     desc: 'ทั้งทีมรับดาเมจน้อยลง {pct}% · ตัวเต่าเองได้สองเท่า',
     short: 'ทีมรับดาเมจน้อยลง {pct}% · เต่าเองสองเท่า',
   },
@@ -296,14 +304,16 @@ export const PET_PASSIVES = {
   },
   earth: {
     name: 'ฤดูกาลหมุนเวียน', icon: '🌏',
-    parts: [{ hook: 'onRoundEnd', effect: 'season', value: { hot: 20, rain: 25, cold: 30 },
+    // rain 12 (ลดจาก 25 ตามเมต้าซิม 27 ก.ย. 2026 — ร้อน/หนาวเท่าเดิม)
+    parts: [{ hook: 'onRoundEnd', effect: 'season', value: { hot: 20, rain: 12, cold: 30 },
               step: { hot: 5, rain: 5, cold: 5 } }],
     desc: 'จบรอบทีไร ฤดูตามช่องทำงาน: ช่อง 1 ☀️ รอบหน้าทีมแรง +{hot}% · ช่อง 2 🌧️ ทีมฟื้น {rain}% ของเลือดที่หาย · ช่อง 3 ❄️ ศัตรูแต่ละตัว {cold}% โดนแช่แข็ง 1 ตา · ทีมมีซอลแต่ไม่มี common: กลายเป็นองศา (นับเป็น common ไม่มีฤดู)',
     short: 'จบรอบ: ช่อง1 แรง +{hot}% · ช่อง2 ฟื้น {rain}% · ช่อง3 แช่แข็ง {cold}%',
   },
   luna: {
     name: 'ข้างขึ้นข้างแรม', icon: '🌕',
-    parts: [{ hook: 'onAttack', effect: 'moonPhase', value: { dark: 75, half: 125, full: 175 },
+    // 75/200/325 (เดิม 75/125/175 ตามเมต้าซิม 27 ก.ย. 2026)
+    parts: [{ hook: 'onAttack', effect: 'moonPhase', value: { dark: 75, half: 200, full: 325 },
               step: { dark: 0, half: 0, full: 25 } }],
     desc: 'หมัดวนตามข้างจันทร์: 🌑 จันทร์ดับ {dark}% → 🌙 เสี้ยว {half}% → 🌕 เต็มดวง {full}%',
     short: 'หมัดวน 🌑 {dark}% → 🌙 {half}% → 🌕 {full}%',
