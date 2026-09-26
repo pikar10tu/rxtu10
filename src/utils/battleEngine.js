@@ -6,8 +6,9 @@
 import { BATTLE_CFG, buildCombatant, elementMult } from '../data/battle.js'
 import {
   applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
-  tauntTargetOf, psOf,
+  tauntTargetOf, psOf, windupOf,
 } from './battlePassives.js'
+import { PET_PASSIVES } from '../data/petPassives.js'
 
 // mulberry32 — RNG เดียวกับ sim
 function rng(seed) {
@@ -166,7 +167,7 @@ export function simulateBattle(teamA, teamB, seed) {
     // 🔴 P2c-2 (สเปก §4.3): คืน false ไม่ใช่ true — ค่าที่คืนแปลว่า "การเรียกครั้งนี้เป็นคนประกาศ
     //    การตายหรือเปล่า" ไม่ใช่ "ตายหรือเปล่า" · เส้นทางอื่นประกาศไปแล้วพร้อมใบใน log ⇒ ใบของ
     //    ผู้เรียกคนนี้ต้องไม่อ้างการฆ่าซ้ำ ไม่งั้น battleSummary แจกเครดิต kills ให้สองคนจากศพใบเดียว
-    //    และ hit() จะให้ killChain กับคนที่ไม่ได้ฆ่า
+    //    และ hit() จะให้ตีต่อ (👹 ฟาดน็อก) กับคนที่ไม่ได้ฆ่า
     //    (ตอนยังไม่มีใบการตายเงียบ การคืน true ถูกต้อง เพราะใบของชั้นนอกเป็นบันทึกเดียวที่มี)
     if (st._deathDone) return false
     const unitTeam = unit.side === 'A' ? A : B
@@ -315,18 +316,30 @@ export function simulateBattle(teamA, teamB, seed) {
         st.skip -= 1
         log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id,
           name: st.skipName || 'แช่แข็ง', icon: st.skipIcon || '❄️', effect: 'frozen', targets: [att.uid], fxKind: 'skip' })
+      } else if (windupOf(att) && !st.wound) {
+        // 👹 ง้าง (27 ก.ย. 2026) — ไม่ตี แต่นับว่าได้ตาในรอบแล้ว (เหมือนตาที่ถูกข้าม)
+        // 🔑 ตาแรกของไฟต์เป็นตาง้างเสมอ · ลำดับ if ต้องให้ skip มาก่อน ⇒ โดนแช่แข็งตอนง้างค้าง = wound ค้างไว้ ตาถัดไปฟาด
+        st.wound = true
+        const p = PET_PASSIVES[att.id]
+        log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: p.name, icon: p.icon,
+          effect: 'windup', targets: [att.uid], fxKind: 'windup' })
       } else {
+        const wu = windupOf(att)
+        if (wu) { st.wound = false; st.smashing = true }   // runOnAttack อ่าน smashing แล้วคูณ pct%
         let killed = hit(att, foes)
-        // killChain — ยังมีเพดานจาก value.max (กฎ "ห้ามเพิ่ม beat" เลิกแล้ว แต่ตีต่อไม่รู้จบไม่ได้)
-        // 🔴 เรียก runOnKill ครั้งเดียวต่อการฆ่าหนึ่งครั้ง · เช็ค att.hp > 0 (โดนหนามสวนตายกลางหมัดได้)
-        let chain = 0
-        while (killed && att.hp > 0 && turns < BATTLE_CFG.maxTurns) {
-          const k = runOnKill(att, chain, team, foes)
-          for (const e of k.events) log.push(e)
-          if (!k.extraAttack || !alive(foes).length) break
-          chain++; turns++
+        const onKill = () => { for (const e of runOnKill(att, team, foes).events) log.push(e) }
+        if (killed) onKill()
+        // 👹 ฟาดน็อก ⇒ ฟาดต่อ 1 ครั้ง (ไม่ใช่ตาใหม่ · สูงสุด 1 ครั้ง) — เพิ่ม beat จริงจึงนับ turns
+        // 🔴 เช็ค att.hp > 0 (โดนหนามสวนตายกลางหมัดได้ — ตายแล้วห้ามตีต่อ)
+        if (wu && killed && att.hp > 0 && alive(foes).length && turns < BATTLE_CFG.maxTurns) {
+          const p = PET_PASSIVES[att.id]
+          log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: p.name, icon: p.icon,
+            effect: 'windup', targets: [att.uid], fxKind: 'chain' })
+          turns++
           killed = hit(att, foes)
+          if (killed) onKill()
         }
+        if (wu) st.smashing = false
       }
       pending.delete(att.uid)
       cursor[cur] = (ai + 1) % team.length

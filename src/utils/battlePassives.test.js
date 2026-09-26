@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, passiveFor, psOf,
+  applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnAnyDeath, passiveFor, psOf, windupOf,
   tauntTargetOf,
 } from './battlePassives.js'
 import { PET_PASSIVES, passiveValueAt, passiveText, effectText, partsOf, PASSIVE_MAX_LEVEL, STATUS_ICON, STATUS_TEXT, TEAM_AURA_EFFECTS } from '../data/petPassives.js'
@@ -803,11 +803,21 @@ test('ทีเร็กซ์: parts มีแค่ hunt hook onAttack เด�
   assert.equal(parts[0].value.max, undefined, 'hunt ไม่มีเพดาน — ต้องไม่มีคีย์ max เลย')
 })
 
-test('killChain (kirin): ตีต่อได้จนถึงเพดาน แล้วหยุด (ไม่วนไม่รู้จบ)', () => {
+test('👹 windup (kirin): runOnAttack คูณ {pct}% เฉพาะตอนฟาด (psOf.smashing) · ตอนอื่นไม่ยุ่ง', () => {
   const k = u('kirin')
-  assert.equal(runOnKill(k, 0).extraAttack, true)
-  assert.equal(runOnKill(k, 1).extraAttack, true)
-  assert.equal(runOnKill(k, 2).extraAttack, false)
+  const tg = u('blank', { uid: 'B0', side: 'B' })
+  assert.deepEqual(windupOf(k)?.v, { pct: 300 })
+  assert.equal(windupOf(u('blank')), null)
+  const idle = runOnAttack(k, tg, [tg], () => 0.5)
+  assert.equal(idle.atkMult, 1)
+  assert.equal(idle.events.length, 0)
+  psOf(k).smashing = true
+  const smash = runOnAttack(k, tg, [tg], () => 0.5)
+  assert.equal(smash.atkMult, 3)
+  assert.equal(smash.events.length, 1)
+  assert.equal(smash.events[0].effect, 'windup')
+  assert.equal(smash.events[0].fxKind, 'smash')
+  assert.deepEqual(smash.events[0].targets, ['B0'])
 })
 
 test('onAnyDeath: ศัตรูล้มโดยใครก็ได้ ทุกตัวในทีมที่มี hook นี้ได้ชั้นเพิ่ม (ยึดเพดาน max)', () => {
@@ -1056,7 +1066,7 @@ test('🪨 ขั้น 3 ต้องไม่หลุดเพดานคว
   }
 })
 
-test('🪨 killChain/cheatDeath/saveAlly ต้องอัพขั้นแล้วค่าไม่ขยับ (โตแล้วพัง)', () => {
+test('🪨 windup/cheatDeath/saveAlly ต้องอัพขั้นแล้วค่าไม่ขยับ (โตแล้วพัง)', () => {
   for (const id of ['kirin', 'cat', 'genie']) {
     const part = partsOf(PET_PASSIVES[id])[0]
     assert.deepEqual(passiveValueAt(part, PASSIVE_MAX_LEVEL), passiveValueAt(part, 1), `${id} ไม่ควรอัพได้`)
@@ -1728,7 +1738,7 @@ test('infect ทะลุทุกเกราะจริง — ยิงผ�
 // ── runOnKill: ต้องยิงครั้งเดียวต่อการฆ่าหนึ่งครั้ง (บั๊กเดิม: เรียกซ้ำเมื่อศัตรูยังเหลือ) ──
 // 🔧 P2c-1 Task 4: ทีเร็กซ์ย้าย hook ไป onAnyDeath แล้ว (ยิงจาก strike() ก่อนบรรทัด log 'attack' จะถูกันซะอีก
 //    ไม่ใช่จากลูป runOnKill ใต้ hit() อีกต่อไป) และไม่มีเพ็ทจริงตัวไหนเหลือ onKill+stackAtk ให้ยืมร่างแล้ว
-//    (มีแค่ kirin ที่เหลือ onKill แต่ effect เป็น killChain) — 3 เทสนี้จึงเปลี่ยนมาใช้ __slayer สังเคราะห์
+//    (27 ก.ย. 2026: kirin ย้ายไป windup แล้ว ไม่มีเพ็ทจริงถือ onKill เลย) — 3 เทสนี้จึงเปลี่ยนมาใช้ __slayer สังเคราะห์
 //    (ค่าค่าเดิมของทีเร็กซ์ทุกประการ) เพื่อให้ยังยิงผ่าน onKill จริง ไม่งั้นเทสจับบั๊กของ Task 1 จะเงียบไปเฉยๆ
 // ⚠️ เทสนี้ (ของบรีฟฉบับแรก) ไม่ discriminate บั๊ก: เพดาน __slayer.stackAtk.max=3 บังเอิญเท่ากับจำนวน
 //    ศัตรู (3 ตัว) พอดี ⇒ ต่อให้ยิงซ้ำจริง ค่าที่ push ออกมาก็ยังไล่ 1,2,3 ไม่ซ้ำกันเอง (assert แรกผ่าน

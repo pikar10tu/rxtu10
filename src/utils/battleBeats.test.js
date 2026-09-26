@@ -510,23 +510,62 @@ test('grit ได้โมเมนต์เต็มเหมือนการ
 // 🔴 ต้องกิน log จากไฟต์จริง — รูปนี้เอนจินเป็นคนผลิต (runOnKill ยิงหลังหมัดที่ปิดไฟต์เสมอ
 //    เพราะการฆ่าที่ปิดไฟต์ไม่เคยเข้าลูป while) log เขียนมือพิสูจน์ไม่ได้ว่าเกิดจริง
 test('passive หลังบีตปิดเกมต้องเงียบ 0ms (หนี้ §7.6 ข้อ 5)', () => {
-  // 🦄 กีรินถือ killChain — น็อกตัวสุดท้ายแล้ว runOnKill ยังยิง event ตามหลังหมัดที่ปิดไฟต์
-  const r = simulateBattle([{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }],
-                           [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }], 1)
-  const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
-  const bs = buildBeats(r.log, mh)
-
-  const at = bs.findIndex(b => b.kind === 'finish')
-  assert.ok(at >= 0, 'ต้องมีบีตปิดเกม')
-
-  let checked = 0
-  for (let i = at + 1; i < bs.length; i++) {
-    if (bs[i].t !== 'passive') continue
-    checked++
-    assert.equal(beatDuration(bs[i]), 0,
-      `passive '${bs[i].effect}' เล่นต่อ ${beatDuration(bs[i])}ms หลังไฟต์จบแล้ว — ไฟต์จบแล้วไม่มีอะไรเล่นต่อ`)
+  // เดิมใช้ 🦄 กีริน (killChain) — 27 ก.ย. 2026 โอนิเปลี่ยนเป็นง้าง/ฟาด ไม่มีเพ็ทจริงถือ onKill แล้ว
+  // ⇒ ใช้เพ็ทสังเคราะห์ onKill stackAtk: runOnKill ยังยิง event ตามหลังหมัดที่ปิดไฟต์เหมือนเดิม
+  PET_PASSIVES.__slayerBeat = {
+    name: 'ทดสอบนักล่า', icon: '🧪',
+    parts: [{ hook: 'onKill', effect: 'stackAtk', value: { pct: 10, max: 5 }, step: { pct: 0, max: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
   }
-  assert.ok(checked > 0, 'ไม่เจอ passive หลังบีตปิดเกมเลย — เทสนี้ไม่ได้ทดสอบอะไร (เปลี่ยนเพ็ท/ซีด)')
+  try {
+    const r = simulateBattle([{ id: '__slayerBeat', rarity: 'legendary', element: 'fist', grade: 5 }],
+                             [{ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }], 1)
+    const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
+    const bs = buildBeats(r.log, mh)
+
+    const at = bs.findIndex(b => b.kind === 'finish')
+    assert.ok(at >= 0, 'ต้องมีบีตปิดเกม')
+
+    let checked = 0
+    for (let i = at + 1; i < bs.length; i++) {
+      if (bs[i].t !== 'passive') continue
+      checked++
+      assert.equal(beatDuration(bs[i]), 0,
+        `passive '${bs[i].effect}' เล่นต่อ ${beatDuration(bs[i])}ms หลังไฟต์จบแล้ว — ไฟต์จบแล้วไม่มีอะไรเล่นต่อ`)
+    }
+    assert.ok(checked > 0, 'ไม่เจอ passive หลังบีตปิดเกมเลย — เทสนี้ไม่ได้ทดสอบอะไร (เปลี่ยนเพ็ท/ซีด)')
+  } finally {
+    delete PET_PASSIVES.__slayerBeat
+  }
+})
+
+// ── 👹 โอนิ: ตาง้างเป็น beat ของตัวเอง (27 ก.ย. 2026) ─────────────────
+test('👹 ตาง้าง: ครั้งแรกได้ skillShow (แบนเนอร์พร้อมชาร์จ) · ทุกตาง้างกินเวลาจริง (ไม่ใช่ 0ms)', () => {
+  const L = () => ({ id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 })
+  const r = simulateBattle([{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }, L(), L()], [L(), L(), L()], 2)
+  const mh = Object.fromEntries(Object.entries(r.units).map(([uid, s]) => [uid, Math.round(s.maxHp) || 1]))
+  const bs = buildBeats(r.log, mh, { showPets: new Set(['kirin']) })
+  const winds = bs.filter(b => b.t === 'passive' && b.fxKind === 'windup')
+  assert.ok(winds.length >= 2, `ต้องมีตาง้างอย่างน้อย 2 ครั้งให้วัด (ได้ ${winds.length})`)
+  assert.equal(winds[0].kind, 'skillShow', 'ง้างครั้งแรก = โชว์ไทม์ของโอนิ')
+  for (const w of winds.slice(1)) assert.equal(w.kind, 'skill', 'ง้างครั้งต่อไป = skill (ไม่ใช่ skillQuiet)')
+  for (const w of winds) assert.ok(beatDuration(w) > 0, 'ตาง้างต้องกินเวลาจริงทุกครั้ง')
+})
+
+test('👹 ตาง้าง: ไม่ส่ง showPets ก็ยังกินเวลาทุกครั้ง · ครั้งซ้ำไม่ตกเป็น skillQuiet', () => {
+  const log = [
+    { t: 'round', n: 1 },
+    pas({ effect: 'windup', fxKind: 'windup', petId: 'kirin' }),
+    atk({ attacker: 'B0', target: 'A0' }),
+    pas({ effect: 'windup', fxKind: 'smash', petId: 'kirin' }),
+    atk(),
+    { t: 'round', n: 2 },
+    pas({ effect: 'windup', fxKind: 'windup', petId: 'kirin' }),
+    atk({ attacker: 'B0', target: 'A0' }),
+  ]
+  const bs = buildBeats(log, MH)
+  assert.deepEqual([bs[1].kind, bs[6].kind], ['skill', 'skill'])
+  assert.ok(beatDuration(bs[6]) > 0)
 })
 
 // ── hitSpread: หมัดหนักยาว หมัดเบาสั้น ความยาวรวมเท่าเดิม ──────────────

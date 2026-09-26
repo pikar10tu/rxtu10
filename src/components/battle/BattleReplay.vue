@@ -48,7 +48,7 @@
           <!-- แถวป้ายเดียว (user เลือก 26 ก.ย.): ทักษะตัวเอง │ บัฟที่ได้รับ — ลำดับเดียวกับหน้าต่างอ่าน
                เลขบนทักษะ = ชั้นสะสม/ที่เหลือเท่านั้น (ownCounter) ไม่ใช่จำนวนครั้งที่ทำงาน -->
           <span v-if="skillIcon(p, 'B'+i) || statusOf('B'+i).length" class="br-status">
-            <b v-if="skillIcon(p, 'B'+i)" class="own" :class="{ lit: skillFired['B'+i], spent: counters['B'+i]?.spent }"><Emoji :char="skillIcon(p, 'B'+i)" /><i v-if="counters['B'+i] && !counters['B'+i].spent">{{ counters['B'+i].n }}</i></b>
+            <b v-if="skillIcon(p, 'B'+i)" class="own" :class="{ lit: skillFired['B'+i], spent: counters['B'+i]?.spent }"><Emoji :char="skillIcon(p, 'B'+i)" /><i v-if="counters['B'+i] && !counters['B'+i].spent"><Emoji v-if="counters['B'+i].kind === 'charge'" char="⏳" /><template v-else>{{ counters['B'+i].n }}</template></i></b>
             <em v-if="skillIcon(p, 'B'+i) && statusOf('B'+i).length" class="sep"></em>
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
@@ -74,7 +74,7 @@
           <!-- แถวป้ายเดียว (user เลือก 26 ก.ย.): ทักษะตัวเอง │ บัฟที่ได้รับ — ลำดับเดียวกับหน้าต่างอ่าน
                เลขบนทักษะ = ชั้นสะสม/ที่เหลือเท่านั้น (ownCounter) ไม่ใช่จำนวนครั้งที่ทำงาน -->
           <span v-if="skillIcon(p, 'A'+i) || statusOf('A'+i).length" class="br-status">
-            <b v-if="skillIcon(p, 'A'+i)" class="own" :class="{ lit: skillFired['A'+i], spent: counters['A'+i]?.spent }"><Emoji :char="skillIcon(p, 'A'+i)" /><i v-if="counters['A'+i] && !counters['A'+i].spent">{{ counters['A'+i].n }}</i></b>
+            <b v-if="skillIcon(p, 'A'+i)" class="own" :class="{ lit: skillFired['A'+i], spent: counters['A'+i]?.spent }"><Emoji :char="skillIcon(p, 'A'+i)" /><i v-if="counters['A'+i] && !counters['A'+i].spent"><Emoji v-if="counters['A'+i].kind === 'charge'" char="⏳" /><template v-else>{{ counters['A'+i].n }}</template></i></b>
             <em v-if="skillIcon(p, 'A'+i) && statusOf('A'+i).length" class="sep"></em>
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
@@ -891,7 +891,7 @@ function firePassiveFx(e) {
 
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
     thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim',
-    moon: 'p_buff', fullMoon: 'p_fire' }
+    moon: 'p_buff', fullMoon: 'p_fire', windup: 'p_guard', smash: 'p_fire' }
   // เสียงประจำสกิล (สัตว์ใหญ่) ทับเสียงกลางตาม fxKind
   // 🐉 ไฟลงจริงมีเสียงพ่นไฟของตัวเอง · 🐦‍🔥 เสียงเกิดใหม่ดังตอนแบนเนอร์แล้ว ไม่ซ้อนเสียงกลาง
   // (เลเจนด์ตัวอื่นเสียงประจำตัวดังตอนโชว์ไทม์ — ตอนผลลงใช้เสียงกลางตาม fxKind เป็นฟีดแบ็กสั้นๆ)
@@ -912,6 +912,9 @@ function firePassiveFx(e) {
     case 'save':    fx?.sweep(on, '🛡️', 0); break
     case 'thorns':  fx?.sweep(on, e.icon, 0); break
     case 'dodge':   fx?.callout(e.uid, 'miss'); break        // "หลบ!" — เดิมยืม 'weak' ซึ่งตอนนี้อ่านว่า "ชนะทาง"
+    // 👹 โอนิ: ตาง้าง = วงแหวนชาร์จที่ตัวเอง (ไม่มีหมัดตามมา) · หมัดฟาด = ประกายระเบิดที่เป้า
+    case 'windup':  fx?.ring(e.uid, 'windup', 420); break
+    case 'smash':   fx?.sweep(on, '💥', 0); break
     case 'chain':
     case 'buff':    if (e.effect === 'seasonHot') fx?.sweep(on, '☀️', 60); else fx?.ring(e.uid, 'windup', 260); break
     case 'aim':     fx?.ring(e.uid, 'windup', 200); break

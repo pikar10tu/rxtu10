@@ -230,6 +230,16 @@ test('ownCounter: ชั้นสะสม — ทีเร็กซ์/กอ�
   assert.deepEqual(t, { n: 4, kind: 'stack', spent: false })
 })
 
+test('ownCounter: 👹 โอนิ ง้างค้าง = charge (ไม่มีเลข) · ฟาดแล้ว = null · ง้างใหม่ = charge อีก', () => {
+  const w = pas('A0', 'windup', { fxKind: 'windup' })
+  const sm = pas('A0', 'windup', { fxKind: 'smash' })
+  assert.equal(counterAt([p('kirin')], []), null, 'ยังไม่ง้าง = ไม่มีป้าย')
+  assert.deepEqual(counterAt([p('kirin')], [w]), { n: 1, kind: 'charge', spent: false })
+  assert.equal(counterAt([p('kirin')], [w, sm]), null, 'ฟาดแล้ว = ป้ายหาย')
+  assert.deepEqual(counterAt([p('kirin')], [w, sm, w]), { n: 1, kind: 'charge', spent: false })
+  assert.deepEqual(counterAt([p('kirin')], [w, sm], 0), { n: 1, kind: 'charge', spent: false }, 'อ่านตาม idx ที่เล่นถึง')
+})
+
 test('ownCounter: ครั้งที่เหลือ — ฟีนิกซ์ 1 → ใช้แล้ว 0', () => {
   assert.deepEqual(counterAt([p('phoenix')], []), { n: 1, kind: 'left', spent: false })
   assert.deepEqual(counterAt([p('phoenix')], [pas('A0', 'revive')]), { n: 0, kind: 'left', spent: true })

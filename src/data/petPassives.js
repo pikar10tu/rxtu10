@@ -3,7 +3,7 @@
 // สเปก: docs/superpowers/specs/2026-08-27-passive-v1-design.md
 //
 // 🔒 กฎเหล็ก: passive ไม่เพิ่มจำนวน "จังหวะหมัด" (beat) — เพิ่มได้แค่ FX กับตัวเลข
-//    ยกเว้น killChain ตัวเดียวที่เพิ่ม beat ได้ จึงต้องมีเพดาน
+//    ยกเว้น 👹 windup (ง้างเป็น beat ของตัวเอง + ฟาดน็อกได้ตีต่อ 1 ครั้ง — มีเพดานในเอนจิน)
 //
 // 🧩 โครงข้อมูล: พาสสีฟ 1 ตัว = `parts: [{ hook, effect, value, step, tag? }]`
 //    เพ็ทตัวเดียวมีได้หลายผล (บากุ = รับแทน + ฟื้นเอง) · ลำดับใน parts = ลำดับที่ event โผล่บนจอ
@@ -18,7 +18,7 @@
 //    ⚠️ step ตั้งให้ "ขั้น 3 ราว 1.5–1.8 เท่าของขั้น 1" ไม่ใช่ 3 เท่า เพราะ
 //       (1) หลายอันเป็น % ที่ชนเพดานความสมเหตุสมผล (guardian 50%×3 = 150% เป็นไปไม่ได้)
 //       (2) dodge/damageReduction ที่สูงเกินทำให้ไฟต์ยืดจนน่าเบื่อ (ชนงบเวลาที่มีเทสคุมอยู่)
-//       (3) step: 0 = "อัพขั้นไม่เพิ่มค่านี้" ใช้กับตัวที่โตแล้วพัง (killChain เพิ่ม beat · จำนวนครั้งของ cheatDeath)
+//       (3) step: 0 = "อัพขั้นไม่เพิ่มค่านี้" ใช้กับตัวที่โตแล้วพัง (windup ฟาด 300% · จำนวนครั้งของ cheatDeath)
 
 export const PASSIVE_MAX_LEVEL = 3
 
@@ -32,11 +32,14 @@ export const PET_PASSIVES = {
     short: 'เริ่มสู้ ยิงศัตรูทุกตัว {pct}% ของพลังโจมตี',
   },
   kirin: {
-    name: 'อสูรกระหายเลือด', icon: '👹',
-    // ⚠️ step 0 โดยตั้งใจ — killChain เป็นตัวเดียวที่เพิ่ม beat จริง ให้อัพได้ = ไฟต์ยืดตามขั้น
-    parts: [{ hook: 'onKill', effect: 'killChain', value: { max: 2 }, step: { max: 0 } }],
-    desc: 'น็อกศัตรูแล้วได้ตีต่อทันที (สูงสุด {max} ครั้งต่อตา)',
-    short: 'น็อกแล้วได้ตีต่อ สูงสุด {max} ครั้ง/ตา',
+    name: 'ง้างตะบองฟาด!', icon: '👹',
+    // 27 ก.ย. 2026 (ไอเดีย user): ง้าง 1 ตา → ฟาด {pct}% · ฟาดน็อก = ตีต่อ 1 ครั้งแรงเท่ากัน · แล้ววนง้างใหม่
+    // ตาแรกของไฟต์ = ง้าง (แบนเนอร์ขึ้นพร้อมชาร์จ — user เคาะ) · โดนแช่แข็งตอนง้างค้าง = ง้างค้างไว้ต่อ
+    // เดิม 'อสูรกระหายเลือด' (onKill killChain) — ทำงานราว 1 ครั้ง/ไฟต์ จึงรื้อทั้งกลไก
+    // ⚠️ step 0 โดยตั้งใจ — ฟาด 300% แรงพอแล้ว อัพขั้นไม่ขยับ
+    parts: [{ hook: 'onAttack', effect: 'windup', value: { pct: 300 }, step: { pct: 0 } }],
+    desc: 'ตาแรกง้างตะบอง ตาถัดไปฟาด {pct}% · ฟาดน็อกได้ฟาดต่ออีก 1 ครั้ง แล้ววนง้างใหม่',
+    short: 'ง้าง 1 ตา → ฟาด {pct}% · น็อกแล้วฟาดต่อ',
   },
   trex: {
     name: 'สัญชาตญาณนักล่า', icon: '🦖',
@@ -438,6 +441,8 @@ export const STATUS_ICON = {
   duoRegen: '💧',
   // 🦖 ทีเร็กซ์ (27 ก.ย. 2026 บาลานซ์รอบ 1): ย้ายออกจาก stackAtk → effect ใหม่ 'hunt' (ไม่มีเพดาน)
   hunt: '📈',
+  // 👹 โอนิ (27 ก.ย. 2026): ป้าย "ง้างค้างอยู่" — ⏳ แทน 🏏 เพราะ 🏏 ไม่มีไฟล์ Fluent (ห้ามรัน fetch-fluent ในงานนี้)
+  windup: '⏳',
   // ── P2 ──
   elementTrinity: '🧩', teamLifesteal: '🩸', teamDamageReduction: '🧱', atkOnHit: '💢',
   berserk: '🔥', giantSlayer: '🗡️', healOnAttack: '💞', stealStats: '🫳',
@@ -470,6 +475,7 @@ export const STATUS_TEXT = {
   cheatDeath: 'รอดตายด้วยเลือด 1 ได้ 1 ครั้ง', stackAtk: 'ยิ่งฆ่ายิ่งแรง',
   duoRegen: 'ทีมฟื้นเลือดทุกรอบ',
   hunt: 'ยิ่งตียิ่งแรง สะสมไม่มีเพดาน',
+  windup: 'ง้างตะบองอยู่ ตาถัดไปฟาดแรง',
   // ── P2 ──
   elementTrinity: 'ทีมครบสายจึงแรงขึ้น', teamLifesteal: 'ตีแล้วดูดเลือด',
   teamDamageReduction: 'ทั้งทีมลดดาเมจที่ได้รับ', atkOnHit: 'ยิ่งโดนตียิ่งแรง',
@@ -491,7 +497,7 @@ export const FOE_AURA_EFFECTS = new Set(['enemyVuln'])
 /** สถานะติดตัวที่ไม่ต้องพึ่งใคร — ป้ายลงเฉพาะเจ้าตัว */
 export const SELF_STATUS_EFFECTS = new Set([
   'guardian', 'damageReduction', 'dodge', 'thorns', 'revive', 'saveAlly', 'cheatDeath', 'stackAtk',
-  'atkOnHit', 'berserk', 'giantSlayer', 'stealStats', 'healOnAttack', 'hunt',
+  'atkOnHit', 'berserk', 'giantSlayer', 'stealStats', 'healOnAttack', 'hunt', 'windup',
   // ── P2b ── สถานะติดตัวเจ้าของสกิลเอง (คนละกลุ่มกับ infect ด้านล่าง ที่ลงบน "ตัวที่ถูกตี" แทน)
   'taunt', 'armorStack',
   // 'grit' ไม่อยู่ในกลุ่มนี้ (หรือกลุ่มไหนเลย) โดยตั้งใจ — ดูเหตุผลยาวที่คอมเมนต์ของ STATUS_ICON ด้านบน

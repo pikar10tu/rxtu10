@@ -213,6 +213,7 @@ export function liveBuffs(sources, beats, idx, uid = null) {
 /** เลขบนป้ายทักษะตัวเองในการ์ด (แถวป้ายซ้ายล่าง) — null = ไม่มีเลข
  *  user 26 ก.ย. 2026: "ไม่ต้องนับว่าทำงานกี่ครั้ง (เลขขึ้นแต่ตีแรงเท่าเดิม = งง)
  *  นับเฉพาะสกิลที่สะสมชั้น หรือจำนวนที่เหลือ" ⇒ kind 'stack' = ชั้นตอนนี้ · 'left' = ที่เหลือ (0 = spent ใช้หมดแล้ว)
+ *  · 'charge' = 👹 ง้างค้างอยู่ (ไม่มีเลข — การ์ดวาดไอคอนแทน)
  *  อ่านจาก liveBuffs ชุดเดียวกับหน้าต่างอ่าน ⇒ เลขบนการ์ดกับ "x/max ชั้น · ใช้ไปแล้ว" ในหน้าต่างไม่มีทางขัดกัน */
 export function ownCounter(sources, beats, idx, uid) {
   const live = liveBuffs(sources, beats, idx, uid)
@@ -226,6 +227,14 @@ export function ownCounter(sources, beats, idx, uid) {
     case 'hunt': {
       const n = Math.max(b.stacks || 0, v.start || 0)
       return n > 0 ? { n, kind: 'stack', spent: false } : null
+    }
+    case 'windup': {
+      // 👹 ง้างค้างอยู่ = event windup ล่าสุดของตัวนี้เป็นตาง้าง (fxKind 'windup') · ฟาดแล้ว (smash/chain) = ไม่มีป้าย
+      //    kind 'charge' ไม่มีเลข — การ์ดวาดเป็นไอคอน ⏳ แทนตัวเลข
+      let charging = false
+      const played = (beats || []).slice(0, Math.max(0, (idx ?? -1) + 1))
+      for (const e of played) if (e?.t === 'passive' && e.effect === 'windup' && e.uid === uid) charging = e.fxKind === 'windup'
+      return charging ? { n: 1, kind: 'charge', spent: false } : null
     }
     case 'armorStack': return left(b.stacks ?? v.count ?? 0)
     case 'revive':
@@ -241,7 +250,7 @@ export function ownCounter(sources, beats, idx, uid) {
     default: return null
   }
 }
-const COUNTER_EFFECTS = new Set(['stackAtk', 'atkOnHit', 'hunt', 'armorStack', 'revive', 'saveAlly', 'cheatDeath'])
+const COUNTER_EFFECTS = new Set(['stackAtk', 'atkOnHit', 'hunt', 'windup', 'armorStack', 'revive', 'saveAlly', 'cheatDeath'])
 
 /** ย่อเป็นรูปที่ป้ายไอคอนเล็กบนการ์ดใช้ — ตัดที่มาทิ้ง + ตัดที่ max
  *  ⚠️ ต้องไม่มี effect ซ้ำ (ป้าย 💨 สองอันบนการ์ดเดียวอ่านไม่รู้เรื่อง) */

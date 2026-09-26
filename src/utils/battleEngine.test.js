@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { simulateBattle } from './battleEngine.js'
-import { buildCombatant } from '../data/battle.js'
+import { buildCombatant, BATTLE_CFG } from '../data/battle.js'
 import { PET_PASSIVES } from '../data/petPassives.js'
 
 // 🔑 ตัวประกอบในเทสไฟต์จริงใช้ `id: 'blank'` (เพ็ทที่ไม่มีพาสสีฟ) โดยตั้งใจ — เดิมใช้ 🐭 หนู
@@ -275,33 +275,120 @@ test('aoeOpener: บาฮามุทฆ่าศัตรูก่อนรอ
   }
 })
 
-test('killChain: ผู้ตีที่ตายจากหนามกลางหมัดของตัวเองต้องหยุดตี ไม่ตีต่อทั้งที่ตายไปแล้ว (สเปก §7.6 ข้อ 6)', () => {
-  // เพ็ทสังเคราะห์หนาม 500% — บังคับให้ "ตีศัตรูตัวแรกสำเร็จ" กับ "หนามสวนกลับจนตัวเองตาย" เกิดในหมัดเดียวกัน
-  // แบบไม่ต้องพึ่ง RNG พอดิบพอดี (thorns ธรรมดา 8% ของเกมจริงไม่พอฆ่ากีรินได้ภายในหมัดเดียว)
+test('👹 ฟาดน็อกแต่ผู้ตีตายจากหนามกลางหมัด ⇒ ต้องไม่ฟาดต่อ (สเปก §7.6 ข้อ 6 · เจตนาเดิมของเทส killChain)', () => {
+  // เพ็ทสังเคราะห์หนาม 500% — บังคับให้ "ฟาดศัตรูตัวแรกน็อก" กับ "หนามสวนกลับจนตัวเองตาย" เกิดในหมัดเดียวกัน
   PET_PASSIVES.__spikeTest = {
     name: 'หนามทดสอบ', icon: '🧪',
     parts: [{ hook: 'onHit', effect: 'thorns', value: { pct: 500 }, step: { pct: 0 } }],
     desc: 'ทดสอบ', short: 'ทดสอบ',
   }
   try {
-    const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]   // killChain สูงสุด 2 ครั้ง/ตา
+    const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]
     const B = [
       { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },
       { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },        // ตัวที่ 2 = เป้าที่ไม่ควรถูกตีถ้าแก้ถูก
     ]
     const r = simulateBattle(A, B, 43)
 
-    const atkA0 = r.log.filter(e => e.t === 'attack' && e.attacker === 'A0')
-    assert.equal(atkA0.length, 1, 'กีรินตายจากหนามกลางหมัดแรก (ฆ่า B0 สำเร็จแต่โดนหนามสวนตายไปด้วย) ต้องไม่มีหมัดที่ 2 จาก killChain')
-    assert.equal(atkA0[0].dead, true, 'หมัดแรกต้องฆ่า B0 สำเร็จจริง (เข้าเงื่อนไข killChain)')
-
-    const chainEvents = r.log.filter(e => e.t === 'passive' && e.effect === 'killChain')
-    assert.equal(chainEvents.length, 0, 'ต้องไม่มี killChain event เกิดขึ้นเลย เพราะกีรินตายไปแล้วก่อนถึงจังหวะตีต่อ')
-
-    assert.equal(r.winner, 'B', 'กีรินตายจริง เหลือ B1 รอด ทีม B ต้องชนะ')
+    const atkA0 = r.log.filter(e => e.t === 'attack' && e.attacker === 'A0' && !e.sub)
+    assert.equal(atkA0.length, 1, 'โอนิตายจากหนามกลางหมัดฟาดแรก ต้องไม่มีหมัดฟาดต่อ')
+    assert.equal(atkA0[0].dead, true, 'หมัดฟาดต้องน็อก B0 จริง (เข้าเงื่อนไขฟาดต่อ)')
+    const chain = r.log.filter(e => e.t === 'passive' && e.effect === 'windup' && e.fxKind === 'chain')
+    assert.equal(chain.length, 0, 'ต้องไม่มี event ฟาดต่อ เพราะโอนิตายไปแล้ว')
+    assert.equal(r.winner, 'B', 'โอนิตายจริง เหลือ B1 รอด ทีม B ต้องชนะ')
   } finally {
     delete PET_PASSIVES.__spikeTest
   }
+})
+
+// ── 👹 โอนิ "ง้างตะบองฟาด!" (27 ก.ย. 2026) ─────────────────────────────
+const oniActs = (log, uid = 'A0') => log.filter(e =>
+  (e.t === 'attack' && e.attacker === uid && !e.sub) ||
+  (e.t === 'passive' && e.uid === uid && (e.fxKind === 'windup' || e.fxKind === 'skip' || e.fxKind === 'chain')))
+  .map(e => e.t === 'attack' ? 'hit' : e.fxKind)
+
+test('👹 ตาแรกง้าง (ไม่มีหมัด) → ตาถัดไปฟาด ~300% → วนง้างใหม่', () => {
+  const L = () => ({ id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 })
+  const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }, L(), L()]
+  const r = simulateBattle(A, [L(), L(), L()], 2)
+  const acts = oniActs(r.log)
+  assert.deepEqual(acts.slice(0, 4), ['windup', 'hit', 'windup', 'hit'], `ลำดับตาของโอนิ: ${acts.join(',')}`)
+  const firstWind = r.log.findIndex(e => e.fxKind === 'windup' && e.uid === 'A0')
+  assert.ok(!r.log.slice(0, firstWind).some(e => e.t === 'attack' && e.attacker === 'A0'), 'ตาแรกต้องไม่มีหมัด')
+  // ฟาด = 3× หมัดปกติ ⇒ dmg/atk อยู่ในช่วง 3 × [1 - var, critMult × (1 + var)]
+  // (เอนจินไม่มีค่าป้องกัน · blank ไม่มีลดดาเมจ · เลือกเฉพาะหมัดที่ไม่น็อก = ดาเมจไม่ถูกตัดที่เลือดเป้า)
+  // หมัดปกติสูงสุด = critMult × (1 + var) ≈ 1.95× < ขอบล่างของฟาด 2.34× ⇒ แยกกันขาด
+  const atk = r.units.A0.atk
+  const { variance, critMult } = BATTLE_CFG
+  const smashes = r.log.filter(e => e.t === 'attack' && e.attacker === 'A0' && !e.sub && !e.dead)
+  assert.ok(smashes.length >= 1, 'ต้องมีหมัดฟาดที่ไม่น็อกให้วัด (เปลี่ยนซีด)')
+  for (const e of smashes) {
+    const ratio = e.dmg / atk
+    assert.ok(ratio >= 3 * (1 - variance) - 0.02 && ratio <= 3 * critMult * (1 + variance) + 0.02, `ฟาดต้อง ≈3× (ได้ ${ratio.toFixed(2)}×)`)
+  }
+  assert.equal(r.log.filter(e => e.effect === 'windup' && e.fxKind === 'smash').length,
+    r.log.filter(e => e.t === 'attack' && e.attacker === 'A0' && !e.sub).length, 'ทุกหมัดฟาดมี event smash นำหน้า')
+})
+
+test('👹 ฟาดน็อก ⇒ ฟาดต่อทันที 1 ครั้ง (×3 เช่นกัน) แล้วไม่ต่อครั้งที่ 3 แม้น็อกอีก', () => {
+  const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]
+  const B = Array.from({ length: 3 }, () => ({ id: 'blank', rarity: 'common', element: 'fist', grade: 0 }))
+  const r = simulateBattle(A, B, 3)
+  const acts = oniActs(r.log)
+  assert.deepEqual(acts.slice(0, 5), ['windup', 'hit', 'chain', 'hit', 'windup'], `ลำดับ: ${acts.join(',')}`)
+  const hits = r.log.filter(e => e.t === 'attack' && e.attacker === 'A0' && !e.sub)
+  assert.equal(hits[0].dead, true, 'หมัดฟาดแรกน็อก')
+  assert.equal(hits[1].dead, true, 'หมัดฟาดต่อก็น็อก — แต่ต้องไม่มีฟาดต่อครั้งที่ 3')
+  // หมัดฟาดต่อต้องตามหลัง event chain ทันที (ไม่มีหมัดฝั่ง B คั่น) และแบก smash ×3 ด้วย
+  const ci = r.log.findIndex(e => e.fxKind === 'chain' && e.uid === 'A0')
+  const next = r.log.slice(ci + 1).find(e => e.t === 'attack')
+  assert.equal(next.attacker, 'A0')
+  assert.ok(r.log.slice(ci + 1, r.log.indexOf(next)).some(e => e.fxKind === 'smash'), 'ฟาดต่อต้องแรง ×3 ด้วย')
+  assert.equal(r.log.filter(e => e.fxKind === 'chain').length, 1, 'ฟาดต่อได้สูงสุด 1 ครั้งต่อการฟาด')
+})
+
+test('👹 โดนแช่แข็งตอนง้างค้าง ⇒ ตานั้นหาย · ง้างยังค้าง · ตาถัดไปที่ได้เล่นคือฟาด (ไม่ง้างซ้ำ)', () => {
+  PET_PASSIVES.__freezer = {
+    name: 'ทดสอบหนาว', icon: '🧪',
+    parts: [{ hook: 'onRoundEnd', effect: 'season', value: { hot: 0, rain: 0, cold: 50 }, step: { hot: 0, rain: 0, cold: 0 } }],
+    desc: 'ทดสอบ', short: 'ทดสอบ',
+  }
+  try {
+    let sawSkipAfterWindup = 0
+    for (let seed = 1; seed <= 40; seed++) {
+      const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 },
+        { id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 },
+        { id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 }]
+      const B = [
+        { id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 },
+        { id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 },
+        { id: '__freezer', rarity: 'legendary', element: 'fist', grade: 5 },   // ช่อง 3 = ฤดูหนาว
+      ]
+      const acts = oniActs(simulateBattle(A, B, seed).log)
+      let pendingWind = false
+      for (let i = 0; i < acts.length; i++) {
+        if (acts[i] === 'windup') { assert.equal(pendingWind, false, `ซีด ${seed}: ง้างซ้ำทั้งที่ง้างค้าง ${acts.join(',')}`); pendingWind = true }
+        else if (acts[i] === 'skip') { if (pendingWind) sawSkipAfterWindup++ }
+        else if (acts[i] === 'hit') { assert.equal(pendingWind, true, `ซีด ${seed}: ฟาดโดยไม่ได้ง้าง ${acts.join(',')}`); pendingWind = false }
+        else if (acts[i] === 'chain') { i++ }   // ข้ามหมัดฟาดต่อ
+      }
+    }
+    assert.ok(sawSkipAfterWindup > 0, 'ไม่เจอเคสแช่แข็งตอนง้างค้างเลย — เทสไม่ได้ทดสอบอะไร')
+  } finally {
+    delete PET_PASSIVES.__freezer
+  }
+})
+
+test('👹 ตาง้างนับเป็นการได้ตาในรอบ — รอบ 1 จบได้ ไฟต์ไม่ค้าง', () => {
+  const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]
+  const B = [{ id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 }]
+  const r = simulateBattle(A, B, 11)
+  const r2 = r.log.findIndex(e => e.t === 'round' && e.n === 2)
+  assert.ok(r2 > 0, 'ต้องมีรอบ 2 (รอบ 1 จบได้แม้โอนิแค่ง้าง)')
+  assert.equal(r.log.slice(0, r2).filter(e => e.fxKind === 'windup').length, 1, 'รอบ 1 = ง้าง 1 ครั้ง')
+  assert.equal(r.log.slice(0, r2).filter(e => e.t === 'attack' && e.attacker === 'B0').length, 1, 'รอบ 1 = B ตี 1 ครั้ง')
+  assert.equal(r.log[r.log.length - 1].t, 'end')
+  assert.ok(r.winner === 'A' || r.winner === 'B', 'ไฟต์ต้องจบด้วยการล้มทีม ไม่ใช่หมดตา')
 })
 
 // ── รีวิวรอบ 2 (6 ก.ย. 2026): บั๊กตระกูลเดียวกับ killChain ที่หลุดไว้ ──────────
@@ -420,7 +507,7 @@ test('ตายด้วยหนาม: มีใบบันทึกการ
     desc: 'ทดสอบ', short: 'ทดสอบ',
   }
   try {
-    // ชุดเดียวกับเทส killChain ด้านบนเป๊ะ (ซีด 43) — กีรินฆ่า B0 สำเร็จแล้วโดนหนามสวนตายในหมัดเดียวกัน
+    // ชุดเดียวกับเทสฟาดต่อ/หนามด้านบนเป๊ะ (ซีด 43) — โอนิฟาด B0 สำเร็จแล้วโดนหนามสวนตายในหมัดเดียวกัน
     const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]
     const B = [
       { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },

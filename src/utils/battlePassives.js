@@ -4,7 +4,7 @@
 //
 // 🔒 กฎเหล็ก: passive ไม่เพิ่มจำนวน beat — cleave/multiStrike อยู่ใน beat เดียวกับหมัดหลัก
 //    (ยิงเป็น event `passive` ที่ battleBeats ให้ timing ZERO ⇒ ไม่กินเวลา)
-//    killChain เป็นข้อยกเว้นเดียวที่เพิ่ม beat จริง จึงมีเพดาน
+//    👹 windup เป็นข้อยกเว้นเดียวที่เพิ่ม beat จริง (ตาง้าง + ฟาดน็อกตีต่อ 1 ครั้ง) — เพดานอยู่ในเอนจิน
 import { PET_PASSIVES, passiveValueAt, partsAt, partAt, partWithEffect } from '../data/petPassives.js'
 import { degreeFormActive, seasonOfSlot } from './petForms.js'
 
@@ -384,6 +384,12 @@ export function tauntTargetOf(foes) {
 // ══════════════════════════════════════════════════════════════
 //  onAttack — ก่อนคิดดาเมจ (คืนตัวปรับ ไม่แก้ state เอง)
 // ══════════════════════════════════════════════════════════════
+/** 👹 พาสสีฟง้าง/ฟาดของ unit นี้ (null = ไม่มี) — เอนจินใช้ตัดสินว่าตานี้ง้างหรือฟาด */
+export function windupOf(unit) {
+  const part = partWithEffect(passiveFor(unit), 'windup')
+  return part ? { part, v: valOf(part, unit) } : null
+}
+
 /**
  * คืน { target, atkMult, extra[], strikes, events }
  *   target  = เป้าหลัก (อาจถูกเปลี่ยนโดย targetLowest)
@@ -487,6 +493,14 @@ export function runOnAttack(att, target, foes, rand, attTeam = null) {
         res.events.push(ev(att, p, part, { targets: [tg.uid], amount: Math.round(lost * v.pct), fxKind: 'aim' }))
         break
       }
+      case 'windup':
+        // 👹 โอนิ: เอนจินเป็นคนตัดสินว่าตานี้ง้างหรือฟาด (windupOf + psOf.smashing) — ที่นี่แค่คูณหมัดฟาด
+        //    ทั้งหมัดฟาดปกติและหมัดตีต่อหลังฟาดน็อก (smashing ยังเป็น true ตลอดทั้งตา)
+        if (psOf(att).smashing) {
+          res.atkMult *= v.pct / 100
+          res.events.push(ev(att, p, part, { targets: [res.target.uid], fxKind: 'smash' }))
+        }
+        break
       // 🔴 healOnAttack ก็ hook: 'onAttack' ในข้อมูล แต่คำนวณใน runOnDealt (ข้างล่างนี้) — ดูคอมเมนต์ที่นั่น
       case 'hunt': {
         // 🦖 ทุกหมัดที่ตี +pct% ของ atk ฐาน (หลัง aura, จับไว้ตอน initHunt) บวกเพิ่มเสมอ ไม่เซ็ตทับ
@@ -914,9 +928,9 @@ export function runOnAnyDeath(dead, killerTeam, foes, rand) {
 // ══════════════════════════════════════════════════════════════
 //  onKill — หลังศัตรูตายจริง (onDeath ต้องผ่านไปแล้ว)
 // ══════════════════════════════════════════════════════════════
-/** คืน { extraAttack, events } — extraAttack = true ให้เอนจินตีต่ออีก 1 หมัด (beat เพิ่มจริง) */
-export function runOnKill(killer, chainUsed, team, foes) {
-  const out = { extraAttack: false, events: [] }
+/** คืน { events } · ตีต่อตอนน็อก (killChain เดิม) ถูกแทนด้วย 👹 windup ในเอนจินแล้ว (27 ก.ย. 2026) */
+export function runOnKill(killer, team, foes) {
+  const out = { events: [] }
   const p = passiveFor(killer)
   for (const part of partsAt(p, 'onKill')) {
     const v = valOf(part, killer)
@@ -929,11 +943,6 @@ export function runOnKill(killer, chainUsed, team, foes) {
         const e = ev(killer, p, part, { targets: [killer.uid], amount: st.atkStacks, fxKind: 'buff' })
         if (team && foes) e.statsAfter = statsSnapshot(team, foes)
         out.events.push(e)
-      }
-    } else if (part.effect === 'killChain') {
-      if (chainUsed < v.max) {
-        out.extraAttack = true
-        out.events.push(ev(killer, p, part, { targets: [killer.uid], fxKind: 'chain' }))
       }
     }
   }

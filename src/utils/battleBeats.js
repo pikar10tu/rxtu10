@@ -270,7 +270,7 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       const e = evts[i]
       if (!e || e.t !== 'passive') { groupId = null; groupEffCount = null; continue }
       // 🔴 หนี้ §7.6 ข้อ 5: event ชนิด passive ไม่ผ่าน finishAt/finishGroup (รับ kind จาก pass นี้แทน)
-      //    ⇒ killChain/stackAtk ของการฆ่าที่ปิดไฟต์ (runOnKill ยิงหลังหมัดที่ปิดเสมอ เพราะการฆ่าที่ปิด
+      //    ⇒ stackAtk (onKill) ของการฆ่าที่ปิดไฟต์ (runOnKill ยิงหลังหมัดที่ปิดเสมอ เพราะการฆ่าที่ปิด
       //    ไฟต์ไม่เคยเข้าลูป while) ได้ 'skill' 200ms = เล่นต่อทั้งที่ไฟต์จบไปแล้ว
       //    ไฟต์จบแล้วไม่มีอะไรเล่นต่อ — เงียบเสมอ ไม่ว่าจะเป็น CLUTCH_EFFECTS หรือไม่
       //    (finishAt คำนวณเสร็จก่อนถึงบล็อกนี้แล้ว — อ่านค่ามาใช้ตรงๆ ห้ามคำนวณซ้ำ)
@@ -296,11 +296,15 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       //    ก่อนที่สกิลจริงจะได้พูดอะไรเลย ⇒ ต้องตกไปทาง 'skill'/'skillQuiet' เสมอ และห้ามนับเข้า `shown`
       //    (ตัวเองยังไม่ได้โชว์ไทม์จริง — ครั้งหน้าที่สกิลจริงทำงานต้องยังมีสิทธิ์ได้ skillShow)
       const isFreezeSkip = e.fxKind === 'skip'
+      // 👹 ตาง้างของโอนิ (27 ก.ย. 2026) ไม่มีหมัดตามมา = ต้องเป็น beat ของตัวเองทุกครั้ง (ห้าม skillQuiet 0ms
+      //    ไม่งั้นตาง้างครั้งที่ 2+ หายวับ) · ต่างจากตาที่ถูกแช่แข็ง: ง้างคือสกิลจริง ⇒ ครั้งแรกได้โชว์ไทม์
+      //    (แบนเนอร์ขึ้นพร้อมชาร์จ — user เคาะ) ครั้งต่อไปได้ 'skill'
+      const isWindup = e.fxKind === 'windup'
       if (CLUTCH_EFFECTS.has(e.effect)) pKind.set(i, 'skillMoment')
       else if (BANNER_EVERY_TIME_EFFECTS.has(e.effect)) { pKind.set(i, lastOfGroup ? 'skillShow' : 'bannerQuiet'); if (lastOfGroup) shown.add(uid) }
-      else if (!lastOfGroup) pKind.set(i, 'skillQuiet')
+      else if (!lastOfGroup && !isWindup) pKind.set(i, 'skillQuiet')
       else if (!isFreezeSkip && first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
-      else pKind.set(i, first ? 'skill' : 'skillQuiet')
+      else pKind.set(i, (first || isWindup) ? 'skill' : 'skillQuiet')
     }
   }
 
