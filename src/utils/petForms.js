@@ -34,6 +34,15 @@ export const SEASONS = [
 ]
 export const seasonOfSlot = (slot) => SEASONS[Math.max(0, Math.min(SEASONS.length - 1, slot | 0))]
 
+/** ข้อความผลของฤดู (เลขมาจากค่าพาสสีฟตามขั้น — ห้ามพิมพ์เลขตรง) · ใช้ในแบนเนอร์ + หน้าดูบัฟ */
+export function seasonText(key, v) {
+  if (key === 'hot') return `จบรอบ: รอบหน้าทั้งทีมแรง +${v.hot}%`
+  if (key === 'rain') return `จบรอบ: ทั้งทีมฟื้น ${v.rain}% ของเลือดที่หาย`
+  return `จบรอบ: ศัตรูแต่ละตัว ${v.cold}% โดนแช่แข็ง 1 ตา`
+}
+/** effect ของ event ฤดู → key ใน SEASONS */
+export const SEASON_OF_EFFECT = { seasonHot: 'hot', seasonRain: 'rain', seasonCold: 'cold' }
+
 /** คู่ที่แบนเนอร์ขึ้นหน้าเพ็ทสองตัวชิดกัน — `when` คืน true เมื่อคู่ทำงานในทีมนั้น */
 const DUO_FACES = [
   { ids: ['sol', 'earth'], when: degreeFormActive },

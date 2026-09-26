@@ -47,9 +47,9 @@
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <!-- แถวป้ายเดียว (user เลือก 26 ก.ย.): ทักษะตัวเอง │ บัฟที่ได้รับ — ลำดับเดียวกับหน้าต่างอ่าน
                เลขบนทักษะ = ชั้นสะสม/ที่เหลือเท่านั้น (ownCounter) ไม่ใช่จำนวนครั้งที่ทำงาน -->
-          <span v-if="skillIcon(p) || statusOf('B'+i).length" class="br-status">
-            <b v-if="skillIcon(p)" class="own" :class="{ lit: skillFired['B'+i], spent: counters['B'+i]?.spent }"><Emoji :char="skillIcon(p)" /><i v-if="counters['B'+i] && !counters['B'+i].spent">{{ counters['B'+i].n }}</i></b>
-            <em v-if="skillIcon(p) && statusOf('B'+i).length" class="sep"></em>
+          <span v-if="skillIcon(p, 'B'+i) || statusOf('B'+i).length" class="br-status">
+            <b v-if="skillIcon(p, 'B'+i)" class="own" :class="{ lit: skillFired['B'+i], spent: counters['B'+i]?.spent }"><Emoji :char="skillIcon(p, 'B'+i)" /><i v-if="counters['B'+i] && !counters['B'+i].spent">{{ counters['B'+i].n }}</i></b>
+            <em v-if="skillIcon(p, 'B'+i) && statusOf('B'+i).length" class="sep"></em>
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
           <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out }">
@@ -73,9 +73,9 @@
           <span class="br-el"><Emoji :char="elEmoji(p)" /></span>
           <!-- แถวป้ายเดียว (user เลือก 26 ก.ย.): ทักษะตัวเอง │ บัฟที่ได้รับ — ลำดับเดียวกับหน้าต่างอ่าน
                เลขบนทักษะ = ชั้นสะสม/ที่เหลือเท่านั้น (ownCounter) ไม่ใช่จำนวนครั้งที่ทำงาน -->
-          <span v-if="skillIcon(p) || statusOf('A'+i).length" class="br-status">
-            <b v-if="skillIcon(p)" class="own" :class="{ lit: skillFired['A'+i], spent: counters['A'+i]?.spent }"><Emoji :char="skillIcon(p)" /><i v-if="counters['A'+i] && !counters['A'+i].spent">{{ counters['A'+i].n }}</i></b>
-            <em v-if="skillIcon(p) && statusOf('A'+i).length" class="sep"></em>
+          <span v-if="skillIcon(p, 'A'+i) || statusOf('A'+i).length" class="br-status">
+            <b v-if="skillIcon(p, 'A'+i)" class="own" :class="{ lit: skillFired['A'+i], spent: counters['A'+i]?.spent }"><Emoji :char="skillIcon(p, 'A'+i)" /><i v-if="counters['A'+i] && !counters['A'+i].spent">{{ counters['A'+i].n }}</i></b>
+            <em v-if="skillIcon(p, 'A'+i) && statusOf('A'+i).length" class="sep"></em>
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
           <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out }">
@@ -229,7 +229,7 @@ import { parseArenaRef } from '../../utils/arenas.js'
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPetDef, atkStyleOf, projectileOf, passiveOf, sparkOf, ELEMENTS, EL_NAME, GRADE_LABELS } from '../../data/index.js'
-import { passiveText, passiveTitle, effectText, STATUS_MAX } from '../../data/petPassives.js'
+import { passiveText, passiveTitle, effectText, STATUS_MAX, passiveValueAt, partWithEffect } from '../../data/petPassives.js'
 import { buffSources, liveBuffs, badgesOf, ownCounter } from '../../utils/battleBuffs.js'
 import { RARITY } from '../../data/index.js'
 import { buildCombatant } from '../../data/battle.js'
@@ -241,7 +241,7 @@ import { readPrefs, fxFlags, paceMult, FX_LABEL, PACE_LABEL } from '../../utils/
 import { createFrameMeter, FALLBACK_BASE, DROP_RATIO } from '../../utils/frameMeter.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
 import { sfx } from '../../utils/sfx.js'
-import { displayName, duoPartnerOf } from '../../utils/petForms.js'
+import { displayName, duoPartnerOf, degreeFormActive, seasonOfSlot, seasonText, SEASON_OF_EFFECT } from '../../utils/petForms.js'
 
 const props = defineProps({
   data: { type: Object, default: null },
@@ -635,8 +635,18 @@ const handlers = {
  *  🔑 เทียบกับ `e.name` ซึ่งเป็น "ชื่อจริง" ที่ log แบกมา ไม่ใช่ชื่อบนจอ (skillTitle) — ชื่อร่วมของคู่หู
  *     เป็นของฝั่งจอล้วน ถ้าเอามาเทียบตรงนี้ คำอธิบายของ 🦭 กับ 🐳 จะหายทันทีที่จับคู่ */
 function passiveDescOf(e) {
+  const sd = seasonDescOf(e)
+  if (sd) return sd
   const p = passiveOf(defForUid(e.uid))
   return p && p.name === e.name ? passiveText(p) : ''
+}
+
+/** 🌍 event ฤดู แบกชื่อ/ไอคอนของฤดู (ไม่ใช่ชื่อสกิลรวม) ⇒ คำอธิบายต้องเป็นของฤดูนั้น · ไม่ใช่ event ฤดู = null */
+function seasonDescOf(e) {
+  const key = SEASON_OF_EFFECT[e?.effect]
+  if (!key) return null
+  const part = partWithEffect(passiveOf(defForUid(e.uid)), 'season')
+  return part ? seasonText(key, passiveValueAt(part, entryForUid(e.uid)?.passiveLv)) : null
 }
 
 // ── ชื่อสกิลบนจอ (ชื่อร่วมของคู่หู) ──────────────────────────
@@ -680,7 +690,7 @@ async function applyPassive(e) {
     const p = passiveOf(pet)
     await spotlightPassive(e, t, g, {
       icon: pet.emoji || e.icon || '✨',
-      desc: p && p.name === e.name ? effectText(p, entryForUid(e.uid)?.passiveLv) : '',
+      desc: seasonDescOf(e) ?? (p && p.name === e.name ? effectText(p, entryForUid(e.uid)?.passiveLv) : ''),
       side: e.uid[0],
     })
     return
@@ -1118,7 +1128,14 @@ function closeInspect() {
 }
 
 /** ไอคอนสกิลของเพ็ทตัวนี้ (static ต่อไฟต์ — อ่านจาก def ไม่ใช่ state ที่วิ่งทุกเฟรม) */
-const skillIcon = (p) => passiveOf(getPetDef(p?.id))?.icon || ''
+// 🌍 ไอคอนทักษะบนการ์ด = ฤดูของช่อง (☀️/🌧️/❄️) · ร่างองศาไม่มีทักษะ = ไม่มีไอคอน (user ขอ 27 ก.ย.)
+const skillIcon = (p, uid) => {
+  if (p?.id === 'earth' && uid) {
+    if (degreeFormActive(sideTeam(uid[0]))) return ''
+    return seasonOfSlot(parseInt(uid.slice(1), 10)).icon
+  }
+  return passiveOf(getPetDef(p?.id))?.icon || ''
+}
 
 function hpPct(uid) { return hp.value[uid] ?? 100 }
 
@@ -1299,7 +1316,16 @@ onUnmounted(() => {
 /* ไม่ตั้ง will-change ถาวร — melee lunge วิ่งผ่าน fx.lunge (WAAPI el.animate ตรง ไม่ใช่ CSS transition)
    browser promote เฉพาะช่วง animation รัน แล้ว release เอง (fill:none คืน layer ทันทีที่จบ) — ไม่มี transition: transform บน .br-unit แล้ว
    เดิม promote ถาวรทั้ง 8 การ์ด = layer เปล่าค้างตลอด → WebKit thrash */
-.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(12,16,30,.62); border: 2px solid transparent; border-radius: 16px; cursor: pointer; }
+.br-unit { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: rgba(12,16,30,.62); border: 2px solid transparent; border-radius: 16px; cursor: pointer;
+  /* กันที่ล่างการ์ดให้แถวบัฟ (.br-status ลอย bottom:3px สูง ~14px) — เดิมไม่กัน ⇒ ตัวเลข ATK/HP ถูกแถวบัฟทับ
+     (user เจอบนมือถือ 27 ก.ย. "อ่านตัวเลขไม่ได้เลย" · การ์ดกว้าง (กล่อง−24)/4 ≈ 80px บนจอ 375) */
+  padding-bottom: 15px; box-sizing: border-box; }
+/* จอแคบ: การ์ด ~80px แต่ของข้างใน (หน้า 2rem + หลอด + ตัวเลข) สูง ~67px + ที่กันแถวบัฟ 15px ไม่พอ ⇒ บีบของข้างใน */
+@media (max-width: 440px) {
+  .br-unit { gap: 2px; }
+  .br-unit .br-face { font-size: 1.6rem; }
+  .br-unit .br-stats { margin-top: 0; }
+}
 /* ⛔ ห้ามใส่ transition: border-color กลับ — ขอบแดงตอนโดนจะไล่สี 150ms "พร้อม" squash/lunge
    = การ์ดถูกวาดใหม่ทุกเฟรมระหว่างขยับ (ผิดข้อบังคับ v3) · เปลี่ยนสีทันทีแทน */
 .br-unit.foe { border-color: rgba(248,113,113,.35); }

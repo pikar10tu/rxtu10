@@ -12,9 +12,9 @@ import { getPetDef } from '../data/index.js'
 import {
   STATUS_ICON, STATUS_TEXT, PET_PASSIVES, effectText, BADGE_PRIORITY,
   TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS, SELF_STATUS_EFFECTS,
-  partsOf, partsAt, partWithEffect, passiveTitle,
+  partsOf, partsAt, partWithEffect, passiveTitle, passiveValueAt,
 } from '../data/petPassives.js'
-import { effectiveRarity } from './petForms.js'
+import { effectiveRarity, degreeFormActive, seasonOfSlot, seasonText } from './petForms.js'
 
 const passiveOf = (pet) => PET_PASSIVES[pet?.id] || null
 const defOf = (pet) => getPetDef(pet?.id) || { name: '?', emoji: '❓' }
@@ -109,8 +109,17 @@ export function buffSources(playerTeam, botTeam) {
       const self = passiveOf(pet)
       for (const part of partsOf(self)) {
         if (!SELF_STATUS_EFFECTS.has(part.effect)) continue
-        const b = makeBuff(part.effect, pet, uid, { passive: self, teamIds: own.ids })
+        // 🌍 ฤดู: ป้ายเป็นของฤดูตามช่อง (☀️/🌧️/❄️) · ร่างองศาไม่มีฤดู = ไม่มีป้าย (user ขอ 27 ก.ย.)
+        let seasonOpts = {}
+        if (part.effect === 'season') {
+          if (degreeFormActive(teams[side])) continue
+          const sn = seasonOfSlot(i)
+          seasonOpts = { skillName: sn.label, skillIcon: sn.icon, label: seasonText(sn.key, passiveValueAt(part, pet?.passiveLv)) }
+        }
+        const b = makeBuff(part.effect, pet, uid, { passive: self, teamIds: own.ids, ...seasonOpts })
         b.self = true
+        // ไอคอนฤดูขึ้นเป็น "ทักษะตัวเอง" บนการ์ดอยู่แล้ว ⇒ ไม่ต้องมีป้ายซ้ำในแถวบัฟ (badgesOf ข้ามตัวที่ไม่มี icon) · หน้าดูบัฟยังเห็นผ่าน skillIcon/skillName
+        if (part.effect === 'season') b.icon = ''
         list.push(b)
       }
       // 2) aura จากทีมตัวเอง (รวมของตัวเอง) + คู่หู

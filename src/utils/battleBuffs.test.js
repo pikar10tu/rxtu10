@@ -260,3 +260,13 @@ test('ป้าย 🌟 ขึ้นเฉพาะ common (และองศ�
   assert.ok(s.A1.some(b => b.effect === 'rarityBoost'))
   assert.ok(!s.A2.some(b => b.effect === 'rarityBoost'))
 })
+
+test('🌍 ป้ายฤดูตามช่อง (ช่อง 3 = ❄️ ฤดูหนาว) · ร่างองศาไม่มีป้ายฤดู', () => {
+  const s = buffSources([{ id: 'cat', rarity: 'common' }, { id: 'lion', rarity: 'legendary' }, { id: 'earth', rarity: 'legendary' }], [])
+  const b = s.A2.find(x => x.effect === 'season')
+  assert.equal(b.skillName, 'ฤดูหนาว')
+  assert.equal(b.skillIcon, '❄️')
+  assert.equal(b.icon, '', 'ไม่ซ้ำป้ายในแถวบัฟ — ไอคอนฤดูเป็นทักษะตัวเองบนการ์ดแล้ว')
+  const f = buffSources([{ id: 'sol', rarity: 'legendary' }, { id: 'earth', rarity: 'legendary' }, { id: 'lion', rarity: 'legendary' }], [])
+  assert.ok(!f.A1.some(x => x.effect === 'season'))
+})

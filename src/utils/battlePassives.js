@@ -335,23 +335,24 @@ export function runOnRoundEnd(team, foes, rand) {
     for (const part of partsAt(p, 'onRoundEnd')) {
       if (part.effect !== 'season' || psOf(u).formed) continue   // ร่างองศาไม่มีฤดู
       const v = valOf(part, u)
+      // ชื่อ/ไอคอนบนจอเป็นของฤดู (☀️ ฤดูร้อน · 🌧️ ฤดูฝน · ❄️ ฤดูหนาว) ไม่ใช่ชื่อสกิลรวม — user ขอ 27 ก.ย.
       const s = seasonOfSlot(u.slot)
       if (s.key === 'hot') {
         for (const t of alive(team)) psOf(t).hotNext = v.hot
-        out.push(ev(u, p, part, { effect: 'seasonHot', targets: alive(team).map(t => t.uid), amount: v.hot, fxKind: 'buff' }))
+        out.push(ev(u, p, part, { effect: 'seasonHot', name: s.label, icon: s.icon, targets: alive(team).map(t => t.uid), amount: v.hot, fxKind: 'buff' }))
       } else if (s.key === 'rain') {
         for (const t of alive(team)) {
           const before = t.hp
           t.hp = Math.min(t.maxHp, t.hp + (t.maxHp - t.hp) * v.rain / 100)
           const amount = Math.round(t.hp - before)
-          if (amount > 0) out.push(ev(u, p, part, { effect: 'seasonRain', targets: [t.uid], amount,
+          if (amount > 0) out.push(ev(u, p, part, { effect: 'seasonRain', name: s.label, icon: s.icon, targets: [t.uid], amount,
             hpPct: Math.round((t.hp / t.maxHp) * 100), fxKind: 'heal' }))
         }
       } else {
         // 🎲 ดึง rand ศัตรูละ 1 ครั้ง ตามลำดับช่อง (deterministic)
         const hit = alive(foes).filter(() => rand() * 100 < v.cold)
         for (const f of hit) { const st = psOf(f); st.skip = 1; st.skipName = 'แช่แข็ง'; st.skipIcon = '❄️' }
-        if (hit.length) out.push(ev(u, p, part, { effect: 'seasonCold', targets: hit.map(f => f.uid), amount: hit.length, fxKind: 'freeze' }))
+        if (hit.length) out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: hit.map(f => f.uid), amount: hit.length, fxKind: 'freeze' }))
       }
     }
   }

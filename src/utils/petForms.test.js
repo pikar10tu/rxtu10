@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { degreeFormActive, effectiveRarity, displayName, seasonOfSlot, SEASONS, duoPartnerOf } from './petForms.js'
+import { degreeFormActive, effectiveRarity, displayName, seasonOfSlot, SEASONS, duoPartnerOf, seasonText, SEASON_OF_EFFECT } from './petForms.js'
 
 const P = (id, rarity) => ({ id, rarity })
 const sol = P('sol', 'legendary'), earth = P('earth', 'legendary'), cat = P('cat', 'common'), lion = P('lion', 'legendary')
@@ -39,4 +39,12 @@ test('duoPartnerOf: ☀️🌍 เฉพาะร่างองศา · 🐳�
   assert.equal(duoPartnerOf('sol', [sol, earth, cat]), null)
   assert.equal(duoPartnerOf('whale', [P('whale', 'legendary'), P('seal', 'rare')]), 'seal')
   assert.equal(duoPartnerOf('whale', [P('whale', 'legendary')]), null)
+})
+
+test('seasonText: เลขมาจากค่าที่ส่งเข้ามา', () => {
+  const v = { hot: 20, rain: 25, cold: 30 }
+  assert.match(seasonText('hot', v), /\+20%/)
+  assert.match(seasonText('rain', v), /25%/)
+  assert.match(seasonText('cold', v), /30%/)
+  assert.equal(SEASON_OF_EFFECT.seasonCold, 'cold')
 })
