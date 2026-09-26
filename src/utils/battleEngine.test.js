@@ -259,7 +259,7 @@ test('killChain: ผู้ตีที่ตายจากหนามกลา
     desc: 'ทดสอบ', short: 'ทดสอบ',
   }
   try {
-    const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]   // killChain สูงสุด 2 ครั้ง/รอบ
+    const A = [{ id: 'kirin', rarity: 'legendary', element: 'fist', grade: 5 }]   // killChain สูงสุด 2 ครั้ง/ตา
     const B = [
       { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },
       { id: '__spikeTest', rarity: 'common', element: 'fist', grade: 0 },        // ตัวที่ 2 = เป้าที่ไม่ควรถูกตีถ้าแก้ถูก

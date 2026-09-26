@@ -286,9 +286,16 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       seen.add(key)
       const next = evts[i + 1]
       const lastOfGroup = !(next && next.t === 'passive' && groupIdOf(next) === gid)
+      // ❄️ ข้ามตา (frozen/fxKind 'skip') ไม่ใช่ "สกิลของเพ็ทตัวนั้นทำงาน" — มันคือตัวที่ถูกแช่แข็ง
+      //    เอนจินยังยิงเป็น t:'passive' บน uid ของเหยื่อ (battleEngine.js hit()) ⇒ ถ้าไม่กันไว้ตรงนี้
+      //    เพ็ทเลเจนด์ (☀️ ออร่าล้วน) ที่บังเอิญโดนแช่แข็งเป็นครั้งแรกของ uid ตัวเอง จะชิงเอาโชว์ไทม์จริง
+      //    (skillShow) ไปให้ตาที่ถูกข้าม — แบนเนอร์ขึ้นชื่อ "แช่แข็ง" พร้อมเสียงประจำตัว แล้วใช้โชว์ไทม์ทิ้ง
+      //    ก่อนที่สกิลจริงจะได้พูดอะไรเลย ⇒ ต้องตกไปทาง 'skill'/'skillQuiet' เสมอ และห้ามนับเข้า `shown`
+      //    (ตัวเองยังไม่ได้โชว์ไทม์จริง — ครั้งหน้าที่สกิลจริงทำงานต้องยังมีสิทธิ์ได้ skillShow)
+      const isFreezeSkip = e.fxKind === 'skip'
       if (CLUTCH_EFFECTS.has(e.effect)) pKind.set(i, 'skillMoment')
       else if (!lastOfGroup) pKind.set(i, 'skillQuiet')
-      else if (first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
+      else if (!isFreezeSkip && first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
       else pKind.set(i, first || EVERY_TIME_EFFECTS.has(e.effect) ? 'skill' : 'skillQuiet')
     }
   }

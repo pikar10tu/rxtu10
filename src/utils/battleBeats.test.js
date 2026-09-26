@@ -297,6 +297,20 @@ test('showPets: ครั้งแรกของเลเจนด์ได้ 
   assert.equal(buildBeats(log, MH)[1].kind, 'skill', 'ไม่ส่ง showPets = พฤติกรรมเดิม')
 })
 
+test('❄️ ตาที่ถูกข้าม (frozen/fxKind skip) ไม่ได้ skillShow ปลอม · สกิลจริงครั้งถัดมายังได้โชว์ไทม์', () => {
+  const log = [
+    atk(),
+    pas({ uid: 'B0', petId: 'sol', effect: 'frozen', name: 'แช่แข็ง', icon: '❄️', fxKind: 'skip' }),
+    atk(),
+    pas({ uid: 'B0', petId: 'sol', effect: 'auraPulse', fxKind: 'buff' }),
+    atk(),
+  ]
+  const bs = buildBeats(log, MH, { showPets: new Set(['sol']) })
+  assert.equal(bs[1].kind, 'skill', 'ตาที่ถูกข้าม = ชิปธรรมดา ไม่ใช่แบนเนอร์โชว์ไทม์')
+  assert.notEqual(bs[1].kind, 'skillShow')
+  assert.equal(bs[3].kind, 'skillShow', 'สกิลจริงครั้งแรกของตัวนี้ต้องยังได้โชว์ไทม์ (skip ต้องไม่ไปแย่งสิทธิ์)')
+})
+
 test('ไม่มี passive ก่อนหมัดแรกเลย → ไม่มี openShow และไม่ throw', () => {
   const bs = buildBeats([atk(), atk({ dmg: 99, targetHpAfter: 0, dead: true })], MH)
   assert.equal(kinds(bs).filter(k => k === 'openShow').length, 0)

@@ -717,7 +717,8 @@ async function applyPassive(e) {
   }
 
   if (e.kind === 'skill') {
-    markSkill(e.uid)          // tuning.skillMark 'lit' — นับครั้งที่โปรกของสกิลนี้
+    // ❄️ ตาที่ถูกข้าม (fxKind 'skip') ไม่ใช่สกิลของตัวเอง — ห้ามให้วงส้ม "ทำงานแล้ว" ติดจากการถูกแช่แข็ง
+    if (e.fxKind !== 'skip') markSkill(e.uid)   // tuning.skillMark 'lit' — นับครั้งที่โปรกของสกิลนี้
     showChip(e.uid, e)
     sfx('skill')
     if (hold > 0) { await wait(hold); if (g !== gen) return }
@@ -728,7 +729,7 @@ async function applyPassive(e) {
   }
 
   // skillQuiet (ครั้งซ้ำ) — ผลอย่างเดียว ไม่มีชิป ไม่กินเวลา
-  markSkill(e.uid)            // tuning.skillMark 'lit' — นับซ้ำด้วย (ตัวเลข ×N ต้องรวมครั้งซ้ำ)
+  if (e.fxKind !== 'skip') markSkill(e.uid)   // tuning.skillMark 'lit' — นับซ้ำด้วย (ตัวเลข ×N ต้องรวมครั้งซ้ำ)
   firePassiveFx(e)
 }
 

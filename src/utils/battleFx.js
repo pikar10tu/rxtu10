@@ -132,7 +132,9 @@ export function createBattleFx() {
     for (let i = 0; i < 3; i++) pool.sweep.push(mkImg('brfx-sweep'))    // cleave มากสุด 3 เป้า
     // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
     // ⚠️ ห้ามสร้าง element ใหม่ตอนเลขเปลี่ยนกลางไฟต์ — พูลมีไว้เพื่อไม่ให้มี DOM เกิดใหม่ระหว่างเล่น
-    for (let i = 0; i < 6; i++) {
+    // 6 → 12: คีย์เป็น uid+icon (ไม่ใช่ uid เฉยๆ) แล้ว ⇒ ❄️ ×3 ตัว + 🦠 ×1 ตัวพร้อมกันเกิน 6 ช่องได้
+    // (ทีม 4v4 ติดแช่แข็งพร้อมกันหลายตัวจากฤดูหนาว/luna) ตราส่วนเกินเคยหายไปเงียบๆ
+    for (let i = 0; i < 12; i++) {
       const e = mkEl('brfx-mark')
       const ico = document.createElement('img')
       ico.className = 'brfx-mark-ico'; ico.setAttribute('aria-hidden', 'true')
@@ -376,7 +378,8 @@ export function createBattleFx() {
     el.style.opacity = '1'
     const ico = el.firstChild
     if (ico && ico.dataset.char !== char) { imgSrc(ico, char); ico.dataset.char = char }
-    el.lastChild.textContent = String(n)
+    // ❄️ แช่แข็งมีแค่ "ติด/ไม่ติด" ไม่มีชั้นสะสม — เลข 1 ที่โผล่มาดูเหมือนบั๊ก (user เจอ 27 ก.ย.) · 🦠 ยังโชว์ชั้นตามเดิม
+    el.lastChild.textContent = (char === '❄️' && n === 1) ? '' : String(n)
     markOn.set(key, el)
   }
   /** เอาป้ายสถานะ "ทุกชนิด" ของ uid นี้ออก — ใช้ตอนการ์ดตาย (🦠 + ❄️ + ไอคอนใหม่ในอนาคต ต้องหายไปพร้อมกัน)
