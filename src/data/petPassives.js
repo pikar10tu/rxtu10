@@ -34,8 +34,8 @@ export const PET_PASSIVES = {
     name: 'อสูรกระหายเลือด', icon: '👹',
     // ⚠️ step 0 โดยตั้งใจ — killChain เป็นตัวเดียวที่เพิ่ม beat จริง ให้อัพได้ = ไฟต์ยืดตามขั้น
     parts: [{ hook: 'onKill', effect: 'killChain', value: { max: 2 }, step: { max: 0 } }],
-    desc: 'น็อกศัตรูแล้วได้ตีต่อทันที (สูงสุด {max} ครั้งต่อรอบ)',
-    short: 'น็อกแล้วได้ตีต่อ สูงสุด {max} ครั้ง/รอบ',
+    desc: 'น็อกศัตรูแล้วได้ตีต่อทันที (สูงสุด {max} ครั้งต่อตา)',
+    short: 'น็อกแล้วได้ตีต่อ สูงสุด {max} ครั้ง/ตา',
   },
   trex: {
     name: 'สัญชาตญาณนักล่า', icon: '🦖',
@@ -52,8 +52,8 @@ export const PET_PASSIVES = {
   ouroboros: {
     name: 'วัฏจักรนิรันดร์', icon: '🐍',
     parts: [
-      { hook: 'onRound', effect: 'regenSelf', value: { pct: 4 }, step: { pct: 1.5 }, tag: 'regen' },
-      { hook: 'onRound', effect: 'stackAtk', value: { pct: 5, max: 4 }, step: { pct: 1, max: 0 }, tag: 'rage' },
+      { hook: 'onRound', effect: 'regenSelf', value: { pct: 12 }, step: { pct: 4 }, tag: 'regen' },
+      { hook: 'onRound', effect: 'stackAtk', value: { pct: 10, max: 4 }, step: { pct: 2, max: 0 }, tag: 'rage' },
     ],
     desc: 'ทุกต้นรอบ ฟื้นเลือดตัวเอง {regen.pct}% และพลังโจมตี +{rage.pct}% (สะสมได้ {rage.max} ชั้น)',
     short: 'ทุกต้นรอบ ฟื้น {regen.pct}% + แรง +{rage.pct}%',
@@ -83,7 +83,7 @@ export const PET_PASSIVES = {
     name: 'กลืนกินฝันร้าย', icon: '🛡️',
     parts: [
       { hook: 'onHit', effect: 'guardian', value: { pct: 50 }, step: { pct: 8 }, tag: 'guard' },
-      { hook: 'onRound', effect: 'regenSelf', value: { pct: 3 }, step: { pct: 1 }, tag: 'regen' },
+      { hook: 'onRound', effect: 'regenSelf', value: { pct: 10 }, step: { pct: 3 }, tag: 'regen' },
     ],
     desc: 'รับดาเมจแทนเพื่อนที่เลือดน้อยสุด {guard.pct}% · ฟื้นเลือดตัวเอง {regen.pct}% ทุกต้นรอบ',
     short: 'รับแทน {guard.pct}% · ฟื้นเอง {regen.pct}%/รอบ',
@@ -156,7 +156,7 @@ export const PET_PASSIVES = {
   },
   panda: {
     name: 'ลมปราณฟื้นฟู', icon: '🎋',
-    parts: [{ hook: 'onRound', effect: 'regenSelf', value: { pct: 5 }, step: { pct: 2 } }],
+    parts: [{ hook: 'onRound', effect: 'regenSelf', value: { pct: 15 }, step: { pct: 5 } }],
     desc: 'ฟื้นเลือดตัวเอง {pct}% ของเลือดสูงสุดทุกต้นรอบ',
     short: 'ฟื้นเลือดตัวเอง {pct}% ทุกต้นรอบ',
   },
@@ -226,8 +226,8 @@ export const PET_PASSIVES = {
     name: 'ยอดนักซัพพอร์ต', icon: '💧',
     parts: [{
       hook: 'aura', effect: 'teamAtk',
-      value: { pct: 6, duoWith: 'whale', duoPct: 10, duoRegen: 3 },
-      step: { pct: 2, duoPct: 3, duoRegen: 1 },
+      value: { pct: 6, duoWith: 'whale', duoPct: 10, duoRegen: 10 },
+      step: { pct: 2, duoPct: 3, duoRegen: 3 },
     }],
     desc: 'พลังโจมตีทีม +{pct}% · เข้าคู่กับคุณวาฬเป็น +{duoPct}% และทีมฟื้นเลือด {duoRegen}%/รอบ',
     short: 'พลังโจมตีทีม +{pct}% (คู่กับ 🐳 เป็น +{duoPct}%)',
@@ -271,7 +271,7 @@ export const PET_PASSIVES = {
     //    ลองเป็น teamRegen 2%/รอบ แล้ววัดได้ +53% — แรงเกินเพราะฟื้นทั้งทีมทุกรอบมันทบต้น
     //    ลงตัวที่ "รุ่นอ่อนของ unicorn" ตามแพทเทิร์นเดียวกับ dodge/damageReduction ที่ common ใช้
     name: 'ละอองเยียวยา', icon: '🦋',
-    parts: [{ hook: 'onRound', effect: 'healLowestAlly', value: { pct: 2 }, step: { pct: 1 } }],
+    parts: [{ hook: 'onRound', effect: 'healLowestAlly', value: { pct: 6 }, step: { pct: 3 } }],
     desc: 'ฟื้นเลือดเพื่อนที่บอบช้ำที่สุด {pct}% ทุกต้นรอบ',
     short: 'ฟื้นเลือดเพื่อนที่บอบช้ำสุด {pct}% ทุกต้นรอบ',
   },

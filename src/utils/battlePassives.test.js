@@ -109,7 +109,7 @@ test('teamAtk (seal): เดี่ยว +6% · เข้าคู่ whale เ�
   applyAuras(duo, [])
   // whale teamHp ไม่แตะ atk — atk มาจาก seal อย่างเดียว
   assert.ok(Math.abs(duo[0].atk - 110) < 0.01, `ได้ ${duo[0].atk}`)
-  assert.equal(duo[0].teamRegenPct, 3)
+  assert.equal(duo[0].teamRegenPct, 10)
 })
 
 test('หมาป่า: บัฟเฉพาะเพื่อนสายจู่โจม ตัวสายอื่นไม่ได้อะไร', () => {
@@ -1749,8 +1749,8 @@ test('อูโรโบรอสตันที่ 4 ชั้น ไม่ไ�
   const base = o.atk
   for (let i = 0; i < 10; i++) runOnRound([o])
   assert.equal(psOf(o).atkStacks, 4, 'เพดาน 4 ชั้นตาม value.max ของ part rage')
-  assert.ok(Math.abs(o.atk / base - 1.05 ** 4) < 1e-9,
-    `atk ขึ้นแค่ 4 ชั้น (ได้ ${o.atk / base} ต้องได้ ${1.05 ** 4})`)
+  assert.ok(Math.abs(o.atk / base - 1.10 ** 4) < 1e-9,
+    `atk ขึ้นแค่ 4 ชั้น (ได้ ${o.atk / base} ต้องได้ ${1.10 ** 4})`)
 })
 
 test('เพ็ทสอง part นับเป็นจังหวะเดียว — part แรกต้องเงียบ (หนี้ §7.6 ข้อ 8)', () => {
