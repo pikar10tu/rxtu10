@@ -209,6 +209,8 @@ async function pull(n, isEvent = false) {
 
 สุ่มต่อโดยไม่เลือกเลยไหม?`)
     if (!go) { openPicker('theme'); return }
+    // ⏳ ค้างหน้า confirm ได้นาน (คนคิด) — เช็คซ้ำว่าตู้ยังเปิดอยู่ไหม เผื่อดีลหมดเวลาไปแล้วระหว่างรอ
+    if (!ev.value.active) { toast('ตู้พิเศษปิดแล้ว', 'error'); return }
   }
 
   const { rolls, pay, amount } = resolvePullPayment(n, tickets.value)
