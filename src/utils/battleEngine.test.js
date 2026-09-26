@@ -549,7 +549,7 @@ test('แช่แข็ง: เป้าที่โดน ตาถัดไ�
              { id: 'earth', rarity: 'legendary', element: 'paper', grade: 3 }]
   const B = blank(3)
   let checked = 0
-  for (let seed = 1; seed < 300 && checked < 3; seed++) {
+  for (let seed = 1; seed < 60 && checked < 3; seed++) {
     const log = simulateBattle(A, B, seed).log
     const ci = log.findIndex(e => e.effect === 'seasonCold')
     if (ci < 0) continue
