@@ -6,6 +6,7 @@ import { botTeamOf, botTeamForPower, getFallbackBots, BOT_POWER_RATIOS } from '.
 import { teamPower } from './pvpCoins.js'
 import { PVP_RATING_FLOOR } from './pvpRating.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
+import { RARITY_ORDER } from '../data/petPower.js'
 
 test('botTeamOf: คืนทีมเต็มช่อง + deterministic ต่อ seed', () => {
   const a = botTeamOf('rare', 3, 42)
@@ -64,4 +65,34 @@ test('getFallbackBots: ขอมากกว่าจำนวนอัตรา
   const bots = getFallbackBots(5000, 1000, 42, BOT_POWER_RATIOS.length + 3)
   assert.ok(bots.length <= BOT_POWER_RATIOS.length)
   assert.equal(new Set(bots.map(b => b.uid)).size, bots.length)
+})
+
+// ── กันเพ็ทรุ่นที่ยังไม่เปิดตัวโผล่ในทีมบอท (review round 1, Task A 4) ──────────────
+const UNRELEASED = new Set(['sol', 'earth', 'luna'])
+
+test('บอทไม่มี sol/earth/luna หลุดออกมาก่อนเปิดตู้ — ไม่มีอีเวนต์ก็ไม่มี · อีเวนต์ wave 2 ก็ยังไม่มี', () => {
+  for (let seed = 0; seed <= 300; seed++) {
+    for (const rarity of RARITY_ORDER) {
+      const noEvent = botTeamOf(rarity, 3, seed)
+      assert.ok(noEvent.every(u => !UNRELEASED.has(u.id)), `seed ${seed} (ไม่มีอีเวนต์) ได้ ${JSON.stringify(noEvent)}`)
+      const wave2Event = botTeamOf(rarity, 3, seed, { wave: 2, endsAt: Date.now() + 1000 })
+      assert.ok(wave2Event.every(u => !UNRELEASED.has(u.id)), `seed ${seed} (อีเวนต์ wave 2 เปิดอยู่) ได้ ${JSON.stringify(wave2Event)}`)
+    }
+    const bots = getFallbackBots(5000, 1000, seed, BOT_POWER_RATIOS.length)
+    for (const bot of bots) {
+      assert.ok(bot.team.every(u => !UNRELEASED.has(u.id)), `seed ${seed} getFallbackBots ได้ ${JSON.stringify(bot.team)}`)
+    }
+  }
+})
+
+test('บอทได้ sol/earth/luna เมื่ออีเวนต์ wave 3 จบแล้วเท่านั้น (gate ใช้งานได้จริง ไม่ใช่ปิดตายถาวร)', () => {
+  const stillOpen = { wave: 3, endsAt: Date.now() + 1000 }
+  const ended = { wave: 3, endsAt: Date.now() - 1000 }
+  let sawWhileOpen = false, sawAfterEnd = false
+  for (let seed = 0; seed <= 300; seed++) {
+    if (botTeamOf('legendary', 3, seed, stillOpen).some(u => UNRELEASED.has(u.id))) sawWhileOpen = true
+    if (botTeamOf('legendary', 3, seed, ended).some(u => UNRELEASED.has(u.id))) sawAfterEnd = true
+  }
+  assert.equal(sawWhileOpen, false, 'อีเวนต์ wave 3 ยังเปิดอยู่ ตู้ปกติ (releasedPets w-1) ต้องยังไม่มี sol/earth/luna')
+  assert.ok(sawAfterEnd, 'อีเวนต์ wave 3 จบแล้ว sol/earth/luna ต้องไหลเข้าตู้ปกติ — ไม่เจอเลยแปลว่า gate ปิดตายถาวรผิดที่')
 })

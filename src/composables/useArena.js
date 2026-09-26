@@ -5,6 +5,7 @@ import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useToast } from './useToast.js'
+import { useAppConfig } from './useAppConfig.js'
 import { simulateBattle } from '../utils/battleEngine.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { rosterOpponents } from '../utils/roster.js'
@@ -31,6 +32,7 @@ export function useArena() {
   const members = useMembersStore()
   const { toast } = useToast()
   const { syncRosterRow } = useRosterSync()
+  const { rawConfig } = useAppConfig()
 
   // เรต/สถิติ "ตามซีซั่นปัจจุบัน" — preview soft-reset ก่อนเขียนจริง (เผื่อข้ามเดือน)
   const seasonPvp = computed(() => applySeasonReset(auth.userData?.pvp, currentSeasonId()))
@@ -65,7 +67,8 @@ export function useArena() {
     const humans = pickHumanOpponents(
       rosterOpponents(members.rosterRows || {}, uid), rating.value, seed,
     )
-    const bots = getFallbackBots(myPower.value, rating.value, seed, BOARD_SIZE - humans.length)
+    // gachaEvent สด — กันเพ็ทรุ่นที่ยังไม่เปิดตัว (เช่น wave 3 ฟากฟ้า) โผล่ในทีมบอท (ดู pvpBot.js)
+    const bots = getFallbackBots(myPower.value, rating.value, seed, BOARD_SIZE - humans.length, rawConfig.value?.gachaEvent)
     return [...humans, ...bots]
   })
 
