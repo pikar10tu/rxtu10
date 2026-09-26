@@ -274,8 +274,12 @@ export function simulateBattle(teamA, teamB, seed) {
   }
 
   // ใครก่อน: ฝั่งตัวเยอะกว่าตีก่อน · เท่ากัน → สุ่ม (ดึงจาก rand เดิม คง deterministic)
+  // 🐹 แฮมสเตอร์ช่อง 1 = ทีมได้ตีก่อนเสมอ (27 ก.ย. 2026) · มีทั้งสองฝั่ง = กติกาเดิม
+  // ⚠️ ห้ามดึง rand() เพิ่มในเส้นทางนี้ — ลำดับสุ่มของไฟต์ต้องเหมือนเดิมเมื่อไม่มีแฮมสเตอร์
   const ca = countAlive(A), cb = countAlive(B)
-  const first = ca > cb ? 'A' : cb > ca ? 'B' : (rand() < 0.5 ? 'A' : 'B')
+  const leadA = A[0]?.id === 'hamster', leadB = B[0]?.id === 'hamster'
+  const first = leadA !== leadB ? (leadA ? 'A' : 'B')
+    : ca > cb ? 'A' : cb > ca ? 'B' : (rand() < 0.5 ? 'A' : 'B')
   const cursor = { A: 0, B: 0 }
   let cur = first, round = 0, turns = 0
   // 🔑 "รอบ" (user เคาะ 26 ก.ย. 2026) = ทุกตัวที่ยังมีชีวิตทั้งสองฝั่งได้ตาครบคนละ 1 ครั้ง

@@ -608,3 +608,47 @@ test('แช่แข็ง: เป้าที่โดน ตาถัดไ�
   }
   assert.ok(checked > 0, 'ต้องเจอเคสแช่แข็งอย่างน้อย 1')
 })
+
+// ── ต.ค. 2569: 🐹 แฮมสเตอร์ช่อง 1 ⇒ ทีมได้ตีก่อนเสมอ ─────────────────────
+const withHamster = (slot) =>
+  Array.from({ length: 3 }, (_, i) =>
+    i === slot ? { id: 'hamster', rarity: 'common', element: 'fist', grade: 0 }
+               : { id: '__blank__', rarity: 'common', element: 'fist', grade: 0 })
+
+test('แฮมสเตอร์ช่อง 1: 3v3 เท่ากัน A ตีก่อนทุก seed', () => {
+  const A = withHamster(0)
+  const B = blank(3, 'common', 'fist')
+  for (let seed = 1; seed <= 50; seed++) {
+    const first = simulateBattle(A, B, seed).log.find(e => e.t === 'attack')
+    assert.equal(first.side, 'A', `seed ${seed}`)
+  }
+})
+
+test('แฮมสเตอร์ช่อง 2 (ไม่ใช่ช่อง 1): ไม่บังคับ ต้องมี seed ที่ B ตีก่อนบ้าง', () => {
+  const A = withHamster(1)
+  const B = blank(3, 'common', 'fist')
+  let bFirst = 0
+  for (let seed = 1; seed <= 50; seed++) {
+    const first = simulateBattle(A, B, seed).log.find(e => e.t === 'attack')
+    if (first.side === 'B') bFirst++
+  }
+  assert.ok(bFirst > 0, 'ต้องมีบาง seed ที่ B ตีก่อน (แฮมสเตอร์ไม่ได้อยู่ช่อง 1)')
+})
+
+test('แฮมสเตอร์ช่อง 1 ทั้งสองฝั่ง: กติกาเดิม (บาง seed B ตีก่อน)', () => {
+  const A = withHamster(0)
+  const B = withHamster(0)
+  let bFirst = 0
+  for (let seed = 1; seed <= 50; seed++) {
+    const first = simulateBattle(A, B, seed).log.find(e => e.t === 'attack')
+    if (first.side === 'B') bFirst++
+  }
+  assert.ok(bFirst > 0, 'มีแฮมสเตอร์ทั้งสองฝั่ง = หักล้างกัน กลับไปใช้กติกาเดิม')
+})
+
+test('A 2 ตัว (มีแฮมสเตอร์ช่อง 1) vs B 3 ตัว: A ตีก่อน (แฮมสเตอร์ชนะกติกาจำนวนตัว)', () => {
+  const A = withHamster(0).slice(0, 2)
+  const B = blank(3, 'common', 'fist')
+  const first = simulateBattle(A, B, 42).log.find(e => e.t === 'attack')
+  assert.equal(first.side, 'A')
+})
