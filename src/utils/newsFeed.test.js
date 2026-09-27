@@ -72,11 +72,23 @@ test('groupFeed รวมข่าวคนเดียวกัน หัวก
   }
   const docs = [{ id: 'n1', msg: 'ประกาศ', ts: NOW - 5 }, { id: 'n2', msg: 'ประกาศ 2', ts: NOW - 6 }]
   const g = groupFeed(buildFeed(rows, docs, { now: NOW, myUid: null }))
-  assert.deepEqual(g.map(x => x.key), ['a', 'news:n1', 'news:n2', 'b'])
+  assert.deepEqual(g.map(x => x.head.uid || x.key), ['a', 'news:n1', 'news:n2', 'b'])
   assert.match(g[0].head.text, /ชั้น 30/)
   assert.equal(g[0].rest.length, 1)
   assert.match(g[0].rest[0].text, /ชั้น 20/)
   assert.equal(g[1].rest.length, 0)
+})
+
+test('groupFeed ข่าวคนเดิมห่างเกิน 1 ชม. = ขึ้นบรรทัดใหม่ · ถี่ๆ ต่อเป็นโซ่', () => {
+  const H = 60 * 60 * 1000
+  const items = [
+    { id: 'x1', uid: 'a', t: NOW }, { id: 'x2', uid: 'a', t: NOW - 40 * 60e3 },
+    { id: 'x3', uid: 'a', t: NOW - 80 * 60e3 },            // ห่างตัวก่อน 40 นาที → ยังต่อโซ่
+    { id: 'y1', uid: 'b', t: NOW - 2 * H },
+    { id: 'x4', uid: 'a', t: NOW - 3 * H },                 // ห่าง > 1 ชม. → กลุ่มใหม่
+  ]
+  const g = groupFeed(items)
+  assert.deepEqual(g.map(x => [x.key, x.rest.length]), [['x1', 2], ['y1', 0], ['x4', 0]])
 })
 
 test('groupFeed ข้อมูลว่าง = []', () => assert.deepEqual(groupFeed(null), []))

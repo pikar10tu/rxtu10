@@ -160,20 +160,24 @@ export function buildFeed(rows, newsDocs, { now = Date.now(), myUid = null } = {
 }
 
 /**
- * รวมข่าวของคนเดียวกันเป็นกลุ่ม — หัวกลุ่ม = ข่าวล่าสุดของคนนั้น · กลุ่มเรียงตามเวลาหัวกลุ่ม ใหม่→เก่า
+ * รวมข่าวของคนเดียวกันที่ "ติดกันถี่ๆ" เป็นกลุ่ม — หัวกลุ่ม = ข่าวล่าสุดของช่วงนั้น · กลุ่มเรียงตามเวลาหัวกลุ่ม ใหม่→เก่า
+ * user สั่ง 28 ก.ย. 2026: เดิมรวมทุกข่าวของคนเดียวเป็นก้อนเดียว → กระดานดูไม่เป็นปัจจุบัน
+ *   ตอนนี้ข่าวถัดไปจะต่อเข้ากลุ่มเดิมได้ก็ต่อเมื่อห่างจากข่าวที่เก่าสุดในกลุ่มไม่เกิน GROUP_GAP_MS (ต่อเป็นโซ่)
+ *   ห่างเกินนั้น = ขึ้นบรรทัดใหม่ของคนเดิม
  * ข่าวเลน news ที่ไม่มีเจ้าของ (uid null) เป็นกลุ่มเดี่ยว · ข่าวเลน news ที่มี uid รวมเข้ากลุ่มคนนั้น (ตั้งใจ)
  * @param items ผลของ buildFeed (เรียงใหม่→เก่าแล้ว)
  * @returns [{ key, head, rest: [] }]
  */
+export const GROUP_GAP_MS = 60 * 60 * 1000
 export function groupFeed(items) {
   const out = []
-  const byKey = new Map()
+  const open = new Map()   // uid → กลุ่มล่าสุดของคนนั้น (ที่ยังต่อได้)
   for (const it of items || []) {
-    const key = it.uid || it.id
-    const g = byKey.get(key)
-    if (g) { g.rest.push(it); continue }
-    const ng = { key, head: it, rest: [] }
-    byKey.set(key, ng)
+    const g = it.uid ? open.get(it.uid) : null
+    const tail = g ? (g.rest.length ? g.rest[g.rest.length - 1] : g.head) : null
+    if (g && tail.t - it.t <= GROUP_GAP_MS) { g.rest.push(it); continue }
+    const ng = { key: it.id, head: it, rest: [] }
+    if (it.uid) open.set(it.uid, ng)
     out.push(ng)
   }
   return out
