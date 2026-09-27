@@ -4,9 +4,10 @@
   <div v-if="pet" class="pd-ov" @click.self="$emit('close')">
     <div class="pd-box">
       <!-- รีดีไซน์ 27 ก.ย. 2026 — user เลือกแนว "โปรไฟล์ตัวละคร" จากเดโม artifact -->
-      <div class="pd-top" :style="{ '--rc': rc }">
+      <div class="pd-top" :style="{ '--rc': rc, '--fw': `${gradeNow * 1.2}px` }">
         <button class="pd-x" aria-label="ปิด" @click="$emit('close')">✕</button>
-        <span class="pd-grade-pill" :aria-label="`เกรด ${gradeLabel}`">{{ gradeLabel }}</span>
+        <!-- ตราเกรด: ริบบิ้นห้อย + กรอบขาวหนาขึ้นทีละขั้น (user เลือกแบบ E 27 ก.ย. 2026) -->
+        <span class="pd-ribbon" :aria-label="`เกรด ${gradeLabel}`">{{ gradeLabel }}</span>
         <div class="pd-head">
           <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
           <div class="pd-id">
@@ -289,11 +290,11 @@ async function evolve() {
 .pd-box { width: 100%; max-width: 380px; border-radius: 22px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; background: #fff; color: var(--ink); }
 
 /* หัวการ์ด: ไล่สีความหายาก → ม่วงโลกเพ็ท */
-.pd-top { position: relative; padding: 14px 14px 18px; color: #fff; overflow: hidden;
+.pd-top { box-shadow: inset 0 0 0 var(--fw) rgba(255,255,255,.85); position: relative; padding: 14px 14px 18px; color: #fff; overflow: hidden;
   background: linear-gradient(160deg, var(--rc), color-mix(in srgb, var(--rc) 45%, #e6dcfd)); }
 .pd-top::after { content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,.18); pointer-events: none; }
 .pd-x { position: absolute; left: 10px; top: 10px; z-index: 2; border: none; background: rgba(255,255,255,.28); color: #fff; border-radius: 10px; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-.pd-grade-pill { position: absolute; right: 12px; top: 12px; z-index: 2; min-width: 40px; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 999px; font-size: 1rem; font-weight: 800; letter-spacing: .04em; box-shadow: var(--pop); }
+.pd-ribbon { position: absolute; top: 0; right: 16px; z-index: 2; min-width: 36px; padding: 6px 8px 12px; text-align: center; background: #fff; color: color-mix(in srgb, var(--rc) 55%, #1e293b); font-size: 1rem; font-weight: 800; letter-spacing: .04em; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%); filter: drop-shadow(0 2px 3px rgba(0,0,0,.2)); }
 .pd-head { position: relative; z-index: 1; display: flex; gap: 12px; align-items: center; margin-top: 36px; }
 .pd-emoji { width: 88px; height: 88px; flex: none; border-radius: 24px; background: rgba(255,255,255,.3); display: grid; place-items: center; font-size: 3.4rem; }
 .pd-id { min-width: 0; }
