@@ -6,6 +6,7 @@
       <!-- Tier 1: hero (residence art = the flex background) -->
       <div class="pf-hero" :class="{ 'pf-lightbg': cosBg && !cosBg.dark }" :style="heroStyle">
         <CosBg :id="cos.g" />
+        <button v-if="isMe" class="pf-deco" aria-label="ไปร้านตกแต่ง" @click="goShop">🎀</button>
         <button class="pf-x" @click="$emit('close')">✕</button>
         <div class="pf-hero-art"><Emoji :char="tier.art" /></div>
         <CosFrame :id="cos.f" class="pf-av-frame">
@@ -76,6 +77,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useMembersStore } from '../../stores/members.js'
 import { useAuthStore } from '../../stores/auth.js'
 import Emoji from '../shared/Emoji.vue'
@@ -184,6 +186,14 @@ const { syncRosterRow } = useRosterSync()
 const myUid = computed(() => auth.currentUser?.uid)
 const canDuel = computed(() => !!view.value?.uid && view.value.uid !== myUid.value && showcase.value.length > 0)
 
+// 🎀 ทางลัดร้านตกแต่ง — เฉพาะโปรไฟล์ตัวเองเท่านั้น (เดิมต้องปิดโมดัลแล้วไปเองที่หน้า "ฉัน")
+const router = useRouter()
+const isMe = computed(() => !!view.value?.uid && view.value.uid === myUid.value)
+function goShop() {
+  emit('close')
+  router.push('/shop?tab=style')
+}
+
 const duelReplay = ref(null)
 function startDuel() {
   const myTeam = resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
@@ -217,13 +227,15 @@ function startDuel() {
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pf-box { scrollbar-gutter: stable; background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }
-.pf-hero > :not(.cz-bgl):not(.pf-x) { position: relative; z-index: 1; }
-.pf-hero .pf-x { z-index: 2; }
+.pf-hero > :not(.cz-bgl):not(.pf-x):not(.pf-deco) { position: relative; z-index: 1; }
+.pf-hero .pf-x, .pf-hero .pf-deco { z-index: 2; }
 /* พื้นการ์ดสีอ่อนจากร้าน → ตัวอักษรเข้ม (พื้นเดิมของ hero เข้ม ตัวอักษรขาว) */
 .pf-hero.pf-lightbg { color: var(--ink); }
 /* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
 .pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+/* ทางลัดร้านตกแต่ง — เฉพาะโปรไฟล์ตัวเอง วางถัดจาก ✕ ในกลุ่มปุ่มเดียวกัน (ขอบ/ขนาด/สไตล์ชุดเดียวกับ pf-x) */
+.pf-deco { position: absolute; left: 60px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; font-size: 1.1rem; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; z-index: 2; }
 .pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }
 .pf-real {
   font-family: var(--font-display); font-weight: 400;
