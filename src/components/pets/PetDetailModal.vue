@@ -5,6 +5,8 @@
     <div class="pd-box">
       <div class="pd-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
         <button class="pd-x" aria-label="ปิด" @click="$emit('close')">✕</button>
+        <!-- เกรดมุมขวาบน (27 ก.ย. 2026 user เลือกแบบ A — ป้ายเดียวกับกริดหน้าเพ็ท แต่ใหญ่ขึ้น) -->
+        <span class="pd-grade-pill" :aria-label="`เกรด ${GRADE_LABELS[gradeNow] || '0'}`">{{ GRADE_LABELS[gradeNow] || '0' }}</span>
         <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
         <div class="pd-name">
           {{ pet.name }}
@@ -263,6 +265,7 @@ async function evolve() {
 .pd-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .pd-emoji { font-size: 3.4rem; }
 .pd-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
+.pd-grade-pill { position: absolute; right: 12px; top: 12px; min-width: 40px; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 999px; font-size: 1rem; font-weight: 800; letter-spacing: .04em; box-shadow: var(--pop); }
 .pd-quote { margin: 10px auto 0; max-width: 30ch; white-space: pre-line; text-wrap: balance; font-style: italic; font-size: .86rem; line-height: 1.5; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
 .pd-quote::before { content: '“'; }
 .pd-quote::after { content: '”'; }
