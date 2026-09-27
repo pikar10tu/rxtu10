@@ -9,13 +9,12 @@
 //    ตำแหน่งใน `filled` (=หลัง compact) ไม่ใช่ index ดิบใน slotIds — สะท้อนพฤติกรรมจริงของเอนจิน
 //    ไม่ใช่เลขช่องที่ตาเห็นตรงๆ ถ้ามีช่องว่างค้างอยู่ก่อนหน้า (แจ้งเคสนี้ในรีพอร์ต)
 
-import { getPetDef, ELEMENTS } from '../data/index.js'
+import { getPetDef } from '../data/index.js'
 import { PET_PASSIVES, partWithEffect, passiveValueAt } from '../data/petPassives.js'
 import { seasonOfSlot, seasonText, degreeFormActive, effectiveRarity } from './petForms.js'
 
 const ELEMENT_TH = { fist: 'กำปั้น', scissors: 'กรรไกร', paper: 'กระดาษ' }
 const ELEMENT_ORDER = ['fist', 'paper', 'scissors']
-const elEmojiOfElement = (el) => ELEMENTS[el]?.emoji || '✊'
 
 /** @param {(string|null)[]} slotIds
  *  @returns {Array<{key:string, icon:string, ok:boolean, text:string}>} */
@@ -40,7 +39,7 @@ export function teamSynergy(slotIds) {
       const missing = ELEMENT_ORDER.filter(el => !els.has(el))
       out.push(missing.length
         ? { key: id, icon: passive.icon, ok: false,
-            text: `ยังขาดสาย ${missing.map(el => `${elEmojiOfElement(el)} ${ELEMENT_TH[el]}`).join(' ')}` }
+            text: `ยังขาดสาย ${missing.map(el => ELEMENT_TH[el]).join(' ')}` }
         : { key: id, icon: passive.icon, ok: true,
             text: `ครบ 3 สาย ทั้งทีมแรง +${v.pct}% เลือด +${v.hpPct}%` })
     }
@@ -59,16 +58,18 @@ export function teamSynergy(slotIds) {
     }
 
     // 🌍 เอิร์ธ — ฤดูตามช่อง (ตำแหน่งจริงหลัง compact) เว้นแต่กลายร่างองศา
+    // ⚠️ text ต้องไม่มีอีโมจิฝังอยู่ — TeamPicker.vue render {{ s.text }} ดิบ (ไม่ผ่าน <Emoji>)
+    //    ไอคอนที่ต้องโชว์ทั้งหมดต้องอยู่ใน `icon` เท่านั้น
     const seasonPart = partWithEffect(passive, 'season')
     if (seasonPart) {
       if (degreeFormActive(team)) {
-        out.push({ key: id, icon: passive.icon, ok: false,
-          text: `${passive.icon} กลายเป็นองศา นับเป็นธรรมดา — ไม่ได้ฤดูกาลรอบนี้` })
+        out.push({ key: id, icon: '🌗', ok: false,
+          text: 'กลายเป็นองศา นับเป็นธรรมดา — ไม่ได้ฤดูกาลรอบนี้' })
       } else {
         const v = passiveValueAt(seasonPart, 1)
         const pos = filled.indexOf(id)
         const s = seasonOfSlot(pos)
-        out.push({ key: id, icon: passive.icon, ok: true, text: `${s.icon} ${seasonText(s.key, v)}` })
+        out.push({ key: id, icon: s.icon, ok: true, text: seasonText(s.key, v) })
       }
     }
 

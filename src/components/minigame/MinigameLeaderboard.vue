@@ -25,7 +25,8 @@ const game = getMinigame(props.gameKey)
 const { rows, loading, load } = useMinigameBoard(props.gameKey)
 onMounted(load)
 
-const medal = (i) => (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`)
+// เรียกเฉพาะ i < 3 (ดู template) — ไม่มี fallback เลขลำดับที่นี่
+const medal = (i) => (i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉')
 </script>
 
 <style scoped>
