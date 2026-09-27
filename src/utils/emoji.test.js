@@ -74,6 +74,13 @@ test('ข้อความปนทั้ง emoji และแท็ก → em
   assert.ok(out.includes('<img src="emoji/fluent/1f431.webp"'))
 })
 
+test('toast: ข้อความปน <img onerror> + 🪙 → แท็กถูก escape เฉยๆ เหรียญกลายเป็น <img> จริง (ToastContainer.vue)', () => {
+  const out = emojifyHtml('<img src=x onerror=alert(1)> 🪙')
+  assert.ok(!/<img src=x/.test(out), 'ห้ามมีแท็กดิบที่ควบคุมโดยผู้ใช้หลุดออกไป')
+  assert.ok(out.includes('&lt;img src=x onerror=alert(1)&gt;'))
+  assert.ok(out.includes(`<img src="emoji/fluent/${emojiCodepoint('🪙')}.webp"`), out)
+})
+
 // ── WebP คู่กับ SVG ทุกตัว ──
 // 🔑 iPhone Safari raster SVG Fluent ใหม่ทุกครั้งที่การ์ด repaint = ต้นเหตุรีเพลย์กระตุก
 //    (ห้องเทียบ v5 26 ก.ย. 2026: <30fps 119+ → 7 เฟรม/ไฟต์) ⇒ แอปเสิร์ฟ WebP · SVG เก็บไว้เป็นต้นฉบับ
