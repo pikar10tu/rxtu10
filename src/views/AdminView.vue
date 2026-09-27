@@ -16,7 +16,8 @@
         </div>
         <div class="maint-toggle">
           <span class="maint-state" :class="maintenance ? 'off' : 'on'">
-            {{ maintenance ? '🔒 ปิดซ่อมบำรุง (เฉพาะทีมงาน)' : '🟢 เปิดให้ทุกคนใช้' }}
+            <template v-if="maintenance"><Emoji char="🔒" /> ปิดซ่อมบำรุง (เฉพาะทีมงาน)</template>
+            <template v-else><Emoji char="🟢" /> เปิดให้ทุกคนใช้</template>
           </span>
           <button
             class="btn-mini" :class="maintenance ? 'btn-gold' : 'btn-gray'"
@@ -36,7 +37,8 @@
         </div>
         <div class="maint-toggle">
           <span class="maint-state" :class="gachaEv.active ? 'on' : 'off'">
-            {{ gachaEv.active ? `🟢 เปิดอยู่ · เหลือ ${gachaEvLeft}` : '⚪ ยังไม่มีอีเวนต์' }}
+            <template v-if="gachaEv.active"><Emoji char="🟢" /> เปิดอยู่ · เหลือ {{ gachaEvLeft }}</template>
+            <template v-else><Emoji char="⚪" /> ยังไม่มีอีเวนต์</template>
           </span>
           <div class="ev-btns">
             <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(7)">เริ่ม 7 วัน</button>
@@ -54,14 +56,15 @@
           สุ่มป้อนข้อให้ทีมวิชาการ+อาจารย์ช่วยตรวจความถูกต้อง — ดูได้ว่าใครตรวจไปกี่ข้อ
         </div>
         <RouterLink to="/review" class="btn-mini btn-gold" style="display:inline-block;text-decoration:none;margin-top:4px">
-          ไปหน้าตรวจข้อสอบ 🔍
+          ไปหน้าตรวจข้อสอบ <Emoji char="🔍" />
         </RouterLink>
         <div class="admin-hint" style="margin-top:10px">
           ซิงก์ = เติมสถานะตรวจให้ข้อเก่า (ครั้งแรกต้องกด ไม่งั้นหน้า /review มองไม่เห็นข้อพวกนั้น)
           + คำนวณตัวนับ "ใครตรวจกี่ข้อ" ใหม่ · กดซ้ำได้ ปลอดภัย
         </div>
         <button class="btn-mini" :disabled="reviewSyncBusy" @click="syncReviewSystem">
-          {{ reviewSyncBusy ? 'กำลังซิงก์…' : '🔄 ซิงก์ระบบตรวจ' }}
+          <template v-if="reviewSyncBusy">กำลังซิงก์…</template>
+          <template v-else><Emoji char="🔄" /> ซิงก์ระบบตรวจ</template>
         </button>
 
       </section>
@@ -77,11 +80,13 @@
           ประวัติการบุกและข่าวกระดานของทุกคนถูกพ่วงต่อให้ ไม่หาย
         </div>
         <button class="btn-mini" :disabled="rebuildingRoster" @click="regenMinis">
-          {{ rebuildingRoster ? 'กำลังทำ…' : '🖼️ สร้างรูปย่อใหม่ทั้งรุ่น + roster' }}
+          <template v-if="rebuildingRoster">กำลังทำ…</template>
+          <template v-else><Emoji char="🖼️" /> สร้างรูปย่อใหม่ทั้งรุ่น + roster</template>
         </button>
         <div class="admin-hint">รูปที่อัปเองในหน้าสมาชิกคมขึ้น (ย่อใหม่เป็น {{ MINI_SIZE }}px) · เฉพาะคนที่ยังเป็นรุ่นเก่า · กดซ้ำได้</div>
         <button class="btn-mini" :disabled="rebuildingRoster" @click="rebuildRoster">
-          {{ rebuildingRoster ? 'กำลังสร้าง…' : '🔄 สร้าง roster ใหม่' }}
+          <template v-if="rebuildingRoster">กำลังสร้าง…</template>
+          <template v-else><Emoji char="🔄" /> สร้าง roster ใหม่</template>
         </button>
       </section>
 
@@ -95,7 +100,8 @@
           ไม่แตะตัวนับ PvP/พลิกการ์ด (สองตัวนั้นนับสดจากการเล่นเท่านั้น)
         </div>
         <button class="btn-mini" :disabled="computingGlobalStats" @click="computeGlobalStats">
-          {{ computingGlobalStats ? 'กำลังคำนวณ…' : '📊 คำนวณสถิติรวมครั้งแรก' }}
+          <template v-if="computingGlobalStats">กำลังคำนวณ…</template>
+          <template v-else><Emoji char="📊" /> คำนวณสถิติรวมครั้งแรก</template>
         </button>
       </section>
 
@@ -168,7 +174,8 @@
         </div>
         <template v-if="spPreview">
           <div v-if="spPreview.paid" class="admin-hint sp-paid">
-            {{ spPreview.paid.status === 'done' ? `✅ ซีซั่นนี้แจกไปแล้ว ${spPreview.paid.mails} ฉบับ` : '⚠️ ค้างกลางทาง — เช็คจดหมายก่อนทำอะไรต่อ' }}
+            <template v-if="spPreview.paid.status === 'done'"><Emoji char="✅" /> ซีซั่นนี้แจกไปแล้ว {{ spPreview.paid.mails }} ฉบับ</template>
+            <template v-else><Emoji char="⚠️" /> ค้างกลางทาง — เช็คจดหมายก่อนทำอะไรต่อ</template>
           </div>
           <div class="admin-hint">
             หอคอย {{ spPreview.tower }} คน (ท็อป {{ spPreview.towerTop }} · ได้ตั๋ว {{ spPreview.tickets }}) ·
@@ -176,13 +183,14 @@
           </div>
           <!-- สนามแชมป์ต้องอยู่ใน data/arenas.js ก่อนกดแจก ไม่งั้นจดหมายไม่แนบสนาม (ยังแจกเหรียญ/achievement ได้) -->
           <div class="admin-hint" :class="{ 'sp-paid': !spPreview.champArena }">
-            {{ spPreview.champArena ? `🏟️ สนามแชมป์ซีซั่นนี้: ${spPreview.champArena}` : `❌ ยังไม่มีสนามแชมป์ ch-${spSeason} ในโค้ด — กดแจกตอนนี้จะไม่ได้สนาม` }}
+            <template v-if="spPreview.champArena"><Emoji char="🏟️" /> สนามแชมป์ซีซั่นนี้: {{ spPreview.champArena }}</template>
+            <template v-else><Emoji char="❌" /> ยังไม่มีสนามแชมป์ ch-{{ spSeason }} ในโค้ด — กดแจกตอนนี้จะไม่ได้สนาม</template>
           </div>
           <ul class="sp-list">
             <li v-for="r in spPreview.rows" :key="r.uid">
               <b>{{ r.nickname }}</b>
-              <span v-if="r.tower"> · 🏯 ชั้น {{ r.tower.best }}{{ r.tower.top ? ' 👑' : '' }} → {{ r.tower.coins.toLocaleString() }}{{ r.tower.tickets ? ` + ตั๋ว ${r.tower.tickets}` : '' }}</span>
-              <span v-if="r.arena"> · ⚔️ #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม{{ r.arena.ach ? ' 👑' : '' }}{{ r.arena.top && spPreview.champArena ? ' 🏟️' : '' }} → {{ r.arena.coins.toLocaleString() }}</span>
+              <span v-if="r.tower"> · <Emoji char="🏯" /> ชั้น {{ r.tower.best }}<template v-if="r.tower.top"> <Emoji char="👑" /></template> → {{ r.tower.coins.toLocaleString() }}<template v-if="r.tower.tickets"> + ตั๋ว {{ r.tower.tickets }}</template></span>
+              <span v-if="r.arena"> · <Emoji char="⚔️" /> #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม<template v-if="r.arena.ach"> <Emoji char="👑" /></template><template v-if="r.arena.top && spPreview.champArena"> <Emoji char="🏟️" /></template> → {{ r.arena.coins.toLocaleString() }}</span>
             </li>
           </ul>
           <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
