@@ -3,102 +3,107 @@
   <Teleport to="body">
   <div v-if="pet" class="pd-ov" @click.self="$emit('close')">
     <div class="pd-box">
-      <div class="pd-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
+      <!-- รีดีไซน์ 27 ก.ย. 2026 — user เลือกแนว "โปรไฟล์ตัวละคร" จากเดโม artifact -->
+      <div class="pd-top" :style="{ '--rc': rc }">
         <button class="pd-x" aria-label="ปิด" @click="$emit('close')">✕</button>
-        <!-- เกรดมุมขวาบน (27 ก.ย. 2026 user เลือกแบบ A — ป้ายเดียวกับกริดหน้าเพ็ท แต่ใหญ่ขึ้น) -->
-        <span class="pd-grade-pill" :aria-label="`เกรด ${GRADE_LABELS[gradeNow] || '0'}`">{{ GRADE_LABELS[gradeNow] || '0' }}</span>
-        <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
-        <div class="pd-name">
-          {{ pet.name }}
-          <span v-if="balTag" class="pd-baltag" :class="balTag.kind" :title="`ปรับสมดุล: ${balTag.label}`" :aria-label="`ปรับสมดุล: ${balTag.label}`"><Emoji :char="balTag.icon" /></span>
+        <span class="pd-grade-pill" :aria-label="`เกรด ${gradeLabel}`">{{ gradeLabel }}</span>
+        <div class="pd-head">
+          <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
+          <div class="pd-id">
+            <div class="pd-name">
+              {{ pet.name }}
+              <span v-if="balTag" class="pd-baltag" :class="balTag.kind" :title="`ปรับสมดุล: ${balTag.label}`" :aria-label="`ปรับสมดุล: ${balTag.label}`"><Emoji :char="balTag.icon" /></span>
+            </div>
+            <div class="pd-tags">
+              <span class="pd-tag">{{ RARITY[pet.rarity]?.label }}</span>
+              <span class="pd-tag"><Emoji :char="ELEMENTS[elDef]?.emoji || '✊'" /> {{ EL_NAME[elDef] || elDef }}</span>
+              <HelpButton topic="element" style="width:18px;height:18px;font-size: .7rem" />
+            </div>
+          </div>
         </div>
-        <div class="pd-tags">
-          <span class="pd-tag"><Emoji :char="ELEMENTS[elDef]?.emoji || '✊'" /> {{ EL_NAME[elDef] || elDef }}</span>
-          <HelpButton topic="element" style="width:18px;height:18px;font-size: .7rem" />
-          <span class="pd-tag">ตัวซ้ำ {{ pet.copies || 0 }}</span>
-        </div>
-        <!-- คำพูดประจำตัว (flavor) — แบ่งบรรทัดด้วย 
- ใน data/index.js (27 ก.ย. 2026 user เคาะ: คำพูดบนหัว · เรื่องเล่าพับไว้ก่อน) -->
+        <!-- คำพูดประจำตัว (flavor ใน data/index.js) — ตัดบรรทัดด้วยตัวขึ้นบรรทัดใหม่ในสตริง · เรื่องเล่า (lore) พับไว้ก่อน -->
         <p v-if="quote" class="pd-quote">{{ quote }}</p>
       </div>
 
-      <!-- ✨ ทักษะเฉพาะ — ยกขึ้นมาไว้ใต้ชื่อเลย
-           เดิมอยู่ล่างสุดใต้เกรด/วิวัฒน์ ต้องเลื่อนถึงจะเจอ คนเล่นเลยแทบไม่รู้ว่าเพ็ทมีสกิล -->
-      <div class="pd-skill" :class="{ none: !pdPassive }">
-        <div class="pd-skill-kicker">ทักษะเฉพาะ</div>
-        <div class="pd-skill-top">
-          <span class="pd-skill-icon"><Emoji :char="pdPassive ? pdPassive.icon : '✨'" /></span>
-          <span class="pd-skill-name">{{ pdPassive ? pdPassive.name : 'ยังไม่มีทักษะเฉพาะ' }}</span>
-        </div>
-        <!-- passiveText() เติมตัวเลขจริงของขั้นนั้นให้แล้ว — ห้ามพิมพ์ตัวเลขลง desc เอง (petPassives.js) -->
-        <div class="pd-skill-desc">{{ pdPassive ? passiveText(pdPassive) : 'เพ็ทตัวนี้ยังไม่มีทักษะติดตัว — ลองตัวอื่นดูได้' }}</div>
-      </div>
-
-      <!-- active team toggle -->
-      <template v-if="isActive">
-        <div class="pd-slotrow">
-          <span class="pd-slotrow-label">ลำดับในทีม: ช่อง {{ activeSlotIndex + 1 }}<small>ช่อง 1 ลงสนามก่อน · กดเลขเพื่อย้ายช่อง</small></span>
-          <div class="pd-slotbtns">
-            <button
-              v-for="n in battleSlots" :key="n" type="button" class="pd-slotbtn"
-              :class="{ cur: n - 1 === activeSlotIndex }" :disabled="busy || n - 1 === activeSlotIndex"
-              :aria-pressed="n - 1 === activeSlotIndex" :aria-label="`ย้ายไปช่อง ${n}`"
-              @click="swapSlot(n - 1)"
-            >{{ n }}</button>
+      <div class="pd-body">
+        <div class="pd-skill" :class="{ none: !pdPassive }">
+          <div class="pd-skill-ic"><Emoji :char="pdPassive ? pdPassive.icon : '✨'" /></div>
+          <div>
+            <div class="pd-skill-name">{{ pdPassive ? pdPassive.name : 'ยังไม่มีทักษะเฉพาะ' }}</div>
+            <!-- passiveText() เติมตัวเลขจริงของขั้นนั้นให้แล้ว — ห้ามพิมพ์ตัวเลขลง desc เอง (petPassives.js) -->
+            <div class="pd-skill-desc">{{ pdPassive ? passiveText(pdPassive) : 'เพ็ทตัวนี้ยังไม่มีทักษะติดตัว' }}</div>
           </div>
         </div>
-        <button class="pd-active on" :disabled="busy" @click="removeFromTeam">
-          <Emoji char="⭐" /> อยู่ในทีมต่อสู้ · กดเพื่อเอาออก
-        </button>
-      </template>
-      <template v-else>
-        <button class="pd-active" :disabled="busy" @click="onAddTap">
-          <Emoji char="➕" /> ใส่ในทีมต่อสู้ ({{ activeList.length }}/{{ battleSlots }})
-        </button>
-        <div v-if="pickerOpen" class="pd-picker">
-          <div class="pd-picker-label">แทนตัวไหน?</div>
-          <button
-            v-for="(id, i) in activeList" :key="id" type="button" class="pd-picker-row"
-            :disabled="busy" @click="replaceSlot(i)"
-          >
-            <Emoji :char="teamPetOf(id).emoji" /> <span class="pd-picker-name">{{ teamPetOf(id).name }}</span>
-            <span class="pd-picker-slot">ช่อง {{ i + 1 }}</span>
-          </button>
-          <button type="button" class="pd-picker-cancel" :disabled="busy" @click="pickerOpen = false">ยกเลิก</button>
-        </div>
-      </template>
 
-      <!-- stats -->
-      <div class="pd-stats">
-        <div class="pd-stat"><span><Emoji char="⚔️" /></span><b>{{ atk }}</b><small>ATK</small></div>
-        <div class="pd-stat"><span><Emoji char="❤️" /></span><b>{{ hp }}</b><small>HP</small></div>
-        <div class="pd-stat"><span><Emoji char="💰" /></span><b>{{ income }}</b><small>/วัน</small></div>
+        <!-- หลอดค่าพลัง: เพดาน = ค่าสูงสุดในเกม (ATK ตำนานจู่โจม V · HP ตำนานพิทักษ์ V · รายได้ ตำนาน V)
+             ⇒ ไม่มีตัวไหนเต็มทุกหลอด แม้อัพสุด (user กำหนด 27 ก.ย. 2026) · ดู STAT_MAX -->
+        <section>
+          <div class="pd-sec">ค่าพลัง</div>
+          <div class="pd-bars">
+            <div v-for="b in bars" :key="b.k" class="pd-bar">
+              <span><Emoji :char="b.icon" /> {{ b.label }}</span>
+              <span class="pd-track"><i :style="{ width: b.pct + '%', background: b.color }"></i></span>
+              <b>{{ b.shown }}</b>
+            </div>
+          </div>
+        </section>
+
+        <section class="pd-evo">
+          <div class="pd-sec pd-sec-help">เกรด<HelpButton topic="grade" style="width:18px;height:18px;font-size: .7rem" /></div>
+          <div class="pd-steps">
+            <span v-for="n in MAX_GRADE" :key="n" :class="{ on: n <= gradeNow, next: n === gradeNow + 1 }">{{ GRADE_LABELS[n] }}</span>
+          </div>
+          <template v-if="gradeNow < MAX_GRADE && upCost">
+            <button class="pd-btn" :class="{ ok: canUp }" :disabled="!canUp || busy" @click="evolve">วิวัฒน์ → เกรด {{ GRADE_LABELS[gradeNow + 1] }}</button>
+            <!-- ของที่ต้องใช้ แยก 2 แถว มี/ต้องใช้ — ปุ่ม :disabled กดไม่ติด เหตุผลต้องมองเห็นก่อนกด
+                 (เพื่อนแจ้ง 31 ส.ค. "มีตัวซ้ำ 11 แต่อัพไม่ได้" ทั้งที่ตัวจริงคือเหรียญไม่พอ) -->
+            <div class="pd-need">
+              <div v-for="n in needs" :key="n.k" class="pd-need-row" :class="{ short: n.short > 0 }">
+                <span><Emoji :char="n.icon" /> {{ n.label }}</span>
+                <span class="pd-track sm"><i :style="{ width: n.pct + '%' }"></i></span>
+                <b>{{ n.have.toLocaleString() }} / {{ n.need.toLocaleString() }}</b>
+                <small>{{ n.short > 0 ? `ขาด ${n.short.toLocaleString()}` : 'ครบ' }}</small>
+              </div>
+            </div>
+          </template>
+          <div v-else class="pd-max">วิวัฒน์ถึงเกรด V แล้ว</div>
+        </section>
+
+        <section class="pd-team">
+          <template v-if="isActive">
+            <div class="pd-slotrow">
+              <span class="pd-slotrow-label">ลำดับในทีม: ช่อง {{ activeSlotIndex + 1 }}<small>ช่อง 1 ลงสนามก่อน · กดเลขเพื่อย้ายช่อง</small></span>
+              <div class="pd-slotbtns">
+                <button
+                  v-for="n in battleSlots" :key="n" type="button" class="pd-slotbtn"
+                  :class="{ cur: n - 1 === activeSlotIndex }" :disabled="busy || n - 1 === activeSlotIndex"
+                  :aria-pressed="n - 1 === activeSlotIndex" :aria-label="`ย้ายไปช่อง ${n}`"
+                  @click="swapSlot(n - 1)"
+                >{{ n }}</button>
+              </div>
+            </div>
+            <button class="pd-active on" :disabled="busy" @click="removeFromTeam">
+              <Emoji char="⭐" /> อยู่ในทีมต่อสู้ · กดเพื่อเอาออก
+            </button>
+          </template>
+          <template v-else>
+            <button class="pd-active add" :disabled="busy" @click="onAddTap">
+              <Emoji char="➕" /> ใส่ในทีมต่อสู้ ({{ activeList.length }}/{{ battleSlots }})
+            </button>
+            <div v-if="pickerOpen" class="pd-picker">
+              <div class="pd-picker-label">แทนตัวไหน?</div>
+              <button
+                v-for="(id, i) in activeList" :key="id" type="button" class="pd-picker-row"
+                :disabled="busy" @click="replaceSlot(i)"
+              >
+                <Emoji :char="teamPetOf(id).emoji" /> <span class="pd-picker-name">{{ teamPetOf(id).name }}</span>
+                <span class="pd-picker-slot">ช่อง {{ i + 1 }}</span>
+              </button>
+              <button type="button" class="pd-picker-cancel" :disabled="busy" @click="pickerOpen = false">ยกเลิก</button>
+            </div>
+          </template>
+        </section>
       </div>
-
-      <!-- แกนพลัง: ความหายาก / เกรด+วิวัฒน์ (ศักยภาพถอดออก P2 — pet build depth ไปที่ passive P3) -->
-      <div class="pd-axes">
-        <div class="pd-axis">
-          <span class="pd-axis-k">ความหายาก</span>
-          <span class="pd-axis-v pd-rarity" :style="{ background: RARITY[pet.rarity]?.color }">{{ RARITY[pet.rarity]?.label }}</span>
-        </div>
-        <div class="pd-axis">
-          <span class="pd-axis-k pd-axis-k-help">เกรด<HelpButton topic="grade" style="width:18px;height:18px;font-size: .7rem" /></span>
-          <span class="pd-axis-v">
-            <b class="pd-grade-badge">{{ GRADE_LABELS[gradeNow] || '0' }}</b>
-            <button v-if="gradeNow < MAX_GRADE" class="pd-btn" :class="{ ok: canUp }" :disabled="!canUp || busy" @click="evolve">วิวัฒน์ → {{ GRADE_LABELS[gradeNow + 1] }}</button>
-            <span v-else class="pd-max">สูงสุดแล้ว</span>
-          </span>
-        </div>
-        <!-- ต้องโชว์ "ของที่มี" ครบทั้งสองอย่าง ไม่ใช่แค่ตัวซ้ำ —
-             ปุ่มวิวัฒน์เป็น :disabled จึงกดไม่ติด = ไม่มีทางรู้ว่าติดตรงไหน
-             (เพื่อนแจ้ง 31 ส.ค. "มีตัวซ้ำ 11 แต่อัพไม่ได้" ทั้งที่ตัวจริงคือเหรียญไม่พอ) -->
-        <div v-if="gradeNow < MAX_GRADE && upCost" class="pd-axis-cost">
-          ใช้ {{ upCost.copies }} ตัวซ้ำ + {{ upCost.coins.toLocaleString() }} เหรียญ ·
-          มี {{ pet.copies || 0 }} ตัวซ้ำ · {{ (auth.userData?.coins || 0).toLocaleString() }} เหรียญ
-          <span v-if="blockText" class="pd-axis-lack">{{ blockText }}</span>
-        </div>
-      </div>
-
     </div>
   </div>
   </Teleport>
@@ -122,6 +127,18 @@ import { replaceAt, swapTo } from '../../utils/teamSlots.js'
 import { balanceTagOf } from '../../utils/balanceTag.js'
 import { useRosterSync } from '../../composables/useRosterSync.js'
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
+import { COMBAT_BASE, COMBAT_GRADE, ELEMENT_BIAS, RARITY_DAILY_BASE, GRADE_MULTI_V2 } from '../../data/petPower.js'
+
+// เพดานหลอดค่าพลัง = ค่าสูงสุดที่มีในเกม (ตำนานเกรด V ในสายที่ถนัดด้านนั้น) — คำนวณจากสูตรจริง ไม่ฝังเลข
+// ⇒ ปรับตัวเลขใน petPower.js แล้วหลอดตามเอง · จู่โจม ATK นำ / สมดุลเท่ากัน / พิทักษ์ HP นำ มาจาก ELEMENT_BIAS
+const TOP = COMBAT_GRADE[COMBAT_GRADE.length - 1]
+const STAT_MAX = {
+  atk: Math.max(...Object.values(COMBAT_BASE).map(b => b.atk)) * TOP * Math.max(...Object.values(ELEMENT_BIAS).map(e => e.atk)),
+  hp: Math.max(...Object.values(COMBAT_BASE).map(b => b.hp)) * TOP * Math.max(...Object.values(ELEMENT_BIAS).map(e => e.hp)),
+  income: Math.max(...Object.values(RARITY_DAILY_BASE)) * GRADE_MULTI_V2[GRADE_MULTI_V2.length - 1],
+}
+// ขั้นต่ำ 3% ให้หลอดของตัวเล็กยังเห็นเป็นขีด ไม่หายไปทั้งหลอด
+const pctOf = (v, max) => Math.max(3, Math.min(100, (v / max) * 100))
 
 const props = defineProps({ petId: { type: String, default: null } })
 const emit = defineEmits(['close'])
@@ -193,17 +210,21 @@ const quote = computed(() => getPetDef(pet.value?.id)?.flavor || '')
 const elDef = computed(() => getPetDef(pet.value?.id)?.element || pet.value?.element || 'scissors')
 
 const gradeNow = computed(() => pet.value?.grade || 0)
+const gradeLabel = computed(() => GRADE_LABELS[gradeNow.value] || '0')
 const upCost = computed(() => pet.value ? gradeUpCost(pet.value) : null)
-// แหล่งความจริงเดียวของ "อัพได้ไหม + ทำไมไม่ได้" — อย่าแยกเป็นสองสูตร เดี๋ยวปุ่มกับข้อความไม่ตรงกัน
+// แหล่งความจริงเดียวของ "อัพได้ไหม" — อย่าแยกเป็นสองสูตร เดี๋ยวปุ่มกับข้อความไม่ตรงกัน
 const block = computed(() => pet.value ? upgradeBlock(pet.value, auth.userData?.coins || 0) : { reason: 'maxed' })
 const canUp = computed(() => !!pet.value && block.value === null)
-const blockText = computed(() => {
-  const b = block.value
-  if (!b || b.reason !== 'short') return ''
-  const parts = []
-  if (b.copiesShort) parts.push(`ตัวซ้ำอีก ${b.copiesShort}`)
-  if (b.coinsShort) parts.push(`เหรียญอีก ${b.coinsShort.toLocaleString()}`)
-  return `ขาด${parts.join(' และ ')}`
+// แถว "มี / ต้องใช้" ของตัวซ้ำและเหรียญ (แทนประโยคยาวบรรทัดเดียวเดิม — user บอกว่ารก)
+const needs = computed(() => {
+  const c = upCost.value
+  if (!c || !pet.value) return []
+  const copies = pet.value.copies || 0
+  const coins = auth.userData?.coins || 0
+  const row = (k, icon, label, have, need) => ({
+    k, icon, label, have, need, short: Math.max(0, need - have), pct: need ? Math.min(100, (have / need) * 100) : 100,
+  })
+  return [row('cp', '🧬', 'ตัวซ้ำ', copies, c.copies), row('co', '🪙', 'เหรียญ', coins, c.coins)]
 })
 
 // เลข combat จริง (= ที่ใช้สู้) — element ดึงจาก def (per-species), grade V = ×2
@@ -214,6 +235,11 @@ const combat = computed(() => {
 const atk = computed(() => Math.round(combat.value.atk))
 const hp = computed(() => Math.round(combat.value.maxHp))
 const income = computed(() => pet.value ? petDailyCoins(pet.value) : 0)
+const bars = computed(() => [
+  { k: 'atk', icon: '⚔️', label: 'ATK', color: '#f59e0b', pct: pctOf(combat.value.atk, STAT_MAX.atk), shown: atk.value },
+  { k: 'hp', icon: '❤️', label: 'HP', color: '#ef4444', pct: pctOf(combat.value.maxHp, STAT_MAX.hp), shown: hp.value },
+  { k: 'inc', icon: '💰', label: '/วัน', color: '#4cc9a0', pct: pctOf(income.value, STAT_MAX.income), shown: income.value.toLocaleString() },
+])
 
 async function commit(newPets, coinDelta = 0) {
   // reconcile the active team: drop any species no longer owned so a
@@ -260,65 +286,79 @@ async function evolve() {
    คนเล่นกด ⋯ แล้วเห็นแค่จอมืดลง (เกิดจริง 28 ส.ค. ที่หอคอยและสนามประลอง)
    บันไดชั้น: sheet/modal ฐาน = 400 · อะไรที่เปิดจากในนั้น = 410 (ดู SeedPicker, SpendCopiesModal) */
 .pd-ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
-.pd-box { background: #fff; width: 100%; max-width: 380px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; }
-.pd-hero { position: relative; padding: 20px 16px 16px; text-align: center; color: #fff; }
-.pd-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-.pd-emoji { font-size: 3.4rem; }
-.pd-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
-.pd-grade-pill { position: absolute; right: 12px; top: 12px; min-width: 40px; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 999px; font-size: 1rem; font-weight: 800; letter-spacing: .04em; box-shadow: var(--pop); }
-.pd-quote { margin: 10px auto 0; max-width: 30ch; white-space: pre-line; text-wrap: balance; font-style: italic; font-size: .86rem; line-height: 1.5; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+.pd-box { width: 100%; max-width: 380px; border-radius: 22px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; background: #fff; color: var(--ink); }
+
+/* หัวการ์ด: ไล่สีความหายาก → ม่วงโลกเพ็ท */
+.pd-top { position: relative; padding: 14px 14px 18px; color: #fff; overflow: hidden;
+  background: linear-gradient(160deg, var(--rc), color-mix(in srgb, var(--rc) 45%, #e6dcfd)); }
+.pd-top::after { content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,.18); pointer-events: none; }
+.pd-x { position: absolute; left: 10px; top: 10px; z-index: 2; border: none; background: rgba(255,255,255,.28); color: #fff; border-radius: 10px; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pd-grade-pill { position: absolute; right: 12px; top: 12px; z-index: 2; min-width: 40px; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #fff; border: 2px solid #fff; border-radius: 999px; font-size: 1rem; font-weight: 800; letter-spacing: .04em; box-shadow: var(--pop); }
+.pd-head { position: relative; z-index: 1; display: flex; gap: 12px; align-items: center; margin-top: 36px; }
+.pd-emoji { width: 88px; height: 88px; flex: none; border-radius: 24px; background: rgba(255,255,255,.3); display: grid; place-items: center; font-size: 3.4rem; }
+.pd-id { min-width: 0; }
+.pd-name { font-size: 1.4rem; font-weight: 800; line-height: 1.15; }
+.pd-tags { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.pd-tag { background: rgba(255,255,255,.28); font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.pd-quote { position: relative; z-index: 1; margin: 12px 2px 0; white-space: pre-line; text-wrap: balance; font-style: italic; font-size: .88rem; line-height: 1.5; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
 .pd-quote::before { content: '“'; }
 .pd-quote::after { content: '”'; }
-.pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
-.pd-tag { background: rgba(255,255,255,.25); font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
-/* ป้ายบาลานซ์ 27 ก.ย. 2026 — เล็ก ไม่แย่งซีน แค่บอกว่ามีการปรับล่าสุด (หายเองหลัง 14 วัน — ดู utils/balanceTag.js) */
+/* ป้ายบาลานซ์ — เล็ก ไม่แย่งซีน (หายเองหลัง 14 วัน — ดู utils/balanceTag.js) */
 .pd-baltag { display: inline-flex; font-size: .78rem; vertical-align: middle; margin-left: 2px; border-radius: 999px; padding: 1px 4px; }
 .pd-baltag.buff { background: color-mix(in srgb, var(--mint) 45%, transparent); }
 .pd-baltag.nerf { background: color-mix(in srgb, var(--accent) 45%, transparent); }
 .pd-baltag.rework { background: color-mix(in srgb, var(--primary) 45%, transparent); }
-.pd-slotrow { margin: 10px 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .78rem; font-weight: 800; color: var(--ink); }
+
+.pd-body { padding: 14px; display: grid; gap: 14px; }
+.pd-sec { font-size: .7rem; font-weight: 800; letter-spacing: .06em; color: #8a93ab; margin-bottom: 6px; }
+.pd-sec-help { display: flex; align-items: center; gap: 4px; }
+.pd-skill { display: flex; gap: 10px; align-items: flex-start; background: #f5f3ff; border-radius: 14px; padding: 10px; }
+.pd-skill.none { background: #f8fafc; }
+.pd-skill-ic { width: 40px; height: 40px; flex: none; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 1.4rem; box-shadow: var(--pop); }
+.pd-skill-name { font-weight: 800; color: #6a52b8; }
+.pd-skill.none .pd-skill-name { color: rgba(0,0,0,.45); }
+.pd-skill-desc { font-size: .8rem; color: #434a63; line-height: 1.5; margin-top: 2px; }
+
+.pd-bars { display: grid; gap: 7px; }
+.pd-bar { display: grid; grid-template-columns: 62px 1fr 56px; gap: 8px; align-items: center; font-size: .78rem; }
+.pd-bar b { text-align: right; font-variant-numeric: tabular-nums; }
+.pd-track { height: 8px; border-radius: 4px; background: #eef1f7; overflow: hidden; }
+.pd-track i { display: block; height: 100%; border-radius: 4px; transition: width .35s; }
+.pd-track.sm { height: 6px; }
+
+.pd-evo { display: grid; gap: 8px; }
+.pd-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.pd-steps span { height: 26px; border-radius: 8px; background: #eef1f7; color: #8a93ab; display: grid; place-items: center; font-size: .74rem; font-weight: 800; }
+.pd-steps span.on { background: #2b3550; color: #fff; }
+.pd-steps span.next { outline: 2px dashed var(--primary); outline-offset: -2px; color: var(--primary); background: #fff; }
+.pd-btn { width: 100%; border: 0; border-radius: 12px; padding: 10px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; }
+.pd-btn.ok { background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: var(--pop); }
+.pd-btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
+.pd-need { display: grid; gap: 5px; }
+.pd-need-row { display: grid; grid-template-columns: 68px 1fr auto 56px; gap: 8px; align-items: center; font-size: .74rem; }
+.pd-need-row b { font-variant-numeric: tabular-nums; font-weight: 700; }
+.pd-need-row small { font-size: .7rem; font-weight: 800; text-align: right; color: #15803d; }
+.pd-need-row .pd-track i { background: var(--mint); }
+/* พื้นขาว — แดงเข้มพอให้ contrast ผ่าน (CLAUDE.md ข้อ 13 ก่อนก๊อปสีไปที่อื่น) */
+.pd-need-row.short small { color: #b91c1c; }
+.pd-need-row.short .pd-track i { background: var(--accent); }
+.pd-max { font-size: .78rem; color: #15803d; font-weight: 800; }
+
+.pd-team { display: grid; gap: 8px; }
+.pd-slotrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .78rem; font-weight: 800; }
 .pd-slotrow-label small { display: block; font-size: .7rem; font-weight: 600; color: rgba(0,0,0,.55); }
 .pd-slotbtns { display: flex; gap: 5px; }
-.pd-slotbtn { width: 34px; height: 34px; border-radius: 10px; border: var(--bw) solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: .74rem; font-weight: 800; cursor: pointer; }
+.pd-slotbtn { width: 34px; height: 34px; border-radius: 10px; border: var(--bw) solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
 .pd-slotbtn.cur { background: var(--primary); color: #fff; cursor: default; }
 .pd-slotbtn:disabled:not(.cur) { opacity: .5; }
-.pd-picker { margin: 8px 14px 0; border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px; }
-.pd-picker-label { font-size: .74rem; font-weight: 800; color: var(--ink); }
+.pd-active { width: 100%; border: var(--bw) solid var(--line); border-radius: 12px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; background: #fff; color: var(--ink); }
+.pd-active.add { border: 0; background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; box-shadow: var(--pop); }
+.pd-active.on { background: var(--accent-light); color: #c2477a; border-color: #f7c1d6; }
+.pd-active:disabled { opacity: .6; box-shadow: none; }
+.pd-picker { border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px; }
+.pd-picker-label { font-size: .74rem; font-weight: 800; }
 .pd-picker-row { display: flex; align-items: center; gap: 6px; border: var(--bw) solid var(--line); border-radius: 10px; background: #fff; padding: 7px 10px; font-family: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; text-align: left; }
 .pd-picker-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pd-picker-slot { font-size: .7rem; font-weight: 800; color: var(--muted, #64748b); }
 .pd-picker-cancel { border: none; background: none; color: var(--muted, #64748b); font-family: inherit; font-size: .74rem; font-weight: 700; padding: 4px; cursor: pointer; }
-.pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: #fff; color: var(--ink); box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
-.pd-active.on { background: var(--gold); color: #fff; }
-.pd-active:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pd-active:disabled { opacity: .6; box-shadow: none; }
-.pd-stats { display: flex; }
-.pd-stat { flex: 1; text-align: center; padding: 14px 4px; border-right: 1px solid rgba(0,0,0,.06); }
-.pd-stat:last-child { border-right: none; }
-.pd-stat span { font-size: 1.1rem; }
-.pd-stat b { display: block; font-size: 1.15rem; font-weight: 800; }
-.pd-stat small { font-size: .7rem; color: rgba(0,0,0,.45); }
-.pd-skill { margin: 12px 14px 0; padding: 10px 12px; border: var(--bw) solid var(--line); border-radius: 14px; background: linear-gradient(135deg, #eef2ff, #f8fafc); box-shadow: var(--pop); }
-.pd-skill.none { background: #f8fafc; box-shadow: none; border-color: rgba(0,0,0,.18); }
-.pd-skill-kicker { font-size: .7rem; font-weight: 800; color: rgba(0,0,0,.4); letter-spacing: .04em; }
-.pd-skill-top { display: flex; align-items: center; gap: 7px; margin-top: 2px; }
-.pd-skill-icon { font-size: 1.35rem; line-height: 1; }
-.pd-skill-name { font-size: .95rem; font-weight: 800; color: var(--primary); }
-.pd-skill.none .pd-skill-name { color: rgba(0,0,0,.45); font-size: .82rem; }
-.pd-skill-desc { font-size: .74rem; color: rgba(0,0,0,.65); line-height: 1.45; margin-top: 4px; }
-.pd-btn { width: 100%; border: var(--bw) solid var(--line); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
-.pd-btn.ok { background: var(--primary); box-shadow: var(--pop); }
-.pd-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
-.pd-btn.ok:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pd-axes { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; padding: 0 16px; }
-.pd-axis { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 11px; border: var(--bw) solid var(--line); border-radius: 12px; }
-.pd-axis-k { font-size: .72rem; font-weight: 800; color: #64748b; }
-.pd-axis-k-help { display: inline-flex; align-items: center; gap: 4px; }
-.pd-axis-v { display: inline-flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 800; }
-.pd-rarity { color: #fff; padding: 2px 12px; border-radius: 999px; font-size: .74rem; }
-.pd-grade-badge { background: #1e293b; color: #fff; min-width: 26px; text-align: center; padding: 2px 8px; border-radius: 8px; }
-.pd-max { font-size: .72rem; color: #15803d; font-weight: 800; }
-.pd-axis-cost { font-size: .7rem; color: rgba(0,0,0,.55); text-align: right; margin: -4px 4px 0; line-height: 1.6; }
-/* พื้นการ์ดเป็นสีขาว — แดงเข้มพอให้ contrast ผ่าน (ดู CLAUDE.md ข้อ 13 ก่อนก๊อปสีไปที่อื่น) */
-.pd-axis-lack { display: block; color: #b91c1c; font-weight: 800; }
 </style>
