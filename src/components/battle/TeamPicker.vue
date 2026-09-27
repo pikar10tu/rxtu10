@@ -23,7 +23,7 @@
           <template v-if="id">
             <PetThumb :pet="slotPetOf(id)" />
             <span class="tp-slotname">{{ displayName(id, defOf(id).name, teamNow) }}</span>
-            <span v-if="earthTag(i)" class="tp-season">{{ earthTag(i) }}</span>
+            <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
           </template>
           <span v-else class="tp-empty">＋</span>
         </button>
@@ -138,13 +138,14 @@ const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({
 const formOn = computed(() => degreeFormActive(teamNow.value))
 const synergy = computed(() => teamSynergy(edit.value.slots))
 
-/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา */
+/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา
+ *  คืน {icon, text} แยกกัน (ไม่ใช่ string รวม) เพื่อให้ icon เดินผ่าน <Emoji> เสมอ — ไม่ใช่ OS glyph */
 function earthTag(i) {
   if (edit.value.slots[i] !== 'earth') return null
-  if (formOn.value) return '🌗 องศา · นับเป็น common'
+  if (formOn.value) return { icon: '🌗', text: 'องศา · นับเป็น common' }
   const pos = edit.value.slots.slice(0, i).filter(Boolean).length
   const s = seasonOfSlot(pos)
-  return `${s.icon} ${s.label}`
+  return { icon: s.icon, text: s.label }
 }
 
 // เรียง legendary→common → เกรดสูงก่อน → ชื่อ (เหมือนหน้าเพ็ท)
