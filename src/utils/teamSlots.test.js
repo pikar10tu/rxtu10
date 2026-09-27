@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { toSlots, firstEmpty, nextEmpty, placeAt } from './teamSlots.js'
+import { toSlots, firstEmpty, nextEmpty, placeAt, replaceAt, swapTo } from './teamSlots.js'
 
 const M = 3
 
@@ -83,4 +83,46 @@ test('placeAt — id ว่าง = ถอดตัวในช่องนั�
 test('placeAt — ผลลัพธ์ยาวเท่า maxSlots เสมอแม้ input สั้น/ยาวผิด', () => {
   assert.equal(placeAt(['a'], 0, 'x', M).slots.length, M)
   assert.equal(placeAt(['a', 'b', 'c', 'd', 'e'], 0, 'x', M).slots.length, M)
+})
+
+// ── replaceAt / swapTo — ทำงานบน compact list ล้วน (activePets ที่บันทึกจริงไม่มีรู) ──
+// ใช้ตอนกดใส่ทีมจากหน้าข้อมูลเพ็ท (PetDetailModal): ทีมเต็ม = "แทนตัวไหน?", ตัวอยู่ในทีมแล้ว = "สลับช่อง"
+
+test('replaceAt — แทนตัวที่ตำแหน่งเดิม ตำแหน่งไม่ขยับ', () => {
+  assert.deepEqual(replaceAt(['a', 'b', 'c'], 1, 'x'), ['a', 'x', 'c'])
+})
+
+test('replaceAt — ไม่แก้ array เดิม', () => {
+  const before = ['a', 'b', 'c']
+  replaceAt(before, 1, 'x')
+  assert.deepEqual(before, ['a', 'b', 'c'])
+})
+
+test('replaceAt — idx นอกช่วงหรือ id ว่าง = คืนของเดิม', () => {
+  assert.deepEqual(replaceAt(['a', 'b'], 5, 'x'), ['a', 'b'])
+  assert.deepEqual(replaceAt(['a', 'b'], -1, 'x'), ['a', 'b'])
+  assert.deepEqual(replaceAt(['a', 'b'], 0, null), ['a', 'b'])
+})
+
+test('swapTo — สลับที่กับตัวที่อยู่ตำแหน่งเป้าหมายอยู่แล้ว', () => {
+  assert.deepEqual(swapTo(['a', 'b', 'c'], 'a', 2), ['c', 'b', 'a'])
+})
+
+test('swapTo — เป้าหมายเป็นตำแหน่งตัวเอง = ไม่เปลี่ยนอะไร', () => {
+  assert.deepEqual(swapTo(['a', 'b', 'c'], 'b', 1), ['a', 'b', 'c'])
+})
+
+test('swapTo — idx เกินความยาวทีม (ช่องว่าง/เกิน) = ย้ายไปท้ายสุด', () => {
+  assert.deepEqual(swapTo(['a', 'b'], 'a', 2), ['b', 'a'])
+  assert.deepEqual(swapTo(['a', 'b'], 'a', 99), ['b', 'a'])
+})
+
+test('swapTo — id ไม่อยู่ใน list = คืนของเดิม', () => {
+  assert.deepEqual(swapTo(['a', 'b'], 'z', 0), ['a', 'b'])
+})
+
+test('swapTo — ไม่แก้ array เดิม', () => {
+  const before = ['a', 'b', 'c']
+  swapTo(before, 'a', 2)
+  assert.deepEqual(before, ['a', 'b', 'c'])
 })

@@ -65,3 +65,39 @@ export function placeAt(slots, cursor, id, maxSlots) {
 
   return { slots: next, cursor: nextEmpty(next, c) }
 }
+
+/**
+ * แทนตัวใน `list` (compact array ไม่มีรู เช่น activePets ที่บันทึกจริง) ที่ตำแหน่ง `idx`
+ * ด้วย `id` — ตำแหน่งเดิมคงที่ (ใช้ตอนทีมเต็มแล้วเลือก "แทนตัวไหน?")
+ * idx นอกช่วง = คืนของเดิมไม่แก้อะไร (กันเผลอส่ง index ผิด)
+ * @returns {string[]}
+ */
+export function replaceAt(list, idx, id) {
+  const next = Array.isArray(list) ? list.slice() : []
+  if (!id || idx < 0 || idx >= next.length) return next
+  next[idx] = id
+  return next
+}
+
+/**
+ * ย้าย `id` (ต้องอยู่ใน `list` อยู่แล้ว) ไปตำแหน่ง `idx`
+ * - `idx` เป็นตำแหน่งของตัวอื่นในทีมอยู่แล้ว → สลับที่กัน
+ * - `idx` เกินความยาวทีม (ช่องว่าง/เกินจำนวนตัวที่มี) → ย้ายไปท้ายสุด (ทีมยังกระชับ ไม่มีรู)
+ * - `id` ไม่อยู่ใน `list` → คืนของเดิมไม่แก้อะไร
+ * @returns {string[]}
+ */
+export function swapTo(list, id, idx) {
+  const next = Array.isArray(list) ? list.slice() : []
+  const at = next.indexOf(id)
+  if (at < 0) return next
+  if (idx === at) return next
+  if (idx >= 0 && idx < next.length) {
+    const tmp = next[idx]
+    next[idx] = next[at]
+    next[at] = tmp
+  } else {
+    next.splice(at, 1)
+    next.push(id)
+  }
+  return next
+}

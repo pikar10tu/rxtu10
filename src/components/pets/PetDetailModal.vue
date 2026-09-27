@@ -6,7 +6,10 @@
       <div class="pd-hero" :style="{ background: `linear-gradient(135deg, ${rc}, ${rc}aa)` }">
         <button class="pd-x" aria-label="ปิด" @click="$emit('close')">✕</button>
         <div class="pd-emoji"><Emoji :char="pet.emoji" /></div>
-        <div class="pd-name">{{ pet.name }}</div>
+        <div class="pd-name">
+          {{ pet.name }}
+          <span v-if="balTag" class="pd-baltag" :class="balTag.kind" :title="`ปรับสมดุล: ${balTag.label}`" :aria-label="`ปรับสมดุล: ${balTag.label}`"><Emoji :char="balTag.icon" /></span>
+        </div>
         <div class="pd-tags">
           <span class="pd-tag"><Emoji :char="ELEMENTS[elDef]?.emoji || '✊'" /> {{ EL_NAME[elDef] || elDef }}</span>
           <HelpButton topic="element" style="width:18px;height:18px;font-size: .7rem" />
@@ -27,10 +30,38 @@
       </div>
 
       <!-- active team toggle -->
-      <button class="pd-active" :class="{ on: isActive }" :disabled="busy" @click="toggleActive">
-        <template v-if="isActive"><Emoji char="⭐" /> อยู่ในทีมต่อสู้ · กดเพื่อเอาออก</template>
-        <template v-else><Emoji char="➕" /> ใส่ในทีมต่อสู้ ({{ activeList.length }}/{{ battleSlots }})</template>
-      </button>
+      <template v-if="isActive">
+        <div class="pd-slotrow">
+          <span class="pd-slotrow-label">ช่อง {{ activeSlotIndex + 1 }} · ช่อง 1 ออกตีก่อน</span>
+          <div class="pd-slotbtns">
+            <button
+              v-for="n in battleSlots" :key="n" type="button" class="pd-slotbtn"
+              :class="{ cur: n - 1 === activeSlotIndex }" :disabled="busy || n - 1 === activeSlotIndex"
+              :aria-pressed="n - 1 === activeSlotIndex" :aria-label="`ย้ายไปช่อง ${n}`"
+              @click="swapSlot(n - 1)"
+            >{{ n }}</button>
+          </div>
+        </div>
+        <button class="pd-active on" :disabled="busy" @click="removeFromTeam">
+          <Emoji char="⭐" /> อยู่ในทีมต่อสู้ · กดเพื่อเอาออก
+        </button>
+      </template>
+      <template v-else>
+        <button class="pd-active" :disabled="busy" @click="onAddTap">
+          <Emoji char="➕" /> ใส่ในทีมต่อสู้ ({{ activeList.length }}/{{ battleSlots }})
+        </button>
+        <div v-if="pickerOpen" class="pd-picker">
+          <div class="pd-picker-label">แทนตัวไหน?</div>
+          <button
+            v-for="(id, i) in activeList" :key="id" type="button" class="pd-picker-row"
+            :disabled="busy" @click="replaceSlot(i)"
+          >
+            <Emoji :char="teamPetOf(id).emoji" /> <span class="pd-picker-name">{{ teamPetOf(id).name }}</span>
+            <span class="pd-picker-slot">ช่อง {{ i + 1 }}</span>
+          </button>
+          <button type="button" class="pd-picker-cancel" :disabled="busy" @click="pickerOpen = false">ยกเลิก</button>
+        </div>
+      </template>
 
       <!-- stats -->
       <div class="pd-stats">
@@ -82,6 +113,8 @@ import { buildCombatant } from '../../data/battle.js'
 import { petDailyCoins } from '../../utils/petUtils.js'
 import { BATTLE_SLOTS } from '../../data/residence.js'
 import { gradeUpCost, upgradeBlock, MAX_GRADE } from '../../utils/petGrade.js'
+import { replaceAt, swapTo } from '../../utils/teamSlots.js'
+import { balanceTagOf } from '../../utils/balanceTag.js'
 import { useRosterSync } from '../../composables/useRosterSync.js'
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 
@@ -107,22 +140,45 @@ const activeList = computed(() => {
   return (auth.userData?.activePets || []).filter(id => id && owned.has(id))
 })
 const isActive = computed(() => pet.value && activeList.value.includes(pet.value.id))
-async function toggleActive() {
-  if (busy.value || !pet.value) return
-  const cur = activeList.value
-  let next
-  if (isActive.value) next = cur.filter(id => id !== pet.value.id)
-  else {
-    if (cur.length >= battleSlots.value) { toast(`ทีมต่อสู้เต็ม (${battleSlots.value}) — เอาตัวอื่นออกก่อน`, 'info'); return }
-    next = [...cur, pet.value.id]
-  }
+const activeSlotIndex = computed(() => (pet.value ? activeList.value.indexOf(pet.value.id) : -1))
+const teamPetOf = (id) => pets.value.find(p => p.id === id) || getPetDef(id) || { id, emoji: '❓', name: '?' }
+
+const pickerOpen = ref(false)
+
+async function writeTeam(next) {
   busy.value = true
   const ok = await auth.patchUser({ activePets: next })
   if (!ok) toast('ตั้งทีมไม่สำเร็จ', 'error')
   else syncRosterRow()   // ทีมเปลี่ยน → คู่ต่อสู้ใน Arena ต้องเห็นทีมใหม่
   busy.value = false
 }
+
+async function removeFromTeam() {
+  if (busy.value || !pet.value) return
+  await writeTeam(activeList.value.filter(id => id !== pet.value.id))
+}
+
+// ทีมยังไม่เต็ม → ใส่ต่อท้ายทันที · ทีมเต็มแล้ว → เปิดตัวเลือก "แทนตัวไหน?" (ไม่แทนเงียบๆ)
+async function onAddTap() {
+  if (busy.value || !pet.value) return
+  const cur = activeList.value
+  if (cur.length >= battleSlots.value) { pickerOpen.value = true; return }
+  await writeTeam([...cur, pet.value.id])
+}
+
+async function replaceSlot(idx) {
+  if (busy.value || !pet.value) return
+  pickerOpen.value = false
+  await writeTeam(replaceAt(activeList.value, idx, pet.value.id))
+}
+
+// ตัวนี้อยู่ในทีมแล้ว แตะเลขช่องอื่น = สลับตำแหน่งกับตัวที่อยู่ช่องนั้น (หรือย้ายไปท้ายสุดถ้าช่องนั้นเกินจำนวนตัวที่มี)
+async function swapSlot(idx) {
+  if (busy.value || !pet.value || idx === activeSlotIndex.value) return
+  await writeTeam(swapTo(activeList.value, pet.value.id, idx))
+}
 const pet = computed(() => pets.value.find(p => p.id === props.petId) || null)
+const balTag = computed(() => (pet.value ? balanceTagOf(pet.value.id) : null))
 
 const rc = computed(() => RARITY[pet.value?.rarity]?.color || '#94a3b8')
 const elDef = computed(() => getPetDef(pet.value?.id)?.element || pet.value?.element || 'scissors')
@@ -202,6 +258,19 @@ async function evolve() {
 .pd-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
 .pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .pd-tag { background: rgba(255,255,255,.25); font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+/* ป้ายบาลานซ์ 27 ก.ย. 2026 — เล็ก ไม่แย่งซีน แค่บอกว่ามีการปรับล่าสุด (หายเองหลัง 14 วัน — ดู utils/balanceTag.js) */
+.pd-baltag { display: inline-flex; font-size: .78rem; vertical-align: middle; margin-left: 2px; }
+.pd-slotrow { margin: 10px 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .7rem; color: rgba(255,255,255,.7); }
+.pd-slotbtns { display: flex; gap: 5px; }
+.pd-slotbtn { width: 26px; height: 26px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,.5); background: rgba(255,255,255,.15); color: #fff; font-family: inherit; font-size: .74rem; font-weight: 800; cursor: pointer; }
+.pd-slotbtn.cur { background: #fff; color: var(--ink); cursor: default; }
+.pd-slotbtn:disabled:not(.cur) { opacity: .5; }
+.pd-picker { margin: 8px 14px 0; border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px; }
+.pd-picker-label { font-size: .74rem; font-weight: 800; color: var(--ink); }
+.pd-picker-row { display: flex; align-items: center; gap: 6px; border: var(--bw) solid var(--line); border-radius: 10px; background: #fff; padding: 7px 10px; font-family: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; text-align: left; }
+.pd-picker-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-picker-slot { font-size: .7rem; font-weight: 800; color: var(--muted, #64748b); }
+.pd-picker-cancel { border: none; background: none; color: var(--muted, #64748b); font-family: inherit; font-size: .74rem; font-weight: 700; padding: 4px; cursor: pointer; }
 .pd-active { display: block; width: calc(100% - 28px); margin: 12px 14px 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; background: #fff; color: var(--ink); box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .pd-active.on { background: var(--gold); color: #fff; }
 .pd-active:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
