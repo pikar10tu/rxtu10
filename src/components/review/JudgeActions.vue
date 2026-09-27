@@ -22,7 +22,8 @@
           {{ mode === 'report' ? 'ผิดจริง' : 'มีจุดผิด' }}
         </button>
         <button class="rv-btn ja-good" type="button" :disabled="busy || !canPass" @click="clickGood">
-          {{ mode === 'report' ? 'ไม่ผิด ข้อสอบถูกแล้ว' : '✅ ถูกต้อง ส่งผล' }}
+          <template v-if="mode === 'report'">ไม่ผิด ข้อสอบถูกแล้ว</template>
+          <template v-else><Emoji char="✅" /> ถูกต้อง ส่งผล</template>
         </button>
       </div>
       <div v-if="!canPass && blockedHint" class="ja-blocked-hint">{{ blockedHint }}</div>
@@ -47,8 +48,8 @@
         <span v-if="mode === 'report'" class="ja-hint-inline">(รางวัลผู้แจ้งจะออกตอนจัดการเสร็จ)</span>
       </div>
       <div class="rv-actions ja-row">
-        <button class="rv-btn rv-primary" type="button" :disabled="busy" @click="openEdit">✏️ แก้ข้อนี้</button>
-        <button class="rv-btn" type="button" :disabled="busy" @click="openRetire">🗑️ นำออก</button>
+        <button class="rv-btn rv-primary" type="button" :disabled="busy" @click="openEdit"><Emoji char="✏️" /> แก้ข้อนี้</button>
+        <button class="rv-btn" type="button" :disabled="busy" @click="openRetire"><Emoji char="🗑️" /> นำออก</button>
       </div>
       <button class="rv-mini ja-back" type="button" :disabled="busy" @click="backToJudge">‹ ย้อนกลับ</button>
     </template>
@@ -87,6 +88,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import Emoji from '../shared/Emoji.vue'
 import QuestionEditor from '../questions/QuestionEditor.vue'
 import { LIMITS } from '../../utils/text.js'
 import { draftFrom, draftPayload, draftValid } from '../../utils/questionDraft.js'

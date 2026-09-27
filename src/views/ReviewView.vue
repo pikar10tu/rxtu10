@@ -16,14 +16,14 @@
           <Emoji char="📋" /> ผ่านแล้ว <b>{{ progress.passed }}</b> ·
           รอตรวจ <b>{{ progress.pending }}</b><span v-if="progress.conflict"> · ขัดแย้ง <b>{{ progress.conflict }}</b></span><span v-if="progress.failed"> · ไม่ผ่าน <b>{{ progress.failed }}</b></span>
         </div>
-        <div v-else class="rv-sum-line">ยังไม่มีตัวเลขสรุป — รอแอดมินกด "🔄 ซิงก์ระบบตรวจ" ในหน้า Admin ครั้งแรกก่อน</div>
+        <div v-else class="rv-sum-line">ยังไม่มีตัวเลขสรุป — รอแอดมินกด "<Emoji char="🔄" /> ซิงก์ระบบตรวจ" ในหน้า Admin ครั้งแรกก่อน</div>
         <div v-if="progress.total" class="rv-bar"><div class="rv-bar-fill" :style="{ width: progress.pct + '%' }"></div></div>
         <div class="rv-sum-mine">คิวรอบนี้ของคุณ: <b>{{ myQueueCount }}</b> ข้อ</div>
       </div>
 
       <!-- ── 🚩 ข้อที่ถูกรีพอร์ท — ขึ้นก่อนคิวปกติเสมอ (ดู ReportCaseCard.vue) ── -->
       <div v-if="pendingReportCount" class="rv-report-banner">
-        🚩 มีข้อที่ถูกแจ้ง <b>{{ pendingReportCount }}</b> ข้อ — ขึ้นให้ตรวจก่อนข้อปกติ
+        <Emoji char="🚩" /> มีข้อที่ถูกแจ้ง <b>{{ pendingReportCount }}</b> ข้อ — ขึ้นให้ตรวจก่อนข้อปกติ
       </div>
 
       <div v-if="loading || reportsLoading || reportOpening" class="rv-empty">กำลังโหลด…</div>
@@ -48,7 +48,7 @@
           <span v-if="current.domain" class="rv-cat">{{ domainLabel(current.domain) || current.domain }}</span>
           <span v-for="c in getCategories(current)" :key="c" class="rv-cat rv-cat-sub">{{ c }}</span>
           <span v-if="!current.isPublished" class="rv-draft">ร่าง</span>
-          <span v-if="currentStatus === 'conflict'" class="rv-conflict-badge">⚠️ ขัดแย้ง — คุณคือผู้ตัดสิน</span>
+          <span v-if="currentStatus === 'conflict'" class="rv-conflict-badge"><Emoji char="⚠️" /> ขัดแย้ง — คุณคือผู้ตัดสิน</span>
         </div>
 
         <template v-if="!editing">
@@ -60,7 +60,7 @@
             </li>
           </ul>
           <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
-          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ "＋ เพิ่ม…" แล้วกด "📝 แก้คำอธิบายเฉลย"</div>
+          <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ "＋ เพิ่ม…" แล้วกด "<Emoji char="📝" /> แก้คำอธิบายเฉลย"</div>
         </template>
 
         <div v-else class="rv-editbox">
@@ -70,8 +70,8 @@
             <textarea v-model="fixReason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="สรุปสั้นๆ ว่าแก้ตรงไหน เพราะอะไร…"></textarea>
           </template>
           <div class="rv-edit-hint" :class="editRequeues ? 'requeue' : 'stay'">
-            <template v-if="editRequeues">✅ บันทึกแล้ว = ตรวจผ่านทันที (นับเป็นข้อที่คุณตรวจแล้ว)</template>
-            <template v-else-if="editTouched">✅ บันทึกแล้วตรวจต่อได้เลย ผลตรวจเดิมยังอยู่</template>
+            <template v-if="editRequeues"><Emoji char="✅" /> บันทึกแล้ว = ตรวจผ่านทันที (นับเป็นข้อที่คุณตรวจแล้ว)</template>
+            <template v-else-if="editTouched"><Emoji char="✅" /> บันทึกแล้วตรวจต่อได้เลย ผลตรวจเดิมยังอยู่</template>
             <template v-else>ยังไม่ได้แก้อะไร</template>
           </div>
           <div class="rv-actions">
@@ -152,7 +152,7 @@
             </label>
             <textarea v-model="note" :maxlength="LIMITS.reviewNote" class="rv-input" rows="3" placeholder="ข้อควรระวัง / จุดที่คนมักเข้าใจผิด…"></textarea>
 
-            <button class="rv-mini rv-open-edit" type="button" @click="openEdit">📝 แก้คำอธิบายเฉลย</button>
+            <button class="rv-mini rv-open-edit" type="button" @click="openEdit"><Emoji char="📝" /> แก้คำอธิบายเฉลย</button>
           </div>
 
           <JudgeActions
@@ -207,7 +207,7 @@
 
             <details v-for="k in BUCKET_KEYS" :key="k" class="rv-bucket" :open="openBucket === k">
               <summary class="rv-bucket-sum" @click.prevent="openBucket = openBucket === k ? null : k">
-                <span>{{ BUCKET_META[k].icon }} {{ BUCKET_META[k].label }}</span>
+                <span><Emoji :char="BUCKET_META[k].icon" /> {{ BUCKET_META[k].label }}</span>
                 <span class="rv-bucket-n" :class="{ zero: !buckets[k].length }">{{ buckets[k].length }}</span>
               </summary>
               <div class="rv-bucket-body">
@@ -215,12 +215,12 @@
 
                 <!-- 🏷️ เครื่องมือจำแนกหมวดเป็นชุด (bulk) — ใช้ path เดียวกับ saveNogroup ทุกประการ แค่วนลูปแทนกดทีละข้อ -->
                 <details v-if="k === 'nogroup' && buckets[k].length" class="rv-bulk">
-                  <summary class="rv-bulk-sum">🧰 จำแนกหมวดเป็นชุด (bulk)</summary>
+                  <summary class="rv-bulk-sum"><Emoji char="🧰" /> จำแนกหมวดเป็นชุด (bulk)</summary>
                   <div class="rv-bulk-body">
                     <p class="rv-bucket-hint">1) คัดลอกออกไปให้ AI/คนอ่านโจทย์แล้วเลือกกลุ่ม → 2) วาง JSON ผลลัพธ์กลับมาแล้วกด "นำเข้า"</p>
                     <label class="rv-label">ส่งออกข้อที่ไม่มีกลุ่มโรค ({{ buckets[k].length }} ข้อ)</label>
                     <textarea class="rv-input rv-bulk-text" readonly rows="4" :value="bulkExportText"></textarea>
-                    <button class="rv-mini" @click="copyBulkExport">📋 คัดลอก JSON</button>
+                    <button class="rv-mini" @click="copyBulkExport"><Emoji char="📋" /> คัดลอก JSON</button>
 
                     <label class="rv-label" style="margin-top:12px">นำเข้าผลจำแนกหมวด — รูปแบบ [{"id","pleGroup","pleSub"}, ...]</label>
                     <textarea v-model="bulkImportText" class="rv-input rv-bulk-text" rows="4" placeholder='[{"id":"...","pleGroup":"cvs","pleSub":"..."}]'></textarea>
@@ -243,15 +243,17 @@
                     </div>
                     <div class="rv-bucket-acts">
                       <button v-if="k === 'failed'" class="rv-mini" @click="openFix(q)">
-                        {{ fixId === q.id ? 'ปิด' : '✏️ แก้ข้อนี้' }}
+                        <template v-if="fixId === q.id">ปิด</template>
+                        <template v-else><Emoji char="✏️" /> แก้ข้อนี้</template>
                       </button>
                       <button
                         v-if="k === 'failed'" class="rv-mini"
                         :disabled="requeuingId === q.id" @click="requeue(q)"
-                      >{{ requeuingId === q.id ? 'กำลังส่ง…' : '↩️ ส่งกลับเข้าคิวตรวจ' }}</button>
+                      ><template v-if="requeuingId === q.id">กำลังส่ง…</template><template v-else><Emoji char="↩️" /> ส่งกลับเข้าคิวตรวจ</template></button>
                       <button v-if="k === 'conflict'" class="rv-mini" @click="jumpTo(q)">ตรวจข้อนี้เลย</button>
                       <button v-if="k === 'nogroup'" class="rv-mini" @click="openNogroup(q)">
-                        {{ nogroupId === q.id ? 'ปิด' : '🏷️ เลือกกลุ่มโรค' }}
+                        <template v-if="nogroupId === q.id">ปิด</template>
+                        <template v-else><Emoji char="🏷️" /> เลือกกลุ่มโรค</template>
                       </button>
                     </div>
                     <!-- ฟอร์มแก้ในแถว (ไม่ใช่ modal จึงไม่มี overlay/Teleport ให้พลาด) -->
@@ -260,7 +262,7 @@
                       <label class="rv-label">แก้อะไร/ทำไม (บังคับ)</label>
                       <textarea v-model="triageFixReason" :maxlength="LIMITS.reviewReason" class="rv-input" rows="3" placeholder="สรุปสั้นๆ ว่าแก้ตรงไหน เพราะอะไร…"></textarea>
                       <p class="rv-fix-note">
-                        ✅ บันทึกแล้ว = ตรวจผ่านทันที (นับเป็นข้อที่คุณตรวจแล้ว)
+                        <Emoji char="✅" /> บันทึกแล้ว = ตรวจผ่านทันที (นับเป็นข้อที่คุณตรวจแล้ว)
                       </p>
                       <button
                         class="rv-btn rv-primary rv-fix-save"

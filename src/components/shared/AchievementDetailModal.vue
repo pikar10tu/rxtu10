@@ -20,10 +20,12 @@
       </div>
       <div v-if="owner" class="ad-acts">
         <button class="ad-act" :class="{ on: equipped }" @click="$emit('equip', item.docId)">
-          {{ equipped ? '✓ ใช้เป็นฉายาอยู่ · ถอด' : '🎖️ ใช้เป็นฉายา' }}
+          <template v-if="equipped">✓ ใช้เป็นฉายาอยู่ · ถอด</template>
+          <template v-else><Emoji char="🎖️" /> ใช้เป็นฉายา</template>
         </button>
         <button class="ad-act" :class="{ on: pinned }" @click="$emit('pin', item.docId)">
-          {{ pinned ? '✓ อยู่ในตู้โชว์ · เอาออก' : '🏆 ใส่ตู้โชว์' }}
+          <template v-if="pinned">✓ อยู่ในตู้โชว์ · เอาออก</template>
+          <template v-else><Emoji char="🏆" /> ใส่ตู้โชว์</template>
         </button>
       </div>
     </div>

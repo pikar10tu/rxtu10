@@ -14,9 +14,9 @@
     <template v-else>
       <!-- ── แท็บงาน (in-component tabs — state ร่วมกัน ไม่ต้องอ่านคลังซ้ำ) ── -->
       <div class="qz-tabs">
-        <button class="qz-tab" :class="{ on: activeTab === 'edit' }" @click="activeTab = 'edit'">✍️ เพิ่ม/แก้</button>
-        <button class="qz-tab" :class="{ on: activeTab === 'bank' }" @click="activeTab = 'bank'">📚 คลัง</button>
-        <button class="qz-tab" :class="{ on: activeTab === 'check' }" @click="activeTab = 'check'">🔍 ตรวจสอบ</button>
+        <button class="qz-tab" :class="{ on: activeTab === 'edit' }" @click="activeTab = 'edit'"><Emoji char="✍️" /> เพิ่ม/แก้</button>
+        <button class="qz-tab" :class="{ on: activeTab === 'bank' }" @click="activeTab = 'bank'"><Emoji char="📚" /> คลัง</button>
+        <button class="qz-tab" :class="{ on: activeTab === 'check' }" @click="activeTab = 'check'"><Emoji char="🔍" /> ตรวจสอบ</button>
       </div>
 
       <!-- ── ✍️ แท็บ เพิ่ม/แก้ : นำเข้า JSON ── -->
@@ -66,14 +66,18 @@
           </div>
 
           <button class="qz-btn qz-primary qz-import-btn" :disabled="importing || !importCount" @click="runImport">
-            {{ importing ? 'กำลังนำเข้า…' : (importCount ? `📥 นำเข้า ${importCount} ข้อ` : '📥 นำเข้า') }}
+            <template v-if="importing">กำลังนำเข้า…</template>
+            <template v-else-if="importCount"><Emoji char="📥" /> นำเข้า {{ importCount }} ข้อ</template>
+            <template v-else><Emoji char="📥" /> นำเข้า</template>
           </button>
 
           <button class="qz-btn qz-maint qz-import-btn" :disabled="backfilling" @click="backfillRand">
-            {{ backfilling ? 'กำลังเติม…' : '🔧 เติม rand/qhash ให้ข้อเก่า' }}
+            <template v-if="backfilling">กำลังเติม…</template>
+            <template v-else><Emoji char="🔧" /> เติม rand/qhash ให้ข้อเก่า</template>
           </button>
           <button class="qz-btn qz-maint qz-import-btn" :disabled="recomputingMeta" @click="recomputeMeta">
-            {{ recomputingMeta ? 'กำลังคำนวณ…' : '🔄 คำนวณ meta ใหม่' }}
+            <template v-if="recomputingMeta">กำลังคำนวณ…</template>
+            <template v-else><Emoji char="🔄" /> คำนวณ meta ใหม่</template>
           </button>
         </div>
       </details>
@@ -198,13 +202,13 @@
           </button>
         </div>
         <button v-if="draft.id && authStore.isAdmin" class="qz-mini" style="margin-top:8px" @click="resetReviewState">
-          🔍 ล้างผลตรวจข้อนี้ (ส่งกลับเข้าคิว peer-review)
+          <Emoji char="🔍" /> ล้างผลตรวจข้อนี้ (ส่งกลับเข้าคิว peer-review)
         </button>
         <button v-if="draft.id && !isDraftRetired" class="qz-mini" style="margin-top:8px" @click="retireQuestion">
-          🗑️ นำออกจากการใช้งาน (ไม่ลบ — เก็บไว้ นำกลับมาได้)
+          <Emoji char="🗑️" /> นำออกจากการใช้งาน (ไม่ลบ — เก็บไว้ นำกลับมาได้)
         </button>
         <button v-if="draft.id && isDraftRetired" class="qz-mini" style="margin-top:8px" @click="unretireQuestion">
-          ↩️ นำกลับมาใช้ (กลับเข้าคิวตรวจใหม่)
+          <Emoji char="↩️" /> นำกลับมาใช้ (กลับเข้าคิวตรวจใหม่)
         </button>
       </section>
       </template>
@@ -279,7 +283,8 @@
         class="qz-btn qz-primary qz-pubfiltered" :disabled="batchBusy"
         @click="publishAllFilteredDrafts"
       >
-        {{ batchBusy ? 'กำลังทำ…' : `🚀 เผยแพร่ร่างที่กรองอยู่ทั้งหมด (${filteredDraftIds.length})` }}
+        <template v-if="batchBusy">กำลังทำ…</template>
+        <template v-else><Emoji char="🚀" /> เผยแพร่ร่างที่กรองอยู่ทั้งหมด ({{ filteredDraftIds.length }})</template>
       </button>
 
       <div v-if="loading" class="qz-empty">กำลังโหลด…</div>
