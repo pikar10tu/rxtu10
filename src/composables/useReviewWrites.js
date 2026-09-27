@@ -18,8 +18,8 @@ import { computeStatus, reviewFixResult } from '../utils/questionReview.js'
 import { getCategories } from '../utils/questionCategories.js'
 import { plePatch } from '../utils/pleMapping.js'
 import { resolvePayload } from '../utils/questionReport.js'
-import { buildReportRewardMail, buildReportResultMail } from '../utils/mailbox.js'
-import { REPORT_REWARD } from '../data/index.js'
+import { buildReportRewardMail, buildReportResultMail, buildReviewCaseRewardMail } from '../utils/mailbox.js'
+import { REPORT_REWARD, REVIEW_CASE_REWARD, AI_REPORTER_UID } from '../data/index.js'
 
 export function useReviewWrites() {
   const authStore = useAuthStore()
@@ -190,17 +190,29 @@ export function useReviewWrites() {
   // ปิดรีพอร์ท — valid มัดรางวัลเมล์ให้ผู้แจ้งทันที, invalid ส่งจดหมายแจ้งผลเฉยๆ (ไม่มีรางวัล)
   //  transaction: อ่านสถานะรีพอร์ททุกฉบับก่อนเขียน (กติกา transaction) — ฉบับที่ไม่ open แล้วข้าม
   //  กันจ่ายรางวัลซ้ำถ้ามีคนปิดไปพร้อมกัน (เดิมเป็น writeBatch เขียนตรงไม่เช็คสถานะก่อน)
+  //  27 ก.ย. 2026:
+  //   - รีพอร์ทจาก AI (reportedBy = AI_REPORTER_UID) ปิดเฉยๆ ไม่มีจดหมาย (ไม่งั้นเกิด users/ai-reviewer/mail)
+  //   - คนตรวจได้ REVIEW_CASE_REWARD ต่อเคส (จดหมายหาตัวเอง) เมื่อปิดได้อย่างน้อย 1 ฉบับ
+  //   - ล้างตัวนับรีพอร์ทบนข้อ + ถ้าข้อถูกพักเผยแพร่เพราะเพื่อนแจ้ง (reportHold) และยังไม่ถูกนำออก → เผยแพร่คืน
   async function resolveReports(group, verdict, note = '') {
     const cleanNote = cleanText(note, LIMITS.reviewReason)
-    let closed = 0, skipped = 0
+    const uid = authStore.currentUser?.uid
+    let closed = 0, skipped = 0, released = false
     await runTransaction(db, async (tx) => {
-      closed = 0; skipped = 0   // transaction รีทรายได้
+      closed = 0; skipped = 0; released = false   // transaction รีทรายได้
+      const qRef = doc(db, 'questions', group.questionId)
       const refs = group.reports.map(r => doc(db, 'questionReports', r.id))
+      const qSnap = await tx.get(qRef)
       const snaps = []
       for (const ref of refs) snaps.push(await tx.get(ref))   // อ่านทั้งหมดก่อนเขียน (กติกา transaction)
       snaps.forEach((s, i) => {
         const r = group.reports[i]
         if (!s.exists() || s.data().status !== 'open') { skipped++; return }   // มีคนปิดไปแล้ว → ไม่จ่ายซ้ำ
+        closed++
+        if (r.reportedBy === AI_REPORTER_UID) {
+          tx.update(refs[i], { ...resolvePayload(verdict, 0), rewardAmount: 0, resolvedAt: serverTimestamp() })
+          return
+        }
         const mailRef = doc(collection(db, 'users', r.reportedBy, 'mail'))
         if (verdict === 'valid') {
           tx.set(mailRef, buildReportRewardMail(r, REPORT_REWARD, serverTimestamp()))
@@ -209,11 +221,26 @@ export function useReviewWrites() {
           tx.set(mailRef, buildReportResultMail(r, cleanNote, serverTimestamp()))
           tx.update(refs[i], { ...resolvePayload('invalid', REPORT_REWARD), resolvedAt: serverTimestamp() })
         }
-        closed++
       })
+      if (!closed) return
+      if (uid) {
+        const qText = qSnap.exists() ? qSnap.data().question : group.snapshot?.question
+        tx.set(doc(collection(db, 'users', uid, 'mail')), buildReviewCaseRewardMail(qText || '', REVIEW_CASE_REWARD, serverTimestamp()))
+      }
+      if (qSnap.exists()) {
+        const cur = qSnap.data()
+        if (cur.reportCount || cur.reportHold) {
+          released = !!cur.reportHold && !cur.retired
+          tx.update(qRef, {
+            reportCount: 0, reportHold: deleteField(),
+            ...(released ? { isPublished: true } : {}),
+            updatedAt: serverTimestamp(),
+          })
+        }
+      }
     })
-    usage.track(group.reports.length, closed * 2)
-    return { closed, skipped }
+    usage.track(group.reports.length + 1, closed * 2 + (closed ? 2 : 0))
+    return { closed, skipped, released }
   }
 
   return { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports }

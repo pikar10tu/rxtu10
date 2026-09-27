@@ -333,7 +333,8 @@ import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { groupReports } from '../utils/questionReport.js'
 import { canHandleReport, nextReportGroup, fixedAfterReport, questionChangedSince } from '../utils/reportCase.js'
-import { REPORT_REWARD } from '../data/index.js'
+import { REPORT_REWARD, REVIEW_CASE_REWARD, AI_REPORTER_UID } from '../data/index.js'
+const REPORTS_LIMIT = 800
 import { useReviewWrites } from '../composables/useReviewWrites.js'
 
 const authStore = useAuthStore()
@@ -481,15 +482,15 @@ function reportedGroupOf(questionId) {
 }
 function fixConfirmText(group) {
   return group
-    ? `${FIX_CONFIRM}\nและปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${group.reports.length} คน`
+    ? `${FIX_CONFIRM}\nและปิดรีพอร์ท · ${reportersText(group, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`
     : FIX_CONFIRM
 }
 async function closeReportsAfterFix(group, logTag) {
   if (!group) return
   try {
-    const { closed } = await resolveReports(group, 'valid')
-    openReports.value = openReports.value.filter(r => r.questionId !== group.questionId)
-    if (closed) toast(`ปิดรีพอร์ท + ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${closed} คนแล้ว`, 'success')
+    const { closed, skipped, released } = await resolveReports(group, 'valid')
+    if (closed) finishReport(group, closed, skipped, 'valid', released)
+    else openReports.value = openReports.value.filter(r => r.questionId !== group.questionId)
   } catch (e) { console.error(logTag, e); toast('แก้ข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ', 'error') }
 }
 
@@ -805,7 +806,12 @@ onMounted(() => {
 // ── 🚩 ข้อที่ถูกรีพอร์ท (questionReports) — ขึ้นก่อนคิวตรวจปกติเสมอ (ดู ReportCaseCard.vue) ──
 const openReports = ref([])
 const reportsLoading = ref(false)
-const reportGroups = computed(() => groupReports(openReports.value))
+// เพื่อนแจ้งมาก่อนเสมอ (ข้อที่ถูกพักเผยแพร่อยู่ในนี้) · เคสที่มีแต่รีพอร์ทจาก AI ไว้ท้าย
+const isAiOnly = g => g.reports.every(r => r.reportedBy === AI_REPORTER_UID)
+const reportGroups = computed(() => {
+  const gs = groupReports(openReports.value)
+  return [...gs.filter(g => !isAiOnly(g)), ...gs.filter(isAiOnly)]
+})
 
 async function loadOpenReports() {
   reportsLoading.value = true
@@ -814,7 +820,7 @@ async function loadOpenReports() {
       collection(db, 'questionReports'),
       where('status', '==', 'open'),
       orderBy('createdAt', 'desc'),
-      limit(200),
+      limit(REPORTS_LIMIT),   // รีพอร์ทจาก AI เข้ามาหลายร้อย — 200 เดิมจะดันรีพอร์ทเพื่อนตกคิว
     ))
     usage.track(snap.size)
     openReports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -875,11 +881,19 @@ watch([reportGroups, reportSkipped], openNextReport)
 
 // ปิดกลุ่มรีพอร์ทนี้ทิ้งจาก openReports (การ์ดถัดไปเปิดเองผ่าน watch ด้านบน) + toast ผลลัพธ์
 //  verdict คุมว่าจะเติมข้อความรางวัลไหม ('invalid' = ไม่มีรางวัลจริง แม้ closed > 0)
-function finishReport(g, closed, skipped, verdict = 'valid') {
+function finishReport(g, closed, skipped, verdict = 'valid', released = false) {
   openReports.value = openReports.value.filter(r => r.questionId !== g.questionId)
   if (skipped && !closed) { toast('มีคนปิดรีพอร์ทข้อนี้ไปแล้ว', 'info'); return }
-  const rewardSuffix = verdict === 'valid' && closed ? ` · ส่งรางวัลให้ผู้แจ้ง ${closed} คน` : ''
-  toast(`จัดการแล้ว ขอบคุณ!${rewardSuffix}`, 'success')
+  const friends = g.reports.filter(r => r.reportedBy !== AI_REPORTER_UID).length
+  const rewardSuffix = verdict === 'valid' && friends ? ` · ส่งรางวัลให้ผู้แจ้ง ${friends} คน` : ''
+  const releaseSuffix = released ? ' · เผยแพร่ข้อนี้คืนแล้ว' : ''
+  toast(`จัดการแล้ว ได้ ${REVIEW_CASE_REWARD} เหรียญทางจดหมาย${rewardSuffix}${releaseSuffix}`, 'success')
+}
+// ข้อความใน confirm ว่าผู้แจ้งจะได้อะไร (รีพอร์ทจาก AI ไม่มีจดหมาย/รางวัล)
+function reportersText(g, valid) {
+  const friends = g.reports.filter(r => r.reportedBy !== AI_REPORTER_UID).length
+  if (!friends) return 'รีพอร์ทจาก AI (ไม่มีผู้รับรางวัล)'
+  return valid ? `ส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${friends} คน` : `ผู้แจ้ง ${friends} คนจะได้จดหมายแจ้งผล ไม่มีรางวัล`
 }
 
 // 🔒 อ่านรีพอร์ท + ข้อสดอีกรอบ หลัง confirm และก่อนเขียนอะไรทั้งนั้น (final review I1)
@@ -913,8 +927,7 @@ async function reportCaseStillValid(g, loaded) {
 async function onReportPass({ note: passNote }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  const n = g.reports.length
-  if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\nผู้แจ้ง ${n} คนจะได้จดหมายแจ้งผล ไม่มีรางวัล`))) return
+  if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\n${reportersText(g, false)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
   reportBusy.value = true
   try {
     if (!(await reportCaseStillValid(g, q))) return
@@ -936,8 +949,8 @@ async function onReportPass({ note: passNote }) {
       })
     }
     try {
-      const { closed, skipped } = await resolveReports(g, 'invalid', passNote)
-      finishReport(g, closed, skipped, 'invalid')
+      const { closed, skipped, released } = await resolveReports(g, 'invalid', passNote)
+      finishReport(g, closed, skipped, 'invalid', released)
     } catch (e) {
       console.error('[report resolve invalid]', e)
       // กดไม่ผิดซ้ำได้ (writeVote คืน already) — ไม่ต้องเข้าโหมดจัดการแล้วแบบแก้/นำออกด้านล่าง
@@ -954,8 +967,7 @@ async function onReportPass({ note: passNote }) {
 async function onReportFix({ payload, reason: fixReasonText }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  const n = g.reports.length
-  if (!(await confirm(`บันทึกการแก้?\nข้อผ่านตรวจทันที และส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${n} คน`))) return
+  if (!(await confirm(`บันทึกการแก้?\nข้อผ่านตรวจทันที · ${reportersText(g, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
   reportBusy.value = true
   const uid = myUid.value
   const fixerName = reviewerName()
@@ -975,8 +987,8 @@ async function onReportFix({ payload, reason: fixReasonText }) {
     }
     patchTriageRow(q.id, fixedPatch)
     try {
-      const { closed, skipped } = await resolveReports(g, 'valid')
-      finishReport(g, closed, skipped, 'valid')
+      const { closed, skipped, released } = await resolveReports(g, 'valid')
+      finishReport(g, closed, skipped, 'valid', released)
     } catch (e) {
       console.error('[report resolve valid]', e)
       toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
@@ -990,8 +1002,7 @@ async function onReportFix({ payload, reason: fixReasonText }) {
 async function onReportRetire({ reason: retireReasonText }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  const n = g.reports.length
-  if (!(await confirm(`นำข้อนี้ออก?\nถอนเผยแพร่ และส่งรางวัล ${REPORT_REWARD} เหรียญให้ผู้แจ้ง ${n} คน`))) return
+  if (!(await confirm(`นำข้อนี้ออก?\nถอนเผยแพร่ · ${reportersText(g, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
   reportBusy.value = true
   try {
     if (!(await reportCaseStillValid(g, q))) return
@@ -1005,8 +1016,8 @@ async function onReportRetire({ reason: retireReasonText }) {
       }
     }
     try {
-      const { closed, skipped } = await resolveReports(g, 'valid')
-      finishReport(g, closed, skipped, 'valid')
+      const { closed, skipped, released } = await resolveReports(g, 'valid')
+      finishReport(g, closed, skipped, 'valid', released)
     } catch (e) {
       console.error('[report resolve valid]', e)
       toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
@@ -1019,13 +1030,12 @@ async function onReportRetire({ reason: retireReasonText }) {
 async function onReportCloseGone() {
   if (reportBusy.value || !reportCase.value) return
   const g = reportCase.value.group
-  const n = g.reports.length
-  if (!(await confirm(`ปิดรีพอร์ท + ให้รางวัล ${REPORT_REWARD} เหรียญแก่ผู้แจ้ง ${n} คน?`))) return
+  if (!(await confirm(`ปิดรีพอร์ท?\n${reportersText(g, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
   reportBusy.value = true
   try {
     // ไม่ต้องอ่านซ้ำก่อน — resolveReports เป็น transaction ข้ามฉบับที่ปิดไปแล้วเอง (ไม่จ่ายซ้ำ)
-    const { closed, skipped } = await resolveReports(g, 'valid')
-    finishReport(g, closed, skipped, 'valid')
+    const { closed, skipped, released } = await resolveReports(g, 'valid')
+    finishReport(g, closed, skipped, 'valid', released)
   } catch (e) { console.error('[report close gone]', e); toast('ปิดรีพอร์ทไม่สำเร็จ', 'error') }
   finally { reportBusy.value = false }
 }

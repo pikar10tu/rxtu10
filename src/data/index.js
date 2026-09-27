@@ -125,7 +125,13 @@ export { DRUGS } from './drugs.js';
 // ── REPORT REWARD (Phase 5) ──
 // เหรียญรางวัลเมื่อทีมวิชาการตัดสินว่า report ข้อสอบผิด "ผิดจริง" (verdict=valid).
 // ส่งจริงผ่าน Mailbox (track ถัดไป) — Phase 5 แค่ stamp ค่านี้ค้างไว้บน report doc.
-export const REPORT_REWARD = 50; // TBD รอเคาะตอนรีวิว economy
+export const REPORT_REWARD = 300; // 27 ก.ย. 2026 user สั่งเพิ่ม (เดิม 50) ≈ ตอบถูก 3 ข้อ
+// เหรียญให้คนตรวจที่ปิดเคสรีพอร์ท 1 ข้อ (ไม่ว่าผลจะผิดจริง/ไม่ผิด) — ส่งเป็นจดหมายหาตัวเอง (user สั่ง 27 ก.ย. 2026)
+export const REVIEW_CASE_REWARD = 200;
+// เพื่อนแจ้งครบกี่คน (คนละ uid, รีพอร์ทยังเปิดอยู่) → ถอนเผยแพร่ชั่วคราว รอทีมวิชาการตรวจ
+export const REPORT_HOLD_AT = 2;
+// รีพอร์ทจากสคริปต์ผลตรวจ AI (DOC/tools/apply-ai-review.mjs) — ไม่ใช่คน: ไม่ส่งจดหมาย/รางวัล
+export const AI_REPORTER_UID = 'ai-reviewer';
 
 // ── QUESTION STATS (SP2b) — เกณฑ์ flag "ข้อมีปัญหา" บนแถวย่อจัดการข้อสอบ ──
 // tunable pin: ปรับตัวเลขที่นี่ที่เดียว

@@ -80,6 +80,23 @@ export function buildReportRewardMail(report, coins, createdAt) {
   }
 }
 
+// รางวัลคนตรวจที่ปิดเคสรีพอร์ท (ส่งหาตัวเอง) · question = ข้อความโจทย์ หรือ ''
+export function buildReviewCaseRewardMail(question, coins, createdAt) {
+  return {
+    type: 'reward',
+    kind: 'review-case',
+    title: 'รางวัลตรวจข้อที่ถูกแจ้ง',
+    body: question
+      ? `ขอบคุณที่ช่วยเคลียร์ข้อ "${truncate(question, 60)}" ที่มีคนแจ้งมา`
+      : 'ขอบคุณที่ช่วยเคลียร์ข้อที่มีคนแจ้งมา',
+    reward: { coins },
+    from: 'system',
+    createdAt,
+    read: false,
+    claimed: false,
+  }
+}
+
 // จดหมายแจ้งผู้แจ้งว่า "ข้อนี้ไม่ผิด" — ไม่มีรางวัล (notice) · note = เหตุผลที่คนตรวจเขียน (ผ่าน cleanText มาแล้ว)
 // ⚠️ body แสดงด้วย {{ }} ใน MailboxCard (ไม่มี pre-wrap) — ต่อด้วย " · " ไม่ใช้ขึ้นบรรทัด
 export function buildReportResultMail(report, note, createdAt) {

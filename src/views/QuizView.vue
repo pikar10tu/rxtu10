@@ -104,6 +104,9 @@
         <AiReviewNote :q="current" />
         <div v-if="current.reviewNote" class="qv-note"><Emoji char="📝" /> หมายเหตุจากผู้ตรวจ: {{ current.reviewNote }}</div>
         <!-- 🚩 แจ้งข้อผิด -->
+        <button v-if="authStore.isQuestionEditor" class="qv-report-btn qv-edit-btn" @click="quickEditOpen = true">
+          <Emoji char="✏️" /> {{ quickEdited.has(current.id) ? 'แก้แล้ว · แก้อีก' : 'แก้ข้อนี้ (วิชาการ)' }}
+        </button>
         <div class="qv-report">
           <button v-if="reportedIds.has(current.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
           <button v-else-if="!reportOpen" class="qv-report-btn" @click="reportOpen = true"><Emoji char="🚩" /> แจ้งข้อผิด</button>
@@ -117,6 +120,7 @@
               >{{ r }}</button>
             </div>
             <textarea v-model="reportNote" :maxlength="LIMITS.report" class="qv-report-note" rows="2" aria-label="รายละเอียดเพิ่มเติมเกี่ยวกับข้อผิด" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)…"></textarea>
+            <div class="qv-report-hint">ทีมวิชาการตรวจแล้วผิดจริง ได้ {{ REPORT_REWARD }} เหรียญทางจดหมาย · มีเพื่อนแจ้ง {{ REPORT_HOLD_AT }} คน ข้อนี้จะถูกพักไว้ก่อน</div>
             <div class="qv-report-actions">
               <button class="qv-report-cancel" @click="resetReport">ยกเลิก</button>
               <button class="qv-report-send" :disabled="!reportReason || reportSending" @click="sendReport">{{ reportSending ? 'กำลังส่ง…' : 'ส่ง' }}</button>
@@ -195,17 +199,19 @@
         </div>
       </template>
     </template>
+    <QuickEditModal v-model="quickEditOpen" :question-id="current?.id || null" @saved="quickEdited.add($event.id)" />
   </div>
 </template>
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
+import QuickEditModal from '../components/questions/QuickEditModal.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch, deleteField, documentId } from 'firebase/firestore'
+import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch, deleteField, documentId, runTransaction } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
@@ -221,7 +227,7 @@ import { useExamSets } from '../composables/useExamSets.js'
 import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
-import { QUIZ_COIN_PER_CORRECT } from '../data/index.js'
+import { QUIZ_COIN_PER_CORRECT, REPORT_HOLD_AT, REPORT_REWARD } from '../data/index.js'
 import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srsQuestions.js'
 import { sfx } from '../utils/sfx.js'
 import { isOwlHour } from '../utils/gags.js'
@@ -362,7 +368,10 @@ const reportOpen = ref(false)
 const reportReason = ref('')
 const reportNote = ref('')
 const reportSending = ref(false)
-const reportedIds = ref(new Set())   // กันสแปมในเซสชันเดียว (ข้ามเซสชัน deterministic id ทับเอง)
+const reportedIds = ref(new Set())
+// ทีมวิชาการแก้ข้อได้จากตรงนี้เลย (QuickEditModal) — จำข้อที่แก้ในเซสชันไว้บอกบนปุ่ม
+const quickEditOpen = ref(false)
+const quickEdited = reactive(new Set())   // กันสแปมในเซสชันเดียว (ข้ามเซสชัน deterministic id ทับเอง)
 
 function resetReport() { reportOpen.value = false; reportReason.value = ''; reportNote.value = '' }
 
@@ -371,24 +380,39 @@ async function sendReport() {
   if (reportSending.value || !reportReason.value || !q || !authStore.currentUser) return
   reportSending.value = true
   try {
-    usage.track(0, 1)
-    await setDoc(doc(db, 'questionReports', reportDocId(q.id, authStore.currentUser.uid)), {
-      questionId: q.id,
-      reason: reportReason.value,
-      note: cleanText(reportNote.value, LIMITS.report),
-      reportedBy: authStore.currentUser.uid,
-      reportedByName: authStore.userData?.nickname || authStore.userData?.name || null,
-      status: 'open',
-      verdict: null,
-      rewardAmount: 0,
-      rewardDelivered: false,
-      questionSnapshot: buildSnapshot(q),
-      createdAt: serverTimestamp(),
-      resolvedAt: null,
-    }, { merge: true })
+    // transaction: รีพอร์ท + ตัวนับบนข้อในตาเดียว (rules isReportBump เช็คว่ารีพอร์ทนี้ "ใหม่" จริง)
+    //  เพื่อนแจ้งครบ REPORT_HOLD_AT คน → ถอนเผยแพร่ชั่วคราว (reportHold) รอทีมวิชาการตรวจ (user สั่ง 27 ก.ย. 2026)
+    //  แจ้งซ้ำข้อเดิม = ทับรีพอร์ทเดิม ไม่นับเพิ่ม
+    const rRef = doc(db, 'questionReports', reportDocId(q.id, authStore.currentUser.uid))
+    const qRef = doc(db, 'questions', q.id)
+    let held = false
+    await runTransaction(db, async (tx) => {
+      held = false
+      const rSnap = await tx.get(rRef)
+      const qSnap = await tx.get(qRef)
+      tx.set(rRef, {
+        questionId: q.id,
+        reason: reportReason.value,
+        note: cleanText(reportNote.value, LIMITS.report),
+        reportedBy: authStore.currentUser.uid,
+        reportedByName: authStore.userData?.nickname || authStore.userData?.name || null,
+        status: 'open',
+        verdict: null,
+        rewardAmount: 0,
+        rewardDelivered: false,
+        questionSnapshot: buildSnapshot(q),
+        createdAt: serverTimestamp(),
+        resolvedAt: null,
+      }, { merge: true })
+      if (rSnap.exists() || !qSnap.exists() || qSnap.data().isPublished !== true) return
+      const n = (qSnap.data().reportCount || 0) + 1
+      held = n >= REPORT_HOLD_AT
+      tx.update(qRef, { reportCount: n, ...(held ? { reportHold: true, isPublished: false } : {}) })
+    })
+    usage.track(2, 2)
     reportedIds.value.add(q.id)
     resetReport()
-    toast('ขอบคุณที่ช่วยแจ้ง! ทีมวิชาการจะตรวจสอบให้', 'success')
+    toast(held ? 'ขอบคุณที่ช่วยแจ้ง! มีเพื่อนแจ้งข้อนี้ครบแล้ว เลยพักข้อนี้ไว้ก่อนระหว่างทีมวิชาการตรวจ' : 'ขอบคุณที่ช่วยแจ้ง! ทีมวิชาการจะตรวจสอบให้', 'success')
   } catch (e) {
     console.error('[question report]', e); toast('ส่งรายงานไม่สำเร็จ', 'error')
   } finally { reportSending.value = false }
@@ -755,6 +779,8 @@ async function finish() {
 
 .qv-report { margin-top: 12px; }
 .qv-report-btn { width: 100%; border: 1px dashed rgba(0,0,0,.2); background: none; border-radius: 10px; padding: 9px; font-family: inherit; font-size: .76rem; font-weight: 700; color: #64748b; cursor: pointer; }
+.qv-report-hint { font-size: .7rem; color: rgba(0,0,0,.5); margin: 6px 0 2px; line-height: 1.5; }
+.qv-edit-btn { margin-bottom: 6px; border-style: solid; border-color: #c7d2fe; color: #4338ca; background: #eef2ff; }
 .qv-report-btn.done { color: #15803d; border-color: rgba(34,197,94,.4); cursor: default; }
 .qv-report-panel { border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
 .qv-report-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }

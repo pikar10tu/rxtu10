@@ -13,7 +13,10 @@
        'deleted' ข้อถูกลบไปแล้ว (question = null) → โชว์ group.snapshot -->
 <template>
   <section class="rc-card">
-    <div class="rc-head"><Emoji char="🚩" /> นักศึกษาแจ้ง {{ group.count }} คน</div>
+    <div class="rc-head">
+      <Emoji char="🚩" /> {{ headText }}
+      <span v-if="question?.reportHold && !question?.retired" class="rc-hold">พักเผยแพร่อยู่ — ตัดสินแล้วจะเผยแพร่คืนเอง</span>
+    </div>
 
     <template v-if="gone">
       <div class="rc-gone"><Emoji char="⚠️" /> {{ goneText }}</div>
@@ -31,7 +34,7 @@
       <div v-if="shown?.explanation" class="rc-exp"><Emoji char="💡" /> {{ shown.explanation }}</div>
 
       <ul class="rc-reports">
-        <li v-for="r in group.reports" :key="r.id"><b>{{ r.reason }}</b><span v-if="r.note"> — {{ r.note }}</span></li>
+        <li v-for="r in group.reports" :key="r.id"><b>{{ reasonLabel(r) }}</b><span v-if="r.note"> — {{ r.note }}</span></li>
       </ul>
 
       <div class="rc-actions">
@@ -53,8 +56,10 @@
       <div v-else class="rc-exp rc-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย</div>
 
       <ul class="rc-reports">
-        <li v-for="r in group.reports" :key="r.id"><b>{{ r.reason }}</b><span v-if="r.note"> — {{ r.note }}</span></li>
+        <li v-for="r in group.reports" :key="r.id"><b>{{ reasonLabel(r) }}</b><span v-if="r.note"> — {{ r.note }}</span></li>
       </ul>
+
+      <AiReviewNote v-if="question.aiReview" :q="question" team />
 
       <div v-if="differs" class="rc-diff-badge">
         <Emoji char="✏️" /> ข้อนี้ถูกแก้ไปแล้วหลังมีคนแจ้ง — ดูว่ายังผิดอยู่ไหม
@@ -90,6 +95,9 @@ import Emoji from '../shared/Emoji.vue'
 import JudgeActions from './JudgeActions.vue'
 import QuestionComments from '../questions/QuestionComments.vue'
 import { snapshotDiffers } from '../../utils/reportCase.js'
+import AiReviewNote from '../shared/AiReviewNote.vue'
+import { AI_REPORTER_UID } from '../../data/index.js'
+import { AI_CONF } from '../../data/aiReview.js'
 
 const props = defineProps({
   group: { type: Object, required: true },     // { questionId, count, reports[], snapshot }
@@ -119,11 +127,25 @@ const shown = computed(() => {
 })
 
 const differs = computed(() => !gone.value && snapshotDiffers(props.group.snapshot, props.question))
+
+// รีพอร์ทจาก AI (สคริปต์ผลตรวจ) กับของเพื่อนปนกันได้ในกลุ่มเดียว — แยกนับในหัวการ์ด
+const friendCount = computed(() => props.group.reports.filter(r => r.reportedBy !== AI_REPORTER_UID).length)
+const headText = computed(() => {
+  const ai = props.group.reports.length - friendCount.value
+  if (!friendCount.value) return '🤖 AI ส่งข้อนี้ให้ทีมตัดสิน'
+  return `นักศึกษาแจ้ง ${friendCount.value} คน${ai ? ' + AI' : ''}`
+})
+function reasonLabel(r) {
+  if (r.reportedBy !== AI_REPORTER_UID) return r.reason
+  const c = AI_CONF[r.aiConfidence]
+  return `🤖 AI${c ? ` (${c.dot} ${c.label})` : ''}`
+}
 </script>
 
 <style scoped>
 .rc-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
-.rc-head { font-size: .88rem; font-weight: 800; color: #c2410c; margin-bottom: 10px; }
+.rc-head { font-size: .88rem; font-weight: 800; color: #c2410c; margin-bottom: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rc-hold { font-size: .7rem; font-weight: 800; color: #b91c1c; background: #fee2e2; border-radius: 6px; padding: 2px 7px; }
 
 .rc-gone { font-size: .78rem; font-weight: 700; color: #92400e; background: rgba(245,158,11,.13); border-radius: 10px; padding: 9px 11px; margin-bottom: 11px; line-height: 1.5; }
 

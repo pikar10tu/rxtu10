@@ -274,10 +274,29 @@ service cloud.firestore {
           && request.resource.data.get('lastFixBy', '') == request.auth.uid
           && existsAfter(/databases/$(database)/documents/questions/$(qid)/reviews/$(request.auth.uid));
       }
+      // เพื่อนแจ้งข้อผิด (27 ก.ย. 2026): ทุกคนที่ล็อกอิน +1 ตัวนับบนข้อได้ เมื่อรีพอร์ทของตัวเองเป็น "ฉบับใหม่"
+      // ในคำขอเดียวกัน (ไม่มีก่อน → มีหลัง) · ครบ 2 คน ถอนเผยแพร่พร้อมตั้ง reportHold ได้ (ทางเดียว true→false)
+      // เผยแพร่คืน/ล้างตัวนับ = ทีมวิชาการตอนปิดรีพอร์ท (ผ่าน reviewUntouched ปกติ)
+      function isReportBump(qid) {
+        return request.auth != null
+          && resource.data.get('isPublished', false) == true
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reportCount', 'reportHold', 'isPublished'])
+          && request.resource.data.get('reportCount', 0) == resource.data.get('reportCount', 0) + 1
+          && !exists(/databases/$(database)/documents/questionReports/$(qid + '__' + request.auth.uid))
+          && existsAfter(/databases/$(database)/documents/questionReports/$(qid + '__' + request.auth.uid))
+          && (
+            (request.resource.data.get('isPublished', false) == true
+              && request.resource.data.get('reportHold', false) == resource.data.get('reportHold', false))
+            || (request.resource.data.get('reportCount', 0) >= 2
+              && request.resource.data.get('isPublished', true) == false
+              && request.resource.data.get('reportHold', false) == true)
+          );
+      }
       allow read:  if request.auth != null && (resource.data.get('isPublished', false) == true || canEditQuestions());
       allow create, delete: if canEditQuestions();
-      allow update: if canEditQuestions()
-        && (isAdmin() || reviewUntouched() || isReviewSubmit(id) || isReviewAmend(id) || isReviewReset() || isReviewFix(id));
+      allow update: if (canEditQuestions()
+        && (isAdmin() || reviewUntouched() || isReviewSubmit(id) || isReviewAmend(id) || isReviewReset() || isReviewFix(id)))
+        || isReportBump(id);
 
       // ── Comments (SP1) — thread วิชาการ↔อาจารย์ ต่อข้อ (นักศึกษาเข้าไม่ถึง) ──
       match /comments/{commentId} {
@@ -401,7 +420,9 @@ service cloud.firestore {
     //  update: academic (ปิด/ตัดสิน) หรือ เจ้าของ report (re-report = setDoc merge → update)
     //  delete: academic
     match /questionReports/{id} {
-      allow read:   if isAcademic();
+      // อ่านของตัวเองได้ (id = {qid}__{uid}) — QuizView เช็คว่าเคยแจ้งข้อนี้ไหมก่อนนับเพิ่ม · doc ยังไม่มีก็อ่านได้ (เช็คจาก id)
+      allow read:   if isAcademic()
+                    || (request.auth != null && id.matches('.*__' + request.auth.uid));
       allow create: if request.auth != null
                     && request.resource.data.reportedBy == request.auth.uid;
       allow update: if isAcademic()

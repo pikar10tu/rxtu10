@@ -991,7 +991,7 @@ async function loadReports() {
       collection(db, 'questionReports'),
       where('status', '==', 'open'),
       orderBy('createdAt', 'desc'),
-      limit(200),
+      limit(800),   // รีพอร์ทจาก AI หลายร้อยฉบับ — 200 เดิมดันรีพอร์ทเพื่อนตก
     ))
     usage.track(snap.size)
     reports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
