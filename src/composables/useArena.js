@@ -23,6 +23,7 @@ import { energyState, spendEnergy, PVP_ENERGY_MAX } from '../utils/pvpEnergy.js'
 import { dailyView, bumpDaily, canClaimDaily, PVP_DAILY_GOAL, PVP_DAILY_REWARD } from '../utils/pvpDaily.js'
 import { teamPower, coinForResult } from '../utils/pvpCoins.js'
 import { hashStr } from '../utils/seededRng.js'
+import { activeWeekly } from '../data/pvpWeekly.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { buildLoseTip } from '../utils/loseTip.js'
 
@@ -154,7 +155,9 @@ export function useArena() {
       toast('ยังหาคู่ต่อสู้ไม่ได้ ลองใหม่อีกครั้งนะ', 'info')
       return null
     }
-    const result = simulateBattle(myTeam.value, oppTeam, Date.now())
+    // เอฟเฟกต์ประจำสัปดาห์ — เช็คเวลาหมดตอนกดจริง (ไม่ใช่ค่าที่ค้างบนจอ)
+    const weekly = activeWeekly(rawConfig.value?.pvpWeekly, Date.now())
+    const result = simulateBattle(myTeam.value, oppTeam, Date.now(), { weekly: weekly?.id })
     const won = result.winner === 'A'
     const { ok, delta, coin } = await applyResult(opp, won)
     // เขียนผลไม่สำเร็จ → toast error + ไม่โชว์ replay (เหมือน useFarm/useDaily)

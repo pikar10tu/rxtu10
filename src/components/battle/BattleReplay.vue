@@ -841,6 +841,12 @@ function firePassiveFx(e) {
   // ── หลอดเลือด: ฮีล/ฟื้น/รับแทน ทำให้เลือดเปลี่ยนโดยไม่มี attack event
   //    ถ้าไม่อัปเดตตรงนี้ หลอดจะค้างค่าเดิมทั้งที่เลขเด้งขึ้นแล้ว (ผู้เล่นเห็นขัดกันทันที)
   if (typeof e.hpPct === 'number' && on[0]) { hp.value = { ...hp.value, [on[0]]: e.hpPct }; setDead(on[0]) }
+  // 🗓️ เอฟเฟกต์ประจำสัปดาห์ (ไหม้/น้ำพุจบรอบ) — event เดียวครอบทุกตัว เลือด/เลขต่อ uid มาใน hpMap/amounts
+  if (e.hpMap) {
+    hp.value = { ...hp.value, ...e.hpMap }
+    const heal = e.fxKind === 'heal'
+    for (const t of on) if (e.amounts?.[t] > 0) fx?.pop(t, { dmg: e.amounts[t], heal, weight: 0.4 })
+  }
   if (e.guardUid && typeof e.guardHpPct === 'number') {
     hp.value = { ...hp.value, [e.guardUid]: e.guardHpPct }
     if (e.amount > 0) fx?.pop(e.guardUid, { dmg: e.amount, weight: 0.3 })   // หลอดผู้พิทักษ์ลด ต้องมีเลขบอกว่ารับไปเท่าไร

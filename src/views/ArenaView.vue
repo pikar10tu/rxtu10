@@ -20,12 +20,12 @@
       />
 
       <!-- หาคู่ = สุ่มอย่างเดียว เลือกคู่ไม่ได้ (28 ก.ย. 2026 — แทนกระดาน 5 ช่อง ที่ทำให้คนรุมตีคนอ่อน) -->
-      <!-- เอฟเฟกต์ประจำสัปดาห์ (config/app.pvpWeekly) — แอดมินตั้ง · ไม่ได้ตั้ง/ข้อความว่าง = ซ่อน
-           ⚠️ ตอนนี้เป็นป้ายบอกอย่างเดียว ยังไม่ผูกกับเอนจินไฟต์ -->
+      <!-- เอฟเฟกต์ประจำสัปดาห์ (config/app.pvpWeekly · data/pvpWeekly.js) — แอดมินกดเปิด 7 วัน หมดแล้วซ่อนเอง
+           มีผลกับไฟต์จริงทั้งฝั่งบุกและตั้งรับ -->
       <div v-if="weekly" class="ar-weekly">
         <span class="ar-weekly-ico"><Emoji :char="weekly.icon" /></span>
         <span class="ar-weekly-l">
-          <span class="ar-weekly-cap">เอฟเฟกต์ประจำสัปดาห์</span>
+          <span class="ar-weekly-cap">เอฟเฟกต์ประจำสัปดาห์ · เหลือ {{ weeklyLeft }}</span>
           <b class="ar-weekly-t">{{ weekly.title }}</b>
           <span v-if="weekly.desc" class="ar-weekly-d">{{ weekly.desc }}</span>
         </span>
@@ -89,7 +89,8 @@ import ArenaRankCard from '../components/battle/ArenaRankCard.vue'
 import { arenaRanking } from '../utils/arenaRivals.js'
 import { PVP_RATING_START } from '../utils/pvpRating.js'
 import PvpRoulette from '../components/battle/PvpRoulette.vue'
-import { rouletteNames, pvpWeekly } from '../data/pvpRoulette.js'
+import { rouletteNames } from '../data/pvpRoulette.js'
+import { activeWeekly } from '../data/pvpWeekly.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import { rosterArena } from '../utils/arenas.js'
 import ArenaSheet from '../components/battle/ArenaSheet.vue'
@@ -114,7 +115,15 @@ onMounted(() => { if (!canFight.value) router.replace('/play') })
 watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิดสนามระหว่างมีคนอยู่ในหน้า
 
 const rouletteList = computed(() => rouletteNames(rawConfig.value?.pvpRoulette))
-const weekly = computed(() => pvpWeekly(rawConfig.value?.pvpWeekly))
+const weekly = computed(() => activeWeekly(rawConfig.value?.pvpWeekly, energyNow()))
+const weeklyLeft = computed(() => fmtLeft(weekly.value ? weekly.value.endsAt - energyNow() : 0))
+// energy.value ขยับทุกวิ (now ใน useArena) — ใช้เป็นนาฬิกาของหน้าไปด้วย ป้ายเอฟเฟกต์จะหายเองตอนหมดเวลา
+const energyNow = () => { void energy.value; return Date.now() }
+function fmtLeft(ms) {
+  const m = Math.max(0, Math.floor(ms / 60000))
+  const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60)
+  return d > 0 ? `${d} วัน ${h} ชม.` : h > 0 ? `${h} ชม. ${m % 60} นาที` : `${m % 60} นาที`
+}
 const countdown = computed(() => {
   const t = Math.ceil(energy.value.nextMs / 1000)
   return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`

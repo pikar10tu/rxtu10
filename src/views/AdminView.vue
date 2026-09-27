@@ -57,21 +57,25 @@
         </div>
       </section>
 
-      <!-- ───── เอฟเฟกต์ประจำสัปดาห์ PvP (config/app.pvpWeekly) ───── -->
+      <!-- ───── เอฟเฟกต์ประจำสัปดาห์ PvP (config/app.pvpWeekly = {id, startsAt, endsAt}) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="✨" /> เอฟเฟกต์ประจำสัปดาห์ (สนามประลอง)</span></div>
         <div class="admin-hint">
-          ขึ้นเป็นป้ายเหนือปุ่มหาคู่ · ชื่อว่าง = ซ่อนป้าย ·
-          <b>ตอนนี้เป็นข้อความบอกอย่างเดียว ยังไม่มีผลกับไฟต์จริง</b>
+          กดแล้วมีผลทันที {{ WEEKLY_DAYS }} วัน ครบแล้วปลดเอง · มีผลกับไฟต์จริงทั้งฝั่งบุกและตั้งรับ (หอคอยไม่โดน) · กดอันใหม่ = แทนอันเดิมและเริ่มนับใหม่
         </div>
-        <div class="weekly-row">
-          <input v-model="weeklyIcon" class="admin-search weekly-ico" maxlength="4" placeholder="✨" aria-label="อีโมจิ" />
-          <input v-model="weeklyTitle" class="admin-search" :maxlength="WEEKLY_TITLE_MAX" placeholder="ชื่อเอฟเฟกต์ เช่น สัปดาห์แห่งไฟ" aria-label="ชื่อเอฟเฟกต์" />
+        <div class="maint-toggle">
+          <span class="maint-state" :class="weeklyNow ? 'on' : 'off'">
+            <template v-if="weeklyNow"><Emoji :char="weeklyNow.icon" /> {{ weeklyNow.title }} · เหลือ {{ weeklyLeftText }}</template>
+            <template v-else><Emoji char="⚪" /> ไม่มีเอฟเฟกต์</template>
+          </span>
+          <button v-if="weeklyNow" class="btn-mini btn-gray" :disabled="savingWeekly" @click="endWeekly">จบตอนนี้</button>
         </div>
-        <textarea v-model="weeklyDesc" class="admin-search roulette-ta" rows="2" :maxlength="WEEKLY_DESC_MAX" placeholder="รายละเอียด (ไม่บังคับ) เช่น เพ็ทสายไฟตีแรงขึ้น 20%" aria-label="รายละเอียด" />
-        <div class="ev-btns">
-          <button class="btn-mini btn-gold" :disabled="savingWeekly" @click="saveWeekly(false)">บันทึก</button>
-          <button class="btn-mini btn-gray" :disabled="savingWeekly" @click="saveWeekly(true)">ปิดป้าย</button>
+        <div class="weekly-grid">
+          <button v-for="w in WEEKLY_EFFECTS" :key="w.id" class="weekly-btn" :class="{ on: weeklyNow?.id === w.id }"
+                  :disabled="savingWeekly" @click="startWeekly(w)">
+            <b><Emoji :char="w.icon" /> {{ w.title }}</b>
+            <span>{{ w.desc }}</span>
+          </button>
         </div>
       </section>
 
@@ -484,7 +488,8 @@
 </template>
 
 <script setup>
-import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX, WEEKLY_TITLE_MAX, WEEKLY_DESC_MAX } from '../data/pvpRoulette.js'
+import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
+import { WEEKLY_EFFECTS, WEEKLY_DAYS, activeWeekly } from '../data/pvpWeekly.js'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, where, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction, increment } from 'firebase/firestore'
@@ -882,30 +887,34 @@ async function endGachaEvent() {
   await writeGachaEvent({ ...(rawConfig.value?.gachaEvent || {}), endsAt: Date.now() }, 'จบอีเวนต์แล้ว')
 }
 
-// ── เอฟเฟกต์ประจำสัปดาห์ PvP (config/app.pvpWeekly) ──
-const weeklyIcon = ref('')
-const weeklyTitle = ref('')
-const weeklyDesc = ref('')
+// ── เอฟเฟกต์ประจำสัปดาห์ PvP (config/app.pvpWeekly = {id, startsAt, endsAt}) ──
 const savingWeekly = ref(false)
-let weeklyLoaded = false
-watch(() => rawConfig.value?.pvpWeekly, (v) => {
-  if (weeklyLoaded || rawConfig.value == null) return
-  weeklyLoaded = true
-  weeklyIcon.value = v?.icon || ''; weeklyTitle.value = v?.title || ''; weeklyDesc.value = v?.desc || ''
-}, { immediate: true })
-async function saveWeekly(clear) {
-  const payload = clear ? null : {
-    icon: cleanText(weeklyIcon.value, 4) || '',
-    title: cleanText(weeklyTitle.value, WEEKLY_TITLE_MAX) || '',
-    desc: cleanText(weeklyDesc.value, WEEKLY_DESC_MAX) || '',
-  }
+const weeklyNow = computed(() => activeWeekly(rawConfig.value?.pvpWeekly, evNowTick.value))
+const weeklyLeftText = computed(() => {
+  const m = Math.max(0, Math.floor(((weeklyNow.value?.endsAt || 0) - evNowTick.value) / 60000))
+  const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60)
+  return d > 0 ? `${d} วัน ${h} ชม.` : `${h} ชม. ${m % 60} นาที`
+})
+async function writeWeekly(payload, okMsg) {
   savingWeekly.value = true
   try {
     await setDoc(doc(db, 'config', 'app'), { pvpWeekly: payload }, { merge: true })
-    if (clear) { weeklyIcon.value = ''; weeklyTitle.value = ''; weeklyDesc.value = '' }
-    toast(clear || !payload.title ? 'ปิดป้ายแล้ว' : 'บันทึกแล้ว — ขึ้นหน้าสนามประลองทันที', 'success')
+    toast(okMsg, 'success')
   } catch (e) { console.error('[weekly save]', e); toast('บันทึกไม่สำเร็จ', 'error') }
   finally { savingWeekly.value = false }
+}
+async function startWeekly(w) {
+  const cur = weeklyNow.value
+  const ok = await confirm(cur
+    ? `เปลี่ยนเป็น "${w.title}"?\n"${cur.title}" จะจบทันที แล้วเริ่มนับ ${WEEKLY_DAYS} วันใหม่`
+    : `เริ่ม "${w.title}" ${WEEKLY_DAYS} วัน?\n${w.desc}`)
+  if (!ok) return
+  const now = Date.now()
+  await writeWeekly({ id: w.id, startsAt: now, endsAt: now + WEEKLY_DAYS * 86400000 }, `เริ่ม ${w.title} แล้ว`)
+}
+async function endWeekly() {
+  if (!(await confirm('จบเอฟเฟกต์ประจำสัปดาห์ตอนนี้?'))) return
+  await writeWeekly(null, 'จบเอฟเฟกต์แล้ว')
 }
 
 // ── รูเล็ตหาคู่ PvP (config/app.pvpRoulette) ──
@@ -1187,8 +1196,12 @@ async function saveEcon(m) {
 .bc-field { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: .7rem; font-weight: 700; color: #64748b; }
 .bc-coins, .bc-target { box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); width: 100%; }
 .bc-send { width: 100%; }
-.weekly-row { display: flex; gap: 6px; margin-top: 6px; }
-.weekly-ico { width: 56px; flex: none; text-align: center; }
+.weekly-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; margin-top: 8px; }
+.weekly-btn { display: flex; flex-direction: column; gap: 3px; text-align: left; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 10px; font-family: inherit; cursor: pointer; }
+.weekly-btn b { font-size: .78rem; }
+.weekly-btn span { font-size: .7rem; color: rgba(0,0,0,.55); line-height: 1.4; }
+.weekly-btn.on { background: #fdf2f8; border-color: #ec4899; }
+.weekly-btn:disabled { opacity: .5; cursor: default; }
 .roulette-ta { width: 100%; resize: vertical; font-family: inherit; margin: 6px 0; }
 .admin-card {
   background: #fff;

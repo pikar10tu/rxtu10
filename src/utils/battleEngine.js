@@ -3,7 +3,9 @@
 //  scripts/battle-sim.mjs (resolve) + บันทึก log ทุก action ให้ UI replay
 //  ไม่มี side effect — ไม่อ่าน store/Firestore/Date.now
 // ════════════════════════════════════════════════════════════
-import { BATTLE_CFG, buildCombatant, elementMult } from '../data/battle.js'
+import { BATTLE_CFG, buildCombatant } from '../data/battle.js'
+import { elementBeats } from '../data/index.js'
+import { weeklyRules, statMult } from '../data/pvpWeekly.js'
 import {
   applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
   tauntTargetOf, psOf, windupOf,
@@ -24,10 +26,29 @@ function rng(seed) {
 const alive = (t) => t.filter(f => f.hp > 0)
 
 /** teamA/teamB = array ของ {id,rarity,element,grade} (≤4) · seed = int */
-export function simulateBattle(teamA, teamB, seed) {
+export function simulateBattle(teamA, teamB, seed, opts = {}) {
   const rand = rng(seed)
-  const A = (teamA || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `A${i}`, side: 'A' }))
-  const B = (teamB || []).map((p, i) => ({ ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `B${i}`, side: 'B' }))
+  // 🗓️ เอฟเฟกต์ประจำสัปดาห์ (data/pvpWeekly.js) — useArena ส่ง opts.weekly มาเฉพาะ PvP · ไม่ส่ง = ไฟต์ปกติเป๊ะ
+  const W = weeklyRules(opts.weekly) || {}
+  const build = (p, i, side) => {
+    const u = { ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `${side}${i}`, side }
+    const m = statMult(W, u, i)
+    if (m.atk !== 1) u.atk *= m.atk
+    if (m.hp !== 1) { u.maxHp *= m.hp; u.hp = u.maxHp }
+    return u
+  }
+  const A = (teamA || []).map((p, i) => build(p, i, 'A'))
+  const B = (teamB || []).map((p, i) => build(p, i, 'B'))
+  const critRate = BATTLE_CFG.critRate + (W.critAdd || 0)
+  const critMult = W.critMult || BATTLE_CFG.critMult
+  const variance = W.variance ?? BATTLE_CFG.variance
+  const adv = W.elementAdv || BATTLE_CFG.elementAdv
+  const elementMult = (a, d) => {
+    const [x, y] = W.invertElements ? [d, a] : [a, d]
+    if (elementBeats(x, y)) return adv
+    if (elementBeats(y, x)) return BATTLE_CFG.elementDis
+    return 1
+  }
   const log = []
 
   // ── ลำดับ hook ที่ห้ามสลับ (สเปก §B): forms → setup → aura → onStart → [onRound] → onAttack → onHit → onDeath → onKill ──
@@ -239,9 +260,9 @@ export function simulateBattle(teamA, teamB, seed) {
 
     let m = elementMult(att.element, tg.element)
     const eff = m > 1 ? 'super' : (m < 1 ? 'weak' : 'neutral')  // ธาตุล้วน ก่อนคูณ crit/variance
-    const crit = rand() < (BATTLE_CFG.critRate + (att.critBonus || 0))
-    if (crit) m *= BATTLE_CFG.critMult
-    m *= 1 + (rand() * 2 - 1) * BATTLE_CFG.variance
+    const crit = rand() < (critRate + (att.critBonus || 0))
+    if (crit) m *= critMult
+    m *= 1 + (rand() * 2 - 1) * variance
     m *= mod.atkMult * (1 + (tg.vuln || 0))
     const base = att.atk * m
 
@@ -300,6 +321,27 @@ export function simulateBattle(teamA, teamB, seed) {
     }
     if (pending.size) return
     for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
+    // 🗓️ ไฟไหม้/น้ำพุจบรอบ — event เดียวต่อรอบ ครอบทุกตัวบนสนาม (hpMap/amounts ต่อ uid ให้รีเพลย์)
+    //    ไหม้คิดจากเลือดปัจจุบัน จึงไม่มีทางฆ่าใคร (เหลือ ≥1) · ไม่ดึง rand() ⇒ ลำดับสุ่มของไฟต์ไม่เลื่อน
+    const re = W.roundEnd
+    if (re) {
+      const on = [...alive(A), ...alive(B)]
+      if (on.length) {
+        const amounts = {}, hpMap = {}
+        for (const u of on) {
+          const before = u.hp
+          if (re.burnPct) u.hp = Math.max(1, u.hp - u.hp * re.burnPct / 100)
+          if (re.healPct) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * re.healPct / 100)
+          amounts[u.uid] = Math.round(Math.abs(u.hp - before))
+          hpMap[u.uid] = Math.max(1, Math.round((u.hp / u.maxHp) * 100))
+        }
+        const burn = !!re.burnPct
+        log.push({ t: 'passive', uid: on[0].uid, side: on[0].side, petId: null,
+          name: burn ? 'สมรภูมิมอดไหม้' : 'น้ำพุชีวิต', icon: burn ? '🔥' : '💚',
+          effect: burn ? 'weeklyBurn' : 'weeklyHeal', fxKind: burn ? 'damage' : 'heal',
+          targets: on.map(u => u.uid), amount: 0, amounts, hpMap })
+      }
+    }
     pending = null
   }
 

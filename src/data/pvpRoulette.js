@@ -15,16 +15,3 @@ export function rouletteNames(cfg) {
   return list.length ? list.slice(0, ROULETTE_MAX) : ROULETTE_DEFAULT
 }
 
-// ── เอฟเฟกต์ประจำสัปดาห์ (config/app.pvpWeekly = { icon, title, desc }) — 28 ก.ย. 2026 ──
-//  ตอนนี้เป็นป้ายบอกบนหน้าสนามอย่างเดียว · ไม่มี title = ไม่แสดง
-export const WEEKLY_TITLE_MAX = 40
-export const WEEKLY_DESC_MAX = 120
-export function pvpWeekly(cfg) {
-  const title = String(cfg?.title ?? '').trim().slice(0, WEEKLY_TITLE_MAX)
-  if (!title) return null
-  return {
-    icon: String(cfg?.icon ?? '').trim() || '✨',
-    title,
-    desc: String(cfg?.desc ?? '').trim().slice(0, WEEKLY_DESC_MAX),
-  }
-}
