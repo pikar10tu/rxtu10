@@ -74,7 +74,7 @@
     <!-- ── ผล ── -->
     <template v-else-if="stage === 'result'">
       <div class="ta-result">
-        <div class="ta-res-emoji">{{ resultEmoji }}</div>
+        <div class="ta-res-emoji"><Emoji :char="resultEmoji" /></div>
         <div class="ta-res-title">{{ endReasonText }}</div>
         <div class="ta-res-score">{{ correct }}<span> ข้อ</span></div>
         <div class="ta-res-sub">ตอบไป {{ answered }} ข้อ · แม่น {{ accuracy }}%</div>

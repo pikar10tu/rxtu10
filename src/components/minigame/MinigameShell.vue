@@ -11,7 +11,7 @@
     <header class="ms-head">
       <button class="ms-back" @click="$router.push('/play')" aria-label="กลับ">‹ กลับ</button>
       <span class="ms-title"><Emoji :char="game?.emoji" /> {{ game?.name }}</span>
-      <button class="ms-lb" @click="lbOpen = true" aria-label="อันดับ">🏆</button>
+      <button class="ms-lb" @click="lbOpen = true" aria-label="อันดับ"><Emoji char="🏆" /></button>
     </header>
 
     <div class="ms-best">สถิติของคุณ: <b>{{ best.toLocaleString() }}</b> {{ game?.scoreLabel }}</div>

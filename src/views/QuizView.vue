@@ -74,7 +74,7 @@
         <button class="qv-quit" aria-label="ออกจากการทำข้อสอบ" @click="quit">✕</button>
         <div v-if="variant === 'zen'" class="qv-zen-tag"><Emoji char="♾️" /> Zen</div>
         <div v-else class="qv-bar"><div class="qv-fill" :style="{ width: progress + '%' }"></div></div>
-        <span class="qv-pill qv-streak" :class="{ off: !streak }" :aria-label="`ถูกติดกัน ${streak} ข้อ`">🔥 {{ streak }}</span>
+        <span class="qv-pill qv-streak" :class="{ off: !streak }" :aria-label="`ถูกติดกัน ${streak} ข้อ`"><Emoji char="🔥" /> {{ streak }}</span>
       </div>
       <!-- แถวป้าย: ข้อที่ · หมวด · สถานะตรวจ · คะแนน -->
       <div class="qv-meta">
@@ -133,7 +133,7 @@
     <!-- ── RESULT ── -->
     <template v-else-if="mode === 'result'">
       <div class="qv-result">
-        <div class="qv-result-title">{{ resultEmoji }} ทำข้อสอบจบแล้ว!</div>
+        <div class="qv-result-title"><Emoji :char="resultEmoji" /> ทำข้อสอบจบแล้ว!</div>
         <div class="qv-ring" role="img" :aria-label="`ถูก ${correct} จาก ${sessionTotal} ข้อ ${pct} เปอร์เซ็นต์`">
           <svg viewBox="0 0 120 120" aria-hidden="true">
             <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(43,53,80,.08)" stroke-width="12" />
@@ -147,7 +147,7 @@
         </div>
         <div class="qv-stats">
           <div class="qv-stat coin"><b>{{ coinsEarned ? `+${coinsEarned.toLocaleString()}` : '0' }}</b><small>เหรียญ</small></div>
-          <div class="qv-stat"><b>🔥 {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
+          <div class="qv-stat"><b><Emoji char="🔥" /> {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
           <div class="qv-stat"><b>{{ sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
         </div>
         <div v-if="roundDomains.length > 1" class="qv-card qv-rdom">

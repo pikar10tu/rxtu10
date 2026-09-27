@@ -24,7 +24,7 @@
     <template #gameover>
       <div v-if="phase === 'over'" class="cr-over">
         <div class="cr-over-score">คะแนน {{ lastScore }}</div>
-        <div v-if="saveState === 'saved'" class="cr-over-coin">+{{ earned.toLocaleString() }} 🪙</div>
+        <div v-if="saveState === 'saved'" class="cr-over-coin">+{{ earned.toLocaleString() }} <Emoji char="🪙" /></div>
         <div v-else-if="saveState === 'saving'" class="cr-over-coin">กำลังบันทึก…</div>
         <button v-else-if="saveState === 'failed'" class="cr-retry" @click="saveResult">
           บันทึกไม่สำเร็จ — ลองอีกครั้ง

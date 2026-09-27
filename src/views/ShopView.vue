@@ -67,7 +67,7 @@
       <div v-if="pickerOpen" class="ov" @click.self="pickerOpen = false">
         <div class="picker">
           <div class="picker-head">{{ pickerMode === 'theme' ? 'เลือกเป้าหมายตู้ ' + ev.name : 'เลือกเป้าหมาย legendary' }}</div>
-          <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด ℹ️ = ดูรายละเอียด</div>
+          <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด <Emoji char="ℹ️" /> = ดูรายละเอียด</div>
           <div class="picker-grid">
             <div v-for="p in pickerList" :key="p.id" class="picker-cell" :class="{ on: p.id === pickerOn }" @click="chooseTarget(p.id)">
               <button class="picker-info" @click.stop="infoPet = p" aria-label="ดูรายละเอียด"><Emoji char="ℹ️" /></button>

@@ -1,11 +1,11 @@
 <template>
   <div class="mlb">
-    <div class="mlb-head">🏆 อันดับ {{ game?.name }}</div>
+    <div class="mlb-head"><Emoji char="🏆" /> อันดับ {{ game?.name }}</div>
     <div v-if="loading && !rows.length" class="mlb-empty">กำลังโหลด…</div>
     <div v-else-if="!rows.length" class="mlb-empty">ยังไม่มีใครทำคะแนน — เป็นคนแรกเลย!</div>
     <div v-else class="mlb-list">
       <div v-for="(r, i) in rows" :key="r.uid" class="mlb-row" :class="{ me: r.isMe }">
-        <span class="mlb-rank">{{ medal(i) }}</span>
+        <span class="mlb-rank"><Emoji v-if="i < 3" :char="medal(i)" /><template v-else>{{ i + 1 }}</template></span>
         <span class="mlb-nick">{{ r.nickname }}<span v-if="r.isMe" class="mlb-you"> (คุณ)</span></span>
         <span class="mlb-best">{{ r.best.toLocaleString() }} {{ game?.scoreLabel }}</span>
       </div>
@@ -16,6 +16,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import Emoji from '../shared/Emoji.vue'
 import { useMinigameBoard } from '../../composables/useMinigameBoard.js'
 import { getMinigame } from '../../data/minigames.js'
 
