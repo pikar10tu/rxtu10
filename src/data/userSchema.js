@@ -82,8 +82,8 @@ export const USER_DEFAULTS = {
   incomeBuffFrom: null,    // ms เริ่มบัฟ (คู่กับ incomeBuffUntil) — รองรับสแตคต่อเวลา
   // ── PvP (สนามประลอง) ──
   pvp: { rating: 1000, wins: 0, losses: 0, seasonId: null },
-  // ⚠️ pvpAttackDate/pvpAttacksUsed/pvpBoardNonce/pvpRefreshAt = ฟิลด์ตาย (28 ก.ย. 2026 เปลี่ยนเป็นพลังบุก+สุ่มคู่)
-  pvpEnergy: null,       // พลังบุก ณ pvpEnergyAt (null = เต็ม) · utils/pvpEnergy.js
+  // ⚠️ pvpAttackDate/pvpAttacksUsed/pvpBoardNonce/pvpRefreshAt = ฟิลด์ตาย (28 ก.ย. 2026 เปลี่ยนเป็นพลังงาน+สุ่มคู่)
+  pvpEnergy: null,       // พลังงาน ณ pvpEnergyAt (null = เต็ม) · utils/pvpEnergy.js
   pvpEnergyAt: null,     // ms จุดเริ่มนับเติมครั้งถัดไป
   pvpDaily: null,        // { date, n, claimed } รางวัลตีครบ 5/วัน · utils/pvpDaily.js
   pvpRecent: [],         // uid คู่ล่าสุด 3 คน (กันเจอซ้ำ/สลับ)

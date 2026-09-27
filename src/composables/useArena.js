@@ -1,5 +1,5 @@
 // src/composables/useArena.js
-// PvP สนามประลอง — orchestration core: เรต/พลังบุก/สุ่มคู่/บุก+เขียนผล/รางวัลรายวัน
+// PvP สนามประลอง — orchestration core: เรต/พลังงาน/สุ่มคู่/บุก+เขียนผล/รางวัลรายวัน
 import { computed, ref, onUnmounted } from 'vue'
 import { increment, doc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -43,7 +43,7 @@ export function useArena() {
   const wins      = computed(() => seasonPvp.value.wins)
   const losses    = computed(() => seasonPvp.value.losses)
 
-  // พลังบุก (28 ก.ย. 2026 แทนโควตา 5/วัน) — เติม 1 ทุก 20 นาที เต็ม 5 · now เดินทุกวิให้นับถอยหลังขยับ
+  // พลังงาน (28 ก.ย. 2026 แทนโควตา 5/วัน) — เติม 1 ทุก 20 นาที เต็ม 5 · now เดินทุกวิให้นับถอยหลังขยับ
   const now = ref(Date.now())
   const tick = setInterval(() => { now.value = Date.now() }, 1000)
   onUnmounted(() => clearInterval(tick))
@@ -140,7 +140,7 @@ export function useArena() {
   async function fight() {
     if (attacksLeft.value <= 0) {
       const m = Math.ceil(energy.value.nextMs / 60000)
-      toast(`พลังบุกหมด อีก ${m} นาทีได้เพิ่ม 1`, 'info')
+      toast(`พลังงานหมด อีก ${m} นาทีได้เพิ่ม 1`, 'info')
       return null
     }
     if (!myTeam.value.length) {

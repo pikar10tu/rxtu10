@@ -1,5 +1,5 @@
 <!-- src/views/ArenaView.vue -->
-<!-- สนามประลอง PvP — แต้มประลอง, หาคู่แบบสุ่ม (รูเล็ต) + พลังบุก, รางวัลรายวัน, จัดทีม
+<!-- สนามประลอง PvP — แต้มประลอง, หาคู่แบบสุ่ม (รูเล็ต) + พลังงาน, รางวัลรายวัน, จัดทีม
      สนามปิด = เด้งกลับ /play ทันที (นักศึกษาไม่เห็นหน้านี้เลย)
      admin: เข้าและบุกได้เสมอแม้ pvpOpen=false (ทดสอบก่อนเปิดจริง) -->
 <template>
@@ -94,8 +94,8 @@ watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิ�
 const rouletteList = computed(() => rouletteNames(rawConfig.value?.pvpRoulette))
 const findSub = computed(() => {
   if (!myTeam.value.length) return 'จัดทีมก่อนนะ'
-  if (attacksLeft.value > 0) return `ใช้พลังบุก 1 · เหลือ ${attacksLeft.value}/${energyMax}`
-  return `พลังบุกหมด · อีก ${Math.ceil(energy.value.nextMs / 60000)} นาทีได้เพิ่ม`
+  if (attacksLeft.value > 0) return `ใช้พลังงาน 1 · เหลือ ${attacksLeft.value}/${energyMax}`
+  return `พลังงานหมด · อีก ${Math.ceil(energy.value.nextMs / 60000)} นาทีได้เพิ่ม`
 })
 
 // อันดับแต้มประลองทั้งรุ่น — อ่าน rosterRows ดิบ (rosterUsers key ด้วย studentId แล้วตก guest)
