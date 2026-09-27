@@ -385,11 +385,13 @@ async function sendReport() {
     //  แจ้งซ้ำข้อเดิม = ทับรีพอร์ทเดิม ไม่นับเพิ่ม
     const rRef = doc(db, 'questionReports', reportDocId(q.id, authStore.currentUser.uid))
     const qRef = doc(db, 'questions', q.id)
-    let held = false
+    let held = false, judged = false
     await runTransaction(db, async (tx) => {
-      held = false
+      held = false; judged = false
       const rSnap = await tx.get(rRef)
       const qSnap = await tx.get(qRef)
+      // ใบเดิมตัดสินแล้ว → ห้ามแจ้งทับ (เดิมทับเป็น open + rewardDelivered:false = รับรางวัลซ้ำได้)
+      if (rSnap.exists() && rSnap.data().status !== 'open') { judged = true; return }
       tx.set(rRef, {
         questionId: q.id,
         reason: reportReason.value,
@@ -412,6 +414,7 @@ async function sendReport() {
     usage.track(2, 2)
     reportedIds.value.add(q.id)
     resetReport()
+    if (judged) { toast('คุณเคยแจ้งข้อนี้และทีมวิชาการตรวจไปแล้ว แจ้งซ้ำไม่ได้', 'info'); return }
     toast(held ? 'ขอบคุณที่ช่วยแจ้ง! มีเพื่อนแจ้งข้อนี้ครบแล้ว เลยพักข้อนี้ไว้ก่อนระหว่างทีมวิชาการตรวจ' : 'ขอบคุณที่ช่วยแจ้ง! ทีมวิชาการจะตรวจสอบให้', 'success')
   } catch (e) {
     console.error('[question report]', e); toast('ส่งรายงานไม่สำเร็จ', 'error')

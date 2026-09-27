@@ -339,7 +339,7 @@ import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { groupReports } from '../utils/questionReport.js'
 import { canHandleReport, nextReportGroup, fixedAfterReport, questionChangedSince } from '../utils/reportCase.js'
-import { REPORT_REWARD, REVIEW_CASE_REWARD, REVIEW_REWARD, AI_REPORTER_UID } from '../data/index.js'
+import { REPORT_REWARD, REVIEW_CASE_REWARD, REVIEW_CASE_INVALID_REWARD, REVIEW_REWARD, AI_REPORTER_UID } from '../data/index.js'
 import { reviewBounty, othersSkipped } from '../utils/reviewBounty.js'
 const REPORTS_LIMIT = 800
 import { useReviewWrites } from '../composables/useReviewWrites.js'
@@ -858,6 +858,7 @@ const pendingReportCount = computed(() => authStore.isAcademic
 //  ใครในทีมวิชาการก็กดได้ รวมคนที่แก้เอง (ข้าม canHandleReport) — เคสแก้สำเร็จแต่ปิดรีพอร์ทล้มแล้วรีโหลดหน้า (final review I2)
 function reportCaseFor(g, q) {
   const goneReason = !q ? 'deleted' : q.retired ? 'retired' : fixedAfterReport(q, g) ? 'fixed' : null
+  if (g.reports.some(r => r.reportedBy === myUid.value)) return null   // เคสที่ตัวเองแจ้ง → ให้คนอื่นตรวจ
   if (!goneReason && !canHandleReport(q, myUid.value)) return null
   return { group: g, question: q, goneReason, v: ++reportCaseV }
 }
@@ -904,9 +905,9 @@ function finishReport(g, closed, skipped, verdict = 'valid', released = false, c
   const releaseSuffix = released ? ' · เผยแพร่ข้อนี้คืนแล้ว' : ''
   toast(`จัดการแล้ว${coins ? ` ได้ ${coins.toLocaleString()} เหรียญทางจดหมาย` : ''}${rewardSuffix}${releaseSuffix}`, 'success')
 }
-// เหรียญที่คนตรวจจะได้จากเคสรีพอร์ท (เพื่อนแจ้ง 10000 · มีแต่ AI 5000) + โบนัสคนข้าม
-function caseBounty(g, q) {
-  return reviewBounty(q, myUid.value, isAiOnly(g) ? REVIEW_REWARD : REVIEW_CASE_REWARD)
+// เหรียญที่คนตรวจจะได้จากเคสรีพอร์ท (เพื่อนแจ้ง ผิดจริง 10000 / ไม่ผิด 1000 · มีแต่ AI 5000) + โบนัสคนข้าม
+function caseBounty(g, q, valid = true) {
+  return reviewBounty(q, myUid.value, isAiOnly(g) ? REVIEW_REWARD : valid ? REVIEW_CASE_REWARD : REVIEW_CASE_INVALID_REWARD)
 }
 const fmtCoins = n => n.toLocaleString()
 // ข้อความใน confirm ว่าผู้แจ้งจะได้อะไร (รีพอร์ทจาก AI ไม่มีจดหมาย/รางวัล)
@@ -947,7 +948,7 @@ async function reportCaseStillValid(g, loaded) {
 async function onReportPass({ note: passNote }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\n${reportersText(g, false)} · คุณได้ ${fmtCoins(caseBounty(g, reportCase.value?.question))} เหรียญ`))) return
+  if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\n${reportersText(g, false)} · คุณได้ ${fmtCoins(caseBounty(g, reportCase.value?.question, false))} เหรียญ`))) return
   reportBusy.value = true
   try {
     if (!(await reportCaseStillValid(g, q))) return

@@ -19,7 +19,7 @@ import { getCategories } from '../utils/questionCategories.js'
 import { plePatch } from '../utils/pleMapping.js'
 import { resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail, buildReportResultMail, buildReviewCaseRewardMail } from '../utils/mailbox.js'
-import { REPORT_REWARD, REVIEW_CASE_REWARD, REVIEW_REWARD, AI_REPORTER_UID } from '../data/index.js'
+import { REPORT_REWARD, REVIEW_CASE_REWARD, REVIEW_CASE_INVALID_REWARD, REVIEW_REWARD, AI_REPORTER_UID } from '../data/index.js'
 import { reviewBounty } from '../utils/reviewBounty.js'
 
 export function useReviewWrites() {
@@ -248,8 +248,9 @@ export function useReviewWrites() {
       if (!closed) return
       const cur = qSnap.exists() ? qSnap.data() : null
       const friends = group.reports.some(r => r.reportedBy !== AI_REPORTER_UID)
+      if (uid && group.reports.some(r => r.reportedBy === uid)) throw new Error('own-report')   // ห้ามตรวจเคสที่ตัวเองแจ้ง
       if (uid) {
-        coins = reviewBounty(cur, uid, friends ? REVIEW_CASE_REWARD : REVIEW_REWARD)
+        coins = reviewBounty(cur, uid, !friends ? REVIEW_REWARD : verdict === 'valid' ? REVIEW_CASE_REWARD : REVIEW_CASE_INVALID_REWARD)
         const qText = cur ? cur.question : group.snapshot?.question
         tx.set(doc(collection(db, 'users', uid, 'mail')), buildReviewCaseRewardMail(qText || '', coins, serverTimestamp()))
       }

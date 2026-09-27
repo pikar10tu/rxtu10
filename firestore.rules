@@ -423,10 +423,18 @@ service cloud.firestore {
       // อ่านของตัวเองได้ (id = {qid}__{uid}) — QuizView เช็คว่าเคยแจ้งข้อนี้ไหมก่อนนับเพิ่ม · doc ยังไม่มีก็อ่านได้ (เช็คจาก id)
       allow read:   if isAcademic()
                     || (request.auth != null && id.matches('.*__' + request.auth.uid));
-      allow create: if request.auth != null
-                    && request.resource.data.reportedBy == request.auth.uid;
+      // เจ้าของเขียนได้เฉพาะใบที่ยัง open และห้ามแตะฟิลด์ผลตัดสิน/รางวัล (27 ก.ย. 2026 กันรับรางวัลซ้ำ)
+      function isFreshReport() {
+        return request.resource.data.reportedBy == request.auth.uid
+          && request.resource.data.status == 'open'
+          && request.resource.data.get('verdict', null) == null
+          && request.resource.data.get('rewardAmount', 0) == 0
+          && request.resource.data.get('rewardDelivered', false) == false;
+      }
+      allow create: if request.auth != null && isFreshReport();
       allow update: if isAcademic()
-                    || (request.auth != null && resource.data.reportedBy == request.auth.uid);
+                    || (request.auth != null && resource.data.reportedBy == request.auth.uid
+                        && resource.data.status == 'open' && isFreshReport());
       allow delete: if isAcademic();
     }
 
