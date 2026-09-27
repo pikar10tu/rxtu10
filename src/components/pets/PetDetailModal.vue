@@ -15,6 +15,9 @@
           <HelpButton topic="element" style="width:18px;height:18px;font-size: .7rem" />
           <span class="pd-tag">ตัวซ้ำ {{ pet.copies || 0 }}</span>
         </div>
+        <!-- คำพูดประจำตัว (flavor) — แบ่งบรรทัดด้วย 
+ ใน data/index.js (27 ก.ย. 2026 user เคาะ: คำพูดบนหัว · เรื่องเล่าพับไว้ก่อน) -->
+        <p v-if="quote" class="pd-quote">{{ quote }}</p>
       </div>
 
       <!-- ✨ ทักษะเฉพาะ — ยกขึ้นมาไว้ใต้ชื่อเลย
@@ -184,6 +187,7 @@ const pet = computed(() => pets.value.find(p => p.id === props.petId) || null)
 const balTag = computed(() => (pet.value ? balanceTagOf(pet.value.id) : null))
 
 const rc = computed(() => RARITY[pet.value?.rarity]?.color || '#94a3b8')
+const quote = computed(() => getPetDef(pet.value?.id)?.flavor || '')
 const elDef = computed(() => getPetDef(pet.value?.id)?.element || pet.value?.element || 'scissors')
 
 const gradeNow = computed(() => pet.value?.grade || 0)
@@ -259,6 +263,9 @@ async function evolve() {
 .pd-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .pd-emoji { font-size: 3.4rem; }
 .pd-name { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin-top: 2px; }
+.pd-quote { margin: 10px auto 0; max-width: 30ch; white-space: pre-line; text-wrap: balance; font-style: italic; font-size: .86rem; line-height: 1.5; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+.pd-quote::before { content: '“'; }
+.pd-quote::after { content: '”'; }
 .pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .pd-tag { background: rgba(255,255,255,.25); font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
 /* ป้ายบาลานซ์ 27 ก.ย. 2026 — เล็ก ไม่แย่งซีน แค่บอกว่ามีการปรับล่าสุด (หายเองหลัง 14 วัน — ดู utils/balanceTag.js) */
