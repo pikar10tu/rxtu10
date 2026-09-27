@@ -14,10 +14,10 @@
 
     <!-- ผ่าน onboarding แล้ว → launch gate เดิม (config/app.maintenance, live from
          Firestore — see composables/useAppConfig.js). While maintenance is ON, only
-         the admin + academic team see the live app (academics manage the question
-         bank); everyone else gets the maintenance screen. Admin flips it from the
+         admins see the live app — ทีมวิชาการก็ปิดด้วย (user สั่ง 27 ก.ย. 2026);
+         everyone else gets the maintenance screen. Admin flips it from the
          Admin tab — no redeploy needed. -->
-    <template v-else-if="authStore.isQuestionEditor || !maintenance">
+    <template v-else-if="authStore.isAdmin || !maintenance">
       <a href="#main-content" class="skip-link">ข้ามไปเนื้อหาหลัก</a>
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 

@@ -12,11 +12,11 @@
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🚧" /> โหมดซ่อมบำรุง</span></div>
         <div class="admin-hint">
-          ปกติเว็บเปิดให้ทั้งชั้นปีใช้ · กดปิดเพื่อเข้าโหมดซ่อมบำรุง (เห็นเฉพาะแอดมิน/ทีมวิชาการ) เผื่อเว็บล่มหรือชนลิมิต Firebase — มีผลทันที ไม่ต้อง deploy
+          ปกติเว็บเปิดให้ทั้งชั้นปีใช้ · กดปิดเพื่อเข้าโหมดซ่อมบำรุง (เห็นเฉพาะแอดมิน — ทีมวิชาการก็เข้าไม่ได้) เผื่อเว็บล่มหรือชนลิมิต Firebase — มีผลทันที ไม่ต้อง deploy
         </div>
         <div class="maint-toggle">
           <span class="maint-state" :class="maintenance ? 'off' : 'on'">
-            <template v-if="maintenance"><Emoji char="🔒" /> ปิดซ่อมบำรุง (เฉพาะทีมงาน)</template>
+            <template v-if="maintenance"><Emoji char="🔒" /> ปิดซ่อมบำรุง (เฉพาะแอดมิน)</template>
             <template v-else><Emoji char="🟢" /> เปิดให้ทุกคนใช้</template>
           </span>
           <button
@@ -25,7 +25,15 @@
           >
             {{ savingMaint ? '...' : (maintenance ? 'เปิดเว็บอีกครั้ง' : 'ปิดซ่อมบำรุง') }}
           </button>
+          <button class="btn-mini btn-gray" @click="maintPreview = true"><Emoji char="👀" /> ดูจอที่เพื่อนเห็น</button>
         </div>
+        <!-- พรีวิวจอปิดปรับปรุง (ของจริง กดส่งข้อเสนอแนะได้จริง) — Teleport ตาม CLAUDE.md ข้อ 6 -->
+        <Teleport to="body">
+          <div v-if="maintPreview" class="maint-preview">
+            <MaintenanceScreen />
+            <button class="maint-preview-x" @click="maintPreview = false">✕ ปิดพรีวิว</button>
+          </div>
+        </Teleport>
       </section>
 
       <!-- ───── ตู้อัญเชิญพิเศษ (config/app.gachaEvent) ───── -->
@@ -460,6 +468,7 @@ import { LATEST_THEME_WAVE, themeOf } from '../data/gachaThemes.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
+import MaintenanceScreen from '../components/layout/MaintenanceScreen.vue'
 import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { computeSeasonRewards, seasonRewardMails } from '../utils/seasonRewards.js'
@@ -842,6 +851,7 @@ async function endGachaEvent() {
 
 // ── maintenance toggle (config/app.maintenance) ──
 const savingMaint = ref(false)
+const maintPreview = ref(false)
 async function toggleMaintenance() {
   const next = !maintenance.value
   savingMaint.value = true
@@ -1237,4 +1247,6 @@ async function saveEcon(m) {
 .news-admin-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; background: rgba(0,0,0,.03); font-size: .76rem; }
 .news-admin-row span { flex: 1; word-break: break-word; }
 .news-del { border: none; background: none; cursor: pointer; font-size: .9rem; flex-shrink: 0; }
+.maint-preview { position: fixed; inset: 0; z-index: 230; }
+.maint-preview-x { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 231; border: 2px solid #2b3550; background: #fff; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
 </style>

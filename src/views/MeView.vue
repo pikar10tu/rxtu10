@@ -96,43 +96,15 @@
       <button class="me-logout" @click="auth.logout()">ออกจากระบบ</button>
     </template>
 
-    <!-- ── feedback modal ── — Teleport ไป body: #main-content stacking context, z-index สู้ #bottom-nav ไม่ได้ (ดู CLAUDE.md) -->
-    <Teleport to="body">
-    <div v-if="fbOpen" class="fb-ov" @click.self="fbOpen = false">
-      <div class="fb-box">
-        <div class="fb-head">
-          <span><Emoji char="💡" /> ข้อเสนอแนะเพื่อพัฒนา</span>
-          <button class="fb-x" @click="fbOpen = false">✕</button>
-        </div>
-        <div class="fb-cats">
-          <button
-            v-for="c in FB_CATS" :key="c.key"
-            class="fb-cat-btn" :class="{ on: fbCat === c.key }"
-            @click="fbCat = c.key"
-          >{{ c.label }}</button>
-        </div>
-        <textarea
-          v-model="fbText"
-          :maxlength="LIMITS.feedback"
-          class="fb-input"
-          rows="4"
-          placeholder="อยากให้เพิ่ม/แก้อะไร เล่าได้เลย เช่น ฟีเจอร์ใหม่ จุดที่ใช้งานยาก หรือบั๊กที่เจอ…"
-        ></textarea>
-        <button class="fb-send" :disabled="!fbText.trim() || fbBusy" @click="sendFeedback">
-          {{ fbBusy ? 'กำลังส่ง…' : 'ส่งข้อเสนอแนะ' }}
-        </button>
-      </div>
-    </div>
-    </Teleport>
+    <FeedbackModal v-model="fbOpen" />
   </div>
 </template>
 
 <script setup>
-import { useEscapeKey } from '../composables/useEscapeKey.js'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
@@ -150,6 +122,7 @@ import { getTier } from '../data/residence.js'
 import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
+import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import ShowcaseEditor from '../components/shared/ShowcaseEditor.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import { fetchAchievementItems } from '../composables/useAchievementItems.js'
@@ -242,42 +215,7 @@ const previewPhoto = computed(() =>
   newPhoto.value || avatarUrl(auth.userData, auth.userData?.nickname)
 )
 
-// ── dev feedback → Firestore `feedback` (admin reads in Admin tab) ──
-const FB_CATS = [
-  { key: 'idea', label: '💡 ไอเดีย' },
-  { key: 'bug', label: '🐞 ปัญหา' },
-  { key: 'other', label: '📝 อื่นๆ' },
-]
 const fbOpen = ref(false)
-useEscapeKey(fbOpen, () => { fbOpen.value = false })
-const fbCat = ref('idea')
-const fbText = ref('')
-const fbBusy = ref(false)
-
-async function sendFeedback() {
-  const message = cleanText(fbText.value, LIMITS.feedback)
-  if (!message || fbBusy.value) return
-  fbBusy.value = true
-  try {
-    await addDoc(collection(db, 'feedback'), {
-      category: fbCat.value,
-      message,
-      reporterUid: auth.currentUser?.uid || null,
-      reporterName: auth.userData?.nickname || auth.userData?.name || null,
-      status: 'open',
-      ts: serverTimestamp(),
-    })
-    fbText.value = ''
-    fbCat.value = 'idea'
-    fbOpen.value = false
-    toast('ส่งข้อเสนอแนะแล้ว ขอบคุณมาก', 'success')
-  } catch (e) {
-    console.error('[feedback]', e)
-    toast('ส่งไม่สำเร็จ', 'error')
-  } finally {
-    fbBusy.value = false
-  }
-}
 
 // ── Backfill: คนที่อัปรูปไว้ก่อนมีฟิลด์ photoMini ──
 // ตัวเต็มอยู่ใน doc อยู่แล้ว แค่ไม่เคยมีตัวจิ๋ว ⇒ เพื่อนเลยเห็นเป็นตัวอักษรย่อมาตลอด
@@ -423,21 +361,6 @@ async function save() {
 .me-logout { width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); background: #fff; color: var(--accent); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .me-logout:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 
-/* feedback modal */
-/* align-items:flex-start + overflow + box margin:auto = จัดกลางเมื่อเตี้ย, เลื่อนได้เมื่อสูงเกินจอ
-   สำคัญตอนคีย์บอร์ดมือถือเด้งขึ้น (textarea) — ปุ่มส่งจะไม่จมใต้คีย์บอร์ด เลื่อนถึงได้เสมอ */
-.fb-ov { position: fixed; inset: 0; z-index: 240; background: rgba(0,0,0,.5); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
-.fb-box { background: #fff; width: 100%; max-width: 380px; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop-lg); padding: 16px; margin: auto 0; }
-.fb-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .92rem; margin-bottom: 12px; }
-.fb-x { border: none; background: rgba(0,0,0,.06); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-.fb-cats { display: flex; gap: 6px; margin-bottom: 10px; }
-.fb-cat-btn { flex: 1; border: 1px solid rgba(0,0,0,.12); background: #fff; border-radius: 10px; padding: 8px 4px; font-family: inherit; font-size: .72rem; font-weight: 700; color: rgba(0,0,0,.5); cursor: pointer; }
-.fb-cat-btn.on { background: var(--primary); border-color: var(--ink); color: #fff; }
-.fb-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: .82rem; resize: vertical; }
-.fb-input:focus { outline: none; box-shadow: var(--pop); }
-.fb-send { width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
-.fb-send:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.fb-send:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 
 /* ═══ หน้าฉัน จัดใหม่ (25 ก.ย. 2026) ═══ */
 .me-card { padding: 18px 14px 14px; }
