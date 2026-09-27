@@ -17,7 +17,7 @@ test('balanceTagOf — คืน null ถ้าเพ็ทไม่มีป้
 
 test('balanceTagOf — buff/nerf/rework คืนไอคอน+ป้ายถูกต้อง', () => {
   assert.deepEqual(balanceTagOf('lion', START, PATCH), { kind: 'buff', icon: '⬆️', label: 'บัฟ' })
-  assert.deepEqual(balanceTagOf('bahamut', START, PATCH), { kind: 'nerf', icon: '↘️', label: 'เนิร์ฟ' })
+  assert.deepEqual(balanceTagOf('bahamut', START, PATCH), { kind: 'nerf', icon: '⬇️', label: 'เนิร์ฟ' })
   assert.deepEqual(balanceTagOf('kirin', START, PATCH), { kind: 'rework', icon: '🔄', label: 'รีเวิร์ค' })
 })
 

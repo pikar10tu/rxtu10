@@ -1,10 +1,6 @@
 // balanceTag — ป้ายบาลานซ์บนการ์ดเพ็ท (⬆️ บัฟ / ↘️ เนิร์ฟ / 🔄 รีเวิร์ค)
 // ข้อมูลอยู่ที่ data/petPassives.js (BALANCE_PATCH) ที่นี่มีแค่ตรรกะ pure ล้วน (แสดงกี่วัน/หายเมื่อไหร่)
 //
-// ⚠️ ไอคอนเนิร์ฟ "ควรจะ" เป็น ⬇️ (2b07) แต่ public/emoji/fluent/ ไม่มีไฟล์ 2b07.webp (มีแค่ 2b06/1f504)
-//    ใช้ ↘️ (2198, มีไฟล์จริง) แทนไปก่อน — ถ้าจะได้ลูกศรลงตรงๆ ต้องรัน scripts/fetch-fluent.mjs
-//    เพิ่ม 2b07 (ห้ามรันเองตามกฎ CLAUDE.md ข้อ 17 — ต้องให้ user สั่ง)
-//
 // เทส: node --test src/utils/balanceTag.test.js
 
 import { BALANCE_PATCH } from '../data/petPassives.js'
@@ -14,7 +10,7 @@ const BKK_OFFSET_MS = 7 * 60 * 60 * 1000 // UTC+7
 
 const KIND_META = {
   buff:   { icon: '⬆️', label: 'บัฟ' },
-  nerf:   { icon: '↘️', label: 'เนิร์ฟ' },   // ↘️ แทน ⬇️ (ดูคอมเมนต์บนสุด)
+  nerf:   { icon: '⬇️', label: 'เนิร์ฟ' },
   rework: { icon: '🔄', label: 'รีเวิร์ค' },
 }
 
