@@ -20,7 +20,10 @@
         <!-- ปุ่มบันทึกต้องอยู่ใกล้รูป ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
              เดิมเลือกรูปแล้วเห็นรูปเปลี่ยนบนจอ แต่หาปุ่มบันทึกไม่เจอ ⇒ รีเฟรชแล้วรูปเด้งกลับ -->
         <div v-if="newPhoto" class="me-photo-save">
-          <button class="me-btn-sm on" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึกรูปนี้' }}</button>
+          <button class="me-btn-sm on" :disabled="saving" @click="save">
+            <template v-if="saving">กำลังบันทึก…</template>
+            <template v-else><Emoji char="💾" /> บันทึกรูปนี้</template>
+          </button>
           <button class="me-btn-sm ghost" :disabled="saving" @click="cancelPhoto">ยกเลิก</button>
         </div>
         <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
@@ -28,7 +31,7 @@
           <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
         </button>
         <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
-        <RouterLink to="/shop?tab=style" class="me-shoplink">🎀 ร้านตกแต่ง ›</RouterLink>
+        <RouterLink to="/shop?tab=style" class="me-shoplink"><Emoji char="🎀" /> ร้านตกแต่ง ›</RouterLink>
       </div>
 
       <!-- ทีมเฝ้าบ้าน + ปุ่มจัดทีม (เปิดแผ่นจัดทีมตัวเดียวกับหน้าเพ็ท/หอคอย/อารีน่า) -->
@@ -36,7 +39,7 @@
         <span class="me-guard-cap">ทีมเฝ้าบ้าน</span>
         <span v-for="(g, i) in guard" :key="i" class="me-guard-pet"><Emoji :char="g" /></span>
         <span v-if="!guard.length" class="me-guard-none">ยังไม่ได้จัด</span>
-        <button class="me-guard-edit" @click="teamOpen = true">⚙️ จัดทีม</button>
+        <button class="me-guard-edit" @click="teamOpen = true"><Emoji char="⚙️" /> จัดทีม</button>
       </div>
       <TeamPicker v-model:open="teamOpen" />
 
@@ -83,7 +86,10 @@
           <div class="me-crow"><span><Emoji char="📷" /></span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
           <div class="me-crow"><span><Emoji char="💬" /></span><input v-model="line" :maxlength="LIMITS.contact" class="me-input" placeholder="LINE ID" /></div>
         </div>
-        <button class="me-save" :disabled="saving" @click="save">{{ saving ? 'กำลังบันทึก…' : '💾 บันทึก' }}</button>
+        <button class="me-save" :disabled="saving" @click="save">
+          <template v-if="saving">กำลังบันทึก…</template>
+          <template v-else><Emoji char="💾" /> บันทึก</template>
+        </button>
       </details>
 
       <button class="me-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>

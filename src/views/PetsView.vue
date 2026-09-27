@@ -10,7 +10,7 @@
       <div class="pt-team">
         <div class="pt-team-head">
           <span><Emoji char="⚔️" /> ทีมต่อสู้ ({{ teamSlots.filter(Boolean).length }}/{{ battleSlots }})</span>
-          <button class="pt-team-edit" @click="pickOpen = true">⚙️ จัดทีม</button>
+          <button class="pt-team-edit" @click="pickOpen = true"><Emoji char="⚙️" /> จัดทีม</button>
         </div>
         <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
           <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" :style="id ? { '--rc': rarityColor(teamPetOf(id).rarity) } : null" @click="id ? sel = id : pickOpen = true">

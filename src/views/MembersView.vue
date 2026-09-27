@@ -9,7 +9,7 @@
     </div>
 
     <div v-if="members.rosterMissing" class="mv-empty-roster">
-      ยังไม่มีข้อมูลรายชื่อ — ให้แอดมินกด "🔄 สร้าง roster ใหม่" ในหน้า Admin หนึ่งครั้ง
+      ยังไม่มีข้อมูลรายชื่อ — ให้แอดมินกด "<Emoji char="🔄" /> สร้าง roster ใหม่" ในหน้า Admin หนึ่งครั้ง
     </div>
 
     <input v-model="search" class="mv-search" type="text" placeholder="🔍 ค้นหาชื่อเล่น / ชื่อจริง / รหัส…" />

@@ -6,7 +6,7 @@
       <!-- Tier 1: hero (residence art = the flex background) -->
       <div class="pf-hero" :class="{ 'pf-lightbg': cosBg && !cosBg.dark }" :style="heroStyle">
         <CosBg :id="cos.g" />
-        <button v-if="isMe" class="pf-deco" aria-label="ไปร้านตกแต่ง" @click="goShop">🎀</button>
+        <button v-if="isMe" class="pf-deco" aria-label="ไปร้านตกแต่ง" @click="goShop"><Emoji char="🎀" /></button>
         <button class="pf-x" @click="$emit('close')">✕</button>
         <div class="pf-hero-art"><Emoji :char="tier.art" /></div>
         <CosFrame :id="cos.f" class="pf-av-frame">
