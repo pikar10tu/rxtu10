@@ -29,7 +29,7 @@ src/
   stores/auth.js       หัวใจของแอพ — ดูแพทเทิร์น patchUser ด้านล่าง
   stores/members.js    รายชื่อสมาชิก (users ทุกคน + guest จาก data/students.js)
   router/index.js      hash router, lazy routes, reload-guard กัน stale chunk หลัง deploy
-  App.vue              launch gate: เข้าได้เมื่อ isLoggedIn && (isAcademic || !maintenance)
+  App.vue              launch gate: เข้าได้เมื่อ isLoggedIn && (isAdmin || !maintenance) — วิชาการก็ปิด (27 ก.ย. 2026)
                        maintenance อ่านสดจาก Firestore (useAppConfig) — admin toggle ได้ ไม่ต้อง deploy
   views/               หน้าละไฟล์: Home Members Play Study Quiz Questions Shop Rank Admin Me Pets
   composables/         useDaily (รายได้ idle) useFarm useResidence useToast useConfirm useGuard

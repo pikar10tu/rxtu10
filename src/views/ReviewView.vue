@@ -61,6 +61,7 @@
           </ul>
           <div v-if="current.explanation" class="rv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
           <div v-else class="rv-exp rv-exp-none"><Emoji char="💡" /> ข้อนี้ยังไม่มีคำอธิบายเฉลย — เติมได้ที่ "＋ เพิ่ม…" แล้วกด "<Emoji char="📝" /> แก้คำอธิบายเฉลย"</div>
+          <AiReviewNote :q="current" team />
         </template>
 
         <div v-else class="rv-editbox">
@@ -308,6 +309,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { collection, getDocs, getDoc, doc, updateDoc, deleteField, serverTimestamp, query, where, orderBy, startAt, limit } from 'firebase/firestore'
 import { db } from '../firebase/config.js'

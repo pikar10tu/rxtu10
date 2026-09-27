@@ -101,6 +101,7 @@
           {{ picked === current.answer ? `ได้ +${QUIZ_COIN_PER_CORRECT} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้เข้าคิวทบทวนแล้ว` }}
         </div>
         <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
+        <AiReviewNote :q="current" />
         <div v-if="current.reviewNote" class="qv-note"><Emoji char="📝" /> หมายเหตุจากผู้ตรวจ: {{ current.reviewNote }}</div>
         <!-- 🚩 แจ้งข้อผิด -->
         <div class="qv-report">
@@ -199,6 +200,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted, watch } from 'vue'

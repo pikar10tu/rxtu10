@@ -98,6 +98,7 @@
           <div class="ta-miss-line no">คุณตอบ: {{ m.q.choices[m.picked] }}</div>
           <div class="ta-miss-line ok">เฉลย: {{ m.q.choices[m.q.answer] }}</div>
           <div v-if="m.q.explanation" class="ta-miss-exp"><Emoji char="💡" /> {{ m.q.explanation }}</div>
+          <AiReviewNote :q="m.q" />
         </div>
       </template>
       <div v-else-if="answered" class="ta-miss-none"><Emoji char="🏆" /> ตอบถูกหมดทุกข้อ!</div>
@@ -107,6 +108,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import TaBoard from '../components/study/TaBoard.vue'

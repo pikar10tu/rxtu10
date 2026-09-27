@@ -315,6 +315,7 @@
               </li>
             </ul>
             <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
+            <AiReviewNote :q="q" team />
             <div v-if="q.reviewNote" class="qz-note"><Emoji char="📝" /> {{ q.reviewNote }}</div>
             <div class="qz-audit">
               <div class="qz-audit-row"><b>เพิ่มโดย:</b> {{ q.createdByName || 'ไม่ระบุ' }}<span v-if="q.source === 'import'"> · นำเข้า</span> · {{ fmtTime(q.createdAt) || '—' }}</div>
@@ -353,6 +354,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'
 import QuestionEditor from '../components/questions/QuestionEditor.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
