@@ -10,7 +10,7 @@
 //    ไม่ใช่เลขช่องที่ตาเห็นตรงๆ ถ้ามีช่องว่างค้างอยู่ก่อนหน้า (แจ้งเคสนี้ในรีพอร์ต)
 
 import { getPetDef, ELEMENTS } from '../data/index.js'
-import { PET_PASSIVES, partWithEffect, passiveValueAt, DUO_TITLES } from '../data/petPassives.js'
+import { PET_PASSIVES, partWithEffect, passiveValueAt } from '../data/petPassives.js'
 import { seasonOfSlot, seasonText, degreeFormActive, effectiveRarity } from './petForms.js'
 
 const ELEMENT_TH = { fist: 'กำปั้น', scissors: 'กรรไกร', paper: 'กระดาษ' }
@@ -81,12 +81,7 @@ export function teamSynergy(slotIds) {
     }
   })
 
-  // ดูโอ้ — คู่ที่ชื่อสกิลเปลี่ยนบนจอเมื่ออยู่ทีมเดียวกันครบ
-  for (const d of DUO_TITLES) {
-    if (d.ids.every(pid => filled.includes(pid))) {
-      out.push({ key: `duo:${d.ids.join('+')}`, icon: getPetDef(d.ids[0])?.emoji || '💞', ok: true, text: d.name })
-    }
-  }
+  // 🚫 ดูโอ้ไม่ขึ้นป้ายที่นี่โดยตั้งใจ (user 27 ก.ย.): เป็นกิมมิคให้ค้นเจอเองจากชื่อสกิลที่เปลี่ยน
 
   return out
 }

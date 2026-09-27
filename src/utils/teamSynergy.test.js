@@ -21,8 +21,8 @@ test('แฮมสเตอร์ช่อง 1 ok · ช่องอื่น�
   assert.equal(find(teamSynergy(['hamster', 'sol', 'panda']), 'hamster').ok, true)
   assert.equal(find(teamSynergy(['sol', 'hamster', 'panda']), 'hamster').ok, false)
 })
-test('ดูโอ้ครบคู่ขึ้นชื่อคู่ · ทีมว่าง/ไม่มีเงื่อนไข → []', () => {
-  assert.ok(teamSynergy(['whale', 'seal', null]).some(x => x.key.startsWith('duo')))
+test('ดูโอ้ไม่ขึ้นป้าย (กิมมิคให้ค้นเอง) · ทีมว่าง/ไม่มีเงื่อนไข → []', () => {
+  assert.deepEqual(teamSynergy(['whale', 'seal', null]), [])
   assert.deepEqual(teamSynergy([null, null, null]), [])
   assert.deepEqual(teamSynergy(['bahamut', 'phoenix', 'mammoth']), [])
 })
