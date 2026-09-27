@@ -138,7 +138,7 @@ single-file component + scoped style · ธีมพาสเทลนุ่ม 
    200  #bottom-nav
    220  ProfileModal      → 250 PetStatPopup → 260 AchievementDetailModal   (ห่วงโซ่ที่ถูกอยู่แล้ว)
    300–330  onboarding gates (MigrationWelcome / ConsentGate / IntroTour)
-   400  sheet/modal ฐาน   (BottomSheet · HelpModal · ShopView)
+   400  sheet/modal ฐาน   (BottomSheet · ShopView)
    410  อะไรที่เปิด "จากใน" ตัว 400  (SeedPicker · SpendCopiesModal · PetDetailModal)
    420–430  BattleReplay (overlay ไฟต์ · peek · inspect)
    440  HelpModal (เปิดได้จากในทุก modal)

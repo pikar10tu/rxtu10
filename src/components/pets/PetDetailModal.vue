@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import HelpButton from '../help/HelpButton.vue'
 import { increment } from 'firebase/firestore'
@@ -144,6 +144,9 @@ const activeSlotIndex = computed(() => (pet.value ? activeList.value.indexOf(pet
 const teamPetOf = (id) => pets.value.find(p => p.id === id) || getPetDef(id) || { id, emoji: '❓', name: '?' }
 
 const pickerOpen = ref(false)
+// โมดัลนี้ mount ค้างไว้ (parent ส่ง :pet-id ไม่มี v-if) — เปลี่ยนตัว/ปิดโมดัลแล้วต้องล้าง picker
+// ไม่งั้นเปิดเพ็ทตัวถัดไปแล้วเจอ "แทนตัวไหน?" ค้างจากตัวก่อนหน้า
+watch(() => props.petId, () => { pickerOpen.value = false })
 
 async function writeTeam(next) {
   busy.value = true
@@ -259,7 +262,10 @@ async function evolve() {
 .pd-tags { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
 .pd-tag { background: rgba(255,255,255,.25); font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
 /* ป้ายบาลานซ์ 27 ก.ย. 2026 — เล็ก ไม่แย่งซีน แค่บอกว่ามีการปรับล่าสุด (หายเองหลัง 14 วัน — ดู utils/balanceTag.js) */
-.pd-baltag { display: inline-flex; font-size: .78rem; vertical-align: middle; margin-left: 2px; }
+.pd-baltag { display: inline-flex; font-size: .78rem; vertical-align: middle; margin-left: 2px; border-radius: 999px; padding: 1px 4px; }
+.pd-baltag.buff { background: color-mix(in srgb, var(--mint) 45%, transparent); }
+.pd-baltag.nerf { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+.pd-baltag.rework { background: color-mix(in srgb, var(--primary) 45%, transparent); }
 .pd-slotrow { margin: 10px 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .7rem; color: rgba(255,255,255,.7); }
 .pd-slotbtns { display: flex; gap: 5px; }
 .pd-slotbtn { width: 26px; height: 26px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,.5); background: rgba(255,255,255,.15); color: #fff; font-family: inherit; font-size: .74rem; font-weight: 800; cursor: pointer; }

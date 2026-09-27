@@ -183,7 +183,10 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .7rem; font-weight: 800; color: rgba(0,0,0,.4); }
 .pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }
 /* ป้ายบาลานซ์ 27 ก.ย. 2026 — เล็ก มุมขวาบน หายเองหลัง 14 วัน (utils/balanceTag.js) */
-.pt-cell-bal { position: absolute; top: 4px; right: 4px; font-size: .7rem; line-height: 1; background: rgba(255,255,255,.85); border-radius: 7px; padding: 1px 3px; }
+.pt-cell-bal { position: absolute; top: 4px; right: 4px; font-size: .7rem; line-height: 1; border-radius: 7px; padding: 1px 3px; background: rgba(255,255,255,.85); }
+.pt-cell-bal.buff { background: color-mix(in srgb, var(--mint) 55%, #fff); }
+.pt-cell-bal.nerf { background: color-mix(in srgb, var(--accent) 45%, #fff); }
+.pt-cell-bal.rework { background: color-mix(in srgb, var(--primary) 40%, #fff); }
 .pt-cell-grade { position: absolute; bottom: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; line-height: 1.3; }
 .pt-news { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; padding: 10px 12px;
   background: #eef2ff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); }
