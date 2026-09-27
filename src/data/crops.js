@@ -16,27 +16,46 @@
 //  All numbers are tunable.
 // ════════════════════════════════════════════════════════════
 
+// 🌿 28 ก.ย. 2026 เปลี่ยนเป็นสมุนไพรที่ นศ.เภสัชฯ ควรรู้ (ส่วนใหญ่จากบัญชียาหลักแห่งชาติ ยาจากสมุนไพร)
+//    เปลี่ยนแค่ชื่อ/รูป/ข้อมูลสมุดพืช — **id เดิมห้ามแตะ** (คลังผลผลิต แปลง ออเดอร์ ผูกกับ id)
+//    emoji = คีย์ 'herb:<id>' → public/herbs/<id>.webp (scripts/herb-icons.mjs) · herb = ข้อมูลในสมุดพืช
 export const CROPS = [
   // ── Lv1–2: ธรรมดา (common) ──
-  { id: 'lettuce',  name: 'ผักกาด',     emoji: '🥬', tier: 'common',    unlockLevel: 1,  seedCost: 20,    growMinutes: 5,    sellPrice: 45 },
-  { id: 'tomato',   name: 'มะเขือเทศ',   emoji: '🍅', tier: 'common',    unlockLevel: 1,  seedCost: 120,   growMinutes: 60,   sellPrice: 320 },
-  { id: 'corn',     name: 'ข้าวโพด',    emoji: '🌽', tier: 'common',    unlockLevel: 2,  seedCost: 400,   growMinutes: 360,  sellPrice: 1300 },
-  { id: 'potato',   name: 'มันฝรั่ง',    emoji: '🥔', tier: 'common',    unlockLevel: 2,  seedCost: 1200,  growMinutes: 1440, sellPrice: 4200 },
+  { id: 'lettuce',  name: 'ฟ้าทะลายโจร',     emoji: 'herb:lettuce', tier: 'common',    unlockLevel: 1,  seedCost: 20,    growMinutes: 5,    sellPrice: 45,
+    herb: { sci: 'Andrographis paniculata', part: 'ส่วนเหนือดิน (ใบ)', uses: 'บรรเทาอาการหวัด เจ็บคอ และท้องเสียที่ไม่ได้เกิดจากการติดเชื้อ สารสำคัญคือ andrographolide', note: 'ห้ามใช้ในหญิงตั้งครรภ์ · อาจทำให้ความดันต่ำ · ใช้ 3 วันแล้วไม่ดีขึ้นควรพบแพทย์' } },
+  { id: 'tomato',   name: 'ขมิ้นชัน',   emoji: 'herb:tomato', tier: 'common',    unlockLevel: 1,  seedCost: 120,   growMinutes: 60,   sellPrice: 320,
+    herb: { sci: 'Curcuma longa', part: 'เหง้า', uses: 'บรรเทาอาการท้องอืด ท้องเฟ้อ อาหารไม่ย่อย สารสำคัญคือกลุ่ม curcuminoids', note: 'ระวังในผู้ที่มีท่อน้ำดีอุดตันหรือนิ่วในถุงน้ำดี · อาจเสริมฤทธิ์ยาต้านการแข็งตัวของเลือด' } },
+  { id: 'corn',     name: 'ขิง',    emoji: 'herb:corn', tier: 'common',    unlockLevel: 2,  seedCost: 400,   growMinutes: 360,  sellPrice: 1300,
+    herb: { sci: 'Zingiber officinale', part: 'เหง้า', uses: 'บรรเทาอาการคลื่นไส้ อาเจียน เมารถเมาเรือ และท้องอืด สารสำคัญคือ gingerols', note: 'ระวังในผู้ที่มีนิ่วในถุงน้ำดี · อาจเพิ่มความเสี่ยงเลือดออกเมื่อใช้ร่วมกับยาต้านการแข็งตัวของเลือด' } },
+  { id: 'potato',   name: 'ว่านหางจระเข้',    emoji: 'herb:potato', tier: 'common',    unlockLevel: 2,  seedCost: 1200,  growMinutes: 1440, sellPrice: 4200,
+    herb: { sci: 'Aloe vera', part: 'วุ้นในใบ', uses: 'ทาแผลไฟไหม้ น้ำร้อนลวกที่ไม่รุนแรง และแผลถลอก', note: 'ล้างยางสีเหลือง (aloin) ออกก่อนใช้ เพราะระคายเคือง · ไม่ใช้กับแผลลึกหรือแผลติดเชื้อ' } },
   // ── Lv3–6: แรร์ (rare) ──
-  { id: 'strawberry', name: 'สตรอว์เบอร์รี', emoji: '🍓', tier: 'rare',  unlockLevel: 3,  seedCost: 80,    growMinutes: 10,   sellPrice: 160 },
-  { id: 'chili',    name: 'พริก',       emoji: '🌶️', tier: 'rare',      unlockLevel: 4,  seedCost: 300,   growMinutes: 120,  sellPrice: 800 },
-  { id: 'eggplant', name: 'มะเขือ',     emoji: '🍆', tier: 'rare',      unlockLevel: 5,  seedCost: 900,   growMinutes: 480,  sellPrice: 2900 },
-  { id: 'melon',    name: 'แตงโม',      emoji: '🍉', tier: 'rare',      unlockLevel: 6,  seedCost: 2500,  growMinutes: 2160, sellPrice: 9000 },
+  { id: 'strawberry', name: 'บัวบก', emoji: 'herb:strawberry', tier: 'rare',  unlockLevel: 3,  seedCost: 80,    growMinutes: 10,   sellPrice: 160,
+    herb: { sci: 'Centella asiatica', part: 'ใบ / ทั้งต้น', uses: 'ช่วยสมานแผล ลดรอยแผลเป็น สารสำคัญคือ asiaticoside และ madecassoside', note: 'อาจแพ้เป็นผื่นสัมผัสได้' } },
+  { id: 'chili',    name: 'พญายอ',       emoji: 'herb:chili', tier: 'rare',      unlockLevel: 4,  seedCost: 300,   growMinutes: 120,  sellPrice: 800,
+    herb: { sci: 'Clinacanthus nutans', part: 'ใบ', uses: 'ทาบรรเทาอาการของเริมและงูสวัด ผื่นคันจากแมลงกัดต่อย', note: 'ใช้ภายนอกเท่านั้น' } },
+  { id: 'eggplant', name: 'ชุมเห็ดเทศ',     emoji: 'herb:eggplant', tier: 'rare',      unlockLevel: 5,  seedCost: 900,   growMinutes: 480,  sellPrice: 2900,
+    herb: { sci: 'Senna alata', part: 'ใบ', uses: 'ยาระบายแก้ท้องผูก (สาร anthraquinones) · ใบสดตำทากลากเกลื้อน', note: 'ห้ามใช้ในผู้ที่ลำไส้อุดตัน ปวดท้องไม่ทราบสาเหตุ และหญิงตั้งครรภ์ · ไม่ควรใช้ต่อเนื่องนาน' } },
+  { id: 'melon',    name: 'มะขามแขก',      emoji: 'herb:melon', tier: 'rare',      unlockLevel: 6,  seedCost: 2500,  growMinutes: 2160, sellPrice: 9000,
+    herb: { sci: 'Senna alexandrina', part: 'ใบ และฝัก', uses: 'ยาระบายแก้ท้องผูก สารสำคัญคือ sennosides', note: 'อาจปวดบิด · ห้ามใช้ในผู้ที่ลำไส้อุดตันและหญิงตั้งครรภ์ · ไม่ควรใช้ต่อเนื่องนาน' } },
   // ── Lv7–10: อิพิค (epic) ──
-  { id: 'mushroom', name: 'เห็ดวิเศษ',   emoji: '🍄', tier: 'epic',      unlockLevel: 7,  seedCost: 200,   growMinutes: 15,   sellPrice: 380 },
-  { id: 'herb',     name: 'สมุนไพร',    emoji: '🌿', tier: 'epic',      unlockLevel: 8,  seedCost: 700,   growMinutes: 180,  sellPrice: 1900 },
-  { id: 'ginseng',  name: 'โสม',        emoji: '🪴', tier: 'epic',      unlockLevel: 9,  seedCost: 2000,  growMinutes: 720,  sellPrice: 6800 },
-  { id: 'pumpkin',  name: 'ฟักทองยักษ์', emoji: '🎃', tier: 'epic',     unlockLevel: 10, seedCost: 5000,  growMinutes: 2880, sellPrice: 20000 },
+  { id: 'mushroom', name: 'กระเจี๊ยบแดง',   emoji: 'herb:mushroom', tier: 'epic',      unlockLevel: 7,  seedCost: 200,   growMinutes: 15,   sellPrice: 380,
+    herb: { sci: 'Hibiscus sabdariffa', part: 'กลีบเลี้ยง', uses: 'ขับปัสสาวะ ใช้เป็นเครื่องดื่ม สีแดงมาจาก anthocyanins', note: 'ระวังเมื่อใช้ร่วมกับยาขับปัสสาวะหรือยาลดความดัน' } },
+  { id: 'herb',     name: 'ทองพันชั่ง',    emoji: 'herb:herb', tier: 'epic',      unlockLevel: 8,  seedCost: 700,   growMinutes: 180,  sellPrice: 1900,
+    herb: { sci: 'Rhinacanthus nasutus', part: 'ใบ และราก', uses: 'ทารักษากลากเกลื้อน สารสำคัญคือ rhinacanthins', note: 'ใช้ภายนอกเท่านั้น' } },
+  { id: 'ginseng',  name: 'ขี้เหล็ก',        emoji: 'herb:ginseng', tier: 'epic',      unlockLevel: 9,  seedCost: 2000,  growMinutes: 720,  sellPrice: 6800,
+    herb: { sci: 'Senna siamea', part: 'ใบอ่อน และดอก', uses: 'ช่วยให้นอนหลับ และเป็นยาระบายอ่อนๆ สารสำคัญคือ barakol', note: 'มีรายงานพิษต่อตับ · ห้ามใช้ต่อเนื่องนานและห้ามใช้ในผู้ป่วยโรคตับ' } },
+  { id: 'pumpkin',  name: 'เพชรสังฆาต', emoji: 'herb:pumpkin', tier: 'epic',     unlockLevel: 10, seedCost: 5000,  growMinutes: 2880, sellPrice: 20000,
+    herb: { sci: 'Cissus quadrangularis', part: 'เถา', uses: 'บรรเทาอาการริดสีดวงทวาร', note: 'มีผลึก calcium oxalate ทำให้คันปากคอ จึงใช้แบบบรรจุแคปซูล ไม่กินสด' } },
   // ── Lv11–12: ตำนาน (legendary) ──
-  { id: 'glowflower', name: 'ดอกไม้เรืองแสง', emoji: '🌟', tier: 'legendary', unlockLevel: 11, seedCost: 600, growMinutes: 20, sellPrice: 1100 },
-  { id: 'lotus',    name: 'บัวหลวง',    emoji: '🪷', tier: 'legendary', unlockLevel: 11, seedCost: 2000,  growMinutes: 240,  sellPrice: 5600, stages: ['🌱','🍃'] },
-  { id: 'sunflower', name: 'ทานตะวันทอง', emoji: '🌻', tier: 'legendary', unlockLevel: 12, seedCost: 6000, growMinutes: 1440, sellPrice: 22000 },
-  { id: 'moneytree', name: 'ต้นไม้เงินตรา', emoji: '🌳', tier: 'legendary', unlockLevel: 12, seedCost: 15000, growMinutes: 4320, sellPrice: 70000, stages: ['🌱','🌲'] },
+  { id: 'glowflower', name: 'ดอกคำฝอย', emoji: 'herb:glowflower', tier: 'legendary', unlockLevel: 11, seedCost: 600, growMinutes: 20, sellPrice: 1100,
+    herb: { sci: 'Carthamus tinctorius', part: 'ดอก', uses: 'ชงเป็นชา ใช้ตามภูมิปัญญาเพื่อช่วยลดไขมันในเลือด (หลักฐานยังจำกัด)', note: 'ห้ามใช้ในหญิงตั้งครรภ์ · ระวังเมื่อใช้ร่วมกับยาต้านการแข็งตัวของเลือด' } },
+  { id: 'lotus',    name: 'บัวหลวง',    emoji: 'herb:lotus', tier: 'legendary', unlockLevel: 11, seedCost: 2000,  growMinutes: 240,  sellPrice: 5600, stages: ['🌱','🍃'],
+    herb: { sci: 'Nelumbo nucifera', part: 'เกสร', uses: 'เป็นส่วนผสมของยาหอม ใช้แก้ลมวิงเวียนตามตำรับแพทย์แผนไทย', note: '' } },
+  { id: 'sunflower', name: 'ไพล', emoji: 'herb:sunflower', tier: 'legendary', unlockLevel: 12, seedCost: 6000, growMinutes: 1440, sellPrice: 22000,
+    herb: { sci: 'Zingiber montanum (Z. cassumunar)', part: 'เหง้า', uses: 'ทาบรรเทาอาการปวดเมื่อย เคล็ดขัดยอก ฟกช้ำ (ครีมไพล)', note: 'ใช้ภายนอก · ห้ามทาบนแผลเปิดหรือรอบดวงตา' } },
+  { id: 'moneytree', name: 'มะขามป้อม', emoji: 'herb:moneytree', tier: 'legendary', unlockLevel: 12, seedCost: 15000, growMinutes: 4320, sellPrice: 70000, stages: ['🌱','🌲'],
+    herb: { sci: 'Phyllanthus emblica', part: 'ผล', uses: 'บรรเทาอาการไอ ขับเสมหะ ทำให้ชุ่มคอ มีวิตามินซีและแทนนินสูง', note: '' } },
 ]
 
 const _byId = Object.fromEntries(CROPS.map(c => [c.id, c]))

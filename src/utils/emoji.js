@@ -40,9 +40,22 @@ export function emojiCodepoint(emoji) {
  *  🔑 เสิร์ฟ WebP ไม่ใช่ SVG — iPhone Safari raster SVG ใหม่ทุกครั้งที่ layer ถูกวาดใหม่
  *     (รีเพลย์: <30fps 119+ → 7 เฟรม/ไฟต์ วัด 26 ก.ย. 2026) · SVG เป็นต้นฉบับ แปลงด้วย scripts/fluent-webp.mjs */
 export function fluentFile(emoji) {
+  // ไอคอนวาดเอง (สมุนไพรฟาร์ม) ใช้คีย์ 'herb:<id>' / 'herb:<id>:gold' แทนอีโมจิ → public/herbs/*.webp
+  // สร้างด้วย scripts/herb-icons.mjs (ไม่มีอีโมจิจริงของพืชพวกนี้)
+  const h = herbKey(emoji)
+  if (h) return `herbs/${h.id}${h.gold ? '-gold' : ''}.webp`
   const cp = emojiCodepoint(emoji)
   return cp ? `emoji/fluent/${cp}.webp` : ''
 }
+
+const HERB_RE = /^herb:([a-z0-9]+)(:gold)?$/
+/** 'herb:tomato:gold' → { id:'tomato', gold:true } · อย่างอื่น → null */
+export function herbKey(s) {
+  const m = typeof s === 'string' ? HERB_RE.exec(s) : null
+  return m ? { id: m[1], gold: !!m[2] } : null
+}
+/** ตัวอักษรสำรองตอนโหลดรูปไม่ได้ — คีย์ herb: แสดงเป็นข้อความดิบไม่ได้ */
+export const emojiFallback = (s) => (herbKey(s) ? '🌿' : s)
 
 // emoji ดิบ (base pictographic + VS16/ZWJ/skin-tone) — เดียวกับ scripts/fetch-fluent
 const EMOJI_RE = /\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*/gu

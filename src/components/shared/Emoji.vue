@@ -15,12 +15,12 @@
     loading="lazy"
     @error="failed = true"
   />
-  <span v-else class="twemoji-fallback" aria-hidden="true">{{ char }}</span>
+  <span v-else class="twemoji-fallback" aria-hidden="true">{{ emojiFallback(char) }}</span>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { fluentFile } from '../../utils/emoji.js'
+import { fluentFile, emojiFallback } from '../../utils/emoji.js'
 
 const props = defineProps({ char: { type: String, default: '' } })
 const failed = ref(false)

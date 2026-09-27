@@ -61,7 +61,7 @@ export const USER_DEFAULTS = {
   role: 'student',                            // 'student' | 'academic' | 'instructor' | 'admin'
   tags: [],                                   // admin-assigned badges
   residence: { level: 1, upgradedAt: null },  // ที่อยู่อาศัย (prestige/coin sink)
-  farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null, plotsUnlocked: 1, orders: [] },
+  farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null, plotsUnlocked: 1, orders: [], harvests: {}, gold: {}, goldFound: {} },  // harvests/gold/goldFound = ดาว+พืชทอง (data/farmMastery.js)
   study: { cards: {}, qcards: {} },           // SRS: cards = แฟลชการ์ดตัวยา · qcards = ข้อสอบที่เคยตอบผิด
   dailyQuest: { date: null, quiz: 0, farm: 0, gacha: 0, pvp: 0, claimed: false },
   freeGachaTickets: 0,

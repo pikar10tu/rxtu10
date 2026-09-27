@@ -19,7 +19,7 @@
         >
           <span class="sp-emoji"><Emoji :char="c.emoji" /></span>
           <div class="sp-info">
-            <div class="sp-name">{{ c.name }}</div>
+            <div class="sp-name">{{ c.name }} <span v-if="starsOf(c)" class="sp-stars">{{ "★".repeat(starsOf(c)) }}</span></div>
             <div class="sp-meta"><Emoji char="⏱" /> {{ growLabel(c) }} · ขายได้ {{ c.sellPrice.toLocaleString() }}<Emoji char="🪙" /></div>
           </div>
           <span class="sp-cost" :class="{ no: coins < c.seedCost }">{{ c.seedCost.toLocaleString() }}<Emoji char="🪙" /></span>
@@ -33,6 +33,8 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { growLabel } from '../../data/crops.js'
+import { masteryStars } from '../../data/farmMastery.js'
+import { useFarm } from '../../composables/useFarm.js'
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 const props = defineProps({
   open: Boolean,
@@ -41,6 +43,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['pick', 'close'])
 useEscapeKey(() => props.open, () => emit('close'))
+const farm = useFarm()
+const starsOf = (c) => masteryStars(farm.harvests.value[c.id])
 </script>
 
 <style scoped>
@@ -56,6 +60,7 @@ useEscapeKey(() => props.open, () => emit('close'))
 .sp-emoji { font-size: 1.6rem; }
 .sp-info { flex: 1; min-width: 0; }
 .sp-name { font-weight: 700; font-size: .86rem; }
+.sp-stars { color: #f0b400; font-size: .78rem; letter-spacing: 1px; }
 .sp-meta { font-size: .7rem; color: rgba(0,0,0,.5); }
 .sp-cost { font-weight: 800; font-size: .8rem; color: #b45309; white-space: nowrap; }
 .sp-cost.no { color: #ef4444; }

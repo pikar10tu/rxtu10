@@ -2,13 +2,16 @@
   <div class="farm">
     <div class="farm-head">
       <span class="farm-title"><Emoji char="🌾" /> ฟาร์ม <HelpButton topic="farm" /></span>
-      <span class="farm-coins" ref="coinChipEl"><Emoji char="🪙" /> {{ shownCoins.toLocaleString() }}</span>
+      <span class="farm-head-r">
+        <button class="farm-book-btn" @click="bookOpen = true"><Emoji char="📗" /> สมุดพืช</button>
+        <span class="farm-coins" ref="coinChipEl"><Emoji char="🪙" /> {{ shownCoins.toLocaleString() }}</span>
+      </span>
     </div>
     <!-- เก็บทั้งหมด (โผล่เมื่อพร้อมตั้งแต่ 2 แปลง — แปลงเดียวกดที่แปลงเองเร็วกว่า) -->
     <button v-if="readyIdx.length >= 2" class="farm-harvest-all" @click="onHarvestAll">
       <Emoji char="🧺" /> เก็บทั้งหมด ({{ readyIdx.length }} แปลง)
     </button>
-    <div class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} {{ upcomingEmojis }}</template></div>
+    <div class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} <Emoji v-for="c in upcoming.crops" :key="c.id" :char="c.emoji" /></template></div>
 
     <!-- plots -->
     <div class="farm-grid">
@@ -49,7 +52,7 @@
       </div>
       <div v-if="!invList.length" class="inv-empty">ยังไม่มีผลผลิต — ปลูกแล้วเก็บเกี่ยวมาขายได้เลย</div>
       <div v-else class="inv-list">
-        <button v-for="it in invList" :key="it.id" class="inv-item" @click="confirmSell(it, $event)">
+        <button v-for="it in invList" :key="it.key" class="inv-item" :class="{ gold: it.gold }" @click="confirmSell(it, $event)">
           <span class="inv-emoji"><Emoji :char="it.emoji" /></span>
           <span class="inv-qty">×{{ it.qty }}</span>
           <span class="inv-sell">ขาย {{ (it.sellPrice * it.qty).toLocaleString() }}<Emoji char="🪙" /></span>
@@ -64,6 +67,7 @@
       @pick="onPick"
       @close="pickIndex = null"
     />
+    <FarmBook :open="bookOpen" @close="bookOpen = false" />
   </div>
 </template>
 
@@ -79,6 +83,8 @@ import { getCrop, stageEmoji, DEFAULT_STAGES } from '../../data/crops.js'
 import { fluentFile } from '../../utils/emoji.js'
 import { flyTo, cancelFarmFx } from '../../utils/farmfx.js'
 import SeedPicker from './SeedPicker.vue'
+import FarmBook from './FarmBook.vue'
+import { goldEmoji, goldPrice } from '../../data/farmMastery.js'
 
 const auth = useAuthStore()
 const farm = useFarm()
@@ -93,6 +99,7 @@ onMounted(() => {
   const chars = new Set(DEFAULT_STAGES)
   for (const c of seedChoices.value) {
     chars.add(c.emoji)
+    chars.add(goldEmoji(c))
     for (const s of (c.stages || [])) chars.add(s)
   }
   for (const ch of chars) {
@@ -113,7 +120,7 @@ const shownCoins  = useCountUp(coins)                    // เลขวิ่�
 const coinChipEl  = ref(null)                             // ปลายทางให้เหรียญพุ่งเข้า (ใช้ใน Task 6)
 const seedChoices = computed(() => farm.seedChoices.value)
 const upcoming    = computed(() => farm.upcomingSeed.value)
-const upcomingEmojis = computed(() => (upcoming.value?.crops || []).map(c => c.emoji).join(''))
+const bookOpen = ref(false)
 
 const pickIndex = ref(null)
 function openPicker(i) { pickIndex.value = i }
@@ -138,11 +145,14 @@ const readyIdx = computed(() => plots.value.map((p, i) => (p && stat(p).ready ? 
 // เก็บทั้งหมด: จับตำแหน่ง/อีโมจิทุกแปลงก่อน (หลัง harvestAll แปลงว่างทันที — เหตุผลเดียวกับ onHarvest)
 async function onHarvestAll() {
   const to = invHeadEl.value?.getBoundingClientRect()
-  const flights = readyIdx.value.map(i => ({ from: plotEls.value[i]?.getBoundingClientRect(), char: stat(plots.value[i]).crop?.emoji }))
-  const n = await farm.harvestAll()
-  if (!n || !to) return
-  flights.forEach((f, k) => {
-    if (f.from && f.char) setTimeout(() => flyTo({ emoji: f.char, from: f.from, to, count: 1, onArrive: popBasket }), k * 70)
+  const flights = readyIdx.value.map(i => ({ i, from: plotEls.value[i]?.getBoundingClientRect(), crop: stat(plots.value[i]).crop }))
+  await farm.harvestAll(({ golds }) => {
+    if (!to) return
+    const g = new Set(golds)
+    flights.forEach((f, k) => {
+      const char = g.has(f.i) ? goldEmoji(f.crop) : f.crop?.emoji
+      if (f.from && char) setTimeout(() => flyTo({ emoji: char, from: f.from, to, count: 1, size: g.has(f.i) ? 40 : 26, onArrive: popBasket }), k * 70)
+    })
   })
 }
 
@@ -153,11 +163,10 @@ function onHarvest(i, plot) {
   if (!st.ready) { farm.harvest(i); return }        // ไม่พร้อม = ให้ useFarm เป็นคน toast บอกเอง
   const from = plotEls.value[i]?.getBoundingClientRect()
   const to   = invHeadEl.value?.getBoundingClientRect()
-  const char = st.crop?.emoji
-  farm.harvest(i)
-  if (from && to && char) {
-    flyTo({ emoji: char, from, to, count: 1, onArrive: popBasket })
-  }
+  farm.harvest(i, ({ gold }) => {
+    const char = gold ? goldEmoji(st.crop) : st.crop?.emoji
+    if (from && to && char) flyTo({ emoji: char, from, to, count: 1, size: gold ? 40 : 26, onArrive: popBasket })
+  })
 }
 
 // กล่องผลผลิตเด้งรับของ
@@ -178,7 +187,8 @@ async function confirmSell(it, ev) {
   // farm.sell คืน undefined เสมอ (useFarm กลืนผลลัพธ์ commit() เอง) — เช็กจาก coins
   // หลัง await แทน เพราะถ้าบันทึกล้มเหลว useFarm จะ rollback coins กลับเป็นค่าเดิมให้
   const before = coins.value
-  await farm.sell(it.id)
+  if (it.gold) await farm.sellGold(it.id)
+  else await farm.sell(it.id)
   if (coins.value > before) shootCoins(from)
 }
 
@@ -211,16 +221,22 @@ function fmt(ms) {
   return `${sec}ว`
 }
 
-const invList = computed(() =>
-  Object.entries(farm.inventory.value)
+// พืชทองขึ้นก่อน (ของดีอยู่หน้า) · key แยกกันเพราะ id ซ้ำกับของปกติได้
+const invList = computed(() => [
+  ...Object.entries(farm.gold.value)
+    .filter(([id, q]) => q > 0 && getCrop(id))
+    .map(([id, qty]) => { const c = getCrop(id); return { key: 'g:' + id, id, qty, gold: true, emoji: goldEmoji(c), name: c.name + 'ทอง', sellPrice: goldPrice(c) } }),
+  ...Object.entries(farm.inventory.value)
     .filter(([, q]) => q > 0)
-    .map(([id, qty]) => { const c = getCrop(id); return { id, qty, emoji: c?.emoji, name: c?.name, sellPrice: c?.sellPrice || 0 } })
-)
+    .map(([id, qty]) => { const c = getCrop(id); return { key: id, id, qty, gold: false, emoji: c?.emoji, name: c?.name, sellPrice: c?.sellPrice || 0 } }),
+])
 </script>
 
 <style scoped>
 .farm { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; padding: 14px; }
 .farm-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.farm-head-r { display: inline-flex; align-items: center; gap: 6px; }
+.farm-book-btn { display: inline-flex; align-items: center; gap: 4px; font-family: inherit; font-weight: 700; font-size: .78rem; color: #3e7a2a; background: linear-gradient(160deg,#fff,rgba(76,175,80,.12)); border: 1px solid rgba(62,122,42,.25); border-radius: 999px; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
 .farm-title { font-weight: 800; font-size: 1rem; }
 .farm-coins { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; font-size: .82rem; color: #b45309; background: linear-gradient(160deg,#fff,rgba(245,158,11,.14)); border: 1px solid rgba(180,83,9,.22); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
 .farm-sub { font-size: .7rem; color: rgba(0,0,0,.45); margin-bottom: 12px; }
@@ -252,6 +268,7 @@ const invList = computed(() =>
 .inv-item { display: flex; align-items: center; gap: 5px; border: 1px solid rgba(180,83,9,.18); border-radius: 10px; padding: 6px 9px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.07)); cursor: pointer; font-family: inherit; transition: transform .15s, box-shadow .15s; }
 .inv-item:hover { box-shadow: 0 3px 10px -4px rgba(180,83,9,.4); transform: translateY(-1px); }
 .inv-item:active { transform: scale(.97); }
+.inv-item.gold { border-color: #e0a816; background: linear-gradient(160deg,#fffbe6,#ffe89a); box-shadow: 0 0 0 1px rgba(224,168,22,.35), 0 2px 8px -3px rgba(224,168,22,.7); }
 .inv-emoji { font-size: 1.1rem; }
 .inv-qty { font-weight: 800; font-size: .74rem; }
 .inv-sell { font-size: .7rem; color: #b45309; font-weight: 700; }

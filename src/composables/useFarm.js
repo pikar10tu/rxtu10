@@ -7,6 +7,7 @@ import {
   getCrop, cropsForLevel, nextUnlock, growMs,
 } from '../data/crops.js'
 import { nextPlotInfo, MAX_PLOTS } from '../data/farmPlots.js'
+import { rollGold, goldPrice } from '../data/farmMastery.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { sfx } from '../utils/sfx.js'
 
@@ -40,6 +41,10 @@ export function useFarm() {
   }))
 
   const inventory = computed(() => auth.userData?.farm?.inventory || {})
+  // ดาว+พืชทอง (data/farmMastery.js) — harvests = จำนวนครั้งที่เก็บต่อพืช · gold = คลังพืชทอง · goldFound = เคยได้ทองแล้ว
+  const harvests  = computed(() => auth.userData?.farm?.harvests || {})
+  const gold      = computed(() => auth.userData?.farm?.gold || {})
+  const goldFound = computed(() => auth.userData?.farm?.goldFound || {})
 
   // normalized plots array of length plotCount (null = empty)
   const plots = computed(() => {
@@ -63,14 +68,17 @@ export function useFarm() {
   }
 
   // ── persistence helper: optimistic + Firestore ──
-  async function commit(newPlots, { coinDelta = 0, inventory: newInv, salesGain = 0, dailyQuest = null } = {}) {
+  // extra = ฟิลด์อื่นใต้ farm ที่เขียนทั้งก้อน (harvests / gold / goldFound)
+  async function commit(newPlots, { coinDelta = 0, inventory: newInv, salesGain = 0, dailyQuest = null, extra = null } = {}) {
     const farm = { ...(auth.userData?.farm || {}), plots: newPlots }
     if (newInv) farm.inventory = newInv
+    if (extra) Object.assign(farm, extra)
     const optimistic = { farm, ...(coinDelta ? { coins: (auth.userData?.coins || 0) + coinDelta } : {}) }
     if (salesGain) optimistic.farmSalesTotal = (auth.userData?.farmSalesTotal || 0) + salesGain
     if (dailyQuest) optimistic.dailyQuest = dailyQuest
     const patch = { 'farm.plots': newPlots }
     if (newInv) patch['farm.inventory'] = newInv
+    if (extra) for (const [k, v] of Object.entries(extra)) patch['farm.' + k] = v
     if (coinDelta) patch.coins = increment(coinDelta)
     if (salesGain) patch.farmSalesTotal = increment(salesGain)
     if (dailyQuest) patch.dailyQuest = dailyQuest
@@ -97,7 +105,8 @@ export function useFarm() {
     toast(`ปลูก ${crop.name} แล้ว`, 'success')
   }
 
-  async function harvest(i) {
+  // onCollected({ gold }) ถูกเรียกทันทีที่รู้ผล ก่อนรอ Firestore — ให้จอยิงของลอยได้ไม่ดีเลย์
+  async function harvest(i, onCollected) {
     const p = plots.value[i]
     if (!p) return
     const st = status(p, Date.now())
@@ -105,29 +114,62 @@ export function useFarm() {
     const next = clonePlots()
     next[i] = null
     const inv = { ...inventory.value }
-    inv[p.seedId] = (inv[p.seedId] || 0) + 1
-    await commit(next, { inventory: inv })
+    const bag = newHarvestBag()
+    const isGold = collect(p.seedId, inv, bag)
+    onCollected?.({ gold: isGold })
+    await commit(next, { inventory: inv, extra: bag.extra() })
     sfx('harvest')
-    toast(`เก็บเกี่ยว ${st.crop.name}!`, 'success')
+    if (isGold) toast(`✨ ได้${st.crop.name}ทอง! ขายได้ราคา ×3`, 'success')
+    else toast(`เก็บเกี่ยว ${st.crop.name}!`, 'success')
+    return { gold: isGold }
   }
 
-  // เก็บทุกแปลงที่พร้อมใน write เดียว (roadmap #6) · คืนจำนวนที่เก็บได้ (0 = ไม่มีแปลงพร้อม)
-  async function harvestAll() {
+  // ถุงรวมการเก็บในรอบเดียว — ก๊อป map ครั้งเดียว แล้วเขียนทีเดียวใน commit
+  function newHarvestBag() {
+    const h = { ...harvests.value }, g = { ...gold.value }, f = { ...goldFound.value }
+    let goldHit = false
+    return {
+      h, g, f,
+      markGold() { goldHit = true },
+      extra() { return goldHit ? { harvests: h, gold: g, goldFound: f } : { harvests: h } },
+    }
+  }
+  // เก็บ 1 ผล: สุ่มทองจากดาว "ก่อน" เก็บครั้งนี้ แล้วนับครั้ง · คืน true ถ้าได้ทอง (ทองไม่เข้า inventory ปกติ)
+  function collect(seedId, inv, bag) {
+    const before = bag.h[seedId] || 0
+    const isGold = rollGold(before)
+    bag.h[seedId] = before + 1
+    if (isGold) {
+      bag.g[seedId] = (bag.g[seedId] || 0) + 1
+      bag.f[seedId] = true
+      bag.markGold()
+    } else {
+      inv[seedId] = (inv[seedId] || 0) + 1
+    }
+    return isGold
+  }
+
+  // เก็บทุกแปลงที่พร้อมใน write เดียว (roadmap #6)
+  // คืน { n, golds } — n = จำนวนที่เก็บ (0 = ไม่มีแปลงพร้อม) · golds = index แปลงที่ออกทอง
+  async function harvestAll(onCollected) {
     const now = Date.now()
     const next = clonePlots()
     const inv = { ...inventory.value }
+    const bag = newHarvestBag()
+    const golds = []
     let n = 0
     next.forEach((p, i) => {
       if (!p || !status(p, now).ready) return
-      inv[p.seedId] = (inv[p.seedId] || 0) + 1
+      if (collect(p.seedId, inv, bag)) golds.push(i)
       next[i] = null
       n++
     })
-    if (!n) { toast('ยังไม่มีแปลงที่พร้อมเก็บ', 'info'); return 0 }
-    await commit(next, { inventory: inv })
+    if (!n) { toast('ยังไม่มีแปลงที่พร้อมเก็บ', 'info'); return { n: 0, golds } }
+    onCollected?.({ n, golds })
+    await commit(next, { inventory: inv, extra: bag.extra() })
     sfx('harvest')
-    toast(`เก็บเกี่ยวทั้งหมด ${n} แปลง!`, 'success')
-    return n
+    toast(golds.length ? `เก็บเกี่ยวทั้งหมด ${n} แปลง · ✨ ได้พืชทอง ${golds.length} ผล!` : `เก็บเกี่ยวทั้งหมด ${n} แปลง!`, 'success')
+    return { n, golds }
   }
 
   async function sell(cropId, qty = null) {
@@ -143,14 +185,29 @@ export function useFarm() {
     toast(`ขาย ${crop.name} ×${n} = +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 
+  // ขายพืชทองทั้งกอง (ราคา ×3)
+  async function sellGold(cropId) {
+    const n = gold.value[cropId] || 0
+    if (n <= 0) return
+    const crop = getCrop(cropId)
+    const gain = goldPrice(crop) * n
+    const g = { ...gold.value }
+    delete g[cropId]
+    await commit(clonePlots(), { coinDelta: gain, salesGain: gain, extra: { gold: g } })
+    toast(`ขาย ${crop.name}ทอง ×${n} = +${gain.toLocaleString()} เหรียญ`, 'success')
+  }
+
   async function sellAll() {
     const inv = inventory.value
     let gain = 0
     for (const [id, qty] of Object.entries(inv)) {
       const c = getCrop(id); if (c) gain += c.sellPrice * qty
     }
+    for (const [id, qty] of Object.entries(gold.value)) {
+      const c = getCrop(id); if (c) gain += goldPrice(c) * qty
+    }
     if (gain <= 0) { toast('ไม่มีผลผลิตให้ขาย', 'info'); return }
-    await commit(clonePlots(), { coinDelta: gain, inventory: {}, salesGain: gain })
+    await commit(clonePlots(), { coinDelta: gain, inventory: {}, salesGain: gain, extra: { gold: {} } })
     toast(`ขายทั้งหมด +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 
@@ -174,8 +231,8 @@ export function useFarm() {
 
   return {
     level, ceiling, plotsUnlocked, plotCount, nextPlot,
-    plots, inventory, seedChoices, upcomingSeed,
+    plots, inventory, harvests, gold, goldFound, seedChoices, upcomingSeed,
     status,
-    plant, harvest, harvestAll, sell, sellAll, unlockPlot,
+    plant, harvest, harvestAll, sell, sellGold, sellAll, unlockPlot,
   }
 }
