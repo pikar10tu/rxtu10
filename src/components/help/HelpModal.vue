@@ -49,7 +49,9 @@ const revealUpTo = computed(() => Math.min(myLevel.value + 1, MAX_RESIDENCE_LEVE
 </script>
 
 <style scoped>
-.help-ov { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
+/* z440: mount ที่ App.vue root (sibling ของ #bottom-nav ไม่ใช่ลูก #main-content) เปิดได้จากในทุก
+   modal (PetDetailModal z410 ฯลฯ) — ต้องสูงกว่า 400/410/420-430 ที่ใช้อยู่ (ดู CLAUDE.md ข้อ 12) */
+.help-ov { position: fixed; inset: 0; z-index: 440; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
 .help-box { background: #fff; width: 100%; max-width: 480px; max-height: 85dvh; border: var(--bw) solid var(--line); border-bottom: none; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: help-up .2s ease; }
 @keyframes help-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .help-head { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,.07); }

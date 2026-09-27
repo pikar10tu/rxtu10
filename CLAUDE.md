@@ -141,6 +141,7 @@ single-file component + scoped style · ธีมพาสเทลนุ่ม 
    400  sheet/modal ฐาน   (BottomSheet · HelpModal · ShopView)
    410  อะไรที่เปิด "จากใน" ตัว 400  (SeedPicker · SpendCopiesModal · PetDetailModal)
    420–430  BattleReplay (overlay ไฟต์ · peek · inspect)
+   440  HelpModal (เปิดได้จากในทุก modal)
    500+ toast / balloon / WelcomeBox
    ```
    ⚠️ เพิ่ม overlay ใหม่ = ถามก่อนว่า "มันถูกเปิดจากในอะไร" แล้วเลือกชั้นให้สูงกว่านั้น
