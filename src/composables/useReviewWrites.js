@@ -19,7 +19,8 @@ import { getCategories } from '../utils/questionCategories.js'
 import { plePatch } from '../utils/pleMapping.js'
 import { resolvePayload } from '../utils/questionReport.js'
 import { buildReportRewardMail, buildReportResultMail, buildReviewCaseRewardMail } from '../utils/mailbox.js'
-import { REPORT_REWARD, REVIEW_CASE_REWARD, AI_REPORTER_UID } from '../data/index.js'
+import { REPORT_REWARD, REVIEW_CASE_REWARD, REVIEW_REWARD, AI_REPORTER_UID } from '../data/index.js'
+import { reviewBounty } from '../utils/reviewBounty.js'
 
 export function useReviewWrites() {
   const authStore = useAuthStore()
@@ -187,6 +188,28 @@ export function useReviewWrites() {
     return { oldStatus, credited, bumped }
   }
 
+  // ── รางวัลคนตรวจ (27 ก.ย. 2026) — จดหมายหาตัวเอง · พลาดต้องไม่ทำให้ผลตรวจล้ม (คืน 0) ──
+  //  q = ข้อที่โหลดมา (ใช้ reviewSkips คำนวณโบนัส) · base = REVIEW_REWARD หรือ REVIEW_CASE_REWARD
+  async function payReviewer(q, base = REVIEW_REWARD) {
+    const uid = authStore.currentUser?.uid
+    if (!uid) return 0
+    const coins = reviewBounty(q, uid, base)
+    try {
+      await setDoc(doc(collection(db, 'users', uid, 'mail')), buildReviewCaseRewardMail(q?.question || '', coins, serverTimestamp()))
+      // ใช้โบนัสไปแล้ว — ล้างคนข้ามทิ้ง กันข้อกลับเข้าคิวรอบหน้าแล้วโบนัสเก่าค้าง
+      if ((q?.reviewSkips || []).length) updateDoc(doc(db, 'questions', q.id), { reviewSkips: deleteField() }).catch(() => {})
+      usage.track(0, 2)
+      return coins
+    } catch (e) { console.error('[review reward]', e); return 0 }
+  }
+  // กด "ข้าม" = ข้อนี้ยาก → จดชื่อไว้บนข้อ คนถัดไปเห็นว่ามีคนข้ามกี่คนและได้โบนัสเพิ่ม
+  async function markSkip(q) {
+    const uid = authStore.currentUser?.uid
+    if (!uid || !q?.id || (q.reviewSkips || []).includes(uid)) return
+    try { await updateDoc(doc(db, 'questions', q.id), { reviewSkips: arrayUnion(uid) }); usage.track(0, 1) }
+    catch (e) { console.error('[review skip mark]', e) }
+  }
+
   // ปิดรีพอร์ท — valid มัดรางวัลเมล์ให้ผู้แจ้งทันที, invalid ส่งจดหมายแจ้งผลเฉยๆ (ไม่มีรางวัล)
   //  transaction: อ่านสถานะรีพอร์ททุกฉบับก่อนเขียน (กติกา transaction) — ฉบับที่ไม่ open แล้วข้าม
   //  กันจ่ายรางวัลซ้ำถ้ามีคนปิดไปพร้อมกัน (เดิมเป็น writeBatch เขียนตรงไม่เช็คสถานะก่อน)
@@ -197,9 +220,9 @@ export function useReviewWrites() {
   async function resolveReports(group, verdict, note = '') {
     const cleanNote = cleanText(note, LIMITS.reviewReason)
     const uid = authStore.currentUser?.uid
-    let closed = 0, skipped = 0, released = false
+    let closed = 0, skipped = 0, released = false, coins = 0
     await runTransaction(db, async (tx) => {
-      closed = 0; skipped = 0; released = false   // transaction รีทรายได้
+      closed = 0; skipped = 0; released = false; coins = 0   // transaction รีทรายได้
       const qRef = doc(db, 'questions', group.questionId)
       const refs = group.reports.map(r => doc(db, 'questionReports', r.id))
       const qSnap = await tx.get(qRef)
@@ -223,25 +246,25 @@ export function useReviewWrites() {
         }
       })
       if (!closed) return
+      const cur = qSnap.exists() ? qSnap.data() : null
+      const friends = group.reports.some(r => r.reportedBy !== AI_REPORTER_UID)
       if (uid) {
-        const qText = qSnap.exists() ? qSnap.data().question : group.snapshot?.question
-        tx.set(doc(collection(db, 'users', uid, 'mail')), buildReviewCaseRewardMail(qText || '', REVIEW_CASE_REWARD, serverTimestamp()))
+        coins = reviewBounty(cur, uid, friends ? REVIEW_CASE_REWARD : REVIEW_REWARD)
+        const qText = cur ? cur.question : group.snapshot?.question
+        tx.set(doc(collection(db, 'users', uid, 'mail')), buildReviewCaseRewardMail(qText || '', coins, serverTimestamp()))
       }
-      if (qSnap.exists()) {
-        const cur = qSnap.data()
-        if (cur.reportCount || cur.reportHold) {
-          released = !!cur.reportHold && !cur.retired
-          tx.update(qRef, {
-            reportCount: 0, reportHold: deleteField(),
-            ...(released ? { isPublished: true } : {}),
-            updatedAt: serverTimestamp(),
-          })
-        }
+      if (cur && (cur.reportCount || cur.reportHold || (cur.reviewSkips || []).length)) {
+        released = !!cur.reportHold && !cur.retired
+        tx.update(qRef, {
+          reportCount: 0, reportHold: deleteField(), reviewSkips: deleteField(),
+          ...(released ? { isPublished: true } : {}),
+          updatedAt: serverTimestamp(),
+        })
       }
     })
     usage.track(group.reports.length + 1, closed * 2 + (closed ? 2 : 0))
-    return { closed, skipped, released }
+    return { closed, skipped, released, coins }
   }
 
-  return { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports }
+  return { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports, payReviewer, markSkip }
 }

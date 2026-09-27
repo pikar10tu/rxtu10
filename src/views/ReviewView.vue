@@ -30,6 +30,8 @@
 
       <ReportCaseCard
         v-else-if="reportCase"
+        :bounty="caseBountyNow"
+        :skips="othersSkipped(reportCase.question, myUid)"
         :key="reportCase.group.questionId + ':' + reportCase.v"
         :group="reportCase.group"
         :question="reportCase.question"
@@ -44,6 +46,10 @@
 
       <!-- ── การ์ดข้อปัจจุบัน ── -->
       <section v-else-if="current" class="rv-card">
+        <div class="rv-bounty">
+          <Emoji char="🪙" /> ตรวจข้อนี้ได้ <b>{{ currentBounty.toLocaleString() }}</b> เหรียญ
+          <span v-if="currentSkips" class="rv-bounty-skip">· มีคนข้ามไปแล้ว {{ currentSkips }} คน</span>
+        </div>
         <div class="rv-card-tags">
           <span v-if="current.domain" class="rv-cat">{{ domainLabel(current.domain) || current.domain }}</span>
           <span v-for="c in getCategories(current)" :key="c" class="rv-cat rv-cat-sub">{{ c }}</span>
@@ -333,7 +339,8 @@ import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { groupReports } from '../utils/questionReport.js'
 import { canHandleReport, nextReportGroup, fixedAfterReport, questionChangedSince } from '../utils/reportCase.js'
-import { REPORT_REWARD, REVIEW_CASE_REWARD, AI_REPORTER_UID } from '../data/index.js'
+import { REPORT_REWARD, REVIEW_CASE_REWARD, REVIEW_REWARD, AI_REPORTER_UID } from '../data/index.js'
+import { reviewBounty, othersSkipped } from '../utils/reviewBounty.js'
 const REPORTS_LIMIT = 800
 import { useReviewWrites } from '../composables/useReviewWrites.js'
 
@@ -341,7 +348,7 @@ const authStore = useAuthStore()
 const usage = useUsageStore()
 const { toast } = useToast()
 const { confirm } = useConfirm()
-const { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports } = useReviewWrites()
+const { reviewerName, writeVote, writeFix, writeRetireWithCredit, resolveReports, payReviewer, markSkip } = useReviewWrites()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 // เหลือผลตรวจเดียว "ถูกต้อง" — เจอปัญหาให้กด "มีจุดผิด" ใน JudgeActions แก้เนื้อหาแล้วนับว่าผ่านตรวจในตาเดียว (ดู onJudgeFix)
@@ -450,7 +457,8 @@ async function saveEdit() {
       })
       fixReason.value = ''
       closeEdit()
-      toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
+      const coins = reportedGroup ? 0 : await payReviewer(q)
+      toast(`แก้และตรวจผ่านแล้ว ขอบคุณ!${coins ? ` ได้ ${fmtCoins(coins)} เหรียญทางจดหมาย` : ''}`, 'success')
       pickNext()
       await closeReportsAfterFix(reportedGroup, '[review edit report resolve]')
     } else {
@@ -482,14 +490,14 @@ function reportedGroupOf(questionId) {
 }
 function fixConfirmText(group) {
   return group
-    ? `${FIX_CONFIRM}\nและปิดรีพอร์ท · ${reportersText(group, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`
-    : FIX_CONFIRM
+    ? `${FIX_CONFIRM}\nและปิดรีพอร์ท · ${reportersText(group, true)} · คุณได้ ${fmtCoins(caseBounty(group, current.value))} เหรียญ`
+    : `${FIX_CONFIRM}\nคุณได้ ${fmtCoins(currentBounty.value)} เหรียญ`
 }
 async function closeReportsAfterFix(group, logTag) {
   if (!group) return
   try {
-    const { closed, skipped, released } = await resolveReports(group, 'valid')
-    if (closed) finishReport(group, closed, skipped, 'valid', released)
+    const { closed, skipped, released, coins } = await resolveReports(group, 'valid')
+    if (closed) finishReport(group, closed, skipped, 'valid', released, coins)
     else openReports.value = openReports.value.filter(r => r.questionId !== group.questionId)
   } catch (e) { console.error(logTag, e); toast('แก้ข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ', 'error') }
 }
@@ -521,7 +529,8 @@ async function onJudgeFix({ payload, reason: fixReasonText }) {
       ...finalPayload, ...reviewFixResult(uid), retired: false,
       lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
     })
-    toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
+    const coins = reportedGroup ? 0 : await payReviewer(q)
+    toast(`แก้และตรวจผ่านแล้ว ขอบคุณ!${coins ? ` ได้ ${fmtCoins(coins)} เหรียญทางจดหมาย` : ''}`, 'success')
     pickNext()
     await closeReportsAfterFix(reportedGroup, '[review judge fix report resolve]')
   } catch (e) { console.error('[review judge fix]', e); toast('บันทึกไม่สำเร็จ', 'error') }
@@ -545,7 +554,8 @@ async function onJudgeRetire({ reason: retireReasonText }) {
         progress: bumpedProgress(oldStatus, 'retired'),
       }
     }
-    toast('นำข้อนี้ออกแล้ว', 'success')
+    const coins = credited ? await payReviewer(q) : 0
+    toast(`นำข้อนี้ออกแล้ว${coins ? ` ได้ ${fmtCoins(coins)} เหรียญทางจดหมาย` : ''}`, 'success')
     pickNext()
   } catch (e) { console.error('[review judge retire]', e); toast('นำออกไม่สำเร็จ', 'error') }
   finally { retiring.value = false }
@@ -718,7 +728,8 @@ async function saveFix(q) {
       lastFixBy: uid, lastFixByName: fixerName, lastFixAt: new Date(),   // local ใช้ Date จริง
     })   // computeStatus กลับเป็น passed → แถวหลุดกอง 🔴 ทันที ไม่ต้องรอโหลดใหม่
     if (fixId.value === q.id) { fixId.value = null; fixDraft.value = null; triageFixReason.value = '' }
-    toast('แก้และตรวจผ่านแล้ว ขอบคุณ!', 'success')
+    const coins = reportedGroup ? 0 : await payReviewer(q)
+    toast(`แก้และตรวจผ่านแล้ว ขอบคุณ!${coins ? ` ได้ ${fmtCoins(coins)} เหรียญทางจดหมาย` : ''}`, 'success')
     // แก้เนื้อหาแล้ว = รีพอร์ทที่ค้างของข้อนี้ (ถ้ามี) ถือว่าจริง ปิดพร้อมให้รางวัลผู้แจ้งไปเลย
     // ใช้ reportedGroup ตัวเดียวกับที่หาไว้ก่อน confirm ด้านบน (ไม่ find ซ้ำ — ข้อความยืนยันกับของจริงต้องอ้างกลุ่มเดียวกัน)
     await closeReportsAfterFix(reportedGroup, '[triage fix report resolve]')
@@ -835,6 +846,10 @@ const reportOpening = ref(false)
 const reportBusy = ref(false)
 let reportCaseV = 0                 // เลขรอบที่เปิดการ์ด — ใส่ใน :key ให้การ์ด mount ใหม่ตอนโหลดข้อสดซ้ำ (ฟอร์มแก้ต้องไม่ค้างเนื้อหาเก่า)
 // เฉพาะทีมวิชาการ (isAcademic) เห็นคิวรีพอร์ท — instructor เป็น question editor แต่ไม่ผ่าน canHandleReport/รางวัล
+// ป้ายรางวัลบนการ์ด (ข้อปกติ / เคสรีพอร์ท)
+const currentBounty = computed(() => current.value ? reviewBounty(current.value, myUid.value, REVIEW_REWARD) : 0)
+const currentSkips = computed(() => othersSkipped(current.value, myUid.value))
+const caseBountyNow = computed(() => reportCase.value ? caseBounty(reportCase.value.group, reportCase.value.question) : 0)
 const pendingReportCount = computed(() => authStore.isAcademic
   ? reportGroups.value.filter(g => !reportSkipped.value.has(g.questionId)).length : 0)
 
@@ -881,14 +896,19 @@ watch([reportGroups, reportSkipped], openNextReport)
 
 // ปิดกลุ่มรีพอร์ทนี้ทิ้งจาก openReports (การ์ดถัดไปเปิดเองผ่าน watch ด้านบน) + toast ผลลัพธ์
 //  verdict คุมว่าจะเติมข้อความรางวัลไหม ('invalid' = ไม่มีรางวัลจริง แม้ closed > 0)
-function finishReport(g, closed, skipped, verdict = 'valid', released = false) {
+function finishReport(g, closed, skipped, verdict = 'valid', released = false, coins = 0) {
   openReports.value = openReports.value.filter(r => r.questionId !== g.questionId)
   if (skipped && !closed) { toast('มีคนปิดรีพอร์ทข้อนี้ไปแล้ว', 'info'); return }
   const friends = g.reports.filter(r => r.reportedBy !== AI_REPORTER_UID).length
   const rewardSuffix = verdict === 'valid' && friends ? ` · ส่งรางวัลให้ผู้แจ้ง ${friends} คน` : ''
   const releaseSuffix = released ? ' · เผยแพร่ข้อนี้คืนแล้ว' : ''
-  toast(`จัดการแล้ว ได้ ${REVIEW_CASE_REWARD} เหรียญทางจดหมาย${rewardSuffix}${releaseSuffix}`, 'success')
+  toast(`จัดการแล้ว${coins ? ` ได้ ${coins.toLocaleString()} เหรียญทางจดหมาย` : ''}${rewardSuffix}${releaseSuffix}`, 'success')
 }
+// เหรียญที่คนตรวจจะได้จากเคสรีพอร์ท (เพื่อนแจ้ง 10000 · มีแต่ AI 5000) + โบนัสคนข้าม
+function caseBounty(g, q) {
+  return reviewBounty(q, myUid.value, isAiOnly(g) ? REVIEW_REWARD : REVIEW_CASE_REWARD)
+}
+const fmtCoins = n => n.toLocaleString()
 // ข้อความใน confirm ว่าผู้แจ้งจะได้อะไร (รีพอร์ทจาก AI ไม่มีจดหมาย/รางวัล)
 function reportersText(g, valid) {
   const friends = g.reports.filter(r => r.reportedBy !== AI_REPORTER_UID).length
@@ -927,7 +947,7 @@ async function reportCaseStillValid(g, loaded) {
 async function onReportPass({ note: passNote }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\n${reportersText(g, false)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
+  if (!(await confirm(`ปิดรีพอร์ทว่า "ไม่ผิด"?\n${reportersText(g, false)} · คุณได้ ${fmtCoins(caseBounty(g, reportCase.value?.question))} เหรียญ`))) return
   reportBusy.value = true
   try {
     if (!(await reportCaseStillValid(g, q))) return
@@ -949,8 +969,8 @@ async function onReportPass({ note: passNote }) {
       })
     }
     try {
-      const { closed, skipped, released } = await resolveReports(g, 'invalid', passNote)
-      finishReport(g, closed, skipped, 'invalid', released)
+      const { closed, skipped, released, coins } = await resolveReports(g, 'invalid', passNote)
+      finishReport(g, closed, skipped, 'invalid', released, coins)
     } catch (e) {
       console.error('[report resolve invalid]', e)
       // กดไม่ผิดซ้ำได้ (writeVote คืน already) — ไม่ต้องเข้าโหมดจัดการแล้วแบบแก้/นำออกด้านล่าง
@@ -967,7 +987,7 @@ async function onReportPass({ note: passNote }) {
 async function onReportFix({ payload, reason: fixReasonText }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  if (!(await confirm(`บันทึกการแก้?\nข้อผ่านตรวจทันที · ${reportersText(g, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
+  if (!(await confirm(`บันทึกการแก้?\nข้อผ่านตรวจทันที · ${reportersText(g, true)} · คุณได้ ${fmtCoins(caseBounty(g, reportCase.value?.question))} เหรียญ`))) return
   reportBusy.value = true
   const uid = myUid.value
   const fixerName = reviewerName()
@@ -987,8 +1007,8 @@ async function onReportFix({ payload, reason: fixReasonText }) {
     }
     patchTriageRow(q.id, fixedPatch)
     try {
-      const { closed, skipped, released } = await resolveReports(g, 'valid')
-      finishReport(g, closed, skipped, 'valid', released)
+      const { closed, skipped, released, coins } = await resolveReports(g, 'valid')
+      finishReport(g, closed, skipped, 'valid', released, coins)
     } catch (e) {
       console.error('[report resolve valid]', e)
       toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
@@ -1002,7 +1022,7 @@ async function onReportFix({ payload, reason: fixReasonText }) {
 async function onReportRetire({ reason: retireReasonText }) {
   if (reportBusy.value || !reportCase.value) return
   const { group: g, question: q } = reportCase.value
-  if (!(await confirm(`นำข้อนี้ออก?\nถอนเผยแพร่ · ${reportersText(g, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
+  if (!(await confirm(`นำข้อนี้ออก?\nถอนเผยแพร่ · ${reportersText(g, true)} · คุณได้ ${fmtCoins(caseBounty(g, reportCase.value?.question))} เหรียญ`))) return
   reportBusy.value = true
   try {
     if (!(await reportCaseStillValid(g, q))) return
@@ -1016,8 +1036,8 @@ async function onReportRetire({ reason: retireReasonText }) {
       }
     }
     try {
-      const { closed, skipped, released } = await resolveReports(g, 'valid')
-      finishReport(g, closed, skipped, 'valid', released)
+      const { closed, skipped, released, coins } = await resolveReports(g, 'valid')
+      finishReport(g, closed, skipped, 'valid', released, coins)
     } catch (e) {
       console.error('[report resolve valid]', e)
       toast('จัดการข้อแล้ว แต่ปิดรีพอร์ทไม่สำเร็จ — กด "ปิดรีพอร์ท + ให้รางวัล" อีกครั้ง', 'error')
@@ -1030,18 +1050,19 @@ async function onReportRetire({ reason: retireReasonText }) {
 async function onReportCloseGone() {
   if (reportBusy.value || !reportCase.value) return
   const g = reportCase.value.group
-  if (!(await confirm(`ปิดรีพอร์ท?\n${reportersText(g, true)} · คุณได้ ${REVIEW_CASE_REWARD} เหรียญ`))) return
+  if (!(await confirm(`ปิดรีพอร์ท?\n${reportersText(g, true)} · คุณได้ ${fmtCoins(caseBounty(g, reportCase.value?.question))} เหรียญ`))) return
   reportBusy.value = true
   try {
     // ไม่ต้องอ่านซ้ำก่อน — resolveReports เป็น transaction ข้ามฉบับที่ปิดไปแล้วเอง (ไม่จ่ายซ้ำ)
-    const { closed, skipped, released } = await resolveReports(g, 'valid')
-    finishReport(g, closed, skipped, 'valid', released)
+    const { closed, skipped, released, coins } = await resolveReports(g, 'valid')
+    finishReport(g, closed, skipped, 'valid', released, coins)
   } catch (e) { console.error('[report close gone]', e); toast('ปิดรีพอร์ทไม่สำเร็จ', 'error') }
   finally { reportBusy.value = false }
 }
 
 function onReportSkip() {
   if (!reportCase.value) return
+  if (reportCase.value.question) markSkip(reportCase.value.question)
   skipReportGroup(reportCase.value.group.questionId)
 }
 
@@ -1113,6 +1134,7 @@ watch(currentId, async (id) => {
 
 function skip() {
   if (!current.value) return
+  markSkip(current.value)   // ไม่ await — จดคนข้ามไว้บนข้อ (โบนัสให้คนถัดไป)
   const next = new Set(skippedIds.value)
   next.add(current.value.id)
   skippedIds.value = next   // Set ใหม่ → computed queue เลื่อนไปข้อถัดไป
@@ -1136,7 +1158,7 @@ function bumpedProgress(from, to) {
 // เป็น note:'' เปล่าๆ เสมอ เพราะ JudgeActions ส่ง pass ทันทีไม่ถามซ้ำ) — ไม่รับพารามิเตอร์จึงไม่ชนกัน
 async function submit() {
   if (!canSubmit.value || submitting.value || !current.value || !myUid.value) return
-  if (!(await confirm('ส่งผลว่า "ถูกต้อง"?'))) return
+  if (!(await confirm(`ส่งผลว่า "ถูกต้อง"?\nคุณได้ ${fmtCoins(currentBounty.value)} เหรียญ`))) return
   submitting.value = true
   const q = current.value
   const uid = myUid.value
@@ -1168,12 +1190,14 @@ async function submit() {
         progress: bumpedProgress(oldStatusLocal, newStatus),
       }
     }
+    const coins = already ? 0 : await payReviewer(q)
+    const coinText = coins ? ` ได้ ${fmtCoins(coins)} เหรียญทางจดหมาย` : ''
     if (already) {
       toast('คุณตรวจข้อนี้ไปแล้ว', 'info')
     } else if (wasResolved) {
-      toast('มีคนตรวจข้อนี้ตัดกันพอดี — นับเสียงคุณเข้าไปด้วยแล้ว', 'success')
+      toast(`มีคนตรวจข้อนี้ตัดกันพอดี — นับเสียงคุณเข้าไปด้วยแล้ว${coinText}`, 'success')
     } else {
-      toast('ส่งผลตรวจแล้ว ขอบคุณ!', 'success')
+      toast(`ส่งผลตรวจแล้ว ขอบคุณ!${coinText}`, 'success')
     }
     pickNext()
   } catch (e) {
@@ -1317,4 +1341,7 @@ async function submit() {
 /* ต่อยอด .rv-mini เดิม (นิยามหลักอยู่ด้านบน) ให้ใช้กับปุ่ม disabled และลิงก์ในรายการรอดำเนินการ */
 .rv-mini:disabled { background: #f1f5f9; color: rgba(0,0,0,.4); cursor: default; }
 a.rv-mini { display: inline-block; text-decoration: none; }
+.rv-bounty { font-size: .78rem; font-weight: 700; color: #92400e; background: #fef3c7; border-radius: 10px; padding: 6px 10px; margin-bottom: 8px; }
+.rv-bounty b { font-weight: 800; }
+.rv-bounty-skip { color: #b45309; }
 </style>

@@ -17,6 +17,10 @@
       <Emoji char="🚩" /> {{ headText }}
       <span v-if="question?.reportHold && !question?.retired" class="rc-hold">พักเผยแพร่อยู่ — ตัดสินแล้วจะเผยแพร่คืนเอง</span>
     </div>
+    <div v-if="bounty" class="rc-bounty">
+      <Emoji char="🪙" /> เคลียร์ข้อนี้ได้ <b>{{ bounty.toLocaleString() }}</b> เหรียญ
+      <span v-if="skips"> · มีคนข้ามไปแล้ว {{ skips }} คน</span>
+    </div>
 
     <template v-if="gone">
       <div class="rc-gone"><Emoji char="⚠️" /> {{ goneText }}</div>
@@ -104,6 +108,8 @@ const props = defineProps({
   question: { type: Object, default: null },    // ข้อสด (null เมื่อ goneReason = 'deleted')
   goneReason: { type: String, default: null },  // null | 'fixed' | 'retired' | 'deleted' (ดูหัวไฟล์)
   busy: { type: Boolean, default: false },
+  bounty: { type: Number, default: 0 },          // เหรียญที่คนตรวจจะได้ (ReviewView คำนวณ)
+  skips: { type: Number, default: 0 },           // คนในทีมที่ข้ามข้อนี้ไปแล้ว (ไม่นับตัวเอง)
 })
 defineEmits(['pass', 'fix', 'retire', 'closeGone', 'skip'])
 
@@ -145,6 +151,8 @@ function reasonLabel(r) {
 <style scoped>
 .rc-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 14px; margin-bottom: 16px; }
 .rc-head { font-size: .88rem; font-weight: 800; color: #c2410c; margin-bottom: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rc-bounty { font-size: .78rem; font-weight: 700; color: #92400e; background: #fef3c7; border-radius: 10px; padding: 6px 10px; margin-bottom: 8px; }
+.rc-bounty b { font-weight: 800; }
 .rc-hold { font-size: .7rem; font-weight: 800; color: #b91c1c; background: #fee2e2; border-radius: 6px; padding: 2px 7px; }
 
 .rc-gone { font-size: .78rem; font-weight: 700; color: #92400e; background: rgba(245,158,11,.13); border-radius: 10px; padding: 9px 11px; margin-bottom: 11px; line-height: 1.5; }
