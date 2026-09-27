@@ -32,7 +32,7 @@
       <!-- active team toggle -->
       <template v-if="isActive">
         <div class="pd-slotrow">
-          <span class="pd-slotrow-label">ช่อง {{ activeSlotIndex + 1 }} · ช่อง 1 ออกตีก่อน</span>
+          <span class="pd-slotrow-label">ลำดับในทีม: ช่อง {{ activeSlotIndex + 1 }}<small>ช่อง 1 ลงสนามก่อน · กดเลขเพื่อย้ายช่อง</small></span>
           <div class="pd-slotbtns">
             <button
               v-for="n in battleSlots" :key="n" type="button" class="pd-slotbtn"
@@ -266,10 +266,11 @@ async function evolve() {
 .pd-baltag.buff { background: color-mix(in srgb, var(--mint) 45%, transparent); }
 .pd-baltag.nerf { background: color-mix(in srgb, var(--accent) 45%, transparent); }
 .pd-baltag.rework { background: color-mix(in srgb, var(--primary) 45%, transparent); }
-.pd-slotrow { margin: 10px 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .7rem; color: rgba(255,255,255,.7); }
+.pd-slotrow { margin: 10px 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .78rem; font-weight: 800; color: var(--ink); }
+.pd-slotrow-label small { display: block; font-size: .7rem; font-weight: 600; color: rgba(0,0,0,.55); }
 .pd-slotbtns { display: flex; gap: 5px; }
-.pd-slotbtn { width: 26px; height: 26px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,.5); background: rgba(255,255,255,.15); color: #fff; font-family: inherit; font-size: .74rem; font-weight: 800; cursor: pointer; }
-.pd-slotbtn.cur { background: #fff; color: var(--ink); cursor: default; }
+.pd-slotbtn { width: 34px; height: 34px; border-radius: 10px; border: var(--bw) solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: .74rem; font-weight: 800; cursor: pointer; }
+.pd-slotbtn.cur { background: var(--primary); color: #fff; cursor: default; }
 .pd-slotbtn:disabled:not(.cur) { opacity: .5; }
 .pd-picker { margin: 8px 14px 0; border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px; }
 .pd-picker-label { font-size: .74rem; font-weight: 800; color: var(--ink); }
