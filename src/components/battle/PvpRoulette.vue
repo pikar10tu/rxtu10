@@ -6,8 +6,14 @@
   <Teleport to="body">
     <div v-if="open" class="pr-ov" role="status" aria-live="polite">
       <div class="pr-cap">{{ locked ? 'เจอแล้ว!' : 'กำลังหาคู่ต่อสู้…' }}</div>
+      <!-- วงล้อสล็อต 3 แถว: บน/ล่าง = ชื่อตลกที่หมุนผ่าน · กลาง = ช่องผล (หยุดที่ ROULETTE_WINNER เสมอ) -->
       <div class="pr-reel" :class="{ locked }">
-        <div :key="tick" class="pr-name">{{ shown }}</div>
+        <div :key="tick" class="pr-rows">
+          <div class="pr-row pr-side">{{ above }}</div>
+          <div class="pr-row pr-mid">{{ shown }}</div>
+          <div class="pr-row pr-side">{{ below }}</div>
+        </div>
+        <div class="pr-window" />
       </div>
       <div class="pr-sub">{{ locked ? 'เตรียมตัวเข้าสังเวียน' : 'สุ่มจากคนแต้มใกล้ๆ กัน' }}</div>
     </div>
@@ -28,6 +34,8 @@ const emit = defineEmits(['done'])
 const SPIN_MS = 1800
 const HOLD_MS = 1200
 const shown = ref('')
+const above = ref('')
+const below = ref('')
 const tick = ref(0)
 const locked = ref(false)
 let timer = null
@@ -39,17 +47,21 @@ function start() {
   locked.value = false
   const pool = props.names.length ? props.names : ['…']
   let i = Math.floor(Math.random() * pool.length)
+  const at = (k) => pool[((k % pool.length) + pool.length) % pool.length]
+  // ชุดสามแถว: แถวบนคือชื่อถัดไป (กำลังจะเลื่อนลงมา) แถวล่างคือชื่อที่เพิ่งผ่านไป
+  const setRows = () => { above.value = at(i + 1); shown.value = at(i); below.value = at(i - 1) }
   const t0 = performance.now()
   const step = () => {
     const el = performance.now() - t0
     if (el >= SPIN_MS) {
+      above.value = at(i + 1); below.value = at(i)
       shown.value = ROULETTE_WINNER; tick.value++; locked.value = true
       sfx('levelup')
       timer = setTimeout(() => emit('done'), HOLD_MS)
       return
     }
-    i = (i + 1 + Math.floor(Math.random() * 2)) % pool.length
-    shown.value = pool[i]; tick.value++
+    i = (i + 1) % pool.length
+    setRows(); tick.value++
     sfx('tap')
     // ช้าลงเรื่อยๆ 60ms → ~260ms (ease-out) ให้รู้สึกว่ารูเล็ตกำลังจะหยุด
     const p = el / SPIN_MS
@@ -65,11 +77,21 @@ onUnmounted(stop)
 <style scoped>
 .pr-ov { position: fixed; inset: 0; z-index: 450; background: radial-gradient(circle at 50% 45%, #4338ca 0%, #1e1b4b 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; color: #fff; }
 .pr-cap { font-size: .9rem; font-weight: 800; color: rgba(255,255,255,.8); letter-spacing: .02em; }
-.pr-reel { width: 100%; max-width: 340px; height: 84px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.35); border-radius: 18px; box-shadow: inset 0 0 24px rgba(0,0,0,.35); }
-.pr-reel.locked { border-color: #fde68a; background: rgba(253,230,138,.14); box-shadow: 0 0 32px rgba(253,230,138,.55), inset 0 0 24px rgba(0,0,0,.25); animation: pr-pop .45s ease-out; }
-.pr-name { font-size: 1.25rem; font-weight: 800; text-align: center; padding: 0 12px; animation: pr-slide .09s ease-out; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.pr-reel.locked .pr-name { font-size: 1.45rem; color: #fde68a; animation: none; }
+.pr-reel { position: relative; width: 100%; max-width: 340px; height: 168px; overflow: hidden; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.35); border-radius: 18px; box-shadow: inset 0 0 24px rgba(0,0,0,.35); }
+/* จางหัวท้ายให้เหมือนวงล้อโค้งหายไป */
+.pr-reel::before, .pr-reel::after { content: ''; position: absolute; left: 0; right: 0; height: 40px; z-index: 2; pointer-events: none; }
+.pr-reel::before { top: 0; background: linear-gradient(#1e1b4b, transparent); }
+.pr-reel::after { bottom: 0; background: linear-gradient(transparent, #1e1b4b); }
+.pr-rows { display: flex; flex-direction: column; animation: pr-slide .09s ease-out; }
+.pr-reel.locked .pr-rows { animation: pr-settle .35s cubic-bezier(.3,1.6,.5,1); }
+.pr-row { height: 56px; display: flex; align-items: center; justify-content: center; padding: 0 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pr-side { font-size: .95rem; color: rgba(255,255,255,.5); }
+.pr-mid { font-size: 1.2rem; }
+.pr-reel.locked .pr-mid { font-size: 1.35rem; color: #fde68a; }
+/* ช่องผลตรงกลาง */
+.pr-window { position: absolute; left: 6px; right: 6px; top: 56px; height: 56px; z-index: 3; pointer-events: none; border: 2px solid rgba(255,255,255,.55); border-radius: 12px; }
+.pr-reel.locked .pr-window { border-color: #fde68a; box-shadow: 0 0 24px rgba(253,230,138,.6), inset 0 0 16px rgba(253,230,138,.25); }
 .pr-sub { font-size: .76rem; font-weight: 700; color: rgba(255,255,255,.62); }
-@keyframes pr-slide { from { transform: translateY(-60%); opacity: .3; } to { transform: none; opacity: 1; } }
-@keyframes pr-pop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes pr-slide { from { transform: translateY(-56px); } to { transform: none; } }
+@keyframes pr-settle { 0% { transform: translateY(-56px); } 100% { transform: none; } }
 </style>

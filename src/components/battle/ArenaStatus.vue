@@ -18,17 +18,6 @@
       <span class="as-season">ซีซั่น {{ seasonLabel }}</span>
     </div>
 
-    <div class="as-quota">
-      <span class="as-dots" role="img" :aria-label="`พลังงาน ${attacksLeft} จาก ${energyMax} หน่วย`">
-        <i v-for="i in energyMax" :key="i" class="as-dot" :class="{ used: i > attacksLeft }" />
-      </span>
-      <span class="as-quota-txt">
-        พลังงาน {{ attacksLeft }}/{{ energyMax }}
-        <template v-if="nextMs > 0"> · +1 หน่วยใน {{ countdown }}</template>
-        <template v-else> · เต็มแล้ว</template>
-      </span>
-    </div>
-
     <SeasonCountdown kind="arena" />
 
     <div class="as-sep" />
@@ -75,8 +64,6 @@ const props = defineProps({
   wins: { type: Number, default: 0 },
   losses: { type: Number, default: 0 },
   attacksLeft: { type: Number, default: 0 },
-  energyMax: { type: Number, default: 5 },
-  nextMs: { type: Number, default: 0 },    // อีกกี่ ms ได้พลังเพิ่ม 1 (0 = เต็ม)
   myRank: { type: Number, default: null },
   total: { type: Number, default: 0 },
   team: { type: Array, default: () => [] },   // หน่วยรบจาก resolveBattleTeam
@@ -85,10 +72,6 @@ const props = defineProps({
 defineEmits(['pick', 'arena'])
 const arenaName = computed(() => getArena(parseArenaRef(props.arenaRef).id)?.name || '')
 
-const countdown = computed(() => {
-  const t = Math.ceil(props.nextMs / 1000)
-  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`
-})
 
 const rankLabel = computed(() =>
   props.myRank ? `อันดับ ${props.myRank} จาก ${props.total}` : 'ยังไม่ติดอันดับ')
@@ -119,12 +102,6 @@ const seasonLabel = computed(() => seasonMonthLabel(currentSeasonId()))
 .as-line2 { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
 .as-wl { font-size: .76rem; font-weight: 700; color: rgba(255,255,255,.8); }
 .as-season { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 1px 8px; }
-
-.as-quota { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-.as-dots { display: inline-flex; gap: 4px; }
-.as-dot { width: 10px; height: 10px; border-radius: 50%; background: #fde68a; border: 1.5px solid rgba(0,0,0,.25); }
-.as-dot.used { background: transparent; border-color: rgba(255,255,255,.45); }
-.as-quota-txt { font-size: .74rem; font-weight: 700; color: rgba(255,255,255,.8); }
 
 .as-sep { height: 1px; background: rgba(255,255,255,.22); margin: 12px 0 10px; }
 

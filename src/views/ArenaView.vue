@@ -14,12 +14,23 @@
 
     <template v-if="authStore.isLoggedIn">
       <ArenaStatus
-        :rating="rating" :wins="wins" :losses="losses" :attacks-left="attacksLeft" :energy-max="energyMax" :next-ms="energy.nextMs"
+        :rating="rating" :wins="wins" :losses="losses" :attacks-left="attacksLeft"
         :my-rank="rivals.myRank" :total="rivals.total" :team="myTeam" :arena-ref="myArena"
         @pick="pickOpen = true" @arena="arenaOpen = true"
       />
 
       <!-- หาคู่ = สุ่มอย่างเดียว เลือกคู่ไม่ได้ (28 ก.ย. 2026 — แทนกระดาน 5 ช่อง ที่ทำให้คนรุมตีคนอ่อน) -->
+      <!-- พลังงานติดปุ่มหาคู่ (user สั่ง 28 ก.ย. — เดิมอยู่ในแผงบน ไกลจนไม่มีใครเห็น) -->
+      <div class="ar-energy">
+        <span class="ar-dots" role="img" :aria-label="`พลังงาน ${attacksLeft} จาก ${energyMax} หน่วย`">
+          <i v-for="i in energyMax" :key="i" :class="{ on: i <= attacksLeft }" />
+        </span>
+        <span class="ar-energy-txt">
+          <b>พลังงาน {{ attacksLeft }}/{{ energyMax }}</b>
+          <template v-if="energy.nextMs > 0"> · +1 หน่วยใน {{ countdown }}</template>
+          <template v-else> · เต็มแล้ว</template>
+        </span>
+      </div>
       <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0 || !myTeam.length" @click="onFind">
         <span class="ar-find-main"><Emoji char="⚔️" /> หาคู่ต่อสู้</span>
         <span class="ar-find-sub">{{ findSub }}</span>
@@ -92,6 +103,10 @@ onMounted(() => { if (!canFight.value) router.replace('/play') })
 watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิดสนามระหว่างมีคนอยู่ในหน้า
 
 const rouletteList = computed(() => rouletteNames(rawConfig.value?.pvpRoulette))
+const countdown = computed(() => {
+  const t = Math.ceil(energy.value.nextMs / 1000)
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`
+})
 const findSub = computed(() => {
   if (!myTeam.value.length) return 'จัดทีมก่อนนะ'
   if (attacksLeft.value > 0) return `ใช้พลังงาน 1 หน่วย · เหลือ ${attacksLeft.value}/${energyMax}`
@@ -168,6 +183,13 @@ onMounted(() => { members.loadRoster() })
 .ar-head { display: flex; align-items: center; justify-content: space-between; }
 .ar-head-r { display: flex; align-items: center; gap: 8px; }
 .ar-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
+.ar-energy { display: flex; align-items: center; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-bottom: none; border-radius: 16px 16px 0 0; padding: 8px 12px; }
+.ar-dots { display: inline-flex; gap: 4px; }
+.ar-dots i { width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,.08); border: 1.5px solid rgba(0,0,0,.18); }
+.ar-dots i.on { background: #facc15; border-color: #ca8a04; }
+.ar-energy-txt { font-size: .76rem; color: rgba(0,0,0,.6); }
+.ar-energy-txt b { color: var(--ink); }
+.ar-energy + .ar-find { border-radius: 0 0 16px 16px; }
 .ar-find { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; border: var(--bw) solid var(--line); border-radius: 16px; padding: 16px 12px; margin-bottom: 12px; font-family: inherit; color: #fff; background: linear-gradient(160deg, #e11d48, #f97316); box-shadow: var(--pop); cursor: pointer; }
 .ar-find:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .ar-find:disabled { background: #cbd5e1; box-shadow: none; cursor: default; }
