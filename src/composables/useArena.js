@@ -140,7 +140,7 @@ export function useArena() {
   async function fight() {
     if (attacksLeft.value <= 0) {
       const m = Math.ceil(energy.value.nextMs / 60000)
-      toast(`พลังงานหมด อีก ${m} นาทีได้เพิ่ม 1`, 'info')
+      toast(`พลังงานหมด อีก ${m} นาทีได้เพิ่ม 1 หน่วย`, 'info')
       return null
     }
     if (!myTeam.value.length) {

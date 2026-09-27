@@ -94,8 +94,8 @@ watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิ�
 const rouletteList = computed(() => rouletteNames(rawConfig.value?.pvpRoulette))
 const findSub = computed(() => {
   if (!myTeam.value.length) return 'จัดทีมก่อนนะ'
-  if (attacksLeft.value > 0) return `ใช้พลังงาน 1 · เหลือ ${attacksLeft.value}/${energyMax}`
-  return `พลังงานหมด · อีก ${Math.ceil(energy.value.nextMs / 60000)} นาทีได้เพิ่ม`
+  if (attacksLeft.value > 0) return `ใช้พลังงาน 1 หน่วย · เหลือ ${attacksLeft.value}/${energyMax}`
+  return `พลังงานหมด · อีก ${Math.ceil(energy.value.nextMs / 60000)} นาทีได้เพิ่ม 1 หน่วย`
 })
 
 // อันดับแต้มประลองทั้งรุ่น — อ่าน rosterRows ดิบ (rosterUsers key ด้วย studentId แล้วตก guest)

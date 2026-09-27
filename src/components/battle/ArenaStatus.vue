@@ -19,12 +19,12 @@
     </div>
 
     <div class="as-quota">
-      <span class="as-dots" role="img" :aria-label="`พลังงาน ${attacksLeft} จาก ${energyMax}`">
+      <span class="as-dots" role="img" :aria-label="`พลังงาน ${attacksLeft} จาก ${energyMax} หน่วย`">
         <i v-for="i in energyMax" :key="i" class="as-dot" :class="{ used: i > attacksLeft }" />
       </span>
       <span class="as-quota-txt">
         พลังงาน {{ attacksLeft }}/{{ energyMax }}
-        <template v-if="nextMs > 0"> · +1 ใน {{ countdown }}</template>
+        <template v-if="nextMs > 0"> · +1 หน่วยใน {{ countdown }}</template>
         <template v-else> · เต็มแล้ว</template>
       </span>
     </div>
