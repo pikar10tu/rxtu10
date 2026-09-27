@@ -441,8 +441,8 @@ export const STATUS_ICON = {
   duoRegen: '💧',
   // 🦖 ทีเร็กซ์ (27 ก.ย. 2026 บาลานซ์รอบ 1): ย้ายออกจาก stackAtk → effect ใหม่ 'hunt' (ไม่มีเพดาน)
   hunt: '📈',
-  // 👹 โอนิ (27 ก.ย. 2026): ป้าย "ง้างค้างอยู่" — ⏳ แทน 🏏 เพราะ 🏏 ไม่มีไฟล์ Fluent (ห้ามรัน fetch-fluent ในงานนี้)
-  windup: '⏳',
+  // 👹 โอนิ (27 ก.ย. 2026): ป้าย "ง้างค้างอยู่" — 🏏 ไม้ตี (ของแทนเดิม ⏳ ตอน 🏏 ยังไม่มีไฟล์ Fluent)
+  windup: '🏏',
   // ── P2 ──
   elementTrinity: '🧩', teamLifesteal: '🩸', teamDamageReduction: '🧱', atkOnHit: '💢',
   berserk: '🔥', giantSlayer: '🗡️', healOnAttack: '💞', stealStats: '🫳',
