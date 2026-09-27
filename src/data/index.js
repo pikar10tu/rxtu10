@@ -131,7 +131,7 @@ export const REPORT_REWARD = 10000; // 27 ก.ย. 2026 user สั่ง (เ�
 export const REVIEW_CASE_REWARD = 10000;
 export const REVIEW_CASE_INVALID_REWARD = 1000;
 // ตรวจข้อปกติในคิว (ถูกต้อง/แก้/นำออก) และเคสที่มีแต่ AI ส่งมา
-export const REVIEW_REWARD = 5000;
+export const REVIEW_REWARD = 1000; // 27 ก.ย. 2026 user สั่ง (เดิม 5000) — AI ตรวจยกคลังให้แล้ว
 // มีคนในทีมกด "ข้าม" ข้อนี้ไปแล้วกี่คน (ไม่นับตัวเอง) → บวกเพิ่มคนละเท่านี้ จูงใจให้หยิบข้อยาก
 export const REVIEW_SKIP_BONUS = 5000;
 // เพื่อนแจ้งครบกี่คน (คนละ uid, รีพอร์ทยังเปิดอยู่) → ถอนเผยแพร่ชั่วคราว รอทีมวิชาการตรวจ

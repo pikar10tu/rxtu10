@@ -377,9 +377,9 @@ const CONFLICT_LIMIT = 200  // ข้อขัดแย้ง (ของเก�
 const PENDING_WINDOW = 40   // ข้อที่ยังไม่มีใครตรวจ — สุ่มหน้าต่างเล็กพอ ต้นทุนคงที่
 
 const currentId = ref(null)
-// คิวข้อที่ต้องให้ฉันตรวจ ลบข้อที่กด "ข้าม" ในเซสชันนี้
+// คิวข้อที่ต้องให้ฉันตรวจ ลบข้อที่ฉันเคยกด "ข้าม" (ถาวรผ่าน reviewSkips + ในเซสชันนี้)
 const queue = computed(() =>
-  nextReviewQueue(list.value, myUid.value).filter(q => !skippedIds.value.has(q.id)))
+  nextReviewQueue(list.value, myUid.value).filter(q => !skippedIds.value.has(q.id) && !(q.reviewSkips || []).includes(myUid.value)))
 // ข้อปัจจุบัน = ข้อที่สุ่มไว้ (ตรึงไว้จนกว่าจะส่ง/ข้าม — ห้ามผูกกับ queue[0] ไม่งั้นข้อจะเด้งเอง)
 const current = computed(() => queue.value.find(q => q.id === currentId.value) || null)
 
@@ -574,7 +574,7 @@ const progress = computed(() => {
   return { passed, failed, conflict, pending, total, pct: total ? Math.round((passed / total) * 100) : 0 }
 })
 // จำนวนข้อที่ต้องให้ฉันตรวจ "ในคิวรอบนี้" (เท่าที่โหลดมา ไม่ใช่ทั้งคลัง)
-const myQueueCount = computed(() => nextReviewQueue(list.value, myUid.value).length)
+const myQueueCount = computed(() => nextReviewQueue(list.value, myUid.value).filter(q => !(q.reviewSkips || []).includes(myUid.value)).length)
 
 // กลุ่มโรคบังคับ — picker prefill ค่าที่เดาให้อยู่แล้ว ปกติจึงเป็น 0 คลิก
 // แต่ข้อที่เดาไม่ออกต้องให้คนตรวจเลือก ไม่งั้นมันจะค้างไม่มีหมวดไปตลอด
@@ -889,6 +889,7 @@ async function openReportGroup(g) {
     if (token !== openToken) return
     const c = reportCaseFor(g, snap.exists() ? { id: snap.id, ...snap.data() } : null)
     if (!c) { reportCase.value = null; skipReportGroup(g.questionId); return }   // ข้อของตัวเอง → ปล่อยให้คนอื่น
+    if ((c.question?.reviewSkips || []).includes(myUid.value)) { reportCase.value = null; skipReportGroup(g.questionId); return }   // เคยกดข้ามแล้ว → ไม่ขึ้นอีก
     reportCase.value = c
   } catch (e) { console.error('[report open]', e); toast('โหลดข้อที่ถูกแจ้งไม่สำเร็จ', 'error'); reportCase.value = null }
   finally { if (token === openToken) reportOpening.value = false }
