@@ -25,16 +25,17 @@
     <div class="as-team">
       <span class="as-team-l">
         <span class="as-team-cap">ทีมเฝ้าบ้าน</span>
-        <span v-if="team.length" class="as-thumbs">
-          <PetThumb v-for="(p, i) in team" :key="i" :pet="p" />
-        </span>
         <!-- ⚠️ ข้อความนี้ตรงตามโค้ดจริง: rosterOpponents() ข้ามแถวที่ tm ว่าง
              ⇒ ไม่จัดทีม = ไม่โผล่บนกระดานของใครเลย ห้ามเขียนว่า "จะโดนบุกแล้วแพ้ฟรี" -->
-        <span v-else class="as-team-empty">ยังไม่ได้ตั้งทีม — ตั้งทีมก่อนถึงจะหาคู่ได้ และคนอื่นถึงจะสุ่มเจอเรา</span>
+        <span v-if="!team.length" class="as-team-empty">ยังไม่ได้ตั้งทีม — ตั้งทีมก่อนถึงจะหาคู่ได้ และคนอื่นถึงจะสุ่มเจอเรา</span>
       </span>
       <button class="as-pick" :class="{ hot: !team.length }" @click="$emit('pick')">
         <Emoji char="🛡️" /> จัดทีม
       </button>
+    </div>
+    <!-- รูปทีมแถวของตัวเอง (28 ก.ย. user ขอให้ใหญ่ขึ้น · 40px เดิมอ่าน ATK/HP บนการ์ดไม่ออก) -->
+    <div v-if="team.length" class="as-thumbs">
+      <PetThumb v-for="(p, i) in team" :key="i" :pet="p" />
     </div>
 
     <!-- สนามของฉัน = ครึ่งล่างตอนเราบุก และครึ่งบนตอนคนอื่นมาบุกเรา -->
@@ -112,8 +113,7 @@ const seasonLabel = computed(() => seasonMonthLabel(currentSeasonId()))
 .as-arena-name { font-size: .84rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .as-team-l { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .as-team-cap { font-size: .72rem; font-weight: 800; color: rgba(255,255,255,.7); }
-.as-thumbs { display: flex; gap: 5px; }
-.as-thumbs > * { width: 40px; flex-shrink: 0; }
+.as-thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 64px)); gap: 8px; margin-top: 8px; }
 .as-team-empty { font-size: .74rem; font-weight: 700; color: #fde68a; line-height: 1.45; }
 
 .as-pick { border: var(--bw) solid var(--line); background: #fff; color: var(--ink); border-radius: 11px; padding: 9px 13px; font-family: inherit; font-weight: 800; font-size: .78rem; cursor: pointer; box-shadow: var(--pop); display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }

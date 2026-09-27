@@ -20,6 +20,17 @@
       />
 
       <!-- หาคู่ = สุ่มอย่างเดียว เลือกคู่ไม่ได้ (28 ก.ย. 2026 — แทนกระดาน 5 ช่อง ที่ทำให้คนรุมตีคนอ่อน) -->
+      <!-- เอฟเฟกต์ประจำสัปดาห์ (config/app.pvpWeekly) — แอดมินตั้ง · ไม่ได้ตั้ง/ข้อความว่าง = ซ่อน
+           ⚠️ ตอนนี้เป็นป้ายบอกอย่างเดียว ยังไม่ผูกกับเอนจินไฟต์ -->
+      <div v-if="weekly" class="ar-weekly">
+        <span class="ar-weekly-ico"><Emoji :char="weekly.icon" /></span>
+        <span class="ar-weekly-l">
+          <span class="ar-weekly-cap">เอฟเฟกต์ประจำสัปดาห์</span>
+          <b class="ar-weekly-t">{{ weekly.title }}</b>
+          <span v-if="weekly.desc" class="ar-weekly-d">{{ weekly.desc }}</span>
+        </span>
+      </div>
+
       <!-- พลังงานติดปุ่มหาคู่ (user สั่ง 28 ก.ย. — เดิมอยู่ในแผงบน ไกลจนไม่มีใครเห็น) -->
       <div class="ar-energy">
         <span class="ar-dots" role="img" :aria-label="`พลังงาน ${attacksLeft} จาก ${energyMax} หน่วย`">
@@ -78,7 +89,7 @@ import ArenaRankCard from '../components/battle/ArenaRankCard.vue'
 import { arenaRanking } from '../utils/arenaRivals.js'
 import { PVP_RATING_START } from '../utils/pvpRating.js'
 import PvpRoulette from '../components/battle/PvpRoulette.vue'
-import { rouletteNames } from '../data/pvpRoulette.js'
+import { rouletteNames, pvpWeekly } from '../data/pvpRoulette.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import { rosterArena } from '../utils/arenas.js'
 import ArenaSheet from '../components/battle/ArenaSheet.vue'
@@ -103,6 +114,7 @@ onMounted(() => { if (!canFight.value) router.replace('/play') })
 watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิดสนามระหว่างมีคนอยู่ในหน้า
 
 const rouletteList = computed(() => rouletteNames(rawConfig.value?.pvpRoulette))
+const weekly = computed(() => pvpWeekly(rawConfig.value?.pvpWeekly))
 const countdown = computed(() => {
   const t = Math.ceil(energy.value.nextMs / 1000)
   return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`
@@ -183,6 +195,12 @@ onMounted(() => { members.loadRoster() })
 .ar-head { display: flex; align-items: center; justify-content: space-between; }
 .ar-head-r { display: flex; align-items: center; gap: 8px; }
 .ar-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
+.ar-weekly { display: flex; align-items: center; gap: 10px; background: #fdf2f8; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 10px 12px; margin-bottom: 12px; }
+.ar-weekly-ico { font-size: 1.6rem; flex-shrink: 0; }
+.ar-weekly-l { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ar-weekly-cap { font-size: .7rem; font-weight: 800; color: #be185d; }
+.ar-weekly-t { font-size: .88rem; }
+.ar-weekly-d { font-size: .74rem; color: rgba(0,0,0,.6); line-height: 1.45; }
 .ar-energy { display: flex; align-items: center; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-bottom: none; border-radius: 16px 16px 0 0; padding: 8px 12px; }
 .ar-dots { display: inline-flex; gap: 4px; }
 .ar-dots i { width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,.08); border: 1.5px solid rgba(0,0,0,.18); }
