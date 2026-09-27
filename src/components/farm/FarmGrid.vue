@@ -54,6 +54,7 @@
       <div v-else class="inv-list">
         <button v-for="it in invList" :key="it.key" class="inv-item" :class="{ gold: it.gold }" @click="confirmSell(it, $event)">
           <span class="inv-emoji"><Emoji :char="it.emoji" /></span>
+          <span class="inv-name">{{ it.name }}</span>
           <span class="inv-qty">×{{ it.qty }}</span>
           <span class="inv-sell">ขาย {{ (it.sellPrice * it.qty).toLocaleString() }}<Emoji char="🪙" /></span>
         </button>
@@ -264,12 +265,13 @@ const invList = computed(() => [
 .inv-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .82rem; margin-bottom: 8px; }
 .inv-sellall { border: none; background: linear-gradient(135deg,#f59e0b,#d97706); color: #fff; font-weight: 700; font-size: .7rem; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-family: inherit; }
 .inv-empty { font-size: .7rem; color: rgba(0,0,0,.4); text-align: center; padding: 8px 0; }
-.inv-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.inv-item { display: flex; align-items: center; gap: 5px; border: 1px solid rgba(180,83,9,.18); border-radius: 10px; padding: 6px 9px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.07)); cursor: pointer; font-family: inherit; transition: transform .15s, box-shadow .15s; }
+.inv-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+.inv-item { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; border: 1px solid rgba(180,83,9,.18); border-radius: 10px; padding: 6px 9px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.07)); cursor: pointer; font-family: inherit; transition: transform .15s, box-shadow .15s; }
 .inv-item:hover { box-shadow: 0 3px 10px -4px rgba(180,83,9,.4); transform: translateY(-1px); }
 .inv-item:active { transform: scale(.97); }
 .inv-item.gold { border-color: #e0a816; background: linear-gradient(160deg,#fffbe6,#ffe89a); box-shadow: 0 0 0 1px rgba(224,168,22,.35), 0 2px 8px -3px rgba(224,168,22,.7); }
-.inv-emoji { font-size: 1.1rem; }
+.inv-emoji { font-size: 1.9rem; line-height: 1; margin-bottom: 2px; }
+.inv-name { font-size: .72rem; font-weight: 700; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .inv-qty { font-weight: 800; font-size: .74rem; }
 .inv-sell { font-size: .7rem; color: #b45309; font-weight: 700; }
 

@@ -15,18 +15,14 @@
 
         <!-- ช่องที่มีออเดอร์ -->
         <template v-else>
-          <div class="fo-items">
-            <span
-              v-for="(qty, id) in o.items"
-              :key="id"
-              class="fo-chip"
-              :class="{ lack: missing(o)[id] }"
-            >
-              <Emoji :char="cropOf(id).emoji" />
-              <span aria-hidden="true">×{{ qty }}</span>
-              <span class="sr-only">{{ cropOf(id).name }} {{ qty }} ชิ้น</span>
-            </span>
-          </div>
+          <!-- แถวละชนิด: ไอคอนใหญ่ + ชื่อ + มี/ต้องการ — สมุนไพรหลายตัวเขียวเรียวคล้ายกัน ไอคอนเล็กอย่างเดียวแยกไม่ออก (user 28 ก.ย.) -->
+          <ul class="fo-items">
+            <li v-for="(qty, id) in o.items" :key="id" class="fo-row" :class="{ lack: missing(o)[id] }">
+              <span class="fo-ico"><Emoji :char="cropOf(id).emoji" /></span>
+              <span class="fo-name">{{ cropOf(id).name }}</span>
+              <span class="fo-have">{{ Math.min(have(id), qty) }}/{{ qty }}</span>
+            </li>
+          </ul>
           <div class="fo-pay"><Emoji char="🪙" /> {{ o.reward.coins.toLocaleString() }}<span class="sr-only">เหรียญ</span></div>
           <div class="fo-btns">
             <button
@@ -75,6 +71,7 @@ onUnmounted(() => { dead = true; clearInterval(timer) })
 const cropOf = (id) => getCrop(id) || { name: id, emoji: '❓' }
 const missing = (o) => missingItems(o, board.inventory.value)
 const ready   = (o) => canDeliver(o, board.inventory.value)
+const have    = (id) => Number(board.inventory.value[id]) || 0
 const readyCount = computed(() => orders.value.filter(o => o.items && ready(o)).length)
 
 function fmt(ms) {
@@ -109,12 +106,16 @@ async function onReroll(i, o) {
    (วัดจากจอจริง 27 ส.ค.: ราง 892px ในกล่อง 487px → main ล้น 816/545) */
 .fo-rail { display: flex; gap: 8px; overflow-x: auto; min-width: 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
 .fo { min-width: 0; }
-.fo-card { flex: 0 0 172px; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 118px; border: 1px solid rgba(180,83,9,.2); border-radius: 12px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.06)); padding: 10px; }
+.fo-card { flex: 0 0 196px; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 118px; border: 1px solid rgba(180,83,9,.2); border-radius: 12px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.06)); padding: 10px; }
 .fo-card.waiting { background: rgba(0,0,0,.03); border-style: dashed; }
 .fo-wait { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 100%; color: rgba(0,0,0,.45); font-size: .75rem; font-weight: 700; }
-.fo-items { display: flex; flex-wrap: wrap; gap: 5px; }
-.fo-chip { display: inline-flex; align-items: center; gap: 3px; font-size: .78rem; font-weight: 700; background: rgba(0,0,0,.05); border-radius: 8px; padding: 3px 7px; }
-.fo-chip.lack { background: rgba(220,38,38,.1); color: #b91c1c; }
+.fo-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.fo-row { display: flex; align-items: center; gap: 7px; background: rgba(34,197,94,.09); border-radius: 9px; padding: 3px 8px 3px 4px; }
+.fo-row.lack { background: rgba(0,0,0,.045); }
+.fo-ico { font-size: 1.7rem; line-height: 1; flex-shrink: 0; }
+.fo-name { flex: 1; min-width: 0; font-size: .76rem; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fo-have { font-size: .76rem; font-weight: 800; color: #15803d; font-variant-numeric: tabular-nums; }
+.fo-row.lack .fo-have { color: #b91c1c; }
 .fo-pay { font-size: .82rem; font-weight: 800; color: #b45309; }
 .fo-btns { display: flex; gap: 6px; }
 .fo-send { flex: 1; border: none; background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; font-weight: 800; font-size: .76rem; padding: 7px; border-radius: 9px; cursor: pointer; font-family: inherit; }
