@@ -520,6 +520,15 @@ export const STATUS_MAX = 4
 export const PASSIVE_V2_CHANGED = ['cat', 'phoenix', 'cerberus', 'trex', 'wolf', 'ouroboros', 'qilin',
   'bahamut', 'mammoth', 'turtle', 'mouse', 'unicorn', 'hamster']
 
+// ป้ายบาลานซ์รอบ 1 (27 ก.ย. 2026) — ขึ้นบนการ์ด 14 วันแล้วหายเอง · รอบหน้าแทนทั้งก้อน
+// ตัวใหม่ ต.ค. (ซอล/เอิร์ธ/ลูน่า) ไม่ติดป้าย — ยังไม่มีใครได้ (user)
+export const BALANCE_PATCH = {
+  date: '2026-09-27', days: 14,
+  tags: { lion: 'buff', hamster: 'buff', hedgehog: 'buff', mouse: 'buff', cat: 'buff', butterfly: 'buff', turtle: 'buff',
+          bahamut: 'nerf', mammoth: 'nerf',
+          kirin: 'rework', simurgh: 'rework', trex: 'rework', virus: 'rework' },
+}
+
 /** ป้ายไหนสำคัญกว่าเมื่อพื้นที่ไม่พอ — เลขน้อย = มาก่อน · ไม่อยู่ในนี้ = 50 (เรียงตามลำดับเดิม)
  *  🔑 เกณฑ์: "อ่านแล้วเปลี่ยนความเข้าใจว่าไฟต์กำลังเป็นยังไง" มาก่อน "บัฟตัวเลขที่รู้ก็ทำอะไรไม่ได้"
  *  ⚠️ ยังต้องมีแม้เพดานจะพอ เพราะป้ายชั้นเชื้อ (ชั้น FX) มาแย่งพื้นที่เดียวกันบนการ์ด */

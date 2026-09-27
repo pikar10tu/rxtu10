@@ -52,6 +52,7 @@
           <span v-if="activeSet.has(p.id)" class="pt-cell-team">ทีม</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
           <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.emoji || '✊'" /></span>
+          <span v-if="balTagOf(p.id)" class="pt-cell-bal" :class="balTagOf(p.id).kind" :title="`ปรับสมดุล: ${balTagOf(p.id).label}`" :aria-label="`ปรับสมดุล: ${balTagOf(p.id).label}`"><Emoji :char="balTagOf(p.id).icon" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
           <span v-if="clampGrade(p.grade) > 0" class="pt-cell-grade">{{ GRADE_LABELS[clampGrade(p.grade)] }}</span>
@@ -86,6 +87,7 @@ import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { RARITY, PETS, ELEMENTS, GRADE_LABELS } from '../data/index.js'
 import { PET_PASSIVES, PASSIVE_V2_CHANGED } from '../data/petPassives.js'
+import { balanceTagOf } from '../utils/balanceTag.js'
 import { petDailyCoins } from '../utils/petUtils.js'
 import { clampGrade } from '../data/petPower.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
@@ -131,6 +133,7 @@ const teamSlots = computed(() => {
   return a
 })
 const defOf = (id) => PETS.find(p => p.id === id) || { emoji: '❓' }
+const balTagOf = (id) => balanceTagOf(id)
 const teamPetOf = (id) => pets.value.find(p => p.id === id) || { id }
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
@@ -179,6 +182,8 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-name { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .pt-cell-copies { position: absolute; bottom: 2px; left: 4px; font-size: .7rem; font-weight: 800; color: rgba(0,0,0,.4); }
 .pt-cell-el { position: absolute; top: 4px; left: 4px; font-size: .7rem; background: rgba(0,0,0,.06); border-radius: 7px; padding: 1px 3px; line-height: 1; }
+/* ป้ายบาลานซ์ 27 ก.ย. 2026 — เล็ก มุมขวาบน หายเองหลัง 14 วัน (utils/balanceTag.js) */
+.pt-cell-bal { position: absolute; top: 4px; right: 4px; font-size: .7rem; line-height: 1; background: rgba(255,255,255,.85); border-radius: 7px; padding: 1px 3px; }
 .pt-cell-grade { position: absolute; bottom: -5px; right: -5px; background: #1e293b; color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; line-height: 1.3; }
 .pt-news { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; padding: 10px 12px;
   background: #eef2ff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); }
