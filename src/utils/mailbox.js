@@ -33,6 +33,12 @@ export function canClaim(mail) {
 }
 
 // ต้องสนใจไหม = ยังไม่อ่าน หรือ ยังกดรับได้ (ใช้คิด badge)
+// ลบได้ = ไม่มีรางวัลค้างรับ (รับแล้ว หรือไม่มีรางวัลตั้งแต่แรก) — user สั่ง 28 ก.ย. 2026
+// ⚠️ welcome-v1 ลบแล้วไม่เด้งกลับ: auth.js กันด้วย flag welcomeGiftV1 บน user doc ไม่ได้ดูว่ามีจดหมายไหม
+export function canDelete(mail) {
+  return !!mail && !canClaim(mail)
+}
+
 export function needsAttention(mail) {
   return !!mail && (!mail.read || canClaim(mail))
 }

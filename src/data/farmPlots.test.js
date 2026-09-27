@@ -2,8 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { MAX_PLOTS, PLOT_UNLOCK_COST, plotUnlockCost, nextPlotInfo } from './farmPlots.js'
 
-test('MAX_PLOTS = 12 เท่าเพดานเลเวลบ้านสูงสุด', () => {
-  assert.equal(MAX_PLOTS, 12)
+test('MAX_PLOTS = 15 เท่าเพดานเลเวลบ้านสูงสุด', () => {
+  assert.equal(MAX_PLOTS, 15)
 })
 
 test('แปลงที่ 1 ฟรี, ราคาแพงขึ้นเรื่อยๆ (strictly increasing)', () => {
@@ -24,7 +24,7 @@ test('แปลงช่วงต้นราคาถูกตามดีไ�
 
 test('plotUnlockCost นอกช่วง → null', () => {
   assert.equal(plotUnlockCost(0), null)
-  assert.equal(plotUnlockCost(13), null)
+  assert.equal(plotUnlockCost(16), null)
   assert.equal(plotUnlockCost(-1), null)
 })
 
@@ -50,8 +50,8 @@ test('nextPlotInfo: ชนเพดานเลเวลบ้าน → atCeili
   assert.equal(info.reason, 'atCeiling')
 })
 
-test('nextPlotInfo: ปลดครบ 12 → maxed (nextPlot/cost = null)', () => {
-  const info = nextPlotInfo({ plotsUnlocked: 12, ceiling: 12, coins: 999999 })
+test('nextPlotInfo: ปลดครบ 15 → maxed (nextPlot/cost = null)', () => {
+  const info = nextPlotInfo({ plotsUnlocked: 15, ceiling: 15, coins: 999999 })
   assert.equal(info.canUnlock, false)
   assert.equal(info.reason, 'maxed')
   assert.equal(info.nextPlot, null)

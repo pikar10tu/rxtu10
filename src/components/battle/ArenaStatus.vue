@@ -19,11 +19,13 @@
     </div>
 
     <div class="as-quota">
-      <span class="as-dots" role="img" :aria-label="`บุกได้อีก ${attacksLeft} จาก ${max} ครั้ง`">
-        <i v-for="i in max" :key="i" class="as-dot" :class="{ used: i > attacksLeft }" />
+      <span class="as-dots" role="img" :aria-label="`พลังบุก ${attacksLeft} จาก ${energyMax}`">
+        <i v-for="i in energyMax" :key="i" class="as-dot" :class="{ used: i > attacksLeft }" />
       </span>
       <span class="as-quota-txt">
-        {{ attacksLeft > 0 ? `บุกได้อีก ${attacksLeft} ครั้งวันนี้` : 'โควตาวันนี้หมดแล้ว พรุ่งนี้เริ่มใหม่' }}
+        พลังบุก {{ attacksLeft }}/{{ energyMax }}
+        <template v-if="nextMs > 0"> · +1 ใน {{ countdown }}</template>
+        <template v-else> · เต็มแล้ว</template>
       </span>
     </div>
 
@@ -39,7 +41,7 @@
         </span>
         <!-- ⚠️ ข้อความนี้ตรงตามโค้ดจริง: rosterOpponents() ข้ามแถวที่ tm ว่าง
              ⇒ ไม่จัดทีม = ไม่โผล่บนกระดานของใครเลย ห้ามเขียนว่า "จะโดนบุกแล้วแพ้ฟรี" -->
-        <span v-else class="as-team-empty">ยังไม่ได้ตั้งทีม — ตอนนี้ยังไม่มีใครบุกเราได้</span>
+        <span v-else class="as-team-empty">ยังไม่ได้ตั้งทีม — ตั้งทีมก่อนถึงจะหาคู่ได้ และคนอื่นถึงจะสุ่มเจอเรา</span>
       </span>
       <button class="as-pick" :class="{ hot: !team.length }" @click="$emit('pick')">
         <Emoji char="🛡️" /> จัดทีม
@@ -62,7 +64,6 @@
 import { computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import PetThumb from '../shared/PetThumb.vue'
-import { PVP_DAILY_ATTACKS } from '../../utils/pvpRating.js'
 import { currentSeasonId, seasonMonthLabel } from '../../utils/pvpSeason.js'
 import SeasonCountdown from '../shared/SeasonCountdown.vue'
 import ArenaFloor from './ArenaFloor.vue'
@@ -74,6 +75,8 @@ const props = defineProps({
   wins: { type: Number, default: 0 },
   losses: { type: Number, default: 0 },
   attacksLeft: { type: Number, default: 0 },
+  energyMax: { type: Number, default: 5 },
+  nextMs: { type: Number, default: 0 },    // อีกกี่ ms ได้พลังเพิ่ม 1 (0 = เต็ม)
   myRank: { type: Number, default: null },
   total: { type: Number, default: 0 },
   team: { type: Array, default: () => [] },   // หน่วยรบจาก resolveBattleTeam
@@ -82,7 +85,10 @@ const props = defineProps({
 defineEmits(['pick', 'arena'])
 const arenaName = computed(() => getArena(parseArenaRef(props.arenaRef).id)?.name || '')
 
-const max = PVP_DAILY_ATTACKS
+const countdown = computed(() => {
+  const t = Math.ceil(props.nextMs / 1000)
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`
+})
 
 const rankLabel = computed(() =>
   props.myRank ? `อันดับ ${props.myRank} จาก ${props.total}` : 'ยังไม่ติดอันดับ')

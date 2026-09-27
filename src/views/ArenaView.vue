@@ -1,5 +1,5 @@
 <!-- src/views/ArenaView.vue -->
-<!-- สนามประลอง PvP — แต้มประลอง, กระดานคู่ต่อสู้ 5 ช่อง, บุก, จัดทีม
+<!-- สนามประลอง PvP — แต้มประลอง, หาคู่แบบสุ่ม (รูเล็ต) + พลังบุก, รางวัลรายวัน, จัดทีม
      สนามปิด = เด้งกลับ /play ทันที (นักศึกษาไม่เห็นหน้านี้เลย)
      admin: เข้าและบุกได้เสมอแม้ pvpOpen=false (ทดสอบก่อนเปิดจริง) -->
 <template>
@@ -14,50 +14,28 @@
 
     <template v-if="authStore.isLoggedIn">
       <ArenaStatus
-        :rating="rating" :wins="wins" :losses="losses" :attacks-left="attacksLeft"
+        :rating="rating" :wins="wins" :losses="losses" :attacks-left="attacksLeft" :energy-max="energyMax" :next-ms="energy.nextMs"
         :my-rank="rivals.myRank" :total="rivals.total" :team="myTeam" :arena-ref="myArena"
         @pick="pickOpen = true" @arena="arenaOpen = true"
       />
 
-      <!-- กระดานคู่ต่อสู้ — โซน "ของกดได้" หัวโซนชัดเพื่อแยกจากแผงสถานะด้านบน -->
-      <div class="ar-board-head">
-        <span class="ar-board-title"><Emoji char="⚔️" /> เลือกคู่ต่อสู้</span>
-        <button class="ar-refresh" :disabled="busy || refreshLeft > 0" @click="onRefresh">
-          <Emoji char="🔄" /> {{ refreshLeft > 0 ? `อีก ${Math.ceil(refreshLeft / 60000)} นาที` : 'เปลี่ยนคู่' }}
+      <!-- หาคู่ = สุ่มอย่างเดียว เลือกคู่ไม่ได้ (28 ก.ย. 2026 — แทนกระดาน 5 ช่อง ที่ทำให้คนรุมตีคนอ่อน) -->
+      <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0 || !myTeam.length" @click="onFind">
+        <span class="ar-find-main"><Emoji char="⚔️" /> หาคู่ต่อสู้</span>
+        <span class="ar-find-sub">{{ findSub }}</span>
+      </button>
+
+      <!-- รางวัลรายวัน: ลงสนามครบ 5 ครั้ง กดรับ -->
+      <div class="ar-daily" :class="{ ready: canClaim }">
+        <span class="ar-daily-l">
+          <span class="ar-daily-t"><Emoji char="🎁" /> ลงสนามครบ {{ dailyGoal }} ครั้งวันนี้</span>
+          <span class="ar-daily-bar"><i :style="{ width: Math.min(100, daily.n / dailyGoal * 100) + '%' }" /></span>
+          <span class="ar-daily-n">{{ Math.min(daily.n, dailyGoal) }}/{{ dailyGoal }}</span>
+        </span>
+        <button class="ar-daily-btn" :disabled="!canClaim || busy" @click="onClaim">
+          <template v-if="daily.claimed">รับแล้ว</template>
+          <template v-else><Emoji char="🪙" /> {{ dailyReward.toLocaleString() }}</template>
         </button>
-      </div>
-      <div class="ar-board-hint">ตีเสร็จได้คู่ใหม่ทันที</div>
-      <div class="ar-list">
-        <div v-for="opp in opponents" :key="opp.uid" class="ar-opp">
-          <!-- สนามของคู่ต่อสู้ = ครึ่งบนตอนเราบุก — เห็นก่อนกดบุก (user ขอ ให้สนามสวยมีคนเห็น) -->
-          <div class="ar-opp-arena">
-            <ArenaFloor mode="thumb" :arena-ref="oppArena(opp)" />
-            <span class="ar-opp-arena-name">{{ oppArenaName(opp) }}</span>
-          </div>
-          <div class="ar-opp-top">
-            <span class="ar-opp-info">
-              <span class="ar-opp-name">
-                <Emoji :char="opp.isBot ? '🤖' : '🧑'" /> {{ opp.isBot ? ('หุ่นซ้อม' + (opp.label ? ' · ' + opp.label : '')) : (opp.nickname || '?') }}
-              </span>
-              <span class="ar-opp-rt">
-                <span v-if="rankOf(opp)" class="ar-opp-rank">{{ rankBadge(rankOf(opp)) }}</span>
-                {{ (opp.rating || 0).toLocaleString() }} แต้ม<span v-if="opp.isBot"> · ฝึกซ้อม</span>
-                <span class="ar-opp-coin"><Emoji char="🪙" /> {{ coinPreview(opp).toLocaleString() }}</span>
-              </span>
-            </span>
-            <button class="ar-fight" :disabled="!canFight || busy || attacksLeft <= 0" @click="onFight(opp)">
-              <Emoji char="⚔️" /> บุก
-            </button>
-          </div>
-          <!-- ทีมศัตรูได้บรรทัดของตัวเอง — 34px เดิมเล็กจนอ่าน ATK/HP บนการ์ดไม่ออกเลย
-               และกดไม่ได้ ⇒ ไม่มีทางรู้ว่าอีกฝั่งมีทักษะอะไรก่อนบุก -->
-          <div class="ar-opp-team">
-            <button v-for="(p, i) in oppPreview(opp)" :key="i" type="button" class="ar-opp-pet"
-                    :aria-label="`ดูข้อมูล ${petName(p)}`" @click="scout = p">
-              <PetThumb :pet="p" />
-            </button>
-          </div>
-        </div>
       </div>
 
       <ArenaRankCard :rivals="rivals" />
@@ -69,7 +47,7 @@
     <TeamPicker v-model:open="pickOpen" />
     <ArenaSheet v-model:open="arenaOpen" />
     <BattleReplay :data="replay" theme="arena" @close="replay = null" />
-    <PetScoutCard :pet="scout" @close="scout = null" />
+    <PvpRoulette :open="spinning" :names="rouletteList" @done="onSpinDone" />
   </div>
 </template>
 
@@ -88,26 +66,20 @@ import ArenaStatus from '../components/battle/ArenaStatus.vue'
 import ArenaRankCard from '../components/battle/ArenaRankCard.vue'
 import { arenaRanking } from '../utils/arenaRivals.js'
 import { PVP_RATING_START } from '../utils/pvpRating.js'
-import PetThumb from '../components/shared/PetThumb.vue'
-import PetScoutCard from '../components/pets/PetScoutCard.vue'
-import { getPetDef } from '../data/index.js'
+import PvpRoulette from '../components/battle/PvpRoulette.vue'
+import { rouletteNames } from '../data/pvpRoulette.js'
 import HelpButton from '../components/help/HelpButton.vue'
-import { rosterArena, parseArenaRef } from '../utils/arenas.js'
-import { getArena } from '../data/arenas.js'
-import ArenaFloor from '../components/battle/ArenaFloor.vue'
+import { rosterArena } from '../utils/arenas.js'
 import ArenaSheet from '../components/battle/ArenaSheet.vue'
 
 const authStore = useAuthStore()
 const members = useMembersStore()
-const { pvpOpen } = useAppConfig()
-const { rating, wins, losses, attacksLeft, myTeam, opponents, fight, refreshBoard, refreshLeft, coinPreview } = useArena()
+const { pvpOpen, rawConfig } = useAppConfig()
+const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily } = useArena()
 
 const pickOpen = ref(false)
 const arenaOpen = ref(false)
 const myArena = computed(() => rosterArena(authStore.userData))
-// บอทไม่มีแถว roster = สนามฟรี
-const oppArena = (opp) => (opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null))
-const oppArenaName = (opp) => getArena(parseArenaRef(oppArena(opp)).id)?.name || ''
 const replay = ref(null)
 const busy = ref(false)
 
@@ -119,9 +91,12 @@ const router = useRouter()
 onMounted(() => { if (!canFight.value) router.replace('/play') })
 watch(canFight, (ok) => { if (!ok) router.replace('/play') })   // admin ปิดสนามระหว่างมีคนอยู่ในหน้า
 
-const oppPreview = (opp) => opp.team   // roster/บอท ให้ทีมมาพร้อมแล้ว
-const scout = ref(null)
-const petName = (p) => getPetDef(p?.id)?.name || 'เพ็ท'
+const rouletteList = computed(() => rouletteNames(rawConfig.value?.pvpRoulette))
+const findSub = computed(() => {
+  if (!myTeam.value.length) return 'จัดทีมก่อนนะ'
+  if (attacksLeft.value > 0) return `ใช้พลังบุก 1 · เหลือ ${attacksLeft.value}/${energyMax}`
+  return `พลังบุกหมด · อีก ${Math.ceil(energy.value.nextMs / 60000)} นาทีได้เพิ่ม`
+})
 
 // อันดับแต้มประลองทั้งรุ่น — อ่าน rosterRows ดิบ (rosterUsers key ด้วย studentId แล้วตก guest)
 // ค่าสดของเราจาก useArena ทับแถวตัวเองใน roster ซึ่งอาจเก่ากว่าหนึ่งไฟต์
@@ -144,34 +119,46 @@ const rivals = computed(() => {
   })
 })
 
-// อันดับของคู่ต่อสู้ — Map สร้างครั้งเดียวต่อการเปลี่ยนกระดาน ไม่ใช่ find() ต่อการ์ด
-const rankByUid = computed(() => {
-  const m = new Map()
-  for (const r of (rivals.value?.all || [])) m.set(r.uid, r.rank)
-  return m
-})
-// บอทไม่มีแถวใน roster · คนจริงที่ยังไม่เคยบุกก็ยังไม่ติดอันดับ → ทั้งคู่คืน null = ไม่ขึ้นป้าย
-const rankOf = (opp) => (opp?.isBot ? null : (rankByUid.value.get(opp?.uid) ?? null))
-const rankBadge = (rank) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`)
+// กด → ยิงไฟต์จริงทันที (เขียนผลแล้ว) คู่ขนานกับรูเล็ต · replay ขึ้นเมื่อทั้งสองเสร็จ
+const spinning = ref(false)
+let pending = null      // ผลไฟต์ที่รอรูเล็ตหมุนจบ
+let spinDone = false
+function reveal() {
+  if (!spinDone || !pending) return
+  spinning.value = false
+  replay.value = pending
+  pending = null
+}
+function onSpinDone() { spinDone = true; reveal() }
 
-async function onFight(opp) {
+async function onFind() {
   if (busy.value) return
-  busy.value = true
-  // สนามครึ่งบน = ของคู่ต่อสู้ (แถว roster · บอทไม่มีแถว = สนามฟรี) · ครึ่งล่าง = ของเรา
-  const top = opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null)
+  busy.value = true; spinDone = false; pending = null
+  spinning.value = true
   // ⚠️ หยิบแต้มก่อน await — fight() เขียนแต้มใหม่แบบ synchronous (CLAUDE.md ข้อ 9)
-  const sides = {
-    top: { name: opp?.isBot ? 'หุ่นซ้อม' : (opp?.nickname || '?'), rating: opp?.rating ?? null },
-    bot: { name: 'คุณ', rating: rating.value },
-  }
-  try { const r = await fight(opp); if (r) replay.value = { ...r, sides, arenas: { top, bot: rosterArena(authStore.userData) } } }
-  finally { busy.value = false }
+  const myRating = rating.value
+  const myArenaRef = rosterArena(authStore.userData)
+  try {
+    const r = await fight()
+    if (!r) { spinning.value = false; return }   // toast บอกเหตุแล้วใน fight()
+    const opp = r.opp
+    // สนามครึ่งบน = ของคู่ต่อสู้ (แถว roster · บอทไม่มีแถว = สนามฟรี) · ครึ่งล่าง = ของเรา
+    const top = opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null)
+    const sides = {
+      top: { name: opp?.isBot ? 'หุ่นซ้อม' : (opp?.nickname || '?'), rating: opp?.rating ?? null },
+      bot: { name: 'คุณ', rating: myRating },
+    }
+    pending = { ...r, sides, arenas: { top, bot: myArenaRef } }
+    reveal()
+  } catch (e) {
+    console.error('[arena find]', e); spinning.value = false
+  } finally { busy.value = false }
 }
 
-async function onRefresh() {
+async function onClaim() {
   if (busy.value) return
   busy.value = true
-  try { await refreshBoard() } finally { busy.value = false }
+  try { await claimDaily() } finally { busy.value = false }
 }
 
 onMounted(() => { members.loadRoster() })
@@ -181,28 +168,19 @@ onMounted(() => { members.loadRoster() })
 .ar-head { display: flex; align-items: center; justify-content: space-between; }
 .ar-head-r { display: flex; align-items: center; gap: 8px; }
 .ar-back { font-size: .8rem; color: var(--muted); text-decoration: none; }
-.ar-list { display: flex; flex-direction: column; gap: 8px; }
-.ar-opp { position: relative; display: flex; flex-direction: column; gap: 8px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 10px 10px 10px 92px; overflow: hidden; min-height: 108px; }
-/* แถบซ้ายเต็มความสูงการ์ด = ภาพย่อสนามของคู่ต่อสู้ */
-.ar-opp-arena { position: absolute; left: 0; top: 0; bottom: 0; width: 82px; }
-.ar-opp-arena-name { position: absolute; left: 4px; right: 4px; bottom: 5px; z-index: 2; font-size: .7rem; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); border-radius: 6px; padding: 1px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ar-opp-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ar-opp-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.ar-opp-name { font-size: .78rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ar-opp-rt { font-size: .7rem; color: rgba(0,0,0,.5); }
-.ar-opp-team { display: flex; gap: 8px; }
-/* 58px = อ่าน ATK/HP/สาย/เกรด ที่การ์ดมีอยู่แล้วออก · เป็นปุ่มจึงต้องรีเซ็ตสไตล์ปุ่มดีฟอลต์ */
-.ar-opp-pet { width: 58px; flex-shrink: 0; padding: 0; border: none; background: none; font-family: inherit; cursor: pointer; }
-.ar-fight { border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .76rem; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
-.ar-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.ar-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
+.ar-find { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; border: var(--bw) solid var(--line); border-radius: 16px; padding: 16px 12px; margin-bottom: 12px; font-family: inherit; color: #fff; background: linear-gradient(160deg, #e11d48, #f97316); box-shadow: var(--pop); cursor: pointer; }
+.ar-find:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.ar-find:disabled { background: #cbd5e1; box-shadow: none; cursor: default; }
+.ar-find-main { font-size: 1.15rem; font-weight: 800; }
+.ar-find-sub { font-size: .74rem; font-weight: 700; opacity: .9; }
+.ar-daily { display: flex; align-items: center; gap: 10px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); padding: 10px 12px; margin-bottom: 16px; }
+.ar-daily.ready { background: #fef9c3; }
+.ar-daily-l { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ar-daily-t { font-size: .8rem; font-weight: 800; }
+.ar-daily-bar { height: 8px; border-radius: 999px; background: rgba(0,0,0,.08); overflow: hidden; }
+.ar-daily-bar i { display: block; height: 100%; background: #f59e0b; border-radius: 999px; transition: width .3s; }
+.ar-daily-n { font-size: .7rem; color: rgba(0,0,0,.55); font-weight: 700; }
+.ar-daily-btn { flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .78rem; background: #fde68a; box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.ar-daily-btn:disabled { background: #e2e8f0; color: rgba(0,0,0,.45); box-shadow: none; cursor: default; }
 .ar-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
-.ar-board-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-.ar-board-title { font-size: .88rem; font-weight: 800; }
-.ar-board-hint { font-size: .72rem; color: rgba(0,0,0,.5); margin-bottom: 8px; }
-.ar-opp-rank { font-weight: 800; color: var(--primary); margin-right: 3px; }
-.ar-refresh { border: var(--bw) solid var(--line); background: #fff; border-radius: 11px; padding: 6px 12px; font-family: inherit; font-weight: 800; font-size: .74rem; cursor: pointer; box-shadow: var(--pop); display: inline-flex; align-items: center; gap: 5px; }
-.ar-refresh:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.ar-refresh:disabled { opacity: .5; cursor: default; }
-.ar-opp-coin { margin-left: 6px; font-weight: 800; color: #b45309; }
 </style>

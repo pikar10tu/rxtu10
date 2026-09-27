@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { collection, getDocs, doc, updateDoc, query, orderBy, runTransaction, increment, serverTimestamp, arrayUnion } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, runTransaction, increment, serverTimestamp, arrayUnion } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from './auth.js'
 import { useUsageStore } from './usage.js'
-import { attentionCount, canClaim, rewardCoins, rewardTickets, rewardArena } from '../utils/mailbox.js'
+import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardArena } from '../utils/mailbox.js'
 import { getArena } from '../data/arenas.js'
 import { announceAchievement, addEarned } from '../composables/useAchievements.js'
 import { achievementDocId } from '../utils/achievements.js'
@@ -90,5 +90,16 @@ export const useMailbox = defineStore('mailbox', () => {
     } catch (e) { console.error('[mail claim]', e); return false }
   }
 
-  return { mails, loading, attention, load, markRead, claim }
+  // ลบจดหมายที่ไม่มีรางวัลค้าง (rules: เจ้าของลบได้) · optimistic แล้วคืนที่เดิมถ้าพลาด
+  async function remove(id) {
+    const uid = auth.currentUser?.uid
+    const i = mails.value.findIndex(x => x.id === id)
+    const m = mails.value[i]
+    if (!uid || !canDelete(m)) return false
+    mails.value.splice(i, 1)
+    try { await deleteDoc(doc(db, 'users', uid, 'mail', id)); usage.track(0, 1); return true }
+    catch (e) { console.error('[mail delete]', e); mails.value.splice(i, 0, m); return false }
+  }
+
+  return { mails, loading, attention, load, markRead, claim, remove }
 })

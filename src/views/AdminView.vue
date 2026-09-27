@@ -57,6 +57,20 @@
         </div>
       </section>
 
+      <!-- ───── รูเล็ตหาคู่ PvP (config/app.pvpRoulette) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🎰" /> ชื่อบนรูเล็ตหาคู่</span></div>
+        <div class="admin-hint">
+          บรรทัดละ 1 ชื่อ (สูงสุด {{ ROULETTE_MAX }} ชื่อ · ชื่อละไม่เกิน {{ ROULETTE_NAME_MAX }} ตัวอักษร) —
+          ของตกแต่งล้วน รูเล็ตจบที่ "{{ ROULETTE_WINNER }}" เสมอ · ปล่อยว่าง = ใช้ชุดตั้งต้น
+        </div>
+        <textarea v-model="rouletteText" class="admin-search roulette-ta" rows="8" :placeholder="ROULETTE_DEFAULT.join('\n')" />
+        <div class="ev-btns">
+          <button class="btn-mini btn-gold" :disabled="savingRoulette" @click="saveRoulette">บันทึก</button>
+          <button class="btn-mini btn-gray" :disabled="savingRoulette" @click="rouletteText = ROULETTE_DEFAULT.join('\n')">ใส่ชุดตั้งต้น</button>
+        </div>
+      </section>
+
       <!-- ───── ตรวจข้อสอบ (วิชาการ) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🔍" /> ตรวจข้อสอบ (วิชาการ)</span></div>
@@ -452,7 +466,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, where, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction, increment } from 'firebase/firestore'
 import { buildRosterFromUsers } from '../utils/roster.js'
@@ -849,6 +864,27 @@ async function endGachaEvent() {
   await writeGachaEvent({ ...(rawConfig.value?.gachaEvent || {}), endsAt: Date.now() }, 'จบอีเวนต์แล้ว')
 }
 
+// ── รูเล็ตหาคู่ PvP (config/app.pvpRoulette) ──
+const rouletteText = ref('')
+const savingRoulette = ref(false)
+// เติมช่องจากค่าที่บันทึกไว้ครั้งแรกที่ config โหลด (ไม่ทับตอนแอดมินกำลังพิมพ์)
+let rouletteLoaded = false
+watch(() => rawConfig.value?.pvpRoulette, (v) => {
+  if (rouletteLoaded || rawConfig.value == null) return
+  rouletteLoaded = true
+  rouletteText.value = Array.isArray(v) ? v.join('\n') : ''
+}, { immediate: true })
+async function saveRoulette() {
+  const list = rouletteText.value.split('\n').map(x => x.trim().slice(0, ROULETTE_NAME_MAX)).filter(Boolean).slice(0, ROULETTE_MAX)
+  savingRoulette.value = true
+  try {
+    await setDoc(doc(db, 'config', 'app'), { pvpRoulette: list }, { merge: true })
+    rouletteText.value = list.join('\n')
+    toast(list.length ? `บันทึก ${list.length} ชื่อแล้ว` : 'ล้างแล้ว — ใช้ชุดตั้งต้น', 'success')
+  } catch (e) { console.error('[roulette save]', e); toast('บันทึกไม่สำเร็จ', 'error') }
+  finally { savingRoulette.value = false }
+}
+
 // ── maintenance toggle (config/app.maintenance) ──
 const savingMaint = ref(false)
 const maintPreview = ref(false)
@@ -1107,6 +1143,7 @@ async function saveEcon(m) {
 .bc-field { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: .7rem; font-weight: 700; color: #64748b; }
 .bc-coins, .bc-target { box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: .82rem; font-weight: 700; background: #fff; color: var(--ink); width: 100%; }
 .bc-send { width: 100%; }
+.roulette-ta { width: 100%; resize: vertical; font-family: inherit; margin: 6px 0; }
 .admin-card {
   background: #fff;
   border: var(--bw) solid var(--line);

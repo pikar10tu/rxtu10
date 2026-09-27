@@ -82,8 +82,13 @@ export const USER_DEFAULTS = {
   incomeBuffFrom: null,    // ms เริ่มบัฟ (คู่กับ incomeBuffUntil) — รองรับสแตคต่อเวลา
   // ── PvP (สนามประลอง) ──
   pvp: { rating: 1000, wins: 0, losses: 0, seasonId: null },
-  pvpAttackDate: null,   // YYYY-MM-DD (local) รีโควต้าบุกรายวัน
-  pvpAttacksUsed: 0,     // จำนวนบุกที่ใช้ไปวันนี้ (รวมคน+บอท)
+  // ⚠️ pvpAttackDate/pvpAttacksUsed/pvpBoardNonce/pvpRefreshAt = ฟิลด์ตาย (28 ก.ย. 2026 เปลี่ยนเป็นพลังบุก+สุ่มคู่)
+  pvpEnergy: null,       // พลังบุก ณ pvpEnergyAt (null = เต็ม) · utils/pvpEnergy.js
+  pvpEnergyAt: null,     // ms จุดเริ่มนับเติมครั้งถัดไป
+  pvpDaily: null,        // { date, n, claimed } รางวัลตีครบ 5/วัน · utils/pvpDaily.js
+  pvpRecent: [],         // uid คู่ล่าสุด 3 คน (กันเจอซ้ำ/สลับ)
+  pvpFightsTotal: 0,     // ลงสนามตลอดชีพ (achievement)
+  pvpDefWinsTotal: 0,    // ตั้งรับชนะตลอดชีพ (คนบุกเป็นคน +1 · rules เปิดฟิลด์เดียว)
   // ── Expedition (ส่งผจญภัย) ──
   expedition: null,   // { petIds:[3], party:[{id,rarity,element,grade}], missionId, durationId, startedAt, endsAt } | null (1 สายต่อครั้ง)
   minigames: {},   // { [key]: { best, plays } } — คะแนนมินิเกม (ดู data/minigames.js)

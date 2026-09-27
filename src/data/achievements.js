@@ -35,6 +35,16 @@ export const ACHIEVEMENTS = {
   pvp_10: { title: 'นักสู้หน้าใหม่', icon: '🥊', type: 'milestone', trigger: { stat: 'pvpWinsTotal', gte: 10 }, desc: 'ชนะอารีน่ารวม 10 ครั้ง', flavor: 'เริ่มมีชื่อในสังเวียน' },
   pvp_50: { title: 'ขาประจำสังเวียน', icon: '⚔️', type: 'milestone', trigger: { stat: 'pvpWinsTotal', gte: 50 }, desc: 'ชนะอารีน่ารวม 50 ครั้ง', flavor: 'ทุกคนจำหน้าได้' },
   pvp_200: { title: 'ราชันแห่งอารีน่า', icon: '👑', type: 'milestone', trigger: { stat: 'pvpWinsTotal', gte: 200 }, desc: 'ชนะอารีน่ารวม 200 ครั้ง', flavor: 'ใครเข้ามาก็ต้องก้มหัว' },
+  // ลานประลอง ชุด 28 ก.ย. 2026 (user สั่ง: สู้/ชนะ/ตั้งรับชนะ 100·500·1000)
+  pvp_100: { title: 'นักล่าแต้ม', icon: '🏅', type: 'milestone', trigger: { stat: 'pvpWinsTotal', gte: 100 }, desc: 'ชนะอารีน่ารวม 100 ครั้ง', flavor: 'ร้อยชัยไม่ใช่เรื่องบังเอิญ' },
+  pvp_500: { title: 'จอมทัพไร้พ่าย', icon: '🗡️', type: 'milestone', trigger: { stat: 'pvpWinsTotal', gte: 500 }, desc: 'ชนะอารีน่ารวม 500 ครั้ง', flavor: 'ชื่อนี้ทำคู่แข่งถอยครึ่งก้าว' },
+  pvp_1000: { title: 'เทพแห่งสังเวียน', icon: '🔱', type: 'milestone', trigger: { stat: 'pvpWinsTotal', gte: 1000 }, desc: 'ชนะอารีน่ารวม 1,000 ครั้ง', flavor: 'สังเวียนนี้ถูกสร้างมาเพื่อเรา' },
+  fight_100: { title: 'ขาลุยสนาม', icon: '🥾', type: 'milestone', trigger: { stat: 'pvpFightsTotal', gte: 100 }, desc: 'ลงสนามประลองรวม 100 ครั้ง', flavor: 'แพ้บ้างชนะบ้าง แต่ไม่เคยหาย' },
+  fight_500: { title: 'สิงห์สังเวียน', icon: '🦁', type: 'milestone', trigger: { stat: 'pvpFightsTotal', gte: 500 }, desc: 'ลงสนามประลองรวม 500 ครั้ง', flavor: 'ลุงยามจำหน้าได้แล้ว' },
+  fight_1000: { title: 'ผู้อาศัยในสังเวียน', icon: '🏟️', type: 'milestone', trigger: { stat: 'pvpFightsTotal', gte: 1000 }, desc: 'ลงสนามประลองรวม 1,000 ครั้ง', flavor: 'บ้านอยู่ไหน? อยู่ในสนามนี่แหละ' },
+  def_100: { title: 'กำแพงเหล็ก', icon: '🛡️', type: 'milestone', trigger: { stat: 'pvpDefWinsTotal', gte: 100 }, desc: 'ตั้งรับชนะรวม 100 ครั้ง', flavor: 'มาเท่าไหร่ก็กลับไปเท่านั้น' },
+  def_500: { title: 'ป้อมปราการ', icon: '🏰', type: 'milestone', trigger: { stat: 'pvpDefWinsTotal', gte: 500 }, desc: 'ตั้งรับชนะรวม 500 ครั้ง', flavor: 'บ้านนี้ไม่รับแขกไม่ได้นัด' },
+  def_1000: { title: 'ผู้พิทักษ์นิรันดร์', icon: '⛩️', type: 'milestone', trigger: { stat: 'pvpDefWinsTotal', gte: 1000 }, desc: 'ตั้งรับชนะรวม 1,000 ครั้ง', flavor: 'หลับอยู่ก็ยังชนะ' },
   tower_legend: { title: 'ตำนานแห่งหอคอย', icon: '🏯', type: 'milestone', trigger: { stat: 'towerChampTotal', gte: 3 }, desc: 'ติดท็อปหอคอยครบ 3 ซีซั่น', flavor: 'ชื่อสลักไว้บนยอดหอคอย' },
   arena_legend: { title: 'ตำนานแห่งสังเวียน', icon: '🏟️', type: 'milestone', trigger: { stat: 'arenaChampTotal', gte: 3 }, desc: 'ติดท็อปอารีน่าครบ 3 ซีซั่น', flavor: 'สังเวียนนี้เป็นบ้านของเรา' },
   // สะสมเพ็ท

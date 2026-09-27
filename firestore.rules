@@ -80,6 +80,13 @@ service cloud.firestore {
             )
           )
         )
+        // PvP ตั้งรับชนะ (28 ก.ย. 2026): คนบุกที่แพ้ +1 ตัวนับของเจ้าของทีมได้ ฟิลด์เดียว ทีละ 1 พอดี
+        // เลวร้ายสุด = มีคนปั่นยอดให้คนอื่น (ได้แค่ achievement ตั้งรับ ไม่มีเหรียญ) — ยอมรับได้
+        || (
+          request.auth.uid != userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pvpDefWinsTotal'])
+          && request.resource.data.get('pvpDefWinsTotal', 0) == resource.data.get('pvpDefWinsTotal', 0) + 1
+        )
         || isAdmin()
       );
       allow delete: if isAdmin();

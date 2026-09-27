@@ -194,3 +194,11 @@ test('สนามแชมป์ในจดหมาย: rewardArena · canCla
   assert.equal(rewardArena({ reward: { arena: { id: 'zz-unknown', rank: 1 } } }), null)   // ไม่อยู่ในทะเบียน
   assert.equal(rewardArena({ reward: { coins: 5 } }), null)
 })
+
+import { canDelete } from './mailbox.js'
+test('canDelete: รับแล้ว/ไม่มีรางวัล = ลบได้ · รางวัลค้าง = ลบไม่ได้', () => {
+  assert.equal(canDelete({ reward: { coins: 100 }, claimed: false }), false)
+  assert.equal(canDelete({ reward: { coins: 100 }, claimed: true }), true)
+  assert.equal(canDelete({ title: 'ประกาศ' }), true)
+  assert.equal(canDelete(null), false)
+})

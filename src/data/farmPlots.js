@@ -1,13 +1,13 @@
 // ════════════════════════════════════════════════════════════
 //  ฟาร์ม — ระบบปลดแปลงด้วยเหรียญ (coin sink)
 //  เริ่ม 1 แปลง → ซื้อปลดทีละแปลง (ราคาแพงขึ้นเรื่อยๆ ช่วงต้นถูก)
-//  แต่ปลดได้ไม่เกินเพดานตามเลเวลบ้าน residencePlots(level) (Lv1=4 … Lv12=12)
+//  แต่ปลดได้ไม่เกินเพดานตามเลเวลบ้าน residencePlots(level) (Lv1=4 … Lv15=15)
 //  ราคาทั้งหมด tunable ที่ตารางเดียวด้านล่าง
 // ════════════════════════════════════════════════════════════
 
-export const MAX_PLOTS = 12
+export const MAX_PLOTS = 15
 
-// index = หมายเลขแปลง (1-based). [1]=0 เริ่มต้นฟรี, [2..12]=ราคาซื้อปลด
+// index = หมายเลขแปลง (1-based). [1]=0 เริ่มต้นฟรี, [2..15]=ราคาซื้อปลด
 export const PLOT_UNLOCK_COST = [
   null,     // 0 — ไม่ใช้
   0,        // แปลง 1 — เริ่มต้นฟรี
@@ -22,6 +22,9 @@ export const PLOT_UNLOCK_COST = [
   150000,   // 10
   320000,   // 11
   700000,   // 12
+  1000000,  // 13 (28 ก.ย. 2026 — user เลือก 1M/1.5M/2M)
+  1500000,  // 14
+  2000000,  // 15
 ]
 
 /** ราคาซื้อ "แปลงลำดับที่ plotNumber" — null ถ้านอกช่วง 1..MAX_PLOTS */
@@ -36,7 +39,7 @@ export function plotUnlockCost(plotNumber) {
  *   plotsUnlocked = จำนวนแปลงที่ปลดแล้ว (≥1)
  *   ceiling       = เพดานตามเลเวลบ้าน residencePlots(level)
  *   coins         = เหรียญปัจจุบัน
- * reason: 'ok' ปลดได้ · 'notEnoughCoins' เงินไม่พอ · 'atCeiling' ชนเพดานบ้าน · 'maxed' ครบ 12
+ * reason: 'ok' ปลดได้ · 'notEnoughCoins' เงินไม่พอ · 'atCeiling' ชนเพดานบ้าน · 'maxed' ครบ 15
  */
 export function nextPlotInfo({ plotsUnlocked, ceiling, coins }) {
   const owned = Math.max(1, Math.floor(Number(plotsUnlocked) || 1))

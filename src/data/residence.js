@@ -3,7 +3,7 @@
 // ════════════════════════════════════════════════════════════
 //  Narrative arc: สู้ชีวิต → สร้างตัว → ประสบความสำเร็จ → (อนาคต) เหนือระดับ
 //  15 tiers ปลดครบแล้ว (25 ก.ย. 2026 user สั่งขยายเพดาน 12 → 15 พร้อมชื่อใหม่ 13–15)
-//  ⚠️ แปลงฟาร์มยังตันที่ 12 (MAX_PLOTS) — ชั้น 13–15 จึงใส่ plots: 12 ให้ตรงของจริง
+//  แปลงฟาร์มขยายถึง 15 แล้ว (28 ก.ย. 2026) — ชั้น 13–15 ปลดแปลง 13/14/15
 //  `residence.level` drives daily income, farm plots, pet-income bonus %,
 //  (battle slots ไม่ผูกเลเวลแล้ว = BATTLE_SLOTS คงที่ 3 · field `battleSlots` ในตารางเป็น legacy)
 //  market unlock, seed tier, shop discount, art/frame. All numbers tunable.
@@ -26,9 +26,9 @@ export const RESIDENCE_TIERS = [
   { level: 11, tierName: 'เพนต์เฮาส์ลอยฟ้า',         art: '🌆', upgradeCost: 350000, dailyIncome: 38000,  plots: 11, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary',  eggSlots: 5, frameColor: '#ec4899' },
   { level: 12, tierName: 'คฤหาสน์บนเกาะส่วนตัว',     art: '🏝️', upgradeCost: 650000, dailyIncome: 55000,  plots: 12, battleSlots: 4, marketUnlocked: true,  maxSeedTier: 'legendary', eggSlots: 6, frameColor: '#f59e0b' },
   // ── 🚀 เหนือระดับ (ปลดแล้ว) ──
-  { level: 13, tierName: 'คฤหาสน์ลอยตัวกลางมหาสมุทร', art: '🌊', upgradeCost: 1100000, dailyIncome: 75000,  plots: 12, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#f43f5e' },
-  { level: 14, tierName: 'มหานครใต้บาดาล',           art: '🔱', upgradeCost: 1900000, dailyIncome: 100000, plots: 12, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#a21caf' },
-  { level: 15, tierName: 'สวนสวรรค์เหนือน่านฟ้า',     art: '☁️', upgradeCost: 3200000, dailyIncome: 140000, plots: 12, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#fbbf24' },
+  { level: 13, tierName: 'คฤหาสน์ลอยตัวกลางมหาสมุทร', art: '🌊', upgradeCost: 1100000, dailyIncome: 75000,  plots: 13, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#f43f5e' },
+  { level: 14, tierName: 'มหานครใต้บาดาล',           art: '🔱', upgradeCost: 1900000, dailyIncome: 100000, plots: 14, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#a21caf' },
+  { level: 15, tierName: 'สวนสวรรค์เหนือน่านฟ้า',     art: '☁️', upgradeCost: 3200000, dailyIncome: 140000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#fbbf24' },
 ]
 
 export const MIN_RESIDENCE_LEVEL = 1

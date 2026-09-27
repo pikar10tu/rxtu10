@@ -33,3 +33,28 @@ export function pickHumanOpponents(candidates, myRating, seed = 0, n = BOARD_SIZ
     .slice(0, Math.max(window, n))
   return shuffle(near, rand).slice(0, n)
 }
+
+// ── Matchmaking สุ่มคู่เดียว (28 ก.ย. 2026 — แทนกระดานเลือกคู่) ──
+//  ห้ามได้คนเดิมติด + กันสลับ A-B-A-B: บล็อกคู่ล่าสุด RECENT_BLOCK คน
+//  คนในย่านน้อย ค่อยๆ ผ่อน (บล็อก 3 → 2 → 1) · เหลือแต่คนล่าสุดคนเดียว = คืน null ให้ caller ใช้บอท
+export const RECENT_BLOCK = 3
+
+export function pickMatch(candidates, myRating, recent = [], seed = 0, window = NEAR_WINDOW) {
+  const rand = mulberry32(seed >>> 0)
+  const near = shuffle([...(candidates || [])], rand)
+    .sort((a, b) => Math.abs(a.rating - myRating) - Math.abs(b.rating - myRating))
+    .slice(0, window)
+  if (!near.length) return null
+  const rec = Array.isArray(recent) ? recent : []
+  if (!rec.length) return near[Math.floor(rand() * near.length)]
+  for (let k = Math.min(RECENT_BLOCK, rec.length); k >= 1; k--) {
+    const block = new Set(rec.slice(0, k))
+    const pool = near.filter(c => !block.has(c.uid))
+    if (pool.length) return pool[Math.floor(rand() * pool.length)]
+  }
+  return null
+}
+
+/** คิวคู่ล่าสุด (ใหม่สุดหน้า) เก็บ RECENT_BLOCK คน · บอทไม่นับ */
+export const pushRecent = (recent, uid) =>
+  uid ? [uid, ...(Array.isArray(recent) ? recent : []).filter(u => u !== uid)].slice(0, RECENT_BLOCK) : (recent || [])

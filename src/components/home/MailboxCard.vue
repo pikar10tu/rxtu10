@@ -33,6 +33,10 @@
               <template v-if="rewardArena(m)"> +สนาม<Emoji char="🏟️" /></template>
             </template>
           </button>
+          <button v-if="canDelete(m)" class="mb-del" :disabled="deletingId === m.id"
+                  :aria-label="`ลบจดหมาย ${m.title}`" @click.stop="onDelete(m)">
+            <Emoji char="🗑️" />
+          </button>
         </div>
       </li>
     </ul>
@@ -44,12 +48,20 @@ import Emoji from '../shared/Emoji.vue'
 import { ref } from 'vue'
 import { useMailbox } from '../../stores/mailbox.js'
 import { useToast } from '../../composables/useToast.js'
-import { canClaim, rewardCoins, rewardTickets, rewardArena } from '../../utils/mailbox.js'
+import { canClaim, canDelete, rewardCoins, rewardTickets, rewardArena } from '../../utils/mailbox.js'
 import { getArena } from '../../data/arenas.js'
 
 const mailbox = useMailbox()
 const { toast } = useToast()
 const claimingId = ref(null)
+const deletingId = ref(null)
+
+async function onDelete(m) {
+  if (deletingId.value) return
+  deletingId.value = m.id
+  try { if (!(await mailbox.remove(m.id))) toast('ลบไม่สำเร็จ', 'error') }
+  finally { deletingId.value = null }
+}
 
 // mailbox.load() ย้ายไป HomeView onMounted แล้ว (ให้จุดแดงโชว์โดยไม่ต้องเปิดแผง)
 
@@ -91,7 +103,9 @@ async function onClaim(m) {
 .mb-item-title { font-weight: 800; font-size: .8rem; color: #1e293b; }
 .mb-item-text { font-size: .72rem; color: rgba(0,0,0,.6); line-height: 1.4; margin-top: 2px; }
 .mb-meta { font-size: .7rem; color: rgba(0,0,0,.4); margin-top: 4px; }
-.mb-action { flex-shrink: 0; }
+.mb-action { flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+.mb-del { border: none; background: rgba(0,0,0,.06); border-radius: 9px; width: 36px; height: 36px; cursor: pointer; font-size: .9rem; display: inline-flex; align-items: center; justify-content: center; }
+.mb-del:disabled { opacity: .4; cursor: default; }
 .mb-claim { border: none; border-radius: 9px; padding: 7px 11px; font-family: inherit; font-size: .72rem; font-weight: 800; color: #fff; background: var(--mint); cursor: pointer; white-space: nowrap; }
 .mb-claim.done { background: rgba(0,0,0,.12); color: rgba(0,0,0,.5); cursor: default; }
 .mb-claim:disabled { cursor: default; }

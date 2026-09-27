@@ -73,8 +73,8 @@ test('normalizeUserData: pvp defaults ครบ', () => {
   assert.equal(d.pvp.rating, 1000)
   assert.equal(d.pvp.wins, 0)
   assert.equal(d.pvp.seasonId, null)
-  assert.equal(d.pvpAttacksUsed, 0)
-  assert.equal(d.pvpAttackDate, null)
+  assert.equal(d.pvpEnergy, null)   // null = เต็ม (utils/pvpEnergy.js)
+  assert.deepEqual(d.pvpRecent, [])
 })
 test('normalizeUserData: pvp บางส่วน merge กับ default', () => {
   const d = normalizeUserData({ pvp: { rating: 1234 } })

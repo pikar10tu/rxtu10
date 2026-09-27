@@ -1,7 +1,8 @@
 // src/composables/useArena.js
-// PvP สนามประลอง — orchestration core: เรต/โควต้า/พูลคู่/บุก+เขียนผล
-import { computed } from 'vue'
-import { increment } from 'firebase/firestore'
+// PvP สนามประลอง — orchestration core: เรต/พลังบุก/สุ่มคู่/บุก+เขียนผล/รางวัลรายวัน
+import { computed, ref, onUnmounted } from 'vue'
+import { increment, doc, updateDoc } from 'firebase/firestore'
+import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useToast } from './useToast.js'
@@ -13,13 +14,15 @@ import { rankOfScore } from '../utils/newsFeed.js'
 import { useRosterSync } from './useRosterSync.js'
 import { bumpGlobalStat } from './useGlobalStats.js'
 import {
-  nextRating, BOT_RATING_MULT, PVP_DAILY_ATTACKS, PVP_RATING_START,
+  nextRating, BOT_RATING_MULT, PVP_RATING_START,
 } from '../utils/pvpRating.js'
 import { currentSeasonId, applySeasonReset } from '../utils/pvpSeason.js'
 import { getFallbackBots } from '../utils/pvpBot.js'
-import { pickHumanOpponents, BOARD_SIZE } from '../utils/pvpMatch.js'
+import { pickMatch, pushRecent } from '../utils/pvpMatch.js'
+import { energyState, spendEnergy, PVP_ENERGY_MAX } from '../utils/pvpEnergy.js'
+import { dailyView, bumpDaily, canClaimDaily, PVP_DAILY_GOAL, PVP_DAILY_REWARD } from '../utils/pvpDaily.js'
 import { teamPower, coinForResult } from '../utils/pvpCoins.js'
-import { boardSeed, canRefresh, refreshLeftMs } from '../utils/pvpBoard.js'
+import { hashStr } from '../utils/seededRng.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { buildLoseTip } from '../utils/loseTip.js'
 
@@ -40,13 +43,19 @@ export function useArena() {
   const wins      = computed(() => seasonPvp.value.wins)
   const losses    = computed(() => seasonPvp.value.losses)
 
-  // โควต้าบุกวันนี้: รีเมื่อ pvpAttackDate != วันนี้
-  const attacksLeft = computed(() => {
-    const used = auth.userData?.pvpAttackDate === todayStr()
-      ? (auth.userData?.pvpAttacksUsed || 0)
-      : 0
-    return Math.max(0, PVP_DAILY_ATTACKS - used)
-  })
+  // พลังบุก (28 ก.ย. 2026 แทนโควตา 5/วัน) — เติม 1 ทุก 20 นาที เต็ม 5 · now เดินทุกวิให้นับถอยหลังขยับ
+  const now = ref(Date.now())
+  const tick = setInterval(() => { now.value = Date.now() }, 1000)
+  onUnmounted(() => clearInterval(tick))
+  const energy = computed(() => energyState(auth.userData?.pvpEnergy, auth.userData?.pvpEnergyAt, now.value))
+  const attacksLeft = computed(() => energy.value.energy)
+  const energyMax = PVP_ENERGY_MAX
+
+  // รางวัลตีครบ 5 ครั้ง/วัน
+  const daily = computed(() => dailyView(auth.userData?.pvpDaily, todayStr()))
+  const dailyGoal = PVP_DAILY_GOAL
+  const dailyReward = PVP_DAILY_REWARD
+  const canClaim = computed(() => canClaimDaily(auth.userData?.pvpDaily, todayStr()))
 
   // ทีมของเรา (activePets slots → battle units)
   const myTeam = computed(() =>
@@ -55,28 +64,15 @@ export function useArena() {
   // พลังทีมเรา — ฐานของทั้งการจ่ายเหรียญและการเล็งบอท
   const myPower = computed(() => teamPower(myTeam.value))
 
-  // nonce ของกระดาน: ขยับเมื่อบุกจบ 1 ครั้ง หรือกดปุ่มรี · เก็บใน user doc ไม่ใช่ใน component
-  // ⇒ โหลดหน้าใหม่ได้กระดานเดิม (ไม่งั้นกด F5 รัวๆ = รีฟรีไม่จำกัด cooldown ไร้ความหมาย)
-  const boardNonce = computed(() => auth.userData?.pvpBoardNonce || 0)
-
-  // กระดาน 5 ช่อง = เท่าโควตาบุก/วัน · คนจริงก่อน บอทเติมเฉพาะช่องที่ขาด
-  // roster ให้ทีมมาพร้อมสู้แล้ว (เหมือนบอท) จึงไม่ต้องอ่าน doc คู่ต่อสู้เลย
-  const opponents = computed(() => {
+  // สุ่มคู่ 1 คน: คนจริงเรตใกล้ (ไม่ซ้ำคู่ล่าสุด) · ไม่มีเหลือ = บอท 1 ตัว
+  function pickOpponent() {
     const uid = auth.currentUser?.uid
-    const seed = boardSeed(todayStr(), uid, boardNonce.value)
-    const humans = pickHumanOpponents(
-      rosterOpponents(members.rosterRows || {}, uid), rating.value, seed,
-    )
-    // gachaEvent สด — กันเพ็ทรุ่นที่ยังไม่เปิดตัว (เช่น wave 3 ฟากฟ้า) โผล่ในทีมบอท (ดู pvpBot.js)
-    const bots = getFallbackBots(myPower.value, rating.value, seed, BOARD_SIZE - humans.length, rawConfig.value?.gachaEvent)
-    return [...humans, ...bots]
-  })
-
-  // เหรียญที่จะได้ถ้าชนะคนนี้ — โชว์บนการ์ดให้เลือกได้ว่าจะเล่นปลอดภัยหรือกล้าเสี่ยง
-  const coinPreview = (opp) => coinForResult(myPower.value, teamPower(opp?.team), true)
-
-  // cooldown ปุ่มรีเฟรช (ms ที่เหลือ · 0 = กดได้)
-  const refreshLeft = computed(() => refreshLeftMs(auth.userData?.pvpRefreshAt, Date.now()))
+    const seed = hashStr(`${uid || ''}|${Date.now()}|${Math.random()}`)
+    const human = pickMatch(rosterOpponents(members.rosterRows || {}, uid), rating.value, auth.userData?.pvpRecent, seed)
+    if (human) return human
+    // gachaEvent สด — กันเพ็ทรุ่นที่ยังไม่เปิดตัวโผล่ในทีมบอท (ดู pvpBot.js)
+    return getFallbackBots(myPower.value, rating.value, seed, 1, rawConfig.value?.gachaEvent)[0] || null
+  }
 
   // เขียนผลการสู้เข้า user doc (optimistic + server patch)
   async function applyResult(opp, won) {
@@ -93,28 +89,26 @@ export function useArena() {
       ...(base.last ? { last: base.last } : {}),
     }
     const today = todayStr()
-    const usedBefore = auth.userData?.pvpAttackDate === today
-      ? (auth.userData?.pvpAttacksUsed || 0)
-      : 0
+    const en = spendEnergy(auth.userData?.pvpEnergy, auth.userData?.pvpEnergyAt, Date.now())
+    const pvpDaily = bumpDaily(auth.userData?.pvpDaily, today)
+    const pvpRecent = opp.isBot ? (auth.userData?.pvpRecent || []) : pushRecent(auth.userData?.pvpRecent, opp.uid)
     // เหรียญตามส่วนต่างพลังทีม · แพ้ให้คนแกร่งกว่ายังได้ปลอบใจ (ดู pvpCoins)
     const coin = coinForResult(myPower.value, teamPower(opp.team), won)
     // ⚠️ CLAUDE.md ข้อ 9 — หยิบค่าก่อนเรียก patchUser (หลังเรียกแล้ว computed จะเป็นค่าใหม่ทันที)
-    const nextNonce = (auth.userData?.pvpBoardNonce || 0) + 1   // บุกจบ = กระดานชุดใหม่
     // เควสประจำวัน "ลองสู้ในสนามประลอง" — นับทั้งชนะและแพ้ (เป้าคือให้คนเข้ามา ไม่ใช่ให้เก่ง)
     // เกาะไปกับ write ที่เกิดอยู่แล้ว ⇒ 0 write เพิ่ม · เขียนไม่สำเร็จ patchUser rollback ให้ทั้งก้อน
     const dq = bumpDailyQuest(auth.userData?.dailyQuest, 'pvp', today, 1)
     const ok = await auth.patchUser(
       {
-        pvp: nextPvp, pvpAttackDate: today, pvpAttacksUsed: usedBefore + 1,
-        pvpBoardNonce: nextNonce, dailyQuest: dq,
+        pvp: nextPvp, ...en, pvpDaily, pvpRecent, dailyQuest: dq,
         ...(coin ? { coins: (auth.userData?.coins || 0) + coin } : {}),
+        pvpFightsTotal: (auth.userData?.pvpFightsTotal || 0) + 1,   // achievement สู้ตลอดชีพ
         ...(won ? { pvpWinsTotal: (auth.userData?.pvpWinsTotal || 0) + 1 } : {}),   // achievement ชนะตลอดชีพ
       },
       {
-        // ใช้ค่าตรงๆ ไม่ใช้ increment() — ให้ตรงกับ optimistic เป๊ะ กัน seed กระดานกระพริบ
-        pvp: nextPvp, pvpAttackDate: today, pvpAttacksUsed: usedBefore + 1,
-        pvpBoardNonce: nextNonce, dailyQuest: dq,
+        pvp: nextPvp, ...en, pvpDaily, pvpRecent, dailyQuest: dq,
         ...(coin ? { coins: increment(coin) } : {}),
+        pvpFightsTotal: increment(1),
         ...(won ? { pvpWinsTotal: increment(1) } : {}),
       },
     )
@@ -133,23 +127,31 @@ export function useArena() {
       event: (newRank < prevRank && newRank <= 10) ? { k: 'pv', v: newRank, t: Date.now() } : null,
     })
     if (ok) bumpGlobalStat('pvpTotal', 1)
+    // ตั้งรับชนะ → +1 ตัวนับของเจ้าของทีม (achievement ตั้งรับ) · rules เปิดให้คนอื่น +1 ฟิลด์นี้ฟิลด์เดียว
+    // พลาดไม่เป็นไร ไม่กระทบผลไฟต์ของเรา
+    if (ok && !won && !opp.isBot && opp.uid) {
+      updateDoc(doc(db, 'users', opp.uid), { pvpDefWinsTotal: increment(1) })
+        .catch(e => console.error('[pvp def win]', e))
+    }
     return { ok, newRating, delta: newRating - base.rating, coin }
   }
 
   // บุก: ตรวจสอบโควต้า+ทีม → จำลองการสู้ → เขียนผล → คืน replayData
-  async function fight(opp) {
+  async function fight() {
     if (attacksLeft.value <= 0) {
-      toast('โควต้าโจมตีวันนี้หมดแล้ว พรุ่งนี้มาใหม่นะ', 'info')
+      const m = Math.ceil(energy.value.nextMs / 60000)
+      toast(`พลังบุกหมด อีก ${m} นาทีได้เพิ่ม 1`, 'info')
       return null
     }
     if (!myTeam.value.length) {
       toast('จัดทีมก่อนนะ (อย่างน้อย 1 ตัว)', 'info')
       return null
     }
+    const opp = pickOpponent()
     // ทั้งบอทและคนจริงมี team resolve มาให้แล้ว (คนจริงมาจาก roster row tm)
-    const oppTeam = opp.team
+    const oppTeam = opp?.team
     if (!oppTeam?.length) {
-      toast('คู่ต่อสู้ยังไม่ได้จัดทีม', 'info')
+      toast('ยังหาคู่ต่อสู้ไม่ได้ ลองใหม่อีกครั้งนะ', 'info')
       return null
     }
     const result = simulateBattle(myTeam.value, oppTeam, Date.now())
@@ -172,23 +174,21 @@ export function useArena() {
     }
   }
 
-  // กดรีเฟรชกระดานเอง — ฟรีแต่มี cooldown (การรีที่ได้จากการบุกจ่ายด้วยโควตาไปแล้ว)
-  async function refreshBoard() {
-    if (!canRefresh(auth.userData?.pvpRefreshAt, Date.now())) {
-      const min = Math.ceil(refreshLeft.value / 60000)
-      toast(`เปลี่ยนคู่ต่อสู้ได้อีกครั้งในอีก ${min} นาที`, 'info')
-      return false
-    }
-    const now = Date.now()
-    const nextNonce = (auth.userData?.pvpBoardNonce || 0) + 1
-    const patch = { pvpBoardNonce: nextNonce, pvpRefreshAt: now }
-    const ok = await auth.patchUser(patch, patch)
-    if (!ok) toast('เปลี่ยนคู่ต่อสู้ไม่สำเร็จ', 'error')
+  // กดรับรางวัลตีครบ 5 ครั้งวันนี้
+  async function claimDaily() {
+    const today = todayStr()
+    if (!canClaimDaily(auth.userData?.pvpDaily, today)) return false
+    const pd = { ...dailyView(auth.userData?.pvpDaily, today), claimed: true }
+    const ok = await auth.patchUser(
+      { pvpDaily: pd, coins: (auth.userData?.coins || 0) + PVP_DAILY_REWARD },
+      { pvpDaily: pd, coins: increment(PVP_DAILY_REWARD) },
+    )
+    toast(ok ? `รับ ${PVP_DAILY_REWARD.toLocaleString()} เหรียญแล้ว!` : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
     return ok
   }
 
   return {
-    rating, wins, losses, attacksLeft, myTeam, opponents, fight,
-    refreshBoard, refreshLeft, coinPreview,
+    rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight,
+    daily, dailyGoal, dailyReward, canClaim, claimDaily,
   }
 }

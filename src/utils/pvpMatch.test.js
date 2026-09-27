@@ -3,6 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { pickHumanOpponents, BOARD_SIZE, NEAR_WINDOW } from './pvpMatch.js'
+import { pickMatch, pushRecent } from './pvpMatch.js'
 
 // candidate รูปเดียวกับที่ rosterOpponents() คืนมา (กรอง+เติม rating มาแล้ว)
 const mk = (uid, rating) => ({ uid, nickname: uid, rating, team: [{ id: 'cat' }] })
@@ -71,4 +72,26 @@ test('pickHumanOpponents: เรตเท่ากันหมด seed ต่า
   const a = pickHumanOpponents(cands, 1000, 1).map(o => o.uid).join()
   const b = pickHumanOpponents(cands, 1000, 2).map(o => o.uid).join()
   assert.notEqual(a, b)
+})
+
+test('pickMatch ไม่ได้คนเดิมติด และไม่สลับ A-B', () => {
+  const c = ['a', 'b', 'c', 'd', 'e'].map(uid => ({ uid, rating: 1000 }))
+  let recent = []
+  const seen = []
+  for (let s = 1; s <= 60; s++) {
+    const m = pickMatch(c, 1000, recent, s)
+    assert.ok(!recent.includes(m.uid))
+    seen.push(m.uid); recent = pushRecent(recent, m.uid)
+  }
+  for (let i = 2; i < seen.length; i++) assert.notEqual(seen[i], seen[i - 2])
+})
+test('pickMatch คนน้อย ผ่อนบล็อก · เหลือคนล่าสุดคนเดียว = null', () => {
+  const c = [{ uid: 'a', rating: 1000 }, { uid: 'b', rating: 1000 }]
+  assert.equal(pickMatch(c, 1000, ['a', 'b'], 7).uid, 'b')
+  assert.equal(pickMatch([{ uid: 'a', rating: 1 }], 1000, ['a'], 7), null)
+  assert.equal(pickMatch([], 1000, [], 7), null)
+})
+test('pickMatch เลือกในย่านเรตใกล้', () => {
+  const c = Array.from({ length: 30 }, (_, i) => ({ uid: 'u' + i, rating: 1000 + i * 100 }))
+  for (let s = 1; s < 20; s++) assert.ok(pickMatch(c, 1000, [], s).rating < 1000 + 12 * 100)
 })

@@ -19,6 +19,8 @@ export function computeProgress(userData) {
     ta15Best: u.timeAttack?.best15 || 0,
     legendarySpecies: new Set(pets.filter(p => p?.rarity === 'legendary').map(p => p.id)).size,
     pvpWinsTotal: u.pvpWinsTotal || 0,
+    pvpFightsTotal: u.pvpFightsTotal || 0,
+    pvpDefWinsTotal: u.pvpDefWinsTotal || 0,
     gachaPullsTotal: u.gachaPullsTotal || 0,
     labFuseTotal: u.labFuseTotal || 0,
     quizPerfectTotal: u.quizPerfectTotal || 0,
