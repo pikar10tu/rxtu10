@@ -19,7 +19,8 @@
       <div v-if="info.reason === 'maxed'" class="fst-msg done">ปลดครบทุกแปลงแล้ว <Emoji char="🎉" /></div>
       <div v-else-if="info.reason === 'atCeiling'" class="fst-msg">ปลดครบเพดานบ้านแล้ว · อัปเกรดบ้านเพื่อปลดแปลงที่ {{ info.nextPlot }}</div>
       <button v-else class="fst-buy" :disabled="info.reason === 'notEnoughCoins'" @click="farm.unlockPlot()">
-        {{ info.reason === 'notEnoughCoins' ? `เหรียญไม่พอ · แปลงที่ ${info.nextPlot} ราคา ${info.cost.toLocaleString()}` : `ปลดแปลงที่ ${info.nextPlot} · 🪙 ${info.cost.toLocaleString()}` }}
+        <template v-if="info.reason === 'notEnoughCoins'">เหรียญไม่พอ · แปลงที่ {{ info.nextPlot }} ราคา {{ info.cost.toLocaleString() }}</template>
+        <template v-else>ปลดแปลงที่ {{ info.nextPlot }} · <Emoji char="🪙" /> {{ info.cost.toLocaleString() }}</template>
       </button>
     </div>
 

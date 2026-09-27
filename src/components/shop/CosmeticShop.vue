@@ -24,14 +24,14 @@
         <button v-for="c in itemsOf(t.t)" :key="c.id" class="cs-item" :class="{ sel: selected?.id === c.id, wear: wearing === c.id }" @click="selected = c">
           <span class="cs-sample">
             <span v-if="c.kind === 'n'" class="cs-sn" :class="'cz-' + c.id">{{ nick }}</span>
-            <CosFrame v-else-if="c.kind === 'f'" :id="c.id"><span class="cs-mini">🧑‍⚕️</span></CosFrame>
+            <CosFrame v-else-if="c.kind === 'f'" :id="c.id"><span class="cs-mini"><Emoji char="🧑‍⚕️" /></span></CosFrame>
             <span v-else-if="c.kind === 'b'" class="cz-bd cs-sb" :class="c.fx ? 'cz-bd-' + c.fx : null"><Emoji :char="c.emoji" /></span>
             <span v-else class="cs-sg"><CosBg :id="c.id" /></span>
           </span>
           <span class="cs-nm">{{ c.label }}</span>
           <span v-if="wearing === c.id" class="cs-st on">ใส่อยู่</span>
           <span v-else-if="owns(c.id)" class="cs-st">มีแล้ว</span>
-          <span v-else class="cs-price">🪙 {{ fmt(c.price) }}</span>
+          <span v-else class="cs-price"><Emoji char="🪙" /> {{ fmt(c.price) }}</span>
         </button>
       </div>
     </section>
@@ -39,7 +39,8 @@
     <!-- ปุ่มติดขอบล่าง -->
     <div v-if="selected" class="cs-dock">
       <button v-if="!owns(selected.id)" class="cs-btn" :disabled="busy || !buy.ok" @click="doBuy">
-        {{ buy.reason === 'coins' ? `เหรียญไม่พอ (ขาด ${(selected.price - coins).toLocaleString()})` : `ซื้อ "${selected.label}" · 🪙 ${selected.price.toLocaleString()}` }}
+        <template v-if="buy.reason === 'coins'">เหรียญไม่พอ (ขาด {{ (selected.price - coins).toLocaleString() }})</template>
+        <template v-else>ซื้อ "{{ selected.label }}" · <Emoji char="🪙" /> {{ selected.price.toLocaleString() }}</template>
       </button>
       <button v-else-if="wearing === selected.id" class="cs-btn ghost" :disabled="busy" @click="doWear(null)">ถอด "{{ selected.label }}"</button>
       <button v-else class="cs-btn" :disabled="busy" @click="doWear(selected.id)">ใส่ "{{ selected.label }}"</button>

@@ -12,7 +12,7 @@
         <div v-if="featured.length" class="bn-feat">
           <span v-for="p in featured" :key="p.id" :title="p.name"><Emoji :char="p.emoji" /></span>
         </div>
-        <span class="bn-time">⏳ เหลือ {{ timeLeft }}</span>
+        <span class="bn-time"><Emoji char="⏳" /> เหลือ {{ timeLeft }}</span>
       </template>
       <div v-else class="bn-desc">เพ็ททุกตัวในคลังปกติ ออกตำนานแล้วลุ้นตัวที่ตั้งเป้าไว้</div>
 

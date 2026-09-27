@@ -31,7 +31,7 @@
           <span class="ash-tier" :class="'t-' + a.tier">{{ ARENA_TIERS[a.tier].label }}</span>
           <span class="ash-info">
             <b>{{ a.name }}</b>
-            <small v-if="a.src === 'limited'" class="ash-limit">⏳ ขายถึง {{ saleEnd(a) }}</small>
+            <small v-if="a.src === 'limited'" class="ash-limit"><Emoji char="⏳" /> ขายถึง {{ saleEnd(a) }}</small>
             <!-- เหตุผลที่ซื้อไม่ได้ต้องเห็นบนปุ่มก่อนกด (บทเรียน :disabled + toast = โค้ดตาย) -->
             <button type="button" class="ash-buy" :disabled="busy || !canBuyArena(auth.userData, a.id).ok" @click="buy(a)">
               {{ canBuyArena(auth.userData, a.id).reason === 'coins' ? `เหรียญไม่พอ · ${arenaPrice(a).toLocaleString()}` : `ซื้อ ${arenaPrice(a).toLocaleString()}` }}
