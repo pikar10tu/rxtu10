@@ -2,7 +2,7 @@
 // รัน: node --test src/utils/mailbox.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rewardCoins, rewardTickets, rewardArena, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildReportResultMail, buildBroadcastMail, buildWelcomeGiftMail, pendingAnnounce } from './mailbox.js'
+import { rewardCoins, rewardTickets, rewardArena, canClaim, needsAttention, attentionCount, buildReportRewardMail, buildReportResultMail, buildBroadcastMail, buildWelcomeGiftMail, pendingAnnounce, isSeasonMail } from './mailbox.js'
 
 test('rewardCoins: คืนจำนวนเหรียญถ้า reward.coins เป็นบวก, ไม่งั้น 0', () => {
   assert.equal(rewardCoins({ reward: { coins: 50 } }), 50)
@@ -193,6 +193,21 @@ test('สนามแชมป์ในจดหมาย: rewardArena · canCla
   assert.equal(canClaim({ ...m, claimed: true }), false)
   assert.equal(rewardArena({ reward: { arena: { id: 'zz-unknown', rank: 1 } } }), null)   // ไม่อยู่ในทะเบียน
   assert.equal(rewardArena({ reward: { coins: 5 } }), null)
+})
+
+test('buildBroadcastMail: ส่ง kind/mode/season/tier ผ่าน · จดหมายปกติไม่มีฟิลด์พวกนี้', () => {
+  const m = buildBroadcastMail({ title: 'x', coins: 5, kind: 'season', mode: 'tower', season: '2026-09', tier: { lv: 1, name: 'ชั้น 1–19', best: 3 } }, 0)
+  assert.equal(m.kind, 'season'); assert.equal(m.mode, 'tower'); assert.equal(m.season, '2026-09')
+  assert.deepEqual(m.tier, { lv: 1, name: 'ชั้น 1–19', best: 3 })
+  const n = buildBroadcastMail({ title: 'y', coins: 5 }, 0)
+  assert.ok(!('kind' in n) && !('mode' in n) && !('tier' in n))
+})
+
+test('attentionCount ไม่นับจดหมายซีซั่น', () => {
+  const season = { kind: 'season', read: false, claimed: false, reward: { coins: 1 } }
+  const normal = { read: false, claimed: false }
+  assert.equal(isSeasonMail(season), true)
+  assert.equal(attentionCount([season, normal]), 1)
 })
 
 import { canDelete } from './mailbox.js'

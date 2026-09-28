@@ -4,7 +4,7 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, runTran
 import { db } from '../firebase/config.js'
 import { useAuthStore } from './auth.js'
 import { useUsageStore } from './usage.js'
-import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardArena } from '../utils/mailbox.js'
+import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardArena, isSeasonMail } from '../utils/mailbox.js'
 import { getArena } from '../data/arenas.js'
 import { announceAchievement, addEarned } from '../composables/useAchievements.js'
 import { achievementDocId } from '../utils/achievements.js'
@@ -20,6 +20,12 @@ export const useMailbox = defineStore('mailbox', () => {
   let loadedFor = null   // uid ที่โหลดไว้แล้ว (guard)
 
   const attention = computed(() => attentionCount(mails.value))
+  const inbox = computed(() => mails.value.filter(m => !isSeasonMail(m)))
+
+  // mails เรียงใหม่→เก่าแล้ว (orderBy createdAt desc)
+  function seasonPending(mode) {
+    return mails.value.find(m => isSeasonMail(m) && m.mode === mode && !m.claimed) || null
+  }
 
   async function load({ force = false } = {}) {
     const uid = auth.currentUser?.uid
@@ -101,5 +107,5 @@ export const useMailbox = defineStore('mailbox', () => {
     catch (e) { console.error('[mail delete]', e); mails.value.splice(i, 0, m); return false }
   }
 
-  return { mails, loading, attention, load, markRead, claim, remove }
+  return { mails, inbox, loading, attention, load, markRead, claim, remove, seasonPending }
 })

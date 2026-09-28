@@ -1,10 +1,10 @@
 <template>
   <div class="mailbox-body">
-    <div v-if="mailbox.loading && !mailbox.mails.length" class="mb-empty">กำลังโหลด…</div>
-    <div v-else-if="!mailbox.mails.length" class="mb-empty">ยังไม่มีจดหมาย</div>
+    <div v-if="mailbox.loading && !mailbox.inbox.length" class="mb-empty">กำลังโหลด…</div>
+    <div v-else-if="!mailbox.inbox.length" class="mb-empty">ยังไม่มีจดหมาย</div>
     <ul v-else class="mb-list">
       <li
-        v-for="m in mailbox.mails" :key="m.id"
+        v-for="m in mailbox.inbox" :key="m.id"
         class="mb-item" :class="{ unread: !m.read }"
         role="button" tabindex="0"
         :aria-label="`จดหมาย: ${m.title}${m.read ? '' : ' (ยังไม่อ่าน)'}`"

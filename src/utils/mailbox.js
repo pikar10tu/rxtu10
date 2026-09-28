@@ -39,13 +39,18 @@ export function canDelete(mail) {
   return !!mail && !canClaim(mail)
 }
 
+// จดหมายรางวัลซีซั่น — กดรับในหน้าหอคอย/อารีน่า ไม่โชว์/ไม่นับในกล่องจดหมาย (client เก่ายังเห็นและรับได้ตามปกติ)
+export function isSeasonMail(mail) {
+  return mail?.kind === 'season'
+}
+
 export function needsAttention(mail) {
   return !!mail && (!mail.read || canClaim(mail))
 }
 
 // นับจำนวน mail ที่ต้องสนใจ (badge)
 export function attentionCount(mails) {
-  return (mails || []).filter(needsAttention).length
+  return (mails || []).filter(m => !isSeasonMail(m) && needsAttention(m)).length
 }
 
 // จดหมายประกาศที่ควร "เด้ง" กล่องจดหมายให้ดูเอง — คืน mail หรือ null
@@ -124,7 +129,7 @@ export function buildReportResultMail(report, note, createdAt) {
 // สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ/achievement)
 //   coins > 0 หรือ tickets > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
 //   caller เติม createdAt = serverTimestamp()
-export function buildBroadcastMail({ title, body, coins, tickets, from, achievement, arena } = {}, createdAt) {
+export function buildBroadcastMail({ title, body, coins, tickets, from, achievement, arena, kind, mode, season, tier } = {}, createdAt) {
   const c = (typeof coins === 'number' && coins > 0) ? coins : 0
   const t = (typeof tickets === 'number' && tickets > 0) ? tickets : 0
   const hasAch = achievement && achievement.id
@@ -144,6 +149,10 @@ export function buildBroadcastMail({ title, body, coins, tickets, from, achievem
     createdAt,
     read: false,
     claimed: false,
+    ...(kind ? { kind } : {}),
+    ...(mode ? { mode } : {}),
+    ...(season ? { season } : {}),
+    ...(tier ? { tier } : {}),
   }
 }
 
