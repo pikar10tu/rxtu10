@@ -64,7 +64,16 @@ const shown = ref([])
 const finished = ref(false)
 const cv = ref(null)
 const doneBtn = ref(null)
-let timers = [], raf = 0
+let timers = []
+// รางวัลแต่ละแถวมี rAF loop นับเลขของตัวเอง + burst() มี loop วาดพลุแยกอีกอัน — ทั้งหมดวิ่งพร้อมกันได้
+// (ROW_GAP 450ms < นับ 600ms ต่อแถว, burst ~1.5วิ) เก็บ id ทุกตัวใน Set แทนตัวแปรเดี่ยว raf=0 เดิม
+// (ตัวแปรเดี่ยวจะจำได้แค่ id ล่าสุดที่ schedule → cancel ตอนข้าม/unmount โดนแค่ loop เดียว ที่เหลือเล่นต่อค้างจอ)
+const rafIds = new Set()
+function scheduleRaf(fn) {
+  const id = requestAnimationFrame((now) => { rafIds.delete(id); fn(now) })
+  rafIds.add(id)
+}
+function cancelAllRaf() { rafIds.forEach((id) => cancelAnimationFrame(id)); rafIds.clear() }
 
 const SHAKE_MS = [0, 500, 800, 1100, 1500]
 const ROW_GAP = 450
@@ -81,17 +90,19 @@ function addRow(r, animate) {
   const step = (now) => {
     const p = Math.min(1, (now - start) / 600)
     item.shownValue = r.value * (1 - Math.pow(1 - p, 3))
-    if (p < 1) raf = requestAnimationFrame(step)
+    if (p < 1) scheduleRaf(step)
   }
-  raf = requestAnimationFrame(step)
+  scheduleRaf(step)
 }
 
 function finishNow() {
   timers.forEach(clearTimeout); timers = []
-  cancelAnimationFrame(raf)
+  cancelAllRaf()
   phase.value = 'open'
   shown.value = rows.value.map(r => ({ ...r, shownValue: r.value }))
   finished.value = true
+  const el = cv.value
+  if (el) el.getContext('2d')?.clearRect(0, 0, el.width, el.height)
   nextTick(() => doneBtn.value?.focus())
 }
 
@@ -116,9 +127,9 @@ function burst() {
       c.fillStyle = p.c; c.globalAlpha = Math.max(0, 1 - fr / 90)
       c.beginPath(); c.ellipse(p.x, p.y, p.r * Math.abs(Math.cos(p.s)), p.r, 0, 0, 7); c.fill()
     }
-    if (fr < 90) raf = requestAnimationFrame(tick); else c.clearRect(0, 0, r.width, r.height)
+    if (fr < 90) scheduleRaf(tick); else c.clearRect(0, 0, r.width, r.height)
   }
-  raf = requestAnimationFrame(tick)
+  scheduleRaf(tick)
 }
 
 onMounted(() => {
@@ -130,7 +141,7 @@ onMounted(() => {
   rows.value.forEach((r, i) => at(sh + 400 + i * ROW_GAP, () => { addRow(r, true); sfx(r.special ? 'finish' : 'coin') }))
   at(sh + 400 + rows.value.length * ROW_GAP, () => { finished.value = true; nextTick(() => doneBtn.value?.focus()) })
 })
-onBeforeUnmount(() => { timers.forEach(clearTimeout); cancelAnimationFrame(raf) })
+onBeforeUnmount(() => { timers.forEach(clearTimeout); cancelAllRaf() })
 
 // แตะจอ = ข้าม (ตลอดจนกว่าจะจบ) · Escape = ข้าม ถ้ายังไม่จบ / ปิด ถ้าจบแล้ว (เหมือน CapsuleReveal)
 useEscapeKey(() => true, () => { if (finished.value) emit('close'); else onTap() })
