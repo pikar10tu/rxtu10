@@ -1,5 +1,5 @@
 <!-- src/components/shared/SeasonCountdown.vue
-     นับถอยหลังจบซีซั่น (เที่ยงคืนเวลาไทยวันที่ 1 เดือนถัดไป) + บอกรางวัลสั้นๆ — ใช้ทั้งหอคอยและอารีน่า
+     นับถอยหลังจบซีซั่น (เที่ยงคืนเวลาไทยวันที่ 1 เดือนถัดไป) + บอกรางวัลสั้นๆ ตามชั้นแจก — ใช้ทั้งหอคอยและอารีน่า
      นาฬิกาเครื่องผู้ใช้ล้วน ไม่มี read/write · ticker 1 วิ หยุดตอนแท็บถูกซ่อน
      พื้นของตัวเอง (ดำโปร่ง) → วางได้ทั้งบนการ์ดพื้นเข้มและพื้นสี -->
 <template>
@@ -17,7 +17,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { currentSeasonId, seasonEndMs, seasonMonthLabel } from '../../utils/pvpSeason.js'
-import { SEASON_REWARDS as R } from '../../utils/seasonRewards.js'
+import { TOWER_TIERS, ARENA_TIERS } from '../../utils/seasonRewards.js'
 
 const props = defineProps({ kind: { type: String, default: 'tower' } })   // 'tower' | 'arena'
 const DAY = 86400000
@@ -41,9 +41,19 @@ const hms = computed(() => {
   return `${p(Math.floor(s / 3600))}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`
 })
 const k = (n) => n.toLocaleString()
-const reward = computed(() => props.kind === 'arena'
-  ? `ท็อป ${R.arena.topN} ได้สนามแชมป์ · ท็อป ${R.arena.achTopN} ได้ achievement ผู้ครอบครองอารีน่าด้วย · ลงสนามแค่ 1 ไฟต์ก็รับ ${k(R.arena.joinCoins)} เหรียญ`
-  : `ท็อป ${R.tower.topN} รับ ${k(R.tower.topCoins)} + achievement · ถึงชั้น ${R.tower.ticketFloor} รับตั๋ว ${R.tower.tickets} ใบ · ไต่แค่ชั้นเดียวก็รับ ${k(R.tower.joinCoins)}`)
+const reward = computed(() => {
+  if (props.kind === 'arena') {
+    const last = ARENA_TIERS[ARENA_TIERS.length - 1]
+    const champRank = ARENA_TIERS.find(t => t.champ)?.maxRank ?? 10
+    const achRank = ARENA_TIERS.find(t => t.ach && !t.champ)?.maxRank ?? ARENA_TIERS.find(t => t.ach)?.maxRank ?? 3
+    const lastAch = ARENA_TIERS.filter(t => t.ach).pop()
+    return `ท็อป ${champRank} ได้สนามแชมป์ · ท็อป ${lastAch.maxRank} ได้ achievement ผู้ครอบครองอารีน่าด้วย · ลงสนามแค่ 1 ไฟต์ก็รับ ${k(last.coins)} เหรียญ + ตั๋ว ${last.tickets} ใบ`
+  } else {
+    const first = TOWER_TIERS[0]
+    const top = TOWER_TIERS[TOWER_TIERS.length - 1]
+    return `ยิ่งไต่สูงยิ่งได้เยอะ · ไต่แค่ชั้นเดียวก็รับ ${k(first.coins)} เหรียญ + ตั๋ว ${first.tickets} ใบ · ถึงชั้น ${top.min} รับ ${k(top.coins)} + ตั๋ว ${top.tickets} ใบ + achievement`
+  }
+})
 </script>
 
 <style scoped>

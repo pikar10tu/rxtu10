@@ -85,7 +85,7 @@ export function seasonRewardMails(r, season, monthLabel) {
       kind: 'season', mode: 'arena', season,
       tier: { lv: tier.lv, name: tier.name, rank, rating },
       title: `รางวัลอารีน่า ซีซั่น ${monthLabel}`,
-      body: rank <= 10
+      body: tier.champ
         ? `จบซีซั่นที่อันดับ ${rank} (${rating.toLocaleString()} แต้ม)${champ ? ' ได้สนามแชมป์ประจำซีซั่น' : ''}`
         : `ซีซั่นนี้ลงสนามไป ${wins + losses} ไฟต์ ขอบคุณที่มาประลองด้วยกัน`,
       coins: tier.coins, tickets: tier.tickets,
