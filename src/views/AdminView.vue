@@ -222,8 +222,8 @@
             <template v-else><Emoji char="⚠️" /> ค้างกลางทาง — เช็คจดหมายก่อนทำอะไรต่อ</template>
           </div>
           <div class="admin-hint">
-            หอคอย {{ spPreview.tower }} คน (ท็อป {{ spPreview.towerTop }} · ได้ตั๋ว {{ spPreview.tickets }}) ·
-            อารีน่า {{ spPreview.arena }} คน (ได้สนาม {{ spPreview.arenaTop }} · achievement {{ spPreview.arenaAch }}) · จดหมาย {{ spPreview.mails }} ฉบับ
+            หอคอย {{ spPreview.tower }} คน ({{ Object.entries(spPreview.towerTiers).map(([n, c]) => `${n} ${c}`).join(' · ') }}) ·
+            อารีน่า {{ spPreview.arena }} คน ({{ Object.entries(spPreview.arenaTiers).map(([n, c]) => `${n} ${c}`).join(' · ') }}) · จดหมาย {{ spPreview.mails }} ฉบับ
           </div>
           <!-- สนามแชมป์ต้องอยู่ใน data/arenas.js ก่อนกดแจก ไม่งั้นจดหมายไม่แนบสนาม (ยังแจกเหรียญ/achievement ได้) -->
           <div class="admin-hint" :class="{ 'sp-paid': !spPreview.champArena }">
@@ -233,8 +233,8 @@
           <ul class="sp-list">
             <li v-for="r in spPreview.rows" :key="r.uid">
               <b>{{ r.nickname }}</b>
-              <span v-if="r.tower"> · <Emoji char="🏯" /> ชั้น {{ r.tower.best }}<template v-if="r.tower.top"> <Emoji char="👑" /></template> → {{ r.tower.coins.toLocaleString() }}<template v-if="r.tower.tickets"> + ตั๋ว {{ r.tower.tickets }}</template></span>
-              <span v-if="r.arena"> · <Emoji char="⚔️" /> #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม<template v-if="r.arena.ach"> <Emoji char="👑" /></template><template v-if="r.arena.top && spPreview.champArena"> <Emoji char="🏟️" /></template> → {{ r.arena.coins.toLocaleString() }}</span>
+              <span v-if="r.tower"> · <Emoji char="🏯" /> ชั้น {{ r.tower.best }}<template v-if="r.tower.tier.ach"> <Emoji char="👑" /></template> → {{ r.tower.tier.name }} {{ r.tower.tier.coins.toLocaleString() }}<template v-if="r.tower.tier.tickets"> + ตั๋ว {{ r.tower.tier.tickets }}</template></span>
+              <span v-if="r.arena"> · <Emoji char="⚔️" /> #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม<template v-if="r.arena.tier.ach"> <Emoji char="👑" /></template><template v-if="r.arena.tier.champ && spPreview.champArena"> <Emoji char="🏟️" /></template> → {{ r.arena.tier.name }} {{ r.arena.tier.coins.toLocaleString() }}</span>
             </li>
           </ul>
           <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
@@ -656,6 +656,8 @@ const spPreview = ref(null)
 const spBusy = ref(false)
 let spUserDocs = []
 
+const countBy = (arr, f) => arr.reduce((m, x) => ((m[f(x)] = (m[f(x)] || 0) + 1), m), {})
+
 async function previewSeason() {
   if (spBusy.value) return
   spBusy.value = true; spPreview.value = null
@@ -672,9 +674,10 @@ async function previewSeason() {
     spPreview.value = {
       rows,
       paid: paidSnap.exists() ? paidSnap.data()[spSeason.value] || null : null,
-      tower: rows.filter(r => r.tower).length, towerTop: rows.filter(r => r.tower?.top).length,
-      tickets: rows.filter(r => r.tower?.tickets).length,
-      arena: rows.filter(r => r.arena).length, arenaTop: rows.filter(r => r.arena?.top).length, arenaAch: rows.filter(r => r.arena?.ach).length,
+      tower: rows.filter(r => r.tower).length,
+      towerTiers: countBy(rows.filter(r => r.tower), r => r.tower.tier.name),
+      arena: rows.filter(r => r.arena).length,
+      arenaTiers: countBy(rows.filter(r => r.arena), r => r.arena.tier.name),
       champArena: getArena('ch-' + spSeason.value)?.name || null,
       mails: rows.reduce((n, r) => n + (r.tower ? 1 : 0) + (r.arena ? 1 : 0), 0),
     }
