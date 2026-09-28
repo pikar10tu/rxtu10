@@ -44,10 +44,9 @@ const k = (n) => n.toLocaleString()
 const reward = computed(() => {
   if (props.kind === 'arena') {
     const last = ARENA_TIERS[ARENA_TIERS.length - 1]
-    const champRank = ARENA_TIERS.find(t => t.champ)?.maxRank ?? 10
-    const achRank = ARENA_TIERS.find(t => t.ach && !t.champ)?.maxRank ?? ARENA_TIERS.find(t => t.ach)?.maxRank ?? 3
+    const lastChamp = ARENA_TIERS.filter(t => t.champ).pop()
     const lastAch = ARENA_TIERS.filter(t => t.ach).pop()
-    return `ท็อป ${champRank} ได้สนามแชมป์ · ท็อป ${lastAch.maxRank} ได้ achievement ผู้ครอบครองอารีน่าด้วย · ลงสนามแค่ 1 ไฟต์ก็รับ ${k(last.coins)} เหรียญ + ตั๋ว ${last.tickets} ใบ`
+    return `ท็อป ${lastChamp.maxRank} ได้สนามแชมป์ · ท็อป ${lastAch.maxRank} ได้ achievement ผู้ครอบครองอารีน่าด้วย · ลงสนามแค่ 1 ไฟต์ก็รับ ${k(last.coins)} เหรียญ + ตั๋ว ${last.tickets} ใบ`
   } else {
     const first = TOWER_TIERS[0]
     const top = TOWER_TIERS[TOWER_TIERS.length - 1]
