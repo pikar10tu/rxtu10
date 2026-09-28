@@ -13,6 +13,7 @@
     </div>
 
     <template v-if="authStore.isLoggedIn">
+      <SeasonClaimBanner mode="arena" />
       <ArenaStatus
         :rating="rating" :wins="wins" :losses="losses" :attacks-left="attacksLeft"
         :my-rank="rivals.myRank" :total="rivals.total" :team="myTeam" :arena-ref="myArena"
@@ -85,6 +86,7 @@ import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import PvpHistory from '../components/battle/PvpHistory.vue'
 import ArenaStatus from '../components/battle/ArenaStatus.vue'
+import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
 import ArenaRankCard from '../components/battle/ArenaRankCard.vue'
 import { arenaRanking } from '../utils/arenaRivals.js'
 import { PVP_RATING_START } from '../utils/pvpRating.js'
