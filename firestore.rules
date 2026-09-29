@@ -220,8 +220,8 @@ service cloud.firestore {
     }
 
     // ── ใจบนกระดานข่าว (29 ก.ย. 2026) — doc เดียว likes/board · ดู composables/useNewsLikes.js ──
-    //  write หนึ่งครั้ง = +1..500 ให้ข่าวเดียว และ +เท่ากันเข้า recv (ข่าวคนอื่น) หรือ self (ข่าวตัวเอง) ได้อย่างใดอย่างหนึ่ง
-    //  recv ห้ามเป็น uid ตัวเอง (ปั่น achievement ไม่ได้) · self ต้องเป็น uid ตัวเองเท่านั้น
+    //  write หนึ่งครั้ง = +1..500 ให้ข่าวเดียว · +เท่ากันเข้า recv ของเจ้าของข่าว · ข่าวตัวเอง = +self ด้วย
+    //  กดให้ตัวเองนับเข้า recv ได้ (user สั่ง 29 ก.ย.) · self ต้องเป็น uid ตัวเองและคู่กับ recv ตัวเองเท่านั้น
     //  ⚠️ ตัวเลข 500 ต้องตรงกับ PER_FLUSH_MAX
     function likeMap(m) {
       return request.resource.data.get(m, {});
@@ -243,9 +243,10 @@ service cloud.firestore {
       return request.auth != null
         && request.resource.data.keys().hasOnly(['items', 'recv', 'self'])
         && ik.size() == 1 && d is int && d >= 1 && d <= 500
-        && rk.size() + sk.size() <= 1
-        && (rk.size() == 0 || (rk.toList()[0] != request.auth.uid && likeDelta('recv', rk.toList()[0]) == d))
-        && (sk.size() == 0 || (sk.toList()[0] == request.auth.uid && likeDelta('self', sk.toList()[0]) == d));
+        && rk.size() <= 1 && sk.size() <= 1
+        && (rk.size() == 0 || likeDelta('recv', rk.toList()[0]) == d)
+        && (sk.size() == 0 || (rk.size() == 1 && rk.toList()[0] == request.auth.uid
+              && sk.toList()[0] == request.auth.uid && likeDelta('self', sk.toList()[0]) == d));
     }
     match /likes/{docId} {
       allow read: if request.auth != null;

@@ -9,8 +9,8 @@ import { useUsageStore } from '../stores/usage.js'
  *
  * ทั้งกระดานอยู่ใน doc เดียว `likes/board`:
  *   items.<itemKey> = ยอดใจของข่าวนั้น
- *   recv.<uid>      = ใจสะสมที่คนนี้ "ได้รับ" จากคนอื่น (achievement like_*)
- *   self.<uid>      = ใจที่คนนี้กดให้ข่าวตัวเอง (achievement ลับ selflove) — ไม่นับเข้า recv
+ *   recv.<uid>      = ใจสะสมที่คนนี้ "ได้รับ" รวมที่กดให้ตัวเองด้วย (achievement like_* · user สั่ง 29 ก.ย. นับได้)
+ *   self.<uid>      = ใจที่คนนี้กดให้ข่าวตัวเอง (achievement ลับ selflove)
  *
  * 🔑 กดรัวแค่ไหนก็ 1 write: ยอดขึ้นจอทันที (pending) แล้วรวบส่งครั้งเดียวตอนหยุดกด FLUSH_MS / ซ่อนแท็บ
  *    อ่าน 1 read ต่อการเปิดกระดาน (getDoc ไม่ฟังสด — ฟังสดจะทำให้ทุกการกดของทุกคนเป็น read ของทุกจอ)
@@ -42,8 +42,8 @@ async function flush() {
   pending.value = null
   const me = useAuthStore().currentUser?.uid
   const data = { items: { [p.key]: increment(p.n) } }
+  if (p.owner) data.recv = { [p.owner]: increment(p.n) }
   if (p.owner && p.owner === me) data.self = { [me]: increment(p.n) }
-  else if (p.owner) data.recv = { [p.owner]: increment(p.n) }
   // ยอดบนจอบวกไว้ถาวรเลย (ไม่รอ server) — ส่งพังก็แค่ยอดจริงน้อยกว่าที่เห็นในเซสชันนี้
   const b = board.value
   b.items[p.key] = (b.items[p.key] || 0) + p.n
@@ -98,8 +98,8 @@ export function useNewsLikes() {
     const p = pending.value
     const pn = p && p.owner === uid ? p.n : 0
     return {
-      self: (board.value.self[uid] || 0) + (p && p.owner === uid ? pn : 0),
-      recv: board.value.recv[uid] || 0,
+      self: (board.value.self[uid] || 0) + pn,
+      recv: (board.value.recv[uid] || 0) + pn,
     }
   }
 

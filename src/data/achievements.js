@@ -58,7 +58,7 @@ export const ACHIEVEMENTS = {
   review_50: { title: 'กรรมการคุมสอบ', icon: '📋', type: 'milestone', trigger: { stat: 'reviewedCount', gte: 50 }, desc: 'ตรวจข้อสอบ 50 ข้อ', flavor: 'ข้อผิดหนีไม่พ้นสายตา' },
   review_200: { title: 'ผู้พิทักษ์คลังข้อสอบ', icon: '🛡️', type: 'milestone', trigger: { stat: 'reviewedCount', gte: 200 }, desc: 'ตรวจข้อสอบ 200 ข้อ', flavor: 'คลังข้อสอบปลอดภัยเพราะเรา' },
   report_1: { title: 'ตาไว', icon: '👀', type: 'milestone', trigger: { stat: 'reportsConfirmed', gte: 1 }, desc: 'แจ้งข้อสอบผิดแล้วทีมยืนยันว่าผิดจริง', flavor: 'เจอก่อนใคร' },
-  // ใจจากกระดานข่าว (29 ก.ย. 2026) — likesReceived = likes/board.recv[uid] ไม่นับใจที่กดให้ตัวเอง
+  // ใจจากกระดานข่าว (29 ก.ย. 2026) — likesReceived = likes/board.recv[uid] (รวมใจที่กดให้ตัวเอง)
   like_100:   { title: 'ดาวรุ่งพุ่งแรง', icon: '❤️', type: 'milestone', trigger: { stat: 'likesReceived', gte: 100 }, desc: 'ได้รับใจบนกระดานข่าวรวม 100 ดวง', flavor: 'เพื่อนเริ่มจำชื่อได้แล้ว' },
   like_1000:  { title: 'ขวัญใจประจำรุ่น', icon: '💞', type: 'milestone', trigger: { stat: 'likesReceived', gte: 1000 }, desc: 'ได้รับใจบนกระดานข่าวรวม 1,000 ดวง', flavor: 'โพสต์อะไรก็มีคนเชียร์' },
   like_10000: { title: 'idol-sama หมื่นปีถึงจะมีสักคน', icon: '💖', type: 'milestone', trigger: { stat: 'likesReceived', gte: 10000 }, desc: 'ได้รับใจบนกระดานข่าวรวม 10,000 ดวง', flavor: 'แฟนคลับต่อแถวยาวถึงหน้าคณะ' },
