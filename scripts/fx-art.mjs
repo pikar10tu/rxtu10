@@ -73,11 +73,6 @@ const ART = {
   dream: () => svg(`<defs>${rg('d', [[0, '#f3e8ff', .1], [.7, '#c79bff', .35], [.92, '#a26bff', .9], [1, '#7b3fe0', 0]])}</defs>
     <circle cx="32" cy="32" r="30" fill="url(#d)"/><ellipse cx="22" cy="18" rx="8" ry="4" fill="#fff" opacity=".55" transform="rotate(-30 22 18)"/>
     ${star4(44, 22, 3.5)}${star4(20, 42, 2.5)}${star4(40, 46, 2)}`),
-  // 👾 ไวรัส — สปอร์หนาม
-  spore: () => svg(`<defs>${rg('v', [[0, '#e6ff9a'], [.6, '#7ad83a'], [1, '#2f8a1a']], .4, .4)}${glow('g', 1.2)}</defs>
-    <g filter="url(#g)">${Array.from({ length: 10 }, (_, i) => `<g transform="rotate(${i * 36} 32 32)"><path d="M32 12L32 4" stroke="#5fbf2a" stroke-width="2.4" stroke-linecap="round"/><circle cx="32" cy="4" r="2.6" fill="#b4f25a"/></g>`).join('')}
-    <circle cx="32" cy="32" r="18" fill="url(#v)"/></g>
-    <circle cx="26" cy="28" r="3" fill="#2f8a1a" opacity=".5"/><circle cx="38" cy="36" r="2.4" fill="#2f8a1a" opacity=".5"/><circle cx="36" cy="24" r="1.6" fill="#fff" opacity=".7"/>`),
   // 🦍 กอริลลา — แรงสั่นพื้น (รอยแตก + ฝุ่น)
   quake: () => svg(`<defs>${rg('q', [[0, '#fff1c2', .9], [.5, '#ffb24a', .55], [1, '#c26a1a', 0]])}</defs>
     <ellipse cx="32" cy="40" rx="30" ry="14" fill="url(#q)"/>
