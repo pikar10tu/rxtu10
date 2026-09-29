@@ -814,7 +814,8 @@ async function applyPassive(e) {
   }
 
   // skillQuiet (ครั้งซ้ำ) — ผลอย่างเดียว ไม่กินเวลา · แบนเนอร์เล็ก (กันรัว) + ท่าประจำตัวเลเจนด์ทุกครั้ง (👾 สปอร์ทุกหมัด)
-  if (e.fxKind !== 'skip' && tuning.value.bannerByCount !== false && !beatAfterFinish()) { showMini(e); playShowtime(e) }
+  // 🌙 เฟสดับ/เสี้ยว = ป้าย n/3 บนหัวพอ ไม่มีแบนเนอร์/พระจันทร์ใหญ่ (เห็นจากจอจริง 29 ก.ย. ว่ายังขึ้นทุกหมัด)
+  if (e.fxKind !== 'skip' && e.effect !== 'moonPhase' && tuning.value.bannerByCount !== false && !beatAfterFinish()) { showMini(e); playShowtime(e) }
   if (e.fxKind !== 'skip') markSkill(e.uid)   // tuning.skillMark 'lit' — นับซ้ำด้วย (ตัวเลข ×N ต้องรวมครั้งซ้ำ)
   firePassiveFx(e)
 }
@@ -1618,6 +1619,8 @@ onUnmounted(() => {
 .dot.foe { background: #f87171; }
 .dot.me { background: #34d399; }
 .me-label { margin-top: 2px; }
+/* ป้ายชื่อทีมเยื้องกัน: ศัตรูชิดขวา · เราชิดซ้าย = ตรงกับทิศที่แบนเนอร์ของแต่ละฝั่งพุ่งเข้า (user 29 ก.ย.) */
+.foe-label { align-self: flex-end; flex-direction: row-reverse; }
 
 .br-team { display: flex; justify-content: center; gap: 8px; }
 /* ทีมละ 3 ตัว (BATTLE_SLOTS) แต่คงขนาดการ์ดเท่าตอนเป็นกริด 4 ช่อง แล้วจัดกลาง — ไม่ขยายการ์ด
@@ -1828,11 +1831,11 @@ onUnmounted(() => {
 .br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 /* แบนเนอร์เล็ก — ทีมเราขึ้นครึ่งล่างจากซ้าย · ศัตรูครึ่งบนจากขวา · transform/opacity ล้วน */
-.br-mini { position: absolute; left: 0; top: 89%;   /* ใต้ป้ายชื่อทีมล่าง — เดิม 58% ทับแถวการ์ด (วัดจอจริง 29 ก.ย.: .br-box = แถวการ์ด+ป้ายชื่อ) */ z-index: 6; display: flex; align-items: center; gap: 6px; max-width: 78%;
+.br-mini { position: absolute; left: 0; top: 50%; margin-top: -18px;   /* กลางจอ (แนวเส้น VS) — ซ้าย=ทีมเรา ขวา=ศัตรู เหมือนแบนเนอร์ใหญ่ (user 29 ก.ย.: บน/ล่างบัง) */ z-index: 8; display: flex; align-items: center; gap: 6px; max-width: 38%;   /* z 8 > ชั้น fx 6 = ออร่า/เลขไม่ทับ · 38% ไม่ชนป้าย VS */
   padding: 4px 14px 4px 6px; border-radius: 0 999px 999px 0; background: linear-gradient(90deg, var(--cut-a, #2563eb), var(--cut-b, #1e3a8a));
   box-shadow: 0 0 0 2px #fff; pointer-events: none; opacity: 0; transform: translateX(-105%); }
 .br-mini.foe { left: auto; right: 0; flex-direction: row-reverse; padding: 4px 6px 4px 14px; border-radius: 999px 0 0 999px;
-  background: linear-gradient(270deg, var(--cut-a, #dc2626), var(--cut-b, #7f1d1d)); transform: translateX(105%); top: 1%; }   /* เหนือป้ายชื่อทีมบน */
+  background: linear-gradient(270deg, var(--cut-a, #dc2626), var(--cut-b, #7f1d1d)); transform: translateX(105%); }
 .br-mini.on { animation: br-mini-l 1.05s cubic-bezier(.2,.9,.3,1) both; }
 .br-mini.foe.on { animation-name: br-mini-r; }
 .br-mini-face { font-size: 1.5rem; line-height: 1; }
