@@ -259,7 +259,7 @@ async function pull(n, isEvent = false) {
       const legN = results.filter((r) => r.rarity === 'legendary').length
       if (legN >= 2) grantSecret('gag_leg2')
       if (legN >= 3) grantSecret('gag_leg3')
-      // สุ่ม 10 การันตี epic อยู่แล้ว ⇒ "ไม่ได้อะไรเกินธรรมดาเลย" เป็นไปไม่ได้ · ธรรมดา ≥8 ตัว ≈ 1 ใน 60 รอบ
+      // สุ่ม 10 การันตี epic อยู่แล้ว ⇒ "ไม่ได้อะไรเกินธรรมดาเลย" เป็นไปไม่ได้ · ธรรมดา ≥8 จาก 11 ≈ 4.7% (~1 ใน 21 รอบ) · ≥9 ≈ 1%
       if (results.filter((r) => r.rarity === 'common').length >= 8) grantSecret('gag_badday')
     }
     if (leg) {
