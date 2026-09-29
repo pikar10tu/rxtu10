@@ -4,7 +4,7 @@
     <div v-if="loading" class="ach-empty">กำลังโหลด…</div>
     <div v-else-if="!items.length" class="ach-empty">ยังไม่มีความสำเร็จ — เริ่มเล่นเพื่อปลดล็อก!</div>
     <div v-else class="ach-grid">
-      <button v-for="a in items" :key="a.docId" type="button" class="ach-item" :class="{ eq: owner && equip === a.docId, pin: owner && pins.includes(a.docId) }" :title="a.desc" @click="selected = a">
+      <button v-for="a in items" :key="a.docId" type="button" class="ach-item" :class="{ eq: owner && equip === a.docId, pin: owner && pins.includes(a.docId) }" :title="a.private && !owner ? 'ความลับ' : a.desc" @click="selected = a">
         <span class="ach-item-icon"><Emoji :char="a.icon" /></span>
         <span class="ach-item-title">{{ a.label }}</span>
       </button>

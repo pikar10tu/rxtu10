@@ -14,7 +14,7 @@ export async function fetchAchievementItems(uid) {
     const data = d.data()
     const def = getAchievement(data.achId) || { title: data.achId, icon: '🏅', desc: '', flavor: '' }
     return {
-      docId: d.id, icon: def.icon, desc: def.desc, flavor: def.flavor || '',
+      docId: d.id, icon: def.icon, desc: def.desc, private: !!def.private, flavor: def.flavor || '',
       earnedAt: data.earnedAt || null, label: titleOf(def, data.date || null),
     }
   })

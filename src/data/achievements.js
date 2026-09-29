@@ -58,6 +58,10 @@ export const ACHIEVEMENTS = {
   review_50: { title: 'กรรมการคุมสอบ', icon: '📋', type: 'milestone', trigger: { stat: 'reviewedCount', gte: 50 }, desc: 'ตรวจข้อสอบ 50 ข้อ', flavor: 'ข้อผิดหนีไม่พ้นสายตา' },
   review_200: { title: 'ผู้พิทักษ์คลังข้อสอบ', icon: '🛡️', type: 'milestone', trigger: { stat: 'reviewedCount', gte: 200 }, desc: 'ตรวจข้อสอบ 200 ข้อ', flavor: 'คลังข้อสอบปลอดภัยเพราะเรา' },
   report_1: { title: 'ตาไว', icon: '👀', type: 'milestone', trigger: { stat: 'reportsConfirmed', gte: 1 }, desc: 'แจ้งข้อสอบผิดแล้วทีมยืนยันว่าผิดจริง', flavor: 'เจอก่อนใคร' },
+  // ใจจากกระดานข่าว (29 ก.ย. 2026) — likesReceived = likes/board.recv[uid] ไม่นับใจที่กดให้ตัวเอง
+  like_100:   { title: 'ดาวรุ่งพุ่งแรง', icon: '❤️', type: 'milestone', trigger: { stat: 'likesReceived', gte: 100 }, desc: 'ได้รับใจบนกระดานข่าวรวม 100 ดวง', flavor: 'เพื่อนเริ่มจำชื่อได้แล้ว' },
+  like_1000:  { title: 'ขวัญใจประจำรุ่น', icon: '💞', type: 'milestone', trigger: { stat: 'likesReceived', gte: 1000 }, desc: 'ได้รับใจบนกระดานข่าวรวม 1,000 ดวง', flavor: 'โพสต์อะไรก็มีคนเชียร์' },
+  like_10000: { title: 'idol-sama หมื่นปีถึงจะมีสักคน', icon: '💖', type: 'milestone', trigger: { stat: 'likesReceived', gte: 10000 }, desc: 'ได้รับใจบนกระดานข่าวรวม 10,000 ดวง', flavor: 'แฟนคลับต่อแถวยาวถึงหน้าคณะ' },
   report_10: { title: 'นักสืบแห่งคลังข้อสอบ', icon: '🕵️', type: 'milestone', trigger: { stat: 'reportsConfirmed', gte: 10 }, desc: 'แจ้งข้อผิดที่ทีมยืนยัน 10 ครั้ง', flavor: 'ไม่มีข้อผิดไหนรอด' },
   cos_5: { title: 'สายแฟ', icon: '🎀', type: 'milestone', trigger: { stat: 'cosmeticsOwned', gte: 5 }, desc: 'มีของตกแต่ง 5 ชิ้น', flavor: 'แต่งตัวก่อนออกจากบ้าน' },
   cos_20: { title: 'แฟชั่นนิสต้า', icon: '💅', type: 'milestone', trigger: { stat: 'cosmeticsOwned', gte: 20 }, desc: 'มีของตกแต่ง 20 ชิ้น', flavor: 'ตู้เสื้อผ้าไม่พอแล้ว' },
@@ -70,6 +74,8 @@ export const ACHIEVEMENTS = {
   gag_mirror:  { title: 'กระจกวิเศษ', icon: '🪞', type: 'secret', desc: 'จิ้มรูปตัวเองในหน้าฉัน 7 ครั้งรัวๆ', flavor: 'ใครงามเลิศในปฐพี' },
   gag_dj:      { title: 'ดีเจมือใหม่', icon: '🎧', type: 'secret', desc: 'เปิดปิดเสียงรัวๆ 6 ครั้ง', flavor: 'เปิด… ปิด… เปิด…' },
   gag_owl:     { title: 'นกฮูกราตรี', icon: '🦉', type: 'secret', desc: 'ทำข้อสอบจบชุดช่วงตี 1–ตี 4', flavor: 'ร่างกายต้องการการนอนนะ' },
+  // private = คนอื่นมาส่องเห็นแค่ชื่อ ไม่เห็นว่าทำอะไรมา (เจ้าของเห็นครบ) · user ขอ 29 ก.ย. 2026
+  selflove:    { title: 'selflove', icon: '💅', type: 'secret', private: true, desc: 'กดใจข่าวตัวเองครบ 100 ครั้ง', flavor: 'รักตัวเองให้เป็น ก่อนจะไปรักคนอื่น' },
   // บ้านเลเวล 12 = เพดานเดิม · id คง home_max ไว้ (คนที่ได้ไปแล้วไม่หาย) แต่ผูกเลข 12 ตรงๆ แทน sentinel
   // เพราะเพดานขยายเป็น 15 แล้ว (25 ก.ย. 2026) — user สั่งให้ "เจ้าของคฤหาสน์" อยู่ที่ 12 เหมือนเดิม + ขั้นละอันถึง 15
   home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 12 }, desc: 'อัปบ้านถึงเลเวล 12', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },

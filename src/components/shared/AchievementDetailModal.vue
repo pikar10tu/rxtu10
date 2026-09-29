@@ -7,11 +7,11 @@
       <button class="ad-x" aria-label="ปิด" @click="$emit('close')">✕</button>
       <div class="ad-icon"><Emoji :char="item.icon" /></div>
       <div class="ad-title">{{ item.label }}</div>
-      <div v-if="item.flavor" class="ad-flavor">&#8220;{{ item.flavor }}&#8221;</div>
+      <div v-if="item.flavor && (owner || !item.private)" class="ad-flavor">&#8220;{{ item.flavor }}&#8221;</div>
       <div class="ad-rows">
         <div class="ad-row">
           <span class="ad-row-k">เงื่อนไข</span>
-          <span class="ad-row-v">{{ item.desc || '—' }}</span>
+          <span class="ad-row-v">{{ item.private && !owner ? '🤫 ความลับ เจ้าของเท่านั้นที่รู้' : (item.desc || '—') }}</span>
         </div>
         <div v-if="fmtDate(item.earnedAt)" class="ad-row">
           <span class="ad-row-k">ปลดล็อกเมื่อ</span>

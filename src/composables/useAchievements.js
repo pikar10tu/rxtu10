@@ -8,6 +8,7 @@ import { useAchievementBalloon } from './useAchievementBalloon.js'
 import { useRosterSync } from './useRosterSync.js'
 import { MILESTONES, getAchievement } from '../data/achievements.js'
 import { obtainablePets } from '../utils/petCatalog.js'
+import { useNewsLikes } from './useNewsLikes.js'
 import { useAppConfig } from './useAppConfig.js'
 import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
 import {
@@ -43,6 +44,8 @@ const progressOf = (u) => ({
   ...computeProgress(u),
   cosmeticLegend: (u?.cosmetics?.owned || []).filter(id => getCosmetic(id)?.tier === 4).length,
   reviewedCount,
+  // มาจาก likes/board ที่กระดานข่าวโหลดอยู่แล้ว ⇒ read เพิ่ม 0 · ยังไม่เปิดกระดาน = 0 (ไม่ปลด ไม่ใช่ปลดผิด)
+  likesReceived: useNewsLikes().board.value.recv?.[u?.uid || useAuthStore().currentUser?.uid] || 0,
 })
 
 // balloon + กระดานข่าว (ใช้ร่วม self-grant + claim) — best effort
@@ -150,4 +153,6 @@ export function initAchievements() {
 
   // userData เปลี่ยน → เช็ค (ครั้งแรกเงียบ · หลังจากนั้นประกาศ)
   watch(() => auth.userData, () => { check() }, { deep: true })
+  // กระดานข่าวโหลดยอดใจมาแล้ว → เช็ค like_* (ยอดตัวเองไม่ขยับระหว่างเซสชัน เลยดูแค่ตอนโหลด)
+  watch(() => useNewsLikes().board.value, () => { check() })
 }

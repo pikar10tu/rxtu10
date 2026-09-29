@@ -20,7 +20,13 @@
           <span class="news-icon"><Emoji :char="g.head.icon" /></span>
           <div class="news-body">
             <div class="news-msg">{{ g.head.text }}</div>
-            <div class="news-time">{{ timeAgo(g.head.t, now) }}</div>
+            <div class="news-foot">
+              <span class="news-time">{{ timeAgo(g.head.t, now) }}</span>
+              <button v-if="likeKeyOf(g.head)" type="button" class="news-like" :class="{ pop: popKey === g.head.id }"
+                      :aria-label="`กดใจ (${countOf(likeKeyOf(g.head))})`" @click="tapLike(g.head)">
+                <span class="news-heart"><Emoji char="❤️" /></span>{{ fmt(countOf(likeKeyOf(g.head))) }}
+              </button>
+            </div>
             <button v-if="g.rest.length" type="button" class="news-more"
                     :aria-expanded="expanded.has(g.key)" @click="toggle(g.key)">
               {{ expanded.has(g.key) ? '▴ ย่อ' : `▾ อีก ${g.rest.length} ข่าวจาก ${whoOf(g)}` }}
@@ -32,7 +38,13 @@
             <span class="news-icon"><Emoji :char="n.icon" /></span>
             <div class="news-body">
               <div class="news-msg">{{ n.text }}</div>
-              <div class="news-time">{{ timeAgo(n.t, now) }}</div>
+              <div class="news-foot">
+                <span class="news-time">{{ timeAgo(n.t, now) }}</span>
+                <button v-if="likeKeyOf(n)" type="button" class="news-like" :class="{ pop: popKey === n.id }"
+                        :aria-label="`กดใจ (${countOf(likeKeyOf(n))})`" @click="tapLike(n)">
+                  <span class="news-heart"><Emoji char="❤️" /></span>{{ fmt(countOf(likeKeyOf(n))) }}
+                </button>
+              </div>
             </div>
           </li>
         </ul>
@@ -59,10 +71,15 @@ import { useMembersStore } from '../../stores/members.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { buildFeed, groupFeed, timeAgo } from '../../utils/newsFeed.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
+import { useNewsLikes, likeKeyOf } from '../../composables/useNewsLikes.js'
+import { grantSecret } from '../../composables/useAchievements.js'
 
 const usage = useUsageStore()
 const members = useMembersStore()
 const auth = useAuthStore()
+
+const likes = useNewsLikes()
+const { countOf } = likes
 
 const newsDocs = ref([])
 const loading = ref(true)
@@ -88,6 +105,19 @@ function toggle(key) {
 // ชื่อในปุ่ม "อีก N ข่าวจาก X" — ข่าวไม่มีเจ้าของไม่มี rest อยู่แล้ว จึงไม่ถึงตรงนี้
 const whoOf = (g) => g.head.uid === auth.currentUser?.uid ? 'คุณ' : (members.rosterRows?.[g.head.uid]?.n || '?')
 
+// ── กดใจ (ไม่จำกัด · รวบส่งทีเดียว ดู useNewsLikes) ──
+const popKey = ref(null)
+let popTimer = null
+const fmt = (n) => n >= 10000 ? `${Math.floor(n / 1000)}k` : n ? n.toLocaleString() : ''
+function tapLike(item) {
+  likes.like(item)
+  popKey.value = null
+  clearTimeout(popTimer)
+  requestAnimationFrame(() => { popKey.value = item.id; popTimer = setTimeout(() => { popKey.value = null }, 350) })
+  const me = auth.currentUser?.uid
+  if (me && item.uid === me && likes.myTotals(me).self >= 100) grantSecret('selflove')   // achievement ลับ
+}
+
 // ── ตัวสลับบรรทัด ──
 // ใช้แค่ opacity/transform (ดู style) — ห้าม backdrop-filter/blur เด็ดขาด (iOS Safari paint)
 let timer = null
@@ -108,6 +138,7 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', start)
   try {
     await members.loadRoster()
+    likes.load()   // ไม่ await — ใจโผล่ตามหลังได้ ไม่ต้องให้ข่าวรอ
     const snap = await getDocs(query(collection(db, 'news'), orderBy('ts', 'desc'), limit(5)))
     usage.track(snap.size)
     newsDocs.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -119,7 +150,7 @@ onMounted(async () => {
   }
 })
 
-onUnmounted(() => { stop(); document.removeEventListener('visibilitychange', start) })
+onUnmounted(() => { likes.flush(); clearTimeout(popTimer); stop(); document.removeEventListener('visibilitychange', start) })
 
 watch(open, (v) => { if (v) { stop(); now.value = Date.now() } else start() })
 </script>
@@ -134,6 +165,14 @@ watch(open, (v) => { if (v) { stop(); now.value = Date.now() } else start() })
 .news-list { list-style: none; margin: 10px 0 0; padding: 8px 0 0; border-top: 1px solid rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; overscroll-behavior: contain; }
 .news-item { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,.05); }
 .news-item:last-child { border-bottom: none; padding-bottom: 0; }
+.news-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.news-like { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; min-height: 28px; padding: 0 8px;
+  border-radius: 999px; font-size: .72rem; font-weight: 700; color: rgba(0,0,0,.5); touch-action: manipulation; user-select: none; }
+.news-like:active { background: rgba(255,90,120,.1); }
+.news-heart { display: inline-block; font-size: .85rem; }
+.news-like.pop .news-heart { animation: news-pop .35s ease-out; }
+@keyframes news-pop { 0% { transform: scale(1) } 40% { transform: scale(1.45) } 100% { transform: scale(1) } }
+@media (prefers-reduced-motion: reduce) { .news-like.pop .news-heart { animation: none; } }
 .news-icon { font-size: 1.2rem; flex-shrink: 0; }
 .news-group { border-bottom: 1px solid rgba(0,0,0,.05); padding-bottom: 8px; }
 .news-group:last-child { border-bottom: none; padding-bottom: 0; }
