@@ -128,6 +128,19 @@ PLANS.duo = ({ owner, partner, team }) => {
       kf: [P(p, .2, 0, 0, 10, -6), P(p, .38, 1, -8, 12, -24, .4), P(p, .3, 0, 8, 16, -44)] })))
 }
 
+// 🦣 เกราะหินแตกทีละชั้น — โล่หินแวบขึ้นแล้วแตกเป็นเศษกระเด็น 4 ทิศ
+PLANS.shatter = ({ owner }) => [
+  { img: 'stone', ms: 380, delay: 0, ease: 'ease-out', kf: [P(owner, .9, .95), P(owner, 1.15, 0, 8)] },
+  ...[[-34, -26, -140], [32, -30, 150], [-28, 22, -200], [30, 26, 220]].map(([dx, dy, r], i) => ({
+    img: 'stone', ms: 460, delay: 40 + i * 20, ease: 'cubic-bezier(.2,.7,.4,1)',
+    kf: [P(owner, .3, 1, 0), P(owner, .22, 0, r, dx, dy)] })),
+]
+// 🦖 ครบทุก 5 ชั้น — รอยข่วนใหญ่บนตัว + วงคำรามแดง ("มันกำลังโหด")
+PLANS.rage = ({ owner }) => [
+  { img: 'roar', ms: 520, delay: 0, ease: 'ease-out', kf: [P(owner, .4, .9), P(owner, 2.2, 0)] },
+  { img: 'claw', ms: 480, delay: 60, ease: 'cubic-bezier(.2,.9,.3,1)', kf: [P(owner, .6, 0, 0, -14, -14), P(owner, 1.1, 1, 0, 0, 0, .35), P(owner, 1.15, 0)] },
+]
+
 /** เพ็ทตัวนี้มีท่าโชว์ไทม์ของตัวเองไหม */
 export const hasShowtime = (petId) => !!PLANS[petId]
 

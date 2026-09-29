@@ -288,6 +288,10 @@ const SOUNDS = {
   // ชิปสกิลโผล่ครั้งแรกของไฟต์
   skill:        () => { tone(660, 0, 0.1, { type: 'triangle', vol: 0.5 }); tone(990, 0.07, 0.18, { type: 'triangle', vol: 0.5 }) },
   // ผลพาสสีฟตาม fxKind
+  // 💗 แบนเนอร์คู่ (รางวัลคนเก่ง/โลกเอียง) — ระฆังใสสองโน้ตขึ้น + ประกายเบาๆ
+  duo:      () => { tone(1047, 0, 0.5, { type: 'sine', vol: 0.4 }); tone(2094, 0, 0.35, { type: 'sine', vol: 0.12 }); tone(1397, 0.16, 0.6, { type: 'sine', vol: 0.4 }); tone(2794, 0.16, 0.4, { type: 'sine', vol: 0.1 }); arp([2093, 2637, 3136], 0.05, { type: 'triangle', vol: 0.12, d: 0.15 }) },
+  // 🦣 เกราะหินแตก — แกร๊กสั้น + เศษหินกระจาย
+  p_crack:  () => { noise(0, 0.12, { vol: 0.35, hp: 1800 }); tone(180, 0, 0.12, { type: 'square', vol: 0.18, slide: 70 }); noise(0.06, 0.18, { vol: 0.15, hp: 4000 }) },
   p_heal:   () => arp([784, 988, 1175], 0.06, { type: 'sine', vol: 0.45, d: 0.2 }),
   p_revive: () => { arp([523, 659, 784, 1047, 1319], 0.07, { type: 'sine', vol: 0.5, d: 0.25 }); noise(0.3, 0.4, { vol: 0.12, hp: 5000 }) },
   p_guard:  () => { tone(1500, 0, 0.18, { type: 'square', vol: 0.18, slide: 1400 }); tone(2250, 0, 0.12, { type: 'sine', vol: 0.2 }) },

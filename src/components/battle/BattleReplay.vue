@@ -135,6 +135,15 @@
     <!-- modal สรุปผล — แตะนอกกล่อง = peek สนาม (ไม่ใช่ปิดทิ้ง กันกดพลาด) -->
     <div v-if="resultOpen && summary" class="br-result-ov" @click.self="resultOpen = false">
       <div class="br-modal">
+        <!-- 🏅 MVP ของฝั่งที่ชนะ — หน้าเพ็ทใหญ่ + ผลงาน (29 ก.ย. user) · ทองเมื่อเราชนะ ม่วงเมื่อศัตรูชนะ -->
+        <div v-if="mvpShow" class="br-mvpbar" :class="{ foe: !data.won }">
+          <span class="br-mvpbar-face"><Emoji :char="mvpShow.face" /></span>
+          <span class="br-mvpbar-t">
+            <b class="br-mvpbar-tag">MVP</b>
+            <span class="br-mvpbar-name">{{ mvpShow.name }}</span>
+            <span class="br-mvpbar-stat">ดาเมจ {{ mvpShow.dmg.toLocaleString() }}<template v-if="mvpShow.kills"> · ล้ม {{ mvpShow.kills }} ตัว</template></span>
+          </span>
+        </div>
         <div class="br-result" :class="{ win: data.won }">{{ data.won ? (data.winText ?? `ชนะ! ขึ้นชั้น ${data.cleared + 1}`) : (data.loseText ?? 'แพ้ ลองใหม่ได้เลย') }}</div>
         <div v-if="data.won && (data.rewardText ?? data.cleared != null)" class="br-reward"><Emoji char="🎁" /> {{ data.rewardText ?? ('ได้รับ: ขึ้นชั้น ' + (data.cleared + 1)) }}</div>
 
@@ -193,9 +202,9 @@
         <div class="br-card-row"><span>พลังโจมตี</span><b>{{ insp.atk }}</b></div>
         <div class="br-card-row"><span>พลังชีวิต</span><b>{{ insp.hpNow }} / {{ insp.hpMax }}</b></div>
         <!-- ไอคอนหน้าชื่อ = ตัวเดียวกับป้ายทักษะบนการ์ด · เลขบนการ์ด (ชั้น/ที่เหลือ) = "x ชั้น · ใช้ไปแล้ว" ใน "กำลังได้รับ" ด้านล่าง -->
-        <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b><Emoji v-if="insp.passive?.icon" :char="insp.passive.icon" /> {{ insp.passive ? insp.passName : 'ตัวนี้ยังไม่มี' }}</b></div>
+        <div class="br-card-pass"><span>ทักษะเฉพาะ</span><b><Emoji v-if="insp.passIcon" :char="insp.passIcon" /> {{ insp.passive ? insp.passName : 'ตัวนี้ยังไม่มี' }}</b></div>
         <!-- เดิมโชว์แค่ชื่อ เปิดมาก็ยังไม่รู้อยู่ดีว่าสกิลทำอะไร — passiveText() เติมเลขจริงของขั้นให้แล้ว -->
-        <div v-if="insp.passive" class="br-card-passdesc">{{ passiveText(insp.passive) }}</div>
+        <div v-if="insp.passive" class="br-card-passdesc">{{ insp.passDesc || passiveText(insp.passive) }}</div>
 
         <div v-if="inspBuffs.length" class="br-buffs">
           <div class="br-buffs-head">กำลังได้รับ</div>
@@ -605,6 +614,7 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  pendingArmor.clear()
   oniBoost.clear()
   pendingBurst.clear()
   pendingInfect.clear()
@@ -714,6 +724,7 @@ const teamIds = computed(() => ({
 /** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
 function skillTitle(e) {
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
+  if (e.lastArmor) return 'เกราะแตกหมดแล้ว!'
   if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'โลกเอียง'   // ☀️🌍 ร่างองศา (29 ก.ย. user)
   if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
@@ -747,7 +758,7 @@ async function applyPassive(e) {
   if (e.kind === 'bannerQuiet') { bannerEvents.push(e); return }
   if (e.kind === 'skillShow') {
     const bchunk = bannerEvents.splice(0)
-    sfx(LEGEND_SFX[e.petId] || 'skill')
+    sfx(isDuoEvent(e) ? 'duo' : (LEGEND_SFX[e.petId] || 'skill'))
     const pet = defForUid(e.uid)
     const p = passiveOf(pet)
     await spotlightPassive(e, t, g, {
@@ -783,7 +794,7 @@ async function applyPassive(e) {
     const bchunk = bannerEvents.splice(0)
     markSkill(e.uid)
     showMini(e, true)
-    sfx(LEGEND_SFX[e.petId] || 'skill')
+    sfx(isDuoEvent(e) ? 'duo' : (LEGEND_SFX[e.petId] || 'skill'))
     await wait(t.windup + t.motion); if (g !== gen) return
     playShowtime(e)
     ;[...bchunk, e].forEach(firePassiveFx)
@@ -814,6 +825,7 @@ const OPEN_SFX = {
   teamDamageReduction: 'open_wall', enemyVuln: 'curse',
 }
 function openSfx(e) {
+  if (isDuoEvent(e)) return sfx('duo')
   if (LEGEND_SFX[e.petId]) return sfx(LEGEND_SFX[e.petId])
   sfx(OPEN_SFX[e.effect] || (e.fxKind === 'debuff' ? 'curse' : e.fxKind === 'damage' ? 'p_fire' : 'aura'))
 }
@@ -1023,6 +1035,7 @@ function landInfect(uid, impactUid) {
 }
 // 💥 เชื้อแตก: ใบ infectBurst มาก่อนหมัดใน log เหมือนกัน → พักตาม "เป้า" แล้วลงตอนหมัดนั้นกระทบ (ใครตีก็ได้ในทีมไวรัส)
 const pendingBurst = new Map()    // uid ที่โดนตี → event
+const pendingArmor = new Map()    // uid เจ้าของเกราะ → event (แตกตอนหมัดกระทบ)
 function landBurst(targetUid) {
   const e = pendingBurst.get(targetUid); if (!e) return
   pendingBurst.delete(targetUid)
@@ -1033,6 +1046,18 @@ function landBurst(targetUid) {
 function firePassiveFx(e) {
   if (e.effect === 'infect' && !e.landing) { pendingInfect.set(e.uid, e); return }
   if (e.effect === 'infectBurst' && !e.landing && e.targets?.[0]) { pendingBurst.set(e.targets[0], e); return }
+  // 🦣 เกราะก็ log ก่อนหมัด (onHit) → พักไว้ แตกตอนหมัดกระทบจริง
+  if (e.fxKind === 'armor' && !e.landing) { pendingArmor.set(e.uid, e); return }
+  if (e.fxKind === 'armor') {
+    if (tuning.value.showtime !== false) fx?.showtime('shatter', { owner: e.uid })
+    sfx('p_crack')
+    if (e.armorLeft === 0) showMini({ ...e, lastArmor: true }, true)   // ชั้นสุดท้ายแตก = แบนเนอร์เล็ก
+  }
+  // 🦖 ครบทุก 5 ชั้น: วงแดง + รอยข่วน + คำราม
+  if (e.effect === 'hunt' && e.amount > 0 && e.amount % 5 === 0) {
+    if (tuning.value.showtime !== false) fx?.showtime('rage', { owner: e.uid })
+    sfx('trex')
+  }
   const on = Array.isArray(e.targets) && e.targets.length ? e.targets : [e.uid]
   if (e.fxKind === 'windup') { holdChip(e.uid, 'ง้างตะบอง…', '💢'); boostOni(e.uid) }
   if (e.fxKind === 'chain') sfx('p_chain')
@@ -1167,6 +1192,7 @@ function applyImpact(beat, g, t) {
   // ── 1) paint บนการ์ดเป้า + Vue patch ลงให้ครบก่อน (ยังไม่มีอนิเมชันการ์ดวิ่งตอนนี้) ──
   highlight(beat.target, 'flash')
   landBurst(beat.target)   // 👾 ควันเชื้อแตกบนตัวที่โดน (ทุกหมัดของทีมไวรัส รวมหมัดลูก)
+  if (pendingArmor.has(beat.target)) { const e = pendingArmor.get(beat.target); pendingArmor.delete(beat.target); firePassiveFx({ ...e, landing: true }) }
   const hpBefore = shownHp(beat.target)   // โดนซ้ำกลางการไล่นับ = นับต่อจากเลขที่เห็นอยู่ ไม่กระโดด
   const hpRaw = (beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100
   // เลือดเหลือแต่ไม่ถึง 0.5% ห้ามปัดเป็น 0 — setDead อ่าน hp<=0 เป็น "ตาย" แล้วทำการ์ดเทาทั้งที่ยังสู้อยู่
@@ -1188,6 +1214,7 @@ function applyImpact(beat, g, t) {
   if (beat.kind !== 'sub') {
     for (const u of [...pendingInfect.keys()]) if (u !== beat.attacker) landInfect(u, null)
     for (const u of [...pendingBurst.keys()]) if (u !== beat.target) { const e = pendingBurst.get(u); pendingBurst.delete(u); firePassiveFx({ ...e, landing: true }) }
+    for (const u of [...pendingArmor.keys()]) if (u !== beat.target) { const e = pendingArmor.get(u); pendingArmor.delete(u); firePassiveFx({ ...e, landing: true }) }
   }   // ค้างจากหมัดที่ไม่ได้มา = ลงเงียบๆ
   if (beat.forced && beat.kind !== 'sub') fx?.callout(beat.attacker, 'taunt')   // 🦍 ถูกยั่วยุ — ป้ายบนตัวคนที่ถูกดึงมา
   // เสียงหมัดตามสายของผู้ตี (fist ทุบ · scissors ฟัน · paper ปัด) · ปิดเกม/น็อกซ้อนเสียงหนักอีกชั้น
@@ -1403,6 +1430,15 @@ const skillIcon = (p, uid) => {
 
 function hpPct(uid) { return hp.value[uid] ?? 100 }
 
+// 🏅 MVP ของฝั่งที่ชนะ สำหรับแบนเนอร์หน้าสรุป
+const mvpShow = computed(() => {
+  const s = summary.value; if (!s) return null
+  const side = props.data?.won ? 'A' : 'B'
+  const uid = s.mvp?.[side]; if (!uid) return null
+  const u = (side === 'A' ? s.teamA : s.teamB).find(x => x.uid === uid)
+  return { face: defForUid(uid)?.emoji || '✨', name: petNameOf(uid), dmg: u?.dmgDealt || 0, kills: u?.kills || 0 }
+})
+
 // ── inspect helpers ──
 function rarityLabel(r) { return RARITY[r]?.label || r }
 const insp = computed(() => {
@@ -1412,11 +1448,19 @@ const insp = computed(() => {
   const p = arr?.[i] || {}
   const c = buildCombatant(p)
   const def = getPetDef(p.id) || { emoji: '❓', name: '?', element: 'scissors', rarity: 'common' }
+  // 🔑 เลขเดียวกับบนการ์ด (dispStats = หลังบัฟ ณ ตอนนี้) — เดิมใช้ค่าดิบ buildCombatant ⇒ กดดูแล้วเลขไม่ตรงการ์ด
+  const ds = dispStats.value[uid]
+  const atk = Math.round(ds?.atk ?? c.atk), hpMax = Math.round(ds?.maxHp ?? c.maxHp)
+  // 🌍 ร่างองศา (อยู่กับซอล ไม่มีตัวธรรมดา): ทักษะกลายเป็นรับแสงซอล — ชื่อ+คำอธิบายสั้นตามจริง · ไม่เข้าเงื่อนไข = ของเดิม
+  const degree = def.id === 'earth' && degreeFormActive(sideTeam(uid[0]))
+  const solPct = degree ? (passiveOf(getPetDef('sol'))?.parts?.find(x => x.effect === 'rarityBoost')?.value?.common ?? 0) : 0
   return {
-    def, grade: p.grade || 0, atk: Math.round(c.atk), hpMax: Math.round(c.maxHp),
-    hpNow: Math.round(c.maxHp * (hp.value[uid] ?? 100) / 100), passive: passiveOf(def),
+    def, grade: p.grade || 0, atk, hpMax,
+    hpNow: curHp(uid), passive: passiveOf(def),
     // ชื่อบนจอ — คู่หูที่อยู่ทีมเดียวกันใช้ชื่อร่วม (🦭+🐳 = "รางวัลคนเก่ง") · คำอธิบายยังเป็นของสกิลตัวเอง
-    passName: passiveTitle(passiveOf(def), p.id, teamIds.value[uid[0]] || null),
+    passName: degree ? 'เอาหน่อยเว้ย องศา!' : passiveTitle(passiveOf(def), p.id, teamIds.value[uid[0]] || null),
+    passIcon: degree ? '💖' : passiveOf(def)?.icon,
+    passDesc: degree ? `ได้แสงจากซอล: พลังโจมตีและเลือดสูงสุด +${solPct}% · ไม่มีผลฤดู` : null,
     elEmoji: ELEMENTS[def.element]?.emoji || '✊', elName: EL_NAME[def.element] || def.element,
   }
 })
@@ -1694,6 +1738,18 @@ onUnmounted(() => {
 .br-sum-row.dead { opacity: .45; }
 .br-sum-row.mvp.win { border-color: #fbbf24; background: rgba(251,191,36,.12); }
 .br-sum-row.mvp:not(.win) { border-color: #c084fc; background: rgba(192,132,252,.12); }
+.br-mvpbar { display: flex; align-items: center; gap: 12px; margin: 0 auto 10px; padding: 8px 18px 8px 10px; max-width: 320px;
+  border-radius: 18px; background: linear-gradient(100deg, #b45309, #78350f); box-shadow: 0 0 0 2px #fde68a, 0 6px 18px rgba(251,191,36,.35);
+  animation: br-mvpbar-in .5s cubic-bezier(.2,1.3,.4,1) both; }
+.br-mvpbar.foe { background: linear-gradient(100deg, #7e22ce, #3b0764); box-shadow: 0 0 0 2px #e9d5ff, 0 6px 18px rgba(192,132,252,.35); }
+.br-mvpbar-face { font-size: 2.8rem; line-height: 1; animation: br-mvpbar-bob 1.6s ease-in-out .5s infinite; }
+.br-mvpbar-t { display: flex; flex-direction: column; text-align: left; min-width: 0; }
+.br-mvpbar-tag { font-family: 'Lilita One', 'Kanit', sans-serif; font-weight: 400; font-size: 1.3rem; letter-spacing: .06em; color: #fde68a; line-height: 1; }
+.br-mvpbar.foe .br-mvpbar-tag { color: #f5d0fe; }
+.br-mvpbar-name { font-size: .95rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.br-mvpbar-stat { font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.85); }
+@keyframes br-mvpbar-in { from { opacity: 0; transform: scale(.6) translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes br-mvpbar-bob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-4px) rotate(4deg); } }
 .br-mvp { position: absolute; top: -8px; left: 8px; font-size: .7rem; font-weight: 900; color: #1e293b; background: #fbbf24; padding: 1px 5px; border-radius: 999px; }
 .br-sum-row.mvp:not(.win) .br-mvp { background: #c084fc; color: #fff; }
 .br-sum-face { font-size: 1.3rem; }
