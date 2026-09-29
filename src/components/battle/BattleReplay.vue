@@ -604,6 +604,7 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  pendingInfect.clear()
   fullMoonNext.clear()
   miniLast.clear()
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
@@ -928,6 +929,7 @@ function showLinks() {
 // เล่นเฉพาะตอนสปอตไลต์ (ยกแรก/ครั้งแรก/โมเมนต์) = ครั้งละไม่กี่ทีต่อไฟต์ ไม่รก · ไม่ await (สไปรต์อยู่ชั้น fx แยกจากการ์ด)
 // tuning.showtime === false = ปิด (ห้องแล็บเทียบกับของเดิม)
 function playShowtime(e) {
+  if (e.effect === 'infect' && !e.landing) return   // 👾 เลื่อนไปเล่นตอนหมัดไวรัสกระทบ (landInfect)
   if (tuning.value.showtime === false || !hasShowtime(e.petId)) return
   const side = e.uid[0]
   const alive = Object.keys(maxHp).filter(u => (hp.value[u] ?? 100) > 0)
@@ -942,7 +944,19 @@ function playShowtime(e) {
 // FX ของ passive: ป้ายชื่อเหนือหัว + ประกายตามชนิดผล + ขยับหลอดเลือด
 // ⚠️ ห้าม await อะไรในนี้ — ตัวเดินเวลาคือ applyPassive/spotlightPassive
 // ป้ายชื่อไม่ได้อยู่ในนี้แล้ว — ชิปบนการ์ด (showChip) ทำหน้าที่นั้นแทน
+// 👾 เชื้อ: เอนจิน log ใบแปะเชื้อ "ก่อน" หมัด (onAttack) ⇒ ถ้าลงผลทันที ควัน/ป้ายชั้นเชื้อขึ้นก่อนไวรัสตีถึง
+//    (29 ก.ย. user: "ควรรอให้ไวรัสตีถึงก่อน") → พักไว้ แล้ว landInfect() ปล่อยตอน impact ของหมัดไวรัสตัวนั้น
+const pendingInfect = new Map()   // uid ไวรัส → event แปะเชื้อที่รอหมัด
+function landInfect(uid, impactUid) {
+  const e = pendingInfect.get(uid); if (!e) return
+  pendingInfect.delete(uid)
+  const le = { ...e, landing: true }
+  if (impactUid && tuning.value.showtime !== false) fx?.showtime('virus', { owner: impactUid, targets: le.targets || [] })
+  firePassiveFx(le)
+}
+
 function firePassiveFx(e) {
+  if (e.effect === 'infect' && !e.landing) { pendingInfect.set(e.uid, e); return }
   const on = Array.isArray(e.targets) && e.targets.length ? e.targets : [e.uid]
   if (e.fxKind === 'windup') holdChip(e.uid, 'ง้างตะบอง…', '💢')
   if (e.fxKind === 'chain') sfx('p_chain')
@@ -1088,6 +1102,8 @@ function applyImpact(beat, g, t) {
   const spark = sparkOf(defForUid(beat.attacker))
   const w = beat.weight ?? 0
   if (chipOn.value[beat.attacker]?.hold) hideChip(beat.attacker)
+  // หมัดลูก (สะท้อนเกราะ/cleave) อยู่ใน beat ของหมัดหลักที่ยังไม่มาถึง — ห้ามปล่อยเชื้อค้างทิ้ง
+  if (beat.kind !== 'sub') for (const u of [...pendingInfect.keys()]) if (u !== beat.attacker) landInfect(u, null)   // ค้างจากหมัดที่ไม่ได้มา = ลงเงียบๆ
   if (beat.forced && beat.kind !== 'sub') fx?.callout(beat.attacker, 'taunt')   // 🦍 ถูกยั่วยุ — ป้ายบนตัวคนที่ถูกดึงมา
   // เสียงหมัดตามสายของผู้ตี (fist ทุบ · scissors ฟัน · paper ปัด) · ปิดเกม/น็อกซ้อนเสียงหนักอีกชั้น
   const elem = defForUid(beat.attacker)?.element
@@ -1199,6 +1215,7 @@ async function applyAttack(beat) {
 
   await wait(t.motion); if (g !== gen) return
   applyImpact(beat, g, t)
+  landInfect(beat.attacker, beat.target)   // 👾 ควันเชื้อระเบิดจากจุดกระทบ ฟุ้งไปทั้งทีม
   // 👹 หมัดฟาดของโอนิ: ฟ้าผ่าลงที่เป้า + จอสั่น (ท่าเดียวกับโชว์ไทม์ แต่ลงที่ตัวที่โดน)
   if (def?.id === 'kirin' && beat.kind !== 'sub' && tuning.value.showtime !== false) { fx?.showtime('kirin', { owner: beat.target }); fx?.shake('ko') }
   await wait(t.hitstop); if (g !== gen) return

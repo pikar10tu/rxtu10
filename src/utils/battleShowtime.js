@@ -6,7 +6,7 @@
 //   x/y = พิกัดในกล่องไฟต์ (เดียวกับ fx.centerOf) · s = สเกล (ภาพฐาน 96px) · r = องศา · o = ความทึบ · at = offset 0..1
 
 export const SHOWTIME_ART = ['flame', 'roar', 'wave', 'wings', 'feather', 'smash', 'claw', 'ouro', 'talon',
-  'dream', 'spore', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star']
+  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star']
 
 /** เพดานสไปรต์ต่อโชว์ — ต้อง ≤ ขนาดพูลใน battlefx (กันยึดชิ้นที่ยังเล่นอยู่) */
 export const SHOWTIME_MAX = 12
@@ -76,12 +76,18 @@ const PLANS = {
   // 🐘 กลืนกินฝันร้าย — ฟองฝันคลุมทีม
   qilin: ({ team }) => team.map((p, i) => ({ img: 'dream', ms: 760, delay: i * 90, ease: 'cubic-bezier(.2,.8,.3,1)',
     kf: [P(p, .3, 0), P(p, 1.15, .85, 0, 0, 0, .35), P(p, 1.2, .7, 0, 0, 0, .7), P(p, 1.35, 0)] })),
-  // 👾 เชื้อลุกลาม — สปอร์ลอยจากไวรัสไปติดศัตรู
-  virus: ({ owner, foes, targets }) => (targets.some(t => foes.includes(t)) ? targets : foes).slice(0, 4).flatMap((f, i) => [
-    { img: 'spore', ms: 420, delay: i * 90, ease: 'cubic-bezier(.3,.2,.5,1)',
-      kf: [P(owner, .25, .9, 0), P(owner, .45, 1, 90, (f.x - owner.x) * .5, (f.y - owner.y) * .5 - 30, .5), P(f, .55, 1, 180)] },
-    { img: 'spore', ms: 380, delay: i * 90 + 400, ease: 'ease-out', kf: [P(f, .55, 1, 180), P(f, 1.1, 0, 260)] },
-  ]),
+  // 👾 เชื้อลุกลาม — ควันพิษม่วงระเบิดที่จุดกระทบ แล้วฟุ้งไปติดศัตรูทุกตัว (29 ก.ย. user)
+  //    owner = "จุดกระทบ" (ตัวที่โดนหมัดไวรัส) ไม่ใช่ตัวไวรัส — BattleReplay เลื่อนมาเล่นตอน impact
+  virus: ({ owner, targets }) => [
+    { img: 'smoke', ms: 620, delay: 0, ease: 'cubic-bezier(.2,.8,.3,1)',
+      kf: [P(owner, .35, .95, 0), P(owner, 1.35, .85, 20, 0, 0, .4), P(owner, 1.7, 0, 40, 0, -10)] },
+    ...targets.filter(t => t !== owner).slice(0, 4).flatMap((t, i) => [
+      { img: 'smoke', ms: 420, delay: 90 + i * 60, ease: 'cubic-bezier(.3,.3,.4,1)',
+        kf: [P(owner, .35, .9, 0), P(t, .7, .9, 60)] },
+      { img: 'smoke', ms: 460, delay: 490 + i * 60, ease: 'ease-out',
+        kf: [P(t, .7, .9, 60), P(t, 1.2, 0, 100, 0, -8)] },
+    ]),
+  ],
   // 🦍 ตีอกท้าชน — พื้นสะเทือน + คลื่นกระแทก
   gorilla: ({ owner }) => [
     { img: 'quake', ms: 620, delay: 0, ease: 'cubic-bezier(.2,.8,.3,1)', kf: [P(owner, .5, 1, 0, 0, 22), P(owner, 2, 0, 0, 0, 26)] },
@@ -134,7 +140,7 @@ export const PET_TINT = {
   bahamut: ['#c2410c', '#7f1d1d'], lion: ['#a16207', '#78350f'], whale: ['#0369a1', '#1e3a8a'],
   phoenix: ['#c2410c', '#9f1239'], kirin: ['#b91c1c', '#450a0a'], trex: ['#9a3412', '#3f1d0b'],
   ouroboros: ['#15803d', '#14532d'], simurgh: ['#0e7490', '#164e63'], qilin: ['#7e22ce', '#3b0764'],
-  virus: ['#4d7c0f', '#1a2e05'], gorilla: ['#92400e', '#451a03'], mammoth: ['#78716c', '#292524'],
+  virus: ['#86198f', '#3b0764'], gorilla: ['#92400e', '#451a03'], mammoth: ['#78716c', '#292524'],
   sol: ['#b45309', '#7c2d12'], earth: ['#15803d', '#1e3a8a'], luna: ['#4338ca', '#1e1b4b'],
 }
 export const KIND_TINT = {

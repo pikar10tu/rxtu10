@@ -102,6 +102,13 @@ const ART = {
     <mask id="k"><rect width="64" height="64" fill="#fff"/><circle cx="42" cy="26" r="19" fill="#000"/></mask>
     <g filter="url(#g)"><circle cx="30" cy="34" r="22" fill="url(#m)" mask="url(#k)"/></g>
     ${star4(48, 20, 3.5)}${star4(52, 40, 2.4)}${star4(44, 50, 1.8)}`),
+  // 👾 ไวรัส — ควันพิษม่วง (29 ก.ย. user: แทนสปอร์เขียว)
+  smoke: () => svg(`<defs><radialGradient id="s" gradientUnits="userSpaceOnUse" cx="28" cy="28" r="28"><stop offset="0" stop-color="#f0abfc"/><stop offset=".55" stop-color="#a21caf"/><stop offset="1" stop-color="#581c87"/></radialGradient>
+    <filter id="b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter>
+    <filter id="h" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+    <g filter="url(#h)" opacity=".55">${[[32, 36, 24]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#a855f7"/>`).join('')}</g>
+    <g filter="url(#b)" opacity=".92"><g fill="url(#s)">${[[32, 38, 15], [19, 38, 10], [45, 38, 11], [25, 27, 11], [39, 26, 12], [32, 47, 10], [14, 44, 7], [50, 46, 8]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g></g>
+    <g filter="url(#b)" fill="#fae8ff" opacity=".5"><ellipse cx="27" cy="25" rx="5" ry="3"/><ellipse cx="40" cy="23" rx="4" ry="2.4"/><ellipse cx="20" cy="35" rx="3.5" ry="2.2"/></g>`),
   // ✨ ประกายทั่วไป
   star: () => svg(`<defs>${glow('g', 1.5)}</defs><g filter="url(#g)">${star4(32, 32, 26, '#fffbe0', '#ffd34a')}</g>`),
 }
