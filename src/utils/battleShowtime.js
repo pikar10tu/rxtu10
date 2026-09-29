@@ -128,6 +128,11 @@ PLANS.duo = ({ owner, partner, team }) => {
       kf: [P(p, .2, 0, 0, 10, -6), P(p, .38, 1, -8, 12, -24, .4), P(p, .3, 0, 8, 16, -44)] })))
 }
 
+// 💗 คู่หูครั้งซ้ำ — หัวใจเล็กลอยเหนือหัวสองตัว ไม่รก
+PLANS.duoSmall = ({ owner, partner }) => [owner, partner || owner].map((p, i) => ({
+  img: 'heart', ms: 620, delay: i * 90, ease: 'ease-out',
+  kf: [P(p, .15, 0, 0, 0, -30), P(p, .3, 1, i ? 8 : -8, 0, -42, .35), P(p, .25, 0, 0, 0, -58)] }))
+
 // 🦣 เกราะหินแตกทีละชั้น — โล่หินแวบขึ้นแล้วแตกเป็นเศษกระเด็น 4 ทิศ
 PLANS.shatter = ({ owner }) => [
   { img: 'stone', ms: 380, delay: 0, ease: 'ease-out', kf: [P(owner, .9, .95), P(owner, 1.15, 0, 8)] },

@@ -1005,7 +1005,9 @@ function playShowtime(e) {
   if (isDuoEvent(e)) {
     if (tuning.value.showtime === false) return
     const side = e.uid[0]
-    fx?.showtime('duo', { owner: e.uid, partner: duoPartnerUid(e),
+    // ครั้งซ้ำ (ฟื้นเลือดคู่ทุกรอบ) = หัวใจเล็กเหนือหัวคู่เท่านั้น · ครั้งใหญ่ (แบนเนอร์เต็ม) = ท่าเต็ม
+    const small = e.kind === 'skillQuiet' || e.kind === 'skillMini'
+    fx?.showtime(small ? 'duoSmall' : 'duo', { owner: e.uid, partner: duoPartnerUid(e),
       team: Object.keys(maxHp).filter(u => u[0] === side && (hp.value[u] ?? 100) > 0) })
     if (e.effect !== 'rarityBoost') return   // ซัน: ยังเล่นดวงอาทิตย์ต่อด้วย
   }
@@ -1826,11 +1828,11 @@ onUnmounted(() => {
 .br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 /* แบนเนอร์เล็ก — ทีมเราขึ้นครึ่งล่างจากซ้าย · ศัตรูครึ่งบนจากขวา · transform/opacity ล้วน */
-.br-mini { position: absolute; left: 0; top: 58%; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: 78%;
+.br-mini { position: absolute; left: 0; top: 89%;   /* ใต้ป้ายชื่อทีมล่าง — เดิม 58% ทับแถวการ์ด (วัดจอจริง 29 ก.ย.: .br-box = แถวการ์ด+ป้ายชื่อ) */ z-index: 6; display: flex; align-items: center; gap: 6px; max-width: 78%;
   padding: 4px 14px 4px 6px; border-radius: 0 999px 999px 0; background: linear-gradient(90deg, var(--cut-a, #2563eb), var(--cut-b, #1e3a8a));
   box-shadow: 0 0 0 2px #fff; pointer-events: none; opacity: 0; transform: translateX(-105%); }
-.br-mini.foe { left: auto; right: 0; top: 30%; flex-direction: row-reverse; padding: 4px 6px 4px 14px; border-radius: 999px 0 0 999px;
-  background: linear-gradient(270deg, var(--cut-a, #dc2626), var(--cut-b, #7f1d1d)); transform: translateX(105%); }
+.br-mini.foe { left: auto; right: 0; flex-direction: row-reverse; padding: 4px 6px 4px 14px; border-radius: 999px 0 0 999px;
+  background: linear-gradient(270deg, var(--cut-a, #dc2626), var(--cut-b, #7f1d1d)); transform: translateX(105%); top: 1%; }   /* เหนือป้ายชื่อทีมบน */
 .br-mini.on { animation: br-mini-l 1.05s cubic-bezier(.2,.9,.3,1) both; }
 .br-mini.foe.on { animation-name: br-mini-r; }
 .br-mini-face { font-size: 1.5rem; line-height: 1; }
