@@ -361,7 +361,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
         // ⏸️ ข้ามตา (❄️ แช่แข็ง · 🛸 สตั๊นในอนาคต) — ตานี้หายไปทั้งตา แต่นับว่าได้ตาในรอบนี้แล้ว
         st.skip -= 1
         log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id,
-          name: st.skipName || 'แช่แข็ง', icon: st.skipIcon || '❄️', effect: 'frozen', targets: [att.uid], fxKind: 'skip' })
+          name: st.skipName || 'แช่แข็ง', icon: st.skipIcon || '❄️', effect: 'frozen', targets: [att.uid], fxKind: 'skip', left: st.skip })   // left = สแตคที่เหลือหลังลด
       } else if (windupOf(att) && !st.wound) {
         // 👹 ง้าง (27 ก.ย. 2026) — ไม่ตี แต่นับว่าได้ตาในรอบแล้ว (เหมือนตาที่ถูกข้าม)
         // 🔑 ตาแรกของไฟต์เป็นตาง้างเสมอ · ลำดับ if ต้องให้ skip มาก่อน ⇒ โดนแช่แข็งตอนง้างค้าง = wound ค้างไว้ ตาถัดไปฟาด

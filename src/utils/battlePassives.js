@@ -29,6 +29,9 @@ const stepsOf10 = (ratio) => Math.floor(ratio * 10 + 1e-9)
  *  คีย์ที่ใช้: uses (กันตายไปแล้วกี่ครั้ง) · atkStacks (ชั้น stackAtk) · rage (ชั้น atkOnHit) */
 export const psOf = (u) => (u.ps || (u.ps = {}))
 
+/** ❄️ ฤดูหนาวแช่ได้กี่ตาต่อครั้ง — ตัวนับเป็นสแตค (st.skip) ลดทีละ 1 ตอนถึงตา */
+export const FREEZE_TURNS = 1
+
 /** snapshot สเตตัสที่ "UI เอาไปวาด" ของทั้งสองทีม — atk/maxHp เท่านั้น
  *  🔑 เอนจินเป็นแหล่งความจริงเดียว — ถ้าปล่อยให้ UI คำนวณ aura เอง
  *     วันที่สูตรเปลี่ยนจะมีสองแหล่งความจริงทันที แล้วเลขบนจอกับเลขที่ใช้สู้จะคลาดกันเงียบๆ
@@ -364,8 +367,11 @@ export function runOnRoundEnd(team, foes, rand) {
       } else {
         // 🎲 ดึง rand ศัตรูละ 1 ครั้ง ตามลำดับช่อง (deterministic)
         const hit = alive(foes).filter(() => rand() * 100 < v.cold)
-        for (const f of hit) { const st = psOf(f); st.skip = 1; st.skipName = 'แช่แข็ง'; st.skipIcon = '❄️' }
-        if (hit.length) out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: hit.map(f => f.uid), amount: hit.length, fxKind: 'freeze' }))
+        // ❄️ แช่แข็ง = สแตคดีบัฟ (29 ก.ย. 2026 user): โดนซ้ำบวกเพิ่ม · ถึงตาตัวเองมีสแตค = ข้ามตาแล้วลด 1 (เอนจิน)
+        //    รองรับกลไกแช่หลายตาในอนาคต (FREEZE_TURNS ต่อครั้ง) · stacks ส่งให้จอวาดเลขบนป้าย ❄️
+        const stacks = {}
+        for (const f of hit) { const st = psOf(f); st.skip = (st.skip || 0) + FREEZE_TURNS; st.skipName = 'แช่แข็ง'; st.skipIcon = '❄️'; stacks[f.uid] = st.skip }
+        if (hit.length) out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: hit.map(f => f.uid), amount: hit.length, stacks, fxKind: 'freeze' }))
       }
     }
   }

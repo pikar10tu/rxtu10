@@ -6,7 +6,7 @@
 //   x/y = พิกัดในกล่องไฟต์ (เดียวกับ fx.centerOf) · s = สเกล (ภาพฐาน 96px) · r = องศา · o = ความทึบ · at = offset 0..1
 
 export const SHOWTIME_ART = ['flame', 'roar', 'wave', 'wings', 'feather', 'smash', 'claw', 'ouro', 'talon',
-  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'heart', 'ice']
+  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'aura-pink', 'heart', 'ice']
 
 /** เพดานสไปรต์ต่อโชว์ — ต้อง ≤ ขนาดพูลใน battlefx (กันยึดชิ้นที่ยังเล่นอยู่) */
 export const SHOWTIME_MAX = 12

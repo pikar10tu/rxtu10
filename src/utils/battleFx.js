@@ -533,12 +533,13 @@ export function createBattleFx() {
   // ภาพอยู่ชั้น fx (ไม่ใช่ลูกของการ์ด) ⇒ วน opacity/scale บน layer ของตัวเอง ไม่บังคับให้การ์ดวาดใหม่
   // ตอนการ์ดพุ่งตี ออร่าไม่ตาม ⇒ auraHide ซ่อนระหว่างนั้น
   const auras = new Map()   // uid → el
-  function auraOn(uid, level) {
+  function auraOn(uid, level, img = 'aura') {
     if (!F('burst') || auras.has(uid)) return
     const c = centerOf(uid), card = getEl(uid); if (!c || !card) return
     const el = pool.aura.find(x => !x.__used); if (!el) return
     el.__used = true; auras.set(uid, el)
-    if (!el.getAttribute('src')) el.src = BASE + 'fx/aura.webp'
+    const src = BASE + 'fx/' + img + '.webp'
+    if (el.getAttribute('src') !== src) el.src = src
     const lv = Math.max(0.2, Math.min(1, level || 0))
     const s = (card.getBoundingClientRect().height / 96) * (1.08 + 0.14 * lv)
     const base = `translate(${c.x.toFixed(1)}px, ${(c.y - 4).toFixed(1)}px) translateZ(0)`
@@ -562,6 +563,16 @@ export function createBattleFx() {
     el.style.visibility = 'hidden'
     setTimeout(() => { if (auras.get(uid) === el) el.style.visibility = '' }, ms / rate)
   }
+  // ❄️ ถึงตาแต่โดนแช่ — การ์ดสั่นเหมือนพยายามขยับแต่ติดน้ำแข็ง (transform ล้วน · อนิเมชันเดียวบนการ์ด)
+  function frozenShake(uid) {
+    const el = getEl(uid); if (!el || !F('cardLunge')) return
+    const a = el.animate([
+      { transform: 'translateX(0)' }, { transform: 'translateX(-4px) rotate(-1.5deg)' }, { transform: 'translateX(4px) rotate(1.5deg)' },
+      { transform: 'translateX(-3px) rotate(-1deg)' }, { transform: 'translateX(3px) rotate(1deg)' }, { transform: 'translateX(0)' },
+    ], { duration: 380 / rate, easing: 'linear' })
+    anims.add(a); a.finished.catch(() => {}).finally(() => { anims.delete(a); el.style.transform = '' })
+  }
+
   function auraClear() { for (const uid of [...auras.keys()]) auraOff(uid) }
 
   function linkClear() {
@@ -570,7 +581,7 @@ export function createBattleFx() {
   }
 
   return {
-    showtime, auraOn, auraOff, auraHide, linkShow, linkFlash, linkHide, linkClear,
+    showtime, frozenShake, auraOn, auraOff, auraHide, linkShow, linkFlash, linkHide, linkClear,
     attach, reset, cancelAll, setRate, setFlags, setReducedOverride, destroy, centerOf, invalidateCenters,
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,

@@ -433,7 +433,7 @@ function setDead(uid) {
   const dead = (hp.value[uid] ?? 100) <= 0
   highlight(uid, 'dead', dead)
   if (dead) { fx?.linkHide(uid); fx?.auraOff(uid); if (chipOn.value[uid]?.hold) hideChip(uid) }
-  else if (auraLevel.has(uid)) fx?.auraOn(uid, auraLevel.get(uid))   // 🐱 กันตาย/ฟื้น: เลือดแตะ 0 แล้วรอด ⇒ ออร่ากลับมา (auraOn ข้ามถ้าติดอยู่แล้ว)   // 🐘 เส้นลิงก์ · ☀️ ออร่า · ป้ายค้าง ดับตามตัว
+  else if (auraLevel.has(uid)) fx?.auraOn(uid, auraLevel.get(uid).lv, auraLevel.get(uid).img)   // 🐱 กันตาย/ฟื้น: เลือดแตะ 0 แล้วรอด ⇒ ออร่ากลับมา (auraOn ข้ามถ้าติดอยู่แล้ว)   // 🐘 เส้นลิงก์ · ☀️ ออร่า · ป้ายค้าง ดับตามตัว
 }
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
@@ -1069,8 +1069,14 @@ function firePassiveFx(e) {
   if (e.fxKind === 'chain') sfx('p_chain')
   // ☀️ ซอล: ตัวที่ได้บัฟติดออร่าซูเปอร์ไซย่า แรงตาม % (ธรรมดา 50 = เต็ม) · ตำนานไม่ได้ = ไม่มีออร่า
   if (e.effect === 'rarityBoost' && e.boosts) {
-    for (const [u, pct] of Object.entries(e.boosts)) { auraLevel.set(u, pct / 50); fx?.auraOn(u, pct / 50) }
-    auraLevel.set(e.uid, 0.6); fx?.auraOn(e.uid, 0.6)   // ซอลเองไม่ได้บัฟ แต่เป็นต้นแสง ⇒ มีออร่าด้วย (29 ก.ย. user)
+    const partner = duoPartnerUid(e)
+    if (partner) {
+      // 🌍 ร่างองศา: ออร่าชมพูที่เอิร์ธตัวเดียว — ตัวเด่นของคู่นี้ (29 ก.ย. user)
+      auraLevel.set(partner, { lv: 1, img: 'aura-pink' }); fx?.auraOn(partner, 1, 'aura-pink')
+    } else {
+      for (const [u, pct] of Object.entries(e.boosts)) { auraLevel.set(u, { lv: pct / 50 }); fx?.auraOn(u, pct / 50) }
+      auraLevel.set(e.uid, { lv: 0.6 }); fx?.auraOn(e.uid, 0.6)
+    }   // ซอลเองไม่ได้บัฟ แต่เป็นต้นแสง ⇒ มีออร่าด้วย (29 ก.ย. user)
   }
   if ((e.fxKind === 'moon' || e.fxKind === 'fullMoon') && typeof e.phase === 'number') lunaPhase.set(e.uid, e.phase)
 
@@ -1127,9 +1133,10 @@ function firePassiveFx(e) {
   // 🌙 หมัดนี้ใช้ข้างไหนไปแล้ว ⇒ ไอคอนบนการ์ดเลื่อนไปข้างถัดไป
   if (e.effect === 'moonPhase' || e.effect === 'fullMoon') moonNext.value = { ...moonNext.value, [e.uid]: ((e.phase ?? 0) + 1) % 3 }
   // ❄️ ฤดูหนาว: ตราแช่แข็งค้างบนการ์ดที่โดน จนกว่าจะถึงตาที่ถูกข้าม
-  if (e.fxKind === 'freeze') { for (const t of on) { fx?.stateMark(t, '❄️', 1); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
+  if (e.fxKind === 'freeze') { for (const t of on) { fx?.stateMark(t, '❄️', e.stacks?.[t] ?? 1); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
   // ⏸️ ถึงตาที่ถูกแช่แข็ง: ป้าย "แข็ง!" แล้วเอาตราออก
-  if (e.fxKind === 'skip') { fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', 0); if (tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid }) }
+  // ❄️ ถึงตาแต่ติดแช่: สั่น → น้ำแข็งแตก → สแตคลด 1 (หมด = ป้ายหาย) · log เก่าไม่มี left = หายเลยแบบเดิม
+  if (e.fxKind === 'skip') { fx?.frozenShake(e.uid); fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', e.left ?? 0); if (tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid }) }
 
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
     thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim',

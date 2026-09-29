@@ -112,6 +112,14 @@ const ART = {
     <g filter="url(#b)" fill="none" stroke="#fff3c4" stroke-linecap="round" opacity=".55">
       <path d="M12 44C9 32 13 18 24 10" stroke-width="1.6"/><path d="M52 44C55 32 51 18 40 10" stroke-width="1.6"/>
       <path d="M17 50C13 40 14 28 20 20" stroke-width="1"/><path d="M47 50C51 40 50 28 44 20" stroke-width="1"/></g>`),
+  // 🌍 ร่างองศา — ออร่าชมพูเฉพาะเอิร์ธ (29 ก.ย. user: เอิร์ธเด่นขึ้นมา)
+  'aura-pink': () => svg(`<defs>
+      <radialGradient id="a" gradientUnits="userSpaceOnUse" cx="32" cy="36" r="30"><stop offset=".5" stop-color="#ffd1e8" stop-opacity="0"/><stop offset=".68" stop-color="#ff9ccf" stop-opacity=".85"/><stop offset=".82" stop-color="#f472b6" stop-opacity=".45"/><stop offset="1" stop-color="#db2777" stop-opacity="0"/></radialGradient>
+      <filter id="b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+    <ellipse cx="32" cy="36" rx="27" ry="29" fill="url(#a)"/>
+    <g filter="url(#b)" fill="none" stroke="#ffe4f1" stroke-linecap="round" opacity=".55">
+      <path d="M12 44C9 32 13 18 24 10" stroke-width="1.6"/><path d="M52 44C55 32 51 18 40 10" stroke-width="1.6"/>
+      <path d="M17 50C13 40 14 28 20 20" stroke-width="1"/><path d="M47 50C51 40 50 28 44 20" stroke-width="1"/></g>`),
   // 💗 คู่หู (รางวัลคนเก่ง / องศาซัน) — หัวใจชมพู
   heart: () => svg(`<defs>${lg('h', [[0, '#ffc2dc'], [.5, '#ff5fa2'], [1, '#d6246e']], 1, 1)}${glow('g', 1.6)}</defs>
     <g filter="url(#g)"><path d="M32 56C14 42 6 32 6 21C6 12 13 6 21 6C26 6 30 9 32 13C34 9 38 6 43 6C51 6 58 12 58 21C58 32 50 42 32 56Z" fill="url(#h)" stroke="#fff" stroke-width="1.5"/></g>
