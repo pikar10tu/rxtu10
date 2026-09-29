@@ -39,6 +39,9 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   }
   const A = (teamA || []).map((p, i) => build(p, i, 'A'))
   const B = (teamB || []).map((p, i) => build(p, i, 'B'))
+  // เลขตั้งต้นบนการ์ด = หลังตัวคูณประจำสัปดาห์ แต่ก่อนสกิลทุกตัว — UI บวกส่วนต่างของ statsAfter ต่อจากนี้
+  // (เดิม UI คำนวณเองจาก buildCombatant ⇒ PvP สัปดาห์ที่คูณ atk/hp เลขบนการ์ดผิดทั้งไฟต์)
+  const base = statsSnapshot(A, B)
   const critRate = BATTLE_CFG.critRate + (W.critAdd || 0)
   const critMult = W.critMult || BATTLE_CFG.critMult
   const variance = W.variance ?? BATTLE_CFG.variance
@@ -400,5 +403,5 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   else winner = hpPctA >= hpPctB ? 'A' : 'B'
 
   log.push({ t: 'end', winner, rounds: round, hpPctA, hpPctB })
-  return { winner, rounds: round, log, units }
+  return { winner, rounds: round, log, units, base }
 }

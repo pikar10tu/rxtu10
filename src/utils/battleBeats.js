@@ -155,8 +155,8 @@ function openCutOf(evts) {
  * @returns {Array} beat[] ยาวเท่า log เสมอ (1 event = 1 beat) เพื่อให้ index ตรงกับของเดิม
  */
 // showPets: Set ของ petId ที่ครั้งแรกของสกิลได้โชว์ไทม์ (skillShow) แทน skill · ครั้งเดียวต่อตัวต่อไฟต์
-export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD } = {}) {
-  const evts = Array.isArray(log) ? log : []
+export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD, statsBase = null } = {}) {
+  const evts = withStatDeltas(Array.isArray(log) ? log : [], statsBase)
   const mh = maxHpByUid || {}
 
   // ── pass 1: %เลือดที่หายจริงของทุกหมัด ──
@@ -370,6 +370,28 @@ export function spreadHits(beats, s) {
     if (b.kind !== 'hit') return b
     const m = raw.get(b) * k
     return { ...b, hitMult: m, timing: phasesOf(BEAT * m, SHAPE.hit) }
+  })
+}
+
+/** แปลง `statsAfter` (ค่าเต็มของทั้งทีม ณ จุดนั้นใน log) → `statsDelta` (เฉพาะส่วนต่างของตัวที่ขยับ)
+ *  🔑 ทำไมต้องเป็นส่วนต่าง: shuffleOpening สลับลำดับยกแรก ⇒ ถ้า UI เอาค่าเต็มไปทับ
+ *     ใบที่อยู่ท้าย log แต่ถูกสลับมาเล่นก่อน จะเขียนค่า "อนาคต" ลงการ์ด แล้วใบต้น log มาทับกลับเป็นค่าเก่า
+ *     = เลข ATK/HP บนการ์ดถอยหลังและจบยกแรกผิด (บั๊กที่ user เจอ 29 ก.ย.) · บวกส่วนต่างสลับลำดับได้ผลรวมเท่าเดิม
+ *  ไม่มี base (log เก่า/เทส) = คืนของเดิมไม่แตะ · ไม่แก้ event เดิม (คืน object ใหม่เฉพาะใบที่มี statsAfter) */
+export function withStatDeltas(evts, base) {
+  if (!base) return evts
+  const cur = {}
+  for (const [uid, v] of Object.entries(base)) cur[uid] = { atk: v.atk, maxHp: v.maxHp }
+  return evts.map(e => {
+    if (!e || !e.statsAfter) return e
+    const d = {}
+    for (const [uid, v] of Object.entries(e.statsAfter)) {
+      const was = cur[uid] || v
+      const dAtk = (v.atk ?? was.atk) - was.atk, dHp = (v.maxHp ?? was.maxHp) - was.maxHp
+      if (dAtk || dHp) d[uid] = { atk: dAtk, maxHp: dHp }
+      cur[uid] = { atk: v.atk ?? was.atk, maxHp: v.maxHp ?? was.maxHp }
+    }
+    return { ...e, statsDelta: d }
   })
 }
 

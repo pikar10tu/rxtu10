@@ -61,7 +61,7 @@
             <div class="br-hp-fill" :style="{ transform: 'scaleX(' + hpPct('B'+i) / 100 + ')' }"></div>
             <span v-for="(t, ti) in ticksFor('B'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
-          <div class="br-stats"><span class="br-atk">{{ atkOf('B'+i) }}</span><span class="br-hpn foe" :class="{ hit: hpHit['B'+i] }">{{ shownHp('B'+i) }}</span></div>
+          <div class="br-stats"><span class="br-atk" :class="[atkMood('B'+i), { bump: atkBump['B'+i] }]"><i v-if="atkMood('B'+i)" class="br-atk-arr">{{ atkMood('B'+i) === 'up' ? '▲' : '▼' }}</i>{{ atkOf('B'+i) }}</span><span class="br-hpn foe" :class="{ hit: hpHit['B'+i] }">{{ shownHp('B'+i) }}</span></div>
         </div>
       </div>
 
@@ -87,7 +87,7 @@
             <div class="br-hp-fill mine" :style="{ transform: 'scaleX(' + hpPct('A'+i) / 100 + ')' }"></div>
             <span v-for="(t, ti) in ticksFor('A'+i)" :key="ti" class="br-tick" :style="{ left: t + '%' }"></span>
           </div>
-          <div class="br-stats"><span class="br-atk">{{ atkOf('A'+i) }}</span><span class="br-hpn me" :class="{ hit: hpHit['A'+i] }">{{ shownHp('A'+i) }}</span></div>
+          <div class="br-stats"><span class="br-atk" :class="[atkMood('A'+i), { bump: atkBump['A'+i] }]"><i v-if="atkMood('A'+i)" class="br-atk-arr">{{ atkMood('A'+i) === 'up' ? '▲' : '▼' }}</i>{{ atkOf('A'+i) }}</span><span class="br-hpn me" :class="{ hit: hpHit['A'+i] }">{{ shownHp('A'+i) }}</span></div>
         </div>
       </div>
       <div class="br-side me-label"><i class="dot me"></i> <b>{{ sideBot.name }}</b><span v-if="sideBot.sub" class="br-side-sub">{{ sideBot.sub }}</span></div>
@@ -387,6 +387,8 @@ function clearPending() {
 //    ห้ามทำเป็น ref เด็ดขาด ไม่งั้น beats จะ re-compute กลางไฟต์ขณะ idx ชี้เข้าอาเรย์เก่า = พังทั้งไฟต์
 //    (เลขที่ "พิมพ์บนการ์ด" เป็นคนละตัว → dispStats ด้านล่าง)
 let maxHp = {}
+// เลขตั้งต้นบนการ์ด (plain เหตุผลเดียวกับ maxHp) — buildBeats ใช้คิดส่วนต่าง statsDelta
+let statsBase = null
 const els = {}                   // uid → DOM el (วัดตำแหน่ง melee/ranged)
 function setEl(uid, el) { if (el) els[uid] = el }
 
@@ -417,7 +419,21 @@ function ensureFx() {
 
 // ── การ์ดสไตล์ Hearthstone: ATK/HP เป็นเลข + หลอดเลือดขีดทุก 50 HP ──
 function atkOf(uid) { return dispStats.value[uid]?.atk ?? 0 }
-function curHp(uid) { return Math.round((dispStats.value[uid]?.maxHp || 0) * (hp.value[uid] ?? 100) / 100) }
+// ATK เทียบเลขตั้งต้น: สูงกว่า = เขียว ▲ · ต่ำกว่า = แดง ▼ (user เสนอ 29 ก.ย. "มีผลต่อการเล่น")
+// เปลี่ยนแค่ตอน statsDelta ลง = ต้น beat ก่อนอนิเมชันการ์ดเริ่ม ⇒ ไม่ผิดกฎ "ห้ามแก้ paint กลางอนิเมชัน"
+function atkMood(uid) {
+  const now = dispStats.value[uid]?.atk, was = statsBase?.[uid]?.atk
+  if (now == null || was == null || now === was) return ''
+  return now > was ? 'up' : 'down'
+}
+const atkBump = ref({})          // uid → true ช่วงเด้งสั้นๆ ตอน ATK เพิ่งขยับ
+// 🔑 hp% เก็บแบบไม่ปัด — ของเดิมปัดเป็น % เต็มแล้วค่อยคูณกลับ ⇒ เลขเลือดคลาดจากดาเมจที่เด้งได้ถึง ±0.5% ของหลอด
+//    (หลอด 800 = คลาด 4 ทุกหมัด) · เหลือเลือดแต่ปัดได้ 0 ต้องโชว์ 1 ไม่งั้นดูเหมือนตายแล้ว
+function curHp(uid) {
+  const pct = hp.value[uid] ?? 100
+  if (pct <= 0) return 0
+  return Math.max(1, Math.round((dispStats.value[uid]?.maxHp || 0) * pct / 100))
+}
 
 // ── เลข HP: snap (เดิม) / flash / count — tuning.hpTick ──
 const hpShown = ref({})          // uid → HP ที่โชว์ระหว่างไล่นับ (ไม่มี = ใช้ curHp ตรงๆ)
@@ -441,7 +457,7 @@ function tickHp(uid, from) {
   }
   hpAnims.set(uid, requestAnimationFrame(step))
 }
-function clearHpTicks() { hpAnims.forEach(id => cancelAnimationFrame(id)); hpAnims.clear(); hpShown.value = {}; hpHit.value = {} }
+function clearHpTicks() { hpAnims.forEach(id => cancelAnimationFrame(id)); hpAnims.clear(); hpShown.value = {}; hpHit.value = {}; atkBump.value = {} }
 
 function ticksFor(uid) {
   const max = dispStats.value[uid]?.maxHp || 1, out = []
@@ -484,7 +500,7 @@ const LEGEND_SHOW = new Set(Object.keys(LEGEND_SFX))
 const tuning = computed(() => props.data?.tuning || {})
 // rng: ลำดับโชว์ยกแรกสุ่มใหม่ทุกไฟต์ (แสดงผลล้วน ไม่แตะผลไฟต์)
 const beats = computed(() => buildBeats(rawLog.value, maxHp, {
-  rng: Math.random, showPets: LEGEND_SHOW,
+  rng: Math.random, showPets: LEGEND_SHOW, statsBase,
   ...(typeof tuning.value.hitSpread === 'number' ? { hitSpread: tuning.value.hitSpread } : {}),
 }))
 const done = computed(() => idx.value >= beats.value.length)
@@ -499,8 +515,9 @@ const dispStats = ref({})
 function buildMax(d) {
   maxHp = {}
   const disp = {}
+  const eb = d?.result?.base   // เอนจินส่งเลขหลังตัวคูณประจำสัปดาห์มา · log เก่าไม่มี → คำนวณเอง
   const add = (p, uid) => {
-    const c = buildCombatant(p)
+    const c = eb?.[uid] || buildCombatant(p)
     disp[uid] = { atk: Math.round(c.atk), maxHp: Math.round(c.maxHp) || 1 }
     // 🔑 ตัวหาร hp% ต้องเป็นค่าหลัง aura ของเอนจิน ไม่ใช่ค่าดิบ — log ส่ง targetHpAfter มาบนสเกลนั้น
     //    ใช้ค่าดิบแล้วทีมที่มีคุณวาฬ (เลือด +10%) หลอดจะเริ่มเกิน 100% และเลข HP ผิดตั้งแต่หมัดแรก
@@ -509,6 +526,7 @@ function buildMax(d) {
   ;(d?.botTeam || []).forEach((p, i) => add(p, 'B' + i))
   ;(d?.playerTeam || []).forEach((p, i) => add(p, 'A' + i))
   dispStats.value = disp
+  statsBase = JSON.parse(JSON.stringify(disp))
   if (import.meta.env.DEV) warnTeamMismatch(d)
 }
 
@@ -866,7 +884,7 @@ function firePassiveFx(e) {
       const max = maxHp[t] || 0
       if (!max) continue
       const raw = (next[t] ?? 100) - (e.amount / max) * 100                          // ตัวหารเดียวกับ applyImpact
-      next[t] = raw > 0 ? Math.max(1, Math.round(raw)) : 0   // เหลือนิดเดียวห้ามปัดเป็น 0 (= การ์ดเทาทั้งที่ยังไม่ตาย)
+      next[t] = raw > 0 ? Math.max(0.01, raw) : 0   // เหลือนิดเดียวห้ามปัดเป็น 0 (= การ์ดเทาทั้งที่ยังไม่ตาย)
       fx?.pop(t, { dmg: e.amount, weight: e.fxKind === 'thorns' ? 0.3 : 0.55 })   // หนามเป็นเลขรอง ห้ามแย่งหมัดหลัก
     }
     hp.value = next
@@ -964,7 +982,8 @@ function applyImpact(beat, g, t) {
   const hpBefore = shownHp(beat.target)   // โดนซ้ำกลางการไล่นับ = นับต่อจากเลขที่เห็นอยู่ ไม่กระโดด
   const hpRaw = (beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100
   // เลือดเหลือแต่ไม่ถึง 0.5% ห้ามปัดเป็น 0 — setDead อ่าน hp<=0 เป็น "ตาย" แล้วทำการ์ดเทาทั้งที่ยังสู้อยู่
-  hp.value = { ...hp.value, [beat.target]: hpRaw > 0 ? Math.max(1, Math.round(hpRaw)) : 0 }
+  // ห้ามปัดเป็น % เต็ม (เลขเลือดจะคลาด) · เหลือเลือดแต่ %น้อยมาก → ขั้นต่ำ 0.01 ให้ setDead ไม่อ่านเป็นตาย
+  hp.value = { ...hp.value, [beat.target]: hpRaw > 0 ? Math.max(0.01, hpRaw) : 0 }
   tickHp(beat.target, hpBefore)
 
   // ── 2) ของที่ไม่ได้แตะการ์ดเป้า ยิงที่จังหวะ impact ตรงๆ (จังหวะที่คนดูรู้สึกว่า "โดน") ──
@@ -1113,7 +1132,21 @@ async function step() {
     // (aura เล่นในกลุ่มเปิดตอนไม่มีการ์ดใบไหนมีอนิเมชัน · 🦖 hunt ไม่มีเพดาน ขยับได้ทุกหมัดตลอดไฟต์)
     // ⚠️ ที่นี่ที่เดียว อย่ากระจายใส่ตาม handler รายชนิด เดี๋ยวพลาดชนิดใดชนิดหนึ่ง
     //    และต้องอยู่นอก try ที่ครอบ dispatch — handler พังก็ยังต้องได้เลขที่ถูก
-    if (b?.statsAfter) dispStats.value = { ...dispStats.value, ...b.statsAfter }
+    // ส่วนต่าง (statsDelta) ไม่ใช่ค่าเต็ม — ยกแรกถูกสลับลำดับ ค่าเต็มจะทับกันถอยหลัง (ดู withStatDeltas)
+    if (b?.statsDelta) {
+      const next = { ...dispStats.value }
+      for (const [uid, dv] of Object.entries(b.statsDelta)) {
+        const was = next[uid] || { atk: 0, maxHp: 1 }
+        next[uid] = { atk: was.atk + dv.atk, maxHp: was.maxHp + dv.maxHp }
+      }
+      dispStats.value = next
+      const bumped = {}
+      for (const [uid, dv] of Object.entries(b.statsDelta)) if (dv.atk) bumped[uid] = true
+      if (Object.keys(bumped).length) {
+        atkBump.value = { ...atkBump.value, ...bumped }
+        later(() => { const n = { ...atkBump.value }; for (const u in bumped) delete n[u]; atkBump.value = n }, 460)
+      }
+    } else if (b?.statsAfter) dispStats.value = { ...dispStats.value, ...b.statsAfter }
     const h = handlers[b.t]
     // 🛡️ กันไฟต์ค้าง: FX ตัวใดตัวหนึ่งพัง ต้องข้ามหมัดนั้นแล้วเล่นต่อ ห้ามหยุดทั้งไฟต์
     //    เกิดจริง 27 ส.ค.: jab() มีตัวแปรที่ไม่ได้นิยาม → throw ทุกหมัดชั้น chip (55% ของหมัด)
@@ -1385,6 +1418,18 @@ onUnmounted(() => {
 .br-hpn { position: relative; }
 .br-hpn.hit { animation: br-hpn-pop .32s ease-out; }
 .br-hpn.hit::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; box-shadow: 0 0 0 2px #fbbf24; opacity: 0; pointer-events: none; animation: br-hpn-ring .32s ease-out; }
+/* ATK ถูกบัฟ/ดีบัฟ — สีค้างทั้งไฟต์ (อ่านสถานะ) + เด้งครั้งเดียวตอนขยับ (อ่านโมเมนต์) · transform/opacity ล้วน */
+.br-atk { position: relative; transition: background-color .2s; }
+.br-atk.up { background: #16a34a; transform: scale(1.12); box-shadow: 0 0 6px rgba(74,222,128,.7); }
+.br-atk.down { background: #be123c; transform: scale(1.06); }
+.br-atk-arr { font-style: normal; font-size: .55rem; margin-right: 1px; vertical-align: 1px; }
+.br-atk.bump { animation: br-atk-bump .46s cubic-bezier(.3,1.6,.5,1); }
+.br-atk.bump::after { content: ''; position: absolute; inset: -3px; border-radius: 999px; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 0 2px currentColor; color: #4ade80; animation: br-hpn-ring .46s ease-out; }
+.br-atk.down.bump::after { color: #fb7185; }
+@keyframes br-atk-bump { 0% { transform: scale(1) } 35% { transform: scale(1.4) } 100% { transform: scale(var(--br-atk-rest, 1)) } }
+.br-atk.up { --br-atk-rest: 1.12; } .br-atk.down { --br-atk-rest: 1.06; }
+@media (prefers-reduced-motion: reduce) { .br-atk.bump, .br-atk.bump::after { animation: none; } }
 @keyframes br-hpn-pop { 0% { transform: scale(1) } 30% { transform: scale(1.28) } 100% { transform: scale(1) } }
 @keyframes br-hpn-ring { 0% { opacity: .95; transform: scale(.9) } 100% { opacity: 0; transform: scale(1.35) } }
 

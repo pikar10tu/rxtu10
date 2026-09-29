@@ -61,15 +61,17 @@
         </button>
       </div>
 
-      <ArenaRankCard :rivals="rivals" />
+      <!-- กดชื่อ → โปรไฟล์ (มีปุ่มท้าสู้ในนั้นอยู่แล้ว) · user สั่ง 29 ก.ย. -->
+      <ArenaRankCard :rivals="rivals" @open="openProfile" />
 
-      <PvpHistory />
+      <PvpHistory @open="openProfile" />
     </template>
     <div v-else class="ar-login">เข้าสู่ระบบเพื่อเล่น</div>
 
     <TeamPicker v-model:open="pickOpen" />
     <ArenaSheet v-model:open="arenaOpen" />
     <BattleReplay :data="replay" theme="arena" @close="replay = null" />
+    <ProfileModal :member="profileOf" @close="profileOf = null" />
     <PvpRoulette :open="spinning" :names="rouletteList" @done="onSpinDone" />
   </div>
 </template>
@@ -96,6 +98,8 @@ import { activeWeekly } from '../data/pvpWeekly.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import { rosterArena } from '../utils/arenas.js'
 import ArenaSheet from '../components/battle/ArenaSheet.vue'
+import ProfileModal from '../components/members/ProfileModal.vue'
+import { toMember } from '../utils/roster.js'
 
 const authStore = useAuthStore()
 const members = useMembersStore()
@@ -200,6 +204,12 @@ async function onClaim() {
 }
 
 onMounted(() => { members.loadRoster() })
+
+const profileOf = ref(null)
+function openProfile(uid) {
+  const row = members.rosterRows?.[uid]
+  if (row) profileOf.value = toMember(uid, row)
+}
 </script>
 
 <style scoped>

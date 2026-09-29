@@ -14,7 +14,7 @@
     <div class="arc-rows">
       <template v-for="(r, i) in rows" :key="r.kind === 'gap' ? 'gap' + i : r.uid">
         <div v-if="r.kind === 'gap'" class="arc-gap">⋯</div>
-        <div v-else class="arc-row" :class="{ me: r.isMe }">
+        <div v-else class="arc-row" :class="{ me: r.isMe, tap: !r.isMe }" @click="!r.isMe && $emit('open', r.uid)">
           <span class="arc-medal">{{ medal(r.rank) }}</span>
           <span class="arc-name">{{ r.nickname }}<span v-if="r.isMe" class="arc-you">คุณ</span></span>
           <span class="arc-wl">{{ r.wins }}–{{ r.losses }}</span>
@@ -25,7 +25,7 @@
     </div>
 
     <button class="arc-all" @click="open = true">ดูอันดับทั้งหมด ({{ rivals.total }})</button>
-    <ArenaRankSheet v-model:open="open" :rows="rivals.all" />
+    <ArenaRankSheet v-model:open="open" :rows="rivals.all" @open="uid => { open = false; $emit('open', uid) }" />
   </div>
 </template>
 
@@ -39,6 +39,7 @@ const props = defineProps({
   rivals: { type: Object, default: null },   // ผลของ arenaRanking()
 })
 
+defineEmits(['open'])   // กดแถวคนอื่น → ArenaView เปิดโปรไฟล์ (uid)
 const open = ref(false)
 const medal = (rank) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : String(rank))
 
@@ -75,4 +76,6 @@ const rows = computed(() => {
 
 .arc-all { margin-top: 10px; width: 100%; border: var(--bw) solid var(--line); background: #fff; border-radius: 11px; padding: 8px 12px; font-family: inherit; font-weight: 800; font-size: .76rem; cursor: pointer; box-shadow: var(--pop); }
 .arc-all:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.arc-row.tap { cursor: pointer; }
+.arc-row.tap:active { background: rgba(0,0,0,.05); }
 </style>

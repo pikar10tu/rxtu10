@@ -657,3 +657,20 @@ test('🌧️ ฤดูฝนฟื้นหลายเพื่อนในก
   const kinds = buildBeats(log, MH).filter(b => b.effect === 'seasonRain').map(b => b.kind)
   assert.deepEqual(kinds, ['bannerQuiet', 'skillShow'])
 })
+
+// 🐞 29 ก.ย.: ยกแรกถูกสลับลำดับ ⇒ statsAfter (ค่าเต็ม) ทับกันถอยหลัง เลขบนการ์ดผิด · ส่วนต่างต้องได้ผลเท่ากันทุกลำดับ
+test('withStatDeltas: บวกส่วนต่างสลับลำดับได้ ผลรวม = snapshot สุดท้ายของ log', async () => {
+  const { withStatDeltas } = await import('./battleBeats.js')
+  const base = { A0: { atk: 10, maxHp: 100 }, A1: { atk: 20, maxHp: 200 } }
+  const log = [
+    { t: 'passive', statsAfter: { A0: { atk: 14, maxHp: 100 }, A1: { atk: 28, maxHp: 200 } } },   // ×1.4 ทั้งทีม
+    { t: 'passive', statsAfter: { A0: { atk: 14, maxHp: 110 }, A1: { atk: 28, maxHp: 220 } } },   // เลือด +10%
+  ]
+  const out = withStatDeltas(log, base)
+  for (const order of [[0, 1], [1, 0]]) {
+    const s = JSON.parse(JSON.stringify(base))
+    for (const i of order) for (const [u, d] of Object.entries(out[i].statsDelta)) { s[u].atk += d.atk; s[u].maxHp += d.maxHp }
+    assert.deepEqual(s, log[1].statsAfter)
+  }
+  assert.equal(withStatDeltas(log, null), log)   // ไม่มี base = ของเดิม
+})

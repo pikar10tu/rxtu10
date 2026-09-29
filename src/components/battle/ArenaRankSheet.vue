@@ -8,7 +8,8 @@
       <li
         v-for="r in rows" :key="r.uid"
         :ref="el => { if (r.isMe) meEl = el }"
-        class="ars-row" :class="{ me: r.isMe }"
+        class="ars-row" :class="{ me: r.isMe, tap: !r.isMe }"
+        @click="!r.isMe && $emit('open', r.uid)"
       >
         <span class="ars-medal">{{ medal(r.rank) }}</span>
         <span class="ars-name">{{ r.nickname }}<span v-if="r.isMe" class="ars-badge">คุณ</span></span>
@@ -28,7 +29,7 @@ const props = defineProps({
   open: { type: Boolean, default: false },
   rows: { type: Array, default: () => [] },   // [{ uid, nickname, rating, wins, losses, rank, isMe }]
 })
-defineEmits(['update:open'])
+defineEmits(['update:open', 'open'])   // open = กดแถวคนอื่น → เปิดโปรไฟล์ (uid)
 
 const meEl = ref(null)
 const medal = (rank) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : String(rank))
@@ -52,4 +53,6 @@ watch(() => props.open, async (o) => {
 .ars-wl { font-size: .74rem; font-weight: 700; color: var(--muted); flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .ars-rt { font-size: .84rem; font-weight: 800; color: var(--ink); flex-shrink: 0; min-width: 46px; text-align: right; font-variant-numeric: tabular-nums; }
 .ars-empty { text-align: center; color: rgba(0,0,0,.45); font-size: .8rem; padding: 20px 8px; }
+.ars-row.tap { cursor: pointer; }
+.ars-row.tap:active { background: rgba(0,0,0,.05); }
 </style>

@@ -739,3 +739,10 @@ test('A 2 ตัว (มีแฮมสเตอร์ช่อง 1) vs B 3 ต
   const first = simulateBattle(A, B, 42).log.find(e => e.t === 'attack')
   assert.equal(first.side, 'A')
 })
+
+test('simulateBattle ส่ง base = เลขตั้งต้นของทุก uid (ก่อนสกิล) ให้การ์ด', async () => {
+  const { simulateBattle } = await import('./battleEngine.js')
+  const t = [{ id: 'cat', rarity: 'common', element: 'fist', grade: 0 }]
+  const r = simulateBattle(t, t, 1)
+  assert.ok(r.base.A0.atk > 0 && r.base.B0.maxHp > 0)
+})
