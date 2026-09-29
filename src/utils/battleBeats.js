@@ -77,6 +77,7 @@ export const OPENING_EFFECTS = new Set([
   'elementTrinity', 'teamLifesteal', 'teamDamageReduction',            // aura ใหม่ของ P2
   'stealStats',                                                        // hook setup — เอนจิน log ก่อน aura ทุกใบ
   'rarityBoost',                                                       // ☀️ ต.ค. 2569
+  'seasonAnnounce',                                                    // 🌍 ประกาศฤดูตอนเปิดไฟต์ (แสดงผลล้วน)
 ])
 
 export const DANGER_PCT = 0.25         // เลือดเหลือไม่เกินนี้ (ยังไม่ตาย) = โซนอันตราย

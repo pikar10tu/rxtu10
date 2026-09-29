@@ -390,7 +390,7 @@ function showMini(e, force = false) {
   miniLast.set(e.uid, now)
   miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0],
     big: !!WEATHER[e.effect],   // 🌍 ฤดูทำงานทุกจบรอบ = แถบใหญ่ขึ้นให้อ่านออก (29 ก.ย. user)
-    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, e.effect) }
+    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, seasonEff(e)) }
   const el = miniEl.value; if (!el) return
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on')
 }
@@ -729,7 +729,8 @@ function skillTitle(e) {
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
   if (e.lastArmor) return 'เกราะแตกหมดแล้ว!'
   // ❄️ ฤดูหนาวบอกผลเสมอ (29 ก.ย. user)
-  if (e.effect === 'seasonCold') return (e.name || 'ฤดูหนาว') + ' · ' + (e.amount > 0 ? `แช่แข็ง ${e.amount} ตัว` : 'ไม่มีใครโดนแช่แข็ง')
+  // ❄️ จบรอบบอกแค่ผล (ชื่อฤดูประกาศไปแล้วตอนเปิดไฟต์ — ต่อชื่อด้วยแล้วล้นแถบ · user 29 ก.ย.)
+  if (e.effect === 'seasonCold') return e.amount > 0 ? `แช่แข็ง ${e.amount} ตัว` : 'ไม่มีใครโดนแช่แข็ง'
   if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'โลกเอียง'   // ☀️🌍 ร่างองศา (29 ก.ย. user)
   if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
@@ -944,7 +945,7 @@ async function spotlightPassive(e, t, g, opts = {}) {
     desc: '', side: opts.side || e.uid?.[0] || 'A',
     // หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ขึ้นเฉพาะตอนคู่นั้นทำงานอยู่จริงในทีม (duoPartnerOf เช็คให้แล้ว)
     face2: (() => { const d = defForUid(e.uid); const id = duoPartnerOf(d.id, sideTeam(e.uid[0])); return id ? getPetDef(id)?.emoji || null : null })(),
-    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, e.effect),
+    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, seasonEff(e)),
   }
   spotView.value = view
   spot.value = view
@@ -1010,9 +1011,11 @@ function duoPairsOf(d) {
 
 // 🌍 ฤดูทำงาน = สภาพอากาศเต็มจอ แทนใบไม้ (ฝนยิง event ต่อเพื่อนละใบ ⇒ กันซ้ำในจบรอบเดียวกัน)
 const WEATHER = { seasonCold: 'weatherCold', seasonRain: 'weatherRain', seasonHot: 'weatherHot' }
+const SEASON_EFFECT = { hot: 'seasonHot', rain: 'seasonRain', cold: 'seasonCold' }   // seasonAnnounce.season → effect ของฤดูนั้น
+const seasonEff = (e) => (e.effect === 'seasonAnnounce' ? SEASON_EFFECT[e.season] : e.effect)
 let lastWeather = -1e9
 function playWeather(e) {
-  const plan = WEATHER[e.effect]; if (!plan) return false
+  const plan = WEATHER[seasonEff(e)]; if (!plan) return false
   const now = performance.now()
   if (now - lastWeather > 900 / (pace.value || 1)) { lastWeather = now; if (tuning.value.showtime !== false) fx?.showtime(plan, { owner: e.uid }) }
   return true

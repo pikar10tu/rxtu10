@@ -239,6 +239,15 @@ export function applyAuras(team, foes) {
       if (STAT_EFFECTS.has(part.effect)) e.statsAfter = statsSnapshot(team, foes)
     }
   }
+  // 🌍 ประกาศฤดูตอนเปิดไฟต์ (29 ก.ย. 2026 user): แบนเนอร์ใหญ่บอกฤดูครั้งเดียว · จบรอบเหลือแถบเล็กบอกผล
+  //    แสดงผลล้วน ไม่แตะสเตตัส ไม่ดึง rand · ร่างองศา (formed) ไม่มีฤดู = ไม่ประกาศ
+  for (const u of alive(team)) {
+    const p = passiveFor(u)
+    const part = partsAt(p, 'onRoundEnd').find(x => x.effect === 'season')
+    if (!part || psOf(u).formed) continue
+    const s = seasonOfSlot(u.slot)
+    out.push(ev(u, p, part, { effect: 'seasonAnnounce', name: s.label, icon: s.icon, season: s.key, targets: [u.uid], fxKind: 'aura' }))
+  }
   return out
 }
 
