@@ -6,7 +6,7 @@
 //   x/y = พิกัดในกล่องไฟต์ (เดียวกับ fx.centerOf) · s = สเกล (ภาพฐาน 96px) · r = องศา · o = ความทึบ · at = offset 0..1
 
 export const SHOWTIME_ART = ['flame', 'roar', 'wave', 'wings', 'feather', 'smash', 'claw', 'ouro', 'talon',
-  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'heart']
+  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'heart', 'ice']
 
 /** เพดานสไปรต์ต่อโชว์ — ต้อง ≤ ขนาดพูลใน battlefx (กันยึดชิ้นที่ยังเล่นอยู่) */
 export const SHOWTIME_MAX = 12
@@ -133,6 +133,18 @@ PLANS.duoSmall = ({ owner, partner }) => [owner, partner || owner].map((p, i) =>
   img: 'heart', ms: 620, delay: i * 90, ease: 'ease-out',
   kf: [P(p, .15, 0, 0, 0, -30), P(p, .3, 1, i ? 8 : -8, 0, -42, .35), P(p, .25, 0, 0, 0, -58)] }))
 
+// ❄️ โดนแช่แข็ง — ผลึกน้ำแข็งงอกขึ้นคลุมการ์ด แล้วจางค้างนิดหนึ่ง
+PLANS.freeze = ({ owner }) => [
+  { img: 'ice', ms: 900, delay: 0, ease: 'cubic-bezier(.2,.9,.3,1)',
+    kf: [P(owner, .3, 0, 0, 0, 16), P(owner, 1.05, .95, 0, 0, 4, .25), P(owner, 1.05, .8, 0, 0, 4, .75), P(owner, 1.1, 0, 0, 0, 4)] },
+]
+// ❄️ ตาที่ถูกข้าม — น้ำแข็งแตกกระจาย (ละลายหลุด)
+PLANS.thaw = ({ owner }) => [
+  { img: 'ice', ms: 380, delay: 0, ease: 'ease-out', kf: [P(owner, 1.05, .9, 0, 0, 4), P(owner, 1.2, 0, 0, 0, 4)] },
+  ...[[-30, -20, -120], [30, -24, 130], [-24, 22, -200], [26, 24, 210]].map(([dx, dy, r], i) => ({
+    img: 'ice', ms: 440, delay: 30 + i * 20, ease: 'cubic-bezier(.2,.7,.4,1)', kf: [P(owner, .3, 1), P(owner, .2, 0, r, dx, dy)] })),
+]
+
 // 🦣 เกราะหินแตกทีละชั้น — โล่หินแวบขึ้นแล้วแตกเป็นเศษกระเด็น 4 ทิศ
 PLANS.shatter = ({ owner }) => [
   { img: 'stone', ms: 380, delay: 0, ease: 'ease-out', kf: [P(owner, .9, .95), P(owner, 1.15, 0, 8)] },
@@ -181,6 +193,8 @@ export const KIND_TINT = {
 }
 const DEFAULT_TINT = ['#334155', '#0f172a']
 /** สีแถบของสกิลนี้ — เลเจนด์ใช้สีประจำตัว · ตัวอื่นตามชนิดผล */
-export function tintOf(petId, fxKind) {
-  return PET_TINT[petId] || KIND_TINT[fxKind] || DEFAULT_TINT
+// 🌍 ฤดูของเอิร์ธ — สีตามฤดู (29 ก.ย. user) มาก่อนสีประจำตัว
+export const SEASON_TINT = { seasonHot: ['#c2410c', '#7c2d12'], seasonRain: ['#0369a1', '#1e3a8a'], seasonCold: ['#0e7490', '#164e63'] }
+export function tintOf(petId, fxKind, effect) {
+  return SEASON_TINT[effect] || PET_TINT[petId] || KIND_TINT[fxKind] || DEFAULT_TINT
 }

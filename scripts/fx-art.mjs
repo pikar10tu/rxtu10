@@ -116,6 +116,13 @@ const ART = {
   heart: () => svg(`<defs>${lg('h', [[0, '#ffc2dc'], [.5, '#ff5fa2'], [1, '#d6246e']], 1, 1)}${glow('g', 1.6)}</defs>
     <g filter="url(#g)"><path d="M32 56C14 42 6 32 6 21C6 12 13 6 21 6C26 6 30 9 32 13C34 9 38 6 43 6C51 6 58 12 58 21C58 32 50 42 32 56Z" fill="url(#h)" stroke="#fff" stroke-width="1.5"/></g>
     <ellipse cx="21" cy="17" rx="6" ry="3.6" fill="#fff" opacity=".6" transform="rotate(-30 21 17)"/>`),
+  // ❄️ แช่แข็ง — ผลึกน้ำแข็งกลุ่มฟ้าใส
+  ice: () => {
+    const shard = (x, y, h, w, r) => `<path d="M${x} ${y - h}L${x + w} ${y - h * .35}L${x + w * .6} ${y}L${x - w * .6} ${y}L${x - w} ${y - h * .35}Z" fill="url(#i)" stroke="#f0fdff" stroke-width="1" transform="rotate(${r} ${x} ${y})"/>`
+    return svg(`<defs>${lg('i', [[0, '#ffffff', .95], [.5, '#a5f3fc', .85], [1, '#38bdf8', .75]], 1, 1)}${glow('g', 1.5)}</defs>
+      <g filter="url(#g)">${shard(32, 58, 50, 9, 0)}${shard(20, 58, 34, 7, -22)}${shard(44, 58, 36, 7, 20)}${shard(12, 58, 22, 5, -40)}${shard(52, 58, 22, 5, 38)}</g>
+      ${star4(40, 14, 3.5)}${star4(18, 26, 2.5)}`)
+  },
   // ✨ ประกายทั่วไป
   star: () => svg(`<defs>${glow('g', 1.5)}</defs><g filter="url(#g)">${star4(32, 32, 26, '#fffbe0', '#ffd34a')}</g>`),
 }

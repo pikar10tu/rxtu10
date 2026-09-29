@@ -389,7 +389,7 @@ function showMini(e, force = false) {
   if (!force && now - (miniLast.get(e.uid) || -1e9) < MINI_GAP_MS / (pace.value || 1)) return
   miniLast.set(e.uid, now)
   miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0],
-    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind) }
+    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, e.effect) }
   const el = miniEl.value; if (!el) return
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on')
 }
@@ -432,7 +432,8 @@ function clearHighlights() { Object.values(els).forEach(el => el && el.classList
 function setDead(uid) {
   const dead = (hp.value[uid] ?? 100) <= 0
   highlight(uid, 'dead', dead)
-  if (dead) { fx?.linkHide(uid); fx?.auraOff(uid); if (chipOn.value[uid]?.hold) hideChip(uid) }   // 🐘 เส้นลิงก์ · ☀️ ออร่า · ป้ายค้าง ดับตามตัว
+  if (dead) { fx?.linkHide(uid); fx?.auraOff(uid); if (chipOn.value[uid]?.hold) hideChip(uid) }
+  else if (auraLevel.has(uid)) fx?.auraOn(uid, auraLevel.get(uid))   // 🐱 กันตาย/ฟื้น: เลือดแตะ 0 แล้วรอด ⇒ ออร่ากลับมา (auraOn ข้ามถ้าติดอยู่แล้ว)   // 🐘 เส้นลิงก์ · ☀️ ออร่า · ป้ายค้าง ดับตามตัว
 }
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
@@ -614,6 +615,7 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  auraLevel.clear()
   pendingArmor.clear()
   oniBoost.clear()
   pendingBurst.clear()
@@ -862,6 +864,7 @@ function showChip(uid, e) {
 // 👹 เลข ATK ตอนชาร์จ: คูณตามสกิล (ฟาด {pct}%) ค้างไว้จนฟาดเสร็จ — รวมหมัดตีต่อหลังฟาดล้ม
 //    (เอนจินคูณทั้งสองหมัด: psOf.smashing ค้างตลอดตา) แล้วคืนค่าเดิม · 29 ก.ย. user
 //    เก็บเป็น "ส่วนต่างที่บวกเข้าไป" ⇒ คืนด้วยการลบก้อนเดิม ไม่ชนกับ statsDelta ที่ลงระหว่างนั้น
+const auraLevel = new Map()   // ☀️ uid → แรงออร่า (จำไว้เปิดคืนตอนรอดจากเลือด 0)
 const oniBoost = new Map()   // uid → atk ที่บวกเพิ่มไว้
 function boostOni(uid) {
   if (oniBoost.has(uid)) return
@@ -938,7 +941,7 @@ async function spotlightPassive(e, t, g, opts = {}) {
     desc: '', side: opts.side || e.uid?.[0] || 'A',
     // หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ขึ้นเฉพาะตอนคู่นั้นทำงานอยู่จริงในทีม (duoPartnerOf เช็คให้แล้ว)
     face2: (() => { const d = defForUid(e.uid); const id = duoPartnerOf(d.id, sideTeam(e.uid[0])); return id ? getPetDef(id)?.emoji || null : null })(),
-    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind),
+    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, e.effect),
   }
   spotView.value = view
   spot.value = view
@@ -1066,8 +1069,8 @@ function firePassiveFx(e) {
   if (e.fxKind === 'chain') sfx('p_chain')
   // ☀️ ซอล: ตัวที่ได้บัฟติดออร่าซูเปอร์ไซย่า แรงตาม % (ธรรมดา 50 = เต็ม) · ตำนานไม่ได้ = ไม่มีออร่า
   if (e.effect === 'rarityBoost' && e.boosts) {
-    for (const [u, pct] of Object.entries(e.boosts)) fx?.auraOn(u, pct / 50)
-    fx?.auraOn(e.uid, 0.6)   // ซอลเองไม่ได้บัฟ แต่เป็นต้นแสง ⇒ มีออร่าด้วย (29 ก.ย. user)
+    for (const [u, pct] of Object.entries(e.boosts)) { auraLevel.set(u, pct / 50); fx?.auraOn(u, pct / 50) }
+    auraLevel.set(e.uid, 0.6); fx?.auraOn(e.uid, 0.6)   // ซอลเองไม่ได้บัฟ แต่เป็นต้นแสง ⇒ มีออร่าด้วย (29 ก.ย. user)
   }
   if ((e.fxKind === 'moon' || e.fxKind === 'fullMoon') && typeof e.phase === 'number') lunaPhase.set(e.uid, e.phase)
 
@@ -1124,9 +1127,9 @@ function firePassiveFx(e) {
   // 🌙 หมัดนี้ใช้ข้างไหนไปแล้ว ⇒ ไอคอนบนการ์ดเลื่อนไปข้างถัดไป
   if (e.effect === 'moonPhase' || e.effect === 'fullMoon') moonNext.value = { ...moonNext.value, [e.uid]: ((e.phase ?? 0) + 1) % 3 }
   // ❄️ ฤดูหนาว: ตราแช่แข็งค้างบนการ์ดที่โดน จนกว่าจะถึงตาที่ถูกข้าม
-  if (e.fxKind === 'freeze') { for (const t of on) fx?.stateMark(t, '❄️', 1); sfx('freeze') }
+  if (e.fxKind === 'freeze') { for (const t of on) { fx?.stateMark(t, '❄️', 1); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
   // ⏸️ ถึงตาที่ถูกแช่แข็ง: ป้าย "แข็ง!" แล้วเอาตราออก
-  if (e.fxKind === 'skip') { fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', 0) }
+  if (e.fxKind === 'skip') { fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', 0); if (tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid }) }
 
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
     thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim',
@@ -1815,7 +1818,7 @@ onUnmounted(() => {
 .br-spot-dim { position: fixed; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; }
 /* แบนเนอร์ถาวร: ไม่มี .on = ซ่อน (ม่านโปร่ง · แถบจาง) — อนิเมชันผูกกับ .on เท่านั้น จึงเริ่มใหม่ทุกครั้งที่ .on กลับมา */
 .br-spot.on .br-spot-dim { animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
-.br-cut { position: relative; z-index: 5; width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
+.br-cut { position: relative; z-index: 7;   /* > ชั้น fx (6) — ออร่า/หัวใจห้ามทับแบนเนอร์ใหญ่ (จอจริง 29 ก.ย.) */ width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
   transform: skewY(-5deg); background: linear-gradient(90deg, var(--cut-a, #2563eb) 0%, var(--cut-a, #2563eb) 35%, var(--cut-b, #0f172a) 100%); box-shadow: 0 0 0 3px #fff;
   will-change: transform, opacity; opacity: 0; }
 .br-spot.on .br-cut { opacity: 1; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
