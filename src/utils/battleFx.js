@@ -545,8 +545,9 @@ export function createBattleFx() {
     el.style.visibility = ''
     lift(el)
     const a = el.animate([
-      { transform: `${base} scale(${(s * .97).toFixed(3)}, ${(s * .95).toFixed(3)})`, opacity: .35 + .45 * lv },
-      { transform: `${base} scale(${(s * 1.03).toFixed(3)}, ${(s * 1.07).toFixed(3)})`, opacity: .55 + .45 * lv },
+      // จางลงอีกนิด (29 ก.ย. user: "สวยแล้ว ขอจางกว่านี้นิดหน่อย")
+      { transform: `${base} scale(${(s * .97).toFixed(3)}, ${(s * .95).toFixed(3)})`, opacity: .22 + .33 * lv },
+      { transform: `${base} scale(${(s * 1.03).toFixed(3)}, ${(s * 1.07).toFixed(3)})`, opacity: .38 + .34 * lv },
     ], { duration: 1150 - 450 * lv, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' })
     anims.add(a)
     el.__anim = a

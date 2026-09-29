@@ -714,7 +714,7 @@ const teamIds = computed(() => ({
 /** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
 function skillTitle(e) {
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
-  if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'องศาซัน'
+  if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'โลกเอียง'   // ☀️🌍 ร่างองศา (29 ก.ย. user)
   if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
 }

@@ -689,4 +689,8 @@ test('joinDuoOpening: ใบยกแรกของคู่หูถูกย�
   assert.deepEqual([kinds.A0, kinds.A2].sort(), ['openQuiet', 'openShow'])
   const order = b.filter(x => x.t === 'passive').map(x => x.uid)
   assert.equal(Math.abs(order.indexOf('A0') - order.indexOf('A2')), 1, 'คู่ต้องอยู่ติดกัน')
+  const show = b.find(x => x.kind === 'openShow' && (x.uid === 'A0' || x.uid === 'A2'))
+  const sum = (t) => t.windup + t.motion + t.hitstop + t.tail
+  assert.ok(show.duo, 'แบนเนอร์คู่ติดธง duo')
+  assert.equal(Math.round(sum(show.timing)), Math.round(sum(timingOf('openShow')) * 1.5), 'ค้าง ×1.5')
 })

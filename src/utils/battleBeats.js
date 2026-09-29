@@ -29,6 +29,8 @@ export const OPEN_SHOW_MS = 800
 export const SKILL_SHOW_MS = 1000
 /** แบนเนอร์เล็ก — สกิลที่ทำงานหลายครั้งต่อไฟต์ (29 ก.ย. user: "โชว์ครั้งเดียว = แบนเนอร์ใหญ่ สะใจ · หลายที = เล็กลงแต่ขึ้นบ่อย") */
 export const SKILL_MINI_MS = 560
+/** แบนเนอร์คู่หูค้างนานกว่าปกติ */
+export const DUO_AIR = 1.5
 
 /** กระจายเวลาหมัดปกติตามความแรง (0 = ทุกหมัดยาว BEAT เท่ากัน) — ความยาวไฟต์รวมเท่าเดิมเสมอ
  *  0.6 = user เลือกจากห้องเทียบ v4 (26 ก.ย. 2026): หมัดเบา ~0.43 วิ · หนัก ~0.73 วิ (ไฟต์ 424242)
@@ -387,6 +389,14 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       danger, survive,
     }
   })
+  // 💗 แบนเนอร์คู่ (รางวัลคนเก่ง/โลกเอียง) ค้างนาน ×1.5 — ยังสั้นกว่าโชว์สองตัวแยกกัน (29 ก.ย. user)
+  const BIG = new Set(['openShow', 'skillShow', 'skillMini'])
+  const isDuoBeat = (b) => b.t === 'passive' && BIG.has(b.kind) && duoOf.has(b.uid)
+    && (b.effect === 'duoRegen' || OPENING_EFFECTS.has(b.effect))
+  for (let i = 0; i < out.length; i++) if (isDuoBeat(out[i])) {
+    const t = out[i].timing
+    out[i] = { ...out[i], duo: true, timing: { windup: t.windup * DUO_AIR, motion: t.motion * DUO_AIR, hitstop: t.hitstop * DUO_AIR, tail: t.tail * DUO_AIR } }
+  }
   const spread = spreadHits(out, hitSpread)
   return rng ? shuffleOpening(spread, openCut, rng) : spread
 }

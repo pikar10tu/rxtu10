@@ -133,6 +133,12 @@ export function buffSources(playerTeam, botTeam) {
           label: a.effect === 'duoRegen' ? STATUS_TEXT.duoRegen : undefined,
         })
         b.self = a.uid === uid
+        // 💖 เอิร์ธร่างองศารับแสงจากซอล = ป้ายหัวใจ ชื่อ "เอาหน่อยเว้ย องศา!" เลขตามจริง (29 ก.ย. user)
+        if (a.effect === 'rarityBoost' && pet.id === 'earth' && degreeFormActive(teams[side])) {
+          const pct = partWithEffect(a.passive, 'rarityBoost').value[effectiveRarity(pet, teams[side])]
+          b.icon = '💖'; b.skillIcon = '💖'; b.skillName = 'เอาหน่อยเว้ย องศา!'
+          b.label = `พลังโจมตีและเลือดสูงสุด +${pct}%`
+        }
         list.push(b)
       }
       // 3) ดีบัฟที่ศัตรูแผ่ใส่ — ป้ายไปอยู่ที่ "ปลายทางของผล" ไม่ใช่ที่เจ้าของสกิล
