@@ -616,6 +616,7 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  fullMoonHit.clear()
   auraLevel.clear()
   pendingArmor.clear()
   oniBoost.clear()
@@ -914,6 +915,7 @@ function holdChip(uid, name, icon, tone = '') {
   chipOn.value = { ...chipOn.value, [uid]: { name, icon, out: false, hold: true, tone } }
 }
 // 🌙 ป้ายนับเฟสบนหัว 1/3 → 2/3 (เรืองม่วง = หมัดหน้าเต็มดวง) → 3/3 · ติดหลังหมัดจบ (event มาก่อนหมัดใน log)
+const fullMoonHit = new Set()   // uid ลูน่าที่หมัดถัดไปคือ FULL MOON SHOT
 const lunaPhase = new Map()   // uid → เฟสของหมัดที่เพิ่งออก (0 ดับ · 1 เสี้ยว · 2 เต็ม)
 /** ป้ายบนหัวลูน่า = เฟสของหมัดถัดไป n/3 · หมัดหน้าเต็มดวง = เรืองม่วง */
 function lunaChip(uid, next) {
@@ -1109,6 +1111,7 @@ function firePassiveFx(e) {
     }   // ซอลเองไม่ได้บัฟ แต่เป็นต้นแสง ⇒ มีออร่าด้วย (29 ก.ย. user)
   }
   if ((e.fxKind === 'moon' || e.fxKind === 'fullMoon') && typeof e.phase === 'number') lunaPhase.set(e.uid, e.phase)
+  if (e.fxKind === 'fullMoon') fullMoonHit.add(e.uid)   // 🌙 หมัดถัดไปของลูน่าตัวนี้ = หมัดเต็มดวง → เอฟเฟกต์ตอนกระทบ
 
   // ── หลอดเลือด: ฮีล/ฟื้น/รับแทน ทำให้เลือดเปลี่ยนโดยไม่มี attack event
   //    ถ้าไม่อัปเดตตรงนี้ หลอดจะค้างค่าเดิมทั้งที่เลขเด้งขึ้นแล้ว (ผู้เล่นเห็นขัดกันทันที)
@@ -1373,6 +1376,11 @@ async function applyAttack(beat) {
   await wait(t.motion); if (g !== gen) return
   applyImpact(beat, g, t)
   landInfect(beat.attacker, beat.target)
+  // 🌙 FULL MOON SHOT กระทบ: เคียวจันทร์ + คลื่นแสงเงิน + ดาว + จอสั่น (29 ก.ย. user ขอ hit effect สวยๆ)
+  if (fullMoonHit.delete(beat.attacker)) {
+    if (tuning.value.showtime !== false) fx?.showtime('moonHit', { owner: beat.target })
+    fx?.shake('ko'); sfx('luna')
+  }
   // 🌙 ตัวนับเฟสขยับตอนหมัดกระทบ แล้วบอก "หมัดถัดไป" (29 ก.ย. user) · เปลี่ยนข้อความป้ายกลางท่าพุ่ง = การ์ดวาดใหม่ 1 ครั้ง/หมัดลูน่า (ยอม)
   if (lunaPhase.has(beat.attacker)) { const ph = lunaPhase.get(beat.attacker); lunaPhase.delete(beat.attacker); lunaChip(beat.attacker, (ph + 1) % 3) }   // 👾 ควันเชื้อระเบิดจากจุดกระทบ ฟุ้งไปทั้งทีม
   // 👹 หมัดฟาดของโอนิ: ฟ้าผ่าลงที่เป้า + จอสั่น (ท่าเดียวกับโชว์ไทม์ แต่ลงที่ตัวที่โดน)

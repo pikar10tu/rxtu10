@@ -6,7 +6,7 @@
 //   x/y = พิกัดในกล่องไฟต์ (เดียวกับ fx.centerOf) · s = สเกล (ภาพฐาน 96px) · r = องศา · o = ความทึบ · at = offset 0..1
 
 export const SHOWTIME_ART = ['flame', 'roar', 'wave', 'wings', 'feather', 'smash', 'claw', 'ouro', 'talon',
-  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'aura-pink', 'heart', 'ice', 'snow', 'drop']
+  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'aura-pink', 'heart', 'ice', 'snow', 'drop', 'crescent', 'moonring']
 
 /** เพดานสไปรต์ต่อโชว์ — ต้อง ≤ ขนาดพูลใน battlefx (กันยึดชิ้นที่ยังเล่นอยู่) */
 export const SHOWTIME_MAX = 12
@@ -151,6 +151,17 @@ PLANS.weatherHot = ({ box }) => {
     .concat(spread(8, box.w).map((x, i) => ({ img: 'star', ms: 900, delay: 200 + i * 70, ease: 'ease-out',
       kf: [{ x, y: box.h * .9, s: .12, r: 0, o: 0 }, { x, y: box.h * .55, s: .22, r: 45, o: .9, at: .4 }, { x, y: box.h * .2, s: .1, r: 90, o: 0 }] })))
 }
+
+// 🌙 FULL MOON SHOT กระทบเป้า — เคียวจันทร์ฟาดเฉียง 2 เส้น + คลื่นแสงเงิน 2 ระลอก + จันทร์เต็มดวงแวบ + ดาวกระจาย
+PLANS.moonHit = ({ owner }) => [
+  { img: 'moon', ms: 520, delay: 0, ease: 'cubic-bezier(.2,.8,.3,1)', kf: [P(owner, .5, 0, -20), P(owner, 1.5, .9, 0, 0, 0, .3), P(owner, 1.8, 0, 10)] },
+  { img: 'crescent', ms: 360, delay: 40, ease: 'cubic-bezier(.3,.8,.3,1)', kf: [P(owner, .9, 0, -60, -34, -30), P(owner, 1.5, 1, -35, 0, 0, .45), P(owner, 1.6, 0, -20, 26, 24)] },
+  { img: 'crescent', ms: 360, delay: 140, ease: 'cubic-bezier(.3,.8,.3,1)', kf: [P(owner, .9, 0, 150, 34, -30), P(owner, 1.5, 1, 125, 0, 0, .45), P(owner, 1.6, 0, 110, -26, 24)] },
+  { img: 'moonring', ms: 560, delay: 120, ease: 'cubic-bezier(.2,.7,.3,1)', kf: [P(owner, .3, 1), P(owner, 2.6, 0)] },
+  { img: 'moonring', ms: 560, delay: 260, ease: 'cubic-bezier(.2,.7,.3,1)', kf: [P(owner, .3, .8), P(owner, 2, 0)] },
+  ...[[-40, -30], [42, -26], [-36, 32], [38, 34], [0, -46]].map(([dx, dy], i) => ({
+    img: 'star', ms: 520, delay: 160 + i * 30, ease: 'cubic-bezier(.2,.7,.4,1)', kf: [P(owner, .1, 1, 0), P(owner, .32, 0, 90, dx, dy)] })),
+]
 
 // ❄️ โดนแช่แข็ง — ผลึกน้ำแข็งงอกขึ้นคลุมการ์ด แล้วจางค้างนิดหนึ่ง
 PLANS.freeze = ({ owner }) => [

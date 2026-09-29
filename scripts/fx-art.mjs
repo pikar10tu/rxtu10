@@ -139,6 +139,13 @@ const ART = {
   drop: () => svg(`<defs>${lg('d', [[0, '#e0f7ff'], [.5, '#60c3ff'], [1, '#1d7fd6']], 1, 1)}${glow('g', 1)}</defs>
     <g filter="url(#g)"><path d="M32 4C40 20 50 32 50 42C50 52 42 60 32 60C22 60 14 52 14 42C14 32 24 20 32 4Z" fill="url(#d)" stroke="#fff" stroke-width="1.5"/></g>
     <ellipse cx="25" cy="40" rx="4" ry="7" fill="#fff" opacity=".55" transform="rotate(20 25 40)"/>`),
+  // 🌙 FULL MOON SHOT — รอยเคียวจันทร์ (โค้งฟาด) เงิน-คราม
+  crescent: () => svg(`<defs>${lg('c', [[0, '#ffffff', 0], [.25, '#ffffff'], [.6, '#c7d2fe'], [1, '#6366f1', 0]], 1, 0)}${glow('g', 2.2)}
+      <mask id="k"><rect width="64" height="64" fill="#fff"/><circle cx="38" cy="26" r="26" fill="#000"/></mask></defs>
+    <g filter="url(#g)"><circle cx="30" cy="34" r="28" fill="url(#c)" mask="url(#k)"/></g>`),
+  // 🌙 คลื่นแสงจันทร์ — วงเงินฟ้า
+  moonring: () => svg(`<defs>${rg('r', [[.55, '#c7d2fe', 0], [.72, '#e0e7ff', .95], [.8, '#ffffff', 1], [.9, '#818cf8', .7], [1, '#4f46e5', 0]])}</defs>
+    <circle cx="32" cy="32" r="31" fill="url(#r)"/>`),
   // ✨ ประกายทั่วไป
   star: () => svg(`<defs>${glow('g', 1.5)}</defs><g filter="url(#g)">${star4(32, 32, 26, '#fffbe0', '#ffd34a')}</g>`),
 }
