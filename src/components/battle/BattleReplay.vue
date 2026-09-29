@@ -1460,7 +1460,7 @@ const insp = computed(() => {
     // ชื่อบนจอ — คู่หูที่อยู่ทีมเดียวกันใช้ชื่อร่วม (🦭+🐳 = "รางวัลคนเก่ง") · คำอธิบายยังเป็นของสกิลตัวเอง
     passName: degree ? 'เอาหน่อยเว้ย องศา!' : passiveTitle(passiveOf(def), p.id, teamIds.value[uid[0]] || null),
     passIcon: degree ? '💖' : passiveOf(def)?.icon,
-    passDesc: degree ? `ได้แสงจากซอล: พลังโจมตีและเลือดสูงสุด +${solPct}% · ไม่มีผลฤดู` : null,
+    passDesc: degree ? `ได้รับกำลังใจจากซัน: พลังโจมตีและเลือดสูงสุด +${solPct}% · ไม่มีผลฤดู` : null,
     elEmoji: ELEMENTS[def.element]?.emoji || '✊', elName: EL_NAME[def.element] || def.element,
   }
 })
