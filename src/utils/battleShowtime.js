@@ -6,7 +6,7 @@
 //   x/y = พิกัดในกล่องไฟต์ (เดียวกับ fx.centerOf) · s = สเกล (ภาพฐาน 96px) · r = องศา · o = ความทึบ · at = offset 0..1
 
 export const SHOWTIME_ART = ['flame', 'roar', 'wave', 'wings', 'feather', 'smash', 'claw', 'ouro', 'talon',
-  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura']
+  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'heart']
 
 /** เพดานสไปรต์ต่อโชว์ — ต้อง ≤ ขนาดพูลใน battlefx (กันยึดชิ้นที่ยังเล่นอยู่) */
 export const SHOWTIME_MAX = 12
@@ -117,6 +117,17 @@ const PLANS = {
   ],
 }
 
+// 💗 คู่หู (รางวัลคนเก่ง 🐳🦭 · องศาซัน ☀️🌍) — หัวใจลอยจากทั้งคู่มาเจอกันกลางทาง แล้วหัวใจเล็กลอยบนทีม
+PLANS.duo = ({ owner, partner, team }) => {
+  const p2 = partner || owner
+  const mid = { x: (owner.x + p2.x) / 2, y: Math.min(owner.y, p2.y) - 30 }
+  return [owner, p2].map((p, i) => ({ img: 'heart', ms: 560, delay: i * 80, ease: 'cubic-bezier(.3,.6,.4,1)',
+    kf: [P(p, .3, 0), P(p, .6, 1, i ? 12 : -12, 0, -12, .3), P(mid, .75, 1, 0)] }))
+    .concat({ img: 'heart', ms: 520, delay: 600, ease: 'cubic-bezier(.2,.8,.3,1)', kf: [P(mid, .8, 1), P(mid, 1.6, 0)] })
+    .concat(team.slice(0, 4).map((p, i) => ({ img: 'heart', ms: 620, delay: 700 + i * 70, ease: 'ease-out',
+      kf: [P(p, .2, 0, 0, 10, -6), P(p, .38, 1, -8, 12, -24, .4), P(p, .3, 0, 8, 16, -44)] })))
+}
+
 /** เพ็ทตัวนี้มีท่าโชว์ไทม์ของตัวเองไหม */
 export const hasShowtime = (petId) => !!PLANS[petId]
 
@@ -140,7 +151,7 @@ export const PET_TINT = {
   bahamut: ['#c2410c', '#7f1d1d'], lion: ['#a16207', '#78350f'], whale: ['#0369a1', '#1e3a8a'],
   phoenix: ['#c2410c', '#9f1239'], kirin: ['#b91c1c', '#450a0a'], trex: ['#9a3412', '#3f1d0b'],
   ouroboros: ['#15803d', '#14532d'], simurgh: ['#0e7490', '#164e63'], qilin: ['#7e22ce', '#3b0764'],
-  virus: ['#86198f', '#3b0764'], gorilla: ['#92400e', '#451a03'], mammoth: ['#78716c', '#292524'],
+  virus: ['#86198f', '#3b0764'], duo: ['#be185d', '#831843'], gorilla: ['#92400e', '#451a03'], mammoth: ['#78716c', '#292524'],
   sol: ['#b45309', '#7c2d12'], earth: ['#15803d', '#1e3a8a'], luna: ['#4338ca', '#1e1b4b'],
 }
 export const KIND_TINT = {

@@ -450,14 +450,15 @@ test('duoRegen ครั้งซ้ำยังเงียบเหมือ�
   assert.equal(b[3].kind, 'skillQuiet')
 })
 
-test('duoRegen ของคนละตัวยังแยกกันเหมือนเดิม (คีย์ก้อนต้องพ่วง uid ด้วย)', () => {
+// 💗 29 ก.ย. 2026 user: "รางวัลคนเก่งแสดงรวมเป็นอันเดียว ไม่แยกวาฬกับแมวน้ำ" — เดิมคนละตัว = คนละก้อน
+test('duoRegen ของคู่ฝั่งเดียวกันติดกัน = ก้อนเดียว แบนเนอร์เดียว', () => {
   const log = [
     atk(),
     { t: 'passive', uid: 'A0', side: 'A', effect: 'duoRegen', fxKind: 'heal', amount: 5, hpPct: 60 },
     { t: 'passive', uid: 'A1', side: 'A', effect: 'duoRegen', fxKind: 'heal', amount: 5, hpPct: 60 },
   ]
   const b = buildBeats(log, MH)
-  assert.deepEqual([b[1].kind, b[2].kind], ['skill', 'skill'], 'คนละตัว = คนละก้อน คนละคีย์ ต่างได้ประกาศของตัวเอง')
+  assert.deepEqual([b[1].kind, b[2].kind], ['skillQuiet', 'skill'], 'ใบแรกพักรอ ใบท้ายถือแบนเนอร์ของทั้งคู่')
 })
 
 // ── สัญญาข้ามไฟล์: OPENING_EFFECTS ต้องครบทุก effect ของ hook aura/setup ────────────
@@ -673,4 +674,19 @@ test('withStatDeltas: บวกส่วนต่างสลับลำดั�
     assert.deepEqual(s, log[1].statsAfter)
   }
   assert.equal(withStatDeltas(log, null), log)   // ไม่มี base = ของเดิม
+})
+
+test('joinDuoOpening: ใบยกแรกของคู่หูถูกย้ายมาติดกัน = ก้อนเดียว (openQuiet + openShow)', () => {
+  const log = [
+    { t: 'passive', uid: 'A0', side: 'A', effect: 'teamHp', fxKind: 'aura' },
+    { t: 'passive', uid: 'A1', side: 'A', effect: 'teamAtkElement', fxKind: 'aura' },
+    { t: 'passive', uid: 'A2', side: 'A', effect: 'teamAtk', fxKind: 'aura' },
+    atk(),
+  ]
+  const b = buildBeats(log, MH, { duoPairs: [['A0', 'A2']] })
+  const kinds = Object.fromEntries(b.filter(x => x.t === 'passive').map(x => [x.uid, x.kind]))
+  assert.equal(kinds.A1, 'openShow')
+  assert.deepEqual([kinds.A0, kinds.A2].sort(), ['openQuiet', 'openShow'])
+  const order = b.filter(x => x.t === 'passive').map(x => x.uid)
+  assert.equal(Math.abs(order.indexOf('A0') - order.indexOf('A2')), 1, 'คู่ต้องอยู่ติดกัน')
 })

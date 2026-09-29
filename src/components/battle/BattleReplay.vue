@@ -380,7 +380,7 @@ function showMini(e, force = false) {
   if (!force && now - (miniLast.get(e.uid) || -1e9) < MINI_GAP_MS / (pace.value || 1)) return
   miniLast.set(e.uid, now)
   miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0],
-    tint: tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind) }
+    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind) }
   const el = miniEl.value; if (!el) return
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on')
 }
@@ -423,7 +423,7 @@ function clearHighlights() { Object.values(els).forEach(el => el && el.classList
 function setDead(uid) {
   const dead = (hp.value[uid] ?? 100) <= 0
   highlight(uid, 'dead', dead)
-  if (dead) { fx?.linkHide(uid); fx?.auraOff(uid) }   // 🐘 เส้นลิงก์ดับ · ☀️ ออร่าดับ
+  if (dead) { fx?.linkHide(uid); fx?.auraOff(uid); if (chipOn.value[uid]?.hold) hideChip(uid) }   // 🐘 เส้นลิงก์ · ☀️ ออร่า · ป้ายค้าง ดับตามตัว
 }
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
@@ -528,6 +528,7 @@ const tuning = computed(() => props.data?.tuning || {})
 // rng: ลำดับโชว์ยกแรกสุ่มใหม่ทุกไฟต์ (แสดงผลล้วน ไม่แตะผลไฟต์)
 const beats = computed(() => buildBeats(rawLog.value, maxHp, {
   rng: Math.random, showPets: LEGEND_SHOW, statsBase, bannerByCount: tuning.value.bannerByCount !== false,
+  duoPairs: duoPairsOf(props.data),
   ...(typeof tuning.value.hitSpread === 'number' ? { hitSpread: tuning.value.hitSpread } : {}),
 }))
 const done = computed(() => idx.value >= beats.value.length)
@@ -713,6 +714,7 @@ const teamIds = computed(() => ({
 /** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
 function skillTitle(e) {
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
+  if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'องศาซัน'
   if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
 }
@@ -880,6 +882,10 @@ function holdChip(uid, name, icon, tone = '') {
 }
 // 🌙 ป้ายนับเฟสบนหัว 1/3 → 2/3 (เรืองม่วง = หมัดหน้าเต็มดวง) → 3/3 · ติดหลังหมัดจบ (event มาก่อนหมัดใน log)
 const lunaPhase = new Map()   // uid → เฟสของหมัดที่เพิ่งออก (0 ดับ · 1 เสี้ยว · 2 เต็ม)
+/** ป้ายบนหัวลูน่า = เฟสของหมัดถัดไป n/3 · หมัดหน้าเต็มดวง = เรืองม่วง */
+function lunaChip(uid, next) {
+  holdChip(uid, `${next + 1}/3`, ['🌑', '🌙', '🌕'][next], next === 2 ? 'moon' : 'luna')
+}
 function hideChip(uid) {
   const cur = chipOn.value[uid]; if (!cur) return
   chipOn.value = { ...chipOn.value, [uid]: { ...cur, out: true } }
@@ -919,7 +925,7 @@ async function spotlightPassive(e, t, g, opts = {}) {
     desc: '', side: opts.side || e.uid?.[0] || 'A',
     // หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ขึ้นเฉพาะตอนคู่นั้นทำงานอยู่จริงในทีม (duoPartnerOf เช็คให้แล้ว)
     face2: (() => { const d = defForUid(e.uid); const id = duoPartnerOf(d.id, sideTeam(e.uid[0])); return id ? getPetDef(id)?.emoji || null : null })(),
-    tint: tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind),
+    tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind),
   }
   spotView.value = view
   spot.value = view
@@ -948,6 +954,7 @@ function lungeStyle(beat) {
 // 🐘 เส้นลิงก์บากุ — ขึ้นตอนไฟต์เริ่ม (beat แรก) จากบากุไปเพื่อนทุกตัวที่ยังอยู่
 function showLinks() {
   ensureFx(); fx?.linkClear()
+  for (const u of Object.keys(maxHp)) if (defForUid(u)?.id === 'luna') lunaChip(u, 0)   // 🌙 เริ่มไฟต์ 1/3
   for (const [side, team] of [['A', props.data?.playerTeam], ['B', props.data?.botTeam]]) {
     ;(team || []).forEach((p, i) => {
       if (p?.id !== 'qilin') return
@@ -960,7 +967,36 @@ function showLinks() {
 // ── โชว์ไทม์เลเจนด์: ท่าประจำตัว (utils/battleShowtime.js) ลงพร้อมผลของสกิล ──
 // เล่นเฉพาะตอนสปอตไลต์ (ยกแรก/ครั้งแรก/โมเมนต์) = ครั้งละไม่กี่ทีต่อไฟต์ ไม่รก · ไม่ await (สไปรต์อยู่ชั้น fx แยกจากการ์ด)
 // tuning.showtime === false = ปิด (ห้องแล็บเทียบกับของเดิม)
+// 💗 คู่หู: รางวัลคนเก่ง (🐳🦭 อยู่ทีมเดียวกัน) · องศาซัน (☀️🌍 ร่างองศา) — แบนเนอร์รวมชมพู + หัวใจ (29 ก.ย. user)
+function duoPartnerUid(e) {
+  const d = defForUid(e.uid); if (!d) return null
+  const pid = duoPartnerOf(d.id, sideTeam(e.uid[0])); if (!pid) return null
+  const i = ((e.uid[0] === 'A' ? props.data?.playerTeam : props.data?.botTeam) || []).findIndex(p => p?.id === pid)
+  return i >= 0 ? e.uid[0] + i : null
+}
+const DUO_EFFECTS = new Set(['teamHp', 'teamAtk', 'duoRegen', 'rarityBoost'])
+const isDuoEvent = (e) => DUO_EFFECTS.has(e.effect) && !!duoPartnerUid(e)
+function duoPairsOf(d) {
+  const out = []
+  for (const [side, team] of [['A', d?.playerTeam], ['B', d?.botTeam]]) {
+    const t = (team || []).filter(Boolean), at = (id) => (team || []).findIndex(p => p?.id === id)
+    for (const [x, y] of [['whale', 'seal'], ['sol', 'earth']]) {
+      if (at(x) < 0 || at(y) < 0) continue
+      if (x === 'sol' && !degreeFormActive(t)) continue
+      out.push([side + at(x), side + at(y)])
+    }
+  }
+  return out
+}
+
 function playShowtime(e) {
+  if (isDuoEvent(e)) {
+    if (tuning.value.showtime === false) return
+    const side = e.uid[0]
+    fx?.showtime('duo', { owner: e.uid, partner: duoPartnerUid(e),
+      team: Object.keys(maxHp).filter(u => u[0] === side && (hp.value[u] ?? 100) > 0) })
+    if (e.effect !== 'rarityBoost') return   // ซัน: ยังเล่นดวงอาทิตย์ต่อด้วย
+  }
   if (e.effect === 'infect' || e.effect === 'infectSpread') return   // 👾 แปะเชื้อ = แค่ป้ายชั้น · ควันแตกตอนโดนตี (landBurst)
   if (e.effect === 'infectBurst' && !e.landing) return
   if (tuning.value.showtime === false || !hasShowtime(e.petId)) return
@@ -1001,7 +1037,10 @@ function firePassiveFx(e) {
   if (e.fxKind === 'windup') { holdChip(e.uid, 'ง้างตะบอง…', '💢'); boostOni(e.uid) }
   if (e.fxKind === 'chain') sfx('p_chain')
   // ☀️ ซอล: ตัวที่ได้บัฟติดออร่าซูเปอร์ไซย่า แรงตาม % (ธรรมดา 50 = เต็ม) · ตำนานไม่ได้ = ไม่มีออร่า
-  if (e.effect === 'rarityBoost' && e.boosts) for (const [u, pct] of Object.entries(e.boosts)) fx?.auraOn(u, pct / 50)
+  if (e.effect === 'rarityBoost' && e.boosts) {
+    for (const [u, pct] of Object.entries(e.boosts)) fx?.auraOn(u, pct / 50)
+    fx?.auraOn(e.uid, 0.6)   // ซอลเองไม่ได้บัฟ แต่เป็นต้นแสง ⇒ มีออร่าด้วย (29 ก.ย. user)
+  }
   if ((e.fxKind === 'moon' || e.fxKind === 'fullMoon') && typeof e.phase === 'number') lunaPhase.set(e.uid, e.phase)
 
   // ── หลอดเลือด: ฮีล/ฟื้น/รับแทน ทำให้เลือดเปลี่ยนโดยไม่มี attack event
@@ -1144,7 +1183,7 @@ function applyImpact(beat, g, t) {
   //    ถ้าวันหลังเพิ่ม kind ใหม่แล้วลืมเขียนกิ่ง จะได้ default (เงียบ) ซึ่งปลอดภัย ไม่ใช่ดังสุด
   const spark = sparkOf(defForUid(beat.attacker))
   const w = beat.weight ?? 0
-  if (chipOn.value[beat.attacker]?.hold) hideChip(beat.attacker)
+  if (chipOn.value[beat.attacker]?.hold && !chipOn.value[beat.attacker].tone) hideChip(beat.attacker)   // ป้ายโอนิ · ป้ายลูน่าค้างตลอด
   // หมัดลูก (สะท้อนเกราะ/cleave) อยู่ใน beat ของหมัดหลักที่ยังไม่มาถึง — ห้ามปล่อยเชื้อค้างทิ้ง
   if (beat.kind !== 'sub') {
     for (const u of [...pendingInfect.keys()]) if (u !== beat.attacker) landInfect(u, null)
@@ -1262,7 +1301,9 @@ async function applyAttack(beat) {
 
   await wait(t.motion); if (g !== gen) return
   applyImpact(beat, g, t)
-  landInfect(beat.attacker, beat.target)   // 👾 ควันเชื้อระเบิดจากจุดกระทบ ฟุ้งไปทั้งทีม
+  landInfect(beat.attacker, beat.target)
+  // 🌙 ตัวนับเฟสขยับตอนหมัดกระทบ แล้วบอก "หมัดถัดไป" (29 ก.ย. user) · เปลี่ยนข้อความป้ายกลางท่าพุ่ง = การ์ดวาดใหม่ 1 ครั้ง/หมัดลูน่า (ยอม)
+  if (lunaPhase.has(beat.attacker)) { const ph = lunaPhase.get(beat.attacker); lunaPhase.delete(beat.attacker); lunaChip(beat.attacker, (ph + 1) % 3) }   // 👾 ควันเชื้อระเบิดจากจุดกระทบ ฟุ้งไปทั้งทีม
   // 👹 หมัดฟาดของโอนิ: ฟ้าผ่าลงที่เป้า + จอสั่น (ท่าเดียวกับโชว์ไทม์ แต่ลงที่ตัวที่โดน)
   if (def?.id === 'kirin' && beat.kind !== 'sub' && tuning.value.showtime !== false) { fx?.showtime('kirin', { owner: beat.target }); fx?.shake('ko') }
   await wait(t.hitstop); if (g !== gen) return
@@ -1270,10 +1311,7 @@ async function applyAttack(beat) {
   await wait(t.tail); if (g !== gen) return
   highlight(beat.attacker, 'acting', false)
   if (oniBoost.has(beat.attacker) && !chainFollows(beat.attacker)) unboostOni(beat.attacker)
-  if (lunaPhase.has(beat.attacker)) {
-    const ph = lunaPhase.get(beat.attacker); lunaPhase.delete(beat.attacker)
-    holdChip(beat.attacker, `${ph + 1}/3`, ['🌑', '🌙', '🌕'][ph] || '🌙', ph === 1 ? 'moon' : 'luna')
-  }
+
 }
 
 // ── กันเปิด beat chain ซ้อนกัน 2 สาย ──

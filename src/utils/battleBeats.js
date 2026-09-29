@@ -131,7 +131,9 @@ export function weightOf(e, dmgPct) {
 export const OUT_OF_GROUP_EFFECTS = new Set(['duoRegen', 'teamLifesteal'])
 
 /** คีย์ของ "ก้อน" = เพ็ทหนึ่งตัวยิงสกิลของตัวเองติดกัน · effect ที่ไม่ใช่สกิลของใบนั้นได้คีย์ของตัวเอง */
-const groupIdOf = (e) => (OUT_OF_GROUP_EFFECTS.has(e.effect) ? `${e.uid || ''}#${e.effect}` : (e.uid || ''))
+// duoRegen ของคู่ (🐳🦭 ฟื้นพร้อมกันทั้งคู่) = ก้อนเดียวต่อฝั่ง ⇒ แบนเนอร์ "รางวัลคนเก่ง" ขึ้นครั้งเดียว ไม่ใช่ตัวละใบ
+const groupIdOf = (e) => (e.effect === 'duoRegen' ? `${e.side || (e.uid || '')[0]}#duoRegen`
+  : OUT_OF_GROUP_EFFECTS.has(e.effect) ? `${e.uid || ''}#${e.effect}` : (e.uid || ''))
 
 /**
  * ตัดกลุ่ม "ยกแรก" ที่ตรงไหน
@@ -158,8 +160,8 @@ function openCutOf(evts) {
  * @returns {Array} beat[] ยาวเท่า log เสมอ (1 event = 1 beat) เพื่อให้ index ตรงกับของเดิม
  */
 // showPets: Set ของ petId ที่ครั้งแรกของสกิลได้โชว์ไทม์ (skillShow) แทน skill · ครั้งเดียวต่อตัวต่อไฟต์
-export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD, statsBase = null, bannerByCount = false } = {}) {
-  const evts = withStatDeltas(Array.isArray(log) ? log : [], statsBase)
+export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD, statsBase = null, bannerByCount = false, duoPairs = null } = {}) {
+  const evts = joinDuoOpening(withStatDeltas(Array.isArray(log) ? log : [], statsBase), duoPairs)
   const mh = maxHpByUid || {}
 
   // ── pass 1: %เลือดที่หายจริงของทุกหมัด ──
@@ -238,6 +240,8 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
   // ทำแบบนี้เพราะต้องคง "1 event = 1 beat" ไว้ (index ต้องตรงกับ log)
   const pKind = new Map()
   const openCut = openCutOf(evts)
+  const duoOf = new Map()
+  for (const [a, b] of duoPairs || []) { duoOf.set(a, a + '&' + b); duoOf.set(b, a + '&' + b) }
   {
     // ยกแรก: ก้อนละเพ็ท (event ติดกันของ uid เดียวกัน) → ใบท้ายก้อนได้ openShow ถือเวลาโชว์ · ใบอื่น openQuiet 0ms
     //   (ผลของใบ openQuiet ถูกพักไว้ลงพร้อมโชว์ของก้อนตัวเอง — ดู BattleReplay.applyPassive)
@@ -245,7 +249,8 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       const e = evts[i]
       if (!e || e.t !== 'passive') continue
       const nx = evts[i + 1]
-      const lastOfChunk = !(i + 1 < openCut && nx && nx.t === 'passive' && nx.uid === e.uid)
+      const same = (x) => x.uid === e.uid || (duoOf.has(e.uid) && duoOf.get(x.uid) === duoOf.get(e.uid))
+      const lastOfChunk = !(i + 1 < openCut && nx && nx.t === 'passive' && same(nx))
       pKind.set(i, lastOfChunk ? 'openShow' : 'openQuiet')
     }
 
@@ -424,6 +429,23 @@ export function withStatDeltas(evts, base) {
     }
     return { ...e, statsDelta: d }
   })
+}
+
+/** 💗 คู่หู (รางวัลคนเก่ง · องศาซัน): ย้ายใบยกแรกของคู่ให้อยู่ติดกัน ⇒ ก้อนเดียว แบนเนอร์เดียว (29 ก.ย. user)
+ *  ยกแรกเกิดพร้อมกันทั้งหมด (shuffleOpening สลับได้อยู่แล้ว) จึงย้ายลำดับได้โดยไม่เปลี่ยนผล · statsDelta คิดก่อนหน้านี้แล้ว */
+export function joinDuoOpening(evts, pairs) {
+  if (!pairs?.length) return evts
+  const cut = openCutOf(evts)
+  const head = evts.slice(0, cut), tail = evts.slice(cut)
+  for (const [a, b] of pairs) {
+    const firstA = head.findIndex(e => e?.t === 'passive' && (e.uid === a || e.uid === b))
+    if (firstA < 0) continue
+    const mine = head.filter(e => e?.t === 'passive' && (e.uid === a || e.uid === b))
+    const rest = head.filter(e => !(e?.t === 'passive' && (e.uid === a || e.uid === b)))
+    rest.splice(Math.min(firstA, rest.length), 0, ...mine)
+    head.splice(0, head.length, ...rest)
+  }
+  return head.concat(tail)
 }
 
 /** สลับลำดับโชว์ของยกแรกทีละก้อน (ก้อน = เพ็ทหนึ่งตัว) — ทุกอย่างในยกแรกเกิดพร้อมกันอยู่แล้ว (aura)

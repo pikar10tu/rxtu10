@@ -109,18 +109,18 @@ const ART = {
     <g filter="url(#h)" opacity=".55">${[[32, 36, 24]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#a855f7"/>`).join('')}</g>
     <g filter="url(#b)" opacity=".92"><g fill="url(#s)">${[[32, 38, 15], [19, 38, 10], [45, 38, 11], [25, 27, 11], [39, 26, 12], [32, 47, 10], [14, 44, 7], [50, 46, 8]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g></g>
     <g filter="url(#b)" fill="#fae8ff" opacity=".5"><ellipse cx="27" cy="25" rx="5" ry="3"/><ellipse cx="40" cy="23" rx="4" ry="2.4"/><ellipse cx="20" cy="35" rx="3.5" ry="2.2"/></g>`),
-  // ☀️ ซอล — ออร่าไฟทองรอบตัวแบบซูเปอร์ไซย่า (กลางโปร่ง ไม่บังหน้าเพ็ท) · วางทับการ์ดที่ได้บัฟ
-  aura: () => {
-    const tongues = Array.from({ length: 13 }, (_, i) => {
-      const a = -180 + i * 15, rad = a * Math.PI / 180            // ครึ่งบน + ข้าง (ไฟพุ่งขึ้น)
-      const bx = 32 + Math.cos(rad) * 20, by = 38 + Math.sin(rad) * 24
-      const h = 12 + (i % 3) * 5, tip = { x: bx + Math.cos(rad) * 4, y: by - h }
-      return `<path d="M${(bx - 4).toFixed(1)} ${by.toFixed(1)}Q${(bx - 2).toFixed(1)} ${(by - h * .6).toFixed(1)} ${tip.x.toFixed(1)} ${tip.y.toFixed(1)}Q${(bx + 3).toFixed(1)} ${(by - h * .5).toFixed(1)} ${(bx + 4).toFixed(1)} ${by.toFixed(1)}Z" fill="url(#f)"/>`
-    }).join('')
-    return svg(`<defs>${lg('f', [[0, '#fffbe0'], [.4, '#ffe14a'], [1, '#ffb400', .2]])}${glow('g', 1.8)}
-      <mask id="k"><rect width="64" height="64" fill="#fff"/><ellipse cx="32" cy="40" rx="15" ry="19" fill="#000"/></mask></defs>
-      <g filter="url(#g)" mask="url(#k)"><ellipse cx="32" cy="40" rx="20" ry="23" fill="none" stroke="#ffe680" stroke-width="7" opacity=".45" filter="url(#g)"/>${tongues}</g>`)
-  },
+  // ☀️ ซอล — ออร่าเรืองทองนุ่มๆ รอบตัว (29 ก.ย. user: ไม่เอาแหลม เอาเท่ๆ ไม่เด่นเกิน) · กลางโปร่งไม่บังหน้าเพ็ท
+  aura: () => svg(`<defs>
+      <radialGradient id="a" gradientUnits="userSpaceOnUse" cx="32" cy="36" r="30"><stop offset=".5" stop-color="#ffe9a0" stop-opacity="0"/><stop offset=".68" stop-color="#ffe27a" stop-opacity=".85"/><stop offset=".82" stop-color="#ffc83d" stop-opacity=".45"/><stop offset="1" stop-color="#ffb000" stop-opacity="0"/></radialGradient>
+      <filter id="b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+    <ellipse cx="32" cy="36" rx="27" ry="29" fill="url(#a)"/>
+    <g filter="url(#b)" fill="none" stroke="#fff3c4" stroke-linecap="round" opacity=".55">
+      <path d="M12 44C9 32 13 18 24 10" stroke-width="1.6"/><path d="M52 44C55 32 51 18 40 10" stroke-width="1.6"/>
+      <path d="M17 50C13 40 14 28 20 20" stroke-width="1"/><path d="M47 50C51 40 50 28 44 20" stroke-width="1"/></g>`),
+  // 💗 คู่หู (รางวัลคนเก่ง / องศาซัน) — หัวใจชมพู
+  heart: () => svg(`<defs>${lg('h', [[0, '#ffc2dc'], [.5, '#ff5fa2'], [1, '#d6246e']], 1, 1)}${glow('g', 1.6)}</defs>
+    <g filter="url(#g)"><path d="M32 56C14 42 6 32 6 21C6 12 13 6 21 6C26 6 30 9 32 13C34 9 38 6 43 6C51 6 58 12 58 21C58 32 50 42 32 56Z" fill="url(#h)" stroke="#fff" stroke-width="1.5"/></g>
+    <ellipse cx="21" cy="17" rx="6" ry="3.6" fill="#fff" opacity=".6" transform="rotate(-30 21 17)"/>`),
   // ✨ ประกายทั่วไป
   star: () => svg(`<defs>${glow('g', 1.5)}</defs><g filter="url(#g)">${star4(32, 32, 26, '#fffbe0', '#ffd34a')}</g>`),
 }
