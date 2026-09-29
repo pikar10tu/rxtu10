@@ -117,6 +117,7 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
+import { grantSecret } from '../composables/useAchievements.js'
 import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
 import { eventState, timeLeftText } from '../utils/gachaEvent.js'
 import { useConfirm } from '../composables/useConfirm.js'
@@ -253,6 +254,14 @@ async function pull(n, isEvent = false) {
     reveal.value = { summary, multi: rolls > 1 }
     // ข่าวกระดาน (เลนอยู่ยาว): เปิด 10 ครั้งได้ legendary 2 ตัว = ข่าวเดียว ยิงตัวแรกที่เจอ
     const leg = results.find((r) => r.rarity === 'legendary')
+    // achievement ลับของตู้ — สุ่ม 10 (ได้ 11) เท่านั้น
+    if (rolls >= 10) {
+      const legN = results.filter((r) => r.rarity === 'legendary').length
+      if (legN >= 2) grantSecret('gag_leg2')
+      if (legN >= 3) grantSecret('gag_leg3')
+      // สุ่ม 10 การันตี epic อยู่แล้ว ⇒ "ไม่ได้อะไรเกินธรรมดาเลย" เป็นไปไม่ได้ · ธรรมดา ≥8 ตัว ≈ 1 ใน 60 รอบ
+      if (results.filter((r) => r.rarity === 'common').length >= 8) grantSecret('gag_badday')
+    }
     if (leg) {
       const petName = PETS.find((p) => p.id === leg.id)?.name || 'เพ็ทระดับตำนาน'
       postNews({ type: 'legendary', icon: '✨', msg: `${myName()} เปิดแคปซูลได้ ${petName}` })
