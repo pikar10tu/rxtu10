@@ -172,7 +172,6 @@ watch(open, (v) => { if (v) { stop(); now.value = Date.now() } else start() })
 .news-heart { display: inline-block; font-size: .85rem; }
 .news-like.pop .news-heart { animation: news-pop .35s ease-out; }
 @keyframes news-pop { 0% { transform: scale(1) } 40% { transform: scale(1.45) } 100% { transform: scale(1) } }
-@media (prefers-reduced-motion: reduce) { .news-like.pop .news-heart { animation: none; } }
 .news-icon { font-size: 1.2rem; flex-shrink: 0; }
 .news-group { border-bottom: 1px solid rgba(0,0,0,.05); padding-bottom: 8px; }
 .news-group:last-child { border-bottom: none; padding-bottom: 0; }
