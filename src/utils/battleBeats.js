@@ -107,6 +107,7 @@ export function timingOf(kind) {
     case 'openShow':    return phasesOf(OPEN_SHOW_MS, SHAPE.ko)
     case 'skillShow':   return phasesOf(SKILL_SHOW_MS, SHAPE.ko)
     case 'skillMini':   return phasesOf(SKILL_MINI_MS, SHAPE.hit)
+    case 'frozenTurn':  return phasesOf(BEAT, SHAPE.hit)   // ❄️ ตาที่ถูกแช่ค้างเท่าหนึ่งหมัด = เห็นว่า "ตีไม่ออก" (29 ก.ย. user)
     // sub · openQuiet · skillQuiet · round/end/ไม่รู้จัก = ผ่านไปเงียบๆ ไม่กินเวลา
     default:            return { ...ZERO }
   }
@@ -336,6 +337,7 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
     }
     for (const [i, k] of pKind) {
       const e = evts[i]
+      if (e?.fxKind === 'skip' && i >= openCut && !(endsFight && finishAt >= 0 && i > finishAt)) { pKind.set(i, 'frozenTurn'); continue }
       if (i < openCut || !e || e.fxKind === 'skip') continue
       const many = (procs.get(e.uid) || 0) > 1
       // 👹 ฟาดล้มแล้วตีต่อ = เกิดไม่บ่อยและเป็นโมเมนต์ ⇒ แบนเนอร์ใหญ่เสมอ (29 ก.ย. user)

@@ -731,6 +731,8 @@ function skillTitle(e) {
   // ❄️ ฤดูหนาวบอกผลเสมอ (29 ก.ย. user)
   // ❄️ จบรอบบอกแค่ผล (ชื่อฤดูประกาศไปแล้วตอนเปิดไฟต์ — ต่อชื่อด้วยแล้วล้นแถบ · user 29 ก.ย.)
   if (e.effect === 'seasonCold') return e.amount > 0 ? `แช่แข็ง ${e.amount} ตัว` : 'ไม่มีใครโดนแช่แข็ง'
+  if (e.effect === 'seasonRain') return 'ฝนโปรยปราย'
+  if (e.effect === 'seasonHot') return 'ร้อนไม่ไหว'
   if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'โลกเอียง'   // ☀️🌍 ร่างองศา (29 ก.ย. user)
   if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
@@ -793,6 +795,17 @@ async function applyPassive(e) {
       fire: () => parts.forEach(firePassiveFx),
     })
     return
+  }
+
+  // ❄️ ตาที่ถูกแช่: ป้ายเยือกแข็ง + ดิ้นค้างทั้งตา (เท่าหนึ่งหมัด) → น้ำแข็งแตก + สแตคลด ตอนท้าย
+  if (e.kind === 'frozenTurn') {
+    const total = t.windup + t.motion + t.hitstop + t.tail
+    fx?.callout(e.uid, 'frozen')
+    fx?.frozenShake(e.uid, total * 0.8)
+    await wait(total * 0.8); if (g !== gen) return
+    fx?.stateMark(e.uid, '❄️', e.left ?? 0)
+    if (tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid })
+    await wait(total * 0.2); return
   }
 
   // แบนเนอร์เล็ก (สกิลหลายครั้งต่อไฟต์ — ครั้งแรก): แถบเล็กขึ้น → ผล+ท่าประจำตัวลง · ไม่หรี่ฉาก

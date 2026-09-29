@@ -567,12 +567,14 @@ export function createBattleFx() {
     setTimeout(() => { if (auras.get(uid) === el) el.style.visibility = '' }, ms / rate)
   }
   // ❄️ ถึงตาแต่โดนแช่ — การ์ดสั่นเหมือนพยายามขยับแต่ติดน้ำแข็ง (transform ล้วน · อนิเมชันเดียวบนการ์ด)
-  function frozenShake(uid) {
+  function frozenShake(uid, ms = 380) {
     const el = getEl(uid); if (!el || !F('cardLunge')) return
-    const a = el.animate([
-      { transform: 'translateX(0)' }, { transform: 'translateX(-4px) rotate(-1.5deg)' }, { transform: 'translateX(4px) rotate(1.5deg)' },
-      { transform: 'translateX(-3px) rotate(-1deg)' }, { transform: 'translateX(3px) rotate(1deg)' }, { transform: 'translateX(0)' },
-    ], { duration: 380 / rate, easing: 'linear' })
+    // ขยับไปทางเป้าแล้วติด — ดิ้นสั้นๆ ซ้ำ ๆ ตลอดตา (ms = เวลาของตานั้น)
+    const kf = [{ transform: 'translate(0,0)' }]
+    const n = Math.max(3, Math.round(ms / 90))
+    for (let i = 1; i < n; i++) kf.push({ transform: `translate(${i % 2 ? -3 : 3}px, ${i % 3 === 0 ? -2 : 0}px) rotate(${i % 2 ? -1.2 : 1.2}deg)` })
+    kf.push({ transform: 'translate(0,0)' })
+    const a = el.animate(kf, { duration: ms / rate, easing: 'linear' })
     anims.add(a); a.finished.catch(() => {}).finally(() => { anims.delete(a); el.style.transform = '' })
   }
 
