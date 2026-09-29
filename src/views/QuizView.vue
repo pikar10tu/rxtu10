@@ -566,8 +566,13 @@ function resetRound() {
   answers.value = []
 }
 
+// achievement ลับ ความไวเป็นของปีศาจ: ตอบถูกภายใน 2 วิหลังโจทย์ขึ้น 5 ข้อติด (นับในเครื่อง ไม่เขียนอะไรจนกว่าจะปลด)
+let shownAt = 0, fastRun = 0
+watch(() => current.value?.id, () => { shownAt = performance.now() }, { immediate: true })
+
 function pick(i) {
   if (picked.value !== null) return
+  const fast = performance.now() - shownAt <= 2000
   picked.value = i
   answered.value++
   const isCorrect = i === current.value.answer
@@ -577,6 +582,8 @@ function pick(i) {
     streak.value++
     if (streak.value > bestStreak.value) bestStreak.value = streak.value
   } else streak.value = 0
+  fastRun = isCorrect && fast ? fastRun + 1 : 0
+  if (fastRun === 5) grantSecret('gag_demon')
   answers.value.push({ id: current.value.id, domain: current.value.domain || null, correct: isCorrect })
 }
 function choiceClass(i) {
