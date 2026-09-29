@@ -420,7 +420,11 @@ function setEl(uid, el) { if (el) els[uid] = el }
 function highlight(uid, cls, on = true) { const el = els[uid]; if (el) el.classList[on ? 'add' : 'remove'](cls) }
 function clearHighlights() { Object.values(els).forEach(el => el && el.classList.remove('windup', 'acting', 'flash', 'spotlit')) }
 // dead ก็ imperative classList เหมือนกัน (ไม่ใช่ reactive :class แล้ว) — กัน Vue re-render เขียนทับ flash/acting/windup ตอน hp เปลี่ยน (Task 9 finding #1)
-function setDead(uid) { highlight(uid, 'dead', (hp.value[uid] ?? 100) <= 0) }
+function setDead(uid) {
+  const dead = (hp.value[uid] ?? 100) <= 0
+  highlight(uid, 'dead', dead)
+  if (dead) fx?.linkHide(uid)   // 🐘 ใครตายเส้นลิงก์ที่ต่อกับมันดับ
+}
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
 const fxLayerEl = ref(null)      // ref บน .br-fx-layer
@@ -706,6 +710,7 @@ const teamIds = computed(() => ({
 /** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
 function skillTitle(e) {
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
+  if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
 }
 
@@ -907,6 +912,18 @@ function lungeStyle(beat) {
   return { back: tuning.value.windupBack === true }
 }
 
+// 🐘 เส้นลิงก์บากุ — ขึ้นตอนไฟต์เริ่ม (beat แรก) จากบากุไปเพื่อนทุกตัวที่ยังอยู่
+function showLinks() {
+  ensureFx(); fx?.linkClear()
+  for (const [side, team] of [['A', props.data?.playerTeam], ['B', props.data?.botTeam]]) {
+    ;(team || []).forEach((p, i) => {
+      if (p?.id !== 'qilin') return
+      const me = side + i
+      fx?.linkShow(me, (team || []).map((_, j) => side + j).filter(u => u !== me && (hp.value[u] ?? 100) > 0))
+    })
+  }
+}
+
 // ── โชว์ไทม์เลเจนด์: ท่าประจำตัว (utils/battleShowtime.js) ลงพร้อมผลของสกิล ──
 // เล่นเฉพาะตอนสปอตไลต์ (ยกแรก/ครั้งแรก/โมเมนต์) = ครั้งละไม่กี่ทีต่อไฟต์ ไม่รก · ไม่ await (สไปรต์อยู่ชั้น fx แยกจากการ์ด)
 // tuning.showtime === false = ปิด (ห้องแล็บเทียบกับของเดิม)
@@ -1002,7 +1019,7 @@ function firePassiveFx(e) {
     case 'damage':  fx?.sweep(on, e.icon, 60); break        // bahamut สาดไฟใส่ทุกตัว
     case 'cleave':  fx?.sweep(on, e.icon, 45); break        // เขี้ยว/เปลวไฟลงหลายใบในจังหวะเดียว
     case 'heal':    fx?.sweep(on, e.effect === 'seasonRain' ? '🌧️' : '✨', 70); break
-    case 'guard':   fx?.ring(e.uid, 'windup', 320); break
+    case 'guard':   fx?.ring(e.uid, 'windup', 320); if (e.guardUid) fx?.linkFlash(e.guardUid, on[0]); break
     // armorStack — วงแหวนกันหมัดชุดเดียวกับ guard (ผู้เล่นอ่านทั้งคู่ว่า "หมัดนี้ไม่เข้า") แต่แยก fxKind
     // เพราะหน่วยของ amount คนละเรื่องกัน (ที่นี่ = ดาเมจสะท้อน, ของ guard = ดาเมจที่รับแทน) ·
     // ตัวก้อนสะท้อนมี attack event sub ตามมาติดๆ เล่าให้อยู่แล้ว จึงไม่ต้องยิง FX ซ้ำที่นี่
@@ -1210,6 +1227,7 @@ async function step() {
   stepGen = g
   try {
     const b = beats.value[idx.value]
+    if (idx.value === 0) showLinks()
     // สกิลเปลี่ยนสเตตัสจริง → เลขบนการ์ดขยับตรงนี้ให้ผู้เล่นเห็น
     // (aura เล่นในกลุ่มเปิดตอนไม่มีการ์ดใบไหนมีอนิเมชัน · 🦖 hunt ไม่มีเพดาน ขยับได้ทุกหมัดตลอดไฟต์)
     // ⚠️ ที่นี่ที่เดียว อย่ากระจายใส่ตาม handler รายชนิด เดี๋ยวพลาดชนิดใดชนิดหนึ่ง
@@ -1723,6 +1741,8 @@ onUnmounted(() => {
 .brfx-proj { width: 1.4rem; height: 1.4rem; }
 .brfx-dash { width: 2rem; height: 2rem; }
 /* โชว์ไทม์เลเจนด์ — ภาพฐาน 96px จุดกึ่งกลาง = พิกัด (สเกลใน transform) · will-change ใส่เฉพาะตอนเล่น */
+.brfx-link { height: 3px; margin-top: -1.5px; transform-origin: 0 50%; border-radius: 2px; will-change: auto; pointer-events: none;
+  background: linear-gradient(90deg, #c084fc, #a855f7 50%, #e9d5ff); box-shadow: 0 0 6px 1px rgba(168,85,247,.8); opacity: 0; }
 .brfx-st { width: 96px; height: 96px; margin: -48px 0 0 -48px; will-change: auto; pointer-events: none; }
 .brfx-ring { width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 18px; }
 /* เหลือ phase เดียวคือ windup — กฎ .brfx-ring.acting ถูกลบพร้อม branch 'acting' ใน fx.ring() ที่ไม่มี call site แล้ว */

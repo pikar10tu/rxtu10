@@ -49,7 +49,7 @@ export function createBattleFx() {
     window.addEventListener('resize', onResize)
     window.addEventListener('orientationchange', onResize)
   }
-  function reset() { invalidateCenters(); cancelAll(); stackAt.clear() }
+  function reset() { invalidateCenters(); cancelAll(); stackAt.clear(); linkClear() }
   function cancelAll() {
     for (const a of anims) a.cancel()          // reject → run() กลืนแล้ว
     anims.clear()
@@ -73,7 +73,7 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [] }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [], link: [] }
   const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0, st: 0 }
   const dangerOn = new Map()      // uid → element ที่กำลังเต้นอยู่
   const markOn = new Map()        // uid → element ป้ายสถานะค้าง (ชั้นเชื้อ)
@@ -134,6 +134,7 @@ export function createBattleFx() {
     // โชว์ไทม์เลเจนด์ (utils/battleShowtime.js) — ภาพ WebP 96px ขยับด้วย transform/opacity ล้วน
 
     for (let i = 0; i < SHOWTIME_MAX; i++) pool.st.push(mkImg('brfx-st'))
+    for (let i = 0; i < 6; i++) pool.link.push(mkEl('brfx-link'))       // 🐘 เส้นลิงก์บากุ (สูงสุด 2 บากุ × 3 เพื่อน)
     // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
     // ⚠️ ห้ามสร้าง element ใหม่ตอนเลขเปลี่ยนกลางไฟต์ — พูลมีไว้เพื่อไม่ให้มี DOM เกิดใหม่ระหว่างเล่น
     // 6 → 12: คีย์เป็น uid+icon (ไม่ใช่ uid เฉยๆ) แล้ว ⇒ ❄️ ×3 ตัว + 🦠 ×1 ตัวพร้อมกันเกิน 6 ช่องได้
@@ -498,8 +499,42 @@ export function createBattleFx() {
     }))
   }
 
+  // ── 🐘 เส้นลิงก์ของบากุ: เส้นม่วงจากบากุไปเพื่อนทุกตัว · ขึ้นสว่างตอนเริ่มแล้วจางค้าง · รับแทน = วาบ ──
+  // เส้นเป็น div ในชั้น fx (ไม่แตะการ์ด) · ตั้งความยาว/มุมครั้งเดียวตอนเริ่ม แล้วขยับแค่ opacity
+  const links = new Map()                         // 'owner>to' → el
+  function linkShow(owner, uids) {
+    const a = centerOf(owner); if (!a) return
+    for (const to of uids) {
+      const b = centerOf(to); if (!b || links.has(owner + '>' + to)) continue
+      const el = pool.link.find(x => !x.__used); if (!el) return
+      el.__used = true; links.set(owner + '>' + to, el)
+      const len = Math.hypot(b.x - a.x, b.y - a.y), ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI
+      el.style.width = len.toFixed(1) + 'px'
+      el.style.transform = `translate(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px) rotate(${ang.toFixed(1)}deg)`
+      run(el, [{ opacity: 0 }, { opacity: 1, offset: .35 }, { opacity: .3 }], { duration: 1100, easing: 'ease-out', fill: 'forwards' })
+    }
+  }
+  function linkFlash(owner, to) {
+    const el = links.get(owner + '>' + to); if (!el) return
+    el.getAnimations?.().forEach(x => x.cancel())
+    run(el, [{ opacity: 1 }, { opacity: .3 }], { duration: 520, easing: 'ease-out', fill: 'forwards' })
+  }
+  /** ตัวใดตัวหนึ่งตาย → เส้นที่ต่อกับมันดับ */
+  function linkHide(uid) {
+    for (const [k, el] of links) {
+      if (!k.split('>').includes(uid)) continue
+      links.delete(k); el.__used = false
+      el.getAnimations?.().forEach(x => x.cancel())
+      run(el, [{ opacity: .3 }, { opacity: 0 }], { duration: 300, fill: 'forwards' })
+    }
+  }
+  function linkClear() {
+    for (const el of pool.link) { el.__used = false; el.getAnimations?.().forEach(x => x.cancel()); el.style.opacity = '0' }
+    links.clear()
+  }
+
   return {
-    showtime,
+    showtime, linkShow, linkFlash, linkHide, linkClear,
     attach, reset, cancelAll, setRate, setFlags, setReducedOverride, destroy, centerOf, invalidateCenters,
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,
