@@ -41,7 +41,8 @@ async function flush() {
   if (!p || !p.n) return
   pending.value = null
   const me = useAuthStore().currentUser?.uid
-  const data = { items: { [p.key]: increment(p.n) } }
+  // last = ให้ rules เช็คว่าแตะแค่ข่าว/เจ้าของนี้ (rules ดึงคีย์ออกจาก diff เองไม่ได้)
+  const data = { items: { [p.key]: increment(p.n) }, last: { k: p.key, o: p.owner || '', n: p.n } }
   if (p.owner) data.recv = { [p.owner]: increment(p.n) }
   if (p.owner && p.owner === me) data.self = { [me]: increment(p.n) }
   // ยอดบนจอบวกไว้ถาวรเลย (ไม่รอ server) — ส่งพังก็แค่ยอดจริงน้อยกว่าที่เห็นในเซสชันนี้

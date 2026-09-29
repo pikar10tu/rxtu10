@@ -235,18 +235,22 @@ service cloud.firestore {
     function likeDelta(m, k) {
       return likeMap(m).get(k, 0) - likeOld(m).get(k, 0);
     }
+    //  rules ดึงสมาชิกออกจาก Set ไม่ได้ ⇒ client แนบ last = { k: ข่าว, o: เจ้าของ|'', n: จำนวน } มาทุก write ให้เช็คเทียบ
     function likeOk() {
-      let ik = likeKeys('items');
+      let L = request.resource.data.last;
       let rk = likeKeys('recv');
       let sk = likeKeys('self');
-      let d  = ik.size() == 1 ? likeDelta('items', ik.toList()[0]) : 0;
       return request.auth != null
-        && request.resource.data.keys().hasOnly(['items', 'recv', 'self'])
-        && ik.size() == 1 && d is int && d >= 1 && d <= 500
-        && rk.size() <= 1 && sk.size() <= 1
-        && (rk.size() == 0 || likeDelta('recv', rk.toList()[0]) == d)
-        && (sk.size() == 0 || (rk.size() == 1 && rk.toList()[0] == request.auth.uid
-              && sk.toList()[0] == request.auth.uid && likeDelta('self', sk.toList()[0]) == d));
+        && request.resource.data.keys().hasOnly(['items', 'recv', 'self', 'last'])
+        && L.keys().hasOnly(['k', 'o', 'n']) && L.k is string && L.o is string
+        && L.n is int && L.n >= 1 && L.n <= 500
+        && likeKeys('items').hasOnly([L.k]) && likeDelta('items', L.k) == L.n
+        && (L.o == ''
+              ? rk.size() == 0 && sk.size() == 0
+              : rk.hasOnly([L.o]) && likeDelta('recv', L.o) == L.n
+                && (L.o == request.auth.uid
+                      ? sk.hasOnly([L.o]) && likeDelta('self', L.o) == L.n
+                      : sk.size() == 0));
     }
     match /likes/{docId} {
       allow read: if request.auth != null;
