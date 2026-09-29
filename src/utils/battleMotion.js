@@ -46,7 +46,7 @@ export function lungesIn(kind) {
  * @param {Object} vec     เวกเตอร์จากผู้ตีไปเป้า {x, y} (px)
  * @returns {Array|null}   keyframes หรือ null = kind นี้ไม่ให้การ์ดขยับ
  */
-export function lungeKeyframes(kind, weight, timing, vec, { back = true } = {}) {
+export function lungeKeyframes(kind, weight, timing, vec, { back = true, deep = 1 } = {}) {
   if (!lungesIn(kind)) return null
   const t = timing || {}
   const total = (t.windup || 0) + (t.motion || 0) + (t.hitstop || 0) + (t.tail || 0)
@@ -74,8 +74,8 @@ export function lungeKeyframes(kind, weight, timing, vec, { back = true } = {}) 
     const ux = -(vec?.x || 0) / len, uy = -(vec?.y || 0) / len
     const tilt = (Math.sign(vec?.x || 0) || 1) * -(LUNGE.tiltBase + LUNGE.tiltPerWeight * w) * depth
     const coil = (k) => `translate(${(ux * pull * k).toFixed(1)}px, ${(uy * pull * k).toFixed(1)}px) rotate(${(tilt * k).toFixed(1)}deg) scale(${(1 + amt * 0.5 * k).toFixed(3)}, ${(1 - amt * 0.6 * k).toFixed(3)})`
-    kf.push({ transform: coil(1), offset: o1 * 0.7 })
-    kf.push({ transform: coil(1.08), offset: o1 })                       // ค้างเกร็งก่อนปล่อย
+    kf.push({ transform: coil(deep), offset: o1 * 0.7 })
+    kf.push({ transform: coil(deep * 1.08), offset: o1 })                       // ค้างเกร็งก่อนปล่อย
   } else if (o1 > 0) kf.push({ transform: `translate(0, ${pull}px) scale(${(1 + amt * 0.5).toFixed(3)}, ${(1 - amt * 0.6).toFixed(3)})`, offset: o1 })
   kf.push({ transform: hit, offset: o2 })
   // เฟรม o2→o3 ซ้ำท่าเดิม = การ์ดหยุดนิ่งช่วง hitstop โดยไม่ต้องแตกเป็น animation ที่สอง

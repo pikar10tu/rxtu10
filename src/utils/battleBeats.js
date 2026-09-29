@@ -330,6 +330,8 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       const e = evts[i]
       if (i < openCut || !e || e.fxKind === 'skip') continue
       const many = (procs.get(e.uid) || 0) > 1
+      // 👹 ฟาดล้มแล้วตีต่อ = เกิดไม่บ่อยและเป็นโมเมนต์ ⇒ แบนเนอร์ใหญ่เสมอ (29 ก.ย. user)
+      if (e.fxKind === 'chain' && k !== 'skillMoment') { pKind.set(i, 'skillShow'); continue }
       if (k === 'skill') pKind.set(i, many ? 'skillMini' : 'skillShow')
       else if (k === 'skillShow' && many) pKind.set(i, 'skillMini')
     }

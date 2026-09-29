@@ -52,7 +52,7 @@
             <em v-if="skillIcon(p, 'B'+i) && statusOf('B'+i).length" class="sep"></em>
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
-          <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out }">
+          <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out, charge: chipOn['B'+i].hold, moon: chipOn['B'+i].tone === 'moon' }">
             <Emoji :char="chipOn['B'+i].icon" /> {{ chipOn['B'+i].name }}
           </span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
@@ -78,7 +78,7 @@
             <em v-if="skillIcon(p, 'A'+i) && statusOf('A'+i).length" class="sep"></em>
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
-          <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out }">
+          <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out, charge: chipOn['A'+i].hold, moon: chipOn['A'+i].tone === 'moon' }">
             <Emoji :char="chipOn['A'+i].icon" /> {{ chipOn['A'+i].name }}
           </span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
@@ -101,10 +101,9 @@
         <div class="br-spot-dim"></div>
         <!-- คัทอิน (user เลือกแบบ 2 จากเดโม 25 ก.ย. 2026): แถบเฉียง + หน้าเพ็ทเจ้าของสกิลทุกครั้ง
              ทีมเราเข้าจากซ้าย (ฟ้า) · ศัตรูเข้าจากขวา (แดง) · จังหวะเดิม: spotlightPassive await จนจบ = ไม่มีใครตีระหว่างนี้ -->
-        <div class="br-cut">
+        <div class="br-cut" :style="{ '--cut-a': spotView.tint?.[0], '--cut-b': spotView.tint?.[1] }">
           <span class="br-cut-face" :class="{ duo: spotView.face2 }"><Emoji :char="spotView.face" /><Emoji v-if="spotView.face2" class="br-cut-face2" :char="spotView.face2" /></span>
           <span class="br-cut-t">
-            <span class="br-cut-who">{{ spotView.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }} · {{ spotView.who }}</span>
             <b class="br-cut-name"><Emoji v-if="spotView.skillIcon" :char="spotView.skillIcon" /> {{ spotView.name }}</b>
           </span>
         </div>
@@ -112,7 +111,7 @@
 
       <!-- แบนเนอร์เล็ก: สกิลที่ทำงานหลายครั้งต่อไฟต์ (29 ก.ย. user) — ไม่หรี่ฉาก ไม่หยุดไฟต์ อยู่ฝั่งทีมเจ้าของ
            อยู่ใน DOM ตลอด (เหตุผลเดียวกับ .br-spot) · เล่นซ้ำด้วยการถอด/ใส่คลาส on (showMini) -->
-      <div ref="miniEl" class="br-mini" :class="{ foe: miniView.side === 'B' }" aria-hidden="true">
+      <div ref="miniEl" class="br-mini" :class="{ foe: miniView.side === 'B' }" :style="{ '--cut-a': miniView.tint?.[0], '--cut-b': miniView.tint?.[1] }" aria-hidden="true">
         <span class="br-mini-face"><Emoji :char="miniView.face" /></span>
         <b class="br-mini-name"><Emoji v-if="miniView.icon" :char="miniView.icon" /> {{ miniView.name }}</b>
       </div>
@@ -243,7 +242,7 @@ import { computeBattleSummary } from '../../utils/battleSummary.js'
 import { fluentFile } from '../../utils/emoji.js'
 import { createBattleFx } from '../../utils/battleFx.js'
 import { buildBeats, scaleTiming, BEAT } from '../../utils/battleBeats.js'
-import { hasShowtime, SHOWTIME_ART } from '../../utils/battleShowtime.js'
+import { hasShowtime, SHOWTIME_ART, tintOf } from '../../utils/battleShowtime.js'
 import { readPrefs, fxFlags, paceMult, FX_LABEL, PACE_LABEL } from '../../utils/battleReplayPrefs.js'
 import { createFrameMeter, FALLBACK_BASE, DROP_RATIO } from '../../utils/frameMeter.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
@@ -380,7 +379,8 @@ function showMini(e, force = false) {
   const now = performance.now()
   if (!force && now - (miniLast.get(e.uid) || -1e9) < MINI_GAP_MS / (pace.value || 1)) return
   miniLast.set(e.uid, now)
-  miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0] }
+  miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0],
+    tint: tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind) }
   const el = miniEl.value; if (!el) return
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on')
 }
@@ -600,6 +600,7 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  fullMoonNext.clear()
   miniLast.clear()
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
   prefs.value = readPrefs()     // อ่านใหม่ทุกไฟต์ — พาเนล Admin เปลี่ยนค่าแล้วยิงไฟต์ทดสอบต้องเห็นผลทันที
@@ -704,6 +705,7 @@ const teamIds = computed(() => ({
 }))
 /** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
 function skillTitle(e) {
+  if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
 }
 
@@ -834,6 +836,12 @@ const counters = computed(() => {
 function showChip(uid, e) {
   chipOn.value = { ...chipOn.value, [uid]: { name: skillTitle(e), icon: e.icon || '✨', out: false } }
 }
+// 👹 ป้ายค้าง "ง้างตะบอง…" — อยู่จนกว่าโอนิจะออกหมัดฟาด (ถอดต้น applyAttack ก่อนการ์ดขยับ = ไม่ผิดกฎ v3)
+function holdChip(uid, name, icon, tone = '') {
+  chipOn.value = { ...chipOn.value, [uid]: { name, icon, out: false, hold: true, tone } }
+}
+// 🌙 หมัดจันทร์เสี้ยวจบ → หมัดหน้าเต็มดวง: ติดป้ายค้างหลังหมัดนี้จบ (event มาก่อนหมัดใน log จึงพักไว้ก่อน)
+const fullMoonNext = new Set()
 function hideChip(uid) {
   const cur = chipOn.value[uid]; if (!cur) return
   chipOn.value = { ...chipOn.value, [uid]: { ...cur, out: true } }
@@ -873,7 +881,7 @@ async function spotlightPassive(e, t, g, opts = {}) {
     desc: '', side: opts.side || e.uid?.[0] || 'A',
     // หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ขึ้นเฉพาะตอนคู่นั้นทำงานอยู่จริงในทีม (duoPartnerOf เช็คให้แล้ว)
     face2: (() => { const d = defForUid(e.uid); const id = duoPartnerOf(d.id, sideTeam(e.uid[0])); return id ? getPetDef(id)?.emoji || null : null })(),
-    who: petNameOf(e.uid),
+    tint: tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind),
   }
   spotView.value = view
   spot.value = view
@@ -890,6 +898,13 @@ async function spotlightPassive(e, t, g, opts = {}) {
   if (opts.fire) opts.fire(); else firePassiveFx(e)   // ป้ายเล็กเหนือหัวไม่ต้องแล้ว — แบนเนอร์ใหญ่ทำหน้าที่นั้นไปแล้ว
   await wait(t.tail); if (g !== gen) return clearSpot(e.uid)
   clearSpot(e.uid)
+}
+
+// 🥊 ท่าง้างถอยหลัง: เฉพาะหมัดฟาดของ 👹 โอนิ (ลึก ×1.5) · ตัวอื่นตีแบบเดิม (29 ก.ย. user: "ตัวอื่นไม่ต้องง้าง")
+//    tuning.windupBack === true = ให้ทุกตัวง้าง (ห้องแล็บเทียบ)
+function lungeStyle(beat) {
+  if (defForUid(beat.attacker)?.id === 'kirin') return { back: true, deep: 1.5 }
+  return { back: tuning.value.windupBack === true }
 }
 
 // ── โชว์ไทม์เลเจนด์: ท่าประจำตัว (utils/battleShowtime.js) ลงพร้อมผลของสกิล ──
@@ -912,6 +927,9 @@ function playShowtime(e) {
 // ป้ายชื่อไม่ได้อยู่ในนี้แล้ว — ชิปบนการ์ด (showChip) ทำหน้าที่นั้นแทน
 function firePassiveFx(e) {
   const on = Array.isArray(e.targets) && e.targets.length ? e.targets : [e.uid]
+  if (e.fxKind === 'windup') holdChip(e.uid, 'ง้างตะบอง…', '💢')
+  if (e.fxKind === 'chain') sfx('p_chain')
+  if (e.fxKind === 'moon' && e.phase === 1) fullMoonNext.add(e.uid)
 
   // ── หลอดเลือด: ฮีล/ฟื้น/รับแทน ทำให้เลือดเปลี่ยนโดยไม่มี attack event
   //    ถ้าไม่อัปเดตตรงนี้ หลอดจะค้างค่าเดิมทั้งที่เลขเด้งขึ้นแล้ว (ผู้เล่นเห็นขัดกันทันที)
@@ -1052,6 +1070,8 @@ function applyImpact(beat, g, t) {
   //    ถ้าวันหลังเพิ่ม kind ใหม่แล้วลืมเขียนกิ่ง จะได้ default (เงียบ) ซึ่งปลอดภัย ไม่ใช่ดังสุด
   const spark = sparkOf(defForUid(beat.attacker))
   const w = beat.weight ?? 0
+  if (chipOn.value[beat.attacker]?.hold) hideChip(beat.attacker)
+  if (beat.forced && beat.kind !== 'sub') fx?.callout(beat.attacker, 'taunt')   // 🦍 ถูกยั่วยุ — ป้ายบนตัวคนที่ถูกดึงมา
   // เสียงหมัดตามสายของผู้ตี (fist ทุบ · scissors ฟัน · paper ปัด) · ปิดเกม/น็อกซ้อนเสียงหนักอีกชั้น
   const elem = defForUid(beat.attacker)?.element
   if (beat.kind === 'sub') sfx('hit_sub')
@@ -1090,7 +1110,9 @@ function applyImpact(beat, g, t) {
   else if (!beat.silent && !infSum && !beat.dodged && beat.eff !== 'super' && beat.eff !== 'weak') fx?.callout(beat.target, 'block')   // 0 โดยไม่ได้หลบ = กันไว้ได้ (เกราะ/ลดดาเมจ)
   // เด้งไล่ทีละชั้น 90ms ให้ตาอ่านได้ว่า "3 ชั้น = 3 ก้อน" — later() ผูก pendingTimers จึงถูกล้างตอน reset เสมอ
   // (เช็ค gen ซ้ำอีกชั้นกันไฟต์ใหม่ที่เริ่มก่อน timer ครบ)
-  infHits.forEach((n, k) => {
+  // ชั้นไม่จำกัดแล้ว (29 ก.ย.) — เกิน 5 ชั้นรวบเป็นเลขเดียว ไม่งั้นเลขเขียวเด้ง 10+ ก้อนต่อหมัด (พูล pop มี 16)
+  const infShown = infHits.length > 5 ? [infSum] : infHits
+  infShown.forEach((n, k) => {
     if (n > 0) later(() => { if (g === gen) { fx?.pop(beat.target, { dmg: n, infect: true, weight: 0.12 }); sfx('virus_tick') } }, 90 * (k + 1))
   })
   if (beat.eff === 'super' || beat.eff === 'weak') fx?.callout(beat.target, beat.eff)
@@ -1140,7 +1162,7 @@ async function applyAttack(beat) {
   // หมัดลูก: ไม่มีงบเวลาของตัวเอง (อยู่ในหมัดหลักที่กำลังพุ่งอยู่) → ลง impact แล้วออกทันที
   if (beat.kind === 'sub') { applyImpact(beat, g, t); return }
 
-  const doLunge = () => { if (!ranged) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w, { back: tuning.value.windupBack !== false }) }
+  const doLunge = () => { if (!ranged) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w, lungeStyle(beat)) }
 
   if (t.windup > 0) {
     highlight(beat.attacker, 'windup')                       // เปลี่ยน class ให้เสร็จ "ก่อน" สั่ง animate (ข้อบังคับ v3)
@@ -1160,10 +1182,13 @@ async function applyAttack(beat) {
 
   await wait(t.motion); if (g !== gen) return
   applyImpact(beat, g, t)
+  // 👹 หมัดฟาดของโอนิ: ฟ้าผ่าลงที่เป้า + จอสั่น (ท่าเดียวกับโชว์ไทม์ แต่ลงที่ตัวที่โดน)
+  if (def?.id === 'kirin' && beat.kind !== 'sub' && tuning.value.showtime !== false) { fx?.showtime('kirin', { owner: beat.target }); fx?.shake('ko') }
   await wait(t.hitstop); if (g !== gen) return
   // acting ถอดหลัง tail เท่านั้น — fx.lunge() ยังพุ่งอยู่ตลอด windup+motion+hitstop+tail (1 animation ครอบทั้ง beat)
   await wait(t.tail); if (g !== gen) return
   highlight(beat.attacker, 'acting', false)
+  if (fullMoonNext.delete(beat.attacker)) holdChip(beat.attacker, 'หมัดหน้าเต็มดวง!', '🌕', 'moon')
 }
 
 // ── กันเปิด beat chain ซ้อนกัน 2 สาย ──
@@ -1606,11 +1631,11 @@ onUnmounted(() => {
 /* แบนเนอร์ถาวร: ไม่มี .on = ซ่อน (ม่านโปร่ง · แถบจาง) — อนิเมชันผูกกับ .on เท่านั้น จึงเริ่มใหม่ทุกครั้งที่ .on กลับมา */
 .br-spot.on .br-spot-dim { animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
 .br-cut { position: relative; z-index: 5; width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
-  transform: skewY(-5deg); background: linear-gradient(90deg, #2563eb 0%, #2563eb 35%, rgba(15,23,42,.96) 100%); box-shadow: 0 0 0 3px #fff;
+  transform: skewY(-5deg); background: linear-gradient(90deg, var(--cut-a, #2563eb) 0%, var(--cut-a, #2563eb) 35%, var(--cut-b, #0f172a) 100%); box-shadow: 0 0 0 3px #fff;
   will-change: transform, opacity; opacity: 0; }
 .br-spot.on .br-cut { opacity: 1; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
 .br-spot.foe .br-cut { flex-direction: row-reverse; text-align: right;
-  background: linear-gradient(270deg, #dc2626 0%, #dc2626 35%, rgba(15,23,42,.96) 100%); }
+  background: linear-gradient(270deg, var(--cut-a, #dc2626) 0%, var(--cut-a, #dc2626) 35%, var(--cut-b, #0f172a) 100%); }
 .br-spot.on.foe .br-cut { animation-name: br-cut-in-r; }
 .br-cut-face { flex: none; width: 70px; height: 70px; display: grid; place-items: center; border-radius: 50%; font-size: 3rem; line-height: 1;
   background: rgba(255,255,255,.18); transform: skewY(5deg); }
@@ -1622,10 +1647,10 @@ onUnmounted(() => {
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 /* แบนเนอร์เล็ก — ทีมเราขึ้นครึ่งล่างจากซ้าย · ศัตรูครึ่งบนจากขวา · transform/opacity ล้วน */
 .br-mini { position: absolute; left: 0; top: 58%; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: 78%;
-  padding: 4px 14px 4px 6px; border-radius: 0 999px 999px 0; background: linear-gradient(90deg, #2563eb, rgba(37,99,235,.82));
+  padding: 4px 14px 4px 6px; border-radius: 0 999px 999px 0; background: linear-gradient(90deg, var(--cut-a, #2563eb), var(--cut-b, #1e3a8a));
   box-shadow: 0 0 0 2px #fff; pointer-events: none; opacity: 0; transform: translateX(-105%); }
 .br-mini.foe { left: auto; right: 0; top: 30%; flex-direction: row-reverse; padding: 4px 6px 4px 14px; border-radius: 999px 0 0 999px;
-  background: linear-gradient(270deg, #dc2626, rgba(220,38,38,.82)); transform: translateX(105%); }
+  background: linear-gradient(270deg, var(--cut-a, #dc2626), var(--cut-b, #7f1d1d)); transform: translateX(105%); }
 .br-mini.on { animation: br-mini-l 1.05s cubic-bezier(.2,.9,.3,1) both; }
 .br-mini.foe.on { animation-name: br-mini-r; }
 .br-mini-face { font-size: 1.5rem; line-height: 1; }
@@ -1670,6 +1695,9 @@ onUnmounted(() => {
   animation: br-chip-in .11s ease-out both;
 }
 .br-chip.out { animation: br-chip-out .3s ease-out both; }
+/* 👹 ป้ายค้างตอนง้าง — แดงเข้ม ขอบเหลือง ไม่กะพริบ (อนิเมชันในการ์ด = การ์ด re-raster ทุกเฟรม) */
+.br-chip.charge.moon { background: #3730a3; box-shadow: 0 0 0 1.5px #c7d2fe, 0 0 10px rgba(165,180,252,.8); }
+.br-chip.charge { background: #991b1b; box-shadow: 0 0 0 1.5px #fbbf24, 0 2px 6px rgba(0,0,0,.35); }
 @keyframes br-chip-in {
   from { opacity: 0; transform: translate(-50%, 5px) scale(.85); }
   to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -1681,6 +1709,7 @@ onUnmounted(() => {
 .brfx { position: absolute; left: 0; top: 0; will-change: transform; }
 .brfx-call { font-weight: 800; font-size: .7rem; white-space: nowrap; padding: 2px 6px; border-radius: 7px; }
 .brfx-call.super { background: #ef4444; color: #fff; }
+.brfx-call.taunt { background: #92400e; color: #fff; }
 .brfx-call.weak { background: rgba(203,213,225,.95); color: #334155; }
 .brfx-puff { width: 1.2rem; height: 1.2rem; }
 .brfx-burst { width: 2rem; height: 2rem; }

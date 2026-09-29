@@ -210,7 +210,7 @@ export function createBattleFx() {
   // kind: 'super' | 'weak' | 'survive' | 'miss' | 'block'
   // 🔴 'miss'/'block' แยกออกมา 26 ก.ย. — เดิมหลบ (dodge) ยืมป้าย 'weak' ตอนที่มันยังเป็นป้ายเทา "ไม่โดน"
   //    พอ 'weak' ถูกเปลี่ยนคำเป็น "ชนะทาง" ⇒ จิ้งจอกหลบแล้วจอขึ้นว่าชนะทางธาตุ (ผิดความหมาย) · CSS ใช้สีของ weak
-  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️', frozen: 'แข็ง! ❄️' }
+  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️', frozen: 'แข็ง! ❄️', taunt: 'ยั่วยุ! 💢' }
   function callout(uid, kind) {
     const el = take('call')
     el.getAnimations?.().forEach(a => a.cancel())

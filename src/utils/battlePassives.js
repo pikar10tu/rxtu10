@@ -605,8 +605,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
     const gp = passiveFor(g)
     const gpart = partsAt(gp, 'onHit').find(x => x.effect === 'guardian')
     if (!gpart || g === defender) continue
-    const low = lowestHpAlly(team, g)
-    if (low !== defender) continue                     // รับแทนเฉพาะเพื่อนที่บอบช้ำที่สุด
+    // 🔗 29 ก.ย. 2026 (user เลือกแบบ ก): ลิงก์ทั้งทีม — เพื่อนคนไหนโดนก็รับแทน (เดิมเฉพาะคนเลือด % น้อยสุด)
     const share = pctOf(res.dmg, valOf(gpart, g).pct)
     g.hp -= share
     res.dmg -= share
@@ -759,7 +758,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
     for (const d of (team ? alive(team) : [defender])) {
       const st = psOf(d)
       const cur = st.infect || { n: 0, from: attacker }
-      if (cur.n >= v.max) { st.infect = cur; continue }
+      if (v.max > 0 && cur.n >= v.max) { st.infect = cur; continue }   // max 0 = ไม่จำกัดชั้น (29 ก.ย. user: แอนตี้ทีมถึก)
       // 🔴 กฎ "ไวรัสตัวแรกเป็นเจ้าของสแตค": from ต้องมาจาก cur.from ไม่ใช่ attacker ตรงๆ
       //    ถ้าทีมมีไวรัส 2 ตัว (คนละเกรด/atk) แล้วให้ attacker ทับทุกครั้งที่ตี เจ้าของดาเมจตอนระเบิด
       //    (งานย่อย 6 อ่าน from.atk) และตอนย้ายเชื้อตอนตาย (งานย่อย 7) จะเปลี่ยนไปเงียบๆ ตามว่าใครตีล่าสุด
@@ -894,7 +893,8 @@ export function runOnAnyDeath(dead, killerTeam, foes, rand) {
       const vp = passiveFor(owner)
       const vpart = partsAt(vp, 'onAttack').find(x => x.effect === 'infect')
       const cap = vpart ? valOf(vpart, owner).max : inf.n
-      const n = Math.min(cap, (cur ? cur.n : 0) + inf.n)
+      const sum = (cur ? cur.n : 0) + inf.n
+      const n = cap > 0 ? Math.min(cap, sum) : sum   // cap 0 = ไม่จำกัดชั้น (ห้าม min กับ 0 = เชื้อหายทั้งกอง)
       psOf(to).infect = { n, from: owner }
       // 🔑 ทุกการสะสม state ในไฟล์นี้ยิง event เสมอ — การย้ายเชื้อเงียบๆ จะทำให้ป้ายชั้นเชื้อของ §6.4
       //    กระโดดจากศพไปโผล่บนตัวใหม่โดยไม่มีใครเล่าว่าเกิดอะไร · effect ตั้งชื่อแยกจากตอนแปะ

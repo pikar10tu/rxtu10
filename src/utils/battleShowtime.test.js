@@ -26,3 +26,15 @@ test('เลเจนด์ทุกตัวมีท่าโชว์ไท�
   }
   assert.deepEqual(showtimePlan('cat', ctx()), [])
 })
+
+test('สีแบนเนอร์ทุกสีเข้มพอให้ตัวอักษรขาวอ่านออก (contrast ≥ 4.5)', async () => {
+  const { PET_TINT, KIND_TINT } = await import('./battleShowtime.js')
+  const lum = (hex) => {
+    const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+  }
+  for (const [k, pair] of Object.entries({ ...PET_TINT, ...KIND_TINT })) for (const hex of pair) {
+    const cr = 1.05 / (lum(hex) + 0.05)
+    assert.ok(cr >= 4.5, `${k} ${hex} contrast ${cr.toFixed(2)}`)
+  }
+})

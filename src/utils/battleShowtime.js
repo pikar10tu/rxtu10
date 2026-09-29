@@ -126,3 +126,26 @@ export function showtimePlan(petId, ctx) {
   if (!c.team.length) c.team = [c.owner]
   return plan(c).slice(0, SHOWTIME_MAX)
 }
+
+// ── สีแบนเนอร์ตามท่า (29 ก.ย. user: "เอาสีที่เหมาะกับท่านั้นๆ") ──
+// [a, b] = ไล่สีจากฝั่งหน้าเพ็ทไปปลายแถบ · ตัวอักษรขาวเสมอ ⇒ ทุกสีต้องเข้มพอให้ขาวอ่านออก (contrast ≥ 4.5 — เทสคุม)
+// ฝั่งทีมบอกด้วยทิศที่แถบพุ่งเข้า (ซ้าย=เรา ขวา=ศัตรู) ไม่ใช่สีแล้ว
+export const PET_TINT = {
+  bahamut: ['#c2410c', '#7f1d1d'], lion: ['#a16207', '#78350f'], whale: ['#0369a1', '#1e3a8a'],
+  phoenix: ['#c2410c', '#9f1239'], kirin: ['#b91c1c', '#450a0a'], trex: ['#9a3412', '#3f1d0b'],
+  ouroboros: ['#15803d', '#14532d'], simurgh: ['#0e7490', '#164e63'], qilin: ['#7e22ce', '#3b0764'],
+  virus: ['#4d7c0f', '#1a2e05'], gorilla: ['#92400e', '#451a03'], mammoth: ['#78716c', '#292524'],
+  sol: ['#b45309', '#7c2d12'], earth: ['#15803d', '#1e3a8a'], luna: ['#4338ca', '#1e1b4b'],
+}
+export const KIND_TINT = {
+  heal: ['#15803d', '#14532d'], revive: ['#b45309', '#7c2d12'], guard: ['#6d28d9', '#2e1065'],
+  damage: ['#b91c1c', '#450a0a'], thorns: ['#9f1239', '#4c0519'], debuff: ['#4d7c0f', '#1a2e05'],
+  buff: ['#b45309', '#78350f'], dodge: ['#0369a1', '#0c4a6e'], windup: ['#b91c1c', '#450a0a'],
+  chain: ['#b91c1c', '#1c1917'], moon: ['#4338ca', '#1e1b4b'], fullMoon: ['#4338ca', '#1e1b4b'],
+  aura: ['#0f766e', '#134e4a'],
+}
+const DEFAULT_TINT = ['#334155', '#0f172a']
+/** สีแถบของสกิลนี้ — เลเจนด์ใช้สีประจำตัว · ตัวอื่นตามชนิดผล */
+export function tintOf(petId, fxKind) {
+  return PET_TINT[petId] || KIND_TINT[fxKind] || DEFAULT_TINT
+}

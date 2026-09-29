@@ -503,21 +503,24 @@ test('thorns (hedgehog): สะท้อนกลับผู้ตี', () => {
   assert.equal(r.events[0].targets[0], 'A0')
 })
 
-test('guardian (qilin): รับแทนเพื่อนที่พร่องสุด · เลือดผู้พิทักษ์ลดจริง', () => {
+test('guardian (qilin): รับแทนเพื่อน 25% · เลือดผู้พิทักษ์ลดจริง', () => {
   const guard = u('qilin', { uid: 'A0' })
   const weak = u('cat', { uid: 'A1', hp: 100 })
   const r = runOnHit(weak, 100, u('mouse'), [guard, weak], () => 0.5)
-  assert.equal(r.dmg, 50)
-  assert.equal(guard.hp, 950)
+  assert.equal(r.dmg, 75)
+  assert.equal(guard.hp, 975)
 })
 
-test('guardian: ไม่รับแทนเพื่อนที่ไม่ได้พร่องสุด', () => {
+// 🔗 29 ก.ย. 2026 (user เลือกแบบ ก): ลิงก์ทั้งทีม — เดิมรับแทนเฉพาะเพื่อนที่เลือด % น้อยสุด
+test('guardian: รับแทนเพื่อนทุกตัว ไม่ใช่แค่ตัวที่พร่องสุด · ไม่รับแทนตัวเอง', () => {
   const guard = u('qilin', { uid: 'A0' })
   const weak = u('cat', { uid: 'A1', hp: 50 })
   const mid = u('mouse', { uid: 'A2', hp: 800 })
   const r = runOnHit(mid, 100, u('cat'), [guard, weak, mid], () => 0.9)
-  assert.equal(r.dmg, 100)
-  assert.equal(guard.hp, 1000)
+  assert.equal(r.dmg, 75)
+  assert.equal(guard.hp, 975)
+  const self = runOnHit(guard, 100, u('cat'), [guard, weak, mid], () => 0.9)
+  assert.ok(!self.events.some(e => e.fxKind === 'guard'))
 })
 
 test('atkOnHit: โดนตีทีนึง atk เพิ่มถาวร ไม่มีเพดาน (user ยืนยัน)', () => {
@@ -1898,7 +1901,7 @@ test('🦁 สิงโต: บัฟไม่หายเมื่อเพื�
   assert.equal(team[0].atk, atkAfterAura)           // ตั้งใจ — เหมือน aura ตัวอื่นทั้งหมด
 })
 
-test('👾 ไวรัส: ชั้นขึ้นจากหมัดไวรัสเท่านั้น · ชนเพดาน · เพื่อนตีก็ระเบิด · ทะลุทุกสายลด', () => {
+test('👾 ไวรัส: ชั้นขึ้นจากหมัดไวรัสเท่านั้น · ไม่มีเพดาน · เพื่อนตีก็ระเบิด · ทะลุทุกสายลด', () => {
   const virus = u('virus', { uid: 'A0', atk: 100 })
   const mate  = u('blank', { uid: 'A1', atk: 100 })
   const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', atk: 10, maxHp: 1000, hp: 1000 })
@@ -1909,11 +1912,11 @@ test('👾 ไวรัส: ชั้นขึ้นจากหมัดไว�
   assert.equal(psOf(foe).infect, undefined)
 
   for (let i = 0; i < 7; i++) runOnHit(foe, 50, virus, [foe], () => 0.99)
-  assert.equal(psOf(foe).infect.n, 5)               // เพดาน 5 ชั้น
+  assert.equal(psOf(foe).infect.n, 7)               // ไม่จำกัดชั้นแล้ว (29 ก.ย. 2026 แอนตี้ทีมถึก)
 
   const res = runOnHit(foe, 50, mate, [foe], () => 0.99)
-  assert.equal(Math.round(res.pierce), 50)          // 5 ชั้น × 10% ของ atk ไวรัส (100)
-  assert.equal(psOf(foe).infect.n, 5)               // เชื้อไม่หายตอนระเบิด
+  assert.equal(Math.round(res.pierce), 70)          // 7 ชั้น × 10% ของ atk ไวรัส (100)
+  assert.equal(psOf(foe).infect.n, 7)               // เชื้อไม่หายตอนระเบิด
   const burst = res.events.find(e => e.effect === 'infectBurst')
   assert.ok(burst, 'ต้องมี event ระเบิดให้จอเล่า')
   assert.deepEqual(burst.targets, ['B0'])

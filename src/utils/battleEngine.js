@@ -144,6 +144,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     const hpAtHit = tg.hp
     const entry = {
       t: 'attack', side: att.side, attacker: att.uid, target: tg.uid,
+      ...(forced ? { forced: true } : {}),   // 🦍 ถูกยั่วยุมาตี (จอขึ้นป้าย "ยั่วยุ!") — แสดงผลล้วน
       dmg: Math.round(before - hpAtHit), crit: !!tier?.crit, eff: tier?.eff || 'neutral',
       dodged: hitRes.dodged,
       // 🔒 sub = หมัดลูกใน beat เดียวกัน (cleave/multiStrike) — battleBeats ให้ timing ZERO
