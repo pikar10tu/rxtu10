@@ -4,6 +4,7 @@ import { fluentFile } from './emoji.js'
 import { fxFlags, REDUCED_FLAGS } from './battleReplayPrefs.js'
 import { lungeKeyframes, squashKeyframes, targetReactsIn, shakeFor } from './battleMotion.js'
 import { prefersReducedMotion } from './motionPref.js'
+import { showtimePlan, SHOWTIME_MAX } from './battleShowtime.js'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -72,8 +73,8 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [] }
-  const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0 }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [] }
+  const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0, st: 0 }
   const dangerOn = new Map()      // uid → element ที่กำลังเต้นอยู่
   const markOn = new Map()        // uid → element ป้ายสถานะค้าง (ชั้นเชื้อ)
 
@@ -130,6 +131,9 @@ export function createBattleFx() {
     pool.dash = [mkImg('brfx-dash')]
     for (let i = 0; i < 8; i++) pool.danger.push(mkEl('brfx-danger'))   // สูงสุด 8 ตัวต่อไฟต์ (4v4)
     for (let i = 0; i < 3; i++) pool.sweep.push(mkImg('brfx-sweep'))    // cleave มากสุด 3 เป้า
+    // โชว์ไทม์เลเจนด์ (utils/battleShowtime.js) — ภาพ WebP 96px ขยับด้วย transform/opacity ล้วน
+
+    for (let i = 0; i < SHOWTIME_MAX; i++) pool.st.push(mkImg('brfx-st'))
     // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
     // ⚠️ ห้ามสร้าง element ใหม่ตอนเลขเปลี่ยนกลางไฟต์ — พูลมีไว้เพื่อไม่ให้มี DOM เกิดใหม่ระหว่างเล่น
     // 6 → 12: คีย์เป็น uid+icon (ไม่ใช่ uid เฉยๆ) แล้ว ⇒ ❄️ ×3 ตัว + 🦠 ×1 ตัวพร้อมกันเกิน 6 ช่องได้
@@ -273,10 +277,10 @@ export function createBattleFx() {
   // ── การ์ดพุ่ง: 1 animation ครอบ windup+motion+hitstop+tail ทั้งก้อน (ข้อบังคับ v3 — 1 promotion/หมัด) ──
   // รูปร่าง keyframes (ระยะที่พุ่งถึง/จังหวะกลับ/เด้ง/เอียง) อยู่ใน battleMotion.js เพราะเป็น pure = เทสได้
   // ที่นี่เหลือแค่ "หา element + วัดพิกัด + ยิง WAAPI + เก็บกวาด"
-  function lunge(el, fromUid, toUid, timing, kind, weight) {
+  function lunge(el, fromUid, toUid, timing, kind, weight, mopts) {
     if (!F('cardLunge') || !el) return Promise.resolve()
     const a = centerOf(fromUid), b = centerOf(toUid); if (!a || !b) return Promise.resolve()
-    const kf = lungeKeyframes(kind, weight, timing, { x: b.x - a.x, y: b.y - a.y })
+    const kf = lungeKeyframes(kind, weight, timing, { x: b.x - a.x, y: b.y - a.y }, mopts)
     if (!kf) return Promise.resolve()            // kind นี้ไม่ให้การ์ดขยับ (หมัดลูก — อยู่ในหมัดหลักแล้ว)
     const total = timing.windup + timing.motion + timing.hitstop + timing.tail
     el.style.zIndex = '7'                        // static ก่อนเริ่ม ไม่อยู่ใน keyframes (ข้อบังคับ v3)
@@ -467,7 +471,35 @@ export function createBattleFx() {
     }))
   }
 
+  // ── โชว์ไทม์เลเจนด์: เล่นสคริปต์สไปรต์จาก showtimePlan() ──
+  // ctx = { owner: uid, team: uid[], foes: uid[], targets: uid[] } · ไม่มีท่า/flag ปิด = คืนทันที
+  function showtime(petId, ctx) {
+    if (!F('burst') || !ctx?.owner) return Promise.resolve()
+    const pts = (l) => (l || []).map(centerOf).filter(Boolean)
+    const owner = centerOf(ctx.owner); if (!owner) return Promise.resolve()
+    if (!boxRect && boxEl) boxRect = boxEl.getBoundingClientRect()
+    const plan = showtimePlan(petId, {
+      owner, team: pts(ctx.team), foes: pts(ctx.foes), targets: pts(ctx.targets),
+      box: { w: boxRect?.width || 360, h: boxRect?.height || 560 },
+    })
+    return Promise.all(plan.map(sp => {
+      const el = take('st')
+      el.getAnimations?.().forEach(a => a.cancel())
+      const src = BASE + 'fx/' + sp.img + '.webp'
+      if (el.getAttribute('src') !== src) el.src = src
+      const n = sp.kf.length
+      const kf = sp.kf.map((k, i) => ({
+        transform: `translate(${k.x.toFixed(1)}px, ${k.y.toFixed(1)}px) rotate(${(k.r || 0).toFixed(1)}deg) scale(${k.s.toFixed(3)}) translateZ(0)`,
+        opacity: k.o, offset: k.at ?? (n > 1 ? i / (n - 1) : 0),
+      }))
+      lift(el)
+      return run(el, kf, { duration: sp.ms, delay: sp.delay || 0, easing: sp.ease, fill: 'backwards' })
+        .then(() => { el.style.opacity = '0'; drop(el) })
+    }))
+  }
+
   return {
+    showtime,
     attach, reset, cancelAll, setRate, setFlags, setReducedOverride, destroy, centerOf, invalidateCenters,
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,

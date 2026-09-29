@@ -49,7 +49,7 @@ test('🔑 ทุก kind ที่เป็นหมัดจริง ต้�
 test('🔑 weight ต่างกัน → ระยะพุ่งต้องเท่ากันเป๊ะ (weight คุมแค่ความลึก)', () => {
   const t = timingOf('hit')
   const at = (w) => {
-    const kf = lungeKeyframes('hit', w, t, VEC)
+    const kf = lungeKeyframes('hit', w, t, VEC, { back: false })
     const hit = kf.find(f => f.transform.includes('translate(') && !f.transform.startsWith('translate(0,'))
     return { x: num(hit.transform, /translate\((-?[\d.]+)px/), y: num(hit.transform, /,\s*(-?[\d.]+)px\)/) }
   }
@@ -62,7 +62,7 @@ test('🔑 weight ต่างกัน → ระยะพุ่งต้อง
 test('weight มากขึ้น → เงื้อลึกขึ้น (แต่ยังเป็นท่าเดียวกัน)', () => {
   const t = timingOf('hit')
   const pullOf = (w) => {
-    const kf = lungeKeyframes('hit', w, t, VEC)
+    const kf = lungeKeyframes('hit', w, t, VEC, { back: false })
     return num(kf[1].transform, /translate\(0,\s*([\d.]+)px/)
   }
   assert.ok(pullOf(1) > pullOf(0))
@@ -71,7 +71,7 @@ test('weight มากขึ้น → เงื้อลึกขึ้น (แ
 
 test('kind ที่แรงกว่าเงื้อลึกกว่า ที่ weight เท่ากัน — แต่ระยะยังเท่าเดิม', () => {
   const pullOf = (kind) => {
-    const kf = lungeKeyframes(kind, 0.5, timingOf(kind), VEC)
+    const kf = lungeKeyframes(kind, 0.5, timingOf(kind), VEC, { back: false })
     return num(kf[1].transform, /translate\(0,\s*([\d.]+)px/)
   }
   assert.ok(pullOf('finish') > pullOf('ko'))
@@ -101,8 +101,8 @@ test('vec ที่ขาด/เป็นศูนย์ ต้องไม่�
 
 test('เอียงเข้าหาเป้าตามทิศจริง — ตีขึ้นบนกับตีลงล่างต้องคนละทาง', () => {
   const t = timingOf('hit')
-  const up = lungeKeyframes('hit', .5, t, { x: 0, y: -100 })
-  const down = lungeKeyframes('hit', .5, t, { x: 0, y: 100 })
+  const up = lungeKeyframes('hit', .5, t, { x: 0, y: -100 }, { back: false })
+  const down = lungeKeyframes('hit', .5, t, { x: 0, y: 100 }, { back: false })
   const yOf = (kf) => num(kf[2].transform, /,\s*(-?[\d.]+)px\)/)
   assert.ok(yOf(up) < 0 && yOf(down) > 0)
 })
@@ -151,4 +151,16 @@ test('input เดิม → keyframes เหมือนเดิมเป๊�
   const t = timingOf('ko')
   assert.deepEqual(lungeKeyframes('ko', .6, t, VEC), lungeKeyframes('ko', .6, t, VEC))
   assert.deepEqual(squashKeyframes('ko', .6, { x: 1, y: 0 }), squashKeyframes('ko', .6, { x: 1, y: 0 }))
+})
+
+// 🥊 29 ก.ย.: ง้าง = ถอยออกจากเป้าตามแนวหมัด (ของเดิมถอยลง +y ตายตัว ⇒ ทีมบน "ง้าง" เข้าหาเป้า)
+test('ง้างถอยหลังออกจากเป้าทั้งทีมบนและทีมล่าง + ระยะพุ่งเท่าแบบเดิม', () => {
+  const t = timingOf('hit')
+  const coilY = (kf) => num(kf[1].transform, /,\s*(-?[\d.]+)px\)/)
+  assert.ok(coilY(lungeKeyframes('hit', .5, t, { x: 0, y: -100 })) > 0, 'ตีขึ้น → ง้างลง')
+  assert.ok(coilY(lungeKeyframes('hit', .5, t, { x: 0, y: 100 })) < 0, 'ตีลง → ง้างขึ้น')
+  const a = lungeKeyframes('hit', .5, t, VEC), b = lungeKeyframes('hit', .5, t, VEC, { back: false })
+  const hitA = a.find(f => f.offset > 0.4 && !/rotate/.test(f.transform)), hitB = b.find(f => f.offset > 0.4)
+  assert.equal(hitA.transform, hitB.transform)
+  for (let i = 1; i < a.length; i++) assert.ok(a[i].offset >= a[i - 1].offset, 'offset ห้ามถอย')
 })

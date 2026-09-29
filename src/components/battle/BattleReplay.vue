@@ -237,6 +237,7 @@ import { computeBattleSummary } from '../../utils/battleSummary.js'
 import { fluentFile } from '../../utils/emoji.js'
 import { createBattleFx } from '../../utils/battleFx.js'
 import { buildBeats, scaleTiming, BEAT } from '../../utils/battleBeats.js'
+import { hasShowtime, SHOWTIME_ART } from '../../utils/battleShowtime.js'
 import { readPrefs, fxFlags, paceMult, FX_LABEL, PACE_LABEL } from '../../utils/battleReplayPrefs.js'
 import { createFrameMeter, FALLBACK_BASE, DROP_RATIO } from '../../utils/frameMeter.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
@@ -555,6 +556,10 @@ function warnTeamMismatch(d) {
 // ไม่งั้น decoding="sync" ครั้งแรกของแต่ละรูป = บล็อกเฟรม
 const preloadedImgs = []
 function preloadCombat(d) {
+  if ([...(d?.playerTeam || []), ...(d?.botTeam || [])].some(p => hasShowtime(p?.id))) {
+    // ภาพโชว์ไทม์ (~160KB ทั้งชุด) โหลดเฉพาะไฟต์ที่มีเลเจนด์ · ทำตรงนี้เพราะ fx ยังไม่ attach ตอน data มา
+    for (const n of SHOWTIME_ART) { const i = new Image(); i.decoding = 'async'; i.src = import.meta.env.BASE_URL + 'fx/' + n + '.webp' }
+  }
   const chars = new Set(['⚡', '🛡️', '💀', '💥', '✨'])
   for (const p of [...(d?.playerTeam || []), ...(d?.botTeam || [])]) {
     const def = getPetDef(p?.id); if (!def) continue
@@ -845,9 +850,25 @@ async function spotlightPassive(e, t, g, opts = {}) {
   //    ไม่งั้นเลือดจะขยับตั้งแต่แบนเนอร์ยังไม่ทันขึ้น = คนดูเห็น "ผล" ก่อน "เหตุ" ซึ่งเป็นสิ่งที่ฟีเจอร์นี้ตั้งใจแก้
   spotOut.value = true
   markSkill(e.uid)     // tuning.skillMark 'lit' — นับครั้งเดียวต่อการโชว์ แม้ opts.fire ลงหลายผลของ uid เดียวกัน (openShow ก้อนเดียว)
+  playShowtime(e)
   if (opts.fire) opts.fire(); else firePassiveFx(e)   // ป้ายเล็กเหนือหัวไม่ต้องแล้ว — แบนเนอร์ใหญ่ทำหน้าที่นั้นไปแล้ว
   await wait(t.tail); if (g !== gen) return clearSpot(e.uid)
   clearSpot(e.uid)
+}
+
+// ── โชว์ไทม์เลเจนด์: ท่าประจำตัว (utils/battleShowtime.js) ลงพร้อมผลของสกิล ──
+// เล่นเฉพาะตอนสปอตไลต์ (ยกแรก/ครั้งแรก/โมเมนต์) = ครั้งละไม่กี่ทีต่อไฟต์ ไม่รก · ไม่ await (สไปรต์อยู่ชั้น fx แยกจากการ์ด)
+// tuning.showtime === false = ปิด (ห้องแล็บเทียบกับของเดิม)
+function playShowtime(e) {
+  if (tuning.value.showtime === false || !hasShowtime(e.petId)) return
+  const side = e.uid[0]
+  const alive = Object.keys(maxHp).filter(u => (hp.value[u] ?? 100) > 0)
+  fx?.showtime(e.petId, {
+    owner: e.uid,
+    team: alive.filter(u => u[0] === side),
+    foes: alive.filter(u => u[0] !== side),
+    targets: (e.targets || []).filter(u => u !== e.uid),
+  })
 }
 
 // FX ของ passive: ป้ายชื่อเหนือหัว + ประกายตามชนิดผล + ขยับหลอดเลือด
@@ -1083,7 +1104,7 @@ async function applyAttack(beat) {
   // หมัดลูก: ไม่มีงบเวลาของตัวเอง (อยู่ในหมัดหลักที่กำลังพุ่งอยู่) → ลง impact แล้วออกทันที
   if (beat.kind === 'sub') { applyImpact(beat, g, t); return }
 
-  const doLunge = () => { if (!ranged) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w) }
+  const doLunge = () => { if (!ranged) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w, { back: tuning.value.windupBack !== false }) }
 
   if (t.windup > 0) {
     highlight(beat.attacker, 'windup')                       // เปลี่ยน class ให้เสร็จ "ก่อน" สั่ง animate (ข้อบังคับ v3)
@@ -1625,6 +1646,8 @@ onUnmounted(() => {
 .brfx-sweep { width: 1.7rem; height: 1.7rem; will-change: auto; }
 .brfx-proj { width: 1.4rem; height: 1.4rem; }
 .brfx-dash { width: 2rem; height: 2rem; }
+/* โชว์ไทม์เลเจนด์ — ภาพฐาน 96px จุดกึ่งกลาง = พิกัด (สเกลใน transform) · will-change ใส่เฉพาะตอนเล่น */
+.brfx-st { width: 96px; height: 96px; margin: -48px 0 0 -48px; will-change: auto; pointer-events: none; }
 .brfx-ring { width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 18px; }
 /* เหลือ phase เดียวคือ windup — กฎ .brfx-ring.acting ถูกลบพร้อม branch 'acting' ใน fx.ring() ที่ไม่มี call site แล้ว */
 .brfx-ring.windup { box-shadow: 0 0 0 3px #fde68a, 0 0 18px 4px rgba(253,230,138,.55); }

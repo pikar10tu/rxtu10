@@ -16,7 +16,9 @@ export const LUNGE = {
   scaleBase: 0.06,      // ยืด/บีบตอนพุ่งถึง ที่ weight = 0
   scalePerWeight: 0.06, // บวกเพิ่มตาม weight → 6–12%
   backMs: 200,          // เวลากลับเข้าที่หลังชน แล้วนิ่งรอ beat ถัดไป
-  bounce: 5,            // px ที่เลยที่เดิมไปทางตรงข้ามนิดนึงก่อนเข้าที่ (แรงเฉื่อยหลังชน)
+  bounce: 5,
+  tiltBase: 3,          // เอนตัวตอนง้าง (องศา) ที่ weight = 0
+  tiltPerWeight: 5,     // → 3–8° (×DEPTH ของหมัดปิดเกม)            // px ที่เลยที่เดิมไปทางตรงข้ามนิดนึงก่อนเข้าที่ (แรงเฉื่อยหลังชน)
 }
 
 /** ตัวคูณความลึกของท่าตาม kind — ไม่แตะ reach (ระยะต้องเท่ากันทุกหมัด) */
@@ -44,7 +46,7 @@ export function lungesIn(kind) {
  * @param {Object} vec     เวกเตอร์จากผู้ตีไปเป้า {x, y} (px)
  * @returns {Array|null}   keyframes หรือ null = kind นี้ไม่ให้การ์ดขยับ
  */
-export function lungeKeyframes(kind, weight, timing, vec) {
+export function lungeKeyframes(kind, weight, timing, vec, { back = true } = {}) {
   if (!lungesIn(kind)) return null
   const t = timing || {}
   const total = (t.windup || 0) + (t.motion || 0) + (t.hitstop || 0) + (t.tail || 0)
@@ -66,7 +68,15 @@ export function lungeKeyframes(kind, weight, timing, vec) {
 
   const kf = [{ transform: REST, offset: 0 }]
   // windup 0 = ไม่มีเฟรมเงื้อ — ใส่ที่ offset 0 ซ้ำจะกลายเป็นกระตุกจากท่าถอยหลังทันทีที่เริ่ม
-  if (o1 > 0) kf.push({ transform: `translate(0, ${pull}px) scale(${(1 + amt * 0.5).toFixed(3)}, ${(1 - amt * 0.6).toFixed(3)})`, offset: o1 })
+  if (o1 > 0 && back) {
+    // 🥊 ง้าง = ถอย "ออกจากเป้า" ตามแนวหมัด + เอนตัว แล้วค้างนิดก่อนพุ่ง (29 ก.ย. user ขอ "ง้างแล้วถอยหลัง")
+    //    ของเดิมถอยลง +y ตายตัว ⇒ ทีมบนที่ตีลงล่าง "ง้าง" เข้าหาเป้าแทน อ่านไม่ออกว่าเป็นท่าง้าง
+    const ux = -(vec?.x || 0) / len, uy = -(vec?.y || 0) / len
+    const tilt = (Math.sign(vec?.x || 0) || 1) * -(LUNGE.tiltBase + LUNGE.tiltPerWeight * w) * depth
+    const coil = (k) => `translate(${(ux * pull * k).toFixed(1)}px, ${(uy * pull * k).toFixed(1)}px) rotate(${(tilt * k).toFixed(1)}deg) scale(${(1 + amt * 0.5 * k).toFixed(3)}, ${(1 - amt * 0.6 * k).toFixed(3)})`
+    kf.push({ transform: coil(1), offset: o1 * 0.7 })
+    kf.push({ transform: coil(1.08), offset: o1 })                       // ค้างเกร็งก่อนปล่อย
+  } else if (o1 > 0) kf.push({ transform: `translate(0, ${pull}px) scale(${(1 + amt * 0.5).toFixed(3)}, ${(1 - amt * 0.6).toFixed(3)})`, offset: o1 })
   kf.push({ transform: hit, offset: o2 })
   // เฟรม o2→o3 ซ้ำท่าเดิม = การ์ดหยุดนิ่งช่วง hitstop โดยไม่ต้องแตกเป็น animation ที่สอง
   if (o3 > o2) kf.push({ transform: hit, offset: o3 })
