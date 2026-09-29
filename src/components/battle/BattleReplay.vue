@@ -106,9 +106,15 @@
           <span class="br-cut-t">
             <span class="br-cut-who">{{ spotView.side === 'B' ? 'ศัตรู' : 'ทีมคุณ' }} · {{ spotView.who }}</span>
             <b class="br-cut-name"><Emoji v-if="spotView.skillIcon" :char="spotView.skillIcon" /> {{ spotView.name }}</b>
-            <span v-if="spotView.desc" class="br-cut-desc">{{ spotView.desc }}</span>
           </span>
         </div>
+      </div>
+
+      <!-- แบนเนอร์เล็ก: สกิลที่ทำงานหลายครั้งต่อไฟต์ (29 ก.ย. user) — ไม่หรี่ฉาก ไม่หยุดไฟต์ อยู่ฝั่งทีมเจ้าของ
+           อยู่ใน DOM ตลอด (เหตุผลเดียวกับ .br-spot) · เล่นซ้ำด้วยการถอด/ใส่คลาส on (showMini) -->
+      <div ref="miniEl" class="br-mini" :class="{ foe: miniView.side === 'B' }" aria-hidden="true">
+        <span class="br-mini-face"><Emoji :char="miniView.face" /></span>
+        <b class="br-mini-name"><Emoji v-if="miniView.icon" :char="miniView.icon" /> {{ miniView.name }}</b>
       </div>
 
       <!-- fx pool layer (pops/callouts/koPuff/projectile) — พิกัดสัมพัทธ์กับ .br-box -->
@@ -362,6 +368,22 @@ const spotOut = ref(false)       // true = กำลังเลื่อนอ�
 // ความยาวอนิเมชันผูกกับ beat.timing จริง (ไม่ใช่ค่าคงที่ใน CSS) — ไม่งั้นพอ pace ไม่ใช่ ×1
 // แบนเนอร์จะยังเลื่อนเข้าไม่เสร็จตอนช่วงค้างอ่านหมดแล้ว
 const spotStyle = ref({})
+const miniEl = ref(null)
+const miniView = ref({ face: '✨', icon: null, name: '', side: 'A' })
+const miniLast = new Map()       // uid → เวลาที่แบนเนอร์เล็กขึ้นล่าสุด (กันรัวตอนสกิลซ้ำติดกัน)
+const MINI_GAP_MS = 1800
+// หมัดปิดเกมเล่นไปแล้ว = ไฟต์จบ · สกิลที่ log ยิงตามหลัง (onKill ของหมัดสุดท้าย) ห้ามมีแบนเนอร์/ท่าโชว์
+const finishIdx = computed(() => beats.value.findIndex(b => b.kind === 'finish'))
+function beatAfterFinish() { return finishIdx.value >= 0 && idx.value > finishIdx.value }
+/** แบนเนอร์เล็ก — ไม่ await · force = ขึ้นแน่ (skillMini) · ไม่ force = กันรัวต่อ uid (skillQuiet) */
+function showMini(e, force = false) {
+  const now = performance.now()
+  if (!force && now - (miniLast.get(e.uid) || -1e9) < MINI_GAP_MS / (pace.value || 1)) return
+  miniLast.set(e.uid, now)
+  miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0] }
+  const el = miniEl.value; if (!el) return
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on')
+}
 const introPhase = ref(null)   // 'ready' | 'go' | null (null = เริ่มเล่น log แล้ว)
 const resultOpen = ref(false)
 useEscapeKey(resultOpen, () => { resultOpen.value = false })    // modal สรุปโชว์อยู่
@@ -501,7 +523,7 @@ const LEGEND_SHOW = new Set(Object.keys(LEGEND_SFX))
 const tuning = computed(() => props.data?.tuning || {})
 // rng: ลำดับโชว์ยกแรกสุ่มใหม่ทุกไฟต์ (แสดงผลล้วน ไม่แตะผลไฟต์)
 const beats = computed(() => buildBeats(rawLog.value, maxHp, {
-  rng: Math.random, showPets: LEGEND_SHOW, statsBase,
+  rng: Math.random, showPets: LEGEND_SHOW, statsBase, bannerByCount: tuning.value.bannerByCount !== false,
   ...(typeof tuning.value.hitSpread === 'number' ? { hitSpread: tuning.value.hitSpread } : {}),
 }))
 const done = computed(() => idx.value >= beats.value.length)
@@ -578,6 +600,7 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  miniLast.clear()
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
   prefs.value = readPrefs()     // อ่านใหม่ทุกไฟต์ — พาเนล Admin เปลี่ยนค่าแล้วยิงไฟต์ทดสอบต้องเห็นผลทันที
   clearTimeout(timer); clearTimeout(introTimer)
@@ -743,6 +766,18 @@ async function applyPassive(e) {
     return
   }
 
+  // แบนเนอร์เล็ก (สกิลหลายครั้งต่อไฟต์ — ครั้งแรก): แถบเล็กขึ้น → ผล+ท่าประจำตัวลง · ไม่หรี่ฉาก
+  if (e.kind === 'skillMini') {
+    const bchunk = bannerEvents.splice(0)
+    markSkill(e.uid)
+    showMini(e, true)
+    sfx(LEGEND_SFX[e.petId] || 'skill')
+    await wait(t.windup + t.motion); if (g !== gen) return
+    playShowtime(e)
+    ;[...bchunk, e].forEach(firePassiveFx)
+    await wait(t.hitstop + t.tail); return
+  }
+
   if (e.kind === 'skill') {
     // ❄️ ตาที่ถูกข้าม (fxKind 'skip') ไม่ใช่สกิลของตัวเอง — ห้ามให้วงส้ม "ทำงานแล้ว" ติดจากการถูกแช่แข็ง
     if (e.fxKind !== 'skip') markSkill(e.uid)   // tuning.skillMark 'lit' — นับครั้งที่โปรกของสกิลนี้
@@ -755,7 +790,8 @@ async function applyPassive(e) {
     return
   }
 
-  // skillQuiet (ครั้งซ้ำ) — ผลอย่างเดียว ไม่มีชิป ไม่กินเวลา
+  // skillQuiet (ครั้งซ้ำ) — ผลอย่างเดียว ไม่กินเวลา · แบนเนอร์เล็ก (กันรัว) + ท่าประจำตัวเลเจนด์ทุกครั้ง (👾 สปอร์ทุกหมัด)
+  if (e.fxKind !== 'skip' && tuning.value.bannerByCount !== false && !beatAfterFinish()) { showMini(e); playShowtime(e) }
   if (e.fxKind !== 'skip') markSkill(e.uid)   // tuning.skillMark 'lit' — นับซ้ำด้วย (ตัวเลข ×N ต้องรวมครั้งซ้ำ)
   firePassiveFx(e)
 }
@@ -834,7 +870,7 @@ async function spotlightPassive(e, t, g, opts = {}) {
   const view = {
     face: defForUid(e.uid)?.emoji || opts.icon || '✨',       // หน้าเจ้าของสกิลทุกครั้ง (เดิมมีแค่ยกแรก)
     skillIcon: e.icon || null, name: skillTitle(e),
-    desc: opts.desc ?? passiveDescOf(e), side: opts.side || e.uid?.[0] || 'A',
+    desc: '', side: opts.side || e.uid?.[0] || 'A',
     // หน้าคู่ (☀️🌍 ร่างองศา · 🐳🦭 คู่หู) — ขึ้นเฉพาะตอนคู่นั้นทำงานอยู่จริงในทีม (duoPartnerOf เช็คให้แล้ว)
     face2: (() => { const d = defForUid(e.uid); const id = duoPartnerOf(d.id, sideTeam(e.uid[0])); return id ? getPetDef(id)?.emoji || null : null })(),
     who: petNameOf(e.uid),
@@ -1584,7 +1620,18 @@ onUnmounted(() => {
 .br-cut-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; transform: skewY(5deg); }
 .br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
-.br-cut-desc { font-size: .74rem; line-height: 1.35; color: rgba(255,255,255,.88); }
+/* แบนเนอร์เล็ก — ทีมเราขึ้นครึ่งล่างจากซ้าย · ศัตรูครึ่งบนจากขวา · transform/opacity ล้วน */
+.br-mini { position: absolute; left: 0; top: 58%; z-index: 6; display: flex; align-items: center; gap: 6px; max-width: 78%;
+  padding: 4px 14px 4px 6px; border-radius: 0 999px 999px 0; background: linear-gradient(90deg, #2563eb, rgba(37,99,235,.82));
+  box-shadow: 0 0 0 2px #fff; pointer-events: none; opacity: 0; transform: translateX(-105%); }
+.br-mini.foe { left: auto; right: 0; top: 30%; flex-direction: row-reverse; padding: 4px 6px 4px 14px; border-radius: 999px 0 0 999px;
+  background: linear-gradient(270deg, #dc2626, rgba(220,38,38,.82)); transform: translateX(105%); }
+.br-mini.on { animation: br-mini-l 1.05s cubic-bezier(.2,.9,.3,1) both; }
+.br-mini.foe.on { animation-name: br-mini-r; }
+.br-mini-face { font-size: 1.5rem; line-height: 1; }
+.br-mini-name { font-size: .8rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
+@keyframes br-mini-l { 0% { opacity: 0; transform: translateX(-105%); } 18% { opacity: 1; transform: translateX(0); } 78% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(-20%); } }
+@keyframes br-mini-r { 0% { opacity: 0; transform: translateX(105%); } 18% { opacity: 1; transform: translateX(0); } 78% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(20%); } }
 .br-spot.on.out .br-spot-dim { animation: br-spot-dim-out var(--spot-out, 230ms) ease-in forwards; }
 .br-spot.on.out .br-cut { animation: br-cut-out var(--spot-out, 230ms) ease-in forwards; }
 @keyframes br-spot-dim-in  { to { opacity: .55; } }

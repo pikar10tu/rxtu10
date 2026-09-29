@@ -27,6 +27,8 @@ export const SKILL_PAUSE = 200
 export const OPEN_SHOW_MS = 800
 /** เลเจนด์: ครั้งแรกที่สกิลโปรกได้แบนเนอร์เต็ม (โชว์ไทม์) แทนชิปเล็ก — user ขอ 25 ก.ย. 2026 */
 export const SKILL_SHOW_MS = 1000
+/** แบนเนอร์เล็ก — สกิลที่ทำงานหลายครั้งต่อไฟต์ (29 ก.ย. user: "โชว์ครั้งเดียว = แบนเนอร์ใหญ่ สะใจ · หลายที = เล็กลงแต่ขึ้นบ่อย") */
+export const SKILL_MINI_MS = 560
 
 /** กระจายเวลาหมัดปกติตามความแรง (0 = ทุกหมัดยาว BEAT เท่ากัน) — ความยาวไฟต์รวมเท่าเดิมเสมอ
  *  0.6 = user เลือกจากห้องเทียบ v4 (26 ก.ย. 2026): หมัดเบา ~0.43 วิ · หนัก ~0.73 วิ (ไฟต์ 424242)
@@ -101,6 +103,7 @@ export function timingOf(kind) {
     case 'skill':       return { ...ZERO, hitstop: SKILL_PAUSE }
     case 'openShow':    return phasesOf(OPEN_SHOW_MS, SHAPE.ko)
     case 'skillShow':   return phasesOf(SKILL_SHOW_MS, SHAPE.ko)
+    case 'skillMini':   return phasesOf(SKILL_MINI_MS, SHAPE.hit)
     // sub · openQuiet · skillQuiet · round/end/ไม่รู้จัก = ผ่านไปเงียบๆ ไม่กินเวลา
     default:            return { ...ZERO }
   }
@@ -155,7 +158,7 @@ function openCutOf(evts) {
  * @returns {Array} beat[] ยาวเท่า log เสมอ (1 event = 1 beat) เพื่อให้ index ตรงกับของเดิม
  */
 // showPets: Set ของ petId ที่ครั้งแรกของสกิลได้โชว์ไทม์ (skillShow) แทน skill · ครั้งเดียวต่อตัวต่อไฟต์
-export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD, statsBase = null } = {}) {
+export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSpread = HIT_SPREAD, statsBase = null, bannerByCount = false } = {}) {
   const evts = withStatDeltas(Array.isArray(log) ? log : [], statsBase)
   const mh = maxHpByUid || {}
 
@@ -305,6 +308,30 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       else if (!lastOfGroup && !isWindup) pKind.set(i, 'skillQuiet')
       else if (!isFreezeSkip && first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
       else pKind.set(i, (first || isWindup) ? 'skill' : 'skillQuiet')
+    }
+  }
+
+  // ── pass 2.5 (bannerByCount): ขนาดแบนเนอร์ตามจำนวนครั้งที่สกิลของเพ็ทตัวนั้นทำงานทั้งไฟต์ ──
+  //   ครั้งเดียว → skillShow (แบนเนอร์ใหญ่) · หลายครั้ง → ครั้งแรก skillMini ส่วนครั้งซ้ำคง skillQuiet
+  //   (จอเป็นคนยิงแบนเนอร์เล็กแบบไม่กินเวลาให้เอง) · ยกแรก/skillMoment (ฟื้น/กันตาย) ไม่แตะ = ใหญ่เสมอ
+  //   นับ "ก้อน" ไม่ใช่ event (เพ็ทยิงหลาย part ติดกัน = ครั้งเดียว) · ตาถูกแช่แข็งไม่นับ
+  if (bannerByCount) {
+    const procs = new Map()
+    for (let i = openCut; i < evts.length; i++) {
+      const e = evts[i]
+      if (!e || e.t !== 'passive' || e.fxKind === 'skip' || !pKind.has(i)) continue
+      const nx = evts[i + 1]
+      if (nx && nx.t === 'passive' && groupIdOf(nx) === groupIdOf(e)) continue   // ไม่ใช่ใบท้ายก้อน
+      const k = pKind.get(i)
+      if (k === 'skillQuiet' && endsFight && finishAt >= 0 && i > finishAt) continue
+      procs.set(e.uid, (procs.get(e.uid) || 0) + 1)
+    }
+    for (const [i, k] of pKind) {
+      const e = evts[i]
+      if (i < openCut || !e || e.fxKind === 'skip') continue
+      const many = (procs.get(e.uid) || 0) > 1
+      if (k === 'skill') pKind.set(i, many ? 'skillMini' : 'skillShow')
+      else if (k === 'skillShow' && many) pKind.set(i, 'skillMini')
     }
   }
 
