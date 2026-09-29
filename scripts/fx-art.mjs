@@ -131,6 +131,14 @@ const ART = {
       <g filter="url(#g)">${shard(32, 58, 50, 9, 0)}${shard(20, 58, 34, 7, -22)}${shard(44, 58, 36, 7, 20)}${shard(12, 58, 22, 5, -40)}${shard(52, 58, 22, 5, 38)}</g>
       ${star4(40, 14, 3.5)}${star4(18, 26, 2.5)}`)
   },
+  // 🌍 ฤดูหนาว — เกล็ดหิมะ 6 แฉก
+  snow: () => svg(`<defs>${glow('g', 1.2)}</defs><g filter="url(#g)" stroke="#f0fbff" stroke-width="3.2" stroke-linecap="round" fill="none">
+    ${[0, 60, 120].map(a => `<g transform="rotate(${a} 32 32)"><path d="M32 6V58"/><path d="M32 16L25 10M32 16L39 10M32 48L25 54M32 48L39 54"/></g>`).join('')}</g>
+    <circle cx="32" cy="32" r="4" fill="#e0f7ff"/>`),
+  // 🌍 ฤดูฝน — หยดน้ำ
+  drop: () => svg(`<defs>${lg('d', [[0, '#e0f7ff'], [.5, '#60c3ff'], [1, '#1d7fd6']], 1, 1)}${glow('g', 1)}</defs>
+    <g filter="url(#g)"><path d="M32 4C40 20 50 32 50 42C50 52 42 60 32 60C22 60 14 52 14 42C14 32 24 20 32 4Z" fill="url(#d)" stroke="#fff" stroke-width="1.5"/></g>
+    <ellipse cx="25" cy="40" rx="4" ry="7" fill="#fff" opacity=".55" transform="rotate(20 25 40)"/>`),
   // ✨ ประกายทั่วไป
   star: () => svg(`<defs>${glow('g', 1.5)}</defs><g filter="url(#g)">${star4(32, 32, 26, '#fffbe0', '#ffd34a')}</g>`),
 }

@@ -6,7 +6,7 @@
 //   x/y = พิกัดในกล่องไฟต์ (เดียวกับ fx.centerOf) · s = สเกล (ภาพฐาน 96px) · r = องศา · o = ความทึบ · at = offset 0..1
 
 export const SHOWTIME_ART = ['flame', 'roar', 'wave', 'wings', 'feather', 'smash', 'claw', 'ouro', 'talon',
-  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'aura-pink', 'heart', 'ice']
+  'dream', 'smoke', 'quake', 'stone', 'sun', 'leaf', 'moon', 'star', 'aura', 'aura-pink', 'heart', 'ice', 'snow', 'drop']
 
 /** เพดานสไปรต์ต่อโชว์ — ต้อง ≤ ขนาดพูลใน battlefx (กันยึดชิ้นที่ยังเล่นอยู่) */
 export const SHOWTIME_MAX = 12
@@ -132,6 +132,25 @@ PLANS.duo = ({ owner, partner, team }) => {
 PLANS.duoSmall = ({ owner, partner }) => [owner, partner || owner].map((p, i) => ({
   img: 'heart', ms: 620, delay: i * 90, ease: 'ease-out',
   kf: [P(p, .15, 0, 0, 0, -30), P(p, .3, 1, i ? 8 : -8, 0, -42, .35), P(p, .25, 0, 0, 0, -58)] }))
+
+// 🌍 สภาพอากาศเต็มจอตอนฤดูทำงาน (29 ก.ย. user: "จบรอบให้ดูรู้เรื่องว่าสกิลเอิร์ธทำงาน")
+//    พิกัดอิงกล่องไฟต์ทั้งกล่อง ไม่ใช่การ์ด · สุ่มแบบกำหนดได้ (ไม่ใช้ Math.random ในแผน = เทสได้)
+const spread = (n, w) => Array.from({ length: n }, (_, i) => ((i * 0.618 + 0.13) % 1) * w)
+PLANS.weatherCold = ({ box }) => spread(12, box.w).map((x, i) => ({
+  img: 'snow', ms: 1500, delay: (i % 6) * 110, ease: 'linear',
+  kf: [{ x, y: -30, s: .22 + (i % 3) * .06, r: 0, o: 0 }, { x: x + 12, y: box.h * .3, s: .26 + (i % 3) * .06, r: 90, o: .95, at: .2 },
+       { x: x - 10, y: box.h * .75, s: .26 + (i % 3) * .06, r: 200, o: .9, at: .75 }, { x: x + 6, y: box.h + 20, s: .22, r: 280, o: 0 }],
+}))
+PLANS.weatherRain = ({ box }) => spread(12, box.w).map((x, i) => ({
+  img: 'drop', ms: 700, delay: (i % 6) * 90 + Math.floor(i / 6) * 260, ease: 'cubic-bezier(.5,0,.9,.6)',
+  kf: [{ x, y: -30, s: .2, r: 0, o: 0 }, { x: x - 6, y: box.h * .25, s: .22, r: 0, o: .9, at: .2 }, { x: x - 22, y: box.h + 10, s: .24, r: 0, o: .7 }],
+}))
+PLANS.weatherHot = ({ box }) => {
+  const top = { x: box.w / 2, y: -6 }
+  return [{ img: 'sun', ms: 1300, delay: 0, ease: 'cubic-bezier(.2,.7,.3,1)', kf: [P(top, .8, 0, 0), P(top, 2.4, .85, 40, 0, 20, .35), P(top, 2.8, 0, 90, 0, 26)] }]
+    .concat(spread(8, box.w).map((x, i) => ({ img: 'star', ms: 900, delay: 200 + i * 70, ease: 'ease-out',
+      kf: [{ x, y: box.h * .9, s: .12, r: 0, o: 0 }, { x, y: box.h * .55, s: .22, r: 45, o: .9, at: .4 }, { x, y: box.h * .2, s: .1, r: 90, o: 0 }] })))
+}
 
 // ❄️ โดนแช่แข็ง — ผลึกน้ำแข็งงอกขึ้นคลุมการ์ด แล้วจางค้างนิดหนึ่ง
 PLANS.freeze = ({ owner }) => [

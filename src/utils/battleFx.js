@@ -73,8 +73,8 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [], link: [], aura: [] }
-  const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0, st: 0 }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [], link: [], aura: [], wx: [] }
+  const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0, st: 0, wx: 0 }
   const dangerOn = new Map()      // uid → element ที่กำลังเต้นอยู่
   const markOn = new Map()        // uid → element ป้ายสถานะค้าง (ชั้นเชื้อ)
 
@@ -134,6 +134,8 @@ export function createBattleFx() {
     // โชว์ไทม์เลเจนด์ (utils/battleShowtime.js) — ภาพ WebP 96px ขยับด้วย transform/opacity ล้วน
 
     for (let i = 0; i < SHOWTIME_MAX; i++) pool.st.push(mkImg('brfx-st'))
+    // 🌍 สภาพอากาศแยกพูล — หิมะ 12 เกล็ดเคยใช้ st จนเต็ม แล้วผลึกน้ำแข็ง (เกิดพร้อมกัน) แย่งช่องยกเลิกหิมะทิ้งหมด (เจอบน Chrome 29 ก.ย.)
+    for (let i = 0; i < SHOWTIME_MAX; i++) pool.wx.push(mkImg('brfx-st'))
     for (let i = 0; i < 6; i++) pool.aura.push(mkImg('brfx-aura'))      // ☀️ ออร่าซอล (สูงสุด 3 เพื่อน × 2 ทีม)
     for (let i = 0; i < 6; i++) pool.link.push(mkEl('brfx-link'))       // 🐘 เส้นลิงก์บากุ (สูงสุด 2 บากุ × 3 เพื่อน)
     // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
@@ -212,7 +214,7 @@ export function createBattleFx() {
   // kind: 'super' | 'weak' | 'survive' | 'miss' | 'block'
   // 🔴 'miss'/'block' แยกออกมา 26 ก.ย. — เดิมหลบ (dodge) ยืมป้าย 'weak' ตอนที่มันยังเป็นป้ายเทา "ไม่โดน"
   //    พอ 'weak' ถูกเปลี่ยนคำเป็น "ชนะทาง" ⇒ จิ้งจอกหลบแล้วจอขึ้นว่าชนะทางธาตุ (ผิดความหมาย) · CSS ใช้สีของ weak
-  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️', frozen: 'แข็ง! ❄️', taunt: 'ยั่วยุ! 💢' }
+  const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️', frozen: 'เยือกแข็ง! ❄️', taunt: 'ยั่วยุ! 💢' }
   function callout(uid, kind) {
     const el = take('call')
     el.getAnimations?.().forEach(a => a.cancel())
@@ -484,8 +486,9 @@ export function createBattleFx() {
       owner, team: pts(ctx.team), foes: pts(ctx.foes), targets: pts(ctx.targets), stacks: ctx.stacks, partner: ctx.partner ? centerOf(ctx.partner) : null,
       box: { w: boxRect?.width || 360, h: boxRect?.height || 560 },
     })
+    const poolName = petId.startsWith('weather') ? 'wx' : 'st'
     return Promise.all(plan.map(sp => {
-      const el = take('st')
+      const el = take(poolName)
       el.getAnimations?.().forEach(a => a.cancel())
       const src = BASE + 'fx/' + sp.img + '.webp'
       if (el.getAttribute('src') !== src) el.src = src

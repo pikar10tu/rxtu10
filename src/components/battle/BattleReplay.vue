@@ -111,7 +111,7 @@
 
       <!-- แบนเนอร์เล็ก: สกิลที่ทำงานหลายครั้งต่อไฟต์ (29 ก.ย. user) — ไม่หรี่ฉาก ไม่หยุดไฟต์ อยู่ฝั่งทีมเจ้าของ
            อยู่ใน DOM ตลอด (เหตุผลเดียวกับ .br-spot) · เล่นซ้ำด้วยการถอด/ใส่คลาส on (showMini) -->
-      <div ref="miniEl" class="br-mini" :class="{ foe: miniView.side === 'B' }" :style="{ '--cut-a': miniView.tint?.[0], '--cut-b': miniView.tint?.[1] }" aria-hidden="true">
+      <div ref="miniEl" class="br-mini" :class="{ foe: miniView.side === 'B', big: miniView.big }" :style="{ '--cut-a': miniView.tint?.[0], '--cut-b': miniView.tint?.[1] }" aria-hidden="true">
         <span class="br-mini-face"><Emoji :char="miniView.face" /></span>
         <b class="br-mini-name"><Emoji v-if="miniView.icon" :char="miniView.icon" /> {{ miniView.name }}</b>
       </div>
@@ -389,6 +389,7 @@ function showMini(e, force = false) {
   if (!force && now - (miniLast.get(e.uid) || -1e9) < MINI_GAP_MS / (pace.value || 1)) return
   miniLast.set(e.uid, now)
   miniView.value = { face: defForUid(e.uid)?.emoji || '✨', icon: e.icon || null, name: skillTitle(e), side: e.uid[0],
+    big: !!WEATHER[e.effect],   // 🌍 ฤดูทำงานทุกจบรอบ = แถบใหญ่ขึ้นให้อ่านออก (29 ก.ย. user)
     tint: isDuoEvent(e) ? tintOf('duo') : tintOf(e.petId || defForUid(e.uid)?.id, e.fxKind, e.effect) }
   const el = miniEl.value; if (!el) return
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on')
@@ -727,6 +728,8 @@ const teamIds = computed(() => ({
 function skillTitle(e) {
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
   if (e.lastArmor) return 'เกราะแตกหมดแล้ว!'
+  // ❄️ ฤดูหนาวบอกผลเสมอ (29 ก.ย. user)
+  if (e.effect === 'seasonCold') return (e.name || 'ฤดูหนาว') + ' · ' + (e.amount > 0 ? `แช่แข็ง ${e.amount} ตัว` : 'ไม่มีใครโดนแช่แข็ง')
   if (isDuoEvent(e) && ['sol', 'earth'].includes(e.petId)) return 'โลกเอียง'   // ☀️🌍 ร่างองศา (29 ก.ย. user)
   if (e.effect === 'fullMoon') return 'FULL MOON SHOT!'   // 🌙 เต็มดวง (29 ก.ย. user)
   return passiveTitle(e.name || 'ทักษะเฉพาะ', e.petId, teamIds.value[e.side] || null)
@@ -1005,7 +1008,18 @@ function duoPairsOf(d) {
   return out
 }
 
+// 🌍 ฤดูทำงาน = สภาพอากาศเต็มจอ แทนใบไม้ (ฝนยิง event ต่อเพื่อนละใบ ⇒ กันซ้ำในจบรอบเดียวกัน)
+const WEATHER = { seasonCold: 'weatherCold', seasonRain: 'weatherRain', seasonHot: 'weatherHot' }
+let lastWeather = -1e9
+function playWeather(e) {
+  const plan = WEATHER[e.effect]; if (!plan) return false
+  const now = performance.now()
+  if (now - lastWeather > 900 / (pace.value || 1)) { lastWeather = now; if (tuning.value.showtime !== false) fx?.showtime(plan, { owner: e.uid }) }
+  return true
+}
+
 function playShowtime(e) {
+  if (playWeather(e)) return
   if (isDuoEvent(e)) {
     if (tuning.value.showtime === false) return
     const side = e.uid[0]
@@ -1133,7 +1147,8 @@ function firePassiveFx(e) {
   // 🌙 หมัดนี้ใช้ข้างไหนไปแล้ว ⇒ ไอคอนบนการ์ดเลื่อนไปข้างถัดไป
   if (e.effect === 'moonPhase' || e.effect === 'fullMoon') moonNext.value = { ...moonNext.value, [e.uid]: ((e.phase ?? 0) + 1) % 3 }
   // ❄️ ฤดูหนาว: ตราแช่แข็งค้างบนการ์ดที่โดน จนกว่าจะถึงตาที่ถูกข้าม
-  if (e.fxKind === 'freeze') { for (const t of on) { fx?.stateMark(t, '❄️', e.stacks?.[t] ?? 1); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
+  // ❄️ targets ว่าง = แช่ไม่โดนใคร (ห้าม fallback ไปแปะที่เอิร์ธ)
+  if (e.fxKind === 'freeze') { for (const t of (e.targets || [])) { fx?.stateMark(t, '❄️', e.stacks?.[t] ?? 1); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
   // ⏸️ ถึงตาที่ถูกแช่แข็ง: ป้าย "แข็ง!" แล้วเอาตราออก
   // ❄️ ถึงตาแต่ติดแช่: สั่น → น้ำแข็งแตก → สแตคลด 1 (หมด = ป้ายหาย) · log เก่าไม่มี left = หายเลยแบบเดิม
   if (e.fxKind === 'skip') { fx?.frozenShake(e.uid); fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', e.left ?? 0); if (tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid }) }
@@ -1849,6 +1864,9 @@ onUnmounted(() => {
 .br-mini.on { animation: br-mini-l 1.05s cubic-bezier(.2,.9,.3,1) both; }
 .br-mini.foe.on { animation-name: br-mini-r; }
 .br-mini-face { font-size: 1.5rem; line-height: 1; }
+.br-mini.big { padding-top: 7px; padding-bottom: 7px; max-width: 46%; box-shadow: 0 0 0 2.5px #fff, 0 4px 14px rgba(0,0,0,.35); }
+.br-mini.big .br-mini-face { font-size: 2rem; }
+.br-mini.big .br-mini-name { font-size: 1rem; }
 .br-mini-name { font-size: .8rem; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
 @keyframes br-mini-l { 0% { opacity: 0; transform: translateX(-105%); } 18% { opacity: 1; transform: translateX(0); } 78% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(-20%); } }
 @keyframes br-mini-r { 0% { opacity: 0; transform: translateX(105%); } 18% { opacity: 1; transform: translateX(0); } 78% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(20%); } }

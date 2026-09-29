@@ -371,7 +371,8 @@ export function runOnRoundEnd(team, foes, rand) {
         //    รองรับกลไกแช่หลายตาในอนาคต (FREEZE_TURNS ต่อครั้ง) · stacks ส่งให้จอวาดเลขบนป้าย ❄️
         const stacks = {}
         for (const f of hit) { const st = psOf(f); st.skip = (st.skip || 0) + FREEZE_TURNS; st.skipName = 'แช่แข็ง'; st.skipIcon = '❄️'; stacks[f.uid] = st.skip }
-        if (hit.length) out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: hit.map(f => f.uid), amount: hit.length, stacks, fxKind: 'freeze' }))
+        // ยิงทุกจบรอบแม้แช่ไม่โดนใคร (29 ก.ย. user: "ควรทำงานไง หิมะตกแล้ว แช่โดนหรือไม่โดนก็อีกเรื่อง") · amount 0 = พลาดหมด
+        out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: hit.map(f => f.uid), amount: hit.length, stacks, fxKind: 'freeze' }))
       }
     }
   }
