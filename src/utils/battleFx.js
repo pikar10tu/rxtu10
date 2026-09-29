@@ -480,7 +480,7 @@ export function createBattleFx() {
     const owner = centerOf(ctx.owner); if (!owner) return Promise.resolve()
     if (!boxRect && boxEl) boxRect = boxEl.getBoundingClientRect()
     const plan = showtimePlan(petId, {
-      owner, team: pts(ctx.team), foes: pts(ctx.foes), targets: pts(ctx.targets),
+      owner, team: pts(ctx.team), foes: pts(ctx.foes), targets: pts(ctx.targets), stacks: ctx.stacks,
       box: { w: boxRect?.width || 360, h: boxRect?.height || 560 },
     })
     return Promise.all(plan.map(sp => {

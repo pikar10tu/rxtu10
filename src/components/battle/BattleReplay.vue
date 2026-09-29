@@ -604,6 +604,8 @@ function preloadCombat(d) {
   try { document.fonts?.load('1em "Lilita One"', '-0123456789+').catch(() => {}) } catch { /* บางเครื่องไม่มี FontFaceSet */ }
 }
 function reset() {
+  oniBoost.clear()
+  pendingBurst.clear()
   pendingInfect.clear()
   fullMoonNext.clear()
   miniLast.clear()
@@ -842,6 +844,36 @@ const counters = computed(() => {
 function showChip(uid, e) {
   chipOn.value = { ...chipOn.value, [uid]: { name: skillTitle(e), icon: e.icon || '✨', out: false } }
 }
+// 👹 เลข ATK ตอนชาร์จ: คูณตามสกิล (ฟาด {pct}%) ค้างไว้จนฟาดเสร็จ — รวมหมัดตีต่อหลังฟาดล้ม
+//    (เอนจินคูณทั้งสองหมัด: psOf.smashing ค้างตลอดตา) แล้วคืนค่าเดิม · 29 ก.ย. user
+//    เก็บเป็น "ส่วนต่างที่บวกเข้าไป" ⇒ คืนด้วยการลบก้อนเดิม ไม่ชนกับ statsDelta ที่ลงระหว่างนั้น
+const oniBoost = new Map()   // uid → atk ที่บวกเพิ่มไว้
+function boostOni(uid) {
+  if (oniBoost.has(uid)) return
+  const pct = passiveOf(defForUid(uid))?.parts?.find(x => x.effect === 'windup')?.value?.pct ?? 300
+  const cur = dispStats.value[uid]; if (!cur) return
+  const add = Math.round(cur.atk * (pct / 100 - 1))
+  oniBoost.set(uid, add)
+  dispStats.value = { ...dispStats.value, [uid]: { ...cur, atk: cur.atk + add } }
+  atkBump.value = { ...atkBump.value, [uid]: true }
+  later(() => { const n = { ...atkBump.value }; delete n[uid]; atkBump.value = n }, 460)
+}
+function unboostOni(uid) {
+  const add = oniBoost.get(uid); if (add == null) return
+  oniBoost.delete(uid)
+  const cur = dispStats.value[uid]; if (!cur) return
+  dispStats.value = { ...dispStats.value, [uid]: { ...cur, atk: cur.atk - add } }
+}
+/** หลังหมัดนี้ยังมี "ฟาดต่อเนื่อง" ของตัวเดิมตามมาก่อนหมัดหลักถัดไปไหม */
+function chainFollows(uid) {
+  for (let i = idx.value + 1; i < beats.value.length; i++) {
+    const b = beats.value[i]
+    if (b.t === 'passive' && b.uid === uid && b.fxKind === 'chain') return true
+    if (b.t === 'attack' && !b.sub && b.kind !== 'sub') return false
+  }
+  return false
+}
+
 // 👹 ป้ายค้าง "ง้างตะบอง…" — อยู่จนกว่าโอนิจะออกหมัดฟาด (ถอดต้น applyAttack ก่อนการ์ดขยับ = ไม่ผิดกฎ v3)
 function holdChip(uid, name, icon, tone = '') {
   chipOn.value = { ...chipOn.value, [uid]: { name, icon, out: false, hold: true, tone } }
@@ -929,7 +961,8 @@ function showLinks() {
 // เล่นเฉพาะตอนสปอตไลต์ (ยกแรก/ครั้งแรก/โมเมนต์) = ครั้งละไม่กี่ทีต่อไฟต์ ไม่รก · ไม่ await (สไปรต์อยู่ชั้น fx แยกจากการ์ด)
 // tuning.showtime === false = ปิด (ห้องแล็บเทียบกับของเดิม)
 function playShowtime(e) {
-  if (e.effect === 'infect' && !e.landing) return   // 👾 เลื่อนไปเล่นตอนหมัดไวรัสกระทบ (landInfect)
+  if (e.effect === 'infect' || e.effect === 'infectSpread') return   // 👾 แปะเชื้อ = แค่ป้ายชั้น · ควันแตกตอนโดนตี (landBurst)
+  if (e.effect === 'infectBurst' && !e.landing) return
   if (tuning.value.showtime === false || !hasShowtime(e.petId)) return
   const side = e.uid[0]
   const alive = Object.keys(maxHp).filter(u => (hp.value[u] ?? 100) > 0)
@@ -950,15 +983,22 @@ const pendingInfect = new Map()   // uid ไวรัส → event แปะเ�
 function landInfect(uid, impactUid) {
   const e = pendingInfect.get(uid); if (!e) return
   pendingInfect.delete(uid)
-  const le = { ...e, landing: true }
-  if (impactUid && tuning.value.showtime !== false) fx?.showtime('virus', { owner: impactUid, targets: le.targets || [] })
-  firePassiveFx(le)
+  firePassiveFx({ ...e, landing: true })
+}
+// 💥 เชื้อแตก: ใบ infectBurst มาก่อนหมัดใน log เหมือนกัน → พักตาม "เป้า" แล้วลงตอนหมัดนั้นกระทบ (ใครตีก็ได้ในทีมไวรัส)
+const pendingBurst = new Map()    // uid ที่โดนตี → event
+function landBurst(targetUid) {
+  const e = pendingBurst.get(targetUid); if (!e) return
+  pendingBurst.delete(targetUid)
+  if (tuning.value.showtime !== false) fx?.showtime('virus', { owner: targetUid, stacks: e.stacks || 1 })
+  firePassiveFx({ ...e, landing: true })
 }
 
 function firePassiveFx(e) {
   if (e.effect === 'infect' && !e.landing) { pendingInfect.set(e.uid, e); return }
+  if (e.effect === 'infectBurst' && !e.landing && e.targets?.[0]) { pendingBurst.set(e.targets[0], e); return }
   const on = Array.isArray(e.targets) && e.targets.length ? e.targets : [e.uid]
-  if (e.fxKind === 'windup') holdChip(e.uid, 'ง้างตะบอง…', '💢')
+  if (e.fxKind === 'windup') { holdChip(e.uid, 'ง้างตะบอง…', '💢'); boostOni(e.uid) }
   if (e.fxKind === 'chain') sfx('p_chain')
   if (e.fxKind === 'moon' && e.phase === 1) fullMoonNext.add(e.uid)
 
@@ -1085,6 +1125,7 @@ function applyImpact(beat, g, t) {
 
   // ── 1) paint บนการ์ดเป้า + Vue patch ลงให้ครบก่อน (ยังไม่มีอนิเมชันการ์ดวิ่งตอนนี้) ──
   highlight(beat.target, 'flash')
+  landBurst(beat.target)   // 👾 ควันเชื้อแตกบนตัวที่โดน (ทุกหมัดของทีมไวรัส รวมหมัดลูก)
   const hpBefore = shownHp(beat.target)   // โดนซ้ำกลางการไล่นับ = นับต่อจากเลขที่เห็นอยู่ ไม่กระโดด
   const hpRaw = (beat.targetHpAfter / (maxHp[beat.target] || 1)) * 100
   // เลือดเหลือแต่ไม่ถึง 0.5% ห้ามปัดเป็น 0 — setDead อ่าน hp<=0 เป็น "ตาย" แล้วทำการ์ดเทาทั้งที่ยังสู้อยู่
@@ -1103,7 +1144,10 @@ function applyImpact(beat, g, t) {
   const w = beat.weight ?? 0
   if (chipOn.value[beat.attacker]?.hold) hideChip(beat.attacker)
   // หมัดลูก (สะท้อนเกราะ/cleave) อยู่ใน beat ของหมัดหลักที่ยังไม่มาถึง — ห้ามปล่อยเชื้อค้างทิ้ง
-  if (beat.kind !== 'sub') for (const u of [...pendingInfect.keys()]) if (u !== beat.attacker) landInfect(u, null)   // ค้างจากหมัดที่ไม่ได้มา = ลงเงียบๆ
+  if (beat.kind !== 'sub') {
+    for (const u of [...pendingInfect.keys()]) if (u !== beat.attacker) landInfect(u, null)
+    for (const u of [...pendingBurst.keys()]) if (u !== beat.target) { const e = pendingBurst.get(u); pendingBurst.delete(u); firePassiveFx({ ...e, landing: true }) }
+  }   // ค้างจากหมัดที่ไม่ได้มา = ลงเงียบๆ
   if (beat.forced && beat.kind !== 'sub') fx?.callout(beat.attacker, 'taunt')   // 🦍 ถูกยั่วยุ — ป้ายบนตัวคนที่ถูกดึงมา
   // เสียงหมัดตามสายของผู้ตี (fist ทุบ · scissors ฟัน · paper ปัด) · ปิดเกม/น็อกซ้อนเสียงหนักอีกชั้น
   const elem = defForUid(beat.attacker)?.element
@@ -1222,6 +1266,7 @@ async function applyAttack(beat) {
   // acting ถอดหลัง tail เท่านั้น — fx.lunge() ยังพุ่งอยู่ตลอด windup+motion+hitstop+tail (1 animation ครอบทั้ง beat)
   await wait(t.tail); if (g !== gen) return
   highlight(beat.attacker, 'acting', false)
+  if (oniBoost.has(beat.attacker) && !chainFollows(beat.attacker)) unboostOni(beat.attacker)
   if (fullMoonNext.delete(beat.attacker)) holdChip(beat.attacker, 'หมัดหน้าเต็มดวง!', '🌕', 'moon')
 }
 

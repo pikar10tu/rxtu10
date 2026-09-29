@@ -76,18 +76,18 @@ const PLANS = {
   // 🐘 กลืนกินฝันร้าย — ฟองฝันคลุมทีม
   qilin: ({ team }) => team.map((p, i) => ({ img: 'dream', ms: 760, delay: i * 90, ease: 'cubic-bezier(.2,.8,.3,1)',
     kf: [P(p, .3, 0), P(p, 1.15, .85, 0, 0, 0, .35), P(p, 1.2, .7, 0, 0, 0, .7), P(p, 1.35, 0)] })),
-  // 👾 เชื้อลุกลาม — ควันพิษม่วงระเบิดที่จุดกระทบ แล้วฟุ้งไปติดศัตรูทุกตัว (29 ก.ย. user)
-  //    owner = "จุดกระทบ" (ตัวที่โดนหมัดไวรัส) ไม่ใช่ตัวไวรัส — BattleReplay เลื่อนมาเล่นตอน impact
-  virus: ({ owner, targets }) => [
-    { img: 'smoke', ms: 620, delay: 0, ease: 'cubic-bezier(.2,.8,.3,1)',
-      kf: [P(owner, .35, .95, 0), P(owner, 1.35, .85, 20, 0, 0, .4), P(owner, 1.7, 0, 40, 0, -10)] },
-    ...targets.filter(t => t !== owner).slice(0, 4).flatMap((t, i) => [
-      { img: 'smoke', ms: 420, delay: 90 + i * 60, ease: 'cubic-bezier(.3,.3,.4,1)',
-        kf: [P(owner, .35, .9, 0), P(t, .7, .9, 60)] },
-      { img: 'smoke', ms: 460, delay: 490 + i * 60, ease: 'ease-out',
-        kf: [P(t, .7, .9, 60), P(t, 1.2, 0, 100, 0, -8)] },
-    ]),
-  ],
+  // 👾 เชื้อลุกลาม — ควันพิษม่วง "แตก" บนตัวที่ติดเชื้อตอนโดนใครก็ได้ในทีมไวรัสตี (infectBurst)
+  //    owner = ตัวที่โดนตี · ไม่ได้พ่นจากไวรัส (29 ก.ย. user) · ชั้นเยอะ = ควันใหญ่ขึ้นนิดหน่อย
+  virus: ({ owner, stacks = 1 }) => {
+    const k = Math.min(1.5, 0.9 + stacks * 0.08)
+    return [
+      { img: 'smoke', ms: 560, delay: 0, ease: 'cubic-bezier(.2,.8,.3,1)',
+        kf: [P(owner, .3 * k, 1, 0), P(owner, 1.1 * k, .85, 25, 0, -4, .4), P(owner, 1.45 * k, 0, 45, 0, -14)] },
+      ...[[-26, -10], [24, -14], [-18, 18], [22, 16]].map(([dx, dy], i) => ({
+        img: 'smoke', ms: 480, delay: 60 + i * 30, ease: 'ease-out',
+        kf: [P(owner, .25, .9, 0), P(owner, .5 * k, 0, 70, dx * k, dy * k)] })),
+    ]
+  },
   // 🦍 ตีอกท้าชน — พื้นสะเทือน + คลื่นกระแทก
   gorilla: ({ owner }) => [
     { img: 'quake', ms: 620, delay: 0, ease: 'cubic-bezier(.2,.8,.3,1)', kf: [P(owner, .5, 1, 0, 0, 22), P(owner, 2, 0, 0, 0, 26)] },
