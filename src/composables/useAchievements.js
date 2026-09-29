@@ -153,6 +153,6 @@ export function initAchievements() {
 
   // userData เปลี่ยน → เช็ค (ครั้งแรกเงียบ · หลังจากนั้นประกาศ)
   watch(() => auth.userData, () => { check() }, { deep: true })
-  // กระดานข่าวโหลดยอดใจมาแล้ว → เช็ค like_* (ยอดตัวเองไม่ขยับระหว่างเซสชัน เลยดูแค่ตอนโหลด)
-  watch(() => useNewsLikes().board.value, () => { check() })
+  // ยอดใจของฉันขยับ (โหลดกระดาน / กดให้ตัวเองแล้วส่งเสร็จ) → เช็ค like_*
+  watch(() => useNewsLikes().board.value.recv?.[auth.currentUser?.uid], () => { check() })
 }
