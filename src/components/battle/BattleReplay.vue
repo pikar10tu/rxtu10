@@ -52,7 +52,7 @@
             <em v-if="skillIcon(p, 'B'+i) && statusOf('B'+i).length" class="sep"></em>
             <b v-for="st in statusOf('B'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
-          <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out, charge: chipOn['B'+i].hold, moon: chipOn['B'+i].tone === 'moon' }">
+          <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out, charge: chipOn['B'+i].hold, moon: chipOn['B'+i].tone === 'moon', luna: chipOn['B'+i].tone === 'luna' }">
             <Emoji :char="chipOn['B'+i].icon" /> {{ chipOn['B'+i].name }}
           </span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
@@ -78,7 +78,7 @@
             <em v-if="skillIcon(p, 'A'+i) && statusOf('A'+i).length" class="sep"></em>
             <b v-for="st in statusOf('A'+i)" :key="st.key" :class="{ dbf: !st.buff }"><Emoji :char="st.icon" /></b>
           </span>
-          <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out, charge: chipOn['A'+i].hold, moon: chipOn['A'+i].tone === 'moon' }">
+          <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out, charge: chipOn['A'+i].hold, moon: chipOn['A'+i].tone === 'moon', luna: chipOn['A'+i].tone === 'luna' }">
             <Emoji :char="chipOn['A'+i].icon" /> {{ chipOn['A'+i].name }}
           </span>
           <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
@@ -423,7 +423,7 @@ function clearHighlights() { Object.values(els).forEach(el => el && el.classList
 function setDead(uid) {
   const dead = (hp.value[uid] ?? 100) <= 0
   highlight(uid, 'dead', dead)
-  if (dead) fx?.linkHide(uid)   // 🐘 ใครตายเส้นลิงก์ที่ต่อกับมันดับ
+  if (dead) { fx?.linkHide(uid); fx?.auraOff(uid) }   // 🐘 เส้นลิงก์ดับ · ☀️ ออร่าดับ
 }
 
 // ── fx pool (Phase 2a): pops/callouts/koPuff/projectile ออกจาก Vue reactivity → plain WAAPI pool ──
@@ -607,7 +607,7 @@ function reset() {
   oniBoost.clear()
   pendingBurst.clear()
   pendingInfect.clear()
-  fullMoonNext.clear()
+  lunaPhase.clear()
   miniLast.clear()
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
   prefs.value = readPrefs()     // อ่านใหม่ทุกไฟต์ — พาเนล Admin เปลี่ยนค่าแล้วยิงไฟต์ทดสอบต้องเห็นผลทันที
@@ -878,8 +878,8 @@ function chainFollows(uid) {
 function holdChip(uid, name, icon, tone = '') {
   chipOn.value = { ...chipOn.value, [uid]: { name, icon, out: false, hold: true, tone } }
 }
-// 🌙 หมัดจันทร์เสี้ยวจบ → หมัดหน้าเต็มดวง: ติดป้ายค้างหลังหมัดนี้จบ (event มาก่อนหมัดใน log จึงพักไว้ก่อน)
-const fullMoonNext = new Set()
+// 🌙 ป้ายนับเฟสบนหัว 1/3 → 2/3 (เรืองม่วง = หมัดหน้าเต็มดวง) → 3/3 · ติดหลังหมัดจบ (event มาก่อนหมัดใน log)
+const lunaPhase = new Map()   // uid → เฟสของหมัดที่เพิ่งออก (0 ดับ · 1 เสี้ยว · 2 เต็ม)
 function hideChip(uid) {
   const cur = chipOn.value[uid]; if (!cur) return
   chipOn.value = { ...chipOn.value, [uid]: { ...cur, out: true } }
@@ -1000,7 +1000,9 @@ function firePassiveFx(e) {
   const on = Array.isArray(e.targets) && e.targets.length ? e.targets : [e.uid]
   if (e.fxKind === 'windup') { holdChip(e.uid, 'ง้างตะบอง…', '💢'); boostOni(e.uid) }
   if (e.fxKind === 'chain') sfx('p_chain')
-  if (e.fxKind === 'moon' && e.phase === 1) fullMoonNext.add(e.uid)
+  // ☀️ ซอล: ตัวที่ได้บัฟติดออร่าซูเปอร์ไซย่า แรงตาม % (ธรรมดา 50 = เต็ม) · ตำนานไม่ได้ = ไม่มีออร่า
+  if (e.effect === 'rarityBoost' && e.boosts) for (const [u, pct] of Object.entries(e.boosts)) fx?.auraOn(u, pct / 50)
+  if ((e.fxKind === 'moon' || e.fxKind === 'fullMoon') && typeof e.phase === 'number') lunaPhase.set(e.uid, e.phase)
 
   // ── หลอดเลือด: ฮีล/ฟื้น/รับแทน ทำให้เลือดเปลี่ยนโดยไม่มี attack event
   //    ถ้าไม่อัปเดตตรงนี้ หลอดจะค้างค่าเดิมทั้งที่เลขเด้งขึ้นแล้ว (ผู้เล่นเห็นขัดกันทันที)
@@ -1239,6 +1241,7 @@ async function applyAttack(beat) {
   // หมัดลูก: ไม่มีงบเวลาของตัวเอง (อยู่ในหมัดหลักที่กำลังพุ่งอยู่) → ลง impact แล้วออกทันที
   if (beat.kind === 'sub') { applyImpact(beat, g, t); return }
 
+  if (beat.kind !== 'sub') fx?.auraHide(beat.attacker, t.windup + t.motion + t.hitstop + Math.min(t.tail, 220))
   const doLunge = () => { if (!ranged) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, t, beat.kind, w, lungeStyle(beat)) }
 
   if (t.windup > 0) {
@@ -1267,7 +1270,10 @@ async function applyAttack(beat) {
   await wait(t.tail); if (g !== gen) return
   highlight(beat.attacker, 'acting', false)
   if (oniBoost.has(beat.attacker) && !chainFollows(beat.attacker)) unboostOni(beat.attacker)
-  if (fullMoonNext.delete(beat.attacker)) holdChip(beat.attacker, 'หมัดหน้าเต็มดวง!', '🌕', 'moon')
+  if (lunaPhase.has(beat.attacker)) {
+    const ph = lunaPhase.get(beat.attacker); lunaPhase.delete(beat.attacker)
+    holdChip(beat.attacker, `${ph + 1}/3`, ['🌑', '🌙', '🌕'][ph] || '🌙', ph === 1 ? 'moon' : 'luna')
+  }
 }
 
 // ── กันเปิด beat chain ซ้อนกัน 2 สาย ──
@@ -1776,6 +1782,7 @@ onUnmounted(() => {
 }
 .br-chip.out { animation: br-chip-out .3s ease-out both; }
 /* 👹 ป้ายค้างตอนง้าง — แดงเข้ม ขอบเหลือง ไม่กะพริบ (อนิเมชันในการ์ด = การ์ด re-raster ทุกเฟรม) */
+.br-chip.charge.luna { background: #312e81; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
 .br-chip.charge.moon { background: #3730a3; box-shadow: 0 0 0 1.5px #c7d2fe, 0 0 10px rgba(165,180,252,.8); }
 .br-chip.charge { background: #991b1b; box-shadow: 0 0 0 1.5px #fbbf24, 0 2px 6px rgba(0,0,0,.35); }
 @keyframes br-chip-in {
@@ -1803,6 +1810,7 @@ onUnmounted(() => {
 .brfx-proj { width: 1.4rem; height: 1.4rem; }
 .brfx-dash { width: 2rem; height: 2rem; }
 /* โชว์ไทม์เลเจนด์ — ภาพฐาน 96px จุดกึ่งกลาง = พิกัด (สเกลใน transform) · will-change ใส่เฉพาะตอนเล่น */
+.brfx-aura { width: 96px; height: 96px; margin: -48px 0 0 -48px; will-change: auto; pointer-events: none; opacity: 0; }
 .brfx-link { height: 3px; margin-top: -1.5px; transform-origin: 0 50%; border-radius: 2px; will-change: auto; pointer-events: none;
   background: linear-gradient(90deg, #c084fc, #a855f7 50%, #e9d5ff); box-shadow: 0 0 6px 1px rgba(168,85,247,.8); opacity: 0; }
 .brfx-st { width: 96px; height: 96px; margin: -48px 0 0 -48px; will-change: auto; pointer-events: none; }

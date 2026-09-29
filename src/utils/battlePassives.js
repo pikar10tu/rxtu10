@@ -219,10 +219,12 @@ export function applyAuras(team, foes) {
           break
         case 'rarityBoost':
           // ☀️ ขั้นบันไดตามระดับ (27 ก.ย. 2026) — ตัวที่ "นับเป็น" ระดับนั้น (เอิร์ธร่างองศา = common) · ซอลเองไม่ได้
+          e.boosts = {}   // uid → % ที่ได้ (จอใช้วาดออร่าตามแรงบัฟ — แสดงผลล้วน)
           for (const t of team) {
             if (t === u) continue
             const pct = v[t.countsAs || t.rarity] || 0
             if (!pct) continue
+            e.boosts[t.uid] = pct
             t.atk *= 1 + pct / 100
             t.maxHp *= 1 + pct / 100
             t.hp = t.maxHp

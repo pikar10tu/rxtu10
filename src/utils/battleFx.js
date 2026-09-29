@@ -49,7 +49,7 @@ export function createBattleFx() {
     window.addEventListener('resize', onResize)
     window.addEventListener('orientationchange', onResize)
   }
-  function reset() { invalidateCenters(); cancelAll(); stackAt.clear(); linkClear() }
+  function reset() { invalidateCenters(); cancelAll(); stackAt.clear(); linkClear(); auraClear() }
   function cancelAll() {
     for (const a of anims) a.cancel()          // reject → run() กลืนแล้ว
     anims.clear()
@@ -73,7 +73,7 @@ export function createBattleFx() {
   // ตั้งตำแหน่งฐานด้วย transform (translateZ promote) — dx/dy = offset ในหน่วย px, bake ใน translate
   function baseXform(uid, dx = 0, dy = 0) { const c = centerOf(uid); return c ? `translate(${(c.x + dx).toFixed(1)}px, ${(c.y + dy).toFixed(1)}px) translateZ(0)` : null }
 
-  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [], link: [] }
+  const pool = { pop: [], call: [], puff: [], ring: [], burst: [], proj: [], dash: [], danger: [], sweep: [], mark: [], st: [], link: [], aura: [] }
   const idx = { pop: 0, call: 0, puff: 0, sweep: 0, burst: 0, proj: 0, st: 0 }
   const dangerOn = new Map()      // uid → element ที่กำลังเต้นอยู่
   const markOn = new Map()        // uid → element ป้ายสถานะค้าง (ชั้นเชื้อ)
@@ -134,6 +134,7 @@ export function createBattleFx() {
     // โชว์ไทม์เลเจนด์ (utils/battleShowtime.js) — ภาพ WebP 96px ขยับด้วย transform/opacity ล้วน
 
     for (let i = 0; i < SHOWTIME_MAX; i++) pool.st.push(mkImg('brfx-st'))
+    for (let i = 0; i < 6; i++) pool.aura.push(mkImg('brfx-aura'))      // ☀️ ออร่าซอล (สูงสุด 3 เพื่อน × 2 ทีม)
     for (let i = 0; i < 6; i++) pool.link.push(mkEl('brfx-link'))       // 🐘 เส้นลิงก์บากุ (สูงสุด 2 บากุ × 3 เพื่อน)
     // ป้ายสถานะค้าง (ชั้นเชื้อ) — ไอคอนกับตัวเลขเป็นลูกที่สร้างครั้งเดียวตรงนี้
     // ⚠️ ห้ามสร้าง element ใหม่ตอนเลขเปลี่ยนกลางไฟต์ — พูลมีไว้เพื่อไม่ให้มี DOM เกิดใหม่ระหว่างเล่น
@@ -528,13 +529,47 @@ export function createBattleFx() {
       run(el, [{ opacity: .3 }, { opacity: 0 }], { duration: 300, fill: 'forwards' })
     }
   }
+  // ── ☀️ ออร่าซูเปอร์ไซย่าของตัวที่ได้บัฟซอล — วนไม่จบจนตาย/ไฟต์จบ · แรงตาม level (0..1 = % บัฟ / 50) ──
+  // ภาพอยู่ชั้น fx (ไม่ใช่ลูกของการ์ด) ⇒ วน opacity/scale บน layer ของตัวเอง ไม่บังคับให้การ์ดวาดใหม่
+  // ตอนการ์ดพุ่งตี ออร่าไม่ตาม ⇒ auraHide ซ่อนระหว่างนั้น
+  const auras = new Map()   // uid → el
+  function auraOn(uid, level) {
+    if (!F('burst') || auras.has(uid)) return
+    const c = centerOf(uid), card = getEl(uid); if (!c || !card) return
+    const el = pool.aura.find(x => !x.__used); if (!el) return
+    el.__used = true; auras.set(uid, el)
+    if (!el.getAttribute('src')) el.src = BASE + 'fx/aura.webp'
+    const lv = Math.max(0.2, Math.min(1, level || 0))
+    const s = (card.getBoundingClientRect().height / 96) * (1.08 + 0.14 * lv)
+    const base = `translate(${c.x.toFixed(1)}px, ${(c.y - 4).toFixed(1)}px) translateZ(0)`
+    el.style.visibility = ''
+    lift(el)
+    const a = el.animate([
+      { transform: `${base} scale(${(s * .97).toFixed(3)}, ${(s * .95).toFixed(3)})`, opacity: .35 + .45 * lv },
+      { transform: `${base} scale(${(s * 1.03).toFixed(3)}, ${(s * 1.07).toFixed(3)})`, opacity: .55 + .45 * lv },
+    ], { duration: 1150 - 450 * lv, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' })
+    anims.add(a)
+    el.__anim = a
+  }
+  function auraOff(uid) {
+    const el = auras.get(uid); if (!el) return
+    auras.delete(uid); el.__used = false
+    el.__anim?.cancel(); anims.delete(el.__anim); drop(el); el.style.opacity = '0'
+  }
+  function auraHide(uid, ms) {
+    const el = auras.get(uid); if (!el) return
+    el.style.visibility = 'hidden'
+    setTimeout(() => { if (auras.get(uid) === el) el.style.visibility = '' }, ms / rate)
+  }
+  function auraClear() { for (const uid of [...auras.keys()]) auraOff(uid) }
+
   function linkClear() {
     for (const el of pool.link) { el.__used = false; el.getAnimations?.().forEach(x => x.cancel()); el.style.opacity = '0' }
     links.clear()
   }
 
   return {
-    showtime, linkShow, linkFlash, linkHide, linkClear,
+    showtime, auraOn, auraOff, auraHide, linkShow, linkFlash, linkHide, linkClear,
     attach, reset, cancelAll, setRate, setFlags, setReducedOverride, destroy, centerOf, invalidateCenters,
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,

@@ -2221,7 +2221,7 @@ test('👾 ไวรัส: log ของไฟต์จริงต้องม
 // ── ต.ค. 2569 ฟากฟ้า: applyForms + ☀️ rarityBoost ─────────────────────────
 const U = (id, rarity, slot, side = 'A') => ({ id, rarity, slot, uid: side + slot, side, element: 'fist', atk: 10, maxHp: 100, hp: 100 })
 
-test('rarityBoost: ☀️ ขั้นบันไดตามระดับ common +50 · rare +40 · epic +30 · ตำนาน 0 · ซอลเองไม่ได้', () => {
+test('rarityBoost: ☀️ ขั้นบันไดตามระดับ common +50 · rare +30 · epic +15 · ตำนาน 0 · ซอลเองไม่ได้', () => {
   const team = [U('sol', 'legendary', 0), U('cat', 'common', 1), U('lion', 'legendary', 2),
                 U('__r', 'rare', 3), U('__e', 'epic', 4)]
   applyForms(team)
@@ -2230,8 +2230,8 @@ test('rarityBoost: ☀️ ขั้นบันไดตามระดับ co
   assert.equal(Math.round(team[1].maxHp), 150)
   assert.equal(team[1].hp, team[1].maxHp)
   assert.equal(Math.round(team[2].atk), 10, 'ตำนานไม่ได้')
-  assert.equal(Math.round(team[3].atk), 14, 'rare +40%')
-  assert.equal(Math.round(team[4].atk), 13, 'epic +30%')
+  assert.equal(Math.round(team[3].atk), 13, 'rare +30%')
+  assert.equal(Math.round(team[4].atk), 12, 'epic +15%')
   assert.equal(Math.round(team[0].atk), 10, 'Sol เองไม่ได้')
 })
 
