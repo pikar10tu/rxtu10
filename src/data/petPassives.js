@@ -93,8 +93,8 @@ export const PET_PASSIVES = {
       { hook: 'onHit', effect: 'guardian', value: { pct: 25 }, step: { pct: 4 }, tag: 'guard' },
       { hook: 'onRound', effect: 'regenSelf', value: { pct: 10 }, step: { pct: 3 }, tag: 'regen' },
     ],
-    desc: 'เพื่อนตัวไหนโดนตี รับดาเมจแทน {guard.pct}% (ลิงก์ทั้งทีมตลอดไฟต์) · ต้นทุกรอบ ฟื้นเลือดตัวเอง {regen.pct}% ของเลือดสูงสุด',
-    short: 'ลิงก์ทั้งทีม: รับดาเมจแทนเพื่อน {guard.pct}% · ฟื้นเลือด {regen.pct}%/รอบ',
+    desc: 'รับดาเมจแทนเพื่อนทุกตัว {guard.pct}% ของดาเมจที่เพื่อนโดน ตลอดไฟต์ · ต้นทุกรอบ ฟื้นเลือดตัวเอง {regen.pct}% ของเลือดสูงสุด',
+    short: 'รับดาเมจแทนเพื่อนทุกตัว {guard.pct}% · ฟื้นเลือด {regen.pct}%/รอบ',
   },
   lion: {
     name: 'อาณัติเจ้าป่า', icon: '👑',
