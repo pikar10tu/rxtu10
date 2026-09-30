@@ -57,12 +57,14 @@
         </span>
         <button class="ar-daily-btn" :disabled="!canClaim || busy" @click="onClaim">
           <template v-if="daily.claimed">รับแล้ว</template>
-          <template v-else><Emoji char="🪙" /> {{ dailyReward.toLocaleString() }}</template>
+          <template v-else><Emoji char="🪙" /> {{ dailyReward.toLocaleString() }} + <Emoji :char="ANTI_LOSS.emoji" /></template>
         </button>
       </div>
 
       <!-- กดชื่อ → โปรไฟล์ (มีปุ่มท้าสู้ในนั้นอยู่แล้ว) · user สั่ง 29 ก.ย. -->
       <ArenaRankCard :rivals="rivals" @open="openProfile" />
+
+      <ArenaGuide :rows="members.rosterRows" :hof="members.rosterHof" />
 
       <PvpHistory @open="openProfile" />
     </template>
@@ -70,7 +72,17 @@
 
     <TeamPicker v-model:open="pickOpen" />
     <ArenaSheet v-model:open="arenaOpen" />
-    <BattleReplay :data="replay" theme="arena" @close="replay = null" />
+    <BattleReplay :data="replay" theme="arena" @close="replay = null">
+      <!-- 💊 ยาแก้แพ้: แพ้แล้วกดใช้ได้เฉพาะบนจอนี้ -->
+      <template #result-extra>
+        <div v-if="replay?.loss && !replay.lossUsed" class="ar-al">
+          <span class="ar-al-ico"><Emoji :char="ANTI_LOSS.emoji" /></span>
+          <span class="ar-al-t"><b>{{ ANTI_LOSS.name }}</b> · มี {{ antiLoss }} ชิ้น
+            <small>{{ antiLoss ? `กินแล้วแต้มไม่ลด คืน ${replay.loss.from - replay.loss.to} แต้ม` : 'ได้จากลงสนามครบ 5 ครั้ง/วัน และรางวัลขั้นหอคอย' }}</small></span>
+          <button v-if="canAntiLoss(replay.loss)" class="ar-al-btn" :disabled="alBusy" @click="onAntiLoss">ใช้เลย</button>
+        </div>
+      </template>
+    </BattleReplay>
     <ProfileModal :member="profileOf" @close="profileOf = null" />
     <PvpRoulette :open="spinning" :names="rouletteList" @done="onSpinDone" />
   </div>
@@ -86,6 +98,8 @@ import { useAppConfig } from '../composables/useAppConfig.js'
 import { useArena } from '../composables/useArena.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
+import ArenaGuide from '../components/battle/ArenaGuide.vue'
+import { ANTI_LOSS } from '../utils/antiLoss.js'
 import PvpHistory from '../components/battle/PvpHistory.vue'
 import ArenaStatus from '../components/battle/ArenaStatus.vue'
 import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
@@ -104,7 +118,20 @@ import { toMember } from '../utils/roster.js'
 const authStore = useAuthStore()
 const members = useMembersStore()
 const { pvpOpen, rawConfig } = useAppConfig()
-const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily } = useArena()
+const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily, antiLoss, canAntiLoss, useAntiLoss } = useArena()
+
+// 💊 ใช้แล้วแก้ผลบนจอเดิมเลย (แต้ม ±0 · ซ่อนการ์ด)
+const alBusy = ref(false)
+async function onAntiLoss() {
+  const r = replay.value
+  if (!r?.loss || alBusy.value) return
+  alBusy.value = true
+  try {
+    if (await useAntiLoss(r.loss)) {
+      replay.value = { ...r, lossUsed: true, rating: { from: r.loss.from, to: r.loss.from, delta: 0 }, loseText: `แพ้ แต่${ANTI_LOSS.name}ช่วยไว้` }
+    }
+  } finally { alBusy.value = false }
+}
 
 const pickOpen = ref(false)
 const arenaOpen = ref(false)
@@ -244,4 +271,10 @@ function openProfile(uid) {
 .ar-daily-btn { flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .78rem; background: #fde68a; box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .ar-daily-btn:disabled { background: #e2e8f0; color: rgba(0,0,0,.45); box-shadow: none; cursor: default; }
 .ar-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
+.ar-al { display: flex; align-items: center; gap: 10px; margin: 10px auto 0; max-width: 320px; background: #fff; color: #1e293b; border-radius: 14px; padding: 10px 12px; text-align: left; }
+.ar-al-ico { font-size: 1.8rem; line-height: 1; }
+.ar-al-t { flex: 1; min-width: 0; font-size: .8rem; }
+.ar-al-t small { display: block; font-size: .7rem; color: #64748b; margin-top: 2px; }
+.ar-al-btn { font-family: inherit; font-weight: 800; font-size: .8rem; border: 0; border-radius: 10px; padding: 8px 12px; background: var(--accent); color: #3d1830; cursor: pointer; }
+.ar-al-btn:disabled { opacity: .5; }
 </style>

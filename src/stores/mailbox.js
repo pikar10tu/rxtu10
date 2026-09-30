@@ -4,7 +4,7 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, runTran
 import { db } from '../firebase/config.js'
 import { useAuthStore } from './auth.js'
 import { useUsageStore } from './usage.js'
-import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardArena, isSeasonMail } from '../utils/mailbox.js'
+import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardAntiLoss, rewardArena, isSeasonMail } from '../utils/mailbox.js'
 import { getArena } from '../data/arenas.js'
 import { announceAchievement, addEarned } from '../composables/useAchievements.js'
 import { achievementDocId } from '../utils/achievements.js'
@@ -66,12 +66,14 @@ export const useMailbox = defineStore('mailbox', () => {
         const data = snap.data()
         const c = rewardCoins(data)
         const t = rewardTickets(data)
+        const al = rewardAntiLoss(data)
         const ach = data.reward?.achievement || null
         const arena = rewardArena(data)
         tx.update(ref, { claimed: true, read: true })
         const userPatch = {}
         if (c > 0) userPatch.coins = increment(c)
         if (t > 0) userPatch.freeGachaTickets = increment(t)
+        if (al > 0) userPatch.antiLoss = increment(al)
         if (ach) {
           tx.set(doc(db, 'users', uid, 'achievements', achievementDocId(ach.id, ach.date || null)),
             { achId: ach.id, ...(ach.date ? { date: ach.date } : {}), earnedAt: serverTimestamp() })
@@ -87,12 +89,12 @@ export const useMailbox = defineStore('mailbox', () => {
         // จดหมายรางวัลแจ้งข้อผิด (kind ใหม่ · ของเก่าดูจากหัวข้อ)
         if (data.kind === 'report' || data.title === 'รางวัลแจ้งข้อสอบผิด') userPatch.reportsConfirmed = increment(1)
         if (Object.keys(userPatch).length) tx.update(doc(db, 'users', uid), userPatch)
-        return { coins: c, tickets: t, ach, arena }
+        return { coins: c, tickets: t, ach, arena, antiLoss: al }
       })
       usage.track(0, 1)
-      if (result.coins > 0 || result.tickets > 0 || result.ach || result.arena) { m.claimed = true; m.read = true } // optimistic local (coins/tickets อัปเดตผ่าน auth onSnapshot)
+      if (result.coins > 0 || result.tickets > 0 || result.antiLoss > 0 || result.ach || result.arena) { m.claimed = true; m.read = true } // optimistic local (coins/tickets อัปเดตผ่าน auth onSnapshot)
       if (result.ach) { addEarned(result.ach.id); await announceAchievement(result.ach.id, result.ach.date || null) }
-      return { coins: result.coins, tickets: result.tickets, arena: result.arena }
+      return { coins: result.coins, tickets: result.tickets, arena: result.arena, antiLoss: result.antiLoss }
     } catch (e) { console.error('[mail claim]', e); return false }
   }
 

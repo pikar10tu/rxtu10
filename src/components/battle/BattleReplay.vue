@@ -145,6 +145,12 @@
           </span>
         </div>
         <div class="br-result" :class="{ win: data.won }">{{ data.won ? (data.winText ?? `ชนะ! ขึ้นชั้น ${data.cleared + 1}`) : (data.loseText ?? 'แพ้ ลองใหม่ได้เลย') }}</div>
+        <!-- PvP: ±แต้มตัวใหญ่ + เก่า → ใหม่ (user สั่ง 30 ก.ย. "แจ้งแต้มบวกลบให้ชัด") · ผู้เรียกแก้ data.rating ได้หลังใช้ยาแก้แพ้ -->
+        <div v-if="data.rating" class="br-rate" :class="data.rating.delta > 0 ? 'up' : data.rating.delta < 0 ? 'down' : 'flat'">
+          <div class="br-rate-d">{{ data.rating.delta > 0 ? '+' : data.rating.delta < 0 ? '-' : '±' }}{{ Math.abs(data.rating.delta) }}</div>
+          <div class="br-rate-ft">แต้มประลอง {{ data.rating.from.toLocaleString() }} → <b>{{ data.rating.to.toLocaleString() }}</b></div>
+        </div>
+        <slot name="result-extra" />
         <div v-if="data.won && (data.rewardText ?? data.cleared != null)" class="br-reward"><Emoji char="🎁" /> {{ data.rewardText ?? ('ได้รับ: ขึ้นชั้น ' + (data.cleared + 1)) }}</div>
 
         <!-- แพ้แล้วต้องมีทางไปต่อ ไม่ใช่ทางตัน — ผู้เรียกเป็นคนเลือกว่าปุ่มควรพาไปไหน (มันเห็นเหรียญ/ตั๋วจริง)
@@ -1784,6 +1790,11 @@ onUnmounted(() => {
 @keyframes br-ready { from { opacity: 0; transform: scale(.7) } to { opacity: 1; transform: scale(1) } }
 @keyframes br-go { from { opacity: 0; transform: scale(1.6) } to { opacity: 1; transform: scale(1) } }
 
+.br-rate { text-align: center; margin: 4px 0 2px; }
+.br-rate-d { font-family: 'Lilita One', system-ui, sans-serif; font-size: 2.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.br-rate.up .br-rate-d { color: #34d399; } .br-rate.down .br-rate-d { color: #f87171; } .br-rate.flat .br-rate-d { color: #c7d2fe; }
+.br-rate-ft { font-size: .78rem; color: #cbd5e1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.br-rate-ft b { color: #fff; }
 .br-reward { text-align: center; color: #fde68a; font-weight: 800; font-size: .8rem; }
 .br-sum-team { background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
 .br-sum-head { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.8); font-weight: 800; font-size: .72rem; margin-bottom: 6px; }

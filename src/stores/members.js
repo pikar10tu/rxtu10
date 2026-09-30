@@ -20,6 +20,7 @@ export const useMembersStore = defineStore('members', () => {
 
     // ── เส้นทาง roster (ทุกจอของนักศึกษา) — 1 read ต่อเซสชัน ──
     // แยกจาก fbUsers/loadFbUsers ที่เป็นของ AdminView เท่านั้น (ต้องการ doc เต็ม)
+    const rosterHof     = ref(null) // ท็อป 3 อารีน่าซีซั่นที่แล้ว (แอดมินเขียนตอนแจกรางวัล · utils/pvpGuide.buildHof)
     const rosterRows    = ref({})   // { uid: row } — ดิบ ใช้โดย Arena/sync
     const rosterUsers   = ref({})   // { studentId: member }
     const rosterGuests  = ref([])
@@ -82,6 +83,7 @@ export const useMembersStore = defineStore('members', () => {
             rosterMissing.value = false
             const rows = snap.data()?.rows || {}
             rosterRows.value = rows
+            rosterHof.value = snap.data()?.hof || null
             const { byStudentId, guests } = rosterToMembers(rows)
             rosterUsers.value  = byStudentId
             rosterGuests.value = guests
@@ -184,7 +186,7 @@ export const useMembersStore = defineStore('members', () => {
 
     return {
         fbUsers, students, guestUsers, loading, fbSkipped, initStudents, loadFbUsers,   // ← AdminView เท่านั้น
-        rosterRows, rosterUsers, rosterGuests, rosterReady, rosterMissing, rosterLoading, loadRoster,
+        rosterRows, rosterHof, rosterUsers, rosterGuests, rosterReady, rosterMissing, rosterLoading, loadRoster,
         profiles, loadProfile,
     }
 })

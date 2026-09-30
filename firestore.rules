@@ -178,6 +178,8 @@ service cloud.firestore {
           request.auth != null
           && request.resource.data.rows.diff(resource.data.rows)
                .affectedKeys().hasOnly([request.auth.uid])
+          // hof (ท็อป 3 ซีซั่นที่แล้ว · ไกด์สนาม) แอดมินเขียนเท่านั้น
+          && request.resource.data.get('hof', null) == resource.data.get('hof', null)
         ) || isAdmin();
       allow create, delete: if isAdmin();
     }

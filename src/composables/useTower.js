@@ -10,6 +10,8 @@ import { doc, setDoc, increment, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { computeBattleStats } from '../utils/battleStats.js'
 import { useUsageStore } from '../stores/usage.js'
+import { claimableMilestones, sumRewards } from '../data/towerMilestones.js'
+import { ANTI_LOSS } from '../utils/antiLoss.js'
 
 export function useTower() {
   const auth = useAuthStore()
@@ -74,5 +76,33 @@ export function useTower() {
     return { result, botTeam: bots, playerTeam: team.value, won, cleared }
   }
 
-  return { floor, best, team, botTeam, bonus, fight, TOWER_MAX }
+  // รางวัลขั้น (ทุก 10 ชั้น) — รับทุกขั้นที่ถึงแล้วในครั้งเดียว · towerClaims ถูกล้างตอนแอดมินรีเซตหอคอย
+  const claims = computed(() => auth.userData?.towerClaims || [])
+  const claimable = computed(() => claimableMilestones(best.value, claims.value))
+  async function claimMilestones() {
+    const list = claimable.value
+    if (!list.length) return false
+    const r = sumRewards(list)
+    const u = auth.userData || {}
+    const nextClaims = [...claims.value, ...list.map(m => m.f)].sort((a, b) => a - b)
+    const ok = await auth.patchUser(
+      {
+        towerClaims: nextClaims,
+        ...(r.coins ? { coins: (u.coins || 0) + r.coins } : {}),
+        ...(r.tickets ? { freeGachaTickets: (u.freeGachaTickets || 0) + r.tickets } : {}),
+        ...(r.antiLoss ? { antiLoss: (u.antiLoss || 0) + r.antiLoss } : {}),
+      },
+      {
+        towerClaims: nextClaims,
+        ...(r.coins ? { coins: increment(r.coins) } : {}),
+        ...(r.tickets ? { freeGachaTickets: increment(r.tickets) } : {}),
+        ...(r.antiLoss ? { antiLoss: increment(r.antiLoss) } : {}),
+      },
+    )
+    const parts = [r.coins && `🪙 ${r.coins.toLocaleString()}`, r.tickets && `🎟️ ×${r.tickets}`, r.antiLoss && `${ANTI_LOSS.emoji} ×${r.antiLoss}`].filter(Boolean)
+    toast(ok ? `รับรางวัลขั้นแล้ว ${parts.join(' · ')}` : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
+    return ok
+  }
+
+  return { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones }
 }

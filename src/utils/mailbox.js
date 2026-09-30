@@ -20,6 +20,12 @@ export function rewardTickets(mail) {
   return (typeof t === 'number' && t > 0) ? t : 0
 }
 
+// 💊 ยาแก้แพ้ในจดหมาย (>0 เท่านั้น)
+export function rewardAntiLoss(mail) {
+  const n = mail?.reward?.antiLoss
+  return (typeof n === 'number' && n > 0) ? Math.floor(n) : 0
+}
+
 // สนามแชมป์ในจดหมาย { id, rank } — id ต้องอยู่ในทะเบียน (data/arenas.js) ไม่งั้น null
 export function rewardArena(mail) {
   const a = mail?.reward?.arena
@@ -29,7 +35,7 @@ export function rewardArena(mail) {
 
 // กดรับได้ไหม = มีรางวัล (เหรียญ/ตั๋ว > 0 · achievement · สนาม) และยังไม่เคยรับ
 export function canClaim(mail) {
-  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || rewardTickets(mail) > 0 || !!mail?.reward?.achievement || !!rewardArena(mail))
+  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || rewardTickets(mail) > 0 || rewardAntiLoss(mail) > 0 || !!mail?.reward?.achievement || !!rewardArena(mail))
 }
 
 // ต้องสนใจไหม = ยังไม่อ่าน หรือ ยังกดรับได้ (ใช้คิด badge)
@@ -129,17 +135,19 @@ export function buildReportResultMail(report, note, createdAt) {
 // สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ/achievement)
 //   coins > 0 หรือ tickets > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
 //   caller เติม createdAt = serverTimestamp()
-export function buildBroadcastMail({ title, body, coins, tickets, from, achievement, arena, kind, mode, season, tier } = {}, createdAt) {
+export function buildBroadcastMail({ title, body, coins, tickets, antiLoss, from, achievement, arena, kind, mode, season, tier } = {}, createdAt) {
   const c = (typeof coins === 'number' && coins > 0) ? coins : 0
   const t = (typeof tickets === 'number' && tickets > 0) ? tickets : 0
   const hasAch = achievement && achievement.id
   const reward = {}
   if (c > 0) reward.coins = c
   if (t > 0) reward.tickets = t
+  const al = (typeof antiLoss === 'number' && antiLoss > 0) ? Math.floor(antiLoss) : 0
+  if (al > 0) reward.antiLoss = al
   if (hasAch) reward.achievement = { id: achievement.id, ...(achievement.date ? { date: achievement.date } : {}) }
   const hasArena = !!(arena && arena.id)
   if (hasArena) reward.arena = { id: arena.id, rank: Number(arena.rank) || 10 }   // สนามแชมป์ (รางวัลซีซั่นอารีน่า)
-  const hasReward = c > 0 || t > 0 || hasAch || hasArena
+  const hasReward = c > 0 || t > 0 || al > 0 || hasAch || hasArena
   return {
     type: hasReward ? 'reward' : 'notice',
     title: title || '',

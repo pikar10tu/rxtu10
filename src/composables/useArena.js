@@ -26,6 +26,7 @@ import { hashStr } from '../utils/seededRng.js'
 import { activeWeekly } from '../data/pvpWeekly.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { buildLoseTip } from '../utils/loseTip.js'
+import { ANTI_LOSS, ANTI_LOSS_DAILY, canUseAntiLoss } from '../utils/antiLoss.js'
 
 // คีย์วันที่รายวัน (UTC) — ใช้ toISOString ให้ตรงกับ daily-reset อื่นของแอป
 // (quizCoinDate/studyCoinDate/dailyQuest ใช้ UTC เหมือนกันหมด → คงไว้เพื่อความสอดคล้อง)
@@ -159,22 +160,42 @@ export function useArena() {
     const weekly = activeWeekly(rawConfig.value?.pvpWeekly, Date.now())
     const result = simulateBattle(myTeam.value, oppTeam, Date.now(), { weekly: weekly?.id })
     const won = result.winner === 'A'
-    const { ok, delta, coin } = await applyResult(opp, won)
+    const { ok, delta, coin, newRating } = await applyResult(opp, won)
     // เขียนผลไม่สำเร็จ → toast error + ไม่โชว์ replay (เหมือน useFarm/useDaily)
     if (!ok) { toast('บันทึกผลประลองไม่สำเร็จ', 'error'); return null }
     // บอทมี 2 ตัว (อ่อน/แกร่ง) — ต้องบอกให้ชัดว่าเพิ่งสู้กับตัวไหน
     const name = opp.isBot ? `หุ่นซ้อม${opp.label ? ' (' + opp.label + ')' : ''}` : (opp.nickname || 'คู่ต่อสู้')
-    const sign = delta >= 0 ? '+' : ''
+    const from = newRating - delta
     return {
       result, playerTeam: myTeam.value, botTeam: oppTeam, won, opp,
+      // จอผลโชว์ ±แต้มตัวใหญ่ + เก่า → ใหม่ · loss = ตั๋วใช้ยาแก้แพ้ของตานี้ (ปิดจอ = ทิ้ง)
+      rating: { from, to: from + delta, delta },
+      loss: won ? null : { from, to: from + delta, season: currentSeasonId() },
       vsLabel: `VS ${name}`,
-      winText: `ชนะ! ${sign}${delta} แต้มประลอง`,
-      loseText: `แพ้ ${delta} แต้มประลอง`,
+      winText: 'ชนะ!',   // ±แต้มโชว์ตัวใหญ่ใน br-rate แล้ว
+      loseText: 'แพ้',
       // ⚠️ CLAUDE.md ข้อ 9 — userData ตรงนี้เป็นค่า "หลัง" patchUser แล้ว (เหรียญที่เพิ่งได้นับรวมด้วย)
       // ตั้งใจให้เป็นแบบนั้น: ปุ่มต้องสะท้อนว่า "ตอนนี้กดอะไรได้" ไม่ใช่ตอนก่อนเริ่มไฟต์
       loseTip: buildLoseTip('arena', auth.userData),
       rewardText: coin ? `ได้รับ: ${coin.toLocaleString()} เหรียญ` : '',
     }
+  }
+
+  const antiLoss = computed(() => auth.userData?.antiLoss || 0)
+  const canAntiLoss = (loss) => canUseAntiLoss(loss, seasonPvp.value, antiLoss.value)
+
+  // 💊 ยาแก้แพ้: คืนแต้มที่เพิ่งเสียตานี้ (ตัวนับแพ้ยังนับ — แค่แต้มไม่ลด)
+  async function useAntiLoss(loss) {
+    if (!canAntiLoss(loss)) return false
+    const nextPvp = { ...seasonPvp.value, rating: loss.from }
+    const left = antiLoss.value - 1
+    const ok = await auth.patchUser(
+      { pvp: nextPvp, antiLoss: left },
+      { pvp: nextPvp, antiLoss: increment(-1) },
+    )
+    if (ok) syncRosterRow({})
+    toast(ok ? `${ANTI_LOSS.emoji} ใช้${ANTI_LOSS.name}แล้ว แต้มกลับเป็น ${loss.from.toLocaleString()}` : 'ใช้ไม่สำเร็จ ลองอีกครั้งนะ', ok ? 'success' : 'error')
+    return ok
   }
 
   // กดรับรางวัลตีครบ 5 ครั้งวันนี้
@@ -183,15 +204,16 @@ export function useArena() {
     if (!canClaimDaily(auth.userData?.pvpDaily, today)) return false
     const pd = { ...dailyView(auth.userData?.pvpDaily, today), claimed: true }
     const ok = await auth.patchUser(
-      { pvpDaily: pd, coins: (auth.userData?.coins || 0) + PVP_DAILY_REWARD },
-      { pvpDaily: pd, coins: increment(PVP_DAILY_REWARD) },
+      { pvpDaily: pd, coins: (auth.userData?.coins || 0) + PVP_DAILY_REWARD, antiLoss: (auth.userData?.antiLoss || 0) + ANTI_LOSS_DAILY },
+      { pvpDaily: pd, coins: increment(PVP_DAILY_REWARD), antiLoss: increment(ANTI_LOSS_DAILY) },
     )
-    toast(ok ? `รับ ${PVP_DAILY_REWARD.toLocaleString()} เหรียญแล้ว!` : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
+    toast(ok ? `รับ ${PVP_DAILY_REWARD.toLocaleString()} เหรียญ + ${ANTI_LOSS.emoji} ${ANTI_LOSS.name} ×${ANTI_LOSS_DAILY} แล้ว!` : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
     return ok
   }
 
   return {
     rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight,
     daily, dailyGoal, dailyReward, canClaim, claimDaily,
+    antiLoss, canAntiLoss, useAntiLoss,
   }
 }

@@ -406,6 +406,10 @@
               <input v-model.number="bcCoins" type="number" inputmode="numeric" min="0" max="100000" class="bc-coins" />
             </label>
             <label class="bc-field">
+              <span>💊 ยาแก้แพ้</span>
+              <input v-model.number="bcAntiLoss" type="number" inputmode="numeric" min="0" max="20" class="bc-coins" />
+            </label>
+            <label class="bc-field">
               <span>ส่งถึง</span>
               <select v-model="bcTarget" class="bc-target" aria-label="เลือกผู้รับ">
                 <option value="all">ทั้งรุ่น</option>
@@ -510,6 +514,7 @@ import MaintenanceScreen from '../components/layout/MaintenanceScreen.vue'
 import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { computeSeasonRewards, seasonRewardMails } from '../utils/seasonRewards.js'
+import { buildHof } from '../utils/pvpGuide.js'
 import { getArena } from '../data/arenas.js'
 import { currentSeasonId, seasonMonthLabel } from '../utils/pvpSeason.js'
 import { TAG_LIST } from '../data/tags.js'
@@ -706,12 +711,20 @@ async function paySeason() {
         ops.push((bt) => bt.set(doc(collection(db, 'users', r.uid, 'mail')), buildBroadcastMail({ ...m, from: 'system' }, serverTimestamp())))
       }
     }
-    for (const d of spUserDocs) ops.push((bt) => bt.set(d.ref, { towerFloor: 1, towerBest: 0 }, { merge: true }))
+    // towerClaims ล้างพร้อมกัน = รางวัลขั้นหอคอยรับใหม่ได้ทุกซีซั่น (data/towerMilestones.js)
+    for (const d of spUserDocs) ops.push((bt) => bt.set(d.ref, { towerFloor: 1, towerBest: 0, towerClaims: [] }, { merge: true }))
     for (let i = 0; i < ops.length; i += 450) {   // < 500 ops/batch ของ Firestore
       const batch = writeBatch(db)
       ops.slice(i, i + 450).forEach(op => op(batch))
       await batch.commit()
     }
+    // ท็อป 3 อารีน่า + ทีม ณ ตอนกดแจก → roster/current.hof (ไกด์สนามหน้า PvP) · พลาดไม่ขวางการแจก
+    try {
+      const rs = await getDoc(doc(db, 'roster', 'current'))
+      const hof = buildHof(season, p.rows, rs.data()?.rows || {})
+      if (hof) await updateDoc(doc(db, 'roster', 'current'), { hof })
+      usage.track(1, hof ? 1 : 0)
+    } catch (e) { console.error('[season hof]', e) }
     await setDoc(payRef, { [season]: { status: 'done', mails: p.mails, at: serverTimestamp() } }, { merge: true })
     usage.track(1, ops.length + 2)
     toast(`แจกรางวัลซีซั่น ${label} แล้ว ${p.mails} ฉบับ`, 'success')
@@ -726,6 +739,7 @@ async function paySeason() {
 const bcTitle = ref('')
 const bcBody = ref('')
 const bcCoins = ref(0)
+const bcAntiLoss = ref(0)
 const bcTarget = ref('all')   // all | sci | care
 const bcAchievement = ref('') // achievement id ที่เลือกแนบ, '' = ไม่แนบ
 const bcSending = ref(false)
@@ -734,6 +748,7 @@ async function sendBroadcast() {
   const title = cleanText(bcTitle.value, LIMITS.news)
   if (!title || bcSending.value) return
   const coins = Math.max(0, Math.min(Number(bcCoins.value) || 0, 100000))
+  const antiLoss = Math.max(0, Math.min(Math.floor(Number(bcAntiLoss.value) || 0), 20))
   bcSending.value = true
   try {
     // โหลดสมาชิกสด (force) เพื่อให้ได้ uid ครบ ไม่อิง cache
@@ -745,7 +760,7 @@ async function sendBroadcast() {
     const label = bcTarget.value === 'sci' ? 'สาย Sci' : bcTarget.value === 'care' ? 'สาย Care' : 'ทั้งรุ่น'
     // บอกด้วยว่ามีบัญชีที่ไม่ได้รับกี่ใบ — เดิมขึ้นแต่เลขคนที่ส่งถึง ใครตกหล่นไม่มีอะไรบอก
     const skipNote = members.fbSkipped ? `\n(ข้าม ${members.fbSkipped} บัญชีที่ยังไม่ผ่าน onboarding — ไม่มีทั้งรหัสและชื่อเล่น)` : ''
-    const ok = await confirm(`ส่งจดหมาย "${title}" ถึง ${label} (${uids.length} คน)${coins ? ` พร้อมเหรียญ ${coins.toLocaleString()}` : ''}?${skipNote}`)
+    const ok = await confirm(`ส่งจดหมาย "${title}" ถึง ${label} (${uids.length} คน)${coins ? ` พร้อมเหรียญ ${coins.toLocaleString()}` : ''}${antiLoss ? ` + ยาแก้แพ้ ${antiLoss}` : ''}?${skipNote}`)
     if (!ok) return
     const body = cleanText(bcBody.value, LIMITS.feedback)
     // chunk ละ 450 (< 500 ops/batch ของ Firestore)
@@ -754,13 +769,13 @@ async function sendBroadcast() {
       const batch = writeBatch(db)
       for (const uid of chunk) {
         batch.set(doc(collection(db, 'users', uid, 'mail')),
-          buildBroadcastMail({ title, body, coins, achievement: bcAchievement.value ? { id: bcAchievement.value } : undefined }, serverTimestamp()))
+          buildBroadcastMail({ title, body, coins, antiLoss, achievement: bcAchievement.value ? { id: bcAchievement.value } : undefined }, serverTimestamp()))
       }
       await batch.commit()
       usage.track(0, chunk.length)
     }
     toast(`ส่งจดหมายถึง ${uids.length} คนแล้ว`, 'success')
-    bcTitle.value = ''; bcBody.value = ''; bcCoins.value = 0; bcAchievement.value = ''
+    bcTitle.value = ''; bcBody.value = ''; bcCoins.value = 0; bcAntiLoss.value = 0; bcAchievement.value = ''
   } catch (e) {
     console.error('[broadcast]', e); toast('ส่งจดหมายไม่สำเร็จ', 'error')
   } finally { bcSending.value = false }
@@ -808,7 +823,9 @@ async function rebuildRoster() {
     const snap = await getDocs(collection(db, 'users'))
     usage.track(snap.size)
     const rows = buildRosterFromUsers(snap.docs.map(d => ({ uid: d.id, data: d.data() })), prevRows)
-    await setDoc(doc(db, 'roster', 'current'), { rows, updatedAt: serverTimestamp() })
+    // hof (ท็อป 3 ซีซั่นที่แล้ว) ไม่ได้อยู่ใน user doc — พ่วงต่อ ไม่งั้นกดทีนึงไกด์สนามหาย
+    const hof = prev.exists() ? (prev.data().hof || null) : null
+    await setDoc(doc(db, 'roster', 'current'), { rows, updatedAt: serverTimestamp(), ...(hof ? { hof } : {}) })
     usage.track(0, 1)
     toast(`สร้าง roster แล้ว ${Object.keys(rows).length} คน`, 'success')
   } catch (e) {

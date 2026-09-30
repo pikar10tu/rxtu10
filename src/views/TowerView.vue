@@ -11,6 +11,7 @@
     <template v-if="authStore.isLoggedIn">
       <SeasonClaimBanner mode="tower" />
       <SeasonCountdown kind="tower" />
+      <TowerMilestones :best="best" :claims="claims" :claimable="claimable" :busy="msBusy" @claim="onClaimMs" />
       <TowerPath :floor="displayFloor" :best="displayBest" :max="TOWER_MAX" :crowd="crowd"
                  @pick="sheetFloor = $event" />
 
@@ -129,11 +130,18 @@ import SeasonCountdown from '../components/shared/SeasonCountdown.vue'
 import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
 import FloorSheet from '../components/tower/FloorSheet.vue'
 import TowerRankSheet from '../components/tower/TowerRankSheet.vue'
+import TowerMilestones from '../components/tower/TowerMilestones.vue'
 import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
-const { floor, best, team, botTeam, bonus, fight, TOWER_MAX } = useTower()
+const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones } = useTower()
+const msBusy = ref(false)
+async function onClaimMs() {
+  if (msBusy.value) return
+  msBusy.value = true
+  try { await claimMilestones() } finally { msBusy.value = false }
+}
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?' }
 
 onMounted(() => { membersStore.loadRoster().catch(() => {}) })  // best-effort, 1 read
