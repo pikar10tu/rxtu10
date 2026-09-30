@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
 import { useRosterSync } from './useRosterSync.js'
@@ -6,11 +6,12 @@ import { useNewsPost } from './useNewsPost.js'
 import { simulateBattle } from '../utils/battleEngine.js'
 import { getFloorTeam, getTowerBonus, TOWER_MAX } from '../data/towerFloors.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
-import { doc, setDoc, increment, writeBatch } from 'firebase/firestore'
+import { doc, setDoc, getDoc, increment, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { computeBattleStats } from '../utils/battleStats.js'
 import { useUsageStore } from '../stores/usage.js'
-import { claimableMilestones, sumRewards } from '../data/towerMilestones.js'
+import { claimableMilestones, sumRewards, milestonesOpen } from '../data/towerMilestones.js'
+import { currentSeasonId } from '../utils/pvpSeason.js'
 import { ANTI_LOSS } from '../utils/antiLoss.js'
 
 export function useTower() {
@@ -77,9 +78,19 @@ export function useTower() {
   }
 
   // รางวัลขั้น (ทุก 10 ชั้น) — รับทุกขั้นที่ถึงแล้วในครั้งเดียว · towerClaims ถูกล้างตอนแอดมินรีเซตหอคอย
+  // เปิดเมื่อแอดมินแจก+รีเซตซีซั่นก่อนแล้ว (config/seasonPayouts · 1 read ต่อการเปิดหน้า)
+  const msOpen = ref(false)
+  async function loadMsOpen() {
+    try {
+      const snap = await getDoc(doc(db, 'config', 'seasonPayouts'))
+      useUsageStore().track(1)
+      msOpen.value = milestonesOpen(currentSeasonId(), snap.data() || null)
+    } catch (e) { console.error('[tower ms]', e) }
+  }
   const claims = computed(() => auth.userData?.towerClaims || [])
-  const claimable = computed(() => claimableMilestones(best.value, claims.value))
+  const claimable = computed(() => msOpen.value ? claimableMilestones(best.value, claims.value) : [])
   async function claimMilestones() {
+    await loadMsOpen()   // เช็คสดตอนกด
     const list = claimable.value
     if (!list.length) return false
     const r = sumRewards(list)
@@ -104,5 +115,5 @@ export function useTower() {
     return ok
   }
 
-  return { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones }
+  return { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen }
 }

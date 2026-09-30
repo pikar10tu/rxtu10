@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildPvpGuide, buildHof } from './pvpGuide.js'
 import { canUseAntiLoss } from './antiLoss.js'
-import { claimableMilestones, nextMilestone, sumRewards } from '../data/towerMilestones.js'
+import { claimableMilestones, nextMilestone, sumRewards, milestonesOpen, prevSeasonId } from '../data/towerMilestones.js'
 
 const row = (ids, r = 1000, pw = 0, pl = 0) => ({ tm: ids.map(i => ({ i, g: 5 })), r, pw, pl })
 
@@ -45,4 +45,13 @@ test('รางวัลขั้นหอคอย', () => {
   assert.equal(nextMilestone(35).f, 40)
   assert.equal(nextMilestone(100), null)
   assert.deepEqual(sumRewards(claimableMilestones(100, [])), { coins: 108000, tickets: 50, antiLoss: 6 })
+})
+
+test('รางวัลขั้นเปิดตั้งแต่ ต.ค. 2026 หลังแจกซีซั่นก่อนเสร็จ', () => {
+  assert.equal(prevSeasonId('2027-01'), '2026-12')
+  assert.equal(milestonesOpen('2026-09', { '2026-08': { status: 'done' } }), false)
+  assert.equal(milestonesOpen('2026-10', {}), false)
+  assert.equal(milestonesOpen('2026-10', { '2026-09': { status: 'sending' } }), false)
+  assert.equal(milestonesOpen('2026-10', { '2026-09': { status: 'done' } }), true)
+  assert.equal(milestonesOpen('2026-11', { '2026-09': { status: 'done' } }), false)
 })

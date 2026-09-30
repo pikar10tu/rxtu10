@@ -11,7 +11,7 @@
     <template v-if="authStore.isLoggedIn">
       <SeasonClaimBanner mode="tower" />
       <SeasonCountdown kind="tower" />
-      <TowerMilestones :best="best" :claims="claims" :claimable="claimable" :busy="msBusy" @claim="onClaimMs" />
+      <TowerMilestones :open-now="msOpen" :best="best" :claims="claims" :claimable="claimable" :busy="msBusy" @claim="onClaimMs" />
       <TowerPath :floor="displayFloor" :best="displayBest" :max="TOWER_MAX" :crowd="crowd"
                  @pick="sheetFloor = $event" />
 
@@ -135,7 +135,8 @@ import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
-const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones } = useTower()
+const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
+loadMsOpen()
 const msBusy = ref(false)
 async function onClaimMs() {
   if (msBusy.value) return

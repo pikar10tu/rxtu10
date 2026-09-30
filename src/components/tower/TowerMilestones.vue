@@ -5,20 +5,21 @@
     <div class="tms-top">
       <span class="tms-t">
         <b><Emoji char="🎁" /> รางวัลขั้นหอคอย</b>
-        <small v-if="claimable.length">ถึงแล้ว {{ claimable.length }} ขั้น รอรับอยู่</small>
+        <small v-if="!openNow">เริ่มซีซั่น ต.ค. 2026 หลังแจกรางวัลซีซั่น ก.ย. · ดูรายการรางวัลได้ก่อน</small>
+        <small v-else-if="claimable.length">ถึงแล้ว {{ claimable.length }} ขั้น รอรับอยู่</small>
         <small v-else-if="next">อีก {{ next.f - best }} ชั้นถึงชั้น {{ next.f }} · {{ rewardText(next) }}</small>
         <small v-else>รับครบทุกขั้นของซีซั่นนี้แล้ว</small>
       </span>
       <button v-if="claimable.length" class="tms-go" :disabled="busy" @click="$emit('claim')">รับเลย</button>
       <button v-else class="tms-more" :aria-expanded="open" @click="open = !open">{{ open ? 'ซ่อน' : 'ดูทั้งหมด' }}</button>
     </div>
-    <div v-if="next" class="tms-bar"><i :style="{ width: ((best % 10) * 10) + '%' }" /></div>
+    <div v-if="next && openNow" class="tms-bar"><i :style="{ width: ((best % 10) * 10) + '%' }" /></div>
     <div v-if="open || claimable.length" class="tms-list">
       <div v-for="m in TOWER_MILESTONES" :key="m.f" class="tms-row"
-           :class="{ done: claims.includes(m.f), can: best >= m.f && !claims.includes(m.f), big: m.big }">
+           :class="{ done: openNow && claims.includes(m.f), can: openNow && best >= m.f && !claims.includes(m.f), big: m.big }">
         <span class="tms-f">{{ m.f }}</span>
         <span class="tms-r">{{ rewardText(m) }}</span>
-        <span class="tms-s">{{ claims.includes(m.f) ? 'รับแล้ว' : best >= m.f ? 'ถึงแล้ว' : `อีก ${m.f - best}` }}</span>
+        <span class="tms-s">{{ !openNow ? '' : claims.includes(m.f) ? 'รับแล้ว' : best >= m.f ? 'ถึงแล้ว' : `อีก ${m.f - best}` }}</span>
       </div>
       <div class="tms-note">หอคอยรีเซตทุกซีซั่น รางวัลขั้นก็รับใหม่ได้ทุกซีซั่น · ชั้น 100 ได้ฉายา "ผู้พิชิตยอดหอคอย" ด้วย</div>
     </div>
@@ -32,6 +33,7 @@ import { TOWER_MILESTONES, nextMilestone } from '../../data/towerMilestones.js'
 import { ANTI_LOSS } from '../../utils/antiLoss.js'
 
 const props = defineProps({
+  openNow: Boolean,
   best: { type: Number, default: 0 },
   claims: { type: Array, default: () => [] },
   claimable: { type: Array, default: () => [] },
