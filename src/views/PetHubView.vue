@@ -25,12 +25,14 @@
     <div class="play-grid">
       <!-- ร้านเพ็ทไม่ต้องมีที่นี่ — เข้าจากปุ่มร้านค้าบนสุดของหน้าเกมที่เดียว (user สั่ง 25 ก.ย. 2026) -->
       <RouterLink to="/tower" class="game-card gc-tower">
+        <span v-if="towerDot" class="nav-dot gc-dot" aria-label="มีรางวัลซีซั่นรอรับ"></span>
         <span class="gc-emoji"><Emoji char="🏯" /></span>
         <span class="gc-name">ปีนหอคอย</span>
         <span class="gc-badge grow">ไต่ชั้น · เพิ่มรายได้รายวัน</span>
       </RouterLink>
 
       <RouterLink v-if="pvpOpen || authStore.isAdmin" to="/arena" class="game-card gc-arena">
+        <span v-if="arenaDot" class="nav-dot gc-dot" aria-label="มีรางวัลรอรับ"></span>
         <span class="gc-emoji"><Emoji char="⚔️" /></span>
         <span class="gc-name">สนามประลอง</span>
         <span class="gc-badge grow">PvP · แต้มประลอง</span>
@@ -51,6 +53,7 @@ import SoonCard from '../components/shared/SoonCard.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
+import { useNavDots } from '../composables/useNavDots.js'
 import { useExpedition } from '../composables/useExpedition.js'
 import { expeditionState } from '../utils/expedition.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
@@ -60,6 +63,7 @@ import { BATTLE_SLOTS } from '../data/residence.js'
 const authStore = useAuthStore()
 const { pvpOpen, expeditionOpen } = useAppConfig()
 const { exp } = useExpedition()
+const { towerDot, arenaDot } = useNavDots()
 // การ์ดหัว
 const team = computed(() => resolveBattleTeam(authStore.userData?.activePets, authStore.userData?.pets))
 const teamEmojis = computed(() => Array.from({ length: BATTLE_SLOTS }, (_, i) => getPetDef(team.value[i]?.id)?.emoji || null))
@@ -83,6 +87,8 @@ const expState = computed(() => expeditionState(exp.value, now.value))
 .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .game-card { all: unset; cursor: pointer; box-sizing: border-box; background: #e2f7f0; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: transform .12s, box-shadow .12s; }
 .game-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.game-card { position: relative; }
+.gc-dot { top: 8px; right: 8px; width: 12px; height: 12px; }
 .gc-emoji { font-size: 1.6rem; }
 .gc-name { font-size: .8rem; font-weight: 800; }
 .gc-badge { font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }

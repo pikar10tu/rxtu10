@@ -47,7 +47,7 @@
         :pity="pity" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
         show-target :target-pet="themeTargetPet"
-        @pull="(n) => pull(n, true)" @open-target="openPicker('theme')"
+        @pull="(n) => pull(n, true)" @open-target="openPicker('theme')" @info="(p) => { pickerMode = 'theme'; infoPet = p }"
       />
       <GachaBanner
         title="อัญเชิญประจำ"
@@ -67,12 +67,13 @@
       <div v-if="pickerOpen" class="ov" @click.self="pickerOpen = false">
         <div class="picker">
           <div class="picker-head">{{ pickerMode === 'theme' ? 'เลือกเป้าหมายตู้ ' + ev.name : 'เลือกเป้าหมาย legendary' }}</div>
-          <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด <Emoji char="ℹ️" /> = ดูรายละเอียด</div>
+          <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด <Emoji char="ℹ️" /> = อ่านสกิลเต็ม</div>
           <div class="picker-grid">
             <div v-for="p in pickerList" :key="p.id" class="picker-cell" :class="{ on: p.id === pickerOn }" @click="chooseTarget(p.id)">
               <button class="picker-info" @click.stop="infoPet = p" aria-label="ดูรายละเอียด"><Emoji char="ℹ️" /></button>
               <span class="picker-emoji"><Emoji :char="p.emoji" /></span>
               <span class="picker-name">{{ p.name }}</span>
+              <span v-if="passiveOf(p)" class="picker-skill"><Emoji :char="passiveOf(p).icon" /> {{ passiveOf(p).name }}</span>
               <span v-if="pets.find((x) => x.id === p.id)" class="picker-have">มีแล้ว</span>
             </div>
           </div>
@@ -309,7 +310,8 @@ async function chooseTarget(id) {
 .picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
 .picker-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 8px 4px; background: #fff; cursor: pointer; font-family: inherit; }
 .picker-cell.on { background: var(--gold); }
-.picker-info { position: absolute; top: 2px; right: 2px; border: none; background: transparent; padding: 2px; font-size: .7rem; line-height: 1; cursor: pointer; opacity: .65; }
+.picker-skill { font-size: .7rem; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.25; }
+.picker-info { position: absolute; top: 2px; right: 2px; border: none; background: transparent; padding: 2px; font-size: .7rem; line-height: 1; cursor: pointer; opacity: 1; font-size: .85rem; }
 .picker-info:active { opacity: 1; }
 .picker-hint { font-size: .7rem; color: rgba(0,0,0,.45); text-align: center; margin-bottom: 8px; }
 .picker-emoji { font-size: 1.6rem; }

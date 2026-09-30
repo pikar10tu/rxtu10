@@ -56,6 +56,7 @@
           <span class="ar-daily-n">{{ Math.min(daily.n, dailyGoal) }}/{{ dailyGoal }}</span>
         </span>
         <button class="ar-daily-btn" :disabled="!canClaim || busy" @click="onClaim">
+          <span v-if="canClaim" class="nav-dot" aria-hidden="true"></span>
           <template v-if="daily.claimed">รับแล้ว</template>
           <template v-else><Emoji char="🪙" /> {{ dailyReward.toLocaleString() }} + <Emoji :char="ANTI_LOSS.emoji" /></template>
         </button>
@@ -268,7 +269,7 @@ function openProfile(uid) {
 .ar-daily-bar { height: 8px; border-radius: 999px; background: rgba(0,0,0,.08); overflow: hidden; }
 .ar-daily-bar i { display: block; height: 100%; background: #f59e0b; border-radius: 999px; transition: width .3s; }
 .ar-daily-n { font-size: .7rem; color: rgba(0,0,0,.55); font-weight: 700; }
-.ar-daily-btn { flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .78rem; background: #fde68a; box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.ar-daily-btn { position: relative; flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .78rem; background: #fde68a; box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .ar-daily-btn:disabled { background: #e2e8f0; color: rgba(0,0,0,.45); box-shadow: none; cursor: default; }
 .ar-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
 .ar-al { display: flex; align-items: center; gap: 10px; margin: 10px auto 0; max-width: 320px; background: #fff; color: #1e293b; border-radius: 14px; padding: 10px 12px; text-align: left; }

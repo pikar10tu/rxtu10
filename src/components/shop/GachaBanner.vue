@@ -10,8 +10,10 @@
       <template v-if="event">
         <!-- ตัวเด่นของอีเวนต์ — ถ่วง ×3 · ตัวที่เลือก ×6 (ในเรตตำนาน 1%) -->
         <div v-if="featured.length" class="bn-feat">
-          <span v-for="p in featured" :key="p.id" :title="p.name"><Emoji :char="p.emoji" /></span>
+          <!-- แตะตัวเด่น = ดูสกิล (เพื่อนบอก 1 ต.ค. 2026 ว่าไม่รู้สกิลตัวใหม่เลย) -->
+          <button v-for="p in featured" :key="p.id" type="button" :aria-label="`ดูสกิล ${p.name}`" @click="$emit('info', p)"><Emoji :char="p.emoji" /></button>
         </div>
+        <span v-if="featured.length" class="bn-feat-hint">แตะตัวเด่นเพื่อดูสกิล</span>
         <span class="bn-time"><Emoji char="⏳" /> เหลือ {{ timeLeft }}</span>
       </template>
       <div v-else class="bn-desc">เพ็ททุกตัวในคลังปกติ ออกตำนานแล้วลุ้นตัวที่ตั้งเป้าไว้</div>
@@ -96,7 +98,7 @@ const props = defineProps({
   showTarget: { type: Boolean, default: false },
   targetPet: { type: Object, default: null },
 })
-defineEmits(['pull', 'open-target'])
+defineEmits(['pull', 'open-target', 'info'])
 
 const POS = [[8, 40], [34, 46], [58, 38], [20, 20], [48, 16], [70, 50]]
 const caps = computed(() => props.event
@@ -118,7 +120,9 @@ const can10 = computed(() => props.pay10.pay === 'ticket' || props.coins >= prop
 .bn-desc { font-size: .74rem; opacity: .92; margin-top: 4px; max-width: 58%; line-height: 1.4; }
 .bn-time { display: inline-block; margin-top: 8px; font-size: .72rem; font-weight: 800; background: rgba(255,255,255,.75); color: #7a4a00; border-radius: 999px; padding: 2px 10px; }
 .bn-feat { display: flex; gap: 6px; margin-top: 10px; max-width: 62%; flex-wrap: wrap; }
-.bn-feat span { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,.75); display: grid; place-items: center; font-size: 1.6rem; box-shadow: 0 4px 10px -4px rgba(120,70,0,.4); }
+.bn-feat-hint { display: block; font-size: .7rem; font-weight: 700; opacity: .75; margin-top: 4px; }
+.bn-feat button { border: 0; padding: 0; cursor: pointer; font-family: inherit; }
+.bn-feat button { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,.75); display: grid; place-items: center; font-size: 1.6rem; box-shadow: 0 4px 10px -4px rgba(120,70,0,.4); }
 
 .mm { position: absolute; right: 12px; bottom: 10px; width: 108px; height: 128px; pointer-events: none; }
 .mm-dome { position: absolute; left: 10px; right: 10px; top: 0; height: 72px; border-radius: 44px 44px 12px 12px; background: rgba(255,255,255,.35); border: 2px solid rgba(255,255,255,.8); overflow: hidden; }

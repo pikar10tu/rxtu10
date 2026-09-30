@@ -16,6 +16,8 @@
       <!-- ── 2 ระบบใหญ่: โหมดเพ็ท / โหมดฟาร์ม ── -->
       <div class="hero-grid">
         <RouterLink to="/play/pets" class="hero-card pets">
+          <!-- จุดแดง: มีรางวัลซีซั่น/รางวัลลงสนามครบ 5 ครั้งรอรับ (useNavDots) -->
+          <span v-if="petModeDot" class="nav-dot hero-dot" aria-label="มีรางวัลรอรับ"></span>
           <span class="hero-emoji"><Emoji char="🐾" /></span>
           <span class="hero-name">โหมดเพ็ท</span>
           <span class="hero-sub">คลัง · จัดทีม · หอคอย · ประลอง</span>
@@ -67,10 +69,12 @@ import SectionTitle from '../components/shared/SectionTitle.vue'
 import SoonCard from '../components/shared/SoonCard.vue'
 import { MINIGAMES } from '../data/minigames.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
+import { useNavDots } from '../composables/useNavDots.js'
 
 const authStore = useAuthStore()
 const { arcadeOpen } = useAppConfig()   // มินิเกมซ่อนจากทุกคนรวมแอดมิน (27 ส.ค.)
 const farm = useFarm()
+const { petModeDot } = useNavDots()
 const { exp } = useExpedition()
 
 const games = MINIGAMES
@@ -100,7 +104,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 .hero-card { all: unset; cursor: pointer; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 22px 14px; min-height: 148px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: transform .12s, box-shadow .12s; }
 .hero-card:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.hero-card.pets { background: linear-gradient(160deg,#e0e7ff,#c7d2fe); }
+.hero-card.pets { position: relative; background: linear-gradient(160deg,#e0e7ff,#c7d2fe); }
 .hero-card.farm { position: relative; background: linear-gradient(160deg,#dcfce7,#bbf7d0); }
 .hero-emoji { font-size: 2.4rem; }
 .hero-dot { top: 10px; right: 10px; width: 13px; height: 13px; }
