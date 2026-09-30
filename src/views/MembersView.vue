@@ -187,7 +187,7 @@ function titleOf(m) {
 .mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mv-card { position: relative; overflow: hidden; }
 .mv-card > :not(.cz-bgl) { position: relative; z-index: 1; }
-.mv-card .mv-bg { opacity: .4; }
+.mv-card .mv-bg { opacity: .7; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
