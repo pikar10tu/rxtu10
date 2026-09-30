@@ -5,7 +5,7 @@ import { useMembersStore } from '../stores/members.js'
 import { useUsageStore } from '../stores/usage.js'
 import { buildRosterRow, rosterRowChanged, canWriteRosterRow } from '../utils/roster.js'
 import { pushHistory } from '../utils/pvpHistory.js'
-import { pushEvent, pushAchievementEvent } from '../utils/newsFeed.js'
+import { pushEvent, pushAchievementEvent, pushLegendaryEvent } from '../utils/newsFeed.js'
 
 /**
  * เขียนแถวของตัวเองลง `roster/current` — **จุดเดียว**ที่ฝั่งนักศึกษาเขียน doc นี้
@@ -32,7 +32,7 @@ export function useRosterSync() {
    * @param opts.achievements docId ความสำเร็จที่เพิ่งปลด (string/array) — รวมกลุ่มกับข่าวความสำเร็จล่าสุด
    *        ถ้ายังอยู่ในช่วง ACH_MERGE_MS (ดู pushAchievementEvent)
    */
-  async function syncRosterRow({ history = null, event = null, achievements = null } = {}) {
+  async function syncRosterRow({ history = null, event = null, achievements = null, legendary = null } = {}) {
     const uid = auth.currentUser?.uid
     const u = auth.userData
     if (!uid || !u) return
@@ -50,6 +50,7 @@ export function useRosterSync() {
     if (history) next.h = pushHistory(prev?.h, history)
     if (event) next.ev = pushEvent(prev?.ev, event)
     if (achievements) next.ev = pushAchievementEvent(next.ev ?? prev?.ev, achievements)
+    if (legendary) next.ev = pushLegendaryEvent(next.ev ?? prev?.ev, legendary)
     if (!rosterRowChanged(prev, next)) return
 
     try {

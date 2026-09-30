@@ -15,6 +15,7 @@ import { TA_MODES } from './timeAttack.js'
 import { RESIDENCE_TIERS } from '../data/residence.js'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from './achievements.js'
+import { PETS } from '../data/index.js'
 
 /** เก็บกี่ข่าวต่อคน — ⚠️ เพิ่มแล้วต้องคำนวณขนาด doc ใหม่ (10×~35B×105คน ≈ 37KB จากลิมิต 1MB)
  *  roster โหลดทุกเซสชันอยู่แล้ว ⇒ อ่านเพิ่ม 0 · 3→10 (25 ก.ย. 2026 user ขอ ข่าวแสดงไม่ครบ)
@@ -59,6 +60,16 @@ function achText(who, e) {
   const shown = names.slice(0, 2).map(x => `"${x}"`).join(' ')
   return n > 2 ? `${who} ปลดล็อก ${n} ความสำเร็จ ${shown} และอีก ${n - 2}` : `${who} ปลดล็อก ${shown}`
 }
+/** ข่าวได้เพ็ทตำนานจากกาชา — v = [petId ล่าสุดก่อน] · n = จำนวนรวมในกลุ่ม (รวมแบบเดียวกับความสำเร็จ) */
+const petName = (id) => PETS.find(p => p.id === id)?.name || null
+function legText(who, e) {
+  const names = [].concat(e.v || []).map(petName).filter(Boolean)
+  const n = Math.max(Number(e.n) || 0, [].concat(e.v || []).length)
+  if (!names.length) return `${who} เปิดแคปซูลได้เพ็ทระดับตำนาน`
+  if (n === 1) return `${who} เปิดแคปซูลได้ ${names[0]}`
+  const shown = names.slice(0, 2).join(' ')
+  return n > 2 ? `${who} เปิดแคปซูลได้ตำนาน ${n} ตัว ${shown} และอีก ${n - 2}` : `${who} เปิดแคปซูลได้ ${shown}`
+}
 const achIcon = (e) => getAchievement(String([].concat(e.v)[0]).split('__')[0])?.icon || '🏅'
 
 /**
@@ -77,6 +88,8 @@ const KINDS = {
   pv: { icon: '⚔️', text: (who, e) => `${who} ขึ้นอันดับ ${e.v} ของสนามประลอง` },
   // ความสำเร็จ (ย้ายจากเลน news 25 ก.ย. 2026) — v = [docId ล่าสุดก่อน] · n = จำนวนรวมในกลุ่ม
   ac: { icon: achIcon, text: achText },
+  // กาชาได้ตำนาน (ย้ายจากเลน news 1 ต.ค. 2026 — เลนนั้นโหลดแค่ 5 doc เปิดรัวคืนเดียวดันข่าวคนอื่นตกหมด)
+  lg: { icon: '✨', text: legText },
 }
 
 /** ต่อข่าวใหม่ไว้หน้าสุด แล้วตัดท้ายให้เหลือ EVENT_MAX — คู่แฝดของ pushHistory */
@@ -92,17 +105,26 @@ export function pushEvent(list, ev) {
  * @param docIds docId ที่เพิ่งปลด (ใหม่สุดก่อน) — string เดียวก็ได้
  */
 export function pushAchievementEvent(list, docIds, now = Date.now()) {
+  return pushMergedEvent(list, 'ac', docIds, now)
+}
+
+/** ข่าวได้เพ็ทตำนาน — รวมกลุ่มแบบเดียวกับความสำเร็จ (เปิดรัวได้ 9 ตัว = บรรทัดเดียว ไม่ดันข่าวอื่นของคนนั้นตก) */
+export function pushLegendaryEvent(list, petIds, now = Date.now()) {
+  return pushMergedEvent(list, 'lg', petIds, now)
+}
+
+function pushMergedEvent(list, k, rawIds, now) {
   const prev = Array.isArray(list) ? list : []
-  const ids = [].concat(docIds || []).filter(Boolean).map(String)
+  const ids = [].concat(rawIds || []).filter(Boolean).map(String)
   if (!ids.length) return prev
   const head = prev[0]
-  if (head?.k === 'ac' && now - (Number(head.t) || 0) < ACH_MERGE_MS) {
+  if (head?.k === k && now - (Number(head.t) || 0) < ACH_MERGE_MS) {
     const old = [].concat(head.v || [])
-    const merged = { k: 'ac', v: [...ids, ...old].slice(0, ACH_KEEP),
+    const merged = { k, v: [...ids, ...old].slice(0, ACH_KEEP),
       n: Math.max(Number(head.n) || 0, old.length) + ids.length, t: now }
     return [merged, ...prev.slice(1)]
   }
-  return pushEvent(prev, { k: 'ac', v: ids.slice(0, ACH_KEEP), n: ids.length, t: now })
+  return pushEvent(prev, { k, v: ids.slice(0, ACH_KEEP), n: ids.length, t: now })
 }
 
 /**

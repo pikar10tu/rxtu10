@@ -117,7 +117,7 @@ import { passiveText } from '../data/petPassives.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY, HALF_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
-import { useNewsPost } from '../composables/useNewsPost.js'
+import { useRosterSync } from '../composables/useRosterSync.js'
 import { grantSecret } from '../composables/useAchievements.js'
 import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
 import { eventState, timeLeftText } from '../utils/gachaEvent.js'
@@ -136,7 +136,7 @@ const { confirm } = useConfirm()
 // ร้านค้าเปิดให้นักศึกษาแล้ว (21 มิ.ย. 2026) — flip false เพื่อปิดปรับปรุง (admin เห็นร้านปกติเสมอ)
 const SHOP_OPEN = true
 const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
-const { postNews, myName } = useNewsPost()
+const { syncRosterRow } = useRosterSync()
 // ?tab=style = ลิงก์ "ตกแต่ง" จากหน้าฉัน
 const STORES = [
   { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · โรงหลอม' },
@@ -252,8 +252,6 @@ async function pull(n, isEvent = false) {
   buying.value = false
   if (ok) {
     reveal.value = { summary, multi: rolls > 1 }
-    // ข่าวกระดาน (เลนอยู่ยาว): เปิด 10 ครั้งได้ legendary 2 ตัว = ข่าวเดียว ยิงตัวแรกที่เจอ
-    const leg = results.find((r) => r.rarity === 'legendary')
     // achievement ลับของตู้ — สุ่ม 10 (ได้ 11) เท่านั้น
     if (rolls >= 10) {
       const legN = results.filter((r) => r.rarity === 'legendary').length
@@ -262,10 +260,10 @@ async function pull(n, isEvent = false) {
       // สุ่ม 10 การันตี epic อยู่แล้ว ⇒ "ไม่ได้อะไรเกินธรรมดาเลย" เป็นไปไม่ได้ · ธรรมดา ≥8 จาก 11 ≈ 4.7% (~1 ใน 21 รอบ) · ≥9 ≈ 1%
       if (results.filter((r) => r.rarity === 'common').length >= 8) grantSecret('gag_badday')
     }
-    if (leg) {
-      const petName = PETS.find((p) => p.id === leg.id)?.name || 'เพ็ทระดับตำนาน'
-      postNews({ type: 'legendary', icon: '✨', msg: `${myName()} เปิดแคปซูลได้ ${petName}` })
-    }
+    // ตำนานทุกตัวในรอบนี้ลงแถว roster ของตัวเอง (1 ต.ค. 2026 ย้ายจากเลน news ที่โหลดแค่ 5 doc
+    //   เปิดรัวคืนเดียวดันข่าวคนอื่นตกหมด) · roster โหลดทุกเซสชันอยู่แล้ว ⇒ อ่านเพิ่ม 0
+    const legIds = results.filter((r) => r.rarity === 'legendary').map((r) => r.id)
+    if (legIds.length) syncRosterRow({ legendary: legIds })
   }
   else toast('สุ่มไม่สำเร็จ', 'error')
 }

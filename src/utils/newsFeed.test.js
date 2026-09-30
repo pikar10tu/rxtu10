@@ -176,3 +176,19 @@ test('ข่าวความสำเร็จ id ไม่รู้จัก 
   assert.match(feed[0].text, /ปลดล็อกความสำเร็จใหม่/)
   assert.equal(feed[0].icon, '🏅')
 })
+
+test('pushLegendaryEvent เปิดรัวได้ตำนานหลายตัว = บรรทัดเดียว ชื่อเพ็ทขึ้นกระดาน', async () => {
+  const { pushLegendaryEvent, buildFeed } = await import('./newsFeed.js')
+  const { PETS } = await import('../data/index.js')
+  const legs = PETS.filter(p => p.rarity === 'legendary').slice(0, 3).map(p => p.id)
+  const NOW = 1_800_000_000_000
+  let ev = [{ k: 'tw', v: 50, t: NOW - 1000 }]
+  ev = pushLegendaryEvent(ev, legs[0], NOW)
+  ev = pushLegendaryEvent(ev, [legs[1], legs[2]], NOW + 60_000)
+  assert.equal(ev.length, 2)
+  assert.equal(ev[0].k, 'lg'); assert.equal(ev[0].n, 3)
+  const feed = buildFeed({ u1: { n: 'แพรวา', ev } }, [], { now: NOW + 70_000 })
+  assert.match(feed[0].text, /แพรวา เปิดแคปซูลได้ตำนาน 3 ตัว/)
+  const one = buildFeed({ u1: { n: 'มายด์', ev: pushLegendaryEvent([], legs[0], NOW) } }, [], { now: NOW })
+  assert.equal(one[0].text, `มายด์ เปิดแคปซูลได้ ${PETS.find(p => p.id === legs[0]).name}`)
+})
