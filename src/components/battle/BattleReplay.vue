@@ -7,7 +7,10 @@
   <!-- Teleport ไป body: #main-content (position:fixed) = stacking context → z420 สู้ #bottom-nav (z200) ไม่ได้ถ้า render ในนี้
        → nav โผล่ทะลุก้นจอสู้. ย้ายทั้งชุด (peek/result/inspect เป็นลูกข้างใน z คงเดิม) ไป root (ดู CLAUDE.md) -->
   <Teleport to="body">
-  <div v-if="data" class="br-ov" ref="ovRef">
+  <!-- กดค้างเร่งได้ทั้งจอ (1 ต.ค. 2026 user) — เดิมผูกที่ .br-box = ต้องกดโซนกลางสนามเท่านั้น -->
+  <div v-if="data" class="br-ov" ref="ovRef"
+       @pointerdown="onHoldStart" @pointerup="onHoldEnd"
+       @pointercancel="onHoldEnd" @pointerleave="onHoldEnd">
     <!-- พื้นครึ่งสนาม: บน = สนามอีกฝ่าย · ล่าง = สนามเรา · เส้นกลาง = กึ่งกลางแถว .br-vs (ไม่ใช่กลางจอ)
          ของตกแต่งวางได้แค่ "เขตขอบนอก" ระหว่างขอบจอกับ .br-box (ArenaFloor + utils/arenaLayout.js)
          user เลือกรอยต่อแบบตรง 25 ก.ย. 2026 · สเปก 2026-09-25-arena-skins-replay-news-design.md §3.1 -->
@@ -25,9 +28,7 @@
       <div class="br-vsi-bar"></div>
       <div class="br-vsi-x">VS</div>
     </div>
-    <div class="br-box" ref="boxRef"
-         @pointerdown="onHoldStart" @pointerup="onHoldEnd"
-         @pointercancel="onHoldEnd" @pointerleave="onHoldEnd">
+    <div class="br-box" ref="boxRef">
       <div v-if="introPhase === 'ready' || introPhase === 'go'" class="br-intro" @click="skipIntro">
         <span class="br-intro-txt" :class="introPhase">{{ introPhase === 'ready' ? 'READY?' : 'GO!' }}</span>
       </div>
@@ -350,18 +351,18 @@ function onHoldStart(e) {
   if (done.value || inspectUid.value || introPhase.value) return           // ไฟต์จบ/เปิด inspect/ยังโชว์ READY-GO อยู่ = ไม่ใช่จังหวะกดค้างเร่ง
   // แตะการ์ด/ปุ่ม = คนละเจตนา (เปิด inspect / พัก) · รวม .br-ctrl ด้วย เพราะ padding รอบปุ่มพักไม่ใช่ตัวปุ่ม
   // แต่คนเล็งจะกดปุ่มพัก แล้วพลาดไปโดนขอบ → กลายเป็นเริ่มกดค้างเร่งแทน
-  if (e.target.closest && e.target.closest('.br-unit, .br-btn, .br-ctrl')) return
+  if (e.target.closest && e.target.closest('.br-unit, .br-btn, .br-ctrl, .br-peek-bar, .br-result-ov, .br-inspect')) return
   // ผูก pointer capture กับกล่องสนามไว้ — กันเคส "ไฟต์จบกลางที่กดค้าง" ที่โมดัลสรุปลอยทับกล่องพอดี
   // ไม่ capture ไว้ pointerup ตอนปล่อยนิ้วจะไปตกที่โมดัล (topmost element ตอนนั้น) ไม่ใช่กล่อง → onHoldEnd ไม่ทำงาน → ffActive ค้าง true ข้ามไฟต์ถัดไป
   // (มี watch(done) ด้านล่างกันเหนียวอีกชั้น เผื่อ browser ไหนไม่รองรับ/ไม่ทำตาม capture)
-  if (boxRef.value?.setPointerCapture) { try { boxRef.value.setPointerCapture(e.pointerId) } catch { /* บาง browser โยน ไม่ใช่สาระ */ } }
+  if (ovRef.value?.setPointerCapture) { try { ovRef.value.setPointerCapture(e.pointerId) } catch { /* บาง browser โยน ไม่ใช่สาระ */ } }
   clearTimeout(holdTimer)
   holdTimer = setTimeout(() => { ffActive.value = true; holdHint.value = false }, HOLD_MS)
 }
 function onHoldEnd(e) {
   clearTimeout(holdTimer)
-  if (e?.pointerId != null && boxRef.value?.hasPointerCapture?.(e.pointerId)) {
-    try { boxRef.value.releasePointerCapture(e.pointerId) } catch { /* เพิกเฉย */ }
+  if (e?.pointerId != null && ovRef.value?.hasPointerCapture?.(e.pointerId)) {
+    try { ovRef.value.releasePointerCapture(e.pointerId) } catch { /* เพิกเฉย */ }
   }
   if (!ffActive.value) {
     // แตะสั้นๆ โดยไม่ค้าง → บอกใบ้ว่ามีทางเร่งอยู่ (ค้นพบได้ตอนต้องการ ไม่ล่อตาตอนไม่ต้องการ)
