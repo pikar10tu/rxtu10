@@ -8,16 +8,16 @@ export const TEN_PULL_COST = 10000
 export const TEN_PULL_N = 11     // สุ่ม 10 ได้ 11 ตัว
 
 /** % โอกาสออก legendary ของ pull ถัดไป เมื่อ pity = pull ที่สะสมตั้งแต่ legendary ล่าสุด */
-export function legendaryChance(pity) {
+export function legendaryChance(pity, flat = false) {
   const pull = pity + 1
   if (pull >= HARD_PITY) return 100
-  if (pull >= SOFT_PITY) return Math.min(100, GACHA_RATES.legendary + (pull - SOFT_PITY + 1) * SOFT_PITY_STEP)
+  if (!flat && pull >= SOFT_PITY) return Math.min(100, GACHA_RATES.legendary + (pull - SOFT_PITY + 1) * SOFT_PITY_STEP)
   return GACHA_RATES.legendary
 }
 
 /** สุ่ม rarity 1 ครั้ง (อาจเรียก rng ได้ถึง 2 ครั้ง: เช็ค legendary → เลือก tier ล่าง) */
-export function rollRarity(pity, rng = Math.random) {
-  if (rng() * 100 < legendaryChance(pity)) return 'legendary'
+export function rollRarity(pity, rng = Math.random, flat = false) {
+  if (rng() * 100 < legendaryChance(pity, flat)) return 'legendary'
   const rest = GACHA_RATES.common + GACHA_RATES.rare + GACHA_RATES.epic // 98.5
   const r = rng() * rest
   if (r < GACHA_RATES.epic) return 'epic'
@@ -42,7 +42,9 @@ export function pickLegendary({ target, guaranteed, ownedLegendaryIds, legendary
 }
 
 /** ตู้ธีม: ตัวเด่นของเดือนมีน้ำหนักเท่านี้เทียบกับ L ตัวอื่น (user เคาะ 26 ก.ย. 2026) */
-export const THEME_FEATURED_WEIGHT = 1
+export const THEME_FEATURED_WEIGHT = 3
+/** ตู้ธีม: ตัวที่เลือกไว้หน้าตู้ ได้น้ำหนักเพิ่มจากตัวเด่นอีกขั้น (แบบ 7k — user เคาะ 1 ต.ค.) */
+export const THEME_TARGET_WEIGHT = 6
 
 /** legendary ของตู้ธีม — อัตรา L รวมไม่เปลี่ยน (ตัดสินแล้วใน rollRarity) เปลี่ยนแค่ "ได้ตัวไหน"
  *  ทุกครั้ง: ตัวเด่น ×THEME_FEATURED_WEIGHT · L ที่มาจาก hard pity + เลือกเป้าไว้ = ได้เป้าแน่นอน (user เคาะ 26 ก.ย.)
@@ -50,7 +52,7 @@ export const THEME_FEATURED_WEIGHT = 1
 export function pickThemeLegendary({ target, atHardPity, legendaryIds, featured, rng = Math.random }) {
   if (target && atHardPity) return { id: target, won: true, newGuaranteed: false }
   const feat = new Set(featured || [])
-  const w = (id) => (feat.has(id) ? THEME_FEATURED_WEIGHT : 1)
+  const w = (id) => (id === target ? THEME_TARGET_WEIGHT : feat.has(id) ? THEME_FEATURED_WEIGHT : 1)
   const total = legendaryIds.reduce((s, id) => s + w(id), 0)
   let r = rng() * total
   let id = legendaryIds[legendaryIds.length - 1]
@@ -67,11 +69,11 @@ const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
  *  ไม่ส่ง/ส่งลิสต์ว่าง = อ่านจาก catalog เหมือนเดิมเป๊ะ (ตู้ปกติต้องไม่เปลี่ยนพฤติกรรมแม้แต่นิดเดียว) */
 export function rollOne(state, catalog, rng = Math.random, opts = {}) {
   const legendaryIds = opts.legendaryIds?.length ? opts.legendaryIds : rarityPool(catalog, 'legendary')
-  const rarity = rollRarity(state.pity, rng)
+  // ตู้ธีม: เรตตำนานคงที่ ไม่ไต่ช่วง soft pity · การันตีครั้งที่ 50 อย่างเดียว (user เคาะ 1 ต.ค.)
+  const rarity = rollRarity(state.pity, rng, !!opts.theme)
   if (rarity === 'legendary') {
-    // ⚠️ นับตั้งแต่ soft pity ไม่ใช่แค่ hard — soft ไต่เร็วจนแทบทุกคนได้ L ก่อนครั้งที่ 50 ⇒ ถ้าผูกกับ hard อย่างเดียว เป้าแทบไม่เคยทำงาน (เพื่อนแจ้ง 1 ต.ค.)
     const pick = opts.theme
-      ? pickThemeLegendary({ target: state.target, atHardPity: state.pity + 1 >= SOFT_PITY, legendaryIds, featured: opts.theme.featured, rng })
+      ? pickThemeLegendary({ target: state.target, atHardPity: state.pity + 1 >= HARD_PITY, legendaryIds, featured: opts.theme.featured, rng })
       : pickLegendary({ target: state.target, guaranteed: state.guaranteed, ownedLegendaryIds: state.ownedLegendaryIds, legendaryIds, rng })
     const nextOwned = state.ownedLegendaryIds.includes(pick.id)
       ? state.ownedLegendaryIds : [...state.ownedLegendaryIds, pick.id]

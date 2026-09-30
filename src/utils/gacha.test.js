@@ -147,11 +147,11 @@ import { pickThemeLegendary, THEME_FEATURED_WEIGHT } from './gacha.js'
 
 const L = ['a', 'b', 'c', 'x', 'y']        // x, y = ตัวเด่น
 
-test('ตู้ธีม: ไม่ถ่วงน้ำหนัก (user เคาะ 1 ต.ค.)', () => {
-  assert.equal(THEME_FEATURED_WEIGHT, 1)
-  // น้ำหนักเท่ากัน 5 ตัว · rng 0.5 → 2.5 → ตก c
+test('ตู้ธีม: ตัวเด่นน้ำหนัก ×3', () => {
+  assert.equal(THEME_FEATURED_WEIGHT, 3)
+  // น้ำหนักรวม 3 + 6 = 9 · rng 0.5 → 4.5 → ตก x
   const r = pickThemeLegendary({ target: null, atHardPity: false, legendaryIds: L, featured: ['x', 'y'], rng: () => 0.5 })
-  assert.equal(r.id, 'c')
+  assert.equal(r.id, 'x')
   assert.equal(r.won, null)
 })
 
@@ -166,9 +166,9 @@ test('ตู้ธีม: ไม่ใช่ hard pity = ถ่วง ×3 ธร
   assert.equal(r.newGuaranteed, false)
 })
 
-test('ตู้ธีม: ถึงการันตีแต่ไม่ได้เลือกเป้า = สุ่มเท่ากัน', () => {
+test('ตู้ธีม: ถึงการันตีแต่ไม่ได้เลือกเป้า = ถ่วง ×3', () => {
   const r = pickThemeLegendary({ target: null, atHardPity: true, legendaryIds: L, featured: ['x', 'y'], rng: () => 0.5 })
-  assert.equal(r.id, 'c')
+  assert.equal(r.id, 'x')
 })
 
 test('rollOne โหมดธีม: legendary ใช้ pickThemeLegendary', () => {
@@ -176,4 +176,12 @@ test('rollOne โหมดธีม: legendary ใช้ pickThemeLegendary', ()
   // pity 49 ⇒ ครั้งนี้คือครั้งที่ 50 = hard pity ⇒ ได้เป้า
   const r = rollOne({ pity: 49, target: 'x', guaranteed: false, ownedLegendaryIds: [] }, cat, () => 0.1, { theme: { featured: ['x'] } })
   assert.equal(r.id, 'x')
+})
+
+test('ตู้ธีม: ตัวที่เลือก ×6 · เรตคงที่ไม่ไต่ soft pity', () => {
+  // a,b,c=1 · x(เป้า)=6 · y=3 ⇒ รวม 12 · rng 0.4 → 4.8 → ตก x (3..9)
+  const r = pickThemeLegendary({ target: 'x', atHardPity: false, legendaryIds: L, featured: ['x', 'y'], rng: () => 0.4 })
+  assert.equal(r.id, 'x')
+  assert.equal(legendaryChance(45, true), GACHA_RATES.legendary)
+  assert.equal(legendaryChance(49, true), 100)
 })
