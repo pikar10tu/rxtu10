@@ -195,7 +195,7 @@ test('buildRosterRow: เรตข้ามซีซั่นต้องถู�
     pvp: { rating: 1600, wins: 9, losses: 1, seasonId: '2000-01' },   // ซีซั่นเก่าแน่ๆ
   })
   assert.ok(row.r < 1600, 'เรตบนบอร์ดยังเป็นของเดือนก่อน')
-  assert.equal(row.r, 1300)   // soft reset: 1000 + (1600-1000)×0.5
+  assert.equal(row.r, 1000)   // ข้ามซีซั่น = กลับ 1000
 })
 
 test('buildRosterRow: เรตในซีซั่นปัจจุบันไม่ถูกแตะ', () => {
