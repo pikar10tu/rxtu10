@@ -44,16 +44,16 @@
       <GachaBanner
         v-if="ev.active"
         :title="ev.name" event :time-left="evLeft" :featured="featuredPets"
-        :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
+        :pity="pity" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
         show-target :target-pet="themeTargetPet"
         @pull="(n) => pull(n, true)" @open-target="openPicker('theme')"
       />
       <GachaBanner
         title="อัญเชิญประจำ"
-        :pity-left="pityLeft" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
+        :pity="pity" :rates="rateList" :tickets="tickets" :coins="coins" :busy="buying"
         :pay1="pay1" :pay10="pay10" :pull-cost="PULL_COST" :ten-pull-cost="TEN_PULL_COST"
-        show-target :target-pet="targetPet" :guaranteed="guaranteed"
+        show-target :target-pet="targetPet"
         @pull="(n) => pull(n)" @open-target="openPicker('normal')"
       />
       <div class="shop-note">ได้เพ็ทที่มีแล้ว = ได้ตัวซ้ำ 1 ชิ้น เอาไปใช้ที่โรงหลอมด้านล่าง</div>
@@ -114,7 +114,7 @@ import { useToast } from '../composables/useToast.js'
 import { PETS, RARITY, passiveOf } from '../data/index.js'
 import { passiveText } from '../data/petPassives.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
-import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY } from '../utils/gacha.js'
+import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY, HALF_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { grantSecret } from '../composables/useAchievements.js'
@@ -171,7 +171,6 @@ const evLeft = computed(() => timeLeftText(ev.value.msLeft))
 const featuredPets = computed(() => ev.value.featured.map(id => PETS.find(p => p.id === id)).filter(Boolean))
 const legendaries = computed(() => catalog.value.filter((p) => p.rarity === 'legendary'))
 const targetPet = computed(() => legendaries.value.find((p) => p.id === target.value) || null)
-const pityLeft  = computed(() => Math.max(0, HARD_PITY - pity.value))
 const pay1  = computed(() => resolvePullPayment(1, tickets.value))
 const pay10 = computed(() => resolvePullPayment(10, tickets.value))
 
@@ -205,8 +204,8 @@ async function pull(n, isEvent = false) {
 
   if (isEvent && !themeTarget.value) {
     const go = await confirm(`ยังไม่ได้เลือกตัวหน้าตู้
-ตัวที่เลือกไว้จะออกง่ายกว่าตัวอื่น และครั้งที่ ${HARD_PITY} ได้ตัวนั้นแน่นอน
-ถ้าไม่เลือก ครั้งที่ ${HARD_PITY} จะได้ตำนานแบบสุ่ม (ตัวเด่นออกง่ายกว่า)
+ถ้าเลือกไว้: ครั้งที่ ${HALF_PITY} ลุ้นตัวนั้น 50% · ครั้งที่ ${HARD_PITY} ได้ตัวนั้นแน่นอน
+ถ้าไม่เลือก: ครั้งที่ ${HALF_PITY} ได้ตำนานแบบสุ่ม
 
 สุ่มต่อโดยไม่เลือกเลยไหม?`)
     if (!go) { openPicker('theme'); return }

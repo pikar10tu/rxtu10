@@ -8,7 +8,7 @@
       <div class="bn-kicker">{{ event ? 'ตู้อีเวนต์' : 'ตู้ประจำ' }}</div>
       <div class="bn-name">{{ title }}</div>
       <template v-if="event">
-        <!-- ตัวเด่นของอีเวนต์ — ถ่วง ×3 · ตัวที่เลือก ×6 · การันตีครั้งที่ 50 (user เคาะ 1 ต.ค.) -->
+        <!-- ตัวเด่นของอีเวนต์ — ถ่วง ×3 · ตัวที่เลือก ×6 (ในเรตตำนาน 1%) -->
         <div v-if="featured.length" class="bn-feat">
           <span v-for="p in featured" :key="p.id" :title="p.name"><Emoji :char="p.emoji" /></span>
         </div>
@@ -26,14 +26,17 @@
     </div>
 
     <div class="bn-body">
+      <!-- แถบ 0/100 แบบ 7k — ขีดกลางที่ 50 = การันตีตำนาน ลุ้นตัวที่เลือก 50% · 100 = ได้ตัวที่เลือกแน่นอน (user เคาะ 1 ต.ค.) -->
       <div class="pity">
-        <div class="pity-row"><span>การันตีตำนาน</span><span class="pity-left">อีก {{ pityLeft }} ครั้ง</span></div>
-        <div class="pity-bar" role="progressbar" :aria-valuenow="HARD_PITY - pityLeft" aria-valuemin="0" :aria-valuemax="HARD_PITY">
-          <i :style="{ width: ((HARD_PITY - pityLeft) / HARD_PITY * 100) + '%' }"></i>
+        <div class="pity-row"><span>การันตี</span><span class="pity-left">{{ pity }} / {{ HARD_PITY }}</span></div>
+        <div class="pity-bar" role="progressbar" :aria-valuenow="pity" aria-valuemin="0" :aria-valuemax="HARD_PITY">
+          <i :style="{ width: (pity / HARD_PITY * 100) + '%' }"></i>
+          <span class="pity-mid"></span>
         </div>
+        <div class="pity-legend"><span>{{ HALF_PITY }} = ได้ตำนาน ลุ้นตัวที่เลือก 50%</span><span>{{ HARD_PITY }} = ได้ตัวที่เลือกแน่นอน</span></div>
       </div>
 
-      <div v-if="event" class="bn-note">ตัวเด่นออกง่ายกว่าตัวอื่น ×3 · ตัวที่เลือกไว้ ×6 · ครั้งที่ 50 ได้ตัวที่เลือกแน่นอน · ใช้การันตีร่วมกับตู้ประจำ</div>
+      <div v-if="event" class="bn-note">ได้ตำนานเมื่อไหร่ ตัวเด่นออกง่ายกว่าตัวอื่น ×3 · ตัวที่เลือกไว้ ×6 · ใช้แถบการันตีร่วมกับตู้ประจำ</div>
 
       <template v-if="showTarget">
         <button class="target" @click="$emit('open-target')">
@@ -44,7 +47,7 @@
           </span>
           <span class="target-ch">{{ targetPet ? 'เปลี่ยน' : 'เลือก' }} ›</span>
         </button>
-        <div v-if="guaranteed && targetPet" class="guar"><Emoji char="✅" /> ตำนานรอบหน้าได้ {{ targetPet.name }} แน่นอน</div>
+        <div v-if="pity >= HALF_PITY && targetPet" class="guar"><Emoji char="✅" /> เลยครึ่งแล้ว ครบ {{ HARD_PITY }} ได้ {{ targetPet.name }} แน่นอน</div>
       </template>
 
       <details class="rates">
@@ -74,14 +77,14 @@
 <script setup>
 import { computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
-import { HARD_PITY } from '../../utils/gacha.js'
+import { HARD_PITY, HALF_PITY } from '../../utils/gacha.js'
 
 const props = defineProps({
   title: { type: String, required: true },
   event: { type: Boolean, default: false },
   timeLeft: { type: String, default: '' },
   featured: { type: Array, default: () => [] },
-  pityLeft: { type: Number, required: true },
+  pity: { type: Number, required: true },
   rates: { type: Array, required: true },
   tickets: { type: Number, default: 0 },
   coins: { type: Number, default: 0 },
@@ -92,7 +95,6 @@ const props = defineProps({
   tenPullCost: { type: Number, required: true },
   showTarget: { type: Boolean, default: false },
   targetPet: { type: Object, default: null },
-  guaranteed: { type: Boolean, default: false },
 })
 defineEmits(['pull', 'open-target'])
 
@@ -130,8 +132,10 @@ const can10 = computed(() => props.pay10.pay === 'ticket' || props.coins >= prop
 .bn-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
 .pity-row { display: flex; justify-content: space-between; font-size: .74rem; font-weight: 700; }
 .pity-left { color: #b45309; }
-.pity-bar { height: 8px; margin-top: 4px; border-radius: 999px; overflow: hidden; background: rgba(43,53,80,.08); }
+.pity-bar { position: relative; height: 8px; margin-top: 4px; border-radius: 999px; overflow: hidden; background: rgba(43,53,80,.08); }
 .pity-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #fbbf24, #ff9d2e); transition: width .3s; }
+.pity-mid { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: #b45309; }
+.pity-legend { display: flex; justify-content: space-between; gap: 6px; margin-top: 3px; font-size: .7rem; color: var(--muted); }
 .bn-note { font-size: .72rem; color: var(--muted); line-height: 1.45; }
 
 .target { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border-radius: 14px; background: #efe9fd; border: 1px dashed #b9a6ef; font-family: inherit; text-align: left; cursor: pointer; color: var(--ink); }
