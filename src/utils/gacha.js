@@ -69,8 +69,9 @@ export function rollOne(state, catalog, rng = Math.random, opts = {}) {
   const legendaryIds = opts.legendaryIds?.length ? opts.legendaryIds : rarityPool(catalog, 'legendary')
   const rarity = rollRarity(state.pity, rng)
   if (rarity === 'legendary') {
+    // ⚠️ นับตั้งแต่ soft pity ไม่ใช่แค่ hard — soft ไต่เร็วจนแทบทุกคนได้ L ก่อนครั้งที่ 50 ⇒ ถ้าผูกกับ hard อย่างเดียว เป้าแทบไม่เคยทำงาน (เพื่อนแจ้ง 1 ต.ค.)
     const pick = opts.theme
-      ? pickThemeLegendary({ target: state.target, atHardPity: state.pity + 1 >= HARD_PITY, legendaryIds, featured: opts.theme.featured, rng })
+      ? pickThemeLegendary({ target: state.target, atHardPity: state.pity + 1 >= SOFT_PITY, legendaryIds, featured: opts.theme.featured, rng })
       : pickLegendary({ target: state.target, guaranteed: state.guaranteed, ownedLegendaryIds: state.ownedLegendaryIds, legendaryIds, rng })
     const nextOwned = state.ownedLegendaryIds.includes(pick.id)
       ? state.ownedLegendaryIds : [...state.ownedLegendaryIds, pick.id]
