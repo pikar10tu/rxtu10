@@ -32,7 +32,7 @@
         <span class="agd-sub">{{ seasonMonthLabel(hof.season, true) }}</span>
       </div>
       <div v-for="t in hof.top" :key="t.rank" class="agd-hof" :class="'r' + t.rank">
-        <span class="agd-medal">{{ ['🥇', '🥈', '🥉'][t.rank - 1] }}</span>
+        <span class="agd-medal"><Emoji :char="['🥇', '🥈', '🥉'][t.rank - 1]" /></span>
         <span class="agd-hn">{{ t.n }}<small>{{ t.r.toLocaleString() }} แต้ม</small></span>
         <span class="agd-team"><Emoji v-for="(s, j) in t.tm" :key="j" :char="getPetDef(s.i)?.emoji || '❔'" /></span>
       </div>
