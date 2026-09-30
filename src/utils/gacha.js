@@ -42,7 +42,7 @@ export function pickLegendary({ target, guaranteed, ownedLegendaryIds, legendary
 }
 
 /** ตู้ธีม: ตัวเด่นของเดือนมีน้ำหนักเท่านี้เทียบกับ L ตัวอื่น (user เคาะ 26 ก.ย. 2026) */
-export const THEME_FEATURED_WEIGHT = 3
+export const THEME_FEATURED_WEIGHT = 1
 
 /** legendary ของตู้ธีม — อัตรา L รวมไม่เปลี่ยน (ตัดสินแล้วใน rollRarity) เปลี่ยนแค่ "ได้ตัวไหน"
  *  ทุกครั้ง: ตัวเด่น ×THEME_FEATURED_WEIGHT · L ที่มาจาก hard pity + เลือกเป้าไว้ = ได้เป้าแน่นอน (user เคาะ 26 ก.ย.)

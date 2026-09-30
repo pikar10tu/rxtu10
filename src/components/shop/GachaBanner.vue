@@ -8,7 +8,7 @@
       <div class="bn-kicker">{{ event ? 'ตู้อีเวนต์' : 'ตู้ประจำ' }}</div>
       <div class="bn-name">{{ title }}</div>
       <template v-if="event">
-        <!-- ตัวเด่นของอีเวนต์ — บอกตรงๆ ว่าน้ำหนัก ×3 ทุกครั้งที่ได้ตำนาน ไม่ต้องให้เดาจากเรต -->
+        <!-- ตัวเด่นของอีเวนต์ — ได้ผ่านการันตีเท่านั้น ไม่ถ่วงน้ำหนัก (user เคาะ 1 ต.ค.) -->
         <div v-if="featured.length" class="bn-feat">
           <span v-for="p in featured" :key="p.id" :title="p.name"><Emoji :char="p.emoji" /></span>
         </div>
@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <div v-if="event" class="bn-note">ตัวเด่นออกง่ายกว่าตัวอื่น ×3 ทุกครั้งที่ได้ตำนาน · ถึงการันตีได้ตัวที่เลือกไว้หน้าตู้แน่นอน · ใช้การันตีร่วมกับตู้ประจำ</div>
+      <div v-if="event" class="bn-note">ได้ตำนานตั้งแต่ครั้งที่ 40 ขึ้นไป = ได้ตัวที่เลือกไว้หน้าตู้แน่นอน · ใช้การันตีร่วมกับตู้ประจำ</div>
 
       <template v-if="showTarget">
         <button class="target" @click="$emit('open-target')">
