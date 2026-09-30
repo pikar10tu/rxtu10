@@ -78,6 +78,9 @@ export function buildRosterRow(u, prev) {
     // เรต "ของซีซั่นปัจจุบัน" — ไม่ใช่เรตดิบ เพราะ soft-reset จะถูกเขียนจริงต่อเมื่อเจ้าตัวบุกครั้งแรกของเดือน
     // ถ้าเขียนดิบ วันที่ 1 ของเดือน เจ้าตัวเห็นเรตบีบแล้วแต่ทั้งชั้นปียังเห็นเรตเดือนก่อน (คนเลิกเล่นค้างถาวร)
     r:  num(pvp.rating, PVP_RATING_START),
+    // ซีซั่นของ r/pw/pl — ให้ฝั่งอ่าน (seasonFreshRow) รีเป็นค่าเริ่มต้นเองเมื่อข้ามเดือน
+    // ไม่งั้นคนที่ยังไม่เข้าเกมเดือนนี้ค้างเรตเดือนก่อนบนกระดาน (เพื่อนงง 1 ต.ค. 2026)
+    ps: pvp.seasonId || currentSeasonId(),
     m,
     tm,
     // ร้านตกแต่ง: สีชื่อ/กรอบ/ป้าย/พื้นการ์ดที่ใส่อยู่ (id สั้น) — ใส่เฉพาะเมื่อมี
@@ -141,6 +144,22 @@ export function buildRosterFromUsers(docs, prevRows) {
     rows[uid] = buildRosterRow(data, prevRows?.[uid])
   }
   return rows
+}
+
+/** แถวที่ ps เป็นซีซั่นเก่า → เรต 1000 · ชนะ/แพ้ 0 (ตามที่เจ้าตัวจะได้ตอนเข้าเกมครั้งถัดไป)
+ *  แถวที่ไม่มี ps (เขียนก่อนมีฟิลด์นี้) ปล่อยตามเดิม — แอดมินกด "สร้าง roster ใหม่" 1 ครั้งเพื่อประทับ ps ทั้งรุ่น
+ *  ⚠️ แสดงผลเท่านั้น ไม่แตะ user doc — `pvp.last` (ใช้แจกรางวัล) ยังอยู่ครบ */
+export function seasonFreshRow(row, season = currentSeasonId()) {
+  if (!row?.ps || row.ps === season) return row
+  const { pw, pl, ...rest } = row
+  return { ...rest, r: PVP_RATING_START, ps: season }
+}
+
+/** rows ทั้งก้อน → seasonFreshRow ทุกแถว */
+export function seasonFreshRows(rows, season = currentSeasonId()) {
+  const out = {}
+  for (const [uid, row] of Object.entries(rows || {})) out[uid] = seasonFreshRow(row, season)
+  return out
 }
 
 /** แถวย่อ → รูปที่ view เดิมคุ้นเคย (คล้าย light subset ของ fbUsers) · export ให้หน้าฉันเปิด ProfileModal จากประวัติได้ */

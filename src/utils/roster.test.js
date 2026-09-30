@@ -392,3 +392,15 @@ test('buildRosterRow: สนามฟรี = ไม่ใส่คีย์ ar 
   assert.equal(buildRosterRow(user({ arenas: { owned: ['ar-lab'], on: 'ar-lab' } })).ar, 'ar-lab')
   assert.equal(buildRosterRow(user({ arenas: { owned: ['ch-2026-09'], on: 'ch-2026-09', champ: { '2026-09': 2 } } })).ar, 'ch-2026-09#2')
 })
+
+// ── คนที่ยังไม่เข้าเกมเดือนนี้ ต้องขึ้นเรตเริ่มต้นบนกระดานทันที (1 ต.ค. 2026) ──
+test('seasonFreshRow: ps เก่า → r 1000 ไม่มี pw/pl · ps ปัจจุบัน/ไม่มี ps = เดิม', async () => {
+  const { seasonFreshRow } = await import('./roster.js')
+  const old = { n: 'a', r: 1400, pw: 9, pl: 3, ps: '2026-09', h: [1] }
+  assert.deepEqual(seasonFreshRow(old, '2026-10'), { n: 'a', r: 1000, ps: '2026-10', h: [1] })
+  const cur = { r: 1100, pw: 1, ps: '2026-10' }
+  assert.equal(seasonFreshRow(cur, '2026-10'), cur)
+  const legacy = { r: 1400, pw: 9 }
+  assert.equal(seasonFreshRow(legacy, '2026-10'), legacy)
+  assert.equal(buildRosterRow(user({ pvp: { rating: 1400, seasonId: '2000-01' } })).ps, currentSeasonId())
+})

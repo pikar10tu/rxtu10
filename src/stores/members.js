@@ -7,7 +7,7 @@ import { normalizeUserData } from '../data/userSchema.js'
 import { readCache, slimForCache, MEMBERS_CACHE_KEY, MEMBERS_CACHE_TTL } from '../utils/membersCache.js'
 import { useUsageStore } from './usage.js'
 import { stripTrailingEmoji } from '../utils/text.js'
-import { rosterToMembers } from '../utils/roster.js'
+import { rosterToMembers, seasonFreshRows } from '../utils/roster.js'
 import { memberBucket, memberKey } from '../utils/memberIndex.js'
 
 export const useMembersStore = defineStore('members', () => {
@@ -81,7 +81,7 @@ export const useMembersStore = defineStore('members', () => {
                 return
             }
             rosterMissing.value = false
-            const rows = snap.data()?.rows || {}
+            const rows = seasonFreshRows(snap.data()?.rows || {})   // คนที่ยังไม่เข้าเกมเดือนนี้ = เรตเริ่มต้นทันที
             rosterRows.value = rows
             rosterHof.value = snap.data()?.hof || null
             const { byStudentId, guests } = rosterToMembers(rows)
