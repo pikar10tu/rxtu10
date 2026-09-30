@@ -48,6 +48,10 @@ export const ARENAS = [
   A('ch-2026-09', 'King of the Jungle', 'champion', 'champ', 'jungle',
     [['🦁', 10, .5, 2, .95, 'bob'], ['🦍', 90, .5, 2, .95], ['👾', 50, .95, 1.1, .8], ['🌿', 28, .9, 1.3, .8], ['🌴', 74, .9, 1.5, .8]],
     { season: '2026-09' }),
+  // ต.ค. 2026 = ตู้ My Earth tilted for you (☀️ sol · 🌍 earth · 🌙 luna)
+  A('ch-2026-10', 'My Earth tilted for you', 'champion', 'champ', 'orbit',
+    [['☀️', 10, .5, 2, .95, 'pulse'], ['🌙', 90, .5, 1.8, .95, 'bob'], ['🌍', 50, .95, 1.3, .9], ['✨', 28, .9, 1, .8], ['☄️', 74, .9, 1.2, .8]],
+    { season: '2026-10' }),
 ]
 
 const BY_ID = new Map(ARENAS.map(a => [a.id, a]))

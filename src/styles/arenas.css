@@ -25,6 +25,11 @@
   radial-gradient(22% 28% at 12% 30%, rgba(22,101,52,.9), transparent 70%), radial-gradient(26% 30% at 88% 70%, rgba(21,128,61,.85), transparent 70%),
   radial-gradient(18% 22% at 60% 20%, rgba(20,83,45,.9), transparent 70%), radial-gradient(16% 20% at 35% 80%, rgba(22,101,52,.8), transparent 70%),
   repeating-radial-gradient(circle at 50% 50%, rgba(250,204,21,.05) 0 3px, transparent 3px 28px), linear-gradient(var(--far), #2d5a1e, #12300c); }
+/* ต.ค. 2026 — วงโคจรสุริยะ: ฝั่งซ้ายแสงอาทิตย์อุ่น ฝั่งขวาแสงจันทร์เย็น กลางเป็นวงโคจรจางๆ */
+.arf-orbit { background:
+  radial-gradient(30% 36% at 10% 30%, rgba(251,191,36,.45), transparent 70%), radial-gradient(30% 36% at 90% 70%, rgba(165,180,252,.35), transparent 70%),
+  repeating-radial-gradient(ellipse 60% 40% at 50% 50%, transparent 0 34px, rgba(147,197,253,.12) 34px 36px),
+  linear-gradient(var(--far), #1e1b4b, #0a0f2c); }
 
 /* ของตกแต่ง — วางด้วย left/top (px) จาก utils/arenaLayout.js · ภาพย่อใช้ % */
 .arf-deco { position: absolute; line-height: 1; pointer-events: none; translate: -50% -50%; }
