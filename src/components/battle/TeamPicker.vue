@@ -13,7 +13,7 @@
     <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, minmax(0, 96px))` }">
       <div v-for="(id, i) in edit.slots" :key="i" class="tp-slotwrap">
         <button
-          type="button" class="tp-slot" :class="{ filled: id, sel: edit.sel === i }"
+          type="button" class="tp-slot" :class="{ filled: id, sel: edit.sel === i, target: pendingId }"
           :style="id ? { '--rc': rarityColor(id) } : null"
           :aria-pressed="edit.sel === i"
           :aria-label="id ? `ช่อง ${i + 1} ${defOf(id).name}` : `ช่อง ${i + 1} ว่าง`"
@@ -38,13 +38,16 @@
       </span>
     </div>
 
-    <div class="tp-status" :class="{ warn: statusWarn }">{{ status }}</div>
+    <div class="tp-status" :class="{ warn: statusWarn, pend: pendingId }">
+      {{ status }}
+      <button v-if="pendingId" type="button" class="tp-pend-x" @click="pendingId = null">ยกเลิก</button>
+    </div>
     <div class="tp-status sub">ช่อง 1 ออกตีก่อน · แตะช่องหนึ่งแล้วแตะอีกช่อง = สลับลำดับ</div>
 
     <div class="tp-pool">
       <button
         v-for="p in sortedOwned" :key="p.id"
-        class="tp-pet" :class="{ active: slotNoOf(p.id) > 0, away: expeditionIds.has(p.id) }"
+        class="tp-pet" :class="{ active: slotNoOf(p.id) > 0, away: expeditionIds.has(p.id), pending: pendingId === p.id }"
         :style="{ '--rc': rarityColor(p.id) }"
         :aria-label="defOf(p.id).name"
         @click="pick(p.id)"
@@ -116,12 +119,17 @@ watch(activeIds, (ids) => {
 const selId = computed(() => (edit.value.sel == null ? null : edit.value.slots[edit.value.sel]))
 const hasEmpty = computed(() => edit.value.slots.some(x => !x))
 const statusWarn = ref(false)
+// ทีมเต็ม + ยังไม่เลือกช่อง แล้วแตะเพ็ทในคลัง → "ถือ" ตัวนั้นไว้ แล้วแตะช่องไหนก็แทนช่องนั้นทันที
+// (เดิมขึ้นแค่ข้อความเตือน ต้องไปแตะช่องแล้วกลับมาแตะเพ็ทซ้ำ — user บอก 1 ต.ค. 2026 ว่าไม่สะดวก)
+const pendingId = ref(null)
+watch(() => props.open, () => { pendingId.value = null })
 const status = computed(() => {
+  if (pendingId.value) return `จะใส่ ${defOf(pendingId.value).name} · แตะช่องข้างบนที่อยากให้แทน`
   const i = edit.value.sel
   if (i != null && selId.value) return `เลือกช่อง ${i + 1} (${defOf(selId.value).name}) · แตะตัวข้างล่างเพื่อใส่แทน หรือแตะช่องอื่นเพื่อสลับ`
   if (i != null) return `เลือกช่อง ${i + 1} (ว่าง) · แตะตัวข้างล่างเพื่อใส่`
   if (hasEmpty.value) return 'แตะตัวข้างล่างเพื่อใส่ช่องว่าง · แตะช่องเพื่อเลือก'
-  return 'ทีมเต็มแล้ว · แตะช่องที่อยากเปลี่ยนก่อน แล้วค่อยแตะตัวใหม่'
+  return 'ทีมเต็มแล้ว · แตะตัวข้างล่าง แล้วเลือกว่าจะแทนช่องไหน'
 })
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
@@ -165,16 +173,28 @@ function apply(res) {
   edit.value = { slots: res.slots, sel: res.sel }
   if (compact(res.slots).join() !== before) save(compact(res.slots))
 }
-function onSlot(i) { statusWarn.value = false; apply(tapSlot(edit.value, i)) }
-function onRemove(i) { statusWarn.value = false; apply(removeAt(edit.value, i)) }
+function onSlot(i) {
+  statusWarn.value = false
+  if (pendingId.value) {
+    const id = pendingId.value
+    pendingId.value = null
+    apply(tapItem({ slots: edit.value.slots, sel: i }, id))
+    return
+  }
+  apply(tapSlot(edit.value, i))
+}
+function onRemove(i) { statusWarn.value = false; pendingId.value = null; apply(removeAt(edit.value, i)) }
 function pick(id) {
   if (expeditionIds.value.has(id)) {
     toast(`${defOf(id).name} กำลังออกผจญภัย — รอกลับมาก่อนถึงจะจัดลงทีมได้`, 'info')
     return
   }
+  statusWarn.value = false
+  if (pendingId.value === id) { pendingId.value = null; return }   // แตะตัวที่ถืออยู่ซ้ำ = ยกเลิก
+  pendingId.value = null
   const res = tapItem(edit.value, id)
-  statusWarn.value = res.event === 'full'   // ทีมเต็ม + ยังไม่เลือกช่อง → ข้อความสถานะเป็นสีเตือน
-  if (res.event !== 'full') apply(res)
+  if (res.event === 'full') { pendingId.value = id; return }   // ทีมเต็ม → ถือไว้ รอแตะช่องที่จะแทน
+  apply(res)
 }
 </script>
 
@@ -199,6 +219,12 @@ function pick(id) {
 .tp-syn-chip.off { background: transparent; color: var(--muted); opacity: .85; border-style: dashed; }
 .tp-status { font-size: .76rem; font-weight: 600; color: var(--ink); text-align: center; margin-top: 16px; padding: 7px 10px; background: var(--primary-light); border-radius: 12px; transition: background .2s; }
 .tp-status.warn { background: #fde7ef; color: #b0386a; }
+.tp-status.pend { background: #fde7ef; color: #b0386a; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.tp-pend-x { border: 0; background: #fff; color: #b0386a; border-radius: 999px; padding: 3px 10px; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+/* ถือเพ็ทรอแทน: ช่องทุกช่องกระพริบขอบชมพูบอกว่า "แตะตรงนี้" · การ์ดที่ถือยกขึ้น */
+.tp-slot.target { box-shadow: 0 0 0 3px var(--accent), var(--pop); animation: tp-target 1s ease-in-out infinite alternate; }
+@keyframes tp-target { to { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent), var(--pop); } }
+.tp-pet.pending { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); transform: translateY(-3px); }
 .tp-status.sub { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 4px 0 12px; padding: 0; }
 
 .tp-pool { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }

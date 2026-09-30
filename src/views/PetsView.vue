@@ -26,7 +26,7 @@
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
-      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์</div>
+      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์ · ใส่/เปลี่ยนตัวในทีม</div>
 
       <!-- แจ้งครั้งเดียวว่าเพ็ทที่ถืออยู่เปลี่ยนกลไก — ไม่ใช้ป๊อปอัป ไม่ส่งจดหมาย (user เคาะ 10 ก.ย.)
            ขึ้นเฉพาะคนที่มีเพ็ทในรายการจริง ⇒ คนที่ไม่ได้รับผลกระทบจะไม่โดนกวน -->
@@ -49,7 +49,7 @@
           class="pt-cell" :style="{ '--rc': rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
-          <span v-if="activeSet.has(p.id)" class="pt-cell-team">ทีม</span>
+          <span v-if="teamSlots.includes(p.id)" class="pt-cell-team">ช่อง {{ teamSlots.indexOf(p.id) + 1 }}</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
           <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.emoji || '✊'" /></span>
           <span v-if="balTagOf(p.id)" class="pt-cell-bal" :class="balTagOf(p.id).kind" :title="`ปรับสมดุล: ${balTagOf(p.id).label}`" :aria-label="`ปรับสมดุล: ${balTagOf(p.id).label}`"><Emoji :char="balTagOf(p.id).icon" /></span>
@@ -137,10 +137,6 @@ const balTagOf = (id) => balanceTagOf(id)
 const teamPetOf = (id) => pets.value.find(p => p.id === id) || { id }
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
-const activeSet = computed(() => {
-  const owned = new Set(pets.value.map(p => p.id))
-  return new Set((authStore.userData?.activePets || []).filter(id => owned.has(id)))
-})
 
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
