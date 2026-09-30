@@ -327,7 +327,7 @@ test('buildRosterRow pw/pl ต้องมาจาก applySeasonReset ก้�
   // ข้ามเดือน: เรตถูกบีบเข้ากลาง ชนะ/แพ้ถูกล้าง
   // ถ้าคำนวณแยกกัน จะได้เรตของเดือนนี้คู่กับชนะ/แพ้ของเดือนก่อน = ตัวเลขคนละเรื่อง
   const r = buildRosterRow(user({ pvp: { rating: 1400, wins: 20, losses: 3, seasonId: '2000-01' } }))
-  assert.equal(r.r, 1200, 'บีบครึ่ง: 1000 + (1400-1000)*0.5')
+  assert.equal(r.r, 1000, 'ข้ามซีซั่น = กลับ 1000 เท่ากันทุกคน')
   assert.equal('pw' in r, false)
   assert.equal('pl' in r, false)
 })

@@ -517,6 +517,7 @@ import { computeSeasonRewards, seasonRewardMails } from '../utils/seasonRewards.
 import { buildHof } from '../utils/pvpGuide.js'
 import { getArena } from '../data/arenas.js'
 import { currentSeasonId, seasonMonthLabel } from '../utils/pvpSeason.js'
+import { PVP_RATING_START } from '../utils/pvpRating.js'
 import { TAG_LIST } from '../data/tags.js'
 import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
@@ -649,14 +650,22 @@ async function loadBattleStats() {
 // ── แจกรางวัลซีซั่น (หอคอย + อารีน่า) — อ่าน users ตรง (แถว roster ถูกรีซีซั่นทับแล้วตั้งแต่วันที่ 1) ──
 //  กันกดซ้ำด้วย config/seasonPayouts.{YYYY-MM}: จอง 'sending' ในทรานแซคชันก่อนส่ง แล้วค่อย 'done'
 //  ค้าง 'sending' = บางคนได้แล้วบางคนยัง → ไม่ให้กดซ้ำอัตโนมัติ ต้องเช็คด้วยมือ
-const spCur = currentSeasonId()
-const spPrev = currentSeasonId(new Date(Date.parse(spCur + '-01T00:00:00+07:00') - 1))
-const spOptions = [
-  { id: spPrev, label: seasonMonthLabel(spPrev, true), current: false },
-  { id: spCur, label: seasonMonthLabel(spCur, true), current: true },
-]
-const spSeason = ref(spPrev)
-const spIsCurrent = computed(() => spSeason.value === spCur)
+// ⚠️ คำนวณสดทุกครั้ง — เปิดหน้าค้างข้ามเที่ยงคืนแล้วค่าตายตัว = ปุ่มแจกหาย (เกิดจริง 1 ต.ค. 2026)
+const spPrevOf = (cur) => currentSeasonId(new Date(Date.parse(cur + '-01T00:00:00+07:00') - 1))
+const spNow = ref(currentSeasonId())
+const spOptions = computed(() => {
+  const cur = spNow.value, prev = spPrevOf(cur)
+  return [
+    { id: prev, label: seasonMonthLabel(prev, true), current: false },
+    { id: cur, label: seasonMonthLabel(cur, true), current: true },
+  ]
+})
+const spSeason = ref(spPrevOf(spNow.value))
+const spIsCurrent = computed(() => spSeason.value === spNow.value)
+const spClock = setInterval(() => {   // ข้ามเดือนระหว่างเปิดหน้า → เลื่อนตัวเลือกตาม
+  const cur = currentSeasonId()
+  if (cur !== spNow.value) { spNow.value = cur; spSeason.value = spPrevOf(cur); spPreview.value = null }
+}, 30000)
 const spPreview = ref(null)
 const spBusy = ref(false)
 let spUserDocs = []
@@ -712,7 +721,14 @@ async function paySeason() {
       }
     }
     // towerClaims ล้างพร้อมกัน = รางวัลขั้นหอคอยรับใหม่ได้ทุกซีซั่น (data/towerMilestones.js)
-    for (const d of spUserDocs) ops.push((bt) => bt.set(d.ref, { towerFloor: 1, towerBest: 0, towerClaims: [] }, { merge: true }))
+    // PvP: คนที่ถูกรีซีซั่นไปแล้วก่อนกดแจก (เปิดเว็บหลังเที่ยงคืน) ด้วยสูตรบีบเข้ากลางแบบเก่า และยังไม่ได้สู้ในซีซั่นใหม่ → ตั้ง 1000
+    //  คนที่ยังไม่ถูกรี applySeasonReset จะตั้ง 1000 ให้เองตอนเปิดเว็บ · คนที่สู้ไปแล้วไม่แตะ (กันลบผลไฟต์)
+    const nowSeason = currentSeasonId()
+    for (const d of spUserDocs) {
+      const pvp = d.data().pvp
+      const fixPvp = pvp?.seasonId === nowSeason && !((pvp.wins || 0) + (pvp.losses || 0)) && pvp.rating !== PVP_RATING_START
+      ops.push((bt) => bt.set(d.ref, { towerFloor: 1, towerBest: 0, towerClaims: [], ...(fixPvp ? { pvp: { rating: PVP_RATING_START } } : {}) }, { merge: true }))
+    }
     for (let i = 0; i < ops.length; i += 450) {   // < 500 ops/batch ของ Firestore
       const batch = writeBatch(db)
       ops.slice(i, i + 450).forEach(op => op(batch))
@@ -874,7 +890,7 @@ const evNowTick = ref(Date.now())
 // เดินนาฬิกาหยาบๆ พอให้บรรทัด "เหลืออีก…" ไม่ค้าง · ต้องเคลียร์ตอนออกจากหน้า ไม่งั้นค้างทุกครั้งที่เข้า-ออก
 let evClock = null
 onMounted(() => { evClock = setInterval(() => { evNowTick.value = Date.now() }, 30000) })
-onUnmounted(() => clearInterval(evClock))
+onUnmounted(() => { clearInterval(evClock); clearInterval(spClock) })
 const gachaEv = computed(() => eventState(rawConfig.value?.gachaEvent, evNowTick.value))
 const gachaEvLeft = computed(() => timeLeftText(gachaEv.value.msLeft))
 
