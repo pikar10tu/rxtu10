@@ -2,7 +2,8 @@
 export const GACHA_RATES = { common: 48, rare: 35, epic: 16, legendary: 1 } // % รวม 100 · ตำนานคงที่ 1% ทั้งสองตู้ (user เคาะ 1 ต.ค. 2026)
 // การันตีแบบ 7k (user เคาะ 1 ต.ค. 2026) — แถบ 0/100 แบ่งครึ่งที่ 50
 //   ครั้งที่ 50 = ได้ตำนานแน่ ลุ้น 50% เป็นตัวที่เลือก · ชนะ ⇒ แถบรีเซ็ต · แพ้ ⇒ นับต่อ ครั้งที่ 100 ได้ตัวที่เลือกแน่นอน
-//   ได้ตัวที่เลือกจากเรต 1% ระหว่างทาง ⇒ รีเซ็ต · ได้ตำนานตัวอื่นระหว่างทาง ⇒ ไม่รีเซ็ต (นับต่อ)
+//   ตำนานออกจากเรต 1% ก่อนครั้งที่ 50 ⇒ ถือเป็นครึ่งทาง (ลุ้น 50/50 เหมือนครั้งที่ 50) แพ้ ⇒ ตัวนับกระโดดไป 50 (user เคาะ 2 ต.ค.)
+//   ตำนานออกในครึ่งหลัง (51–99) ⇒ ได้ตัวที่เลือกแน่นอน รีเซ็ต
 //   ไม่ได้เลือกเป้า ⇒ ครั้งที่ 50 ได้ตำนานสุ่ม แล้วรีเซ็ต · ได้ตำนานสุ่มระหว่างทางก็รีเซ็ต
 export const HALF_PITY = 50
 export const HARD_PITY = 100
@@ -83,20 +84,22 @@ export function rollOne(state, catalog, rng = Math.random, opts = {}) {
     const nextOwned = rarity !== 'legendary' || state.ownedLegendaryIds.includes(id) ? state.ownedLegendaryIds : [...state.ownedLegendaryIds, id]
     return { rarity, id, won, nextPity, nextGuaranteed: false, nextOwned }
   }
+  // ลุ้นครึ่งทาง 50/50 — ชนะ = ได้เป้า รีเซ็ต · แพ้ = ตำนานตัวอื่น ตัวนับไปอยู่ที่ครึ่ง
+  const halfRoll = () => rng() < 0.5
+    ? done('legendary', target, true, 0)
+    : done('legendary', randomLegendary(state, legendaryIds, opts, rng, target), false, HALF_PITY)
   if (target) {
     if (pull >= HARD_PITY) return done('legendary', target, true, 0)
-    if (pull === HALF_PITY) {
-      if (rng() < 0.5) return done('legendary', target, true, 0)
-      return done('legendary', randomLegendary(state, legendaryIds, opts, rng, target), false, pull)
-    }
+    if (pull === HALF_PITY) return halfRoll()
   } else if (pull >= HALF_PITY) {
     return done('legendary', randomLegendary(state, legendaryIds, opts, rng), null, 0)
   }
   const rarity = rollRarity(pity, rng)
   if (rarity === 'legendary') {
-    const id = randomLegendary(state, legendaryIds, opts, rng)
-    if (!target) return done(rarity, id, null, 0)
-    return done(rarity, id, id === target, id === target ? 0 : pull)
+    if (!target) return done(rarity, randomLegendary(state, legendaryIds, opts, rng), null, 0)
+    // ครึ่งหลัง: ตำนานตัวถัดไป = การันตีได้เป้า · ครึ่งแรก: ออกก่อน = ปัดเป็นครึ่งทาง (user เคาะ 2 ต.ค.)
+    if (pull > HALF_PITY) return done(rarity, target, true, 0)
+    return halfRoll()
   }
   const pool = rarityPool(catalog, rarity)
   return done(rarity, pool[Math.floor(rng() * pool.length)], null, pull)

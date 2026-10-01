@@ -35,7 +35,7 @@
           <i :style="{ width: (pity / HARD_PITY * 100) + '%' }"></i>
           <span class="pity-mid"></span>
         </div>
-        <div class="pity-legend"><span>{{ HALF_PITY }} = ได้ตำนาน ลุ้นตัวที่เลือก 50%</span><span>{{ HARD_PITY }} = ได้ตัวที่เลือกแน่นอน</span></div>
+        <div class="pity-legend"><span>ตำนานตัวแรก (ช้าสุด {{ HALF_PITY }}) = ลุ้นตัวที่เลือก 50%</span><span>ตัวถัดไป (ช้าสุด {{ HARD_PITY }}) = ได้ตัวที่เลือกแน่นอน</span></div>
       </div>
 
       <div v-if="event" class="bn-note">ได้ตำนานเมื่อไหร่ ตัวเด่นออกง่ายกว่าตัวอื่น ×3 · ตัวที่เลือกไว้ ×6 · ใช้แถบการันตีร่วมกับตู้ประจำ</div>
@@ -49,7 +49,7 @@
           </span>
           <span class="target-ch">{{ targetPet ? 'เปลี่ยน' : 'เลือก' }} ›</span>
         </button>
-        <div v-if="pity >= HALF_PITY && targetPet" class="guar"><Emoji char="✅" /> เลยครึ่งแล้ว ครบ {{ HARD_PITY }} ได้ {{ targetPet.name }} แน่นอน</div>
+        <div v-if="pity >= HALF_PITY && targetPet" class="guar"><Emoji char="✅" /> เลยครึ่งแล้ว ตำนานตัวถัดไปเป็น {{ targetPet.name }} แน่นอน</div>
       </template>
 
       <details class="rates">

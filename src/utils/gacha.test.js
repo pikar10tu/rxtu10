@@ -184,11 +184,17 @@ test('7k: ครั้งที่ 100 ได้เป้าแน่นอน',
   const r = rollOne(st(99), C7, () => 0.99)
   assert.deepEqual([r.id, r.nextPity], ['x', 0])
 })
-test('7k: ได้ตำนานตัวอื่นระหว่างทาง ไม่รีเซ็ต · ได้เป้า รีเซ็ต', () => {
-  const other = rollOne(st(60), C7, seq([0, 0]))      // L แล้วสุ่มได้ a
-  assert.deepEqual([other.id, other.nextPity], ['a', 61])
-  const hit = rollOne(st(60), C7, seq([0, 0.99]))     // L แล้วสุ่มได้ x
-  assert.deepEqual([hit.id, hit.nextPity], ['x', 0])
+test('ครึ่งแรก: ตำนานออกก่อน 50 แพ้ 50/50 → ตัวนับกระโดดไป 50', () => {
+  const r = rollOne(st(11), C7, seq([0, 0.9, 0]))     // L · แพ้ · ได้ a
+  assert.deepEqual([r.id, r.won, r.nextPity], ['a', false, HALF_PITY])
+})
+test('ครึ่งแรก: ตำนานออกก่อน 50 ชนะ 50/50 → ได้เป้า รีเซ็ต', () => {
+  const r = rollOne(st(11), C7, seq([0, 0.1]))
+  assert.deepEqual([r.id, r.won, r.nextPity], ['x', true, 0])
+})
+test('ครึ่งหลัง: ตำนานตัวถัดไป = ได้เป้าแน่นอน รีเซ็ต', () => {
+  const r = rollOne(st(60), C7, seq([0, 0.99, 0]))
+  assert.deepEqual([r.id, r.won, r.nextPity], ['x', true, 0])
 })
 test('7k: ไม่เลือกเป้า ครั้งที่ 50 ได้ตำนานสุ่ม รีเซ็ต', () => {
   const r = rollOne(st(49, null), C7, () => 0.99)
