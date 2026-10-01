@@ -8,6 +8,8 @@
     <template v-if="authStore.isLoggedIn">
       <!-- ── ร้านค้ารวม (ร้านเพ็ท · ร้านฟาร์ม · ร้านตกแต่ง) — ทางเข้าบนสุดของหน้าเกม ── -->
       <RouterLink to="/shop" class="shop-entry">
+        <!-- จุดแดง: มีตัวซ้ำเก่ารอแปลงเป็นประกายดาว (useNavDots.dustDot) -->
+        <span v-if="dustDot" class="nav-dot se-dot" aria-label="มีตัวซ้ำรอแปลงเป็นประกายดาว"></span>
         <span class="se-emoji"><Emoji char="🛍️" /></span>
         <span class="se-txt"><b>ร้านค้า</b><small>อัญเชิญเพ็ท · ปลดแปลงฟาร์ม · ร้านตกแต่งใหม่ <Emoji char="🎀" /></small></span>
         <span class="se-go">›</span>
@@ -74,7 +76,7 @@ import { useNavDots } from '../composables/useNavDots.js'
 const authStore = useAuthStore()
 const { arcadeOpen } = useAppConfig()   // มินิเกมซ่อนจากทุกคนรวมแอดมิน (27 ส.ค.)
 const farm = useFarm()
-const { petModeDot } = useNavDots()
+const { petModeDot, dustDot } = useNavDots()
 const { exp } = useExpedition()
 
 const games = MINIGAMES
@@ -92,7 +94,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 </script>
 
 <style scoped>
-.shop-entry { display: flex; align-items: center; gap: 12px; margin: 10px 0 12px; padding: 12px 14px; border-radius: 18px; text-decoration: none; color: var(--ink);
+.shop-entry { position: relative; display: flex; align-items: center; gap: 12px; margin: 10px 0 12px; padding: 12px 14px; border-radius: 18px; text-decoration: none; color: var(--ink);
   background: linear-gradient(120deg, #e6dcfd 0%, #fde2ee 50%, #d6f5e3 100%); border: var(--bw) solid var(--line); box-shadow: var(--pop); }
 .se-emoji { font-size: 1.9rem; }
 .se-txt { flex: 1; display: flex; flex-direction: column; }
@@ -107,6 +109,7 @@ const emptyCount = computed(() => farm.plots.value.filter(p => !p).length)
 .hero-card.pets { position: relative; background: linear-gradient(160deg,#e0e7ff,#c7d2fe); }
 .hero-card.farm { position: relative; background: linear-gradient(160deg,#dcfce7,#bbf7d0); }
 .hero-emoji { font-size: 2.4rem; }
+.se-dot { top: 8px; right: 8px; width: 12px; height: 12px; }
 .hero-dot { top: 10px; right: 10px; width: 13px; height: 13px; }
 .hero-name { font-size: 1rem; font-weight: 800; }
 .hero-sub { font-size: .7rem; color: rgba(0,0,0,.5); font-weight: 600; line-height: 1.3; }

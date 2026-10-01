@@ -43,9 +43,9 @@
               <div class="cr-top"></div><div class="cr-bot"></div><div class="cr-band"></div>
             </div>
             <div v-else class="cr-card" :class="s.rarity">
-              <span class="cr-card-e"><Emoji :char="s.emoji" /></span>
+              <span class="cr-card-e" :class="{ dusted: s.toDust }"><Emoji :char="s.emoji" /><DustIcon v-if="s.toDust" class="cr-dust" :k="s.rarity" size="1.9rem" /></span>
               <span class="cr-card-n">{{ s.name }}</span>
-              <span class="cr-card-t">{{ s.isNew ? 'ใหม่' : '+1' }}</span>
+              <span class="cr-card-t">{{ s.isNew ? 'ใหม่' : s.toDust ? 'ประกายดาว' : '+1' }}</span>
             </div>
           </div>
         </div>
@@ -55,10 +55,10 @@
       <div v-if="phase === 'show' && !multi" class="cr-stage cr-col" :style="{ '--rc': rc(one.rarity) }" @click.stop>
         <div v-if="RANK[one.rarity] >= 2" class="cr-rays" aria-hidden="true"></div>
         <div class="cr-label">{{ label || 'คุณได้รับ!' }}</div>
-        <div class="cr-pet"><Emoji :char="one.emoji" /></div>
+        <div class="cr-pet" :class="{ dusted: one.toDust }"><Emoji :char="one.emoji" /><DustIcon v-if="one.toDust" class="cr-dust" :k="one.rarity" size="5.5rem" /></div>
         <div class="cr-nm">{{ one.name }}</div>
         <span class="cr-chip">{{ RARITY[one.rarity]?.label }}</span>
-        <span class="cr-new">{{ one.isNew ? 'ใหม่!' : '+1 ตัวซ้ำ' }}</span>
+        <span class="cr-new">{{ one.isNew ? 'ใหม่!' : one.toDust ? `ตัวซ้ำเต็มแล้ว → +1 ${dustName(one.rarity)}` : '+1 ตัวซ้ำ' }}</span>
       </div>
 
       <div v-if="flash" class="cr-flash" aria-hidden="true" @animationend="flash = false"></div>
@@ -75,13 +75,15 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Emoji from '../shared/Emoji.vue'
+import DustIcon from './DustIcon.vue'
+import { dustName } from '../../utils/stardust.js'
 import { RARITY } from '../../data/index.js'
 import { sfx } from '../../utils/sfx.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 
 const props = defineProps({
-  summary: { type: Array, required: true },     // [{ emoji, name, rarity, isNew }]
+  summary: { type: Array, required: true },     // [{ emoji, name, rarity, isNew, toDust }]
   multi: { type: Boolean, default: false },
   label: { type: String, default: '' },
 })
@@ -287,6 +289,12 @@ onMounted(() => {
 .cr-card.legendary { background: linear-gradient(160deg, #fff7d6, #fff); }
 .cr-card-e { font-size: 1.9rem; line-height: 1; }
 .cr-card-n { font-size: .7rem; font-weight: 700; max-width: 100%; padding: 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-card-e { position: relative; }
+/* ตัวซ้ำเกินเพดาน: โชว์ตัวก่อน แล้วสลายเป็นประกายดาว (WebP + CSS ล้วน ไม่มีเวกเตอร์ขยับ) */
+.cr-dust { position: absolute; left: 50%; top: 50%; translate: -50% -50%; opacity: 0; animation: cr-dust-in .5s .9s ease-out forwards; }
+.dusted > :deep(:first-child) { animation: cr-dust-out .45s .75s ease-in forwards; }
+@keyframes cr-dust-out { to { opacity: 0; transform: scale(.4); filter: blur(3px) brightness(2); } }
+@keyframes cr-dust-in { 0% { opacity: 0; transform: scale(1.6); filter: brightness(2.4); } 100% { opacity: 1; transform: scale(1); filter: none; } }
 .cr-card-t { font-size: .7rem; font-weight: 800; color: #fff; background: var(--rc); border-radius: 999px; padding: 0 6px; }
 
 .cr-flash { position: absolute; inset: 0; background: #fff; pointer-events: none; animation: cr-flash .5s ease-out forwards; }

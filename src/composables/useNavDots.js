@@ -5,6 +5,7 @@ import { useFarm } from './useFarm.js'
 import { useMailbox } from '../stores/mailbox.js'
 import { useAppConfig } from './useAppConfig.js'
 import { canClaimDaily } from '../utils/pvpDaily.js'
+import { migrationPreview } from '../utils/stardust.js'
 
 /** รายได้สะสมเกินกี่ % ของหลอด ถึงขึ้นจุดแดง (user สั่ง 25 ก.ย. 2026: เกินครึ่ง) */
 export const DAILY_DOT_PCT = 50
@@ -40,7 +41,9 @@ export function useNavDots() {
   const arenaDot = computed(() => ready.value && (!!mailbox.seasonPending('arena') ||
     ((pvpOpen.value || auth.isAdmin) && canClaimDaily(auth.userData?.pvpDaily, new Date().toISOString().slice(0, 10)))))
   const petModeDot = computed(() => towerDot.value || arenaDot.value)
-  const playDot = computed(() => farmDot.value || petModeDot.value)
+  // ตัวซ้ำเก่าเกินเพดาน รอกดแปลงเป็นประกายดาว (ครั้งเดียว — แปลงแล้วจุดหายเอง) → ร้านค้า › ร้านเพ็ท
+  const dustDot = computed(() => ready.value && migrationPreview(auth.userData?.pets).rows.length > 0)
+  const playDot = computed(() => farmDot.value || petModeDot.value || dustDot.value)
 
-  return { homeDot, playDot, farmDot, towerDot, arenaDot, petModeDot }
+  return { homeDot, playDot, farmDot, towerDot, arenaDot, petModeDot, dustDot }
 }

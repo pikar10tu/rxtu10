@@ -292,7 +292,7 @@ async function evolve() {
 /* ⚠️ z410 ไม่ใช่ 230 — โมดัลนี้ถูกเปิดจาก 'ข้างใน' BottomSheet (z400) ที่หน้าจัดทีม
    ทั้งคู่ Teleport ไป body = เป็นพี่น้องกันที่ root → z ต่ำกว่าจะไปโผล่ 'ใต้' แผ่นจัดทีม
    คนเล่นกด ⋯ แล้วเห็นแค่จอมืดลง (เกิดจริง 28 ส.ค. ที่หอคอยและสนามประลอง)
-   บันไดชั้น: sheet/modal ฐาน = 400 · อะไรที่เปิดจากในนั้น = 410 (ดู SeedPicker, SpendCopiesModal) */
+   บันไดชั้น: sheet/modal ฐาน = 400 · อะไรที่เปิดจากในนั้น = 410 (ดู SeedPicker) */
 .pd-ov { position: fixed; inset: 0; z-index: 410; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pd-box { width: 100%; max-width: 380px; border-radius: 22px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 90vh; overflow-y: auto; background: #fff; color: var(--ink); }
 

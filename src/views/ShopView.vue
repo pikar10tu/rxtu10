@@ -19,6 +19,7 @@
       <!-- หน้าร้านค้ารวม 3 ร้าน (25 ก.ย. 2026) — ร้านเพ็ท = อัญเชิญ + ห้องทดลองในหน้าเดียว -->
       <div class="stores" role="tablist">
         <button v-for="s in STORES" :key="s.k" class="store" :class="['st-' + s.k, { on: tab === s.k }]" role="tab" :aria-selected="tab === s.k" @click="tab = s.k">
+          <span v-if="s.k === 'pet' && dustDot" class="nav-dot store-dot" aria-label="มีตัวซ้ำรอแปลงเป็นประกายดาว"></span>
           <span class="store-emoji"><Emoji :char="s.icon" /></span>
           <span class="store-name">{{ s.name }}</span>
           <span class="store-sub">{{ s.sub }}</span>
@@ -107,6 +108,7 @@
 import { useEscapeKey } from '../composables/useEscapeKey.js'
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
+import { useNavDots } from '../composables/useNavDots.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import LabTab from '../components/shop/LabTab.vue'
 import { increment } from 'firebase/firestore'
@@ -140,7 +142,7 @@ const shopOpen = computed(() => SHOP_OPEN || authStore.isAdmin)
 const { syncRosterRow } = useRosterSync()
 // ?tab=style = ลิงก์ "ตกแต่ง" จากหน้าฉัน
 const STORES = [
-  { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · โรงหลอม' },
+  { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · ประกายดาว' },
   { k: 'farm', icon: '🌱', name: 'ร้านฟาร์ม', sub: 'ปลดแปลงเพิ่ม' },
   { k: 'style', icon: '🎀', name: 'ร้านตกแต่ง', sub: 'สีชื่อ · กรอบ · ป้าย' },
 ]
@@ -148,6 +150,7 @@ const STORES = [
 const qTab = String(useRoute().query.tab || '')
 const tab = ref(STORES.some(s => s.k === qTab) ? qTab : 'pet')
 
+const { dustDot } = useNavDots()
 const coins   = computed(() => authStore.userData?.coins || 0)
 const pets    = computed(() => authStore.userData?.pets || [])
 const tickets = computed(() => authStore.userData?.freeGachaTickets || 0)
@@ -289,7 +292,8 @@ async function chooseTarget(id) {
 .shop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .shop-coins { font-size: .92rem; font-weight: 800; color: #b45309; background: #fff; border: var(--bw) solid var(--line); border-radius: 999px; padding: 3px 12px; margin-left: auto; }
 .stores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0 14px; }
-.store { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; border: var(--bw) solid var(--line); background: #fff; box-shadow: var(--pop); cursor: pointer; color: var(--ink); transition: transform .12s; }
+.store-dot { top: 6px; right: 6px; width: 12px; height: 12px; }
+.store { position: relative; font: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; border: var(--bw) solid var(--line); background: #fff; box-shadow: var(--pop); cursor: pointer; color: var(--ink); transition: transform .12s; }
 .store-emoji { font-size: 1.6rem; line-height: 1.1; }
 .store-name { font-size: .82rem; font-weight: 800; }
 .store-sub { font-size: .7rem; color: var(--muted); text-align: center; line-height: 1.2; }
