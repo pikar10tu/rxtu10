@@ -4,6 +4,7 @@
 // ════════════════════════════════════════════════════════════
 import { wave1Pets } from '../utils/petCatalog.js'
 import { BATTLE_SLOTS } from './residence.js'
+import { currentSeasonId } from '../utils/pvpSeason.js'
 
 export const TOWER_MAX = 100
 
@@ -68,10 +69,16 @@ function floorElements(f, count) {
     : [theme, theme, counter]         // 2 theme + 1 counter → เคาน์เตอร์ยังได้เปรียบ (สล็อต 3 = mirror ปลอดภัย)
 }
 
-/** ชั้น → ทีมบอท (rarity/เกรด/จำนวน/ธาตุ ตามชั้น) */
-export function getFloorTeam(floor) {
+// 'YYYY-MM' → เลข (2026-10 → 202610) ผสมเข้า seed ⇒ หน้าทีมบอทสลับทุกซีซั่น
+// ความยาก (rarity/เกรด/จำนวน/ธาตุ) ยังผูกเลขชั้นล้วน — สุ่มแค่ "ตัวไหน" ในกลุ่มเดียวกัน
+function seasonSalt(season) {
+  return Number(String(season).replace(/\D/g, '')) || 0
+}
+
+/** ชั้น → ทีมบอท (rarity/เกรด/จำนวน/ธาตุ ตามชั้น · หน้าตัวสลับตามซีซั่น) */
+export function getFloorTeam(floor, season = currentSeasonId()) {
   const f = clamp(Math.floor(floor) || 1, 1, TOWER_MAX)
-  const rand = rng((f * 2654435761) >>> 0)
+  const rand = rng((f * 2654435761 + seasonSalt(season) * 40503) >>> 0)
   const rarity = RARITY_BY_TIER[tierOf(f)]
   const grade = botGrade(f)
   const count = botCount(f)
