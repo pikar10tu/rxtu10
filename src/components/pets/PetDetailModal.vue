@@ -91,7 +91,7 @@
             <button class="pd-active add" :disabled="busy" @click="onAddTap">
               <Emoji char="➕" /> ใส่ในทีมต่อสู้ ({{ activeList.length }}/{{ battleSlots }})
             </button>
-            <div v-if="pickerOpen" class="pd-picker">
+            <div v-if="pickerOpen" ref="pickerEl" class="pd-picker">
               <div class="pd-picker-label">แทนตัวไหน?</div>
               <button
                 v-for="(id, i) in activeList" :key="id" type="button" class="pd-picker-row"
@@ -111,7 +111,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import HelpButton from '../help/HelpButton.vue'
 import { increment } from 'firebase/firestore'
@@ -185,10 +185,17 @@ async function removeFromTeam() {
 }
 
 // ทีมยังไม่เต็ม → ใส่ต่อท้ายทันที · ทีมเต็มแล้ว → เปิดตัวเลือก "แทนตัวไหน?" (ไม่แทนเงียบๆ)
+const pickerEl = ref(null)
 async function onAddTap() {
   if (busy.value || !pet.value) return
   const cur = activeList.value
-  if (cur.length >= battleSlots.value) { pickerOpen.value = true; return }
+  if (cur.length >= battleSlots.value) {
+    pickerOpen.value = true
+    // ตัวเลือกกางอยู่ท้ายกล่อง (ใต้ส่วนวิวัฒน์) — บนมือถือมันตกขอบจอ คนกดแล้วไม่เห็นอะไรเกิดขึ้น (user แจ้ง 1 ต.ค.)
+    await nextTick()
+    pickerEl.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    return
+  }
   await writeTeam([...cur, pet.value.id])
 }
 
