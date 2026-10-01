@@ -1,8 +1,10 @@
 <!--
   <CapsuleReveal> — ฉากเปิดแคปซูล (user เลือกจากเดโม 25 ก.ย. 2026) ใช้ร่วม: อัญเชิญ (ShopView) + หลอม (LabTab)
-    สุ่ม 1 : หมุนตู้ → แคปซูลตก → สั่นไต่สี ขาว→ฟ้า→ม่วง→ทอง (ยังไม่เฉลยจนแตก) → แตก → ผล
-    สุ่ม 10: หมุนตู้ → แคปซูลร่วงลงถาด → เปิดทีละลูก · ตำนานเก็บไว้ท้ายสุด สั่นลุ้นแล้วแตกพร้อมพลุ
-    แสงใบ้หลังตู้ (แบบ ข ที่ user เลือก): ทุกครั้งเริ่มแสงขาวจาง · ออกตำนาน = กลางทางกลายเป็นรุ้งจางๆ · เอพิค = ม่วงจาง
+    1 ต.ค. 2026 (user เคาะเดโม B): ประตูบานเดียวแง้ม → ลูกแสงพุ่งออกตามจำนวนที่สุ่ม สีลูกแสง = ระดับ
+    สุ่ม 1 : ประตู (ตำนานสั่นก่อน) → แง้ม แสงลอดสีของระดับ → ลูกแสงพุ่งออก → แตก → ผล
+    สุ่ม 10: ประตูแง้ม → ลูกแสงร่วงลงถาด → เปิดทีละลูก · ตำนานเก็บไว้ท้ายสุด สั่นลุ้นแล้วแตกพร้อมพลุ
+    แสงใบ้หลังประตู (แบบ ข เดิม): ขาวจาง → ตำนานกลายเป็นรุ้ง · เอพิคเป็นม่วง
+    ทุกชิ้นเป็น div + CSS gradient (ไม่มี SVG ขยับ — CLAUDE.md ข้อ 17)
   🔒 อ่าน "ผลที่สุ่มเสร็จแล้ว" อย่างเดียว ไม่แตะตรรกะ/อัตราสุ่มเลย
   แตะจอ = ข้ามไปดูผลได้ทุกจังหวะ (ห้ามปิดทิ้ง — เหรียญหักไปแล้ว ต้องได้เห็นผลเสมอ)
   z-index 410: เปิดจากใน ShopView (400) — ดูบันได CLAUDE.md ข้อ 12
@@ -18,19 +20,14 @@
         <div class="cr-halo" :class="halo" aria-hidden="true"></div>
         <span v-for="(sp, i) in sparkPos" v-show="halo.includes('rainbow')" :key="i" class="cr-spark"
           :style="{ left: sp.x + '%', top: sp.y + '%', animationDelay: sp.d + 's' }" aria-hidden="true"></span>
-        <div class="cr-machine crank" aria-hidden="true">
-          <div class="cr-dome">
-            <span v-for="(c, i) in DOME" :key="i" class="cr-mcap" :style="{ '--c': c.c, left: c.x + '%', top: c.y + '%' }"></span>
-          </div>
-          <div class="cr-body"><div class="cr-knob"></div><div class="cr-chute"></div></div>
+        <div class="cr-door" :class="{ shake: doorShake, ajar: doorAjar }" :style="{ '--dc': rc(best) }" aria-hidden="true">
+          <div class="cr-door-glow"></div><div class="cr-door-l"></div><div class="cr-door-r"></div>
         </div>
       </div>
 
-      <!-- ── สุ่ม 1: แคปซูล ── -->
+      <!-- ── สุ่ม 1: ลูกแสง ── -->
       <div v-else-if="phase === 'capsule' || phase === 'burst'" class="cr-stage">
-        <div class="cr-cap" :class="capClass" :style="{ '--cc': capColor }" aria-hidden="true">
-          <div class="cr-glow"></div><div class="cr-top"></div><div class="cr-bot"></div><div class="cr-band"></div>
-        </div>
+        <div class="cr-orb out" :class="{ burst: phase === 'burst' }" :style="{ '--cc': rc(one.rarity) }" aria-hidden="true"></div>
       </div>
 
       <!-- ── สุ่ม 10: ถาดแคปซูล ── -->
@@ -38,10 +35,8 @@
         <div class="cr-tray-top">{{ label || `ได้ ${summary.length} แคปซูล` }}</div>
         <div class="cr-tray">
           <div v-for="(s, i) in summary" :key="i" class="cr-slot" :style="{ '--rc': rc(s.rarity) }">
-            <div v-if="!opened[i]" class="cr-cap mini in" :class="{ shake: shaking === i }"
-              :style="{ '--cc': shaking === i ? rc('legendary') : '#e5e7eb', animationDelay: i * 45 + 'ms' }" aria-hidden="true">
-              <div class="cr-top"></div><div class="cr-bot"></div><div class="cr-band"></div>
-            </div>
+            <div v-if="!opened[i]" class="cr-orb mini out" :class="{ shake: shaking === i }"
+              :style="{ '--cc': rc(s.rarity), animationDelay: i * 60 + 'ms' }" aria-hidden="true"></div>
             <div v-else class="cr-card" :class="s.rarity">
               <span class="cr-card-e" :class="{ dusted: s.toDust }"><Emoji :char="s.emoji" /><DustIcon v-if="s.toDust" class="cr-dust" :k="s.rarity" size="1.9rem" /></span>
               <span class="cr-card-n">{{ s.name }}</span>
@@ -90,34 +85,23 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const RANK = { common: 0, rare: 1, epic: 2, legendary: 3 }
-const TIERS = ['common', 'rare', 'epic', 'legendary']
 const rc = (r) => RARITY[r]?.color || '#94a3b8'
-const DOME = [
-  { c: '#60a5fa', x: 6, y: 48 }, { c: '#c084fc', x: 30, y: 56 }, { c: '#94a3b8', x: 56, y: 46 }, { c: '#fbbf24', x: 78, y: 58 },
-  { c: '#f28bb0', x: 18, y: 24 }, { c: '#60a5fa', x: 46, y: 18 }, { c: '#94a3b8', x: 68, y: 28 },
-]
 
-// จังหวะ (ms) — สุ่ม 1 ≈ 2.3 วิ · สุ่ม 10 ≈ 3 วิ (user ดูในเดโมแล้ว)
-const T_DROP = 1150, T_WOBBLE = 1700, T_CLIMB_END = 2250, T_BURST = 2300, T_HINT = 620
+// จังหวะ (ms) — สุ่ม 1 ≈ 2 วิ (+0.7 ถ้าตำนาน) · สุ่ม 10 ≈ 3 วิ
+const T_DROP = 1150, T_BURST = 2000, T_HINT = 620
 
 const one = computed(() => props.summary[0] || {})
 const best = computed(() => props.summary.reduce((b, s) => (RANK[s.rarity] > RANK[b] ? s.rarity : b), 'common'))
 
 const phase = ref('machine')     // machine → capsule → burst → show  |  machine → tray → show
 const halo = ref('')             // '' | 'on plain' | 'on epic' | 'on rainbow'
-const climb = ref(0)
-const capWobble = ref(false)
+const doorShake = ref(false)
+const doorAjar = ref(false)
 const flash = ref(false)
 const confetti = ref(null)
 const opened = ref(props.summary.map(() => false))
 const shaking = ref(-1)
 
-const capColor = computed(() => phase.value === 'burst' ? rc(one.value.rarity) : climb.value ? rc(TIERS[climb.value]) : '#e5e7eb')
-const capClass = computed(() => {
-  if (phase.value === 'burst') return 'burst'
-  if (!capWobble.value) return 'drop'
-  return ['wobble', climb.value ? 'w' + Math.min(3, climb.value) : ''].join(' ')
-})
 const sparkPos = Array.from({ length: 4 }, () => ({ x: 15 + Math.random() * 70, y: 10 + Math.random() * 70, d: Math.random() }))
 
 const timers = []
@@ -200,17 +184,16 @@ onMounted(() => {
   if (best.value === 'legendary') later(T_HINT, () => { halo.value = 'on rainbow' })
   else if (best.value === 'epic') later(T_HINT, () => { halo.value = 'on epic' })
 
+  // ประตู: ตำนานสั่นก่อน → แง้ม → ลูกแสงพุ่งออก
+  const lead = best.value === 'legendary' ? 700 : 0
+  if (lead) { doorShake.value = true; sfx('climb') }
+  later(lead + 450, () => { doorShake.value = false; doorAjar.value = true })
   if (props.multi) {
-    later(T_DROP, () => { phase.value = 'tray'; later(700, openNext) })
+    later(lead + T_DROP, () => { phase.value = 'tray'; later(700, openNext) })
     return
   }
-  later(T_DROP, () => { phase.value = 'capsule' })
-  later(T_WOBBLE, () => { capWobble.value = true })
-  const steps = RANK[one.value.rarity]
-  for (let i = 1; i <= steps; i++) {
-    later(T_WOBBLE + (T_CLIMB_END - T_WOBBLE) * i / (steps + 1), () => { climb.value = i; sfx('climb') })
-  }
-  later(T_BURST, showOne)
+  later(lead + T_DROP, () => { phase.value = 'capsule' })
+  later(lead + T_BURST, showOne)
 })
 </script>
 
@@ -224,15 +207,6 @@ onMounted(() => {
 .cr-col { flex-direction: column; gap: 6px; min-height: 0; cursor: default; }
 
 /* ── ตู้ใหญ่ ── */
-.cr-machine { position: relative; width: 190px; height: 250px; }
-.cr-dome { position: absolute; left: 15px; right: 15px; top: 0; height: 130px; border-radius: 80px 80px 18px 18px; background: rgba(255,255,255,.12); border: 3px solid rgba(255,255,255,.55); overflow: hidden; }
-.cr-mcap { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(#fff 0 50%, var(--c) 50%); border: 1.5px solid rgba(43,53,80,.2); }
-.cr-body { position: absolute; left: 4px; right: 4px; top: 122px; bottom: 0; border-radius: 22px; background: linear-gradient(#8b6cf0, #6d4fd0); box-shadow: inset 0 -10px 0 rgba(0,0,0,.18); }
-.cr-knob { position: absolute; left: 50%; top: 26px; width: 52px; height: 52px; margin-left: -26px; border-radius: 50%; background: #fff; box-shadow: inset 0 -5px 0 rgba(0,0,0,.12); }
-.cr-knob::after { content: ''; position: absolute; left: 8px; right: 8px; top: 22px; height: 8px; background: #6d4fd0; border-radius: 4px; }
-.cr-chute { position: absolute; left: 50%; bottom: 14px; width: 56px; height: 26px; margin-left: -28px; border-radius: 10px; background: #1b1433; }
-.crank .cr-knob { animation: cr-crank .55s cubic-bezier(.5,0,.3,1) 2; }
-.crank .cr-mcap { animation: cr-jostle .28s ease-in-out 4 alternate; }
 
 /* ── แสงใบ้หลังตู้ (จาง — user สั่งลดความชัด) ── */
 .cr-halo { position: absolute; left: 50%; top: 50%; width: 330px; height: 330px; margin: -165px 0 0 -165px; border-radius: 50%; pointer-events: none; opacity: 0; transform: scale(.7); transition: opacity .35s, transform .35s; }
@@ -248,22 +222,6 @@ onMounted(() => {
 .cr-spark::after { transform: rotate(90deg); }
 
 /* ── แคปซูล ── */
-.cr-cap { position: relative; width: 110px; height: 110px; }
-.cr-top, .cr-bot { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; }
-.cr-top { top: 0; }
-.cr-bot { bottom: 0; }
-.cr-top::before, .cr-bot::before { content: ''; position: absolute; left: 0; right: 0; height: 200%; border-radius: 50%; }
-.cr-top::before { top: 0; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,.2) 45%), var(--cc, #e5e7eb); transition: background .25s; }
-.cr-bot::before { bottom: 0; background: linear-gradient(#f8f8fb, #d9dbe6); }
-.cr-band { position: absolute; left: -2px; right: -2px; top: calc(50% - 4px); height: 8px; border-radius: 4px; background: rgba(43,53,80,.35); }
-.cr-glow { position: absolute; inset: -40px; border-radius: 50%; background: radial-gradient(circle, var(--cc, #fff) 0%, transparent 62%); opacity: .55; filter: blur(6px); }
-.cr-cap.drop { animation: cr-drop .55s cubic-bezier(.3,1.6,.5,1) both; }
-.cr-cap.wobble { animation: cr-wobble .36s ease-in-out infinite; }
-.cr-cap.w2 { animation-duration: .26s; }
-.cr-cap.w3 { animation-duration: .17s; }
-.cr-cap.burst .cr-top { animation: cr-top-off .5s cubic-bezier(.3,0,.3,1) forwards; }
-.cr-cap.burst .cr-bot { animation: cr-bot-off .5s cubic-bezier(.3,0,.3,1) forwards; }
-.cr-cap.burst .cr-band { opacity: 0; }
 
 /* ── ผลเดี่ยว ── */
 .cr-rays { position: absolute; left: 50%; top: 110px; width: 420px; height: 420px; margin: -210px 0 0 -210px; border-radius: 50%; pointer-events: none;
@@ -280,10 +238,6 @@ onMounted(() => {
 .cr-tray { display: grid; grid-template-columns: repeat(4, 72px); gap: 10px; justify-content: center; }
 @media (max-width: 350px) { .cr-tray { grid-template-columns: repeat(4, 64px); gap: 6px; } }
 .cr-slot { position: relative; height: 92px; perspective: 500px; }
-.cr-cap.mini { position: absolute; left: calc(50% - 25px); top: 6px; width: 50px; height: 50px; }
-.cr-cap.mini .cr-band { top: calc(50% - 2.5px); height: 5px; }
-.cr-cap.mini.in { animation: cr-drop .5s cubic-bezier(.3,1.6,.5,1) both; }
-.cr-cap.mini.shake { animation: cr-wobble .2s ease-in-out infinite; }
 .cr-card { position: absolute; inset: 0; border-radius: 14px; background: #fff; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   box-shadow: 0 0 0 2px var(--rc), 0 0 18px -2px var(--rc); animation: cr-flipin .38s cubic-bezier(.2,1.3,.4,1) both; }
 .cr-card.legendary { background: linear-gradient(160deg, #fff7d6, #fff); }
@@ -303,17 +257,32 @@ onMounted(() => {
 .cr-ok { position: relative; z-index: 2; margin-top: 18px; border: 0; border-radius: 14px; padding: 11px 40px; font-family: inherit; font-weight: 800; font-size: .95rem; background: #fff; color: #3b2a6e; cursor: pointer; animation: cr-up .4s .3s both; }
 .cr-skip { position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center; font-size: .74rem; color: rgba(255,255,255,.55); }
 
-@keyframes cr-crank { to { transform: rotate(360deg); } }
-@keyframes cr-jostle { to { transform: translate(3px, -4px) rotate(14deg); } }
 @keyframes cr-spin { to { transform: rotate(360deg); } }
 @keyframes cr-twinkle { 0%, 100% { transform: scale(.2); opacity: 0; } 50% { transform: scale(.9) rotate(45deg); opacity: .6; } }
-@keyframes cr-drop { from { transform: translateY(-260px) scale(.5); } to { transform: none; } }
 @keyframes cr-wobble { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg) scale(1.03); } }
-@keyframes cr-top-off { to { transform: translate(-40px, -120px) rotate(-40deg); opacity: 0; } }
-@keyframes cr-bot-off { to { transform: translate(40px, 120px) rotate(30deg); opacity: 0; } }
 @keyframes cr-flash { 0% { opacity: .9; } 100% { opacity: 0; } }
 @keyframes cr-pop { 0% { transform: scale(.2) rotate(-20deg); opacity: 0; } 60% { transform: scale(1.2) rotate(6deg); opacity: 1; } 100% { transform: none; } }
 @keyframes cr-up { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes cr-flipin { from { transform: rotateY(90deg) scale(.8); } to { transform: none; } }
 @keyframes cr-fall { to { transform: translateY(110vh) rotate(540deg); } }
+/* ประตู + ลูกแสง (1 ต.ค. 2026) */
+.cr-door { position: relative; width: 150px; height: 215px; border-radius: 75px 75px 8px 8px; background: #0c0718; border: 4px solid #a48ce0; overflow: hidden; perspective: 500px; box-shadow: 0 0 0 6px rgba(164,140,224,.18); }
+.cr-door-glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 60%, #fff, var(--dc) 35%, transparent 72%); opacity: 0; transition: opacity .5s; }
+.cr-door-l, .cr-door-r { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(90deg, #5b46a0, #7a62c4); transition: transform .6s cubic-bezier(.5,0,.3,1); }
+.cr-door-l { left: 0; transform-origin: left; border-right: 1px solid rgba(0,0,0,.3); }
+.cr-door-r { right: 0; transform-origin: right; background: linear-gradient(270deg, #5b46a0, #7a62c4); }
+.cr-door-l::after, .cr-door-r::after { content: ''; position: absolute; top: 54%; width: 8px; height: 8px; border-radius: 50%; background: #f5b72e; }
+.cr-door-l::after { right: 8px; } .cr-door-r::after { left: 8px; }
+.cr-door.ajar .cr-door-l { transform: rotateY(-40deg); }
+.cr-door.ajar .cr-door-r { transform: rotateY(40deg); }
+.cr-door.ajar .cr-door-glow { opacity: 1; }
+.cr-door.shake { animation: cr-wobble .12s linear infinite; }
+.cr-orb { position: relative; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle at 35% 32%, #fff, var(--cc) 45%, color-mix(in srgb, var(--cc) 60%, #000)); box-shadow: 0 0 28px 8px var(--cc); }
+.cr-orb.out { animation: cr-orb-out .55s cubic-bezier(.2,1.4,.4,1) both, cr-orb-pulse 1.1s .55s ease-in-out infinite; }
+.cr-orb.burst { animation: cr-orb-burst .25s ease-out forwards; }
+.cr-orb.mini { position: absolute; left: calc(50% - 24px); top: 8px; width: 48px; height: 48px; box-shadow: 0 0 14px 3px var(--cc); }
+.cr-orb.mini.shake { animation: cr-wobble .2s ease-in-out infinite; box-shadow: 0 0 24px 8px var(--cc); }
+@keyframes cr-orb-out { from { transform: translateY(-140px) scale(.15); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes cr-orb-pulse { 50% { box-shadow: 0 0 40px 14px var(--cc); } }
+@keyframes cr-orb-burst { to { transform: scale(1.8); opacity: 0; filter: brightness(2); } }
 </style>
