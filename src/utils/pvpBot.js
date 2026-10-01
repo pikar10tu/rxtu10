@@ -80,7 +80,7 @@ export function getFallbackBots(myPower, myRating, seed, count, gachaEvent = nul
 }
 
 // ── 🐣 หุ่นซ้อมมือใหม่ (user สั่ง 2 ต.ค. 2026 — คนใหม่เข้ามาแพ้ยับแล้วเลิกเล่น) ──
-//  ทีมบอท = "เลียนทีมเรา" ระดับ+เกรดเท่ากันทีละช่อง สุ่มพันธุ์ใหม่ (ธาตุสุ่ม)
+//  ทีมบอท = เลียนทีมเราทีละช่อง สุ่มพันธุ์ใหม่ (ดู rookieBot ด้านล่างสำหรับการลดระดับ)
 //  วัดจริง 300 ไฟต์/แบบ (ทุกระดับทีม c0..l2+ทีมผสม): เต็มทีม ≈ ชนะ 50% · ขาด 1 ตัว ≈ 99%
 //  ⇒ สุ่มขาดตัวครึ่งหนึ่ง = ชนะเฉลี่ย ~75% ไม่ว่าเพ็ทระดับไหน (เล็งตาม teamPower ไม่ได้ — กริดหยาบ วัดแล้ว 2%–100% กระโดด)
 export const ROOKIE_DROP_CHANCE = 0.5
@@ -97,17 +97,28 @@ export function rookieBotChance({ rating = 1000, loseStreak = 0, fights = 0 } = 
   return 0
 }
 
-/** หุ่นซ้อมมือใหม่ · myTeam = battle units ของเรา ({rarity, grade}) */
+/** หุ่นซ้อมมือใหม่ · myTeam = battle units ของเรา ({rarity, grade})
+ *  แบบผสม (user เคาะ 2 ต.ค.): อีปิค/ตำนาน → บอทลด 1 ระดับ เกรดเท่าเดิม (ตำนานมีโอกาส 20% คงไว้ 1 ตัว)
+ *  แรร์/ธรรมดา → ระดับเท่าเดิม · ถ้าทั้งทีมไม่มีช่องที่ถูกลด ⇒ สุ่มขาด 1 ตัว 50%
+ *  ⚠️ ห้ามลดแรร์→ธรรมดา: sim ทีมแรร์ ×3 เจอธรรมดา ×3 ชนะแค่ 4% (ธรรมดาบางตัวชนะทางแรร์) */
+export const ROOKIE_KEEP_LEGEND = 0.2
+const ROOKIE_DOWN = { epic: 'rare', legendary: 'epic' }
 export function rookieBot(myTeam, myRating, seed, gachaEvent = null) {
   const rand = mulberry32((seed >>> 0) || 1)
   const pets = releasedPets(gachaEvent)
+  let keptLegend = false, downed = 0
   let team = (myTeam || []).filter(Boolean).map(p => {
-    const pool = pets.filter(d => d.rarity === p.rarity)
+    let rarity = p.rarity
+    if (ROOKIE_DOWN[rarity]) {
+      if (rarity === 'legendary' && !keptLegend && rand() < ROOKIE_KEEP_LEGEND) keptLegend = true
+      else { rarity = ROOKIE_DOWN[rarity]; downed++ }
+    }
+    const pool = pets.filter(d => d.rarity === rarity)
     const src = pool.length ? pool : pets
     const def = src[Math.floor(rand() * src.length)]
     return { id: def.id, rarity: def.rarity, element: def.element, grade: p.grade || 0 }
   })
-  if (team.length > 1 && rand() < ROOKIE_DROP_CHANCE) team.splice(Math.floor(rand() * team.length), 1)
+  if (!downed && team.length > 1 && rand() < ROOKIE_DROP_CHANCE) team.splice(Math.floor(rand() * team.length), 1)
   return {
     uid: 'bot-rookie', name: 'หุ่นซ้อม', label: 'มือใหม่', isBot: true,
     rating: Math.max(PVP_RATING_FLOOR, myRating), team,
