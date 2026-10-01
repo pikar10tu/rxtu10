@@ -56,7 +56,7 @@
         show-target :target-pet="targetPet"
         @pull="(n) => pull(n)" @open-target="openPicker('normal')"
       />
-      <div class="shop-note">ได้เพ็ทที่มีแล้ว = ได้ตัวซ้ำ 1 ชิ้น เอาไปใช้ที่โรงหลอมด้านล่าง</div>
+      <div class="shop-note">ได้เพ็ทที่มีแล้ว = ได้ตัวซ้ำไว้อัพเกรด · ตัวซ้ำเกินที่ต้องใช้อัพจนเต็ม จะกลายเป็นประกายดาว เอาไปแลกของที่ตู้แลกด้านล่าง</div>
       <LabTab />
       </template>
     </template>
@@ -117,6 +117,7 @@ import { passiveText } from '../data/petPassives.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { rollMany, resolvePullPayment, GACHA_RATES, PULL_COST, TEN_PULL_COST, TEN_PULL_N, HARD_PITY, HALF_PITY } from '../utils/gacha.js'
 import { mergeRolls } from '../utils/gachaMerge.js'
+import { addDust, dustOf } from '../utils/stardust.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
 import { grantSecret } from '../composables/useAchievements.js'
 import { releasedPets, obtainablePets } from '../utils/petCatalog.js'
@@ -225,7 +226,11 @@ async function pull(n, isEvent = false) {
   const rollCatalog = isEvent ? ownable.value : catalog.value
   const opts = isEvent ? { theme: { featured: ev.value.featured } } : {}
   const { results, nextState } = rollMany(rolls, state, rollCatalog, undefined, opts)
-  const { pets: newPets, summary } = mergeRolls(pets.value, results, PETS)
+  const { pets: newPets, summary, dust } = mergeRolls(pets.value, results, PETS)
+  // ซ้ำเกินเพดาน → ประกายดาว · server ใช้ increment รายช่อง กันทับกับแท็บอื่น
+  const dustW = addDust(dustOf(authStore.userData), dust)
+  const dustOpt = dustW.changes.length ? { stardust: dustW.next } : {}
+  const dustSrv = Object.fromEntries(dustW.changes.map(([k, d]) => ['stardust.' + k, increment(d)]))
   const today = new Date().toISOString().slice(0, 10)
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'gacha', today, 1)
 
@@ -236,6 +241,7 @@ async function pull(n, isEvent = false) {
     : { pets: newPets, dailyQuest: dq, gachaPity: nextState.pity, gachaGuaranteed: nextState.guaranteed }
   const optimistic = {
     ...base,
+    ...dustOpt,
     gachaPullsTotal: (authStore.userData?.gachaPullsTotal || 0) + rolls,   // achievement มือเติมไม่ยั้ง
     ...(pay === 'ticket'
       ? { freeGachaTickets: tickets.value - amount }
@@ -243,6 +249,7 @@ async function pull(n, isEvent = false) {
   }
   const server = {
     ...base,
+    ...dustSrv,
     gachaPullsTotal: increment(rolls),
     ...(pay === 'ticket'
       ? { freeGachaTickets: increment(-amount) }

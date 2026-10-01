@@ -37,3 +37,19 @@ test('summary เรียง rarity สูง→ต่ำ', () => {
   const { summary } = mergeRolls([], r, CAT)
   assert.deepEqual(summary.map((s) => s.rarity), ['legendary', 'rare', 'common'])
 })
+
+test('ซ้ำถึงเพดาน (5 − เกรด) → กลายเป็นประกายดาว ไม่เพิ่ม copies', () => {
+  const { pets, summary, dust } = mergeRolls([{ id: 'cat', rarity: 'common', copies: 3, grade: 2 }], [{ rarity: 'common', id: 'cat' }], CAT)
+  assert.equal(pets[0].copies, 3)
+  assert.equal(dust.common, 1)
+  assert.equal(summary[0].toDust, true)
+})
+
+test('เกรดเต็ม → ซ้ำทุกตัวเป็นประกายดาว · ในชุดเดียวกันเติมจนเต็มแล้วล้น', () => {
+  const r1 = mergeRolls([{ id: 'bahamut', rarity: 'legendary', copies: 0, grade: 5 }], [{ id: 'bahamut' }], CAT)
+  assert.equal(r1.dust.legendary, 1)
+  const r = Array(3).fill({ id: 'cat' })
+  const r2 = mergeRolls([{ id: 'cat', rarity: 'common', copies: 3, grade: 1 }], r, CAT)
+  assert.equal(r2.pets[0].copies, 4)
+  assert.equal(r2.dust.common, 2)
+})
