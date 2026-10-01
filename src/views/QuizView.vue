@@ -81,6 +81,7 @@
         <span class="qv-tag">{{ variant === 'zen' ? `ข้อที่ ${idx + 1}` : `ข้อ ${idx + 1}/${quiz.length}` }}</span>
         <span v-if="variant === 'redo'" class="qv-tag qv-tag-redo"><Emoji char="🔁" /> ทบทวน</span>
         <span v-if="current.domain" class="qv-tag">{{ domainLabel(current.domain) }}</span>
+        <span v-for="n in setTags(current)" :key="n" class="qv-tag qv-tag-set"><Emoji char="📚" /> {{ n }}</span>
         <ReviewStatusBadge :question="current" />
         <span class="qv-pill qv-score">ถูก {{ correct }}/{{ answered }}</span>
       </div>
@@ -224,6 +225,7 @@ import { cleanText, LIMITS } from '../utils/text.js'
 import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
 import { useExamSets } from '../composables/useExamSets.js'
+import { examSetLabel } from '../utils/examSets.js'
 import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
@@ -312,6 +314,12 @@ const approvedCount = computed(() => {
 })
 
 // เลือกหมวด → ล้างชุด (mutually exclusive)
+// ชื่อชุดข้อสอบของข้อนี้ (user สั่ง 2 ต.ค.) — ต่อปีจาก config ถ้ามี
+function setTags(q) {
+  if (!Array.isArray(q?.examSets) || !q.examSets.length) return []
+  const yearOf = Object.fromEntries(examSetConfig.value.map(s => [s.name, s.year]))
+  return q.examSets.map(n => examSetLabel({ name: n, year: yearOf[n] }))
+}
 function pickDomain(key) { dom.value = key; examSet.value = null }
 // เลือกชุด → toggle + ล้างหมวด
 function pickExamSet(name) { examSet.value = examSet.value === name ? null : name; if (examSet.value) dom.value = '__all' }
@@ -759,6 +767,7 @@ async function finish() {
 .qv-score { background: var(--mint-light); color: #1f7a5c; }
 .qv-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; }
 .qv-tag { font-size: .7rem; font-weight: 700; border-radius: 6px; padding: 2px 8px; background: var(--primary-light); color: var(--primary-dark); }
+.qv-tag-set { background: #eef2ff; color: #4338ca; }
 .qv-tag-redo { background: #fef3c7; color: #92400e; }
 .qv-count { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }

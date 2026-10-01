@@ -20,3 +20,14 @@ test('ใช้ตอนไม่เต็ม นับต่อจุดเด�
   assert.deepEqual(spendEnergy(1, NOW - R - 1000, NOW), { pvpEnergy: 1, pvpEnergyAt: NOW - 1000 })
 })
 test('หมด = null', () => assert.equal(spendEnergy(0, NOW - 1000, NOW), null))
+
+import { addEnergy, PVP_ENERGY_OVER } from './pvpEnergy.js'
+test('ตั๋วพลังงาน +5 ล้นได้ถึง 10 และล้นแล้วไม่เติมเอง', () => {
+  const now = 1_000_000_000
+  assert.deepEqual(addEnergy(2, now - 60_000, now), { pvpEnergy: 7, pvpEnergyAt: now })
+  assert.equal(addEnergy(8, now, now).pvpEnergy, PVP_ENERGY_OVER)
+  assert.equal(addEnergy(10, now, now), null)
+  assert.equal(energyState(7, now - 10 * 3600_000, now).energy, 7)
+  assert.deepEqual(spendEnergy(7, now - 5, now), { pvpEnergy: 6, pvpEnergyAt: now })
+  assert.equal(addEnergy(null, null, now).pvpEnergy, 10)   // ไม่เคยมีฟิลด์ = เต็ม 5 → 10
+})

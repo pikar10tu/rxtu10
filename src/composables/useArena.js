@@ -17,9 +17,9 @@ import {
   nextRating, BOT_RATING_MULT, PVP_RATING_START,
 } from '../utils/pvpRating.js'
 import { currentSeasonId, applySeasonReset } from '../utils/pvpSeason.js'
-import { getFallbackBots } from '../utils/pvpBot.js'
+import { getFallbackBots, rookieBot, rookieBotChance } from '../utils/pvpBot.js'
 import { pickMatch, pushRecent } from '../utils/pvpMatch.js'
-import { energyState, spendEnergy, PVP_ENERGY_MAX } from '../utils/pvpEnergy.js'
+import { energyState, spendEnergy, addEnergy, PVP_ENERGY_MAX, PVP_ENERGY_OVER, ENERGY_TICKET } from '../utils/pvpEnergy.js'
 import { dailyView, bumpDaily, canClaimDaily, PVP_DAILY_GOAL, PVP_DAILY_REWARD } from '../utils/pvpDaily.js'
 import { teamPower, coinForResult } from '../utils/pvpCoins.js'
 import { hashStr } from '../utils/seededRng.js'
@@ -70,6 +70,9 @@ export function useArena() {
   function pickOpponent() {
     const uid = auth.currentUser?.uid
     const seed = hashStr(`${uid || ''}|${Date.now()}|${Math.random()}`)
+    // 🐣 มือใหม่/แต้มน้อย/แพ้ติด → มีโอกาสเจอหุ่นซ้อมที่เลียนทีมเรา (ดู pvpBot.js)
+    const rookie = rookieBotChance({ rating: rating.value, loseStreak: auth.userData?.pvpLoseStreak, fights: auth.userData?.pvpFightsTotal })
+    if (rookie > 0 && Math.random() < rookie && myTeam.value.length) return rookieBot(myTeam.value, rating.value, seed, rawConfig.value?.gachaEvent)
     const human = pickMatch(rosterOpponents(members.rosterRows || {}, uid), rating.value, auth.userData?.pvpRecent, seed)
     if (human) return human
     // gachaEvent สด — กันเพ็ทรุ่นที่ยังไม่เปิดตัวโผล่ในทีมบอท (ดู pvpBot.js)
@@ -100,15 +103,16 @@ export function useArena() {
     // เควสประจำวัน "ลองสู้ในสนามประลอง" — นับทั้งชนะและแพ้ (เป้าคือให้คนเข้ามา ไม่ใช่ให้เก่ง)
     // เกาะไปกับ write ที่เกิดอยู่แล้ว ⇒ 0 write เพิ่ม · เขียนไม่สำเร็จ patchUser rollback ให้ทั้งก้อน
     const dq = bumpDailyQuest(auth.userData?.dailyQuest, 'pvp', today, 1)
+    const loseStreak = won ? 0 : (auth.userData?.pvpLoseStreak || 0) + 1
     const ok = await auth.patchUser(
       {
-        pvp: nextPvp, ...en, pvpDaily, pvpRecent, dailyQuest: dq,
+        pvp: nextPvp, ...en, pvpDaily, pvpRecent, dailyQuest: dq, pvpLoseStreak: loseStreak,
         ...(coin ? { coins: (auth.userData?.coins || 0) + coin } : {}),
         pvpFightsTotal: (auth.userData?.pvpFightsTotal || 0) + 1,   // achievement สู้ตลอดชีพ
         ...(won ? { pvpWinsTotal: (auth.userData?.pvpWinsTotal || 0) + 1 } : {}),   // achievement ชนะตลอดชีพ
       },
       {
-        pvp: nextPvp, ...en, pvpDaily, pvpRecent, dailyQuest: dq,
+        pvp: nextPvp, ...en, pvpDaily, pvpRecent, dailyQuest: dq, pvpLoseStreak: loseStreak,
         ...(coin ? { coins: increment(coin) } : {}),
         pvpFightsTotal: increment(1),
         ...(won ? { pvpWinsTotal: increment(1) } : {}),
@@ -198,6 +202,30 @@ export function useArena() {
     return ok
   }
 
+  // ⚡ ตั๋วพลังงาน: ซื้อ (เหรียญ) / ใช้ (+5 ล้นได้ถึง 10)
+  const energyTickets = computed(() => auth.userData?.pvpEnergyTicket || 0)
+  const canUseTicket = computed(() => energyTickets.value > 0 && energy.value.energy < PVP_ENERGY_OVER)
+  async function useEnergyTicket() {
+    // ⚠️ หยิบค่าก่อน patchUser (CLAUDE.md ข้อ 9)
+    const p = addEnergy(auth.userData?.pvpEnergy, auth.userData?.pvpEnergyAt, Date.now())
+    const have = energyTickets.value
+    if (!p || have <= 0) return false
+    const ok = await auth.patchUser({ ...p, pvpEnergyTicket: have - 1 }, { ...p, pvpEnergyTicket: increment(-1) })
+    toast(ok ? `${ENERGY_TICKET.emoji} พลังงานเป็น ${p.pvpEnergy} แล้ว` : 'ใช้ไม่สำเร็จ ลองอีกครั้งนะ', ok ? 'success' : 'error')
+    return ok
+  }
+  async function buyEnergyTicket() {
+    const coins = auth.userData?.coins || 0
+    const price = ENERGY_TICKET.price
+    if (coins < price) { toast(`เหรียญไม่พอ (ต้องใช้ ${price.toLocaleString()})`, 'info'); return false }
+    const ok = await auth.patchUser(
+      { coins: coins - price, totalSpent: (auth.userData?.totalSpent || 0) + price, pvpEnergyTicket: energyTickets.value + 1 },
+      { coins: increment(-price), totalSpent: increment(price), pvpEnergyTicket: increment(1) },
+    )
+    toast(ok ? `ได้${ENERGY_TICKET.name} 1 ใบ` : 'ซื้อไม่สำเร็จ', ok ? 'success' : 'error')
+    return ok
+  }
+
   // กดรับรางวัลตีครบ 5 ครั้งวันนี้
   async function claimDaily() {
     const today = todayStr()
@@ -215,5 +243,6 @@ export function useArena() {
     rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight,
     daily, dailyGoal, dailyReward, canClaim, claimDaily,
     antiLoss, canAntiLoss, useAntiLoss,
+    energyTickets, canUseTicket, useEnergyTicket, buyEnergyTicket,
   }
 }

@@ -64,6 +64,7 @@ export const OFFERS = [
   { id: 'up-epic',  sec: 'up', cost: ['rare', 12],   title: 'สุ่มเอพิค 1 ตัว', kind: 'randPet', rarity: 'epic' },
   { id: 'up-leg',   sec: 'up', cost: ['epic', 10],   title: 'สุ่มตำนาน 1 ตัว', kind: 'randPet', rarity: 'legendary' },
   { id: 'antiloss', sec: 'item', cost: ['common', 10], title: 'ยาแก้แพ้', kind: 'antiLoss' },
+  { id: 'energy', sec: 'item', cost: ['common', 8], title: 'ตั๋วพลังงาน', kind: 'energyTicket' },
 ]
 export const canAfford = (dust, [k, n]) => (dust?.[k] || 0) >= n
 

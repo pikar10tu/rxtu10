@@ -100,6 +100,7 @@ import { eventState, timeLeftText } from '../../utils/gachaEvent.js'
 import { rarityPool } from '../../utils/gacha.js'
 import { mergeRolls } from '../../utils/gachaMerge.js'
 import { ANTI_LOSS } from '../../utils/antiLoss.js'
+import { ENERGY_TICKET } from '../../utils/pvpEnergy.js'
 import { DUST, DUST_KEYS, DUST_COIN, OFFERS, dustName, dustOf, addDust, canAfford, migrationPreview, applyMigration, pickRandom } from '../../utils/stardust.js'
 
 const auth = useAuthStore()
@@ -113,7 +114,7 @@ const SECS = [
   { k: 'up', icon: '⬆️', label: 'แลกขึ้นระดับ' },
   { k: 'item', icon: '🎒', label: 'ไอเท็ม' },
 ]
-const ICON = { pick: '🎯', legend: '🎲', 'up-rare': '🔷', 'up-epic': '🔮', 'up-leg': '👑', antiloss: ANTI_LOSS.emoji }
+const ICON = { pick: '🎯', legend: '🎲', 'up-rare': '🔷', 'up-epic': '🔮', 'up-leg': '👑', antiloss: ANTI_LOSS.emoji, energy: ENERGY_TICKET.emoji }
 
 // แถบราคาใต้การ์ด — แดงเมื่อไม่พอ
 const Price = (p) => h('span', { class: ['dx-pr', { no: !canAfford(dust.value, p.cost) }] }, [h(DustIcon, { k: p.cost[0] }), ' ' + p.cost[1]])
@@ -168,13 +169,21 @@ async function buy(o) {
   if (o.kind === 'pickPet') { pickId.value = null; pickOpen.value = true; return }
   const [k, n] = o.cost
   const what = o.kind === 'monthPet' ? `สุ่มตำนาน 1 ใน 3 ของตู้เดือนนี้\n(${trio.value.map(p => p.name).join(' · ')})`
-    : o.kind === 'antiLoss' ? `${ANTI_LOSS.name} ×1` : o.title
+    : o.kind === 'antiLoss' ? `${ANTI_LOSS.name} ×1`
+    : o.kind === 'energyTicket' ? `${ENERGY_TICKET.name} ×1 (พลังงาน PvP +${ENERGY_TICKET.add})` : o.title
   if (!await confirm(`${what}\nใช้${dustName(k)} ${n} (เหลือ ${dust.value[k] - n})`)) return
   if (o.kind === 'antiLoss') {
     busy.value = true
     const ok = await commit({ dustDelta: { [k]: -n }, extraOpt: { antiLoss: (auth.userData?.antiLoss || 0) + 1 }, extraSrv: { antiLoss: increment(1) } })
     busy.value = false
     toast(ok ? `ได้${ANTI_LOSS.name} 1 ชิ้น` : 'แลกไม่สำเร็จ', ok ? 'success' : 'error')
+    return
+  }
+  if (o.kind === 'energyTicket') {
+    busy.value = true
+    const ok = await commit({ dustDelta: { [k]: -n }, extraOpt: { pvpEnergyTicket: (auth.userData?.pvpEnergyTicket || 0) + 1 }, extraSrv: { pvpEnergyTicket: increment(1) } })
+    busy.value = false
+    toast(ok ? `ได้${ENERGY_TICKET.name} 1 ใบ ใช้ได้ที่หน้าสนามประลอง` : 'แลกไม่สำเร็จ', ok ? 'success' : 'error')
     return
   }
   const pool = o.kind === 'monthPet' ? trio.value.map(p => p.id) : rarityPool(releasedPets(rawConfig.value?.gachaEvent, now.value), o.rarity)

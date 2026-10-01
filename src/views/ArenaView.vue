@@ -35,13 +35,21 @@
       <!-- พลังงานติดปุ่มหาคู่ (user สั่ง 28 ก.ย. — เดิมอยู่ในแผงบน ไกลจนไม่มีใครเห็น) -->
       <div class="ar-energy">
         <span class="ar-dots" role="img" :aria-label="`พลังงาน ${attacksLeft} จาก ${energyMax} หน่วย`">
-          <i v-for="i in energyMax" :key="i" :class="{ on: i <= attacksLeft }" />
+          <i v-for="i in Math.max(energyMax, attacksLeft)" :key="i" :class="{ on: i <= attacksLeft, over: i > energyMax }" />
         </span>
         <span class="ar-energy-txt">
           <b>พลังงาน {{ attacksLeft }}/{{ energyMax }}</b>
           <template v-if="energy.nextMs > 0"> · +1 หน่วยใน {{ countdown }}</template>
           <template v-else> · เต็มแล้ว</template>
         </span>
+        <!-- ⚡ ตั๋วพลังงาน: มีตั๋ว = ปุ่มใช้ · ไม่มี = ปุ่มซื้อ (user สั่ง 2 ต.ค.) -->
+        <button v-if="energyTickets > 0" class="ar-tk" :disabled="!canUseTicket || tkBusy" @click="onTicket('use')"
+          :title="canUseTicket ? '' : 'พลังงานล้นเต็ม 10 แล้ว'">
+          <Emoji :char="ENERGY_TICKET.emoji" /> ใช้ +{{ ENERGY_TICKET.add }} <small>มี {{ energyTickets }}</small>
+        </button>
+        <button v-else class="ar-tk buy" :disabled="tkBusy" @click="onTicket('buy')">
+          <Emoji :char="ENERGY_TICKET.emoji" /> <Emoji char="🪙" /> {{ ENERGY_TICKET.price.toLocaleString() }}
+        </button>
       </div>
       <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0 || !myTeam.length" @click="onFind">
         <span class="ar-find-main"><Emoji char="⚔️" /> หาคู่ต่อสู้</span>
@@ -101,6 +109,8 @@ import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import ArenaGuide from '../components/battle/ArenaGuide.vue'
 import { ANTI_LOSS } from '../utils/antiLoss.js'
+import { ENERGY_TICKET } from '../utils/pvpEnergy.js'
+import { useConfirm } from '../composables/useConfirm.js'
 import PvpHistory from '../components/battle/PvpHistory.vue'
 import ArenaStatus from '../components/battle/ArenaStatus.vue'
 import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
@@ -119,7 +129,22 @@ import { toMember } from '../utils/roster.js'
 const authStore = useAuthStore()
 const members = useMembersStore()
 const { pvpOpen, rawConfig } = useAppConfig()
-const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily, antiLoss, canAntiLoss, useAntiLoss } = useArena()
+const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily, antiLoss, canAntiLoss, useAntiLoss, energyTickets, canUseTicket, useEnergyTicket, buyEnergyTicket } = useArena()
+
+// ⚡ ตั๋วพลังงาน — ทั้งซื้อและใช้ต้องยืนยันก่อน
+const { confirm } = useConfirm()
+const tkBusy = ref(false)
+async function onTicket(kind) {
+  if (tkBusy.value) return
+  const msg = kind === 'buy'
+    ? `ซื้อ${ENERGY_TICKET.name} 1 ใบ ราคา ${ENERGY_TICKET.price.toLocaleString()} เหรียญ?
+ใช้แล้วพลังงาน +${ENERGY_TICKET.add} (ล้นเกิน 5 ได้ถึง 10)`
+    : `ใช้${ENERGY_TICKET.name} 1 ใบ?
+พลังงาน ${attacksLeft.value} → ${Math.min(10, attacksLeft.value + ENERGY_TICKET.add)}`
+  if (!await confirm(msg)) return
+  tkBusy.value = true
+  try { kind === 'buy' ? await buyEnergyTicket() : await useEnergyTicket() } finally { tkBusy.value = false }
+}
 
 // 💊 ใช้แล้วแก้ผลบนจอเดิมเลย (แต้ม ±0 · ซ่อนการ์ด)
 const alBusy = ref(false)
@@ -129,7 +154,8 @@ async function onAntiLoss() {
   alBusy.value = true
   try {
     if (await useAntiLoss(r.loss)) {
-      replay.value = { ...r, lossUsed: true, rating: { from: r.loss.from, to: r.loss.from, delta: 0 }, loseText: `แพ้ แต่${ANTI_LOSS.name}ช่วยไว้` }
+      // ⚠️ แก้บนก้อนเดิม ห้ามสร้าง object ใหม่ — BattleReplay watch(props.data) เห็นก้อนใหม่ = reset() เล่นไฟต์ซ้ำ (บั๊ก 2 ต.ค.)
+      Object.assign(r, { lossUsed: true, rating: { from: r.loss.from, to: r.loss.from, delta: 0 }, loseText: `แพ้ แต่${ANTI_LOSS.name}ช่วยไว้` })
     }
   } finally { alBusy.value = false }
 }
@@ -254,8 +280,14 @@ function openProfile(uid) {
 .ar-dots { display: inline-flex; gap: 4px; }
 .ar-dots i { width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,.08); border: 1.5px solid rgba(0,0,0,.18); }
 .ar-dots i.on { background: #facc15; border-color: #ca8a04; }
+.ar-dots i.over.on { background: #fb923c; border-color: #c2410c; }
 .ar-energy-txt { font-size: .76rem; color: rgba(0,0,0,.6); }
 .ar-energy-txt b { color: var(--ink); }
+.ar-energy-txt { flex: 1; }
+.ar-tk { font: inherit; font-size: .72rem; font-weight: 800; white-space: nowrap; border: 0; border-radius: 9px; padding: 5px 9px; background: #fde68a; color: #78350f; cursor: pointer; }
+.ar-tk small { font-weight: 700; opacity: .7; }
+.ar-tk.buy { background: #f1f5f9; color: #334155; }
+.ar-tk:disabled { opacity: .5; cursor: default; }
 .ar-energy + .ar-find { border-radius: 0 0 16px 16px; }
 .ar-find { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; border: var(--bw) solid var(--line); border-radius: 16px; padding: 16px 12px; margin-bottom: 12px; font-family: inherit; color: #fff; background: linear-gradient(160deg, #e11d48, #f97316); box-shadow: var(--pop); cursor: pointer; }
 .ar-find:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }

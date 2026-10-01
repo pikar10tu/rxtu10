@@ -78,3 +78,38 @@ export function getFallbackBots(myPower, myRating, seed, count, gachaEvent = nul
   }
   return out
 }
+
+// ── 🐣 หุ่นซ้อมมือใหม่ (user สั่ง 2 ต.ค. 2026 — คนใหม่เข้ามาแพ้ยับแล้วเลิกเล่น) ──
+//  ทีมบอท = "เลียนทีมเรา" ระดับ+เกรดเท่ากันทีละช่อง สุ่มพันธุ์ใหม่ (ธาตุสุ่ม)
+//  วัดจริง 300 ไฟต์/แบบ (ทุกระดับทีม c0..l2+ทีมผสม): เต็มทีม ≈ ชนะ 50% · ขาด 1 ตัว ≈ 99%
+//  ⇒ สุ่มขาดตัวครึ่งหนึ่ง = ชนะเฉลี่ย ~75% ไม่ว่าเพ็ทระดับไหน (เล็งตาม teamPower ไม่ได้ — กริดหยาบ วัดแล้ว 2%–100% กระโดด)
+export const ROOKIE_DROP_CHANCE = 0.5
+//  โอกาสเจอหุ่นแทนคนจริง
+//   · สู้ยังไม่ถึง 3 ตา → หุ่นเสมอ (คนใหม่เริ่ม 1000 = ไม่เข้าเกณฑ์แต้ม ต้องมีด่านนี้)
+//   · แต้ม < 1000 → 70% · แพ้ติด 2 ตาขึ้นไป → 100%
+//   · แต้ม 1000–1099 แพ้ติด 2 ตาขึ้นไป → 50% · นอกนั้น 0
+export const ROOKIE_FIGHTS = 3
+export function rookieBotChance({ rating = 1000, loseStreak = 0, fights = 0 } = {}) {
+  if ((fights || 0) < ROOKIE_FIGHTS) return 1
+  const streak2 = (loseStreak || 0) >= 2
+  if (rating < 1000) return streak2 ? 1 : 0.7
+  if (rating < 1100) return streak2 ? 0.5 : 0
+  return 0
+}
+
+/** หุ่นซ้อมมือใหม่ · myTeam = battle units ของเรา ({rarity, grade}) */
+export function rookieBot(myTeam, myRating, seed, gachaEvent = null) {
+  const rand = mulberry32((seed >>> 0) || 1)
+  const pets = releasedPets(gachaEvent)
+  let team = (myTeam || []).filter(Boolean).map(p => {
+    const pool = pets.filter(d => d.rarity === p.rarity)
+    const src = pool.length ? pool : pets
+    const def = src[Math.floor(rand() * src.length)]
+    return { id: def.id, rarity: def.rarity, element: def.element, grade: p.grade || 0 }
+  })
+  if (team.length > 1 && rand() < ROOKIE_DROP_CHANCE) team.splice(Math.floor(rand() * team.length), 1)
+  return {
+    uid: 'bot-rookie', name: 'หุ่นซ้อม', label: 'มือใหม่', isBot: true,
+    rating: Math.max(PVP_RATING_FLOOR, myRating), team,
+  }
+}

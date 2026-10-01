@@ -90,6 +90,8 @@ export const USER_DEFAULTS = {
   // ⚠️ pvpAttackDate/pvpAttacksUsed/pvpBoardNonce/pvpRefreshAt = ฟิลด์ตาย (28 ก.ย. 2026 เปลี่ยนเป็นพลังงาน+สุ่มคู่)
   pvpEnergy: null,       // พลังงาน ณ pvpEnergyAt (null = เต็ม) · utils/pvpEnergy.js
   pvpEnergyAt: null,     // ms จุดเริ่มนับเติมครั้งถัดไป
+  pvpEnergyTicket: 0,    // ⚡ ตั๋วพลังงาน (utils/pvpEnergy.js ENERGY_TICKET)
+  pvpLoseStreak: 0,      // แพ้ติดกันกี่ตา — ใช้ตัดสินโอกาสเจอหุ่นซ้อมมือใหม่ (utils/pvpBot.js)
   pvpDaily: null,        // { date, n, claimed } รางวัลตีครบ 5/วัน · utils/pvpDaily.js
   pvpRecent: [],         // uid คู่ล่าสุด 3 คน (กันเจอซ้ำ/สลับ)
   pvpFightsTotal: 0,     // ลงสนามตลอดชีพ (achievement)
