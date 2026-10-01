@@ -8,6 +8,19 @@
      ตรรกะช่องอยู่ที่ utils/teamSlots.js (pure + มีเทส) — ที่นี่เหลือแค่ผูกสาย -->
 <template>
   <BottomSheet :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
+    <!-- ทีม 1/2/3 (utils/teamPresets.js) — ทีมที่ "ใช้อยู่" คือทีมเดียวที่ลงทุกที่เหมือนเดิม · ชุดอื่นจัดเก็บไว้สลับได้ -->
+    <div class="tp-presets" role="tablist" aria-label="ทีมที่จัดไว้">
+      <button v-for="(p, i) in presets.presets" :key="i" type="button" role="tab" class="tp-preset"
+        :class="{ on: viewIdx === i }" :aria-selected="viewIdx === i" @click="viewIdx = i">
+        <span class="tp-preset-n">ทีม {{ i + 1 }}</span>
+        <span class="tp-preset-faces"><template v-if="p.length"><Emoji v-for="id in p" :key="id" :char="defOf(id).emoji" /></template><template v-else>ว่าง</template></span>
+        <span v-if="presets.idx === i" class="tp-preset-use">ใช้อยู่</span>
+      </button>
+    </div>
+    <button v-if="viewIdx !== presets.idx" type="button" class="tp-use" :disabled="!presets.presets[viewIdx].length" @click="useThis">
+      {{ presets.presets[viewIdx].length ? 'ใช้ทีมนี้' : 'ใส่เพ็ทก่อนถึงจะใช้ทีมนี้ได้' }}
+    </button>
+
     <!-- วิธีเลือกแบบเดียวกับตู้โชว์ (utils/slotEdit.js): แตะช่อง = เลือก · แตะอีกช่อง = สลับ · ✕ = เอาออก
          ใส่เสร็จ = เลิกเลือก (ไม่กระโดดเอง) · เต็มแล้วต้องเลือกช่องก่อน ถึงจะแทน (ไม่แทนเงียบๆ) -->
     <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, minmax(0, 96px))` }">
@@ -85,6 +98,7 @@ import { toSlots } from '../../utils/teamSlots.js'
 import { tapSlot, tapItem, removeAt, compact } from '../../utils/slotEdit.js'
 import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForms.js'
 import { teamSynergy } from '../../utils/teamSynergy.js'
+import { readPresets, editPresetPatch, usePresetPatch } from '../../utils/teamPresets.js'
 
 const props = defineProps({ open: { type: Boolean, default: false } })
 defineEmits(['update:open'])
@@ -104,15 +118,20 @@ const ownedIds = computed(() => new Set(owned.value.map(p => p.id)))
 // active เฉพาะตัวที่ยังครอบครอง ตัดให้ยาวไม่เกิน battleSlots
 const activeIds = computed(() =>
   (auth.userData?.activePets || []).filter(id => id && ownedIds.value.has(id)).slice(0, battleSlots.value))
-const slots = computed(() => toSlots(activeIds.value, battleSlots.value))
+const presets = computed(() => readPresets(auth.userData, ownedIds.value, battleSlots.value))
+const viewIdx = ref(0)   // ทีมที่กำลังดู/แก้ (ไม่จำเป็นต้องเป็นทีมที่ใช้อยู่)
+watch(() => props.open, (o) => { if (o) viewIdx.value = presets.value.idx }, { immediate: true })
+const viewIds = computed(() => presets.value.presets[viewIdx.value] || [])
+const slots = computed(() => toSlots(viewIds.value, battleSlots.value))
 /** ตัวนี้อยู่ช่องที่เท่าไหร่ (1-based) · 0 = ไม่ได้อยู่ในทีม */
 const slotNoOf = (id) => edit.value.slots.indexOf(id) + 1
 
 // สถานะแก้ไขในแผ่นนี้ — ช่องว่างค้างไว้ระหว่างแก้ (ตัวอื่นไม่เลื่อน) · บันทึกแบบตัดช่องว่าง (เอนจินต้องการทีมติดกัน)
 const edit = ref({ slots: [], sel: null })
 watch(() => props.open, (o) => { if (o) edit.value = { slots: slots.value.slice(), sel: null } }, { immediate: true })
+watch(viewIdx, () => { edit.value = { slots: slots.value.slice(), sel: null }; pendingId.value = null })
 // ทีมเปลี่ยนจากที่อื่น (เช่นกด ถอด ในหน้าข้อมูลเพ็ท ⓘ) → ตามให้ทัน · ของที่เราแก้เองตรงกันอยู่แล้ว ไม่รีเซ็ตช่องว่าง
-watch(activeIds, (ids) => {
+watch(viewIds, (ids) => {
   if (ids.join() !== compact(edit.value.slots).join()) edit.value = { slots: toSlots(ids, battleSlots.value), sel: null }
 })
 
@@ -164,8 +183,17 @@ const sortedOwned = computed(() => owned.value.slice().sort((a, b) => {
 }))
 
 async function save(next) {
-  await auth.patchUser({ activePets: next }, { activePets: next })
-  syncRosterRow()   // ทีมเปลี่ยน → คู่ต่อสู้ใน Arena ต้องเห็นทีมใหม่
+  const i = viewIdx.value
+  const patch = editPresetPatch(presets.value, i, next)
+  await auth.patchUser(patch, patch)
+  if (patch.activePets) syncRosterRow()   // ทีมที่ใช้เปลี่ยน → คู่ต่อสู้ใน Arena ต้องเห็นทีมใหม่
+}
+async function useThis() {
+  const i = viewIdx.value
+  const patch = usePresetPatch(presets.value, i)
+  const ok = await auth.patchUser(patch, patch)
+  if (ok) { syncRosterRow(); toast(`ใช้ทีม ${i + 1} แล้ว`, 'success') }
+  else toast('เปลี่ยนทีมไม่สำเร็จ', 'error')
 }
 
 function apply(res) {
@@ -199,6 +227,15 @@ function pick(id) {
 </script>
 
 <style scoped>
+.tp-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+.tp-preset { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 7px 4px; border-radius: 12px; border: var(--bw) solid var(--line); background: #fff; font-family: inherit; color: var(--ink); cursor: pointer; }
+.tp-preset.on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, #fff); box-shadow: 0 0 0 1px var(--primary); }
+.tp-preset-n { font-size: .78rem; font-weight: 800; }
+.tp-preset-faces { font-size: .9rem; min-height: 1.2em; color: var(--muted); }
+.tp-preset-faces:empty { display: none; }
+.tp-preset-use { font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 7px; }
+.tp-use { width: 100%; margin-bottom: 8px; border: 0; border-radius: 12px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .9rem; color: #fff; background: linear-gradient(135deg, #6d4fd0, #a36bd8); cursor: pointer; }
+.tp-use:disabled { opacity: .5; cursor: default; }
 .tp-slots { display: grid; gap: 10px; margin: 4px 0; justify-content: center; }
 .tp-slotwrap { position: relative; }
 .tp-slot { position: relative; width: 100%; aspect-ratio: .82; padding: 14px 4px 6px; font-family: inherit; border-radius: 16px; cursor: pointer;
