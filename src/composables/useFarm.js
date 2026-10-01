@@ -185,14 +185,16 @@ export function useFarm() {
     toast(`ขาย ${crop.name} ×${n} = +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 
-  // ขายพืชทองทั้งกอง (ราคา ×3)
-  async function sellGold(cropId) {
-    const n = gold.value[cropId] || 0
+  // ขายพืชทอง (ราคา ×3) · qty ว่าง = ทั้งกอง
+  async function sellGold(cropId, qty = null) {
+    const have = gold.value[cropId] || 0
+    const n = qty == null ? have : Math.min(qty, have)
     if (n <= 0) return
     const crop = getCrop(cropId)
     const gain = goldPrice(crop) * n
     const g = { ...gold.value }
-    delete g[cropId]
+    g[cropId] = have - n
+    if (g[cropId] <= 0) delete g[cropId]
     await commit(clonePlots(), { coinDelta: gain, salesGain: gain, extra: { gold: g } })
     toast(`ขาย ${crop.name}ทอง ×${n} = +${gain.toLocaleString()} เหรียญ`, 'success')
   }

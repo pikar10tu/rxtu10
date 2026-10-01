@@ -158,7 +158,9 @@
              ที่นี่แค่วาด: ไม่รู้ราคากาชา ไม่แตะ auth store -->
         <div v-if="!data.won && data.loseTip" class="br-tip">
           <div class="br-tip-text">{{ data.loseTip.text }}</div>
-          <button class="br-btn sm br-tip-btn" @click="goTip(data.loseTip.to)">{{ data.loseTip.label }}</button>
+          <div class="br-tip-acts">
+            <button v-for="a in data.loseTip.actions" :key="a.to" class="br-btn sm br-tip-btn" @click="goTip(a.to)">{{ a.label }}</button>
+          </div>
         </div>
 
         <div class="br-sum-team">
@@ -1768,6 +1770,7 @@ onUnmounted(() => {
 .br-tip { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .br-tip-text { font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.8); text-align: center; }
 .br-tip-btn { background: var(--gold); color: var(--ink); }
+.br-tip-acts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .br-result.win { color: #34d399; }
 
 /* ⚠️ การ์ด inspect พื้นเข้ม (#1e293b) — ตัวอักษรต้องสว่าง

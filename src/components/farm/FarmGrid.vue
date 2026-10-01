@@ -52,7 +52,7 @@
       </div>
       <div v-if="!invList.length" class="inv-empty">ยังไม่มีผลผลิต — ปลูกแล้วเก็บเกี่ยวมาขายได้เลย</div>
       <div v-else class="inv-list">
-        <button v-for="it in invList" :key="it.key" class="inv-item" :class="{ gold: it.gold }" @click="confirmSell(it, $event)">
+        <button v-for="it in invList" :key="it.key" class="inv-item" :class="{ gold: it.gold }" @click="openSell(it, $event)">
           <span class="inv-emoji"><Emoji :char="it.emoji" /></span>
           <span class="inv-name">{{ it.name }}</span>
           <span class="inv-qty">×{{ it.qty }}</span>
@@ -60,6 +60,22 @@
         </button>
       </div>
     </div>
+
+    <!-- ขายรายชิ้น: เลื่อนเลือกจำนวน (ขายทั้งหมดยังเป็น confirm เดิม) -->
+    <BottomSheet :open="!!sellIt" :icon="sellIt?.emoji || '🧺'" :title="sellIt ? 'ขาย' + sellIt.name : ''" @update:open="(v) => { if (!v) sellIt = null }">
+      <div v-if="sellIt" class="sq">
+        <div class="sq-n">×{{ sellQty }} <small>จาก {{ sellIt.qty }}</small></div>
+        <div class="sq-row">
+          <button class="sq-step" :disabled="sellQty <= 1" aria-label="ลด" @click="sellQty--">−</button>
+          <input v-model.number="sellQty" class="sq-range" type="range" min="1" :max="sellIt.qty" step="1" aria-label="จำนวนที่ขาย">
+          <button class="sq-step" :disabled="sellQty >= sellIt.qty" aria-label="เพิ่ม" @click="sellQty++">+</button>
+        </div>
+        <div class="sq-quick">
+          <button v-for="q in sellPresets" :key="q.l" @click="sellQty = q.v">{{ q.l }}</button>
+        </div>
+        <button class="sq-go" @click="doSell">ขาย ×{{ sellQty }} · +{{ (sellIt.sellPrice * sellQty).toLocaleString() }} <Emoji char="🪙" /></button>
+      </div>
+    </BottomSheet>
 
     <SeedPicker
       :open="pickIndex !== null"
@@ -84,6 +100,7 @@ import { getCrop, stageEmoji, DEFAULT_STAGES } from '../../data/crops.js'
 import { fluentFile } from '../../utils/emoji.js'
 import { flyTo, cancelFarmFx } from '../../utils/farmfx.js'
 import SeedPicker from './SeedPicker.vue'
+import BottomSheet from '../shared/BottomSheet.vue'
 import FarmBook from './FarmBook.vue'
 import { goldEmoji, goldPrice } from '../../data/farmMastery.js'
 
@@ -178,19 +195,30 @@ function popBasket() {
   popTimer = setTimeout(() => { basketPop.value = false }, 380)
 }
 
-// ยืนยันก่อนขาย (กันกดพลาด)
-// ⚠️ จับ rect ของปุ่มแบบ synchronous ก่อน await confirm — หลัง await แล้ว
-//    currentTarget จะเป็น null และรายการอาจหายไปจาก DOM แล้ว
-async function confirmSell(it, ev) {
-  const from = ev?.currentTarget?.getBoundingClientRect()
-  const total = (it.sellPrice * it.qty).toLocaleString()
-  if (!await confirm(`ขาย ${it.name} ×${it.qty} = +${total} เหรียญ?`)) return
+// ขายรายชิ้น: เปิดแผงเลื่อนเลือกจำนวน — แผงนี้คือการยืนยันในตัว ไม่ต้อง confirm ซ้ำ
+// ⚠️ จับ rect ของปุ่มตอนแตะ (synchronous) ไว้ยิงเหรียญ — ตอนกดขายในแผง ปุ่มเดิมอาจหายจาก DOM แล้ว
+const sellIt = ref(null)
+const sellQty = ref(1)
+let sellFrom = null
+function openSell(it, ev) {
+  sellFrom = ev?.currentTarget?.getBoundingClientRect()
+  sellIt.value = it
+  sellQty.value = it.qty
+}
+const sellPresets = computed(() => {
+  const n = sellIt.value?.qty || 0
+  return [{ l: '1', v: 1 }, { l: 'ครึ่ง', v: Math.max(1, Math.floor(n / 2)) }, { l: 'เหลือไว้ 1', v: Math.max(1, n - 1) }, { l: 'ทั้งหมด', v: n }]
+})
+async function doSell() {
+  const it = sellIt.value
+  const n = Math.min(Math.max(1, Math.floor(sellQty.value || 1)), it.qty)
+  sellIt.value = null
   // farm.sell คืน undefined เสมอ (useFarm กลืนผลลัพธ์ commit() เอง) — เช็กจาก coins
   // หลัง await แทน เพราะถ้าบันทึกล้มเหลว useFarm จะ rollback coins กลับเป็นค่าเดิมให้
   const before = coins.value
-  if (it.gold) await farm.sellGold(it.id)
-  else await farm.sell(it.id)
-  if (coins.value > before) shootCoins(from)
+  if (it.gold) await farm.sellGold(it.id, n)
+  else await farm.sell(it.id, n)
+  if (coins.value > before) shootCoins(sellFrom)
 }
 
 async function confirmSellAll(ev) {
@@ -274,6 +302,16 @@ const invList = computed(() => [
 .inv-name { font-size: .72rem; font-weight: 700; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .inv-qty { font-weight: 800; font-size: .74rem; }
 .inv-sell { font-size: .7rem; color: #b45309; font-weight: 700; }
+.sq { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 10px; }
+.sq-n { text-align: center; font-size: 1.6rem; font-weight: 800; color: var(--ink, #333); }
+.sq-n small { font-size: .75rem; font-weight: 600; opacity: .6; }
+.sq-row { display: flex; align-items: center; gap: 10px; }
+.sq-range { flex: 1; accent-color: #d97706; height: 28px; }
+.sq-step { width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid #f3c77a; background: #fff8eb; font-size: 1.2rem; font-weight: 800; color: #b45309; cursor: pointer; font-family: inherit; }
+.sq-step:disabled { opacity: .4; cursor: default; }
+.sq-quick { display: flex; gap: 6px; }
+.sq-quick button { flex: 1; padding: 7px 0; border-radius: 10px; border: 1px solid var(--line, #e5e5e5); background: #fff; font-family: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; }
+.sq-go { border: none; border-radius: 14px; padding: 12px; background: linear-gradient(135deg,#f59e0b,#d97706); color: #fff; font-weight: 800; font-size: .95rem; font-family: inherit; cursor: pointer; }
 
 /* ค่าเฟรม 0%/100% ต้องตรงกับ box-shadow ที่ .plot.ready ประกาศไว้ (animation เขียนทับทุกเฟรม)
    และต้องมี inset shadow ของดินด้วย ไม่งั้นแปลงพร้อมเก็บจะเสียเงาดินด้านในไป */
