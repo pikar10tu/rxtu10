@@ -18,6 +18,9 @@
         <button role="tab" :aria-selected="tab === 'quiz'" :class="{ on: tab === 'quiz' }" @click="setTab('quiz')">
           <Emoji char="📝" /> ข้อสอบ
         </button>
+        <button role="tab" :aria-selected="tab === 'sum'" :class="{ on: tab === 'sum' }" @click="setTab('sum')">
+          <Emoji char="📚" /> สรุป
+        </button>
         <button role="tab" :aria-selected="tab === 'flash'" :class="{ on: tab === 'flash' }" @click="setTab('flash')">
           <Emoji char="🧠" /> แฟลชการ์ด
           <!-- ป้ายจำนวนใบรอ = ตัวดึงคนเข้าแท็บนี้ (แฟลชการ์ดคนใช้น้อย — user บอก) -->
@@ -26,7 +29,8 @@
       </div>
 
       <!-- ── แท็บข้อสอบ ── -->
-      <template v-if="tab === 'quiz'">
+      <SummaryLibrary v-if="tab === 'sum'" />
+      <template v-else-if="tab === 'quiz'">
         <div class="sv-modes">
           <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
           <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
@@ -212,6 +216,7 @@ import { useEscapeKey } from '../composables/useEscapeKey.js'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
+import SummaryLibrary from '../components/study/SummaryLibrary.vue'
 import { ref, computed, onUnmounted } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -256,7 +261,8 @@ const queueSize = computed(() => dueCount.value + Math.min(newCount.value, NEW_P
 
 // ── แท็บหน้าหลัก (ข้อสอบ | แฟลชการ์ด) — จำแท็บล่าสุดไว้ในเครื่อง (ของสะดวกล้วน อ่าน/เขียนพังก็ไม่เป็นไร) ──
 const TAB_KEY = 'rxtu.studyTab'
-const tab = ref((() => { try { return localStorage.getItem(TAB_KEY) === 'flash' ? 'flash' : 'quiz' } catch { return 'quiz' } })())
+// ?tab=sum มาจากปุ่มย้อนกลับของหน้าอ่านสรุป
+const tab = ref((() => { if (location.hash.includes('tab=sum')) return 'sum'; try { const t = localStorage.getItem(TAB_KEY); return ['flash', 'sum'].includes(t) ? t : 'quiz' } catch { return 'quiz' } })())
 function setTab(t) { tab.value = t; try { localStorage.setItem(TAB_KEY, t) } catch { /* private mode */ } }
 
 const QUICK_SIZE = 10               // รอบสั้น "มีเวลาน้อย"
