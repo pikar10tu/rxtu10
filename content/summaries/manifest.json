@@ -7,7 +7,7 @@
 {"id":"cad","g":"cvs","t":"Coronary artery disease","s":"final","a":["บัว","ขิม"],"r":["กัส","ซาเนียร์"],"f":"Final Ver/Clinic/2.Cardiovascular🫀/2.3_CAD_rxtu10_final.pdf","an":["หรรษธร เปลี่ยนภักดี","กมลพร ว่องไว"]},
 {"id":"vte","g":"cvs","t":"Venous thromboembolism","s":"draft","a":["ป่าน"],"r":[],"f":"รอตรวจ/Clinic/2.Cardiovascular🫀/2.5_Venous Thromboembolism_rxtu10_รอตรวจ.pdf","an":["ฐิตารีย์ ปานสง่า"]},
 {"id":"dyslipidemia","g":"cvs","t":"Dyslipidemia","s":"draft","a":["อ้น"],"r":[],"f":"รอตรวจ/Clinic/2.Cardiovascular🫀/Dyslipidemia_สรุป.pdf","an":["เกตุโพธิ์ ใจสงฆ์"]},
-{"id":"hf","g":"cvs","t":"Stable heart failure","s":"draft","a":[],"r":[],"f":"รอตรวจ/Clinic/2.Cardiovascular🫀/Stable Heart failure.pdf","an":["ปราณปริยา จ่าพล"]},
+{"id":"hf","g":"cvs","t":"Stable heart failure","s":"draft","a":["mild"],"r":[],"f":"รอตรวจ/Clinic/2.Cardiovascular🫀/Stable Heart failure.pdf","an":["ปราณปริยา จ่าพล"]},
 {"id":"fungal","g":"derm","t":"Superficial fungal infection","s":"final","a":["มายด์"],"r":["บลู","แพรไหม"],"f":"Final Ver/Clinic/3.Dermatologic🤩/3.2_Superficial fungal infection_Rxtu10_final.pdf","an":["กชกร ทรงเตชะเลิศ"]},
 {"id":"acne","g":"derm","t":"Acne","s":"final","a":["เมย์"],"r":["แตงโม","เบเบ้"],"f":"Final Ver/Clinic/3.Dermatologic🤩/3.3_Acne_Rxtu10_final.pdf","an":["ณัฏฐณิชา ตราหยก"]},
 {"id":"herpes","g":"derm","t":"Herpes","s":"final","a":["มายด์"],"r":["บลู","แพรไหม"],"f":"Final Ver/Clinic/3.Dermatologic🤩/3.5_Herpes_Rxtu10_final.pdf","an":["กชกร ทรงเตชะเลิศ"]},
