@@ -5,7 +5,7 @@
         <div class="sv-title"><Emoji char="📚" /> เตรียมสอบ</div>
         <HelpButton topic="study" />
       </div>
-      <div class="sv-sub">ทำข้อสอบ + ทบทวนกลุ่มยา ({{ DECK.length }} ตัวยา)</div>
+      <div class="sv-sub">อีก {{ daysLeft }} วันถึงสอบ PLE-CC1</div>
     </div>
 
     <template v-if="!authStore.isLoggedIn">
@@ -14,30 +14,50 @@
 
     <!-- ── HOME ── แท็บ ข้อสอบ | แฟลชการ์ด (แบบ B — user เลือก 25 ก.ย. 2026) -->
     <template v-else-if="mode === 'home'">
-      <div class="sv-tabs" role="tablist">
-        <button role="tab" :aria-selected="tab === 'quiz'" :class="{ on: tab === 'quiz' }" @click="setTab('quiz')">
-          <Emoji char="📝" /> ข้อสอบ
-        </button>
-        <button role="tab" :aria-selected="tab === 'sum'" :class="{ on: tab === 'sum' }" @click="setTab('sum')">
-          <Emoji char="📚" /> สรุป
-        </button>
-        <button role="tab" :aria-selected="tab === 'flash'" :class="{ on: tab === 'flash' }" @click="setTab('flash')">
-          <Emoji char="🧠" /> แฟลชการ์ด
-          <!-- ป้ายจำนวนใบรอ = ตัวดึงคนเข้าแท็บนี้ (แฟลชการ์ดคนใช้น้อย — user บอก) -->
-          <span v-if="queueSize" class="sv-tab-n">{{ queueSize }}</span>
-        </button>
+      <!-- ── หน้าแรก: ค้นหา + 4 ประตู (แบบ B — user เลือก 3 ต.ค. 2026) ── -->
+      <template v-if="tab === 'home'">
+        <input v-model="search" class="sv-search" type="search" placeholder="ค้นหา โหมด เครื่องคำนวณ หรือเรื่องที่สรุป" aria-label="ค้นหาในหน้าเตรียมสอบ">
+        <div v-if="search.trim()" class="sv-results">
+          <template v-for="r in results" :key="r.key">
+            <RouterLink v-if="r.to" :to="r.to" class="sv-res">
+              <span class="sv-res-em"><Emoji :char="r.emoji" /></span>
+              <span class="sv-res-t"><b>{{ r.title }}</b><small>{{ r.sub }}</small></span>
+            </RouterLink>
+            <button v-else type="button" class="sv-res" :class="{ off: r.off }" :disabled="r.off" @click="openDoor(r.door)">
+              <span class="sv-res-em"><Emoji :char="r.emoji" /></span>
+              <span class="sv-res-t"><b>{{ r.title }}</b><small>{{ r.sub }}</small></span>
+            </button>
+          </template>
+          <div v-if="!results.length" class="sv-res-none">ไม่เจอ "{{ search.trim() }}"</div>
+        </div>
+        <div v-else class="sv-doors">
+          <button v-for="d in DOORS" :key="d.key" type="button" class="sv-door" :class="'d-' + d.key" @click="openDoor(d.key)">
+            <span v-if="d.badge" class="sv-door-badge">{{ d.badge }}</span>
+            <span class="sv-door-em"><Emoji :char="d.emoji" /></span>
+            <span class="sv-door-t"><b>{{ d.title }}</b><small>{{ d.sub }}</small></span>
+          </button>
+        </div>
+      </template>
+      <div v-else class="sv-doorhead">
+        <button type="button" class="sv-back" aria-label="กลับหน้าเตรียมสอบ" @click="openDoor('home')">‹</button>
+        <span><Emoji :char="doorOf(tab).emoji" /> {{ doorOf(tab).title }}</span>
       </div>
 
-      <!-- ── แท็บข้อสอบ ── -->
       <SummaryLibrary v-if="tab === 'sum'" />
+      <div v-else-if="tab === 'tool'" class="sv-modes">
+        <QuizModeCard v-for="t in TOOLS" :key="t.title" :emoji="t.emoji" :title="t.title" :subtitle="t.sub" :to="t.to" :coming-soon="!t.to" />
+      </div>
       <template v-else-if="tab === 'quiz'">
+        <RouterLink v-if="redoDue" to="/quiz?mode=redo" class="sv-feat">
+          <span class="sv-feat-em"><Emoji char="🔁" /></span>
+          <span class="sv-feat-t"><b>ข้อที่เคยผิดรออยู่ {{ redoDue }} ข้อ</b><small>ตอบใหม่จนถูก 3 ครั้งติดแล้วหลุดกอง</small></span>
+          <span class="sv-feat-go">เริ่มเลย ›</span>
+        </RouterLink>
         <div class="sv-modes">
           <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
           <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
           <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
           <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
-          <QuizModeCard emoji="🧮" title="ฝึกคำนวณ CrCl" subtitle="ฝึกสูตร Cockcroft-Gault · ทำกี่ข้อก็ได้" to="/study/crcl" />
-          <QuizModeCard emoji="👶" title="ขนาดยาน้ำเด็ก" subtitle="ใส่น้ำหนัก ได้ขนาดเป็น mL ต่อครั้ง · 19 ยา" to="/study/ped-dose" />
         </div>
         <!-- ยังไม่เปิด = แถบประบาง ไม่กินที่แถวแรกเหมือนเดิม -->
         <div class="sv-soon"><Emoji char="🗓️" /> ข้อสอบประจำวัน ชุดเดียวกันทั้งรุ่น · เร็วๆ นี้</div>
@@ -62,8 +82,8 @@
         </RouterLink>
       </template>
 
-      <!-- ── แท็บแฟลชการ์ด ── -->
-      <div v-else class="sv-flash">
+      <!-- ── ประตูแฟลชการ์ด ── -->
+      <div v-else-if="tab === 'flash'" class="sv-flash">
         <!-- คนยังไม่เคยเปิดเลย: บอกก่อนว่ามันคืออะไร ใช้เวลาแค่ไหน (เดิมเจอแต่ตัวเลข 0 สามช่อง) -->
         <p v-if="!seenCount" class="sv-intro">
           การ์ดตัวยา {{ DECK.length }} ตัว ทายกลุ่มยา ข้อบ่งใช้ และขนาดยา ·
@@ -218,9 +238,10 @@ import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import SummaryLibrary from '../components/study/SummaryLibrary.vue'
+import { SUMMARIES } from '../data/summaryIndex.js'
 import { ref, computed, onUnmounted } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase/config.js'
+import { db, PLE_CC_DATE } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { bumpGlobalStat } from '../composables/useGlobalStats.js'
@@ -261,10 +282,41 @@ const masteredCount = computed(() =>
 const queueSize = computed(() => dueCount.value + Math.min(newCount.value, NEW_PER_SESSION))
 
 // ── แท็บหน้าหลัก (ข้อสอบ | แฟลชการ์ด) — จำแท็บล่าสุดไว้ในเครื่อง (ของสะดวกล้วน อ่าน/เขียนพังก็ไม่เป็นไร) ──
-const TAB_KEY = 'rxtu.studyTab'
-// ?tab=sum มาจากปุ่มย้อนกลับของหน้าอ่านสรุป
-const tab = ref((() => { if (location.hash.includes('tab=sum')) return 'sum'; try { const t = localStorage.getItem(TAB_KEY); return ['flash', 'sum'].includes(t) ? t : 'quiz' } catch { return 'quiz' } })())
-function setTab(t) { tab.value = t; try { localStorage.setItem(TAB_KEY, t) } catch { /* private mode */ } }
+// ── 4 ประตู (3 ต.ค. 2026) — เปิดหน้ามาเจอหน้าแรกเสมอ · ?tab=sum|tool|… (ปุ่มย้อนจากหน้าอ่านสรุป/เครื่องคำนวณ) พากลับเข้าประตูเดิม ──
+const tab = ref((location.hash.match(/[?&]tab=(quiz|sum|flash|tool)/) || [])[1] || 'home')
+const search = ref('')
+function openDoor(t) { tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
+const readySummaries = SUMMARIES.filter(x => x.ready)
+const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
+const DOORS = computed(() => [
+  { key: 'quiz',  emoji: '📝', title: 'ข้อสอบ',      sub: 'ทั่วไป · Zen · Time Attack · ข้อที่ผิด', badge: redoDue.value || 0 },
+  { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: `อ่านได้ ${readySummaries.length} จาก ${SUMMARIES.length} เรื่อง`, badge: 0 },
+  { key: 'flash', emoji: '🧠', title: 'แฟลชการ์ด',   sub: `ทบทวนกลุ่มยา ${DECK.length} ตัว`, badge: queueSize.value || 0 },
+  { key: 'tool',  emoji: '🧮', title: 'เครื่องคำนวณ', sub: 'CrCl · ยาน้ำเด็ก', badge: 0 },
+])
+const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
+const TOOLS = [
+  { emoji: '🧮', title: 'ฝึกคำนวณ CrCl', sub: 'ฝึกสูตร Cockcroft-Gault · ทำกี่ข้อก็ได้', to: '/study/crcl' },
+  { emoji: '👶', title: 'ขนาดยาน้ำเด็ก', sub: 'ใส่น้ำหนัก ได้ขนาดเป็น mL ต่อครั้ง · 19 ยา', to: '/study/ped-dose' },
+  { emoji: '⚖️', title: 'IBW / ABW / BMI / BSA', sub: 'เร็วๆ นี้', to: null },
+  { emoji: '💉', title: 'IV rate + แปลง mEq', sub: 'เร็วๆ นี้', to: null },
+]
+// ค้นหาข้ามทุกประตู: โหมดข้อสอบ · เครื่องคำนวณ · ชื่อเรื่องสรุป (ชื่อ+ผู้จัดทำ) · แฟลชการ์ด
+const SEARCH_ITEMS = [
+  { key: 'm-quiz', emoji: '📝', title: 'ข้อสอบทั่วไป', sub: 'ข้อสอบ', to: '/quiz', words: 'quiz ข้อสอบ ทั่วไป' },
+  { key: 'm-zen', emoji: '♾️', title: 'Zen', sub: 'ข้อสอบ', to: '/quiz?mode=zen', words: 'zen เซน' },
+  { key: 'm-redo', emoji: '🔁', title: 'ข้อที่เคยผิด', sub: 'ข้อสอบ', to: '/quiz?mode=redo', words: 'ผิด redo ทบทวน' },
+  { key: 'm-ta', emoji: '⏱️', title: 'Time Attack', sub: 'ข้อสอบ', to: '/study/time-attack', words: 'time attack จับเวลา' },
+  { key: 'm-flash', emoji: '🧠', title: 'แฟลชการ์ด', sub: 'ทบทวนกลุ่มยา', door: 'flash', words: 'flash แฟลช การ์ด กลุ่มยา' },
+  ...TOOLS.map(t => ({ key: 't-' + t.title, emoji: t.emoji, title: t.title, sub: 'เครื่องคำนวณ' + (t.to ? '' : ' · เร็วๆ นี้'), to: t.to, off: !t.to, words: 'คำนวณ calculator ped pediatric เด็ก dose' })),
+  ...SUMMARIES.map(x => ({ key: 's-' + x.id, emoji: '📖', title: x.title, sub: x.ready ? `สรุป · โดย ${x.authors.join(', ') || '-'}` : 'สรุป · กำลังดำเนินการ', to: x.ready ? `/study/summary/${x.id}` : null, off: !x.ready, words: x.authors.join(' ') })),
+]
+const results = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return []
+  return SEARCH_ITEMS.filter(r => `${r.title} ${r.words}`.toLowerCase().includes(q))
+    .sort((a, b) => (a.off ? 1 : 0) - (b.off ? 1 : 0)).slice(0, 20)
+})
 
 const QUICK_SIZE = 10               // รอบสั้น "มีเวลาน้อย"
 const SEC_PER_CARD = 12             // เวลาเฉลี่ยต่อใบ (นึก+พลิก+ให้คะแนน) ใช้โชว์ประมาณการเท่านั้น
@@ -499,13 +551,36 @@ async function sendReport() {
 .sv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 36px 0; font-size: .85rem; }
 
 /* home */
+/* ── 4 ประตู (3 ต.ค. 2026) ── */
+.sv-search { width: 100%; box-sizing: border-box; padding: 11px 14px; border: var(--bw) solid var(--line); border-radius: 14px; font: inherit; font-size: .9rem; background: #fff; margin-bottom: 12px; }
+.sv-doors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sv-door { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-height: 140px; padding: 16px 14px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop); text-align: left; font: inherit; color: var(--ink); cursor: pointer; transition: transform .12s; }
+.sv-door:active { transform: translateY(1px); }
+.sv-door:focus-visible, .sv-back:focus-visible, .sv-res:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.d-quiz { background: var(--primary-light); } .d-sum { background: var(--accent-light); } .d-flash { background: var(--mint-light); } .d-tool { background: #fff6e0; }
+.sv-door-em { font-size: 2.1rem; line-height: 1; }
+.sv-door-t { display: flex; flex-direction: column; gap: 2px; }
+.sv-door-t b { font-size: 1.05rem; }
+.sv-door-t small { font-size: .74rem; color: var(--muted); line-height: 1.35; }
+.sv-door-badge { position: absolute; top: 10px; right: 10px; min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #ef4444; color: #fff; font-size: .72rem; font-weight: 800; text-align: center; }
+.sv-results { display: flex; flex-direction: column; gap: 6px; }
+.sv-res { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border: var(--bw) solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.sv-res.off { opacity: .55; cursor: default; }
+.sv-res-em { font-size: 1.3rem; }
+.sv-res-t { display: flex; flex-direction: column; min-width: 0; }
+.sv-res-t b { font-size: .88rem; }
+.sv-res-t small { font-size: .72rem; color: var(--muted); }
+.sv-res-none { text-align: center; color: var(--muted); font-size: .84rem; padding: 16px; }
+.sv-doorhead { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; }
+.sv-back { all: unset; cursor: pointer; font-size: 1.6rem; line-height: 1; padding: 0 6px 2px 0; color: var(--ink); }
+.sv-feat { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 14px; border-radius: 18px; background: linear-gradient(120deg, var(--primary), var(--primary-2)); color: #fff; text-decoration: none; box-shadow: var(--pop); }
+.sv-feat-em { font-size: 1.9rem; }
+.sv-feat-t { flex: 1; display: flex; flex-direction: column; }
+.sv-feat-t b { font-size: .95rem; }
+.sv-feat-t small { font-size: .74rem; opacity: .92; }
+.sv-feat-go { font-size: .8rem; font-weight: 800; background: #fff; color: var(--primary-dark); border-radius: 10px; padding: 5px 10px; white-space: nowrap; }
 .sv-modes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
 /* ── แท็บ ข้อสอบ | แฟลชการ์ด ── */
-.sv-tabs { display: flex; gap: 4px; padding: 4px; margin-bottom: 14px; background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); }
-.sv-tabs button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: none; background: none; border-radius: 10px; padding: 10px 6px; font-family: inherit; font-size: .88rem; font-weight: 800; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; }
-.sv-tabs button.on { background: var(--primary); color: #fff; }
-.sv-tabs button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.sv-tab-n { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: #ef4444; color: #fff; font-size: .7rem; font-weight: 800; line-height: 1.4; }
 .sv-soon { margin-top: 10px; padding: 10px 14px; border-radius: 14px; border: 1px dashed rgba(43,53,80,.25); font-size: .78rem; color: var(--muted); }
 
 /* ── แท็บแฟลชการ์ด ── */

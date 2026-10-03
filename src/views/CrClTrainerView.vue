@@ -3,7 +3,7 @@
 <template>
   <div class="tab-content cr-wrap">
     <div class="page-title cr-head">
-      <button class="cr-back" @click="$router.push('/study')">‹ กลับ</button>
+      <button class="cr-back" @click="$router.push('/study?tab=tool')">‹ กลับ</button>
       <span><Emoji char="🧮" /> ฝึกคำนวณ CrCl</span>
     </div>
 

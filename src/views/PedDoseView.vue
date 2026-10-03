@@ -3,7 +3,7 @@
 <template>
   <div class="tab-content pd-wrap">
     <div class="page-title pd-head">
-      <button class="pd-back" @click="$router.push('/study')">‹ กลับ</button>
+      <button class="pd-back" @click="$router.push('/study?tab=tool')">‹ กลับ</button>
       <span><Emoji char="👶" /> ขนาดยาน้ำเด็ก</span>
     </div>
 
