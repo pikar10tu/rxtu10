@@ -41,10 +41,11 @@
             <option value="">ทั้งเรื่อง / ไม่ระบุหัวข้อ</option>
             <option v-for="s in doc.sections" :key="s.id" :value="s.t">{{ s.t }}</option>
           </select>
-          <textarea v-model="repText" rows="3" placeholder="ผิดตรงไหน ควรเป็นอะไร (มีแหล่งอ้างอิงยิ่งดี)" />
+          <textarea v-model="repText" rows="3" placeholder="ผิดตรงไหน ควรแก้เป็นอะไร" />
+          <textarea v-model="repWhy" rows="2" placeholder="เหตุผล / แหล่งอ้างอิง เช่น guideline ปีไหน หน้าไหน" />
           <div class="sv-rep-act">
             <button @click="repOpen = false">ยกเลิก</button>
-            <button class="go" :disabled="!repText.trim() || repBusy" @click="sendReport">ส่ง</button>
+            <button class="go" :disabled="!repText.trim() || !repWhy.trim() || repBusy" @click="sendReport">ส่ง</button>
           </div>
         </template>
       </section>
@@ -83,23 +84,27 @@ const repOpen = ref(false)
 const repSec = ref('')
 const repText = ref('')
 const repBusy = ref(false)
-watch(() => route.params.id, () => { repOpen.value = false; repSec.value = ''; repText.value = '' })
+const repWhy = ref('')
+watch(() => route.params.id, () => { repOpen.value = false; repSec.value = ''; repText.value = ''; repWhy.value = '' })
+// เหตุผล/อ้างอิงบังคับ (user 3 ต.ค. 2026) — Claude เป็นคนตรวจแล้วแก้ไฟล์สรุปแทนวิชาการ ต้องมีหลักฐานให้เช็ค
 async function sendReport() {
-  const note = cleanText(repText.value, LIMITS.report)
-  if (!note || repBusy.value || !meta.value) return
+  const what = cleanText(repText.value, LIMITS.report)
+  const why = cleanText(repWhy.value, LIMITS.report)
+  if (!what || !why || repBusy.value || !meta.value) return
+  const note = `${what}\n— เหตุผล: ${why}`
   repBusy.value = true
   try {
     await addDoc(collection(db, 'drugReports'), {
       drug: `📄 สรุป: ${meta.value.title}`,
       currentClass: repSec.value || 'ทั้งเรื่อง',
       summaryId: meta.value.id,
-      note,
+      note, what, why,
       reporterUid: authStore.currentUser?.uid || null,
       reporterName: authStore.userData?.nickname || authStore.userData?.name || null,
       status: 'open',
       ts: serverTimestamp(),
     })
-    repOpen.value = false; repText.value = ''; repSec.value = ''
+    repOpen.value = false; repText.value = ''; repWhy.value = ''; repSec.value = ''
     toast('ส่งแล้ว ขอบคุณที่ช่วยตรวจ 🙏', 'success')
   } catch (e) {
     console.error('[summaryReport]', e)
