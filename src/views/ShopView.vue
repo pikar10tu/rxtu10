@@ -68,6 +68,7 @@
       <div v-if="pickerOpen" class="ov" @click.self="pickerOpen = false">
         <div class="picker">
           <div class="picker-head">{{ pickerMode === 'theme' ? 'เลือกเป้าหมายตู้ ' + ev.name : 'เลือกเป้าหมาย legendary' }}</div>
+          <div v-if="isNewbie && pickerList.some((p) => newbiePick(p.id))" class="picker-newbie-hint">ยังเลือกไม่ถูก? ตัวที่ติดป้าย <b>NEWBIE FRIENDLY</b> จัดทีมง่าย ใช้ตำนานตัวเดียวก็เก่ง</div>
           <div class="picker-hint">กดการ์ด = ตั้งเป้า · กด <Emoji char="ℹ️" /> = อ่านสกิลเต็ม</div>
           <div class="picker-grid">
             <div v-for="p in pickerList" :key="p.id" class="picker-cell" :class="{ on: p.id === pickerOn }" @click="chooseTarget(p.id)">
@@ -76,6 +77,7 @@
               <span class="picker-name">{{ p.name }}</span>
               <span v-if="passiveOf(p)" class="picker-skill"><Emoji :char="passiveOf(p).icon" /> {{ passiveOf(p).name }}</span>
               <span v-if="pets.find((x) => x.id === p.id)" class="picker-have">มีแล้ว</span>
+              <span v-else-if="newbiePick(p.id)" class="picker-newbie">NEWBIE FRIENDLY</span>
             </div>
           </div>
           <button class="picker-clear" @click="chooseTarget(pickerOn)">{{ pickerOn ? 'ล้างเป้าหมาย' : 'ปิด' }}</button>
@@ -94,6 +96,7 @@
           <div v-if="passiveOf(infoPet)" class="info-passive">
             <b><Emoji :char="passiveOf(infoPet).icon" /> {{ passiveOf(infoPet).name }}</b> — {{ passiveText(passiveOf(infoPet)) }}
           </div>
+          <div v-if="newbiePick(infoPet.id) && !pets.find((x) => x.id === infoPet.id)" class="info-newbie"><b>NEWBIE FRIENDLY</b> · {{ NEWBIE_PICKS[infoPet.id] }}</div>
           <button v-if="!(pickerMode === 'theme' && !ev.featured.includes(infoPet.id))" class="info-target" @click="chooseTarget(infoPet.id); infoPet = null">ตั้งเป็นเป้าหมาย</button>
         </div>
       </div>
@@ -186,7 +189,17 @@ const themeTarget = computed(() => {
 })
 const themeTargetPet = computed(() => featuredPets.value.find(p => p.id === themeTarget.value) || null)
 const pickerMode = ref('normal')          // 'normal' | 'theme' — ตัวเลือกเป้าชุดเดียวกัน แต่รายการคนละชุด
-const pickerList = computed(() => (pickerMode.value === 'theme' ? featuredPets.value : legendaries.value))
+// 🔰 ป้าย NEWBIE FRIENDLY — ตำนานที่จัดทีมง่าย ใช้ตำนานน้อย · ขึ้นเฉพาะคนที่ยังมีตำนาน < 2 ชนิด (3 ต.ค. 2026 user สั่ง แทนไกด์ทีม)
+const NEWBIE_PICKS = {
+  sol: 'บัฟเพื่อนระดับธรรมดา/หายาก/เอพิค ใช้คู่ตัวธรรมดาที่หาง่ายได้เลย',
+  whale: 'เลือดทั้งทีม +% · คู่กับแมวน้ำ (หายาก) ได้โบนัสคู่ ทีมถึกฟื้นเลือดทุกรอบ',
+}
+const isNewbie = computed(() => new Set(ownedLegendaryIds()).size < 2)
+const newbiePick = (id) => isNewbie.value && !!NEWBIE_PICKS[id]
+const pickerList = computed(() => {
+  const list = pickerMode.value === 'theme' ? featuredPets.value : legendaries.value
+  return isNewbie.value ? [...list].sort((a, b) => !!NEWBIE_PICKS[b.id] - !!NEWBIE_PICKS[a.id]) : list
+})
 const pickerOn = computed(() => (pickerMode.value === 'theme' ? themeTarget.value : target.value))
 function openPicker(mode) { pickerMode.value = mode; pickerOpen.value = true }
 
@@ -319,6 +332,9 @@ async function chooseTarget(id) {
 .picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
 .picker-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; border: var(--bw) solid var(--line); border-radius: 11px; padding: 8px 4px; background: #fff; cursor: pointer; font-family: inherit; }
 .picker-cell.on { background: var(--gold); }
+.picker-newbie { font-size: 9px; font-weight: 800; letter-spacing: .3px; color: #fff; background: var(--care); border-radius: 6px; padding: 1px 5px; }
+.picker-newbie-hint { font-size: 12px; background: #e9f9f2; border-radius: 9px; padding: 6px 9px; margin-bottom: 6px; }
+.info-newbie { margin-top: 10px; font-size: 13px; background: #e9f9f2; border-radius: 9px; padding: 6px 9px; }
 .picker-skill { font-size: .7rem; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.25; }
 .picker-info { position: absolute; top: 2px; right: 2px; border: none; background: transparent; padding: 2px; font-size: .7rem; line-height: 1; cursor: pointer; opacity: 1; font-size: .85rem; }
 .picker-info:active { opacity: 1; }
