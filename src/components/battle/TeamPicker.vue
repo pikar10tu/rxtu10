@@ -7,7 +7,7 @@
      และทีมเต็มแล้วคลังจะจางกดไม่ได้ทั้งแถบ โดยไม่บอกว่าต้องไปถอดตัวเก่าก่อน
      ตรรกะช่องอยู่ที่ utils/teamSlots.js (pure + มีเทส) — ที่นี่เหลือแค่ผูกสาย -->
 <template>
-  <BottomSheet :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
+  <component :is="inline ? InlineBox : BottomSheet" :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
     <!-- ทีม 1/2/3 (utils/teamPresets.js) — ทีมที่ "ใช้อยู่" คือทีมเดียวที่ลงทุกที่เหมือนเดิม · ชุดอื่นจัดเก็บไว้สลับได้ -->
     <div class="tp-presets" role="tablist" aria-label="ทีมที่จัดไว้">
       <button v-for="(p, i) in presets.presets" :key="i" type="button" role="tab" class="tp-preset"
@@ -36,6 +36,7 @@
           <template v-if="id">
             <PetThumb :pet="slotPetOf(id)" />
             <span class="tp-slotname">{{ displayName(id, defOf(id).name, teamNow) }}</span>
+            <span v-if="inline && shortOf(id)" class="tp-pass">{{ shortOf(id) }}</span>
             <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
           </template>
           <span v-else class="tp-empty">＋</span>
@@ -57,9 +58,11 @@
     </div>
     <div class="tp-status sub">ช่อง 1 ออกตีก่อน · แตะช่องหนึ่งแล้วแตะอีกช่อง = สลับลำดับ</div>
 
+    <!-- ฟิลเตอร์สายแยกแถว + ระดับ + เฉพาะในทีม (user เคาะ 3 ต.ค. 2026) · ใช้ร่วมกับหน้าคลัง (utils/petFilter.js) -->
+    <PetFilterBar v-if="owned.length" v-model="flt" :count="poolPets.length" />
     <div class="tp-pool">
       <button
-        v-for="p in sortedOwned" :key="p.id"
+        v-for="p in poolPets" :key="p.id"
         class="tp-pet" :class="{ active: slotNoOf(p.id) > 0, away: expeditionIds.has(p.id), pending: pendingId === p.id }"
         :style="{ '--rc': rarityColor(p.id) }"
         :aria-label="defOf(p.id).name"
@@ -71,7 +74,13 @@
         <span class="tp-emoji"><Emoji :char="defOf(p.id).emoji" /></span>
         <span class="tp-name">{{ defOf(p.id).name }}</span>
         <PetStatLine :pet="p" />
+        <!-- เลือกช่องที่มีเพ็ทอยู่ = เทียบ ATK/HP กับตัวเดิม (ไม่มีเลข "พลังทีม" — user สั่ง 3 ต.ค.) -->
+        <span v-if="cmpOf(p)" class="tp-cmp">
+          <i :class="cmpOf(p).atk >= 0 ? 'up' : 'down'">⚔️{{ cmpOf(p).atk >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).atk) }}</i>
+          <i :class="cmpOf(p).hp >= 0 ? 'up' : 'down'">❤️{{ cmpOf(p).hp >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).hp) }}</i>
+        </span>
       </button>
+      <div v-if="owned.length && !poolPets.length" class="tp-none">ไม่มีเพ็ทที่ตรงกับตัวกรอง</div>
       <div v-if="!owned.length" class="tp-none">
         ยังไม่มีเพ็ท — ไปอัญเชิญตัวแรกก่อนนะ
         <RouterLink to="/shop" class="tp-none-cta">ไปอัญเชิญเลย →</RouterLink>
@@ -79,7 +88,7 @@
     </div>
 
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
-  </BottomSheet>
+  </component>
 </template>
 
 <script setup>
@@ -90,7 +99,10 @@ import PetStatLine from '../shared/PetStatLine.vue'
 import PetThumb from '../shared/PetThumb.vue'
 import { useRosterSync } from '../../composables/useRosterSync.js'
 import { useToast } from '../../composables/useToast.js'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, defineComponent, h } from 'vue'
+import PetFilterBar from '../pets/PetFilterBar.vue'
+import { filterPets, sortPets, statOf, DEFAULT_FILTER } from '../../utils/petFilter.js'
+import { PET_PASSIVES, effectText } from '../../data/petPassives.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
 import { BATTLE_SLOTS } from '../../data/residence.js'
@@ -100,7 +112,9 @@ import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForm
 import { teamSynergy } from '../../utils/teamSynergy.js'
 import { readPresets, editPresetPatch, usePresetPatch } from '../../utils/teamPresets.js'
 
-const props = defineProps({ open: { type: Boolean, default: false } })
+const props = defineProps({ open: { type: Boolean, default: false }, inline: { type: Boolean, default: false } })
+// หน้าเต็ม /team ใช้กล่องเปล่าแทนแผ่นเลื่อน — ตรรกะเดียวกันทุกอย่าง
+const InlineBox = defineComponent({ name: 'InlineBox', inheritAttrs: false, setup: (_, { slots }) => () => h('div', { class: 'tp-inline' }, slots.default?.()) })
 defineEmits(['update:open'])
 
 
@@ -175,12 +189,16 @@ function earthTag(i) {
   return { icon: s.icon, text: s.label }
 }
 
-// เรียง legendary→common → เกรดสูงก่อน → ชื่อ (เหมือนหน้าเพ็ท)
-const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
-const sortedOwned = computed(() => owned.value.slice().sort((a, b) => {
-  const da = defOf(a.id), db = defOf(b.id)
-  return (RANK[da.rarity] - RANK[db.rarity]) || ((b.grade || 0) - (a.grade || 0)) || (da.name || '').localeCompare(db.name || '')
-}))
+
+const flt = ref({ ...DEFAULT_FILTER })
+const poolPets = computed(() => sortPets(filterPets(owned.value, flt.value, edit.value.slots), flt.value.sort))
+const shortOf = (id) => effectText(PET_PASSIVES[id])
+function cmpOf(p) {
+  const cur = selId.value
+  if (!cur || cur === p.id) return null
+  const a = statOf(p), b = statOf(slotPetOf(cur))
+  return { atk: a.atk - b.atk, hp: a.hp - b.hp }
+}
 
 async function save(next) {
   const i = viewIdx.value
@@ -264,6 +282,12 @@ function pick(id) {
 .tp-pet.pending { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); transform: translateY(-3px); }
 .tp-status.sub { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 4px 0 12px; padding: 0; }
 
+.tp-inline { padding-bottom: 8px; }
+.tp-pass { font-size: .7rem; line-height: 1.3; color: var(--muted); text-align: center; padding: 0 3px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.tp-inline .tp-slot { aspect-ratio: auto; min-height: 150px; }
+.tp-cmp { display: flex; flex-direction: column; align-items: center; font-size: .7rem; font-weight: 700; line-height: 1.25; }
+.tp-cmp i { font-style: normal; }
+.tp-cmp .up { color: #17805c; } .tp-cmp .down { color: #c2415c; }
 .tp-pool { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .tp-pet { position: relative; border: 1.5px solid color-mix(in srgb, var(--rc) 55%, #fff); border-radius: 14px; background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 10%, #fff), #fff 70%); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 14px 2px 6px; font-family: inherit; transition: transform .1s; }
 .tp-pet:active { transform: scale(.95); }

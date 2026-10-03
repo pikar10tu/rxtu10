@@ -10,10 +10,10 @@
       <div class="pt-team">
         <div class="pt-team-head">
           <span><Emoji char="⚔️" /> ทีมต่อสู้ ({{ teamSlots.filter(Boolean).length }}/{{ battleSlots }})</span>
-          <button class="pt-team-edit" @click="pickOpen = true"><Emoji char="⚙️" /> จัดทีม</button>
+          <button class="pt-team-edit" @click="$router.push('/team')"><Emoji char="⚙️" /> จัดทีม</button>
         </div>
         <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
-          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" :style="id ? { '--rc': rarityColor(teamPetOf(id).rarity) } : null" @click="id ? sel = id : pickOpen = true">
+          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" :style="id ? { '--rc': rarityColor(teamPetOf(id).rarity) } : null" @click="id ? sel = id : $router.push('/team')">
             <span class="pt-team-no">{{ i + 1 }}</span>
             <PetThumb v-if="id" :pet="teamPetOf(id)" />
             <span v-else class="pt-team-empty">＋</span>
@@ -43,9 +43,12 @@
         <RouterLink to="/shop" class="pt-empty-cta">ไปอัญเชิญเลย →</RouterLink>
       </div>
 
-      <div v-else class="pt-grid">
+      <template v-else>
+      <PetFilterBar v-model="flt" :count="shown.length" />
+      <div v-if="!shown.length" class="pt-empty">ไม่มีเพ็ทที่ตรงกับตัวกรอง</div>
+      <div class="pt-grid">
         <button
-          v-for="p in sorted" :key="p.id"
+          v-for="p in shown" :key="p.id"
           class="pt-cell" :style="{ '--rc': rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
@@ -55,9 +58,10 @@
           <span v-if="balTagOf(p.id)" class="pt-cell-bal" :class="balTagOf(p.id).kind" :title="`ปรับสมดุล: ${balTagOf(p.id).label}`" :aria-label="`ปรับสมดุล: ${balTagOf(p.id).label}`"><Emoji :char="balTagOf(p.id).icon" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
-          <span v-if="clampGrade(p.grade) > 0" class="pt-cell-grade">{{ GRADE_LABELS[clampGrade(p.grade)] }}</span>
+          <PetStatLine :pet="p" />
         </button>
       </div>
+      </template>
 
       <!-- เพ็ทที่ยังไม่ปลดล็อก — เงาดำ ชื่อเป็น ????? (user เคาะ 11 ก.ย.)
            รวมทุกตัวที่ยังหาได้ ไม่ใช่แค่ตัวใหม่ · กดไม่ได้โดยตั้งใจ (การ์ดที่กดแล้วเงียบทำให้คนคิดว่าแอปค้าง) -->
@@ -76,7 +80,6 @@
     <div v-else class="pt-empty">เข้าสู่ระบบก่อนนะ</div>
 
     <PetDetailModal :pet-id="sel" @close="sel = null" />
-    <TeamPicker v-model:open="pickOpen" />
   </div>
 </template>
 
@@ -89,10 +92,11 @@ import { RARITY, PETS, ELEMENTS, GRADE_LABELS } from '../data/index.js'
 import { PET_PASSIVES, PASSIVE_V2_CHANGED } from '../data/petPassives.js'
 import { balanceTagOf } from '../utils/balanceTag.js'
 import { petDailyCoins } from '../utils/petUtils.js'
-import { clampGrade } from '../data/petPower.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
-import TeamPicker from '../components/battle/TeamPicker.vue'
+import PetFilterBar from '../components/pets/PetFilterBar.vue'
+import PetStatLine from '../components/shared/PetStatLine.vue'
+import { filterPets, sortPets, DEFAULT_FILTER } from '../utils/petFilter.js'
 import PetThumb from '../components/shared/PetThumb.vue'
 import { obtainablePets } from '../utils/petCatalog.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
@@ -122,7 +126,7 @@ async function dismissPassiveNews() {
   await authStore.patchUser({ passiveV2Seen: true }, { passiveV2Seen: true })
 }
 const sel = ref(null)
-const pickOpen = ref(false)
+const flt = ref({ ...DEFAULT_FILTER })
 
 const pets = computed(() => authStore.userData?.pets || [])
 const battleSlots = computed(() => BATTLE_SLOTS)
@@ -140,6 +144,8 @@ const species = computed(() => new Set(pets.value.map(p => p.id)).size)
 
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
+// คลังที่โชว์ = กรองสาย/ระดับ/ในทีม + เรียง (utils/petFilter.js · 3 ต.ค. 2026)
+const shown = computed(() => sortPets(filterPets(pets.value, flt.value, teamSlots.value), flt.value.sort))
 const sorted = computed(() => pets.value.slice().sort((a, b) =>
   (RANK[a.rarity] - RANK[b.rarity]) || ((b.grade || 0) - (a.grade || 0)) || a.name.localeCompare(b.name)
 ))

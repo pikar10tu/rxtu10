@@ -7,10 +7,10 @@
     </div>
 
     <!-- การ์ดหัว: ทีมต่อสู้ + ตัวเลขหลัก · แตะ = ไปคลัง/จัดทีม -->
-    <RouterLink to="/pets" class="ph-hero">
+    <RouterLink to="/team" class="ph-hero">
       <div class="ph-hero-top">
         <b>ทีมของฉัน</b>
-        <span class="ph-hero-go">คลัง · จัดทีม ›</span>
+        <span class="ph-hero-go">จัดทีม ›</span>
       </div>
       <div class="ph-team">
         <span v-for="(e, i) in teamEmojis" :key="i" class="ph-team-pet" :class="{ empty: !e }"><Emoji v-if="e" :char="e" /><template v-else>＋</template></span>
@@ -23,12 +23,22 @@
     </RouterLink>
 
     <div class="play-grid">
+      <RouterLink to="/team" class="game-card gc-team">
+        <span class="gc-emoji"><Emoji char="⚔️" /></span>
+        <span class="gc-name">จัดทีม</span>
+        <span class="gc-badge grow">ทีม 1/2/3 · ดูพาสสีฟ</span>
+      </RouterLink>
+      <RouterLink to="/pets" class="game-card gc-col">
+        <span class="gc-emoji"><Emoji char="📦" /></span>
+        <span class="gc-name">คลังเพ็ท</span>
+        <span class="gc-badge grow">{{ petCount }} ตัว · กรองสาย/ระดับ</span>
+      </RouterLink>
       <!-- ร้านเพ็ทไม่ต้องมีที่นี่ — เข้าจากปุ่มร้านค้าบนสุดของหน้าเกมที่เดียว (user สั่ง 25 ก.ย. 2026) -->
       <RouterLink to="/tower" class="game-card gc-tower">
         <span v-if="towerDot" class="nav-dot gc-dot" aria-label="มีรางวัลซีซั่นรอรับ"></span>
         <span class="gc-emoji"><Emoji char="🏯" /></span>
         <span class="gc-name">ปีนหอคอย</span>
-        <span class="gc-badge grow">ไต่ชั้น · เพิ่มรายได้รายวัน</span>
+        <span class="gc-badge grow">ชั้น {{ authStore.userData?.towerBest || 0 }} · เพิ่มรายได้รายวัน</span>
       </RouterLink>
 
       <RouterLink v-if="pvpOpen || authStore.isAdmin" to="/arena" class="game-card gc-arena">
@@ -112,5 +122,5 @@ const expState = computed(() => expeditionState(exp.value, now.value))
 .game-card:active { transform: translateY(1px); box-shadow: var(--pop); }
 .gc-emoji { font-size: 2rem; }
 .gc-name { font-size: .86rem; }
-.gc-shop { --gc: #fde2ee; } .gc-tower { --gc: #e6dcfd; } .gc-arena { --gc: #fbd5e3; } .gc-exp { --gc: #d6f5e3; }
+.gc-team { --gc: #ece8ff; } .gc-col { --gc: #e6f5fc; } .gc-shop { --gc: #fde2ee; } .gc-tower { --gc: #e6dcfd; } .gc-arena { --gc: #fbd5e3; } .gc-exp { --gc: #d6f5e3; }
 </style>
