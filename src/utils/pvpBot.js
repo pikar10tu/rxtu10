@@ -89,12 +89,15 @@ export const ROOKIE_DROP_CHANCE = 0.5
 //   · แต้ม < 1000 → 70% · แพ้ติด 2 ตาขึ้นไป → 100%
 //   · แต้ม 1000–1099 แพ้ติด 2 ตาขึ้นไป → 50% · นอกนั้น 0
 export const ROOKIE_FIGHTS = 3
+// ช่วงชั้น (user เคาะ 3 ต.ค. 2026 พร้อมเคิร์ฟแต้มใหม่): แต้มสูงก็ยังมีหุ่นซ้อมรับตอนแพ้ติด กันหมดกำลังใจ
+//   < 1000 → 70% (แพ้ติด 2 = 100%) · 1000–1199 → แพ้ติด 2 = 50% · 1200–1499 → แพ้ติด 3 = 40% · 1500+ → แพ้ติด 3 = 30%
 export function rookieBotChance({ rating = 1000, loseStreak = 0, fights = 0 } = {}) {
   if ((fights || 0) < ROOKIE_FIGHTS) return 1
-  const streak2 = (loseStreak || 0) >= 2
-  if (rating < 1000) return streak2 ? 1 : 0.7
-  if (rating < 1100) return streak2 ? 0.5 : 0
-  return 0
+  const s = loseStreak || 0
+  if (rating < 1000) return s >= 2 ? 1 : 0.7
+  if (rating < 1200) return s >= 2 ? 0.5 : 0
+  if (rating < 1500) return s >= 3 ? 0.4 : 0
+  return s >= 3 ? 0.3 : 0
 }
 
 /** หุ่นซ้อมมือใหม่ · myTeam = battle units ของเรา ({rarity, grade})

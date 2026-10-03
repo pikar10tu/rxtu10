@@ -7,8 +7,11 @@ test('โอกาสเจอหุ่นซ้อมมือใหม่', ()
   assert.equal(rookieBotChance({ rating: 950, fights: 10 }), 0.7)
   assert.equal(rookieBotChance({ rating: 950, fights: 10, loseStreak: 2 }), 1)
   assert.equal(rookieBotChance({ rating: 1050, fights: 10, loseStreak: 1 }), 0)
+  assert.equal(rookieBotChance({ rating: 1300, fights: 10, loseStreak: 3 }), 0.4)
+  assert.equal(rookieBotChance({ rating: 1300, fights: 10, loseStreak: 2 }), 0)
+  assert.equal(rookieBotChance({ rating: 1650, fights: 10, loseStreak: 3 }), 0.3)
   assert.equal(rookieBotChance({ rating: 1050, fights: 10, loseStreak: 2 }), 0.5)
-  assert.equal(rookieBotChance({ rating: 1100, fights: 10, loseStreak: 5 }), 0)
+  assert.equal(rookieBotChance({ rating: 1100, fights: 10, loseStreak: 5 }), 0.5)   // ช่วงชั้นใหม่ 3 ต.ค.: 1000–1199 แพ้ติด ≥2 = 50%
 })
 
 test('หุ่นมือใหม่: แรร์/ธรรมดาเท่าเดิม ขาดได้ไม่เกิน 1 ตัว', () => {

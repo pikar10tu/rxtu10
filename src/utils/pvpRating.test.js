@@ -27,3 +27,23 @@ test('nextRating: clamp ไม่ต่ำกว่า floor', () => {
   assert.equal(nextRating(105, 105, false), PVP_RATING_FLOOR)
 })
 test('ค่าเริ่ม 1000', () => { assert.equal(PVP_RATING_START, 1000) })
+
+// ── เคิร์ฟขึ้นยากตามแต้ม (3 ต.ค. 2026) ──
+import { climbMult } from './pvpRating.js'
+test('climbMult: ช่วงแรกได้เยอะ ช่วงหลังได้น้อย · มีพื้นต่ำสุด', () => {
+  assert.equal(climbMult(1000), 1.25)
+  assert.ok(climbMult(1600) < 0.7 && climbMult(1600) > 0.55)
+  assert.ok(Math.abs(climbMult(2000) - 0.2) < 1e-9)
+  assert.equal(climbMult(3000), 0.15)
+  assert.equal(climbMult(500), 1.25)
+})
+test('nextRating: ชนะคู่เท่ากันที่ 1600 ได้น้อยกว่าที่ 1000 มาก แต่แพ้เสียเท่าเดิม', () => {
+  const g1000 = nextRating(1000, 1000, true) - 1000
+  const g1600 = nextRating(1600, 1600, true) - 1600
+  assert.equal(g1000, 20)
+  assert.equal(g1600, 10)
+  assert.equal(nextRating(1600, 1600, false), 1584)
+})
+test('nextRating: ต่ำกว่า 1100 แพ้เสียแต้มเบาลง', () => {
+  assert.equal(nextRating(1000, 1000, false), 988)
+})
