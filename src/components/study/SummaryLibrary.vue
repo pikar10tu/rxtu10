@@ -13,7 +13,7 @@
         <span class="sl-t">{{ it.title }}</span>
         <span class="sl-tags">
           <span v-if="!it.ready" class="pill soon">กำลังดำเนินการ</span>
-          <span class="pill" :class="it.final ? 'ok' : 'wait'">{{ it.final ? 'ตรวจแล้ว' : 'รอตรวจ' }}</span>
+          <span class="pill" :class="reviewPill(it).cls">{{ reviewPill(it).text }}</span>
         </span>
         <span class="sl-by">{{ it.authors.length ? 'โดย ' + it.authors.join(', ') : 'ยังไม่ระบุผู้จัดทำ' }}</span>
       </component>
@@ -24,7 +24,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { SUMMARIES, SYSTEMS } from '../../data/summaryIndex.js'
+import { SUMMARIES, SYSTEMS, reviewPill } from '../../data/summaryIndex.js'
 
 const q = ref('')
 const sys = ref('all')
@@ -56,6 +56,7 @@ const groups = computed(() => {
 .pill { font-size: .7rem; border-radius: 999px; padding: 1px 8px; font-weight: 600; white-space: nowrap; }
 .pill.ok { background: var(--mint-light); color: var(--mint); }
 .pill.wait { background: #fff3d6; color: #a06a00; }
+.pill.none { background: #f1f4f8; color: var(--muted); }
 .pill.soon { background: var(--bg); color: var(--muted); font-weight: 400; }
 .sl-empty { text-align: center; color: var(--muted); padding: 20px; }
 </style>

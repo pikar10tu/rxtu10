@@ -6,12 +6,12 @@
       <header class="sv-card">
         <div class="sv-sys">{{ sysName }}</div>
         <h1>{{ meta.title }}</h1>
-        <span class="pill" :class="meta.final ? 'ok' : 'wait'">{{ meta.final ? 'ตรวจแล้ว' : 'รอตรวจ' }}</span>
+        <span class="pill" :class="reviewPill(meta).cls">{{ reviewPill(meta).text }}</span>
         <div class="sv-credit">
           <div><span>จัดทำโดย</span><b>{{ meta.authors.join(', ') || 'ยังไม่ระบุ' }}</b><i v-if="doc?.date"> · {{ doc.date }}</i></div>
-          <div><span>ตรวจโดย</span><b v-if="meta.reviewers.length">{{ meta.reviewers.join(', ') }}</b><i v-else>ยังไม่มีคนตรวจ</i></div>
+          <div><span>ตรวจโดย</span><b v-if="meta.reviewers.length">{{ meta.reviewers.join(', ') }}</b><i v-else>ไม่มีคนตรวจ</i></div>
         </div>
-        <div v-if="!meta.final" class="sv-draft">สรุปนี้ยังไม่มีคนตรวจ อ่านแล้วเจอจุดผิดแจ้งได้ที่ปุ่มข้อเสนอแนะ</div>
+        <div v-if="!meta.reviewers.length" class="sv-draft">สรุปนี้ไม่มีคนตรวจ อ่านแล้วเจอจุดผิดแจ้งได้ที่ปุ่มข้อเสนอแนะ</div>
         <div class="sv-size">
           <span>ตัวหนังสือ</span>
           <button v-for="s in SIZES" :key="s[0]" :class="{ on: size === s[0] }" @click="setSize(s[0])">{{ s[1] }}</button>
@@ -40,7 +40,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { summaryMeta, loadSummary, SYSTEMS } from '../data/summaryIndex.js'
+import { summaryMeta, loadSummary, SYSTEMS, reviewPill } from '../data/summaryIndex.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -71,6 +71,7 @@ h1 { font-size: 1.5rem; margin: 2px 0 8px; }
 .pill { font-size: .75rem; border-radius: 999px; padding: 2px 9px; font-weight: 600; }
 .pill.ok { background: var(--mint-light); color: var(--mint); }
 .pill.wait { background: #fff3d6; color: #a06a00; }
+.pill.none { background: #f1f4f8; color: var(--muted); }
 .sv-credit { display: grid; gap: 4px; margin: 10px 0 0; font-size: .9rem; }
 .sv-credit span { display: inline-block; min-width: 70px; color: var(--muted); }
 .sv-credit i { color: var(--muted); font-style: normal; }

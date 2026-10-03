@@ -18,6 +18,14 @@ export const SUMMARIES = manifest.map(x => ({
   authors: x.a, reviewers: x.r, ready: ready.has(x.id),
 }))
 
+// ป้ายสถานะตรวจ (user 3 ต.ค. 2026): ไม่มีคนตรวจ = ขึ้น "ไม่มีคนตรวจ" ไม่ใช่ "รอตรวจ"
+// คนตรวจมาจากชีท "ตรวจเนื้อหา Care (Clinic)" ใน RxTU10 road to CC.xlsx (คนตรวจ 1 + 2) → manifest r (ชื่อเล่น) / rn (ชื่อจริง)
+export function reviewPill(s) {
+  if (s.final) return { cls: 'ok', text: 'ตรวจแล้ว' }
+  if (s.reviewers?.length) return { cls: 'wait', text: 'รอตรวจ' }
+  return { cls: 'none', text: 'ไม่มีคนตรวจ' }
+}
+
 export function summaryMeta(id) { return SUMMARIES.find(s => s.id === id) }
 
 export async function loadSummary(id) {
