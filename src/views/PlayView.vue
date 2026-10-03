@@ -2,6 +2,9 @@
   <div class="tab-content">
     <div class="page-title pv-head"><span><Emoji char="🎮" /> Play</span><span class="pv-right"><span v-if="authStore.isLoggedIn" class="pv-coins"><Emoji char="🪙" /> {{ (authStore.userData?.coins || 0).toLocaleString() }}</span><HelpButton topic="play" /></span></div>
 
+    <!-- กระดานข่าว (เห็นได้ทุกคน) — บนสุดเหมือนเดิม (user ขอคืน 3 ต.ค. หลังลองย้ายลงใต้เกม) -->
+    <NewsBoard />
+
     <template v-if="authStore.isLoggedIn">
       <!-- ── ห้องโถงเกม (แบบ A — user เลือก 3 ต.ค. 2026): การ์ดใหญ่โชว์ของจริง + ปุ่มลัด ── -->
       <div class="hall pet">
@@ -53,9 +56,6 @@
         <RouterLink to="/shop?tab=style" class="shop s-style"><Emoji char="🎀" /><b>แต่งตัว</b></RouterLink>
       </div>
 
-      <!-- กระดานข่าว ย้ายลงมาใต้เกม (การ์ดเกมต้องเห็นก่อนในจอแรก) -->
-      <NewsBoard />
-
       <!-- ── มินิเกม (จาก registry data/minigames.js) — ซ่อนเมื่อ arcadeOpen ปิด ──
            ⚠️ เดิมมี `|| authStore.isAdmin` ให้แอดมินเห็นเสมอ "ไว้เทสก่อนเปิดให้ทั้งรุ่น"
               user สั่งเอาออก 27 ส.ค.: มินิเกมเป็นบทที่ปิดแล้ว ไม่ต้องเห็นแม้แต่แอดมิน
@@ -74,10 +74,7 @@
         </div>
       </template>
     </template>
-    <template v-else>
-      <NewsBoard />
-      <div class="play-login">เข้าสู่ระบบเพื่อเล่น</div>
-    </template>
+    <div v-else class="play-login">เข้าสู่ระบบเพื่อเล่น</div>
   </div>
 </template>
 
