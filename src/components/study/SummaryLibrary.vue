@@ -33,7 +33,7 @@ const groups = computed(() => {
   const term = q.value.trim().toLowerCase()
   return SYSTEMS.filter(s => sys.value === 'all' || sys.value === s.key).map(s => ({
     ...s,
-    items: SUMMARIES.filter(x => x.sys === s.key && (!term || `${x.title} ${s.th} ${x.authors.join(' ')}`.toLowerCase().includes(term)))
+    items: SUMMARIES.filter(x => x.sys === s.key && (!term || `${x.title} ${x.keys} ${s.th} ${x.authors.join(' ')}`.toLowerCase().includes(term)))
       .sort((a, b) => b.ready - a.ready),
   })).filter(g => g.items.length)
 })

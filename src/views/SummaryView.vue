@@ -11,7 +11,7 @@
           <div><span>จัดทำโดย</span><b>{{ meta.authors.join(', ') || 'ยังไม่ระบุ' }}</b><i v-if="doc?.date"> · {{ doc.date }}</i></div>
           <div><span>ตรวจโดย</span><b v-if="meta.reviewers.length">{{ meta.reviewers.join(', ') }}</b><i v-else>ไม่มีคนตรวจ</i></div>
         </div>
-        <div v-if="!meta.reviewers.length" class="sv-draft">สรุปนี้ไม่มีคนตรวจ อ่านแล้วเจอจุดผิดแจ้งได้ที่ปุ่มข้อเสนอแนะ</div>
+        <div v-if="!meta.reviewers.length && !meta.final" class="sv-draft">สรุปนี้ไม่มีคนตรวจ อ่านแล้วเจอจุดผิดกด "แจ้งข้อมูลผิด" ท้ายหน้าได้เลย</div>
         <div class="sv-size">
           <span>ตัวหนังสือ</span>
           <button v-for="s in SIZES" :key="s[0]" :class="{ on: size === s[0] }" @click="setSize(s[0])">{{ s[1] }}</button>
@@ -33,6 +33,21 @@
           <ul><li v-for="r in doc.refs" :key="r">{{ r }}</li></ul>
         </section>
       </article>
+      <section v-if="doc" class="sv-card sv-report">
+        <button v-if="!repOpen" class="sv-rep-btn" @click="repOpen = true">⚠️ แจ้งข้อมูลผิด</button>
+        <template v-else>
+          <b>แจ้งข้อมูลผิดในสรุปนี้</b>
+          <select v-model="repSec" aria-label="หัวข้อที่ผิด">
+            <option value="">ทั้งเรื่อง / ไม่ระบุหัวข้อ</option>
+            <option v-for="s in doc.sections" :key="s.id" :value="s.t">{{ s.t }}</option>
+          </select>
+          <textarea v-model="repText" rows="3" placeholder="ผิดตรงไหน ควรเป็นอะไร (มีแหล่งอ้างอิงยิ่งดี)" />
+          <div class="sv-rep-act">
+            <button @click="repOpen = false">ยกเลิก</button>
+            <button class="go" :disabled="!repText.trim() || repBusy" @click="sendReport">ส่ง</button>
+          </div>
+        </template>
+      </section>
     </template>
   </div>
 </template>
@@ -41,6 +56,11 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { summaryMeta, loadSummary, SYSTEMS, reviewPill } from '../data/summaryIndex.js'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase/config.js'
+import { useAuthStore } from '../stores/auth.js'
+import { useToast } from '../composables/useToast.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -56,6 +76,38 @@ function setSize(s) { size.value = s; try { localStorage.setItem('rx-sum-size', 
 
 const base = import.meta.env.BASE_URL
 function withFigs(html) { return html.replace(/data-fig="([^"]+)"/g, (_, f) => `src="${base}summaries/${f}" loading="lazy"`) }
+// แจ้งข้อมูลผิด → ใช้ collection `drugReports` เดียวกับแฟลชการ์ดตัวยา (แอดมินเห็นในแท็บรายงานเดิม ไม่ต้องแก้ rules)
+const authStore = useAuthStore()
+const { toast } = useToast()
+const repOpen = ref(false)
+const repSec = ref('')
+const repText = ref('')
+const repBusy = ref(false)
+watch(() => route.params.id, () => { repOpen.value = false; repSec.value = ''; repText.value = '' })
+async function sendReport() {
+  const note = cleanText(repText.value, LIMITS.report)
+  if (!note || repBusy.value || !meta.value) return
+  repBusy.value = true
+  try {
+    await addDoc(collection(db, 'drugReports'), {
+      drug: `📄 สรุป: ${meta.value.title}`,
+      currentClass: repSec.value || 'ทั้งเรื่อง',
+      summaryId: meta.value.id,
+      note,
+      reporterUid: authStore.currentUser?.uid || null,
+      reporterName: authStore.userData?.nickname || authStore.userData?.name || null,
+      status: 'open',
+      ts: serverTimestamp(),
+    })
+    repOpen.value = false; repText.value = ''; repSec.value = ''
+    toast('ส่งแล้ว ขอบคุณที่ช่วยตรวจ 🙏', 'success')
+  } catch (e) {
+    console.error('[summaryReport]', e)
+    toast('ส่งไม่สำเร็จ', 'error')
+  } finally {
+    repBusy.value = false
+  }
+}
 function jump(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
 function onClick(e) {
   const a = e.target.closest('[data-calc]')
@@ -108,5 +160,12 @@ h1 { font-size: 1.5rem; margin: 2px 0 8px; }
 .sv-article :deep(.s1), .sv-article :deep(.s2) { background: #cdeccf; } .sv-article :deep(.s3) { background: #fbefa6; }
 .sv-article :deep(.s4) { background: #f8c98f; } .sv-article :deep(.s5) { background: #f2a3a3; }
 .sv-article :deep(.fig) { border: 1px dashed var(--line); border-radius: 10px; padding: 8px 12px; color: var(--muted); font-size: .85em; }
+.sv-report { display: grid; gap: 8px; }
+.sv-rep-btn { justify-self: start; border: var(--bw) solid var(--line); background: var(--bg); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: .85rem; cursor: pointer; }
+.sv-report select, .sv-report textarea { width: 100%; border: var(--bw) solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; background: var(--bg); }
+.sv-rep-act { display: flex; justify-content: flex-end; gap: 8px; }
+.sv-rep-act button { border: var(--bw) solid var(--line); background: var(--bg); border-radius: 10px; padding: 6px 16px; font: inherit; cursor: pointer; }
+.sv-rep-act .go { background: var(--primary); border-color: var(--primary); color: #fff; }
+.sv-rep-act .go:disabled { opacity: .5; }
 .sv-refs { font-size: .8rem; color: var(--muted); word-break: break-word; }
 </style>
