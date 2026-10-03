@@ -722,15 +722,13 @@ test('แฮมสเตอร์ช่อง 2 (ไม่ใช่ช่อง 
   assert.ok(bFirst > 0, 'ต้องมีบาง seed ที่ B ตีก่อน (แฮมสเตอร์ไม่ได้อยู่ช่อง 1)')
 })
 
-test('แฮมสเตอร์ช่อง 1 ทั้งสองฝั่ง: กติกาเดิม (บาง seed B ตีก่อน)', () => {
+test('แฮมสเตอร์ช่อง 1 ทั้งสองฝั่ง: ฝั่ง A (คนหาห้อง) ตีก่อนเสมอ (user เคาะ 3 ต.ค. 2026)', () => {
   const A = withHamster(0)
   const B = withHamster(0)
-  let bFirst = 0
   for (let seed = 1; seed <= 50; seed++) {
     const first = simulateBattle(A, B, seed).log.find(e => e.t === 'attack')
-    if (first.side === 'B') bFirst++
+    assert.equal(first.side, 'A', `seed ${seed}`)
   }
-  assert.ok(bFirst > 0, 'มีแฮมสเตอร์ทั้งสองฝั่ง = หักล้างกัน กลับไปใช้กติกาเดิม')
 })
 
 test('A 2 ตัว (มีแฮมสเตอร์ช่อง 1) vs B 3 ตัว: A ตีก่อน (แฮมสเตอร์ชนะกติกาจำนวนตัว)', () => {

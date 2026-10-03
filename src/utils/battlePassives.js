@@ -786,11 +786,31 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
       hit.push(d.uid)
       stacks[d.uid] = st.infect.n
     }
+    // 🦠 แปะแล้วเลือดลดทันที (user เคาะ 3 ต.ค. 2026 · คำอธิบายไม่ต้องแก้): ทุกเป้าที่ได้ชั้นใหม่โดนดาเมจ
+    //    เชื้อเต็มชั้นปัจจุบันทันที ทะลุทุกอย่างเหมือนตอนระเบิด · เป้าหลักของหมัดนี้ไม่โดนซ้ำ (มันโดนระเบิดด้านบนไปแล้ว)
+    //    เป้าอื่นหักเลือดตรงนี้แล้วส่ง event 'infectSplash' พร้อม hpMap/amounts ให้รีเพลย์ · ตายแล้วเอนจินปิดผ่าน res.splash
+    const amounts = {}, hpMap = {}, splashOn = []
+    for (const uid of hit) {
+      const d = (team ? alive(team) : [defender]).find(x => x.uid === uid)
+      const st = psOf(d)
+      const dmg = pctOf(st.infect.from.atk, valOf(part, st.infect.from).pct) * st.infect.n
+      if (!(dmg > 0)) continue
+      if (d === defender) continue
+      d.hp -= dmg
+      amounts[uid] = Math.round(dmg)
+      hpMap[uid] = d.hp > 0 ? Math.max(1, Math.round((d.hp / d.maxHp) * 100)) : 0
+      splashOn.push(d)
+    }
     if (hit.length) {
       // amount = ชั้นสูงสุดในก้อนนี้ (คงไว้เพื่อผู้อ่านเก่าที่ยังไม่รองรับ stacks ต่อเป้า) ·
       // stacks = ชั้นจริงต่อเป้า — ผู้อ่านต้องเช็ค stacks[uid] ก่อนเสมอ (battleBuffs.js/BattleReplay.vue)
       res.events.push(ev(attacker, ap, part, { targets: hit,
         amount: Math.max(...hit.map(uid => stacks[uid])), stacks, fxKind: 'debuff' }))
+    }
+    if (splashOn.length) {
+      res.events.push(ev(attacker, ap, part, { targets: splashOn.map(d => d.uid),
+        amount: 0, amounts, hpMap, fxKind: 'damage', effect: 'infectSplash' }))
+      res.splash = (res.splash || []).concat(splashOn)
     }
   }
 

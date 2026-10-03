@@ -1478,9 +1478,9 @@ test('infect: ตีเป้าเดียว แต่ทั้งทีม�
   }
   try {
     const virus = { uid: 'A0', side: 'A', id: '__virus', hp: 100, maxHp: 100, atk: 100 }
-    const b0 = { uid: 'B0', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
-    const b1 = { uid: 'B1', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
-    const b2 = { uid: 'B2', side: 'B', id: '__blank__', hp: 100, maxHp: 100, atk: 10 }
+    const b0 = { uid: 'B0', side: 'B', id: '__blank__', hp: 100000, maxHp: 100000, atk: 10 }
+    const b1 = { uid: 'B1', side: 'B', id: '__blank__', hp: 100000, maxHp: 100000, atk: 10 }
+    const b2 = { uid: 'B2', side: 'B', id: '__blank__', hp: 100000, maxHp: 100000, atk: 10 }
     const team = [b0, b1, b2]
 
     const r1 = runOnHit(b0, 10, virus, team, () => 0.5)
@@ -1513,7 +1513,7 @@ test('infect: ตีเป้าเดียว แต่ทั้งทีม�
 
     // เพดาน max=5: เลี้ยงจนถึงเพดานแล้วต้องไม่เกิน และ target ที่ชนเพดานหลุดออกจาก event ต่อไป
     // ก่อนหน้านี้ b0/b1 = n3, b2 = n2 (พลาดตอนตาย) — เลี้ยง b0/b1 ไปชนเพดาน 5 ก่อน b2
-    b2.hp = 100
+    b2.hp = 100000   // เลือดเยอะ: ตั้งแต่ 3 ต.ค. เป้ารองโดนดาเมจเชื้อตอนแปะ — เทสนี้นับชั้น ไม่ได้ทดสอบการตาย
     runOnHit(b0, 10, virus, team, () => 0.5) // n=4/4/3
     const r5 = runOnHit(b0, 10, virus, team, () => 0.5) // n=5/5/4 — b0,b1 ชนเพดานแล้ว
     assert.equal(psOf(b0).infect.n, 5)
@@ -2295,4 +2295,20 @@ test('ร่างองศา: ไม่มีฤดู', () => {
   const team = [U('sol', 'legendary', 0), U('earth', 'legendary', 1)]
   applyForms([...team, U('lion', 'legendary', 2)])
   assert.deepEqual(runOnRoundEnd(team, [], () => 0), [])
+})
+
+test('👾 ไวรัส: แปะเชื้อแล้วเป้ารองเลือดลดทันที (infectSplash) · เป้าหลักไม่โดนซ้ำ (3 ต.ค. 2026)', () => {
+  const virus = u('virus', { uid: 'A0', atk: 100 })
+  const b0 = u('blank', { uid: 'B0', side: 'B', maxHp: 1000, hp: 1000 })
+  const b1 = u('blank', { uid: 'B1', side: 'B', maxHp: 1000, hp: 1000 })
+  const team = [b0, b1]
+  const r1 = runOnHit(b0, 0, virus, team, () => 0.99)
+  const sp = r1.events.find(e => e.effect === 'infectSplash')
+  assert.ok(sp, 'ต้องมี event infectSplash')
+  assert.deepEqual(sp.targets, ['B1'])
+  assert.equal(sp.amounts.B1, 10)                 // 1 ชั้น × 10% ของ atk 100
+  assert.equal(b1.hp, 990)
+  assert.equal(sp.hpMap.B1, 99)
+  assert.equal(r1.pierce, 0, 'เป้าหลักหมัดแรกยังไม่ติดเชื้อ = ไม่มีดาเมจเชื้อ')
+  assert.deepEqual(r1.splash, [b1])
 })

@@ -170,6 +170,8 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     //    ของ strike() นี้เอง ไม่ใช่ผู้พิทักษ์ — บากุไม่ได้สร้างดาเมจ แค่ย้ายเข้าตัว)
     resolveSilentDeath(att, tg)
     resolveSilentDeath(hitRes.guard, att)
+    // 🦠 เป้ารองที่โดนดาเมจเชื้อตอนแปะ (infectSplash) — ตายเงียบหลังใบหมัด (เหตุมาก่อนผล)
+    for (const u of hitRes.splash || []) resolveSilentDeath(u, att)
     return dead
   }
 
@@ -300,11 +302,12 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   }
 
   // ใครก่อน: ฝั่งตัวเยอะกว่าตีก่อน · เท่ากัน → สุ่ม (ดึงจาก rand เดิม คง deterministic)
-  // 🐹 แฮมสเตอร์ช่อง 1 = ทีมได้ตีก่อนเสมอ (27 ก.ย. 2026) · มีทั้งสองฝั่ง = กติกาเดิม
+  // 🐹 แฮมสเตอร์ช่อง 1 = ทีมได้ตีก่อนเสมอ (27 ก.ย. 2026)
+  //    มีทั้งสองฝั่ง = ฝั่ง A (คนกดหาห้อง/เจ้าของแมตช์) ตีก่อน (user เคาะ 3 ต.ค. 2026 · คำอธิบายพาสสีฟไม่ต้องแก้)
   // ⚠️ ห้ามดึง rand() เพิ่มในเส้นทางนี้ — ลำดับสุ่มของไฟต์ต้องเหมือนเดิมเมื่อไม่มีแฮมสเตอร์
   const ca = countAlive(A), cb = countAlive(B)
   const leadA = A[0]?.id === 'hamster', leadB = B[0]?.id === 'hamster'
-  const first = leadA !== leadB ? (leadA ? 'A' : 'B')
+  const first = leadA ? 'A' : leadB ? 'B'
     : ca > cb ? 'A' : cb > ca ? 'B' : (rand() < 0.5 ? 'A' : 'B')
   const cursor = { A: 0, B: 0 }
   let cur = first, round = 0, turns = 0
