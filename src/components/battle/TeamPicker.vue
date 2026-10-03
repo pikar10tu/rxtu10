@@ -13,7 +13,7 @@
       <button v-for="(p, i) in presets.presets" :key="i" type="button" role="tab" class="tp-preset"
         :class="{ on: viewIdx === i }" :aria-selected="viewIdx === i" @click="viewIdx = i">
         <span class="tp-preset-n">ทีม {{ i + 1 }}</span>
-        <span class="tp-preset-faces"><template v-if="p.length"><Emoji v-for="id in p" :key="id" :char="defOf(id).emoji" /></template><template v-else>ว่าง</template></span>
+        <span v-if="!inline" class="tp-preset-faces"><template v-if="p.length"><Emoji v-for="id in p" :key="id" :char="defOf(id).emoji" /></template><template v-else>ว่าง</template></span>
         <span v-if="presets.idx === i" class="tp-preset-use">ใช้อยู่</span>
       </button>
     </div>
@@ -34,8 +34,10 @@
         >
           <span class="tp-slotno">{{ i + 1 }}</span>
           <template v-if="id">
-            <PetThumb :pet="slotPetOf(id)" />
+            <PetThumb :pet="slotPetOf(id)" :stats="false" />
             <span class="tp-slotname">{{ displayName(id, defOf(id).name, teamNow) }}</span>
+            <!-- ATK/HP แบบหน้ารีเพลย์ (เลขดิบ ยังไม่รวมบัฟทีม — user สั่ง 3 ต.ค.) -->
+            <span class="tp-stats"><span class="tp-atk">{{ statOf(slotPetOf(id)).atk }}</span><span class="tp-hp">{{ statOf(slotPetOf(id)).hp }}</span></span>
             <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
           </template>
           <span v-else class="tp-empty">＋</span>
@@ -58,7 +60,7 @@
     </div>
 
     <!-- ฟิลเตอร์สายแยกแถว + ระดับ + เฉพาะในทีม (user เคาะ 3 ต.ค. 2026) · ใช้ร่วมกับหน้าคลัง (utils/petFilter.js) -->
-    <PetFilterBar v-if="owned.length" v-model="flt" :count="poolPets.length" />
+    <PetFilterBar v-if="owned.length" v-model="flt" :count="poolPets.length" :compact="inline" />
     <div class="tp-pool">
       <button
         v-for="p in poolPets" :key="p.id"
@@ -282,6 +284,14 @@ function pick(id) {
 .tp-status.idle { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 12px 0 10px; padding: 0; }
 
 .tp-inline { padding-bottom: 8px; }
+/* 3 ต.ค. 2026 แบบกะทัดรัด (หน้า /team) — ปุ่มทีมแถวเตี้ย · ช่องเตี้ย · ATK/HP แบบรีเพลย์ใต้ชื่อ */
+.tp-inline .tp-preset { flex-direction: row; justify-content: center; gap: 6px; padding: 5px 4px; }
+.tp-inline .tp-slot { aspect-ratio: auto; padding: 12px 6px 8px; }
+.tp-inline .tp-slot :deep(.ptc) { width: 62%; }
+.tp-stats { display: flex; justify-content: space-between; width: 88%; margin-top: 2px; }
+.tp-atk, .tp-hp { font-size: .72rem; font-weight: 800; color: #fff; line-height: 1; padding: 2px 6px; border-radius: 999px; min-width: 18px; text-align: center; }
+.tp-atk { background: #f59e0b; }
+.tp-hp { background: #16a34a; }
 .tp-cmp { display: flex; flex-direction: column; align-items: center; font-size: .7rem; font-weight: 700; line-height: 1.25; }
 .tp-cmp i { font-style: normal; }
 .tp-cmp .up { color: #17805c; } .tp-cmp .down { color: #c2415c; }

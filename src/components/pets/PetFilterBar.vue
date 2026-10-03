@@ -1,7 +1,19 @@
 <!-- PetFilterBar — แถวสาย (แยกของตัวเอง) + แถวระดับ/เฉพาะในทีม + เรียง · ใช้ร่วมหน้าคลังกับจัดทีม (utils/petFilter.js) -->
 <template>
-  <div class="pfb">
-    <div class="pfb-row">
+  <div class="pfb" :class="{ compact }">
+    <!-- compact (หน้าจัดทีม): สายเป็นปุ่ม + ระดับเป็นเมนู อยู่แถวเดียว -->
+    <div v-if="compact" class="pfb-one">
+      <div class="pfb-seg" role="group" aria-label="กรองตามสาย">
+        <button v-for="o in EL_OPTS" :key="o.k" type="button" :class="{ on: modelValue.el === o.k }" :aria-pressed="modelValue.el === o.k" @click="set('el', o.k)">
+          <Emoji v-if="o.icon" :char="o.icon" /><template v-if="!o.icon"> {{ o.t }}</template>
+        </button>
+      </div>
+      <select class="pfb-rar" aria-label="กรองตามระดับ" :value="modelValue.onlyTeam ? '__team' : modelValue.rarity" @change="setRar($event.target.value)">
+        <option v-for="o in RAR_OPTS" :key="o.k" :value="o.k">{{ o.k === 'all' ? 'ทุกระดับ' : o.t }}</option>
+        <option value="__team">เฉพาะในทีม</option>
+      </select>
+    </div>
+    <div v-if="!compact" class="pfb-row">
       <span class="pfb-lbl">สาย</span>
       <div class="pfb-seg" role="group" aria-label="กรองตามสาย">
         <button v-for="o in EL_OPTS" :key="o.k" type="button" :class="{ on: modelValue.el === o.k }" :aria-pressed="modelValue.el === o.k" @click="set('el', o.k)">
@@ -9,7 +21,7 @@
         </button>
       </div>
     </div>
-    <div class="pfb-row">
+    <div v-if="!compact" class="pfb-row">
       <span class="pfb-lbl">ระดับ</span>
       <div class="pfb-chips" role="group" aria-label="กรองตามระดับ">
         <button v-for="o in RAR_OPTS" :key="o.k" type="button" :class="{ on: modelValue.rarity === o.k }" :aria-pressed="modelValue.rarity === o.k" @click="set('rarity', o.k)">{{ o.t }}</button>
@@ -33,11 +45,14 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { EL_NAME, RARITY } from '../../data/index.js'
-const props = defineProps({ modelValue: { type: Object, required: true }, count: { type: Number, default: 0 } })
+const props = defineProps({ modelValue: { type: Object, required: true }, count: { type: Number, default: 0 }, compact: { type: Boolean, default: false } })
 const emit = defineEmits(['update:modelValue'])
 const EL_OPTS = [{ k: 'all', t: 'ทุกสาย' }, { k: 'fist', icon: '✊', t: EL_NAME.fist }, { k: 'scissors', icon: '✌️', t: EL_NAME.scissors }, { k: 'paper', icon: '✋', t: EL_NAME.paper }]
 const RAR_OPTS = [{ k: 'all', t: 'ทั้งหมด' }, ...['legendary', 'epic', 'rare', 'common'].map(k => ({ k, t: RARITY[k].label }))]
 const set = (k, v) => emit('update:modelValue', { ...props.modelValue, [k]: v })
+const setRar = (v) => emit('update:modelValue', v === '__team'
+  ? { ...props.modelValue, rarity: 'all', onlyTeam: true }
+  : { ...props.modelValue, rarity: v, onlyTeam: false })
 </script>
 
 <style scoped>
@@ -51,6 +66,8 @@ const set = (k, v) => emit('update:modelValue', { ...props.modelValue, [k]: v })
 .pfb-chips button { flex: none; border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 5px 11px; font: inherit; font-size: .76rem; color: var(--ink); cursor: pointer; white-space: nowrap; }
 .pfb-chips button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 .pfb-seg button:focus-visible, .pfb-chips button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pfb-one { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; }
+.pfb-rar { font: inherit; font-size: .76rem; border: var(--bw) solid var(--line); border-radius: 12px; padding: 7px 8px; background: #fff; color: var(--ink); }
 .pfb-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: .76rem; color: var(--muted); }
 .pfb-foot select { font: inherit; font-size: .76rem; border: var(--bw) solid var(--line); border-radius: 8px; padding: 2px 6px; background: #fff; color: var(--ink); margin-left: 4px; }
 </style>

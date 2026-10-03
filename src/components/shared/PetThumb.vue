@@ -5,8 +5,10 @@
     <span class="ptc-el"><Emoji :char="elEmoji" /></span>
     <span v-if="grade" class="ptc-gr">{{ gradeLabel }}</span>
     <span class="ptc-face"><Emoji :char="def.emoji" /></span>
-    <span class="ptc-atk">{{ stat.atk }}</span>
-    <span class="ptc-hp">{{ stat.hp }}</span>
+    <template v-if="stats">
+      <span class="ptc-atk">{{ stat.atk }}</span>
+      <span class="ptc-hp">{{ stat.hp }}</span>
+    </template>
   </div>
 </template>
 
@@ -19,6 +21,7 @@ import { buildCombatant } from '../../data/battle.js'
 const props = defineProps({
   pet: { type: Object, default: null },     // instance ({id/species, rarity, grade})
   bordered: { type: Boolean, default: true },
+  stats: { type: Boolean, default: true },   // false = ไม่แปะเลขมุมล่าง (หน้าจัดทีมโชว์เป็นแถบใต้การ์ดแทน)
 })
 
 const def = computed(() => getPetDef(props.pet?.id || props.pet?.species) || { emoji: '❓', element: 'scissors', rarity: 'common' })
