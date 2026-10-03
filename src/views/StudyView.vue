@@ -37,6 +37,7 @@
           <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
           <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
           <QuizModeCard emoji="🧮" title="ฝึกคำนวณ CrCl" subtitle="ฝึกสูตร Cockcroft-Gault · ทำกี่ข้อก็ได้" to="/study/crcl" />
+          <QuizModeCard emoji="👶" title="ขนาดยาน้ำเด็ก" subtitle="ใส่น้ำหนัก ได้ขนาดเป็น mL ต่อครั้ง · 19 ยา" to="/study/ped-dose" />
         </div>
         <!-- ยังไม่เปิด = แถบประบาง ไม่กินที่แถวแรกเหมือนเดิม -->
         <div class="sv-soon"><Emoji char="🗓️" /> ข้อสอบประจำวัน ชุดเดียวกันทั้งรุ่น · เร็วๆ นี้</div>

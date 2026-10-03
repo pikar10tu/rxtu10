@@ -67,4 +67,6 @@
 {"id":"aki","g":"renal","t":"Acute kidney injury","s":"draft","a":["Emme"],"r":[],"f":"รอตรวจ/Clinic/15.Renal🚽/15.1._Acute kidney injury_rxtu10_รอตรวจ.pdf"},
 {"id":"ckd","g":"renal","t":"Chronic kidney disease","s":"final","a":["อุกอิ๊ก"],"r":["แสนดี"],"f":"Final Ver/Clinic/15.Renal🚽/15.1. ckd final ver.pdf","an":["ณัฐดนย์ อภิรติชัยศิริกุล","จาริญดา อินอัญชัญ"]},
 {"id":"fluid-electrolyte","g":"renal","t":"Fluid & electrolyte disorders","s":"draft","a":["แพน"],"r":[],"f":"รอตรวจ/Clinic/15.Renal🚽/Fluid&Electrolyte.pdf","an":["มนณิชชา บุญนำ"]}
+,
+{"id":"ped-dose","g":"ped","t":"ขนาดยาน้ำเด็ก (ตามน้ำหนัก/อายุ)","s":"wait","a":["เพจ Facebook Pharmtutors"],"r":[],"f":null}
 ]

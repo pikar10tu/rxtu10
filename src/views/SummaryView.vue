@@ -59,7 +59,7 @@ function withFigs(html) { return html.replace(/data-fig="([^"]+)"/g, (_, f) => `
 function jump(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
 function onClick(e) {
   const a = e.target.closest('[data-calc]')
-  if (a) { e.preventDefault(); router.push('/study/crcl') }
+  if (a) { e.preventDefault(); router.push(a.dataset.calc === 'ped-dose' ? '/study/ped-dose' : '/study/crcl') }
 }
 </script>
 
