@@ -1,171 +1,107 @@
-<!-- src/views/CrClTrainerView.vue — ฝึกคำนวณ CrCl (Cockcroft-Gault) ทำต่อเนื่อง
-     ตรรกะทั้งหมดอยู่ใน utils/crcl.js · หน้านี้เก็บยอดสะสมเงียบๆ ไม่แสดงบนจอ -->
+<!-- src/views/CrClTrainerView.vue — เครื่องคำนวณ CrCl (Cockcroft-Gault)
+     เดิมเป็นตัวฝึกทำโจทย์ (3 ต.ค. 2026 เปลี่ยนเป็นเครื่องคำนวณ — อยู่ในประตูเครื่องคำนวณแล้วคนงงว่าทำไมเป็นแบบฝึก)
+     สูตรอยู่ใน utils/crcl.js · ใส่ส่วนสูงได้ (ไม่บังคับ) จะได้ CrCl จาก IBW/AdjBW เทียบด้วย -->
 <template>
   <div class="tab-content cr-wrap">
     <div class="page-title cr-head">
       <button class="cr-back" @click="$router.push('/study?tab=tool')">‹ กลับ</button>
-      <span><Emoji char="🧮" /> ฝึกคำนวณ CrCl</span>
-    </div>
-
-    <button class="cr-formula-btn" @click="toggleFormula">
-      {{ showFormula ? 'ซ่อนสูตร' : 'ดูสูตร' }}
-    </button>
-    <div v-if="showFormula" class="cr-formula">
-      <div class="cr-formula-main">CrCl = (140 − อายุ) × น้ำหนัก(kg) ÷ (72 × Scr(mg/dL))</div>
-      <div class="cr-formula-note">ถ้าเป็นผู้หญิง คูณ 0.85 · ผลลัพธ์หน่วย mL/min</div>
-      <div class="cr-formula-note">โจทย์ชุดนี้ฝึกสูตรล้วน ใช้น้ำหนักที่โจทย์ให้ — ของจริงคนอ้วนต้องพิจารณา IBW/AdjBW ด้วย</div>
+      <span><Emoji char="🧮" /> คำนวณ CrCl</span>
     </div>
 
     <div class="cr-card">
-      <div class="cr-row"><span>เพศ</span><b>{{ p.female ? 'หญิง' : 'ชาย' }}</b></div>
-      <div class="cr-row"><span>อายุ</span><b>{{ p.age }} ปี</b></div>
-      <div class="cr-row"><span>น้ำหนัก</span><b>{{ p.weightKg }} kg</b></div>
-      <div class="cr-row"><span>Scr</span><b>{{ p.scr.toFixed(1) }} mg/dL</b></div>
-    </div>
-
-    <div class="cr-answer">
-      <input
-        ref="inputEl" v-model="input" class="cr-input" inputmode="decimal"
-        placeholder="CrCl (mL/min)" aria-label="คำตอบ CrCl หน่วย mL/min"
-        :readonly="checked" @keyup.enter="onEnter"
-      />
-      <button v-if="!checked" class="cr-btn" :disabled="!input.trim()" @click="check">ตรวจคำตอบ</button>
-      <button v-else class="cr-btn" @click="next">ข้อถัดไป →</button>
-    </div>
-
-    <div v-if="checked" class="cr-result" :class="{ ok: lastOk }" aria-live="polite">
-      <div class="cr-result-head">
-        <Emoji :char="lastOk ? '✅' : '❌'" /> {{ lastOk ? 'ถูกต้อง' : 'ยังไม่ถูก' }}
+      <div class="cr-sex" role="group" aria-label="เพศ">
+        <button :class="{ on: !female }" @click="female = false">ชาย</button>
+        <button :class="{ on: female }" @click="female = true">หญิง</button>
       </div>
-      <div class="cr-result-ans">เฉลย <b>{{ expected.toFixed(1) }}</b> mL/min</div>
-      <div class="cr-result-work">
-        ({{ 140 - p.age }} × {{ p.weightKg }}) ÷ (72 × {{ p.scr.toFixed(1) }}){{ p.female ? ' × 0.85' : '' }}
+      <label class="cr-row" for="cr-age"><span>อายุ (ปี)</span>
+        <input id="cr-age" v-model="ageText" class="cr-input" inputmode="numeric" placeholder="เช่น 65" /></label>
+      <label class="cr-row" for="cr-wt"><span>น้ำหนัก (kg)</span>
+        <input id="cr-wt" v-model="wtText" class="cr-input" inputmode="decimal" placeholder="เช่น 60" /></label>
+      <label class="cr-row" for="cr-scr"><span>Scr (mg/dL)</span>
+        <input id="cr-scr" v-model="scrText" class="cr-input" inputmode="decimal" placeholder="เช่น 1.2" /></label>
+      <label class="cr-row" for="cr-ht"><span>ส่วนสูง (cm) <small>ไม่บังคับ</small></span>
+        <input id="cr-ht" v-model="htText" class="cr-input" inputmode="decimal" placeholder="เช่น 165" /></label>
+    </div>
+
+    <div v-if="crcl != null" class="cr-result" aria-live="polite">
+      <div class="cr-big">{{ crcl.toFixed(1) }} <small>mL/min</small></div>
+      <div class="cr-work">
+        ({{ 140 - age }} × {{ wt }}) ÷ (72 × {{ scr }}){{ female ? ' × 0.85' : '' }} · ใช้น้ำหนักจริง
+      </div>
+      <div v-if="ibw" class="cr-alt">
+        <div class="cr-alt-row"><span>IBW {{ ibw.toFixed(1) }} kg</span><b>{{ cgWith(ibw).toFixed(1) }} mL/min</b></div>
+        <div v-if="wt > ibw * 1.2" class="cr-alt-row">
+          <span>AdjBW {{ adjbw.toFixed(1) }} kg</span><b>{{ cgWith(adjbw).toFixed(1) }} mL/min</b>
+        </div>
+        <div class="cr-note">
+          {{ wt > ibw * 1.2 ? 'น้ำหนักจริงเกิน IBW 120% — มักใช้ AdjBW' : wt < ibw ? 'น้ำหนักจริงต่ำกว่า IBW — มักใช้น้ำหนักจริง' : 'น้ำหนักจริงใกล้ IBW — มักใช้ IBW' }}
+        </div>
       </div>
     </div>
-    <div v-else-if="badInput" class="cr-hint" aria-live="polite">พิมพ์เป็นตัวเลขนะ เช่น 50 หรือ 50.5</div>
+    <div v-else-if="anyBad" class="cr-hint">ใส่เป็นตัวเลขในช่วงที่เป็นไปได้ (อายุ 18–120 · Scr มากกว่า 0)</div>
 
-    <div class="cr-session">รอบนี้ทำไปแล้ว <b>{{ sDone }}</b> ข้อ · ถูก <b>{{ sCorrect }}</b></div>
+    <p class="cr-foot">
+      CrCl = (140 − อายุ) × น้ำหนัก ÷ (72 × Scr) · ผู้หญิงคูณ 0.85<br>
+      IBW ชาย 50 / หญิง 45.5 + 0.91 × (ส่วนสูง − 152.4) · AdjBW = IBW + 0.4 × (น้ำหนักจริง − IBW)<br>
+      ใช้ประกอบการเรียนเท่านั้น
+    </p>
   </div>
 </template>
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
-import { ref, computed, onBeforeUnmount, nextTick, watch } from 'vue'
-import { increment } from 'firebase/firestore'
-import { useAuthStore } from '../stores/auth.js'
-import { cockcroftGault, makeProblem, isClose } from '../utils/crcl.js'
+import { ref, computed } from 'vue'
+import { cockcroftGault } from '../utils/crcl.js'
 
-const LS_KEY = 'rxtu10:crcl:showFormula'
-const FLUSH_EVERY = 10        // เขียน Firestore ทุกกี่ข้อ (โหมดต่อเนื่อง เขียนทุกข้อแพงเกินจำเป็น)
+const female = ref(false)
+const ageText = ref('')
+const wtText = ref('')
+const scrText = ref('')
+const htText = ref('')
 
-const auth = useAuthStore()
-const inputEl = ref(null)
+const num = (s) => parseFloat(String(s).replace(',', '.'))
+const age = computed(() => { const n = num(ageText.value); return n >= 18 && n <= 120 ? n : null })
+const wt = computed(() => { const n = num(wtText.value); return n > 0 && n < 400 ? n : null })
+const scr = computed(() => { const n = num(scrText.value); return n > 0 && n < 30 ? n : null })
+const ht = computed(() => { const n = num(htText.value); return n >= 100 && n < 250 ? n : null })
 
-const p = ref(makeProblem())
-const input = ref('')
-const checked = ref(false)
-const lastOk = ref(false)
-const badInput = ref(false)   // พิมพ์ไม่ใช่ตัวเลข — เตือนเฉยๆ ไม่นับเป็นข้อ ไม่กินยอดสะสม
-const showFormula = ref(localStorage.getItem(LS_KEY) === '1')
+const cgWith = (weightKg) => cockcroftGault({ age: age.value, weightKg, scr: scr.value, female: female.value })
+const crcl = computed(() => (age.value && wt.value && scr.value ? cgWith(wt.value) : null))
 
-// ตัวนับ "เฉพาะรอบนี้" — ยอดสะสมไม่แสดงบนจอเด็ดขาด (ตามที่สั่ง)
-const sDone = ref(0)
-const sCorrect = ref(0)
+// IBW (Devine) — ส่วนสูงต่ำกว่า 152.4 cm สูตรติดลบ ปัดพื้นไว้ที่ค่าฐาน
+const ibw = computed(() => {
+  if (!ht.value || crcl.value == null) return null
+  return Math.max(female.value ? 45.5 : 50, (female.value ? 45.5 : 50) + 0.91 * (ht.value - 152.4))
+})
+const adjbw = computed(() => (ibw.value ? ibw.value + 0.4 * (wt.value - ibw.value) : null))
 
-const expected = computed(() => cockcroftGault(p.value))
-
-// พิมพ์แก้ใหม่แล้วซ่อนคำเตือนเดิม ไม่ต้องรอกดตรวจซ้ำ
-watch(input, () => { badInput.value = false })
-
-// ยอดที่ยังไม่ได้เขียนลงฐาน — flush ทุก FLUSH_EVERY ข้อ และตอนออกจากหน้า
-let pendingDone = 0
-let pendingCorrect = 0
-
-function toggleFormula() {
-  showFormula.value = !showFormula.value
-  localStorage.setItem(LS_KEY, showFormula.value ? '1' : '0')
-}
-
-function check() {
-  if (checked.value) return
-  const ans = parseFloat(input.value.replace(',', '.'))
-  // พิมพ์ไม่ใช่ตัวเลข (เช่น "ห้าสิบ" หรือ "~50") — ไม่ตัดสิน ไม่กินยอด ปล่อยให้แก้
-  if (!Number.isFinite(ans)) { badInput.value = true; return }
-  badInput.value = false
-  lastOk.value = isClose(ans, expected.value)
-  checked.value = true
-  sDone.value += 1
-  pendingDone += 1
-  if (lastOk.value) { sCorrect.value += 1; pendingCorrect += 1 }
-  if (pendingDone >= FLUSH_EVERY) flush()
-}
-
-function next() {
-  p.value = makeProblem()
-  input.value = ''
-  checked.value = false
-  badInput.value = false
-  nextTick(() => inputEl.value?.focus())
-}
-
-function onEnter() { checked.value ? next() : (input.value.trim() && check()) }
-
-// เขียนยอดสะสมแบบ batch · รีเซ็ต pending ก่อน await กันนับซ้ำถ้าถูกเรียกซ้อน
-async function flush() {
-  const d = pendingDone
-  const c = pendingCorrect
-  if (!d) return
-  pendingDone = 0
-  pendingCorrect = 0
-  const cur = auth.userData?.minigames?.crcl || { best: 0, correct: 0 }
-  const ok = await auth.patchUser(
-    {
-      minigames: {
-        ...auth.userData?.minigames,
-        // best = "จำนวนข้อที่ทำสะสม" (ไม่ใช่คะแนนสูงสุด) — ใช้ชื่อนี้เพื่อให้ buildMinigameBoard
-        // เปิดกระดานได้ทันทีวันหลังโดยไม่ต้องแตะแคชสมาชิก · ยอดนี้ไม่แสดงบนจอที่ไหนเลย
-        crcl: { best: (cur.best || 0) + d, correct: (cur.correct || 0) + c },
-      },
-    },
-    { 'minigames.crcl.best': increment(d), 'minigames.crcl.correct': increment(c) },
-  )
-  // เขียนไม่สำเร็จ → คืนยอดกลับเข้า pending ให้ flush รอบหน้า (หรือตอนออกจากหน้า) ลองใหม่
-  if (!ok) { pendingDone += d; pendingCorrect += c }
-}
-
-// ไม่โฟกัส input ตอน mount — ปล่อยให้นักศึกษาอ่านโจทย์ก่อน คีย์บอร์ดมือถือจะได้ไม่ผุดมาบัง
-// (โฟกัสหลังกด "ข้อถัดไป" ใน next() ยังอยู่ตามเดิม ให้คนพิมพ์เร็วพิมพ์ต่อได้เลย)
-onBeforeUnmount(() => { flush() })   // fire-and-forget: ออกจากหน้าแล้วยอดที่ค้างต้องไม่หาย
+const anyBad = computed(() =>
+  (ageText.value && age.value == null) || (wtText.value && wt.value == null) || (scrText.value && scr.value == null))
 </script>
 
 <style scoped>
 .cr-wrap { max-width: 480px; margin: 0 auto; }
 .cr-head { display: flex; align-items: center; gap: 10px; }
 .cr-back { all: unset; cursor: pointer; font-weight: 700; color: var(--primary); padding: 6px 4px; }
-.cr-formula-btn { all: unset; cursor: pointer; display: block; margin: 0 auto 8px; font-size: .78rem;
-  color: var(--primary); text-decoration: underline; padding: 6px; }
-.cr-formula { background: var(--primary-light); border: var(--bw) solid var(--line); border-radius: 12px;
-  padding: 12px; margin-bottom: 12px; text-align: center; }
-.cr-formula-main { font-weight: 800; font-size: .84rem; color: var(--ink); line-height: 1.5; }
-.cr-formula-note { font-size: .72rem; color: rgba(0,0,0,.55); margin-top: 5px; }
 .cr-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop);
   padding: 14px 16px; margin-bottom: 14px; }
-.cr-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0;
+.cr-sex { display: flex; gap: 8px; margin-bottom: 8px; }
+.cr-sex button { all: unset; cursor: pointer; flex: 1; text-align: center; padding: 9px; border-radius: 10px;
+  border: var(--bw) solid var(--line); font-weight: 700; color: rgba(0,0,0,.55); }
+.cr-sex button.on { background: var(--primary); color: #fff; }
+.cr-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 5px 0;
   font-size: .86rem; color: rgba(0,0,0,.6); }
-.cr-row b { font-size: 1rem; color: var(--ink); }
-.cr-answer { display: flex; gap: 8px; }
-.cr-input { flex: 1; min-width: 0; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px;
-  font-family: inherit; font-size: 1rem; box-sizing: border-box; }
-.cr-input[readonly] { background: #f1f5f9; }   /* readonly ไม่ใช่ disabled — disabled จะไม่ยิง keyup ทำให้ Enter ข้อถัดไปตาย */
-.cr-btn { flex-shrink: 0; all: unset; cursor: pointer; background: var(--primary); color: #fff;
-  font-weight: 800; padding: 12px 18px; border-radius: 12px; text-align: center; }
-.cr-btn:disabled { background: #cbd5e1; cursor: default; }
-.cr-result { margin-top: 14px; border: 2px dashed rgba(0,0,0,.2); border-radius: 12px; padding: 12px;
-  background: #fef2f2; }
-.cr-result.ok { background: #f0fdf4; }
-.cr-result-head { font-weight: 800; font-size: .92rem; }
-.cr-result-ans { font-size: .88rem; margin-top: 4px; }
-.cr-result-work { font-size: .76rem; color: rgba(0,0,0,.55); margin-top: 4px; overflow-wrap: anywhere; }
-.cr-hint { margin-top: 10px; font-size: .76rem; color: #b45309; text-align: center; }
-.cr-session { text-align: center; font-size: .76rem; color: rgba(0,0,0,.45); margin-top: 16px; }
+.cr-row small { font-size: .68rem; color: rgba(0,0,0,.4); }
+.cr-input { width: 120px; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 10px;
+  font-family: inherit; font-size: 1rem; text-align: right; box-sizing: border-box; }
+.cr-result { border: 2px dashed rgba(0,0,0,.2); border-radius: 12px; padding: 14px; background: var(--primary-light);
+  text-align: center; }
+.cr-big { font-size: 1.8rem; font-weight: 800; color: var(--ink); }
+.cr-big small { font-size: .8rem; font-weight: 700; color: rgba(0,0,0,.5); }
+.cr-work { font-size: .76rem; color: rgba(0,0,0,.55); margin-top: 4px; overflow-wrap: anywhere; }
+.cr-alt { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,.1); }
+.cr-alt-row { display: flex; justify-content: space-between; font-size: .84rem; padding: 3px 0; }
+.cr-note { font-size: .72rem; color: rgba(0,0,0,.5); margin-top: 6px; }
+.cr-hint { font-size: .76rem; color: #b45309; text-align: center; }
+.cr-foot { font-size: .7rem; color: rgba(0,0,0,.45); margin-top: 16px; line-height: 1.6; text-align: center; }
 </style>

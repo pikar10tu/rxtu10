@@ -296,7 +296,7 @@ const DOORS = computed(() => [
 ])
 const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
 const TOOLS = [
-  { emoji: '🧮', title: 'ฝึกคำนวณ CrCl', sub: 'ฝึกสูตร Cockcroft-Gault · ทำกี่ข้อก็ได้', to: '/study/crcl' },
+  { emoji: '🧮', title: 'คำนวณ CrCl', sub: 'Cockcroft-Gault · ใส่ส่วนสูงได้ IBW/AdjBW', to: '/study/crcl' },
   { emoji: '👶', title: 'ขนาดยาน้ำเด็ก', sub: 'ใส่น้ำหนัก ได้ขนาดเป็น mL ต่อครั้ง · 19 ยา', to: '/study/ped-dose' },
   { emoji: '⚖️', title: 'IBW / ABW / BMI / BSA', sub: 'เร็วๆ นี้', to: null },
   { emoji: '💉', title: 'IV rate + แปลง mEq', sub: 'เร็วๆ นี้', to: null },
