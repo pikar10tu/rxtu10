@@ -36,7 +36,6 @@
           <template v-if="id">
             <PetThumb :pet="slotPetOf(id)" />
             <span class="tp-slotname">{{ displayName(id, defOf(id).name, teamNow) }}</span>
-            <span v-if="inline && shortOf(id)" class="tp-pass">{{ shortOf(id) }}</span>
             <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
           </template>
           <span v-else class="tp-empty">＋</span>
@@ -52,11 +51,11 @@
       </span>
     </div>
 
-    <div class="tp-status" :class="{ warn: statusWarn, pend: pendingId }">
+    <!-- 3 ต.ค. 2026 ลดความรก: ข้อความสอนวิธีใช้เหลือบรรทัดเดียว (ไม่มีกล่อง) · กล่องสีขึ้นเฉพาะตอนกำลังเลือก/ถือตัว -->
+    <div class="tp-status" :class="{ warn: statusWarn, pend: pendingId, idle: statusIdle }">
       {{ status }}
       <button v-if="pendingId" type="button" class="tp-pend-x" @click="pendingId = null">ยกเลิก</button>
     </div>
-    <div class="tp-status sub">ช่อง 1 ออกตีก่อน · แตะช่องหนึ่งแล้วแตะอีกช่อง = สลับลำดับ</div>
 
     <!-- ฟิลเตอร์สายแยกแถว + ระดับ + เฉพาะในทีม (user เคาะ 3 ต.ค. 2026) · ใช้ร่วมกับหน้าคลัง (utils/petFilter.js) -->
     <PetFilterBar v-if="owned.length" v-model="flt" :count="poolPets.length" />
@@ -102,7 +101,6 @@ import { useToast } from '../../composables/useToast.js'
 import { computed, ref, watch, defineComponent, h } from 'vue'
 import PetFilterBar from '../pets/PetFilterBar.vue'
 import { filterPets, sortPets, statOf, DEFAULT_FILTER } from '../../utils/petFilter.js'
-import { PET_PASSIVES, effectText } from '../../data/petPassives.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
 import { BATTLE_SLOTS } from '../../data/residence.js'
@@ -161,9 +159,11 @@ const status = computed(() => {
   const i = edit.value.sel
   if (i != null && selId.value) return `เลือกช่อง ${i + 1} (${defOf(selId.value).name}) · แตะตัวข้างล่างเพื่อใส่แทน หรือแตะช่องอื่นเพื่อสลับ`
   if (i != null) return `เลือกช่อง ${i + 1} (ว่าง) · แตะตัวข้างล่างเพื่อใส่`
-  if (hasEmpty.value) return 'แตะตัวข้างล่างเพื่อใส่ช่องว่าง · แตะช่องเพื่อเลือก'
-  return 'ทีมเต็มแล้ว · แตะตัวข้างล่าง แล้วเลือกว่าจะแทนช่องไหน'
+  // หน้าเต็ม (/team) มี "ช่อง 1 ออกตีก่อน" ที่หัวหน้าแล้ว · แผ่นเลื่อน (หอคอย/สนาม) ไม่มี ⇒ ใส่ไว้ตรงนี้
+  const lead = props.inline ? '' : 'ช่อง 1 ออกตีก่อน · '
+  return lead + (hasEmpty.value ? 'แตะตัวข้างล่างเพื่อใส่' : 'แตะตัวข้างล่างเพื่อแทน') + ' · แตะสองช่อง = สลับลำดับ'
 })
+const statusIdle = computed(() => !pendingId.value && edit.value.sel == null && !statusWarn.value)
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
 const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
@@ -192,7 +192,6 @@ function earthTag(i) {
 
 const flt = ref({ ...DEFAULT_FILTER })
 const poolPets = computed(() => sortPets(filterPets(owned.value, flt.value, edit.value.slots), flt.value.sort))
-const shortOf = (id) => effectText(PET_PASSIVES[id])
 function cmpOf(p) {
   const cur = selId.value
   if (!cur || cur === p.id) return null
@@ -280,11 +279,9 @@ function pick(id) {
 .tp-slot.target { box-shadow: 0 0 0 3px var(--accent), var(--pop); animation: tp-target 1s ease-in-out infinite alternate; }
 @keyframes tp-target { to { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent), var(--pop); } }
 .tp-pet.pending { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); transform: translateY(-3px); }
-.tp-status.sub { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 4px 0 12px; padding: 0; }
+.tp-status.idle { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 12px 0 10px; padding: 0; }
 
 .tp-inline { padding-bottom: 8px; }
-.tp-pass { font-size: .7rem; line-height: 1.3; color: var(--muted); text-align: center; padding: 0 3px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.tp-inline .tp-slot { aspect-ratio: auto; min-height: 150px; }
 .tp-cmp { display: flex; flex-direction: column; align-items: center; font-size: .7rem; font-weight: 700; line-height: 1.25; }
 .tp-cmp i { font-style: normal; }
 .tp-cmp .up { color: #17805c; } .tp-cmp .down { color: #c2415c; }
