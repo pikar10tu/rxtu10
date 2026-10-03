@@ -76,8 +76,8 @@
         <PetStatLine :pet="p" />
         <!-- เลือกช่องที่มีเพ็ทอยู่ = เทียบ ATK/HP กับตัวเดิม (ไม่มีเลข "พลังทีม" — user สั่ง 3 ต.ค.) -->
         <span v-if="cmpOf(p)" class="tp-cmp">
-          <i :class="cmpOf(p).atk >= 0 ? 'up' : 'down'">⚔️{{ cmpOf(p).atk >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).atk) }}</i>
-          <i :class="cmpOf(p).hp >= 0 ? 'up' : 'down'">❤️{{ cmpOf(p).hp >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).hp) }}</i>
+          <i :class="cmpOf(p).atk >= 0 ? 'up' : 'down'"><Emoji char="⚔️" />{{ cmpOf(p).atk >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).atk) }}</i>
+          <i :class="cmpOf(p).hp >= 0 ? 'up' : 'down'"><Emoji char="❤️" />{{ cmpOf(p).hp >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).hp) }}</i>
         </span>
       </button>
       <div v-if="owned.length && !poolPets.length" class="tp-none">ไม่มีเพ็ทที่ตรงกับตัวกรอง</div>
