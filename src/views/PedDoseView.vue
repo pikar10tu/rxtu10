@@ -21,10 +21,12 @@
           <span class="pd-conc">{{ concLabel(d) }}</span>
         </div>
         <div class="pd-sub">{{ basisLabel(d) }}{{ d.doseOf ? ` (คิดเป็น ${d.doseOf})` : '' }} · {{ freqLabel(d) }}</div>
+        <div v-if="d.max" class="pd-sub">{{ maxLabel(d) }}</div>
         <div v-if="kg" class="pd-res">
           <span class="pd-ml">{{ range(calcDose(d, kg).ml, 1) }} <small>mL/ครั้ง</small></span>
           <span class="pd-amt">= {{ range(calcDose(d, kg).amt, 1) }} {{ d.unit }}</span>
         </div>
+        <div v-if="kg && calcDose(d, kg).capped" class="pd-cap">ถึงเพดานแล้ว ตัดที่ {{ fmt(calcDose(d, kg).lim, 1) }} {{ d.unit }}/ครั้ง</div>
         <div v-if="d.note" class="pd-note">{{ d.note }}</div>
       </div>
       <div v-if="!shown.length" class="pd-empty">ไม่เจอยาชื่อนี้</div>
@@ -42,6 +44,7 @@
 
     <p class="pd-foot">
       สูตร: mL ต่อครั้ง = ขนาดยา (mg) × 5 ÷ ความแรงต่อ 5 mL · ยาที่เป็น mg/kg/day หารด้วยจำนวนครั้งต่อวัน · 1 ช้อนชา = 5 mL<br>
+      เพดานต่อครั้ง/ต่อวันเป็นค่าสูงสุดทั่วไป (ส่วนใหญ่คือขนาดผู้ใหญ่) บางข้อบ่งใช้ใช้สูงกว่านี้ได้<br>
       ขนาดยาอาจเปลี่ยนตามโรค ใช้ประกอบการเรียนเท่านั้น<br>
       ข้อมูลจาก{{ PED_DOSE_CREDIT }}
     </p>
@@ -51,7 +54,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
-import { WEIGHT_DRUGS, AGE_DRUGS, PED_DOSE_CREDIT, calcDose, concLabel, basisLabel, freqLabel } from '../data/pedDose.js'
+import { WEIGHT_DRUGS, AGE_DRUGS, PED_DOSE_CREDIT, calcDose, concLabel, basisLabel, freqLabel, maxLabel } from '../data/pedDose.js'
 
 const kgText = ref('')
 const q = ref('')
@@ -85,6 +88,7 @@ const range = ([lo, hi], p) => Math.abs(hi - lo) < 1e-9 ? fmt(lo, p) : `${fmt(lo
 .pd-ml { font-size: 1.15rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
 .pd-ml small { font-size: .74rem; font-weight: 700; }
 .pd-amt { font-size: .8rem; color: var(--muted); }
+.pd-cap { margin-top: 6px; font-size: .76rem; font-weight: 800; color: #b91c1c; }
 .pd-note { margin-top: 6px; font-size: .74rem; color: #b45309; line-height: 1.45; }
 .pd-band { display: flex; justify-content: space-between; font-size: .84rem; padding: 3px 0; border-top: 1px dashed var(--line); margin-top: 4px; }
 .pd-band b { color: var(--ink); }
