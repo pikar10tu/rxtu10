@@ -1623,6 +1623,8 @@ onUnmounted(() => {
 
 <style scoped>
 .br-ov { position: fixed; inset: 0; z-index: 420; background: #0f172a; display: flex; align-items: center; justify-content: center; padding: 16px; }
+/* กดค้างเร่งได้ทั้งจอ (1 ต.ค.) ⇒ ต้องกันเลือกข้อความทั้งจอด้วย ไม่งั้นกดค้างแล้วขึ้น select all/แว่นขยาย (เพื่อนแจ้ง 3 ต.ค.) */
+.br-ov { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 /* พื้นครึ่งสนาม (ArenaFloor) อยู่ใต้ .br-box เสมอ — ชั้น: พื้น → การ์ด/ป้าย → แบนเนอร์/เลข */
 .br-bg { position: absolute; left: 0; right: 0; z-index: 0; overflow: hidden; pointer-events: none; }
 .br-seam { position: absolute; left: 0; right: 0; height: 2px; margin-top: -1px; z-index: 0; pointer-events: none;

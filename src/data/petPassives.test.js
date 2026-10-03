@@ -132,6 +132,7 @@ test('desc ต้องแจ้งตัวเลขทุกตัวที่
     for (const part of partsOf(p)) {
       for (const [k, v] of Object.entries(part.value || {})) {
         if (typeof v !== 'number') continue      // duoWith/element เป็นชื่อ ไม่ใช่ค่าที่ต้องบอก
+        if (v === 0) continue   // ค่า 0 เขียนเป็นคำแทนเลข: ไวรัส max 0 = "ไม่จำกัดชั้น" · ซอล legendary 0 = "ตำนานไม่ได้"
         assert.ok(said.has(k), `${id} desc ไม่ได้บอกค่า ${k} (=${v}) → "${p.desc}"`)
       }
     }
