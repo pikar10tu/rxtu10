@@ -76,8 +76,8 @@
               <span class="picker-emoji"><Emoji :char="p.emoji" /></span>
               <span class="picker-name">{{ p.name }}</span>
               <span v-if="passiveOf(p)" class="picker-skill"><Emoji :char="passiveOf(p).icon" /> {{ passiveOf(p).name }}</span>
-              <span v-if="pets.find((x) => x.id === p.id)" class="picker-have">มีแล้ว</span>
-              <span v-else-if="newbiePick(p.id)" class="picker-newbie">NEWBIE FRIENDLY</span>
+              <span v-if="newbiePick(p.id)" class="picker-newbie">NEWBIE FRIENDLY</span>
+              <span v-if="pets.find((x) => x.id === p.id)" class="picker-have">{{ newbiePick(p.id) ? 'มีแล้ว · เปิดซ้ำไว้อัพขั้น' : 'มีแล้ว' }}</span>
             </div>
           </div>
           <button class="picker-clear" @click="chooseTarget(pickerOn)">{{ pickerOn ? 'ล้างเป้าหมาย' : 'ปิด' }}</button>
@@ -96,7 +96,7 @@
           <div v-if="passiveOf(infoPet)" class="info-passive">
             <b><Emoji :char="passiveOf(infoPet).icon" /> {{ passiveOf(infoPet).name }}</b> — {{ passiveText(passiveOf(infoPet)) }}
           </div>
-          <div v-if="newbiePick(infoPet.id) && !pets.find((x) => x.id === infoPet.id)" class="info-newbie"><b>NEWBIE FRIENDLY</b> · {{ NEWBIE_PICKS[infoPet.id] }}</div>
+          <div v-if="newbiePick(infoPet.id)" class="info-newbie"><b>NEWBIE FRIENDLY</b> · {{ NEWBIE_PICKS[infoPet.id] }}<template v-if="pets.find((x) => x.id === infoPet.id)"> · มีแล้วก็เปิดซ้ำไว้อัพขั้นได้</template></div>
           <button v-if="!(pickerMode === 'theme' && !ev.featured.includes(infoPet.id))" class="info-target" @click="chooseTarget(infoPet.id); infoPet = null">ตั้งเป็นเป้าหมาย</button>
         </div>
       </div>
@@ -195,7 +195,13 @@ const NEWBIE_PICKS = {
   whale: 'เลือดทั้งทีม +% · คู่กับแมวน้ำ (หายาก) ได้โบนัสคู่ ทีมถึกฟื้นเลือดทุกรอบ',
 }
 const isNewbie = computed(() => new Set(ownedLegendaryIds()).size < 2)
-const newbiePick = (id) => isNewbie.value && !!NEWBIE_PICKS[id]
+// มีตัวนั้นแล้วแต่ขั้น+ตัวซ้ำที่ถือไว้ยังไม่เกิน 2 ⇒ ยังแนะนำให้เปิดซ้ำไว้อัพขั้น (user 3 ต.ค.)
+// ไม่ผูกกับตู้ — ซอลย้ายเข้าตู้ปกติหลังตู้ธีมปิด ป้ายตามไปเอง (releasedPets)
+const newbiePick = (id) => {
+  if (!isNewbie.value || !NEWBIE_PICKS[id]) return false
+  const own = pets.value.find((x) => x.id === id)
+  return !own || (own.grade || 0) + (own.copies || 0) <= 2
+}
 const pickerList = computed(() => {
   const list = pickerMode.value === 'theme' ? featuredPets.value : legendaries.value
   return isNewbie.value ? [...list].sort((a, b) => !!NEWBIE_PICKS[b.id] - !!NEWBIE_PICKS[a.id]) : list
