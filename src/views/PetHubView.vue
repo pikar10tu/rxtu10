@@ -6,12 +6,10 @@
       <HelpButton topic="pets" />
     </div>
 
-    <!-- การ์ดหัว: ทีมต่อสู้ + ตัวเลขหลัก · แตะ = ไปคลัง/จัดทีม -->
-    <RouterLink to="/team" class="ph-hero">
-      <div class="ph-hero-top">
-        <b>ทีมของฉัน</b>
-        <span class="ph-hero-go">จัดทีม ›</span>
-      </div>
+    <!-- แบบ A (user เลือก 4 ต.ค. 2026): กล่องบน = ทีม + ปุ่มจัดทีม/คลัง · ล่าง = เฉพาะโหมดที่ไปสู้
+         ทุกอย่างมีทางเข้าทางเดียว — เดิมการ์ดหัวกับการ์ด 'จัดทีม' พาไป /team ซ้ำกันจนเพื่อนงง -->
+    <div class="ph-hero">
+      <div class="ph-hero-top"><b>ทีมของฉัน</b></div>
       <div class="ph-team">
         <span v-for="(e, i) in teamEmojis" :key="i" class="ph-team-pet" :class="{ empty: !e }"><Emoji v-if="e" :char="e" /><template v-else>＋</template></span>
       </div>
@@ -20,20 +18,14 @@
         <span><b>{{ legendCount }}</b> เลเจนด์</span>
         <span>หอคอยชั้น <b>{{ authStore.userData?.towerBest || 0 }}</b></span>
       </div>
-    </RouterLink>
-
+      <div class="ph-btns">
+        <RouterLink to="/team" class="ph-btn main"><Emoji char="🛡️" /> จัดทีม</RouterLink>
+        <RouterLink to="/pets" class="ph-btn"><Emoji char="📦" /> คลังเพ็ท</RouterLink>
+      </div>
+    </div>
+    <div class="ph-sec">ไปสู้</div>
     <div class="play-grid">
-      <RouterLink to="/team" class="game-card gc-team">
-        <span class="gc-emoji"><Emoji char="⚔️" /></span>
-        <span class="gc-name">จัดทีม</span>
-        <span class="gc-badge grow">ทีม 1/2/3 · ดูพาสสีฟ</span>
-      </RouterLink>
-      <RouterLink to="/pets" class="game-card gc-col">
-        <span class="gc-emoji"><Emoji char="📦" /></span>
-        <span class="gc-name">คลังเพ็ท</span>
-        <span class="gc-badge grow">{{ petCount }} ตัว · กรองสาย/ระดับ</span>
-      </RouterLink>
-      <!-- ร้านเพ็ทไม่ต้องมีที่นี่ — เข้าจากปุ่มร้านค้าบนสุดของหน้าเกมที่เดียว (user สั่ง 25 ก.ย. 2026) -->
+      <!-- ร้านเพ็ทไม่ต้องมีที่นี่ — เข้าจากร้านค้าบนหน้าเกมที่เดียว (user สั่ง 25 ก.ย. 2026) -->
       <RouterLink to="/tower" class="game-card gc-tower">
         <span v-if="towerDot" class="nav-dot gc-dot" aria-label="มีรางวัลซีซั่นรอรับ"></span>
         <span class="gc-emoji"><Emoji char="🏯" /></span>
@@ -116,6 +108,12 @@ const expState = computed(() => expeditionState(exp.value, now.value))
 .ph-team-pet { width: 62px; height: 62px; border-radius: 18px; display: grid; place-items: center; font-size: 2.1rem; background: #fff; box-shadow: var(--pop); }
 .ph-team-pet.empty { background: rgba(255,255,255,.6); border: 2px dashed #c9b8f4; box-shadow: none; color: #b9a6ef; font-size: 1.3rem; }
 .ph-stats { display: flex; justify-content: center; gap: 14px; font-size: .74rem; color: var(--muted); }
+.ph-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.ph-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 14px; font-size: .86rem; font-weight: 800; text-decoration: none; color: #6246b8; background: #fff; border: var(--bw) solid var(--line); }
+.ph-btn.main { background: #6246b8; color: #fff; border-color: transparent; }
+.ph-btn:active { transform: translateY(1px); }
+.ph-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.ph-sec { font-size: .78rem; font-weight: 800; color: var(--muted); margin: 0 2px 6px; }
 .ph-stats b { color: var(--ink); font-size: .9rem; }
 .play-grid { gap: 10px; }
 .game-card { --gc: #e6dcfd; background: linear-gradient(160deg, var(--gc), #fff 75%); border-radius: 18px; padding: 14px 8px; box-shadow: var(--pop); transition: transform .12s; }
