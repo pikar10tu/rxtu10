@@ -153,6 +153,7 @@ h1 { font-size: 1.5rem; margin: 2px 0 8px; }
 .sv-article :deep(th) { background: var(--bg); }
 .sv-article :deep(figure) { margin: 10px 0; }
 .sv-article :deep(figure img) { max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+.sv-article :deep(td img) { display: block; width: 110px; max-width: 100%; margin: 0 0 4px; border-radius: 6px; }
 .sv-article :deep(figcaption) { font-size: .8em; color: var(--muted); margin-top: 4px; }
 .sv-article :deep(.calc-link) { display: inline-block; border: 1px solid var(--primary); color: var(--primary-dark); background: var(--primary-light); border-radius: 999px; padding: 2px 12px; font-size: .85em; text-decoration: none; margin: 4px 0; }
 .sv-article :deep(.kd) { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 3px; font-size: .8em; min-width: 420px; }
