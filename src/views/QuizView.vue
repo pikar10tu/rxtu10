@@ -86,9 +86,13 @@
         <span class="qv-pill qv-score">ถูก {{ correct }}/{{ answered }}</span>
       </div>
       <div class="qv-q">{{ current.question }}</div>
-      <RouterLink v-if="current.source === 'summary'" class="qv-src" :to="`/study/summary/${current.summaryId}`">
-        <Emoji char="📚" /> {{ summarySourceText(current) }}
-      </RouterLink>
+      <!-- ก่อนตอบ = ป้ายเฉยๆ · หลังตอบ = ลิงก์เปิดแท็บใหม่ (ความคืบหน้าควิซอยู่ในหน้านี้เท่านั้น ออกจากหน้า = หาย) -->
+      <component
+        :is="picked !== null ? 'a' : 'span'" v-if="current.source === 'summary'" class="qv-src"
+        v-bind="picked !== null ? { href: router.resolve(`/study/summary/${current.summaryId}`).href, target: '_blank', rel: 'noopener' } : {}"
+      >
+        <Emoji char="📚" /> {{ summarySourceText(current) }}<span v-if="picked !== null"> · เปิดอ่านในแท็บใหม่ ↗</span>
+      </component>
       <div class="qv-choices">
         <button
           v-for="(c, i) in current.choices" :key="i"
@@ -214,6 +218,7 @@ import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import QuickEditModal from '../components/questions/QuickEditModal.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import { summarySourceText } from '../utils/summaryQuestions.js'
+import { useRouter } from 'vue-router'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -239,6 +244,7 @@ import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srs
 import { sfx } from '../utils/sfx.js'
 import { isOwlHour } from '../utils/gags.js'
 import { grantSecret } from '../composables/useAchievements.js'
+const router = useRouter()   // ลิงก์ที่มาของข้อจากสรุป → แท็บใหม่
 
 const authStore = useAuthStore()
 const { syncRosterRow } = useRosterSync()
