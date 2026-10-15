@@ -28,7 +28,7 @@
           <!-- html มาจากไฟล์ในรีโปที่เราแปลงเอง ไม่ใช่ข้อความจากผู้ใช้ -->
           <div v-html="withFigs(s.html)" />
         </section>
-        <section class="sv-card sv-refs">
+        <section v-if="doc.refs?.length" class="sv-card sv-refs">
           <h2>อ้างอิง</h2>
           <ul><li v-for="r in doc.refs" :key="r">{{ r }}</li></ul>
         </section>
