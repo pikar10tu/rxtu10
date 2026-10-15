@@ -86,6 +86,9 @@
         <span class="qv-pill qv-score">ถูก {{ correct }}/{{ answered }}</span>
       </div>
       <div class="qv-q">{{ current.question }}</div>
+      <RouterLink v-if="current.source === 'summary'" class="qv-src" :to="`/study/summary/${current.summaryId}`">
+        <Emoji char="📚" /> {{ summarySourceText(current) }}
+      </RouterLink>
       <div class="qv-choices">
         <button
           v-for="(c, i) in current.choices" :key="i"
@@ -102,6 +105,7 @@
           {{ picked === current.answer ? `ได้ +${QUIZ_COIN_PER_CORRECT} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้เข้าคิวทบทวนแล้ว` }}
         </div>
         <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
+        <div v-if="current.keyBy === 'converter'" class="qv-note"><Emoji char="ℹ️" /> สรุปต้นฉบับไม่มีเฉลยข้อนี้ เฉลยเรียบเรียงโดยผู้แปลงสรุป — ถ้าเห็นว่าผิดกดแจ้งได้เลย</div>
         <AiReviewNote :q="current" />
         <div v-if="current.reviewNote" class="qv-note"><Emoji char="📝" /> หมายเหตุจากผู้ตรวจ: {{ current.reviewNote }}</div>
         <!-- 🚩 แจ้งข้อผิด -->
@@ -209,6 +213,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import QuickEditModal from '../components/questions/QuickEditModal.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
+import { summarySourceText } from '../utils/summaryQuestions.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -773,7 +778,7 @@ async function finish() {
 .qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }
 .qv-running { text-align: right; font-size: .7rem; font-weight: 700; color: #15803d; margin-bottom: 10px; }
 .qv-review-badge { display: inline-block; margin-bottom: 6px; }
-.qv-q { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 18px; font-size: .95rem; font-weight: 700; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
+.qv-q { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 18px; font-size: .95rem; font-weight: 700; color: var(--ink); line-height: 1.5; margin-bottom: 14px; white-space: pre-line; }
 .qv-choices { display: flex; flex-direction: column; gap: 10px; }
 .qv-choice { display: flex; align-items: center; gap: 10px; text-align: left; border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; padding: 13px 14px; font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; box-shadow: var(--pop); transition: transform .1s, box-shadow .1s; }
 .qv-choice:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
@@ -793,6 +798,7 @@ async function finish() {
 .qv-fb.ok { color: #1f7a5c; background: var(--mint-light); }
 .qv-fb.no { color: #b0386a; background: #fde7ef; }
 .qv-exp { margin-top: 10px; font-size: .76rem; color: #b45309; background: #fffbeb; border-radius: 10px; padding: 10px 12px; line-height: 1.5; }
+.qv-src { display: inline-block; margin: -4px 0 10px; font-size: .72rem; color: var(--primary-dark); text-decoration: none; background: var(--primary-light); border-radius: 999px; padding: 3px 10px; }
 .qv-note { margin-top: 8px; font-size: .76rem; color: #1e40af; background: #eff6ff; border-radius: 8px; padding: 9px 11px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .qv-next { width: 100%; margin-top: 14px; border: none; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .88rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,var(--primary),var(--primary-2)); cursor: pointer; }
 

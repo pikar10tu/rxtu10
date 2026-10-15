@@ -34,6 +34,8 @@ export function computeStatus(question) {
 export function needsReviewBy(question, myUid) {
   if (!myUid || !question) return false
   if (question.retired) return false   // นำออกจากการใช้งานแล้ว — ไม่ต้องตรวจ
+  // ข้อจากสรุปของเพื่อน ถือว่าตรวจแล้ว (user เคาะ 3 ต.ค. 2026) — ผิดให้ไปทางรีพอร์ท ไม่ใช่คิวตรวจ
+  if (question.source === 'summary' && computeStatus(question) === 'passed') return false
   if (question.createdBy === myUid && question.source !== 'import') return false
   // คนแก้ข้อไม่ใช่คนตรวจข้อ — REVIEW_RESET ล้าง reviewedBy เป็น [] ทำให้ข้อเด้งกลับเข้าคิว
   // ของคนที่เพิ่งแก้มันเอง ถ้าไม่กันตรงนี้ ตาที่สองจะหายไปเงียบๆ

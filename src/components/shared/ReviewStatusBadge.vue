@@ -13,7 +13,9 @@ import { reviewStatusKey, REVIEW_STATUS_LABEL } from '../../utils/questionReview
 
 const props = defineProps({ question: { type: Object, required: true } })
 const statusKey = computed(() => reviewStatusKey(props.question))
-const label = computed(() => REVIEW_STATUS_LABEL[statusKey.value])
+// ข้อจากสรุปของเพื่อน ไม่ได้ผ่านทีมวิชาการ — ป้ายต้องบอกตามจริง
+const label = computed(() => props.question.source === 'summary' && statusKey.value === 'passed'
+  ? 'จากสรุป' : REVIEW_STATUS_LABEL[statusKey.value])
 </script>
 
 <style scoped>

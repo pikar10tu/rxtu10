@@ -81,6 +81,26 @@
           </button>
         </div>
       </details>
+
+      <!-- ── ข้อสอบท้ายสรุปของเพื่อน → คลัง (เผยแพร่ + ถือว่าตรวจแล้ว ตามที่ user เคาะ 3 ต.ค. 2026) ── -->
+      <details v-if="authStore.isAcademic" class="qz-import">
+        <summary class="qz-import-sum"><Emoji char="📚" /> นำเข้าข้อสอบจากสรุป</summary>
+        <div class="qz-import-body">
+          <p class="qz-pick-hint">
+            ดึงข้อสอบท้ายสรุปทุกเรื่องเข้าคลัง แบบ<b>เผยแพร่และผ่านตรวจทันที</b> (ไม่เข้าคิวตรวจ) · แต่ละข้อขึ้นที่มา “จากสรุป … ของ …” ·
+            กดซ้ำได้ ระบบข้ามข้อที่เคยนำเข้าแล้ว
+          </p>
+          <p v-if="sumPlan" class="qz-pick-hint">
+            ในสรุปมี {{ sumPlan.total }} ข้อ · อยู่ในคลังแล้ว {{ sumPlan.total - sumPlan.fresh.length }} · ใหม่ {{ sumPlan.fresh.length }} ข้อ
+          </p>
+          <button class="qz-btn qz-import-btn" :disabled="sumBusy || (sumPlan && !sumPlan.fresh.length)" @click="importSummaryQuestions">
+            <template v-if="sumBusy">กำลังทำ…</template>
+            <template v-else-if="!sumPlan"><Emoji char="🔍" /> ตรวจว่ามีข้อใหม่กี่ข้อ</template>
+            <template v-else-if="sumPlan.fresh.length"><Emoji char="📥" /> นำเข้า {{ sumPlan.fresh.length }} ข้อ</template>
+            <template v-else>นำเข้าครบแล้ว</template>
+          </button>
+        </div>
+      </details>
       </template>
 
       <!-- ── 🔍 แท็บ ตรวจสอบ : ข้อถูกแจ้ง + ตรวจข้อซ้ำ ── -->
@@ -319,6 +339,7 @@
             <div v-if="q.reviewNote" class="qz-note"><Emoji char="📝" /> {{ q.reviewNote }}</div>
             <div class="qz-audit">
               <div class="qz-audit-row"><b>เพิ่มโดย:</b> {{ q.createdByName || 'ไม่ระบุ' }}<span v-if="q.source === 'import'"> · นำเข้า</span> · {{ fmtTime(q.createdAt) || '—' }}</div>
+              <div v-if="q.source === 'summary'" class="qz-audit-row"><b>ที่มา:</b> {{ summarySourceText(q) }}<span v-if="q.keyBy === 'converter'"> · ต้นฉบับไม่มีเฉลย ผู้แปลงเฉลยให้</span></div>
               <div class="qz-audit-row"><b>สถานะตรวจ:</b> {{ REVIEW_STATUS_LABEL[reviewStatusKey(q)] }}</div>
               <div class="qz-audit-row">
                 <b>ตรวจโดย:</b>
@@ -368,6 +389,9 @@ import { useConfirm } from '../composables/useConfirm.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { bankStats } from '../utils/questionBankStats.js'
 import { parseImport } from '../utils/importQuestions.js'
+import { buildSummaryQuestions, summarySourceText } from '../utils/summaryQuestions.js'
+import { SUMMARIES, loadSummary } from '../data/summaryIndex.js'
+import summaryManifest from '../../content/summaries/manifest.json'
 import { qhash, groupDuplicates } from '../utils/qhash.js'
 import { planImportWrites, stampFileSets } from '../utils/importTagging.js'
 import { keepKnownSets } from '../utils/examSets.js'
@@ -797,6 +821,51 @@ async function deleteTopic(name) {
     toast(`ลบหมวด “${name}” แล้ว`, 'success')
   } catch (e) { console.error('[topic delete]', e); toast('ลบหมวดไม่สำเร็จ', 'error') }
   finally { topicBusy.value = false }
+}
+
+// ── ข้อสอบจากสรุป: กดครั้งแรก = วางแผน (นับข้อใหม่) · กดอีกครั้ง = เขียนจริง ──
+const sumPlan = ref(null)
+const sumBusy = ref(false)
+async function importSummaryQuestions() {
+  if (sumBusy.value) return
+  sumBusy.value = true
+  try {
+    if (!sumPlan.value) {
+      const all = []
+      for (const s of SUMMARIES.filter(s => s.ready)) {
+        const d = await loadSummary(s.id)
+        const meta = summaryManifest.find(m => m.id === s.id)
+        all.push(...buildSummaryQuestions(d, meta))
+      }
+      const have = new Set(list.value.map(q => q.id))
+      sumPlan.value = { total: all.length, fresh: all.filter(x => !have.has(x.id)) }
+      return
+    }
+    const fresh = sumPlan.value.fresh
+    const meta = {
+      createdBy: authStore.currentUser?.uid || null,
+      createdByName: authStore.userData?.nickname || authStore.userData?.name || null,
+    }
+    for (let i = 0; i < fresh.length; i += 400) {
+      const batch = writeBatch(db)
+      for (const { id, row } of fresh.slice(i, i + 400)) {
+        batch.set(doc(db, 'questions', id), { ...row, ...meta, qhash: qhash(row.question), rand: Math.random(), createdAt: serverTimestamp() })
+      }
+      await batch.commit()
+    }
+    try {
+      await setDoc(doc(db, 'reviewMeta', 'main'), { progress: { passed: increment(fresh.length) } }, { merge: true })
+    } catch (e) { console.error('[reviewMeta progress bump]', e) }
+    toast(`นำเข้าข้อสอบจากสรุป ${fresh.length} ข้อแล้ว`, 'success')
+    sumPlan.value = null
+    await load()
+    await recomputeMeta()
+  } catch (e) {
+    console.error('[summary questions import]', e)
+    toast('นำเข้าไม่สำเร็จ', 'error')
+  } finally {
+    sumBusy.value = false
+  }
 }
 
 const recomputingMeta = ref(false)

@@ -47,7 +47,7 @@
     </button>
     <div v-else class="ai-chips">
       <button class="ai-chip" @click="popOpen = true"><Emoji char="🤖" /> AI ตรวจแล้ว · {{ conf.dot }}</button>
-      <span v-if="q.reviewStatus === 'passed'" class="ai-chip team"><Emoji char="✅" /> ทีมวิชาการตรวจแล้ว</span>
+      <span v-if="q.reviewStatus === 'passed' && q.source !== 'summary'" class="ai-chip team"><Emoji char="✅" /> ทีมวิชาการตรวจแล้ว</span>
     </div>
     <div v-if="prevAnswerText" class="ai-applied"><Emoji char="🤖" /> AI แก้เฉลยข้อนี้แล้ว — เฉลยเดิมคือ {{ prevAnswerText }}</div>
     <!-- ข้อ flag ที่ไม่ใช่ minor ไม่โชว์คำอธิบาย (อาจเฉลยคนละข้อกับในระบบ กันสับสน — สเปก §UI 1) -->
