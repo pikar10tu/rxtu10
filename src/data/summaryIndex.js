@@ -44,7 +44,7 @@ const KEYWORDS = {
 // a = ชื่อจากหัวกระดาษ (เครดิตหลัก ตามที่ user เคาะ 3 ต.ค. 2026) · an = ชื่อจริงจากรายชื่อ ไม่แสดง
 export const SUMMARIES = manifest.map(x => ({
   id: x.id, sys: x.g, title: x.t, final: x.s === 'final',
-  authors: x.a, reviewers: x.r, ready: ready.has(x.id), keys: KEYWORDS[x.id] || '',
+  authors: x.a, reviewers: x.r, pdf: x.pdf || '', ready: ready.has(x.id), keys: KEYWORDS[x.id] || '',
 }))
 
 // ป้ายสถานะตรวจ (user 3 ต.ค. 2026): มีรายชื่อคนตรวจ = "ตรวจแล้ว" · ไม่มี = "ไม่มีคนตรวจ" (เลิกใช้ "รอตรวจ")
@@ -53,6 +53,9 @@ export function reviewPill(s) {
   if (s.final || s.reviewers?.length) return { cls: 'ok', text: 'ตรวจแล้ว' }
   return { cls: 'none', text: 'ไม่มีคนตรวจ' }
 }
+
+// ลิงก์โฟลเดอร์ Drive ที่เก็บ PDF สรุปทั้งหมด (ว่าง = ซ่อนปุ่ม) · ใส่ลิงก์รายไฟล์ได้ที่ manifest ฟิลด์ pdf
+export const SUMMARY_PDF_FOLDER = ''
 
 export function summaryMeta(id) { return SUMMARIES.find(s => s.id === id) }
 

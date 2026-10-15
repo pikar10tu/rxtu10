@@ -16,12 +16,17 @@
           <span>ตัวหนังสือ</span>
           <button v-for="s in SIZES" :key="s[0]" :class="{ on: size === s[0] }" @click="setSize(s[0])">{{ s[1] }}</button>
         </div>
+        <div class="sv-size">
+          <span>ฟอนต์</span>
+          <button v-for="f in FONTS" :key="f.key" :class="{ on: font === f.key }" :style="{ fontFamily: f.css }" @click="setFont(f.key)">{{ f.label }}</button>
+        </div>
+        <a v-if="pdfUrl" class="sv-pdf" :href="pdfUrl" target="_blank" rel="noopener">📄 เปิดไฟล์ PDF ต้นฉบับ</a>
       </header>
       <nav v-if="doc" class="sv-toc">
         <a v-for="s in doc.sections" :key="s.id" :href="`#${s.id}`" @click.prevent="jump(s.id)">{{ s.t }}</a>
       </nav>
       <div v-if="!doc" class="sv-card">กำลังโหลด…</div>
-      <article v-else class="sv-article" :style="{ fontSize: fontPx }" @click="onClick">
+      <article v-else class="sv-article" :style="{ fontSize: fontPx, fontFamily: fontCss }" @click="onClick">
         <section v-for="s in doc.sections" :id="s.id" :key="s.id" class="sv-card">
           <h2>{{ s.t }}</h2>
           <div v-if="s.by" class="sv-secby">ส่วนนี้จัดทำโดย {{ s.by }}</div>
@@ -56,7 +61,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { summaryMeta, loadSummary, SYSTEMS, reviewPill } from '../data/summaryIndex.js'
+import { summaryMeta, loadSummary, SYSTEMS, reviewPill, SUMMARY_PDF_FOLDER } from '../data/summaryIndex.js'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -74,6 +79,27 @@ const SIZES = [['s', 'เล็ก', 15], ['m', 'กลาง', 17], ['l', 'ใ�
 const size = ref((() => { try { return localStorage.getItem('rx-sum-size') || 'm' } catch { return 'm' } })())
 const fontPx = computed(() => (SIZES.find(s => s[0] === size.value) || SIZES[1])[2] + 'px')
 function setSize(s) { size.value = s; try { localStorage.setItem('rx-sum-size', s) } catch { /* private mode */ } }
+
+// ฟอนต์อ่าน (user 3 ต.ค. 2026 จากเดโม P1) — โหลดจาก Google Fonts เฉพาะตอนเลือก ไม่ถ่วงหน้าอื่น
+const FONTS = [
+  { key: 'kanit', label: 'Kanit', css: "'Kanit', sans-serif" },
+  { key: 'sarabun', label: 'Sarabun', css: "'Sarabun', sans-serif", gf: 'Sarabun:wght@400;600;700' },
+  { key: 'plex', label: 'IBM Plex', css: "'IBM Plex Sans Thai', sans-serif", gf: 'IBM+Plex+Sans+Thai:wght@400;600;700' },
+  { key: 'looped', label: 'มีหัว', css: "'Noto Sans Thai Looped', sans-serif", gf: 'Noto+Sans+Thai+Looped:wght@400;600;700' },
+]
+function loadFont(f) {
+  if (!f?.gf || document.getElementById('gf-' + f.key)) return
+  const l = document.createElement('link')
+  l.id = 'gf-' + f.key; l.rel = 'stylesheet'
+  l.href = `https://fonts.googleapis.com/css2?family=${f.gf}&display=swap`
+  document.head.appendChild(l)
+}
+const font = ref((() => { try { return localStorage.getItem('rx-sum-font') || 'kanit' } catch { return 'kanit' } })())
+const fontCss = computed(() => (FONTS.find(f => f.key === font.value) || FONTS[0]).css)
+function setFont(k) { font.value = k; loadFont(FONTS.find(f => f.key === k)); try { localStorage.setItem('rx-sum-font', k) } catch { /* private mode */ } }
+loadFont(FONTS.find(f => f.key === font.value))
+// PDF ต้นฉบับอยู่บน Google Drive (user 16 ต.ค. 2026 เลือกไม่เอาไฟล์ ~100MB เข้ารีโป) — ลิงก์รายไฟล์ก่อน ไม่มีก็ใช้ลิงก์โฟลเดอร์
+const pdfUrl = computed(() => meta.value?.pdf || SUMMARY_PDF_FOLDER || '')
 
 const base = import.meta.env.BASE_URL
 function withFigs(html) { return html.replace(/data-fig="([^"]+)"/g, (_, f) => `src="${base}summaries/${f}" loading="lazy"`) }
@@ -134,6 +160,8 @@ h1 { font-size: 1.5rem; margin: 2px 0 8px; }
 .sv-credit i { color: var(--muted); font-style: normal; }
 .sv-draft { background: #fff3d6; color: #a06a00; border-radius: 10px; padding: 8px 12px; font-size: .85rem; margin-top: 8px; }
 .sv-size { display: flex; gap: 6px; align-items: center; margin-top: 10px; font-size: .8rem; color: var(--muted); }
+.sv-pdf { display: inline-block; margin-top: 10px; font-size: .85rem; color: var(--primary-dark); border: var(--bw) solid var(--primary); background: var(--primary-light); border-radius: 999px; padding: 4px 14px; text-decoration: none; }
+.sv-size { flex-wrap: wrap; }
 .sv-size button { border: var(--bw) solid var(--line); background: var(--bg); border-radius: 8px; padding: 3px 10px; font: inherit; cursor: pointer; }
 .sv-size button.on { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
 .sv-toc { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; scrollbar-width: none; position: sticky; top: 0; z-index: 2; background: var(--bg); }
