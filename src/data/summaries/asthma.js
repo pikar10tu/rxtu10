@@ -12,8 +12,11 @@ export default {
   <li><b>Spirometry:</b> FEV₁/FVC &lt; 0.75 และ <mark>FEV₁ เพิ่ม &gt; 12% และ &gt; 200 mL</mark> หลังพ่น salbutamol 400 mcg 10–15 นาที</li>
   <li><b>PEF:</b> diurnal variability &gt; 10% (วัด 2 ครั้ง/วัน 2 สัปดาห์) หรือเพิ่ม &gt; 20% หลังรักษา 4 สัปดาห์</li>
   <li><b>Bronchial challenge:</b> FEV₁ ลด &gt; 20% ด้วย methacholine (PC₂₀ &lt; 8 mg/mL) หรือ &gt; 10% และ &gt; 200 mL หลังออกกำลังกาย</li>
+  <li><b>Exercise challenge:</b> FEV₁ ลด &gt; 10% และ &gt; 200 mL หลังออกกำลังกาย · methacholine PC₂₀ &gt; 16 mg/mL ไม่นึกถึงหืด · challenge test ปกติไม่แนะนำ ใช้เมื่ออาการไม่ชัดแต่ยังสงสัย</li>
   <li><b>ตอบสนองต่อการรักษา:</b> FEV₁ เพิ่ม &gt; 200 mL และ 12% หลัง medium-dose ICS ≥ 4 สัปดาห์</li>
 </ol>
+<p><b>อาการที่เข้าได้:</b> หอบเหนื่อย แน่นหน้าอก ไอ หายใจเสียงวี้ด เป็น ๆ หาย ๆ มักเป็นกลางคืน/เช้ามืด สัมพันธ์กับไวรัส สารก่อภูมิแพ้ อากาศเย็น ออกกำลังกาย อารมณ์ ยา (NSAIDs, beta-blocker) · มีประวัติภูมิแพ้ของตัวเองหรือครอบครัว · ไม่มีอาการชี้โรคอื่น</p>
+<p><b>เครื่องวัด:</b> spirometer (volume type: FVC, FEV₁ — เครื่องใหญ่ ทำใน รพ.) · peak flow meter (flow type: PEFR — พกพาได้ วัดที่บ้าน)</p>
 <div class="tbl"><table>
   <tr><th></th><th>Asthma</th><th>COPD</th></tr>
   <tr><td>Baseline</td><td>อาจปกติ หรือ FEV₁/FVC &lt; 0.75</td><td>FEV₁/FVC &lt; 0.75 ชัดเจน</td></tr>
@@ -26,7 +29,9 @@ export default {
   <li>Th2 สร้าง IL-4, IL-5, IL-13, GM-CSF คงการอักเสบ</li>
   <li><b>Late phase:</b> (หลายชั่วโมงต่อมา) eosinophil, basophil, neutrophil, T cell สะสม → หดเกร็งและอักเสบต่อเนื่อง</li>
 </ul>
-<div class="fig">🖼️ ภาพ mechanism และหลอดลมปกติ/หอบ (ต้นฉบับ PDF หน้า 5–6)</div>` },
+<figure><img data-fig="asthma/p06-1.webp" alt="กลไกพื้นฐานของโรคหืด: inflammation เชื่อมกับ airway hyperresponsiveness, airflow obstruction และ symptoms"><figcaption>Mechanisms underlying the definition of asthma</figcaption></figure>
+<figure><img data-fig="asthma/p07-1.webp" alt="แผนภาพ antigen กับ IgE กระตุ้น mast cell หลั่ง histamine prostaglandins leukotrienes ทำให้เกิด bronchoconstriction mucus และ vascular permeability"><figcaption>Mast cell → mediators → หลอดลมตีบ เสมหะ</figcaption></figure>
+<figure><img data-fig="asthma/p07-3.webp" alt="ภาพเปรียบเทียบหลอดลมปกติ หลอดลมผู้ป่วยหืด และหลอดลมขณะหอบกำเริบ"><figcaption>Normal airway · Asthmatic airway · ขณะกำเริบ</figcaption></figure>` },
     { id: 'assess', t: "ประเมิน", html: `<p>ประเมิน 2 ส่วนควบคู่กันเสมอ: <b>symptom control</b> และ <b>future risk</b></p>
 <div class="tbl"><table>
   <tr><th>ใน 4 สัปดาห์ที่ผ่านมา</th></tr>
@@ -44,17 +49,19 @@ export default {
   <tr><td><b>Formoterol</b></td><td class="num">5 นาที</td><td class="num">≥ 12 ชม.</td></tr>
 </table></div>
 <ul>
-  <li><b>SABA:</b> 2–4 puff prn · ก่อนออกกำลังกาย 10–15 นาที · exacerbation 4–6 puff q20 min × 3 · <mark>ไม่ใช้ประจำทุกวัน</mark> (down-regulation) · AE tremor, ปวดหัว, ใจสั่น</li>
-  <li><b>LABA:</b> controller BID · <mark>ต้องใช้ร่วม ICS เสมอ</mark> (เดี่ยว ๆ เพิ่มเสี่ยงตาย) · formoterol เป็น LABA ตัวเดียวที่ออกฤทธิ์เร็ว → ใช้เป็น reliever ได้ในรูป ICS-formoterol</li>
-  <li><b>SAMA</b> (ipratropium): ช้ากว่า SABA ป้องกัน EIB ไม่ได้ · ใช้ร่วม SABA ใน acute severe · AE ปากแห้ง ตาพร่า</li>
-  <li><b>LAMA</b> (tiotropium): add-on เมื่อ medium/high ICS/LABA ยังคุมไม่ได้ · <mark>ห้ามใช้เดี่ยว</mark></li>
-  <li><b>Theophylline:</b> PDE inhibitor · narrow therapeutic range · clearance ลดด้วย erythromycin, clarithromycin, ciprofloxacin, propranolol · เพิ่มด้วย rifampicin, carbamazepine, phenobarbital, phenytoin, บุหรี่ · doxophylline SE น้อยกว่า</li>
-  <li><b>ICS:</b> ต้านอักเสบดีที่สุด เริ่มดีขึ้น 1–2 สัปดาห์ สูงสุด 4–8 สัปดาห์ · เสียงแหบ ไอ เชื้อราในปาก → <b>บ้วนปากหลังพ่น</b></li>
-  <li><b>Systemic steroid:</b> exacerbation · PO = IV · ขนาดต่ำสุด ระยะสั้นสุด</li>
-  <li><b>LTRA</b> (montelukast): add-on · ดีใน AR, aspirin-induced, EIB · <b>boxed warning neuropsychiatric</b></li>
-  <li><b>Azithromycin</b> 500 mg 3 วัน/สัปดาห์ ≥ 6 เดือน: severe asthma อายุ &gt; 18 · ตรวจ ECG (QT)</li>
-  <li><b>Omalizumab</b> (anti-IgE): SC ทุก 2–4 สัปดาห์ · อายุ &gt; 12 ปี IgE ≥ 30 IU/mL</li>
-</ul>` },
+  <li><b>SABA:</b> 2–4 puff prn · ก่อนออกกำลังกาย 10–15 นาที · exacerbation 4–6 puff q20 min × 3 · <mark>ไม่ใช้ประจำทุกวัน</mark> (receptor down-regulation อาจต้องใช้ steroid ช่วยฟื้น) · exacerbation ครั้งที่ 3 ยังไม่ดีขึ้น → ไป รพ. · ใช้ &gt; 1 หลอด (200 dose)/เดือน = high risk · onset ~5 นาที อยู่ 4–6 ชม. · AE tremor, ปวดหัว, ใจสั่น<br><small>กลไก β₂-agonist: กระตุ้น adenylyl cyclase → cAMP ↑ → กล้ามเนื้อเรียบหลอดลมคลาย · เพิ่ม mucociliary clearance · ลด vascular permeability</small></li>
+  <li><b>LABA:</b> controller BID · <mark>ต้องใช้ร่วม ICS เสมอ</mark> (เดี่ยว ๆ เพิ่มเสี่ยงตาย) · ลดอาการกลางคืนและการกำเริบ · บรรเทา exacerbation ไม่ได้ (ยกเว้น formoterol) · formoterol เป็น LABA ตัวเดียวที่ออกฤทธิ์เร็ว → ใช้เป็น reliever ได้ในรูป ICS-formoterol</li>
+  <li><b>SAMA</b> (ipratropium): ช้ากว่า SABA ป้องกัน EIB ไม่ได้ · ใช้ร่วม SABA ใน acute severe · ใช้ SAMA เดี่ยวบรรเทาอาการไม่แนะนำ · AE ปากแห้ง เสมหะแห้ง ตาพร่า (ถ้าเข้าตา)</li>
+  <li><b>LAMA</b> (tiotropium): add-on เมื่อ medium/high ICS/LABA ยังคุมไม่ได้ · จับ M1/M3 นาน ใช้ OD · onset 30 นาที peak 3–4 ชม. · <mark>ห้ามใช้เดี่ยว</mark> (เพิ่ม severe exacerbation — long-acting ทุกตัวไม่ใช้เดี่ยวใน asthma)</li>
+  <li><b>Theophylline:</b> PDE inhibitor · narrow therapeutic range · clearance ลดด้วย erythromycin, clarithromycin, ciprofloxacin, propranolol · เพิ่มด้วย rifampicin, carbamazepine, phenobarbital, phenytoin, บุหรี่ · ขยายหลอดลมน้อยกว่า β₂-agonist · กลไกอื่น: กระตุ้นหลั่ง catecholamine, ยับยั้ง Ca²⁺ ในเซลล์, adenosine antagonist · AE (คล้าย caffeine): แผลหลอดอาหาร ระคายกระเพาะ, เบื่ออาหาร N/V ปวดหัว นอนไม่หลับ สั่น ใจสั่น arrhythmia ชัก · doxophylline ได้ผลเท่ากัน SE น้อยกว่า ไม่มี DI</li>
+  <li><b>ICS:</b> ต้านอักเสบดีที่สุด เริ่มดีขึ้น 1–2 สัปดาห์ สูงสุด 4–8 สัปดาห์ · เสียงแหบ ไอ เชื้อราในปาก → <b>บ้วนปากหลังพ่น</b> · ลด bronchial hyperresponsiveness ต้านการอักเสบ เพิ่มจำนวน/การตอบสนองของ β₂ receptor</li>
+  <li><b>Systemic steroid:</b> exacerbation และ severe asthma ที่ไม่ตอบสนอง ICS · PO ได้ผลเท่า IV (ให้กินเป็นหลัก) · ขนาดต่ำสุด ระยะสั้นสุด · SE ระยะสั้น: ติดเชื้อง่าย แผลหายช้า หน้าแดง BP/น้ำตาลสูง ระคายกระเพาะ หิวบ่อย อารมณ์แปรปรวน · ระยะยาว: กระดูกพรุน ต้อกระจก ต้อหิน ผิวบาง</li>
+  <li><b>LTRA</b> (montelukast): add-on · ดีใน AR, aspirin-induced, EIB · <b>boxed warning neuropsychiatric</b> (ฝันร้าย คิดฆ่าตัวตาย) · มีรูปแบบเม็ดเคี้ยว เม็ด และผง</li>
+  <li><b>Azithromycin</b> 500 mg 3 วัน/สัปดาห์ ≥ 6 เดือน: severe asthma อายุ &gt; 18 · ตรวจ sputum (atypical bacteria, mycobacteria) และ ECG (QT) · เชื้อดื้อยา · ADR ท้องเสีย</li>
+  <li><b>Omalizumab</b> (anti-IgE): SC ทุก 2–4 สัปดาห์ · อายุ &gt; 12 ปี moderate–severe ที่ ICS ไม่ได้ผล · IgE ≥ 30 IU/mL · มีหลักฐานแพ้ allergen เฉพาะ (skin test บวก)</li>
+</ul>
+<figure><img data-fig="asthma/p13-1.webp" alt="ประโยชน์ของ ICS ร่วม LABA: LABA ขยายหลอดลม ICS ต้านการอักเสบ"><figcaption>Benefit of ICS/LABA</figcaption></figure>
+<figure><img data-fig="asthma/p15-1.webp" alt="กราฟ dose-response ของ ICS: ประสิทธิภาพแบนราบหลังขนาดต่ำถึงปานกลาง ขณะที่ผลข้างเคียงเพิ่มที่ขนาดสูง"><figcaption>Dose-response ของ ICS — ขนาดสูงได้ผลเพิ่มน้อย แต่ SE เพิ่ม</figcaption></figure>` },
     { id: 'tx', t: "ขั้นการรักษา", html: `<ol>
   <li>ให้ ICS-containing regimen ทุก step</li>
   <li><mark>ห้าม SABA monotherapy</mark> โดยไม่มี ICS ใน step 1–2</li>
@@ -71,6 +78,9 @@ export default {
   <li>Budesonide/formoterol 160/4.5: 1 puff prn ซ้ำได้ทุก 4–6 ชม. ไม่เกิน 6 puff/วัน (step 1–2) · <b>รวมทั้งวันไม่เกิน 12 puff</b> (formoterol 54 mcg)</li>
   <li>Beclomethasone/formoterol 100/6 รวมไม่เกิน 6 puff/วัน</li>
   <li>MART ใช้ได้เฉพาะ budesonide/formoterol หรือ beclomethasone/formoterol</li>
+  <li>Step 1: ไม่แนะนำ SABA เป็น reliever เดี่ยว (เพิ่มการกำเริบและการเสียชีวิต) · low-dose ICS ทุกวันลดการกำเริบและการนอน รพ.</li>
+  <li>Step 3–4 reliever: ICS-formoterol 1 puff ซ้ำได้ทุก 4 ชม. · หรือ SABA 1–2 puff ซ้ำทุก 4–6 ชม. ไม่ดีขึ้นใน 1 สัปดาห์ → พบแพทย์</li>
+  <li>Step 4: ใช้ ICS/LABA ตัวอื่นแล้วยังกำเริบ → เปลี่ยนเป็น MART ได้ · ไม่ดีขึ้นใน 3 เดือน refer</li>
   <li>Step 5: high-dose ICS/LABA ยังคุมไม่ได้ เพิ่ม LAMA · ไม่ดีขึ้นใน 3 เดือน refer</li>
 </ul>
 <div class="tbl"><table>
@@ -78,13 +88,13 @@ export default {
   <tr><td>Beclomethasone (pMDI standard)</td><td class="num">200–500</td><td class="num">&gt; 500–1000</td><td class="num">&gt; 1000</td></tr>
   <tr><td>Beclomethasone (extrafine)</td><td class="num">100–200</td><td class="num">&gt; 200–400</td><td class="num">&gt; 400</td></tr>
   <tr><td>Budesonide</td><td class="num">200–400</td><td class="num">&gt; 400–800</td><td class="num">&gt; 800</td></tr>
-  <tr><td>Ciclesonide</td><td class="num">80–180</td><td class="num">&gt; 160–320</td><td class="num">&gt; 320</td></tr>
+  <tr><td>Ciclesonide</td><td class="num">80–160</td><td class="num">&gt; 160–320</td><td class="num">&gt; 320</td></tr>
   <tr><td>Fluticasone furoate (DPI)</td><td class="num" colspan="2">100</td><td class="num">200</td></tr>
   <tr><td>Fluticasone propionate</td><td class="num">100–250</td><td class="num">&gt; 250–500</td><td class="num">&gt; 500</td></tr>
   <tr><td>Mometasone (pMDI)</td><td class="num" colspan="2">200–400</td><td class="num">&gt; 400</td></tr>
 </table></div>
 <h3>ไม่ใช้ยา</h3>
-<p>Allergen immunotherapy · เลี่ยงสารก่อภูมิแพ้และมลภาวะ · หยุดบุหรี่/บุหรี่ไฟฟ้า · วัคซีนไข้หวัดใหญ่ทุกปี, PCV13/PPSV23 · ออกกำลังกาย · ลดน้ำหนัก 10%</p>` },
+<p>Allergen immunotherapy (SCIT, SLIT) · เลี่ยงสารก่อภูมิแพ้จากอาชีพและในบ้าน · เลี่ยงมลภาวะในและนอกบ้าน · bronchial thermoplasty · หยุดบุหรี่/บุหรี่ไฟฟ้า · วัคซีนไข้หวัดใหญ่ทุกปี, PCV13/PPSV23 · ออกกำลังกาย · ลดน้ำหนัก 10%</p>` },
   ],
   // questions go to the question bank only (P3), tagged with this summary as their source
   questions: [

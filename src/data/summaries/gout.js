@@ -54,6 +54,7 @@ export default {
 </div>` },
     { id: 'ult', t: "Urate-lowering therapy", html: `<h3>ไม่ใช้ยา</h3>
 <p>เลี่ยงอาหาร purine สูง (อาหารทะเล เครื่องใน เนื้อแดง), ผลไม้หวาน/fructose, แอลกอฮอล์ · ลดน้ำหนัก · เปลี่ยนจาก thiazide · ป้องกันปัจจัยเสี่ยง CKD</p>
+<p><small>หมายเหตุผู้แปลง: ต้นฉบับเขียนว่า "เลี่ยงเชอร์รี่" แต่ข้อมูลส่วนใหญ่ชี้ว่าเชอร์รี่อาจช่วยลดการกำเริบ (ไม่ใช่ของต้องเลี่ยง) จึงไม่ได้ใส่ไว้ในรายการ</small></p>
 <h3>เกณฑ์เริ่มยา</h3>
 <p>Uric acid &gt; 6.8 mg/dL ร่วมกับข้อใดข้อหนึ่ง:</p>
 <ol>
@@ -64,17 +65,17 @@ export default {
 <div class="tbl"><table>
   <tr><th>ยา</th><th>ขนาด</th><th>ข้อควรจำ</th></tr>
   <tr><td><b>Allopurinol</b><br><small>active: oxypurinol</small></td><td class="num">CrCl &lt; 60: 50 mg/d<br>CrCl ≥ 60: 100 mg/d<br>max 900 mg/d</td>
-    <td>ช่วงแรกอาจ flare → ให้ colchicine/NSAIDs/steroid คุม 3–6 เดือน · AE: rash, leukopenia, GI · <mark>ตรวจ HLA-B*58:01 ก่อนเริ่ม</mark> (SJS/TEN) · เสี่ยง: สูงอายุ หญิง เริ่ม &gt;100 mg/d CVD ไตไม่ดี<br>DI: probenecid, <b>azathioprine/mercaptopurine</b> (กดไขกระดูก), warfarin (INR↑), theophylline</td></tr>
-  <tr><td><b>Febuxostat</b></td><td class="num">40 mg OD<br>max 80 mg/d</td><td>ใช้เมื่อห้ามใช้/ทนไม่ได้/ไม่ถึงเป้า · Mg/Al hydroxide ชะลอการดูดซึม (AUC ไม่เปลี่ยน) · AE: ตับ, <b>CV death (boxed warning)</b> · DI: theophylline</td></tr>
+    <td>ช่วงแรกอาจ flare → ให้ colchicine/NSAIDs/steroid คุม 3–6 เดือน · AE: rash, leukopenia, GI · <mark>ตรวจ HLA-B*58:01 ก่อนเริ่ม</mark> (SJS/TEN) · เสี่ยง: สูงอายุ หญิง เริ่ม &gt;100 mg/d CVD ไตไม่ดี<br>DI: probenecid (เพิ่ม clearance ของ oxypurinol) · <b>azathioprine</b> (ถูกกำจัดด้วย xanthine oxidase) / <b>mercaptopurine</b> → กดไขกระดูก · warfarin (INR↑) · theophylline (active metabolite สะสม)</td></tr>
+  <tr><td><b>Febuxostat</b></td><td class="num">40 mg OD<br>max 80 mg/d</td><td>เพิ่มขนาดถ้า uric ไม่ถึงเป้าใน 2 สัปดาห์ · ใช้เมื่อห้ามใช้/ทนไม่ได้/ไม่ถึงเป้า · Mg/Al hydroxide ชะลอการดูดซึม (AUC ไม่เปลี่ยน) · AE: ตับ, <b>CV death (boxed warning)</b> · DI: theophylline</td></tr>
 </table></div>
 <h3>Uricosuric (ดื่มน้ำมาก ๆ · ไตไม่ดีได้ผลน้อย + เสี่ยงนิ่ว)</h3>
 <div class="tbl"><table>
   <tr><th>ยา</th><th>ขนาด</th><th>ข้อควรจำ</th></tr>
-  <tr><td>Sulfinpyrazone</td><td class="num">50 mg 1×2<br>max 800 mg/d</td><td>มีฤทธิ์ต้านเกล็ดเลือด · ไม่แนะนำ CrCl &lt; 60 · AE GI bleed · DI warfarin, aspirin</td></tr>
+  <tr><td>Sulfinpyrazone</td><td class="num">50 mg 1×2<br>max 800 mg/d</td><td>มีฤทธิ์ต้านเกล็ดเลือด · ไม่แนะนำ CrCl &lt; 60 · AE GI bleed · DI warfarin, aspirin (ลดการขับ sulfinpyrazone)</td></tr>
   <tr><td>Benzbromarone</td><td class="num">50 mg/d<br>max 200 mg/d</td><td>ใช้ร่วม allopurinol ได้ผลดีกว่าเดี่ยว · CYP2C9/3A4/1A · ระวัง CYP2C9 *3/*3</td></tr>
-  <tr><td>Probenecid</td><td class="num">250 mg BID<br>max 2 g/d</td><td>ยับยั้ง URAT1 · ห้ามใช้ในนิ่วไต · ลดการขับ beta-lactam, NSAIDs, methotrexate</td></tr>
-  <tr><td>Lesinurad</td><td>—</td><td>ยับยั้ง URAT1 · <b>AKI (boxed warning)</b> ต้องใช้ร่วม XOI</td></tr>
-  <tr><td>Pegloticase</td><td>IV ≥ 2 h</td><td>uric → allantoin · refractory gout · ห้ามใน G6PD (hemolysis) · premed antihistamine + steroid · ใช้นานประสิทธิภาพลด (immunogenicity)</td></tr>
+  <tr><td>Probenecid</td><td class="num">250 mg BID<br>max 2 g/d</td><td>ยับยั้ง reabsorption ผ่าน OATs เน้น URAT1 · AE: GI irritation · ห้ามใช้ในนิ่วไต · protein binding สูง (เสี่ยง DI) · ลดการขับ beta-lactam (penicillin, cephalosporin), NSAIDs (indomethacin), methotrexate</td></tr>
+  <tr><td>Lesinurad</td><td>ไม่ระบุ<br><small>(แนวทาง TRA 2026 ไม่กล่าวถึง)</small></td><td>ยับยั้ง URAT1 · <b>AKI (boxed warning)</b> ต้องใช้ร่วม XOI</td></tr>
+  <tr><td>Pegloticase</td><td>IV drip ≥ 2 h<br><small>ขนาดไม่ระบุในแนวทาง TRA 2026</small></td><td>ยา recombinant → เสี่ยง hypersensitivity · uric → allantoin (ละลายน้ำ ขับง่าย) · refractory gout · ห้ามใน G6PD (hemolysis) · premed antihistamine + steroid · ใช้นานประสิทธิภาพลด (immunogenicity)</td></tr>
 </table></div>
 <div class="key"><strong class="k">จำไว้</strong>ยาความดันที่ดีในคนไข้ gout = <b>losartan</b> (ยับยั้งการดูดกลับ uric) · HCTZ ทำให้ uric สูง</div>` },
   ],

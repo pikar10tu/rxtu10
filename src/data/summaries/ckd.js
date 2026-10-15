@@ -26,12 +26,12 @@ export default {
   <li><b>แก้ได้:</b> DM, HTN, autoimmune (SLE, RA), systemic infection, UTI, นิ่ว, ทางเดินปัสสาวะอุดกั้น, drug toxicity</li>
 </ul>
 <p><b>กลไก:</b> DM → glycation ของหลอดเลือด → ไตเพิ่ม pressure/flow ชดเชย → glomerular hypertrophy → proteinuria → glomerulosclerosis · HTN → arteriosclerosis → การกรองลดลง</p>
-<div class="fig">🖼️ แผนภาพ pathophysiology ของ CKD (ต้นฉบับ PDF หน้า 2) — ในเว็บจริงจะตัดรูปจาก PDF มาใส่ตรงนี้</div>
-<p><b>อาการ:</b> ระยะแรกมักไม่มีอาการ ชัดใน stage 4–5 — อ่อนเพลีย หายใจเร็ว สับสน N/V เลือดออก เบื่ออาหาร คัน ผิวแห้ง peripheral neuropathy · บวม ปัสสาวะมาก/น้อย ปัสสาวะเป็นฟอง</p>
+<figure><img data-fig="ckd/p02-1.webp" alt="แผนภาพกลไกการดำเนินโรค CKD จาก DM, HTN และ hyperlipidemia สู่ glomerulosclerosis"><figcaption>Pathophysiology of CKD</figcaption></figure>
+<p><b>อาการ:</b> ระยะแรกมักไม่มีอาการ ชัดใน stage 4–5 — อ่อนเพลีย หายใจเร็ว สับสน N/V เลือดออก เบื่ออาหาร คัน ผิวแห้ง peripheral neuropathy, ตัวเย็น · <b>sign:</b> บวม ปัสสาวะมาก/น้อย ปัสสาวะเป็นฟอง ท้องอืด</p>
 <div class="tbl"><table>
   <tr><th>Lab ที่ลดลง</th><th>Lab ที่เพิ่มขึ้น</th></tr>
-  <tr><td>eGFR · bicarbonate (metabolic acidosis) · Hb/Hct · TSat/ferritin · albumin · glucose · vitamin D · calcium (ระยะแรก)</td>
-      <td>Scr, BUN · <b>K</b> · <b>phosphorus, PTH, FGF-23</b> · calcium (CKD 5) · ACR · BP · glucose · LDL/TG</td></tr>
+  <tr><td>eGFR · bicarbonate (metabolic acidosis) · Hb/Hct (anemia) · TSat/ferritin (ขาดเหล็ก; ferritin อาจสูงได้จากการอักเสบ) · albumin (ขาดสารอาหาร) · glucose (insulin ถูกทำลายน้อยลง/กินได้น้อย) · 25(OH)D · calcium (ระยะแรก)</td>
+      <td>Scr, BUN · <b>K</b> · <b>phosphorus, PTH, FGF-23</b> · calcium (CKD 5) · ACR / protein-creatinine ratio · BP · glucose (DM คุมไม่ได้) · LDL/TG · อาจตรวจเลือดในอุจจาระบวก (GI bleed จาก uremia)</td></tr>
 </table></div>` },
     { id: 'plan', t: "Action plan & เป้าหมาย", html: `<p><b>เป้าหมาย:</b> ชะลอการเสื่อมของไต · คุมโรคร่วม (DM, HTN) · ลดเสี่ยงโรคหัวใจ (สาเหตุตายหลัก) · ป้องกัน/รักษาภาวะแทรกซ้อน</p>
 <div class="tbl"><table>
@@ -50,12 +50,13 @@ export default {
 </ul>
 <div class="tbl"><table>
   <tr><th>Scr เพิ่มขึ้น</th><th>K⁺</th></tr>
-  <tr><td>&lt; 30%: ไม่ต้องปรับ (ถ้าเพิ่มไม่ถึง 30% และไม่ตอบสนอง ให้สงสัย renal artery stenosis)<br><b>31–50%: ลดขนาดครึ่งหนึ่ง</b> ติดตามทุก 1–2 สัปดาห์<br><b>&gt; 50%: หยุดยา</b><br>มี N/V, diarrhea, volume depletion → หยุดยา (เสี่ยง AKI)</td>
+  <tr><td>&lt; 30%: ไม่ต้องปรับ titrate ต่อจนถึง max ได้<br><b>31–50%: ลดขนาดครึ่งหนึ่ง</b> ติดตามทุก 1–2 สัปดาห์ จน Scr กลับมาไม่เกิน 30% ของ baseline<br><b>&gt; 50%: หยุดยา</b> ติดตามทุก 1–2 สัปดาห์ จน Scr ไม่เกิน 15% ของ baseline แล้ววางแผนใหม่ เริ่มจากขนาดต่ำสุด<br>เพิ่ม &gt; 30% ร่วมกับ N/V, diarrhea, volume depletion → หยุดยา (เสี่ยง AKI)<br><small>หมายเหตุผู้แปลง: ต้นฉบับเขียนว่า "Scr เพิ่ม &lt;30% ให้สงสัย renal artery stenosis" — โดยทั่วไปที่ควรสงสัย RAS คือ Scr ขึ้นมาก (&gt; 30%) หลังเริ่ม ACEI/ARB</small></td>
       <td>&gt; 5 mEq/L: จำกัดอาหาร K สูง<br>&gt; 6 mEq/L: ยาลด K (HCTZ, furosemide, NaHCO₃ ถ้า acidosis, potassium binder) · ทางเลือกสุดท้ายคือหยุดยา</td></tr>
 </table></div>
 <h3>SGLT2 inhibitor</h3>
 <ul>
-  <li>ลดการดูดกลับ Na → macula densa รับรู้ → <b>afferent arteriole หด</b> → intraglomerular pressure ลด</li>
+  <li>ปกติ SGLT2 ดูดกลับน้ำตาลและ Na ที่ proximal tubule → macula densa เห็น Na น้อย → ขยาย afferent → GFR สูง ไตทำงานหนัก (glomerular hypertrophy)</li>
+  <li>ยายับยั้ง SGLT2 → Na ถึง macula densa มากขึ้น → <b>afferent arteriole หด</b> → intraglomerular pressure ลด → ชะลอความเสื่อมของไต</li>
   <li>ได้ประโยชน์ทั้งคนเป็นและไม่เป็น DM</li>
   <li><mark>ใช้ร่วม RAAS blocker:</mark> afferent หด + efferent ขยาย → “เลือดเข้าน้อย ออกเยอะ” ไตทำงานสบายขึ้น</li>
 </ul>
@@ -90,61 +91,118 @@ export default {
 <a class="calc-link" href="#" data-calc="egfr">🧮 คำนวณ eGFR</a>
 <h3>ไม่ใช้ยา</h3>
 <p>หยุดบุหรี่ · คุมน้ำหนัก · ออกกำลังกาย 30 นาที 5 วัน/สัปดาห์ · โปรตีน 0.8 g/kg/d (ไม่ฟอกไต), 1–1.2 g/kg/d (ฟอกไต) · Na &lt; 2 g/d (≈ เกลือ 1 ช้อนชา)</p>` },
-    { id: 'anemia', t: "Anemia in CKD", by: "ต้นน้ำ · ตรวจโดย แสนดี", html: `<p>WHO: Hb &lt; 13 g/dL (ชาย), &lt; 12 g/dL (หญิง) · สาเหตุ: ขาด EPO, <mark>ขาดเหล็ก</mark>, hyperparathyroid/thyroid, ACEI/ARB, ขาด folate/B12, อักเสบเรื้อรัง</p>
+    { id: 'anemia', t: "Anemia in CKD", by: "ต้นน้ำ · ตรวจโดย แสนดี", html: `<h3>นิยาม</h3>
+<div class="tbl"><table>
+  <tr><th>กลุ่มผู้ป่วย</th><th class="num">Hb ที่เข้าเกณฑ์โลหิตจาง</th></tr>
+  <tr><td>ผู้ใหญ่ ชาย</td><td class="num">&lt; 13.0 g/dL</td></tr>
+  <tr><td>ผู้ใหญ่ หญิง</td><td class="num">&lt; 12.0 g/dL</td></tr>
+  <tr><td>เด็ก 0.5–4 ปี</td><td class="num">&lt; 11.0 g/dL</td></tr>
+  <tr><td>เด็ก 5–11 ปี</td><td class="num">&lt; 11.5 g/dL</td></tr>
+  <tr><td>เด็ก 12–14 ปี</td><td class="num">&lt; 12.0 g/dL</td></tr>
+</table></div>
+<p><b>ปัจจัยเสี่ยง (KDIGO 2026):</b> ขาด EPO หรือดื้อต่อ EPO · <mark>ขาดเหล็ก</mark> · เสียเลือดทางเดินอาหาร (มะเร็ง พยาธิ) หรือจากการฟอกเลือด · เม็ดเลือดแดงอายุสั้นลง · hyperparathyroid/thyroid dysfunction · ยา ACEI, ARB, ยากดภูมิในผู้ปลูกถ่ายไต · MDS, พังผืดในไขกระดูก · ขาด folate/B12 · อักเสบเรื้อรัง (chronic HF, อ้วน, autoimmune) · โลหิตจางทางพันธุกรรม (thalassemia, sickle cell) · anti-ESA antibody (PRCA)</p>
+<h3>เกณฑ์ขาดเหล็กใน CKD</h3>
+<p>ประเมินเมื่อมีโลหิตจางแล้ว เพื่อพิจารณาให้เหล็ก</p>
 <div class="tbl"><table>
   <tr><th>กลุ่ม</th><th>Ferritin</th><th>TSAT</th></tr>
   <tr><td>ขาดเหล็กรุนแรง (ทุกกลุ่ม)</td><td class="num">&lt; 45 ng/mL</td><td>—</td></tr>
-  <tr><td>ND-CKD / PD</td><td class="num">&lt; 100 หรือ 100–300</td><td class="num">&lt; 40% หรือ &lt; 25%</td></tr>
-  <tr><td>HD</td><td class="num">≤ 500</td><td class="num">≤ 30%</td></tr>
+  <tr><td>ยังไม่ฟอกเลือด (ND-CKD) / ล้างไตทางช่องท้อง (PD)</td><td class="num">&lt; 100 หรือ 100–300</td><td class="num">&lt; 40% หรือ &lt; 25%</td></tr>
+  <tr><td>ฟอกเลือดด้วยเครื่อง (HD)</td><td class="num">≤ 500</td><td class="num">≤ 30%</td></tr>
 </table></div>
-<p>กลไก: ไตสร้าง EPO ลดลง + อักเสบ → hepcidin สูง → ยับยั้ง ferroportin → ดูดซึมเหล็กลดลงและเหล็กติดค้างใน macrophage</p>
-<h3>เหล็ก</h3>
+<p><small>Ferritin &lt; 45 ng/mL → รีบหาสาเหตุเสียเลือดแฝง เช่น แผลในกระเพาะ มะเร็งลำไส้</small></p>
+<h3>กลไก</h3>
+<p>เซลล์ท่อไตที่เสียหายเปลี่ยนรูป (myofibroblast transdifferentiation) → สร้าง EPO ลดลง · การอักเสบใน CKD → ตับสร้าง <b>hepcidin</b> มากขึ้น → ยับยั้ง <b>ferroportin</b> → ลำไส้ดูดซึมเหล็กลดลง และเหล็กติดค้างใน macrophage เอามาสร้างเม็ดเลือดไม่ได้</p>
+<figure><img data-fig="ckd/p10-1.webp" alt="แผนภาพการดูดซึมเหล็กผ่าน DMT1 และ ferroportin การควบคุมด้วย hepcidin และ HIF-2"><figcaption>การควบคุมเหล็กด้วย hepcidin/ferroportin และ HIF</figcaption></figure>
+<p><b>อาการ:</b> อ่อนเพลีย หอบเหนื่อย นอนไม่หลับ ปวดศีรษะ สมองตื้อ (brain fog) เจ็บหน้าอก ทนหนาวไม่ได้<br>
+<b>ความรุนแรง:</b> สัมพันธ์กับผลลัพธ์แย่ลงทั้งไตและหัวใจ — LVH, หัวใจล้มเหลว, โรคหลอดเลือดหัวใจ, เสียชีวิตสูงขึ้น, QoL ลดลง, ต้องรับเลือดมากขึ้น</p>
+<h3>1. เหล็ก</h3>
 <ul>
-  <li>Elemental iron 200 mg/d นาน 3 เดือน · ไม่ดีขึ้นใน 3 เดือนเปลี่ยนเป็น IV</li>
-  <li>Oral: ferrous sulfate 325 mg (Fe 65), ferrous gluconate 325 mg (Fe 36), ferrous fumarate 325 mg (Fe 106) · ดูดซึมดีในกรด · แยกจาก antacid/phosphate binder · ท้องผูก อุจจาระดำ</li>
-  <li>IV: iron dextran (ต้อง test dose 25 mg, เสี่ยง anaphylactoid) · iron sucrose ปลอดภัยกว่า</li>
-  <li>พิษเฉียบพลัน: antidote = <b>deferoxamine</b> (charcoal จับเหล็กไม่ได้) · หยุดเหล็กเมื่อ ferritin &gt; 800 และ TSAT &gt; 50%</li>
+  <li>ดูดซึมที่ duodenum และ proximal jejunum ผ่าน DMT1 · ดูดซึมดีในสภาวะกรด</li>
+  <li>เริ่ม <b>elemental iron 200 mg/d นาน 3 เดือน</b> เมื่อเข้าเกณฑ์ขาดเหล็ก (เช่น ferritin ≤ 500 และ TSAT ≤ 30%) · ไม่ดีขึ้นใน 3 เดือน → เปลี่ยนเป็น IV</li>
 </ul>
-<h3>ESAs</h3>
-<ul>
-  <li>Epoetin alfa 50–100 U/kg 1–3 ครั้ง/สัปดาห์ · Darbepoetin 0.45 mcg/kg ทุก 1–4 สัปดาห์ · Methoxy PEG-epoetin beta 0.6 mcg/kg เดือนละครั้ง</li>
-  <li>ND-CKD: เริ่มเมื่อ Hb &lt; 10 · ESKD: เริ่มเมื่อ Hb 9–10</li>
-  <li><mark>เป้าหมาย Hb 10–11 g/dL · ห้ามเกิน 13 (boxed warning: MI, stroke, DVT)</mark></li>
-  <li>SC ใช้ขนาดน้อยกว่า IV ~30% · ปรับครั้งละ 25–50% · <b>ห้ามหยุดทันที</b> (PRCA) · เก็บ 2–8 °C</li>
-  <li>ยาใหม่ HIF-PHIs (roxadustat, daprodustat, vadadustat) เมื่อดื้อ ESA</li>
-</ul>` },
-    { id: 'mbd', t: "CKD-MBD", by: "ต้นน้ำ · ตรวจโดย แสนดี", html: `<ol>
-  <li>ขับฟอสเฟตไม่ได้ → FGF-23 สูง (เสี่ยงหัวใจ)</li>
-  <li>สร้าง active vitamin D ลดลง → hypocalcemia</li>
-  <li>ฟอสเฟตสูง + Ca ต่ำ → secondary hyperparathyroidism</li>
-</ol>
-<p><b>เป้าหมาย:</b> phosphate และ Ca ปกติ · iPTH (ESRD) 2–9 เท่าของค่าปกติ (~130–600 pg/mL)</p>
 <div class="tbl"><table>
-  <tr><th>Phosphate binder</th><th class="num">RPBC</th><th>ข้อควรจำ</th></tr>
-  <tr><td>Calcium acetate</td><td class="num">1.0</td><td>จับดีกว่า Ca carbonate ที่ขนาดเท่ากัน</td></tr>
-  <tr><td>Calcium carbonate</td><td class="num">1.0</td><td>vascular calcification</td></tr>
-  <tr><td>Sevelamer</td><td class="num">0.75</td><td>ลด LDL · เม็ดเยอะ · hyperchloremic acidosis · ขวาง ciprofloxacin/mycophenolate</td></tr>
-  <tr><td>Lanthanum</td><td class="num">2.0</td><td>จับแรง ต้องเคี้ยว · สะสมในตับ</td></tr>
-  <tr><td>Sucroferric oxyhydroxide</td><td class="num">2.5</td><td>แรงสุด เม็ดน้อย · อุจจาระดำ</td></tr>
-  <tr><td>Aluminum hydroxide</td><td class="num">—</td><td>ไม่เกิน 4 สัปดาห์ (สมองเสื่อม กระดูก)</td></tr>
+  <tr><th>รูปแบบ</th><th>ยา</th><th>Elemental Fe</th><th>ข้อควรจำ</th></tr>
+  <tr><td rowspan="4">Oral</td><td>Ferrous sulfate 325 mg</td><td class="num">65 mg</td><td rowspan="4">ดูดซึมดีที่สุดในรูป ferrous salt · ดูดซึมดีในกรด · antacid และ phosphate binder ขวางการดูดซึม (กินแยกมื้อ) · S/E ท้องผูก ท้องเสีย อุจจาระเปลี่ยนสี</td></tr>
+  <tr><td>Ferrous sulfate desiccated 200 mg</td><td class="num">65 mg</td></tr>
+  <tr><td>Ferrous gluconate 325 mg</td><td class="num">36 mg</td></tr>
+  <tr><td>Ferrous fumarate 325 mg</td><td class="num">106 mg</td></tr>
+  <tr><td rowspan="2">IV</td><td>Iron dextran</td><td>—</td><td>ต้อง <b>test dose 25 mg IV</b> สังเกต 30 นาทีก่อนให้จริงเสมอ · เสี่ยง anaphylactoid reaction</td></tr>
+  <tr><td>Iron sucrose (Venofer)</td><td>—</td><td>ปลอดภัยกว่า แพ้น้อยกว่า · เจือจางใน NSS ให้ระหว่างรอบฟอกเลือด (HD) · PD แบ่งให้ 3 โดสช้า ๆ ภายใน 28 วัน</td></tr>
 </table></div>
-<h3>SHPT</h3>
 <ul>
-  <li>ND-CKD: แก้สาเหตุก่อน ห้ามใช้ calcitriol/vit D analog เป็นประจำ (เฉพาะ PTH สูงรุนแรง)</li>
-  <li>G5D: cinacalcet, calcitriol หรือ vit D analog ใช้ร่วมกันได้</li>
-  <li><b>PTH สูง + Ca/P สูง → cinacalcet</b> · <b>PTH สูง + Ca/P ต่ำ → active vit D</b></li>
-  <li>D2/D3 ต้องผ่านตับและไต · alfacalcidol ผ่านตับ · <mark>calcitriol active 100%</mark></li>
-  <li>Cinacalcet 25 mg: เพิ่มความไวของ CaSR · กินพร้อมอาหาร · CYP3A4/2D6/1A2 · <b>ห้ามเริ่มถ้า Ca &lt; 8.4 mg/dL</b></li>
-  <li>เลี่ยง inorganic phosphate (อาหารแปรรูป น้ำอัดลม) ดูดซึม 90–100%</li>
-</ul>` },
-    { id: 'acid', t: "Metabolic acidosis", by: "ต้นน้ำ · ตรวจโดย แสนดี", html: `<p>Bicarbonate (tCO₂) &lt; 22 mEq/L · <b>เป้า 24–26</b> (อย่างน้อย ≥ 22 ตาม KDIGO 2026)</p>
+  <li><b>พิษเฉียบพลัน:</b> 10 เม็ดอาจทำให้เด็กเสียชีวิต (necrotizing gastroenteritis) · antidote = <b>deferoxamine IV</b> (activated charcoal จับเหล็กไม่ได้)</li>
+  <li><b>พิษเรื้อรัง:</b> hemochromatosis เหล็กเกาะหัวใจ ตับ ตับอ่อน จนอวัยวะล้มเหลว · <mark>หยุดเหล็กเมื่อ ferritin &gt; 800 ng/mL และ TSAT &gt; 50%</mark></li>
+</ul>
+<h3>2. ESAs</h3>
+<p>Glycoprotein 34–39 kDa กระตุ้น EPO receptor ที่ไขกระดูก</p>
+<div class="tbl"><table>
+  <tr><th>ยา</th><th>ขนาด / ความถี่</th><th>จุดเด่น</th></tr>
+  <tr><td>Epoetin alfa</td><td class="num">50–100 U/kg/dose · 1–3 ครั้ง/สัปดาห์</td><td>—</td></tr>
+  <tr><td>Darbepoetin alfa</td><td class="num">0.45 mcg/kg · ทุก 1–4 สัปดาห์</td><td>เติมกรดอะมิโนและ N-linked glycosylation → half-life นานขึ้น</td></tr>
+  <tr><td>Methoxy PEG-epoetin beta</td><td class="num">0.6 mcg/kg · เดือนละครั้ง</td><td>เชื่อม PEG → half-life นานที่สุดในกลุ่ม</td></tr>
+</table></div>
+<ul>
+  <li><b>ND-CKD:</b> พิจารณาเริ่มเมื่อ Hb &lt; 10 g/dL (ดูอาการร่วม เช่น Hb ตกเร็ว ให้เหล็กแล้วไม่ดีขึ้น เสี่ยงต้องรับเลือด ซีดชัด) · <b>ห้ามเริ่มถ้า Hb ≥ 10</b></li>
+  <li><b>ฟอกเลือดแล้ว (ESKD):</b> เริ่มได้เลยเมื่อ Hb 9–10 g/dL (ดักไม่ให้ต่ำกว่า 9)</li>
+  <li>SC ใช้ขนาดน้อยกว่า IV ~30% · ปรับขึ้น/ลงครั้งละ 25–50% · เลี่ยงขนาดถึง 200 U/kg</li>
+  <li><b>ห้ามหยุดทันที</b> (sawtooth effect) เพื่อป้องกัน PRCA</li>
+  <li>เก็บ 2–8 °C ห้ามแช่แข็ง ห้ามเขย่าแรง · อยู่อุณหภูมิห้อง (&lt; 25 °C) ได้ไม่เกิน 7 วัน</li>
+</ul>
+<div class="key"><strong class="k">เป้าหมาย</strong>Hb 10–11 g/dL · <b>US boxed warning: ห้ามให้ Hb &gt; 13 g/dL</b> (เสี่ยง MI, stroke, DVT และกระตุ้นเซลล์มะเร็ง)</div>
+<h3>3. HIF-PHIs (Guideline 2026)</h3>
+<p>ทางเลือกเมื่อดื้อ ESA · กระตุ้นกลไกตอบสนองออกซิเจนต่ำ → เพิ่มการสร้าง EPO ในร่างกายและเพิ่มการดูดซึมเหล็ก — roxadustat, daprodustat, vadadustat</p>
+<p><b>สมุนไพร/อาหารเสริม:</b> ไม่มีสมุนไพรที่แนะนำเฉพาะ · ถ้าขาด folate หรือ vitamin B12 ให้แก้ร่วมกับการให้เหล็ก</p>` },
+    { id: 'mbd', t: "CKD-MBD", by: "ต้นน้ำ · ตรวจโดย แสนดี", html: `<h3>กลไกหลัก 3 ข้อ</h3>
+<ol>
+  <li>ไตขับฟอสเฟตไม่ได้ (phosphate retention) → <b>FGF-23 สูง</b> (เพิ่มเสี่ยงโรคหัวใจรุนแรง)</li>
+  <li>ไตสร้าง active vitamin D (1,25-dihydroxyvitamin D₃) ลดลง → ลำไส้ดูดซึม Ca ไม่ได้ → hypocalcemia</li>
+  <li>ฟอสเฟตสูง + Ca ต่ำ → พาราไทรอยด์ทำงานหนัก = <b>secondary hyperparathyroidism (SHPT)</b> → สลาย Ca จากกระดูก ไปตกตะกอนในหลอดเลือด</li>
+</ol>
+<figure><img data-fig="ckd/p13-1.webp" alt="แผนภาพกลไก CKD-MBD จาก phosphate retention, FGF-23, vitamin D ลดลง สู่ secondary hyperparathyroidism และ renal osteodystrophy"><figcaption>Pathophysiology of CKD-MBD</figcaption></figure>
+<div class="key"><strong class="k">เป้าหมาย</strong>Phosphate และ Ca อยู่ในเกณฑ์ปกติ · iPTH (ESRD) 2–9 เท่าของค่าปกติ (~130–600 pg/mL) — ไม่ให้กระดูกบางหรือสร้างมากจนเปราะ</div>
+<h3>ยาจับฟอสเฟต (phosphate binders)</h3>
+<p>ลำไส้ดูดซึมฟอสเฟตผ่าน paracellular pathway (ช่องระหว่างเซลล์ — กลไกหลัก) และ transcellular ผ่าน NaPi2b</p>
+<div class="tbl"><table>
+  <tr><th>ยา</th><th class="num">RPBC</th><th>ขนาด</th><th>ข้อควรจำ</th></tr>
+  <tr><td>Calcium acetate</td><td class="num">1.0</td><td class="num">1,334 mg TID</td><td>จับฟอสเฟตดีกว่า Ca carbonate ที่ขนาดเท่ากัน</td></tr>
+  <tr><td>Calcium carbonate</td><td class="num">1.0</td><td class="num">0.5–1 g TID</td><td>อาจเกิด vascular calcification</td></tr>
+  <tr><td>Sevelamer carbonate</td><td class="num">0.75</td><td class="num">800–1,600 mg TID</td><td>ข้อดี: ลด LDL ต้านการอักเสบ · ข้อเสีย: เม็ดเยอะ, hyperchloremic acidosis, <mark>ขวาง ciprofloxacin/mycophenolate</mark></td></tr>
+  <tr><td>Lanthanum carbonate</td><td class="num">2.0</td><td class="num">1,500 mg/d แบ่งให้</td><td>จับแรงมาก · ละลายยาก · โลหะอาจสะสมในตับและเนื้อเยื่อ</td></tr>
+  <tr><td>Sucroferric oxyhydroxide</td><td class="num">2.5</td><td class="num">500 mg TID</td><td>มีเหล็ก · จับแรงที่สุด กินน้อยเม็ด · อุจจาระสีดำ</td></tr>
+  <tr><td>Aluminum hydroxide</td><td class="num">—</td><td class="num">300–600 mg TID</td><td><b>ใช้ไม่เกิน 4 สัปดาห์</b> กันอะลูมิเนียมสะสมในสมอง (สมองเสื่อม) และกระดูก</td></tr>
+</table></div>
+<h3>รักษา SHPT</h3>
+<ul>
+  <li><b>ND-CKD:</b> แก้สาเหตุก่อน (คุมฟอสเฟต Ca วิตามิน D) · <b>ห้ามใช้ calcitriol/vit D analog เป็นยาประจำ</b> ยกเว้น PTH สูงรุนแรง</li>
+  <li><b>G5D:</b> เลือก cinacalcet, calcitriol หรือ vit D analog ตัวใดตัวหนึ่ง หรือใช้ร่วมกันได้</li>
+  <li><mark>PTH สูง + Ca/P สูง → cinacalcet</mark> (active vit D จะยิ่งเพิ่มการดูดซึม Ca และ P) · <mark>PTH สูง + Ca/P ต่ำ → active vit D</mark> (calcitriol, alfacalcidol)</li>
+  <li>เป้า 25(OH)D &gt; 30 ng/mL</li>
+</ul>
+<div class="tbl"><table>
+  <tr><th>Vitamin D</th><th>ข้อควรจำ</th></tr>
+  <tr><td>Ergocalciferol (D2) / Cholecalciferol (D3)</td><td>prohormone ต้องผ่านตับและไต · D2 จากพืช/เห็ด t½ ~13.9 วัน · D3 จากผิวหนัง/สัตว์ t½ ~15 วัน</td></tr>
+  <tr><td>Alfacalcidol (One-Alpha)</td><td>ต้องผ่านตับเพื่อเป็น active form · t½ 3–4 ชม. · ขนาด 1.5–2 เท่าของ calcitriol</td></tr>
+  <tr><td>Calcitriol (Meditrol)</td><td><b>active form 100%</b> ดูดซึมเร็ว (onset 2 ชม.) ยับยั้ง PTH ได้ทันที · t½ 5–8 ชม.</td></tr>
+</table></div>
+<p><b>Cinacalcet 25 mg</b> (calcimimetic): เพิ่มความไวของ calcium-sensing receptor ที่พาราไทรอยด์ → ลดการหลั่ง PTH · อาหารเพิ่มการดูดซึม 81% · ผ่าน CYP3A4, 2D6, 1A2 (ระวัง DI) · ADR: คลื่นไส้อาเจียนบ่อย (แก้โดยกินก่อนนอน), hypocalcemia ชา ตะคริว · <b>ห้ามเริ่มถ้า Ca &lt; 8.4 mg/dL</b></p>
+<p><b>อาหาร:</b> เลี่ยง inorganic phosphate (อาหารแปรรูป น้ำอัดลม) ดูดซึมได้ 90–100% · ผักและไข่ขาว (organic phosphate) ดูดซึมน้อยกว่า</p>` },
+    { id: 'acid', t: "Metabolic acidosis", by: "ต้นน้ำ · ตรวจโดย แสนดี", html: `<p><b>วินิจฉัย:</b> serum total CO₂ (tCO₂) หรือ bicarbonate &lt; 22 mEq/L<br>
+<b>กลไก:</b> ไตสร้าง bicarbonate ใหม่ไม่ได้ และขับกรดทางปัสสาวะไม่ทัน<br>
+<b>ผลเสีย:</b> ดึง Ca จากกระดูกมาสะเทินกรด (bone demineralization) · สลายโปรตีนกล้ามเนื้อ · เร่งไตเสื่อมเข้าสู่ ESRD · เพิ่มเสี่ยง heart failure</p>
+<div class="key"><strong class="k">เป้าหมาย</strong>tCO₂ 24–26 mEq/L (อย่างน้อย ≥ 22 ตาม KDIGO 2026)</div>
 <div class="tbl"><table>
   <tr><th>ยา</th><th>HCO₃⁻</th><th>ข้อควรจำ</th></tr>
-  <tr><td>NaHCO₃ 325 / 650 mg</td><td class="num">3.9 / 7.7 mEq</td><td>ผง 1/8 ช้อนชา ≈ 7.1 mEq · ท้องอืด เรอ</td></tr>
-  <tr><td>Sodium citrate/citric acid</td><td class="num">1 mEq/mL</td><td>อืดน้อยกว่า · <mark>ต้องแปลงที่ตับ ไม่ได้ผลในโรคตับ</mark></td></tr>
-  <tr><td>Potassium citrate 540 mg</td><td class="num">5 mEq</td><td>hyperkalemia — อันตรายในโรคไต</td></tr>
+  <tr><td>NaHCO₃ 325 / 650 mg<br>ผง 1/8 ช้อนชา (600 mg)</td><td class="num">3.9 / 7.7 mEq<br>7.1 mEq</td><td>เจอกรดในกระเพาะกลายเป็น CO₂ → ท้องอืด เรอ</td></tr>
+  <tr><td>Sodium citrate/citric acid<br>500/334 mg ต่อ 5 mL</td><td class="num">1 mEq/mL</td><td>อืดน้อยกว่า · <mark>ตับต้องแปลง citrate เป็น bicarbonate → ไม่ได้ผลในโรคตับ</mark></td></tr>
+  <tr><td>Potassium citrate 540 mg</td><td class="num">5 mEq</td><td>hyperkalemia — อันตรายต่อหัวใจในโรคไต</td></tr>
 </table></div>
-<p>เริ่ม NaHCO₃ 650 mg วันละ 2 ครั้ง (~15 mEq/d) · titrate ได้ถึง 1,950 mg วันละ 3 ครั้ง (~70 mEq/d)</p>` },
+<h3>การให้ NaHCO₃</h3>
+<ul>
+  <li>tCO₂ เฉลี่ย 19–21 (วัด 2 ครั้งติดกัน) → เริ่ม <b>650 mg วันละ 2 ครั้ง</b> (~15 mEq/d)</li>
+  <li>tCO₂ ≤ 18 → เริ่ม 1,300 mg วันละ 2 ครั้ง (~30 mEq/d)</li>
+  <li>titrate ถึง 1,950 mg วันละ 2 ครั้ง (~46 mEq/d) เป้า 24–26</li>
+  <li>ถ้ายัง &lt; 22 (ยืนยันด้วย blood gas ถ้าทำได้) → titrate ได้ถึง <b>1,950 mg วันละ 3 ครั้ง</b> (~70 mEq/d) เป้า ≥ 22</li>
+</ul>` },
   ],
   // questions go to the question bank only (P3), tagged with this summary as their source
   questions: [
