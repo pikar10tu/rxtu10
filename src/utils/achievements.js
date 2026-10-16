@@ -27,6 +27,7 @@ export function computeProgress(userData) {
     reportsConfirmed: u.reportsConfirmed || 0,
     towerChampTotal: u.towerChampTotal || 0,
     arenaChampTotal: u.arenaChampTotal || 0,
+    pharmaTeamBest: u.minigames?.pharmaTeam?.best || 0,
     cosmeticsOwned: Array.isArray(u.cosmetics?.owned) ? u.cosmetics.owned.length : 0,
   }
 }

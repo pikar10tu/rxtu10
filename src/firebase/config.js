@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { initializeFirestore } from 'firebase/firestore'
-import { getDatabase } from 'firebase/database'
 
 const firebaseConfig = {
     apiKey: "AIzaSyAlmHZZ3JixrQlH7PyMa_QqQuDPEN4RJBE",
@@ -10,8 +9,8 @@ const firebaseConfig = {
     storageBucket: "rxtu10dashboard.firebasestorage.app",
     messagingSenderId: "485847555600",
     appId: "1:485847555600:web:1ee57ea6044c687b10b495",
-    // RTDB URL — add when you enable Realtime Database in Firebase Console
-    // databaseURL: "https://rxtu10dashboard-default-rtdb.firebaseio.com",
+    // RTDB — ใช้กับเกม PharmaTeam (ห้องเล่นสด)
+    databaseURL: "https://rxtu10dashboard-default-rtdb.asia-southeast1.firebasedatabase.app",
 }
 
 export const app      = initializeApp(firebaseConfig)
@@ -20,7 +19,7 @@ export const auth     = getAuth(app)
 // Firestore เชื่อมไม่ติด; v1 เจอปัญหานี้แล้ว (autoDetect ไม่พอ ต้อง force)
 export const db       = initializeFirestore(app, { experimentalForceLongPolling: true })
 export const provider = new GoogleAuthProvider()
-// export const rtdb  = getDatabase(app)  // enable in Phase 3
+// RTDB สร้างใน composables/usePharmaTeam.js (โหลดเฉพาะหน้าเกม ไม่ถ่วง bundle หลัก)
 
 // ── ADMIN ──
 export const ADMIN_EMAIL = 'prawich.aum@dome.tu.ac.th'

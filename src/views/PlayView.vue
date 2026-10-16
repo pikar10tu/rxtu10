@@ -76,6 +76,12 @@
           </template>
         </div>
       </template>
+
+      <!-- ── PharmaTeam (เดโม) — เกมทีมเล่นสดหลายจอ · ไม่ผูกเหรียญ/เควส ไม่ขึ้นกับ arcadeOpen ── -->
+      <RouterLink to="/play/pharmateam" class="pt-entry">
+        <Emoji char="🧪" /> PharmaTeam <span class="pt-entry-tag">(ทดสอบ)</span>
+        <span class="pt-entry-sub">เกมทีม 2–6 คน ›</span>
+      </RouterLink>
     </template>
     <div v-else class="play-login">เข้าสู่ระบบเพื่อเล่น</div>
   </div>
@@ -164,6 +170,10 @@ const plotCells = computed(() => farm.plots.value.slice(0, 10).map(p => {
 .s-pet { background: #efedff; } .s-farm { background: var(--mint-light); } .s-style { background: var(--accent-light); }
 .shop-dot { top: 8px; right: 8px; width: 11px; height: 11px; }
 .hall:focus-visible, .shop:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pt-entry { display: flex; align-items: center; gap: 6px; margin-top: 14px; padding: 8px 12px; border: var(--bw) solid var(--line);
+  border-radius: 12px; font-size: .85rem; font-weight: 700; color: inherit; text-decoration: none; }
+.pt-entry-tag { color: rgba(0,0,0,.45); font-weight: 600; }
+.pt-entry-sub { margin-left: auto; font-size: .75rem; color: rgba(0,0,0,.5); font-weight: 600; }
 .soon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 .mg-card { all: unset; cursor: pointer; box-sizing: border-box; border: var(--bw) solid var(--line);

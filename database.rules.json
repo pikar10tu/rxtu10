@@ -1,0 +1,30 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "pharmateam": {
+      "rooms": {
+        ".read": "auth != null",
+        "$room": {
+          ".write": "auth != null && !newData.exists() && !data.child('players').exists()",
+          "meta": {
+            ".write": "auth != null && (!data.exists() || data.parent().child('players').child(auth.uid).exists())"
+          },
+          "state": {
+            ".write": "auth != null && data.parent().child('players').child(auth.uid).exists()"
+          },
+          "players": {
+            "$uid": {
+              ".write": "auth != null && (auth.uid === $uid || data.parent().child(auth.uid).exists())"
+            }
+          },
+          "actions": {
+            "$a": {
+              ".write": "auth != null && data.parent().parent().child('players').child(auth.uid).exists()"
+            }
+          }
+        }
+      }
+    }
+  }
+}

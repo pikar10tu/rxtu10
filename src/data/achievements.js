@@ -87,6 +87,11 @@ export const ACHIEVEMENTS = {
   home_13:  { title: 'เจ้าสมุทร',         icon: '🌊', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 13 }, desc: 'อัปบ้านถึงเลเวล 13 คฤหาสน์ลอยตัวกลางมหาสมุทร', flavor: 'ตื่นมาเจอทะเลทุกทิศ ไม่มีเพื่อนบ้านมากวน' },
   home_14:  { title: 'ราชันใต้บาดาล',      icon: '🔱', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 14 }, desc: 'อัปบ้านถึงเลเวล 14 มหานครใต้บาดาล', flavor: 'ทั้งเมืองใต้น้ำเป็นของเรา' },
   home_15:  { title: 'ชาวสวรรค์',         icon: '☁️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 15 }, desc: 'อัปบ้านถึงเลเวล 15 สวนสวรรค์เหนือน่านฟ้า บ้านสูงสุดของเกม', flavor: 'สูงกว่านี้ไม่มีแล้ว นอกจากท้องฟ้า' },
+  // PharmaTeam (16 ต.ค. 2026) — endless ไม่มีชนะ วัดที่ด่านไกลสุดที่ทีมไปถึง (ด่านที่แลปแตกก็นับว่าไปถึง)
+  pt_3:  { title: 'ทีมห้องยามือใหม่', icon: '🧪', type: 'milestone', trigger: { stat: 'pharmaTeamBest', gte: 3 },  desc: 'PharmaTeam ไปถึงด่าน 3', flavor: 'เริ่มรู้แล้วว่าใครถือปุ่มอะไร' },
+  pt_5:  { title: 'ทีมเวิร์คระดับ ER', icon: '🏥', type: 'milestone', trigger: { stat: 'pharmaTeamBest', gte: 5 },  desc: 'PharmaTeam ไปถึงด่าน 5', flavor: 'ห้องฉุกเฉินก็ไม่หวั่น' },
+  pt_8:  { title: 'กะดึกไม่มีพัก', icon: '🚑', type: 'milestone', trigger: { stat: 'pharmaTeamBest', gte: 8 },  desc: 'PharmaTeam ไปถึงด่าน 8', flavor: 'เสียงแหบ แต่ยาไม่พลาด' },
+  pt_12: { title: 'ห้องยาไร้เทียมทาน', icon: '🌙', type: 'milestone', trigger: { stat: 'pharmaTeamBest', gte: 12 }, desc: 'PharmaTeam ไปถึงด่าน 12', flavor: 'สื่อสารกันแค่สบตาก็รู้เรื่อง' },
   // รางวัลสิ้นซีซั่น — แอดมินแจกผ่านจดหมาย (AdminView "แจกรางวัลซีซั่น") · date = 'YYYY-MM' ของซีซั่น
   // ⏳ จะกลายเป็นฉายาที่สวมได้ตอนทำระบบฉายา (roadmap #8)
   tower_champ: { title: 'ผู้ครอบครองหอคอย', icon: '🏯', type: 'awarded', dated: true, season: true, desc: 'ติดท็อป 10 หอคอยตอนจบซีซั่น', flavor: 'ยืนอยู่บนยอดหอคอยตอนหมดเวลา' },
