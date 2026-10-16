@@ -3,6 +3,16 @@
     ".read": false,
     ".write": false,
     "pharmateam": {
+      "board": {
+        ".read": "auth != null",
+        "$size": {
+          ".indexOn": ["level"],
+          "$game": {
+            ".write": "auth != null && !data.exists() && newData.child('uids').child('0').exists()",
+            ".validate": "newData.child('level').isNumber() && newData.child('level').val() >= 1 && newData.child('level').val() <= 200"
+          }
+        }
+      },
       "rooms": {
         ".read": "auth != null",
         "$room": {
@@ -19,6 +29,7 @@
             }
           },
           "actions": {
+            ".write": "auth != null && data.parent().child('players').child(auth.uid).exists()",
             "$a": {
               ".write": "auth != null && data.parent().parent().child('players').child(auth.uid).exists()"
             }

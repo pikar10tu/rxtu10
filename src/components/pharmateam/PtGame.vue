@@ -9,19 +9,19 @@
       <div class="pt-screen">
         <!-- หัว: เลือด + ความคืบหน้า -->
         <div class="pt-stage">
-          <button class="pt-quit" @click="$emit('quit')">✕ ออก</button>
-          <button class="pt-mute" @click="toggleMute">{{ muted ? '🔇' : '🔊' }}</button>
+          <button class="pt-quit" :class="{ armed: quitArmed }" @click="onQuit">{{ quitArmed ? 'แตะอีกครั้งเพื่อออก' : '✕ ออก' }}</button>
+          <button class="pt-mute" @click="toggleMute"><Emoji :char="muted ? '🔇' : '🔊'" /></button>
           <div class="pt-gauges">
-            <div class="pt-row"><span>💚 ความเสถียรของยา</span><span>{{ state.health }}%</span></div>
+            <div class="pt-row"><span><Emoji char="💚" /> ความเสถียรของยา</span><span>{{ state.health }}%</span></div>
             <div class="pt-bar"><div class="pt-fill hp" :style="{ width: state.health + '%' }"></div></div>
-            <div class="pt-row" style="margin-top:6px"><span>🧪 {{ levelName }}</span><span>{{ progPct }}%</span></div>
+            <div class="pt-row" style="margin-top:6px"><span><Emoji char="🧪" /> {{ levelName }}</span><span>{{ progPct }}%</span></div>
             <div class="pt-bar"><div class="pt-fill prog" :style="{ width: progPct + '%' }"></div></div>
           </div>
         </div>
 
         <!-- คำสั่งที่ต้องบอกเพื่อน -->
         <div class="pt-inst">
-          <div class="pt-shout">📢 บอกเพื่อนด่วน!</div>
+          <div class="pt-shout"><Emoji char="📢" /> บอกเพื่อนด่วน!</div>
           <div class="pt-prompt">{{ me?.inst?.prompt || (spectator ? 'รอรอบหน้านะ (เข้ามาตอนเกมเริ่มแล้ว)' : 'รอสูตรยาถัดไป...') }}</div>
           <div class="pt-bar thin"><div class="pt-fill inst" :style="{ width: instPct + '%' }"></div></div>
         </div>
@@ -29,7 +29,7 @@
         <!-- อุปกรณ์ของเรา -->
         <div class="pt-grid">
           <div v-for="c in controls" :key="c.id" class="pt-card" :class="{ hazard: c.hazard }">
-            <div class="pt-label">{{ c.hazard ? '⚠️ ' : '' }}{{ c.label }}</div>
+            <div class="pt-label"><Emoji v-if="c.hazard" char="⚠️" /> {{ c.label }}</div>
 
             <button v-if="c.type === 'button'" class="pt-btn" @pointerdown.prevent="tap(c, true, $event)">กดจ่ายยา</button>
             <button v-else-if="c.type === 'spam'" class="pt-btn spam" @pointerdown.prevent="tap(c, true, $event)">บดรัวๆ!</button>
@@ -57,10 +57,10 @@
           </div>
         </div>
 
-        <div class="pt-feed">{{ state.log?.msg || 'เชื่อมต่อห้องสำเร็จ!' }}</div>
+        <div class="pt-feed" v-html="em(state.log?.msg || 'เชื่อมต่อห้องสำเร็จ!')"></div>
 
         <!-- ผลข้างเคียง -->
-        <div v-if="me?.effect" class="pt-fxbadge">{{ me.effect.label }} {{ fxLeft }} วิ</div>
+        <div v-if="me?.effect" class="pt-fxbadge" v-html="em(`${me.effect.label} ${fxLeft} วิ`)"></div>
         <div class="pt-spill">
           <div v-for="b in spill" :key="b.id" class="pt-blob" :style="{ left: b.x + 'px', top: b.y + 'px', opacity: b.o }"
             @pointerdown.prevent="rubStart(b, $event)" @pointermove="rubMove(b, $event)" @pointerup="b.lx = null"></div>
@@ -69,22 +69,22 @@
 
       <!-- เหตุการณ์ทั้งทีม -->
       <div v-if="state.event" class="pt-event">
-        <div class="pt-evprompt">{{ state.event.prompt }}</div>
+        <div class="pt-evprompt" v-html="em(state.event.prompt)"></div>
         <div class="pt-bar ev"><div class="pt-fill evfill" :style="{ width: evPct + '%' }"></div></div>
         <div class="pt-evact">
           <template v-if="state.event.kind === 'codered'">
             <div class="pt-evhint">แตะรวมทั้งทีม {{ redShown }}/{{ state.event.target }}</div>
             <div class="pt-meter"><div :style="{ width: Math.min(100, redShown / state.event.target * 100) + '%' }"></div></div>
-            <button class="pt-red" @pointerdown.prevent="redTap($event)">🚨<br>กด!</button>
+            <button class="pt-red" @pointerdown.prevent="redTap($event)"><Emoji char="🚨" /><br>กด!</button>
           </template>
-          <div v-else-if="state.event.done[uid] || evSent === state.event.id" class="pt-evok">✅ เรียบร้อย! รอเพื่อน...</div>
+          <div v-else-if="state.event.done[uid] || evSent === state.event.id" class="pt-evok"><Emoji char="✅" /> เรียบร้อย! รอเพื่อน...</div>
           <template v-else-if="state.event.kind === 'shake'">
-            <div class="pt-evemoji">🫨</div>
+            <div class="pt-evemoji"><Emoji char="🫨" /></div>
             <div class="pt-meter"><div :style="{ width: Math.min(100, shakeScore / SHAKE_NEED * 100) + '%' }"></div></div>
             <button class="pt-evfb" @pointerdown.prevent="addShake(1)">เขย่าไม่ได้? แตะรัวๆ ตรงนี้</button>
           </template>
           <template v-else-if="state.event.kind === 'flip'">
-            <div class="pt-evemoji">🙈</div>
+            <div class="pt-evemoji"><Emoji char="🙈" /></div>
             <div class="pt-evhint">คว่ำหน้าจอลงค้างไว้ 1 วินาที</div>
             <button class="pt-evfb" @pointerdown.prevent="flipHoldStart($event)" @pointerup="flipHoldEnd" @pointercancel="flipHoldEnd" @lostpointercapture="flipHoldEnd">
               <div class="pt-holdfill" :style="{ height: flipPct + '%' }"></div><span>ไม่มีเซ็นเซอร์? กดค้าง 2 วิ</span>
@@ -98,14 +98,14 @@
           </template>
           <template v-else>
             <span v-for="p in rosterNames" :key="p.uid" :class="{ done: state.event.done[p.uid] }">
-              {{ state.event.done[p.uid] ? '✅' : '⏳' }} {{ p.name }}</span>
+              <Emoji :char="state.event.done[p.uid] ? '✅' : '⏳'" /> {{ p.name }}</span>
           </template>
         </div>
       </div>
 
       <!-- จบด่าน / จบเกม -->
       <div v-if="endInfo" class="pt-modal">
-        <div class="pt-mtitle" :style="{ color: endInfo.color }">{{ endInfo.title }}</div>
+        <div class="pt-mtitle" :style="{ color: endInfo.color }" v-html="em(endInfo.title)"></div>
         <p class="pt-mdesc">{{ endInfo.desc }}</p>
         <template v-if="state.status !== 'levelClear'">
           <button v-if="isHost && canRestart" class="pt-mbtn" @click="$emit('restart')">เล่นอีกรอบ</button>
@@ -120,6 +120,11 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { levelConfig, CODE_RED_TAPS_PER_PLAYER } from '../../utils/pharmateamEngine.js'
+import Emoji from '../shared/Emoji.vue'
+import { emojifyHtml } from '../../utils/emoji.js'
+
+// ข้อความจาก state (prompt/log มีชื่อผู้เล่น) → emojifyHtml escape ให้แล้ว ปลอดภัยกับ v-html (CLAUDE.md ข้อ 8)
+const em = (t) => emojifyHtml(t, import.meta.env.BASE_URL)
 
 const props = defineProps({
   state: { type: Object, required: true },
@@ -136,6 +141,22 @@ const controls = computed(() => me.value?.controls || [])
 const levelName = computed(() => levelConfig(props.state.level || 1).name)
 const progPct = computed(() => Math.min(100, Math.floor(props.state.progress / (props.state.maxProgress || 1) * 100)))
 const rosterNames = computed(() => Object.entries(props.state.players).map(([uid, p]) => ({ uid, name: p.name })))
+
+// ออกกลางเกมต้องแตะ 2 ครั้ง (กันนิ้วโดนตอนกดรัว — ออกแล้วทีมเสียคน)
+const quitArmed = ref(false)
+let quitTimer = null
+function onQuit() {
+  if (quitArmed.value || props.state.status === 'gameover') { emit('quit'); return }
+  quitArmed.value = true
+  clearTimeout(quitTimer); quitTimer = setTimeout(() => { quitArmed.value = false }, 2500)
+}
+
+// กันจอดับระหว่างเล่น — จอหัวห้องดับ = เกมทั้งห้องค้าง (เบราว์เซอร์หยุด timer ของแท็บที่ซ่อน)
+let wakeLock = null
+async function grabWake() {
+  try { if (navigator.wakeLock && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen') } catch (e) { /* ไม่รองรับ/แบตต่ำ */ }
+}
+const onVis = () => { if (document.visibilityState === 'visible') grabWake() }
 
 // นาฬิกาเดินเพื่ออัปเดตแถบเวลา (ไม่ต้องรอ state ใหม่)
 const clock = ref(props.now())
@@ -326,6 +347,8 @@ watch(() => props.state.event?.id, id => {
 })
 
 onMounted(() => {
+  grabWake()
+  document.addEventListener('visibilitychange', onVis)
   redTimer = setInterval(flushRed, 250)
   window.addEventListener('devicemotion', onMotion)
   window.addEventListener('deviceorientation', onOrient)
@@ -333,6 +356,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearInterval(clockTimer)
   clearInterval(redTimer)
+  clearTimeout(quitTimer)
+  document.removeEventListener('visibilitychange', onVis)
+  try { wakeLock?.release() } catch (e) { /* */ }
   window.removeEventListener('devicemotion', onMotion)
   window.removeEventListener('deviceorientation', onOrient)
   Object.keys(holds).forEach(id => stopHold({ id }))
@@ -349,7 +375,8 @@ onBeforeUnmount(() => {
 .pt-stage { position: relative; height: 120px; background: linear-gradient(160deg, #1b2e4b, #0d151c); border-bottom: 2px solid #243b53;
   display: flex; flex-direction: column; justify-content: flex-end; flex-shrink: 0; }
 .pt-quit, .pt-mute { position: absolute; top: 8px; z-index: 3; background: rgba(0,0,0,.5); color: #fff; border: none; border-radius: 14px; padding: 4px 10px; font-size: .85rem; }
-.pt-quit { left: 8px; } .pt-mute { right: 8px; }
+.pt-quit { left: 8px; }
+.pt-quit.armed { background: #dc2626; } .pt-mute { right: 8px; }
 .pt-gauges { padding: 8px 12px; }
 .pt-row { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: 3px; }
 .pt-bar { height: 10px; background: #26384a; border-radius: 5px; overflow: hidden; }

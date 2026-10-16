@@ -11,7 +11,7 @@
     <div class="ptv-warn">
       <b><Emoji char="🗣️" /> เกมนี้ต้องใช้การสื่อสาร!</b><br>
       คำสั่งบนจอคุณ มักเป็นปุ่มบนจอ<b>เพื่อน</b> — ควรเล่นอยู่ที่เดียวกัน 2–{{ MAX_PLAYERS }} คน
-      เปิดเสียง และระวังปุ่ม ⚠️ ถ้ากดมั่วจะโดนผลข้างเคียง
+      เปิดเสียง และระวังปุ่ม <Emoji char="⚠️" /> ถ้ากดมั่วจะโดนผลข้างเคียง
     </div>
 
     <div v-if="error" class="ptv-err">{{ error }}</div>
@@ -32,6 +32,19 @@
           {{ r.count >= MAX_PLAYERS ? 'เต็ม' : 'เข้าร่วม' }}
         </button>
       </div>
+
+      <!-- กระดานทีม แยกตามขนาดทีม -->
+      <div class="ptv-sub"><Emoji char="🏆" /> กระดานทีม</div>
+      <div class="ptv-tabs">
+        <button v-for="n in SIZES" :key="n" class="ptv-tab" :class="{ on: boardSize === n }" @click="boardSize = n">{{ n }} คน</button>
+      </div>
+      <div v-if="boardLoading" class="ptv-empty">กำลังโหลด…</div>
+      <div v-else-if="!board.length" class="ptv-empty">ยังไม่มีทีม {{ boardSize }} คนลงกระดาน</div>
+      <div v-for="(t, i) in board" :key="t.id" class="ptv-brow" :class="{ mine: t.uids?.includes(uid) }">
+        <span class="ptv-rank">{{ i + 1 }}</span>
+        <span class="ptv-bnames">{{ (t.names || []).join(', ') }}</span>
+        <span class="ptv-blv">Lv.{{ t.level }}</span>
+      </div>
     </template>
 
     <!-- อยู่ในห้อง (ยังไม่เริ่ม) -->
@@ -40,11 +53,11 @@
         <div class="ptv-sub">ห้องของ {{ room.meta?.hostName }}</div>
         <ul class="ptv-players">
           <li v-for="p in players" :key="p.uid">
-            {{ p.uid === room.meta?.hostUid ? '👑' : '🧑‍⚕️' }} {{ p.name }}<span v-if="p.uid === uid"> (คุณ)</span>
+            <Emoji :char="p.uid === room.meta?.hostUid ? '👑' : '🧑‍⚕️'" /> {{ p.name }}<span v-if="p.uid === uid"> (คุณ)</span>
           </li>
         </ul>
         <button v-if="isHost" class="ptv-create" :disabled="!canStart" @click="startGame">
-          🚀 เริ่มปรุงยา! ({{ players.length }} คน)
+          <Emoji char="🚀" /> เริ่มปรุงยา! ({{ players.length }} คน)
         </button>
         <div v-if="isHost && players.length < MIN_PLAYERS" class="ptv-hint">
           {{ canStart ? '(แอดมิน) เริ่มคนเดียวได้ไว้เทสระบบ' : `รอเพื่อนเข้าห้องอีก ${MIN_PLAYERS - players.length} คน — เรียกคนข้างๆ มากดเข้าร่วม` }}
@@ -60,7 +73,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useRouter } from 'vue-router'
@@ -71,14 +84,28 @@ import { usePharmaTeam, MAX_PLAYERS, MIN_PLAYERS } from '../composables/usePharm
 const router = useRouter()
 const {
   uid, now, error, roomList, roomId, room, isHost, canStart,
-  listenRooms, createRoom, joinRoom, leaveRoom,
-  startGame, backToLobby, sendAction, sendEventDone, sendTaps,
+  listenRooms, stopRooms, createRoom, joinRoom, leaveRoom,
+  startGame, backToLobby, sendAction, sendEventDone, sendTaps, loadBoard,
 } = usePharmaTeam()
 
 const players = computed(() => Object.entries(room.value?.players || {})
   .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0))
   .map(([id, p]) => ({ uid: id, name: p.name })))
 const inGame = computed(() => !!room.value?.state)
+
+// กระดานทีม
+const SIZES = [2, 3, 4, 5, 6]
+const boardSize = ref(2)
+const board = ref([])
+const boardLoading = ref(false)
+async function refreshBoard() {
+  boardLoading.value = true
+  try { board.value = await loadBoard(boardSize.value) } catch (e) { board.value = [] }
+  boardLoading.value = false
+}
+watch(boardSize, refreshBoard)
+// กลับมาหน้ารายชื่อห้อง (เช่น เพิ่งจบเกม) → โหลดกระดานใหม่
+watch(roomId, id => { if (!id) refreshBoard() })
 
 // iOS ต้องขอสิทธิ์เซ็นเซอร์จากการกดของผู้ใช้ (เขย่า/คว่ำจอ)
 function askSensors() {
@@ -89,7 +116,9 @@ function onCreate() { askSensors(); createRoom() }
 function onJoin(id) { askSensors(); joinRoom(id) }
 async function goBack() { if (roomId.value) await leaveRoom(); router.push('/play') }
 
-onMounted(listenRooms)
+onMounted(() => { listenRooms(); refreshBoard() })
+// อยู่ในห้อง = ไม่ต้องฟังรายชื่อห้อง (กันดาวน์โหลด state ทุกห้องซ้ำทุกครั้งที่มีคนกด)
+watch(roomId, id => { if (id) stopRooms(); else listenRooms() })
 
 // จบเกม → บันทึกด่านไกลสุดของตัวเอง (ทุกเครื่องเขียนของตัวเอง ครั้งเดียวต่อเกม) → achievement pt_* เช็คเอง
 const auth = useAuthStore()
@@ -141,6 +170,14 @@ watch(() => room.value?.state?.status === 'gameover' ? room.value.state.gameId :
 .ptv-tag { font-size: .75rem; background: #e0e7ff; color: #3730a3; border-radius: 8px; padding: 3px 8px; }
 .ptv-join { border: none; border-radius: 10px; background: #4f46e5; color: #fff; font-weight: 700; padding: 8px 12px; cursor: pointer; }
 .ptv-join:disabled { background: #9ca3af; }
+.ptv-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+.ptv-tab { flex: 1; border: var(--bw) solid var(--line); background: #fff; border-radius: 10px; padding: 6px 0; font-weight: 700; font-size: .8rem; cursor: pointer; }
+.ptv-tab.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.ptv-brow { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid rgba(0,0,0,.06); border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; }
+.ptv-brow.mine { border-color: var(--primary); background: #eef6ff; }
+.ptv-rank { font-weight: 800; width: 20px; text-align: center; color: rgba(0,0,0,.5); }
+.ptv-bnames { flex: 1; min-width: 0; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptv-blv { font-weight: 800; color: #059669; }
 .ptv-lobby { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; padding: 4px 14px 14px; }
 .ptv-players { list-style: none; padding: 0; margin: 0 0 14px; }
 .ptv-players li { padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,.08); font-weight: 600; }
