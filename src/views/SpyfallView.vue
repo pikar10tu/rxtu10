@@ -33,6 +33,7 @@
           {{ r.count >= MAX_PLAYERS ? 'เต็ม' : 'เข้าร่วม' }}
         </button>
       </div>
+      <PlayLogPanel game="spyfall" />
     </template>
 
     <!-- ── ล็อบบี้ ── -->
@@ -159,6 +160,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
+import PlayLogPanel from '../components/shared/PlayLogPanel.vue'
 import { useSpyfall } from '../composables/useSpyfall.js'
 import { MODES, DRUGS } from '../data/spyfall.js'
 import { MAX_PLAYERS, MINUTES } from '../utils/spyfallEngine.js'

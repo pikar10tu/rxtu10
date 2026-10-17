@@ -14,6 +14,7 @@ import {
 import { app } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useNewsPost } from './useNewsPost.js'
+import { logPlay } from '../utils/playLog.js'
 import { newGame, applyAction, eventDone, eventTaps, tick, removePlayer, normalizeState } from '../utils/pharmateamEngine.js'
 
 const ROOT = 'pharmateam/rooms'
@@ -200,6 +201,7 @@ export function usePharmaTeam() {
       .map(([id, p]) => ({ uid: id, name: p.name }))
     if (!timer) startHost()
     engine = newGame(roster, now())
+    logPlay('pharmateam', roster)
     // ล้าง action ค้างจากรอบก่อน
     remove(dbRef(rtdb(), `${ROOT}/${roomId.value}/actions`)).catch(() => {})
     writeState()

@@ -19,6 +19,7 @@ import {
 import { app } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useNewsPost } from './useNewsPost.js'
+import { logPlay } from '../utils/playLog.js'
 import { deal, tally, judgeGuess, allVoted, MIN_PLAYERS, MAX_PLAYERS } from '../utils/spyfallEngine.js'
 
 const ROOT = 'spyfall/rooms'
@@ -202,6 +203,7 @@ export function useSpyfall() {
           startedAt: t, endsAt: t + (r.meta.minutes || 7) * 60000,
         },
       })
+      logPlay('spyfall', players.value, { mode })
     } catch (e) { error.value = 'เริ่มเกมไม่สำเร็จ: ' + e.message }
   }
 

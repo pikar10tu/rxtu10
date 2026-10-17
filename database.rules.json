@@ -2,6 +2,16 @@
   "rules": {
     ".read": false,
     ".write": false,
+    "playlog": {
+      "$game": {
+        ".read": "auth != null && auth.token.email === 'prawich.aum@dome.tu.ac.th'",
+        ".indexOn": ["at"],
+        "$entry": {
+          ".write": "auth != null && !data.exists() && newData.child('uids').child('0').exists()",
+          ".validate": "newData.child('size').isNumber() && newData.child('size').val() >= 1 && newData.child('size').val() <= 10"
+        }
+      }
+    },
     "spyfall": {
       "rooms": {
         ".read": "auth != null",

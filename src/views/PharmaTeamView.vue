@@ -44,6 +44,7 @@
         <span class="ptv-bnames">{{ (t.names || []).join(', ') }}</span>
         <span class="ptv-blv">Lv.{{ t.level }}</span>
       </div>
+      <PlayLogPanel game="pharmateam" />
     </template>
 
     <!-- อยู่ในห้อง (ยังไม่เริ่ม) -->
@@ -77,6 +78,7 @@ import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
+import PlayLogPanel from '../components/shared/PlayLogPanel.vue'
 import PtGame from '../components/pharmateam/PtGame.vue'
 import { usePharmaTeam, MAX_PLAYERS, MIN_PLAYERS } from '../composables/usePharmaTeam.js'
 
