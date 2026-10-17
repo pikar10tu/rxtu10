@@ -1,6 +1,6 @@
 <template>
   <div class="sl">
-    <div class="sl-count">{{ SUMMARIES.length }} เรื่องจากเพื่อน RxTU10 · อ่านได้แล้ว {{ readyCount }} · ที่เหลืออยู่ระหว่างดำเนินการ</div>
+    <div class="sl-count">สรุปจากเพื่อน RxTU10</div>
     <input v-model="q" class="sl-search" placeholder="ค้นหาโรค เช่น gout, เบาหวาน, asthma" aria-label="ค้นหาสรุป">
     <div class="sl-chips" role="group" aria-label="กรองตามระบบ">
       <button :class="{ on: sys === 'all' }" @click="sys = 'all'">ทั้งหมด</button>
@@ -28,7 +28,6 @@ import { SUMMARIES, SYSTEMS, reviewPill } from '../../data/summaryIndex.js'
 
 const q = ref('')
 const sys = ref('all')
-const readyCount = SUMMARIES.filter(s => s.ready).length
 const groups = computed(() => {
   const term = q.value.trim().toLowerCase()
   return SYSTEMS.filter(s => sys.value === 'all' || sys.value === s.key).map(s => ({

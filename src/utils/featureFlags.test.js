@@ -38,6 +38,6 @@ test('key ที่ไม่รู้จัก → ปิดเสมอ แม�
 })
 
 test('FEATURE_KEYS ครบและไม่ซ้ำ', () => {
-  assert.deepEqual([...FEATURE_KEYS].sort(), ['arcadeOpen', 'expeditionOpen', 'pvpOpen'])
+  assert.deepEqual([...FEATURE_KEYS].sort(), ['arcadeOpen', 'drugDbOpen', 'expeditionOpen', 'pvpOpen'])
   assert.equal(new Set(FEATURE_KEYS).size, FEATURE_KEYS.length)
 })

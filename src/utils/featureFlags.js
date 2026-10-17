@@ -7,7 +7,7 @@
  */
 
 // ชื่อ flag ที่ระบบรู้จัก — key นอกลิสต์นี้ถือว่าปิดเสมอ (กันพิมพ์ชื่อผิดแล้วเงียบ)
-export const FEATURE_KEYS = ['pvpOpen', 'expeditionOpen', 'arcadeOpen']
+export const FEATURE_KEYS = ['pvpOpen', 'expeditionOpen', 'arcadeOpen', 'drugDbOpen']
 
 /**
  * @param {object|null|undefined} configData ข้อมูลดิบจาก config/app (null = doc หาย/ยังไม่โหลด)

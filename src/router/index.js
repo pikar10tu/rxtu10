@@ -12,6 +12,7 @@ const routes = [
     { path: '/play',      name: 'play',      component: () => import('../views/PlayView.vue')      },
     { path: '/study',     name: 'study',     component: () => import('../views/StudyView.vue')     },
     { path: '/study/summary/:id', name: 'summary', component: () => import('../views/SummaryView.vue') },
+    { path: '/study/drugs', name: 'drugdb', component: () => import('../views/DrugDbView.vue') },
     { path: '/study/crcl', name: 'crcl', component: () => import('../views/CrClTrainerView.vue') },
     { path: '/study/ped-dose', name: 'ped-dose', component: () => import('../views/PedDoseView.vue') },
     { path: '/study/time-attack', name: 'timeAttack', component: () => import('../views/TimeAttackView.vue') },
@@ -54,6 +55,7 @@ const GATED = {
     'capsule-rush': 'arcadeOpen',
     g2048:          'arcadeOpen',
     stacker:        'arcadeOpen',
+    drugdb:         'drugDbOpen',   // ฐานข้อมูลยา 17 ต.ค. 2026 — แอดมินเห็นก่อน ยังไม่เปิดให้ทั้งรุ่น
 }
 
 router.beforeEach((to) => {

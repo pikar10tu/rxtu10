@@ -31,8 +31,9 @@
           <div v-if="!results.length" class="sv-res-none">ไม่เจอ "{{ search.trim() }}"</div>
         </div>
         <div v-else class="sv-doors">
-          <button v-for="d in DOORS" :key="d.key" type="button" class="sv-door" :class="'d-' + d.key" @click="openDoor(d.key)">
-            <span v-if="d.badge" class="sv-door-badge">{{ d.badge }}</span>
+          <button v-for="d in DOORS" :key="d.key" type="button" class="sv-door" :class="['d-' + d.key, { soon: d.soon }]" :disabled="d.soon" @click="openDoor(d.key)">
+            <span v-if="d.soon" class="sv-door-soon">Coming soon</span>
+            <span v-else-if="d.badge" class="sv-door-badge">{{ d.badge }}</span>
             <span class="sv-door-em"><Emoji :char="d.emoji" /></span>
             <span class="sv-door-t"><b>{{ d.title }}</b><small>{{ d.sub }}</small></span>
           </button>
@@ -243,6 +244,9 @@ import { ref, computed, onUnmounted } from 'vue'
 import { increment, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db, PLE_CC_DATE } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useRouter } from 'vue-router'
+import { useAppConfig } from '../composables/useAppConfig.js'
+import { isFeatureOpen } from '../utils/featureFlags.js'
 import { useToast } from '../composables/useToast.js'
 import { bumpGlobalStat } from '../composables/useGlobalStats.js'
 import { DRUGS } from '../data/index.js'
@@ -285,14 +289,18 @@ const queueSize = computed(() => dueCount.value + Math.min(newCount.value, NEW_P
 // ── 4 ประตู (3 ต.ค. 2026) — เปิดหน้ามาเจอหน้าแรกเสมอ · ?tab=sum|tool|… (ปุ่มย้อนจากหน้าอ่านสรุป/เครื่องคำนวณ) พากลับเข้าประตูเดิม ──
 const tab = ref((location.hash.match(/[?&]tab=(quiz|sum|flash|tool)/) || [])[1] || 'home')
 const search = ref('')
-function openDoor(t) { tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
-const readySummaries = SUMMARIES.filter(x => x.ready)
+const router = useRouter()
+const { rawConfig } = useAppConfig()
+// ฐานข้อมูลยา — ปิดด้วย flag drugDbOpen (แอดมินเห็นก่อน) · คนอื่นเห็นป้าย Coming soon
+const drugDbOpen = computed(() => isFeatureOpen(rawConfig.value, 'drugDbOpen', { isAdmin: authStore.isAdmin }))
+function openDoor(t) { if (t === 'drug') { router.push('/study/drugs'); return } tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 const DOORS = computed(() => [
   { key: 'quiz',  emoji: '📝', title: 'ข้อสอบ',      sub: 'ทั่วไป · Zen · Time Attack · ข้อที่ผิด', badge: redoDue.value || 0 },
-  { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: `อ่านได้ ${readySummaries.length} จาก ${SUMMARIES.length} เรื่อง`, badge: 0 },
+  { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: 'สรุปโรคจากเพื่อน RxTU10', badge: 0 },
   { key: 'flash', emoji: '🧠', title: 'แฟลชการ์ด',   sub: `ทบทวนกลุ่มยา ${DECK.length} ตัว`, badge: queueSize.value || 0 },
   { key: 'tool',  emoji: '🧮', title: 'เครื่องคำนวณ', sub: 'CrCl · ยาน้ำเด็ก', badge: 0 },
+  { key: 'drug',  emoji: '💊', title: 'ฐานข้อมูลยา', sub: 'การ์ดยาภาษาไทย สรุปจากฉลาก FDA', badge: 0, soon: !drugDbOpen.value },
 ])
 const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
 const TOOLS = [
@@ -558,6 +566,10 @@ async function sendReport() {
 .sv-door:active { transform: translateY(1px); }
 .sv-door:focus-visible, .sv-back:focus-visible, .sv-res:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .d-quiz { background: var(--primary-light); } .d-sum { background: var(--accent-light); } .d-flash { background: var(--mint-light); } .d-tool { background: #fff6e0; }
+.d-drug { background: #eef3f7; grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; }
+.sv-door.soon { cursor: default; opacity: .7; }
+.sv-door.soon:active { transform: none; }
+.sv-door-soon { position: absolute; top: 10px; right: 10px; padding: 1px 8px; border-radius: 999px; background: var(--ink); color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: .02em; }
 .sv-door-em { font-size: 2.1rem; line-height: 1; }
 .sv-door-t { display: flex; flex-direction: column; gap: 2px; }
 .sv-door-t b { font-size: 1.05rem; }
