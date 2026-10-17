@@ -33,7 +33,7 @@
 /* ══ กรอบรูป ══ */
 .cz-fw { position: relative; border-radius: 50%; display: inline-flex; vertical-align: middle; }
 /* รูปใน slot ต้องอยู่เหนือวงกรอบ (::before วาดเป็นแผ่นเต็มวง) — ไม่งั้นรูปที่ไม่มี position ถูกทับ (user เจอในหน้าฉัน) */
-.cz-fw > :not(.cz-deco):not(.cz-orbit) { position: relative; z-index: 1; }
+.cz-fw > :not(.cz-deco):not(.cz-orbit):not(.cz-art) { position: relative; z-index: 1; }
 /* รูปเป็น block + ไม่มี line-height ⇒ ตัวห่อกรอบเท่ารูปเป๊ะ (ช่องใต้บรรทัดของ inline img ทำวงกรอบเหลื่อมลงล่าง) */
 .cz-fw { line-height: 0; }
 .cz-fw > img { display: block; }   /* หดพอดีรูป — block จะยืดเต็มแถว วงกลมกลายเป็นวงรี */
@@ -51,6 +51,9 @@
 .cz-f-gold::before, .cz-f-crown::before { inset: -6px; background: conic-gradient(#b7791f, #ffe08a, #fff6cc, #ffe08a, #b7791f, #ffe08a, #b7791f); box-shadow: 0 0 16px 4px rgba(255,200,80,.6); animation: cz-spin 5s linear infinite; }
 .cz-f-heaven::before { inset: -7px; background: conic-gradient(#fff, #ffd6ec, #bfe7ff, #fff4c2, #fff); box-shadow: 0 0 22px 8px rgba(191,231,255,.95); animation: cz-spin 4s linear infinite; }
 .cz-f-dragon::before { inset: -6px; background: conic-gradient(#7a1b12, #e0452f, #ffb020, #e0452f, #7a1b12); box-shadow: 0 0 16px 4px rgba(224,69,47,.55); animation: cz-spin 2.5s linear infinite; }
+/* กรอบลายวาด (fa-*): ภาพ 240 หน่วย รูปโปรไฟล์กิน 132 ตรงกลาง ⇒ ภาพใหญ่ 181.8% ของรูป เลื่อนออก −40.9% ทุกด้าน
+   ชั้นหลังวงในภาพถูกเจาะรูตรงรูปไว้แล้ว จึงวางทับรูปได้เลย (scripts/frame-art.mjs) */
+.cz-art { position: absolute; z-index: 2; width: 181.8%; height: 181.8%; left: -40.9%; top: -40.9%; max-width: none; pointer-events: none; user-select: none; }
 .cz-deco { position: absolute; z-index: 2; line-height: 1; pointer-events: none; }
 .cz-orbit { position: absolute; inset: -14px; z-index: 2; animation: cz-spin 7s linear infinite; pointer-events: none; }
 .cz-orbit i { position: absolute; font-style: normal; font-size: 15px; }

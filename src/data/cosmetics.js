@@ -50,6 +50,15 @@ export const COSMETICS = [
   I('f', 4, 'f-rainbow', 'รุ้งหมุน', 1800000),
   I('f', 4, 'f-dragon', 'มังกรวน', 2500000, { orbit: [['🐉', 'top:-4px;left:44%;font-size:1.2em']], orbitSec: 4 }),
   I('f', 4, 'f-heaven', 'ออร่าสวรรค์', 3500000, { orbit: [['✨', 'top:0;left:50%'], ['☁️', 'bottom:0;left:40%'], ['🕊️', 'top:45%;left:-6px']] }),
+  // ── กรอบลายวาด (art = ภาพ public/cosmetics/frames/<id>.webp จาก scripts/frame-art.mjs) ── user เคาะ 18 ต.ค. 2026
+  ...[['fa-catsakura', 'แมวซากุระ'], ['fa-bunny', 'กระต่ายหูตั้ง'], ['fa-bear', 'หมีน้ำผึ้ง'], ['fa-frog', 'กบน้อยบึงบัว'], ['fa-chick', 'ลูกเจี๊ยบเกาะวง'],
+    ['fa-pills', 'กองยาเม็ด'], ['fa-boba', 'ชานมไข่มุก'], ['fa-strawberry', 'สตรอว์เบอร์รี'], ['fa-melon', 'แตงโมหน้าร้อน'], ['fa-icecream', 'ไอศกรีมเยิ้ม']]
+    .map(([id, l]) => I('f', 2, id, l, 150000, { art: true })),
+  ...[['fa-mortar', 'ครกบดสมุนไพร'], ['fa-stetho', 'หูฟังแพทย์'], ['fa-molecule', 'วงเบนซีน'], ['fa-clover', 'โคลเวอร์นำโชค'], ['fa-sunflower', 'ทานตะวัน'],
+    ['fa-mushroom', 'เห็ดป่าวิเศษ'], ['fa-sea', 'ทะเลปลาดาว'], ['fa-rain', 'ฝนพรำรุ้งพราย'], ['fa-moon', 'คืนดาวพราว'], ['fa-cyber', 'หูฟังไซเบอร์']]
+    .map(([id, l]) => I('f', 3, id, l, 500000, { art: true })),
+  I('f', 4, 'fa-alchemist', 'เภสัชแปรธาตุ', 2500000, { art: true }), I('f', 4, 'fa-grad', 'หมวกรับปริญญา', 2500000, { art: true }),
+  I('f', 4, 'fa-angel', 'ปีกนางฟ้า', 3000000, { art: true }), I('f', 4, 'fa-phoenix', 'ขนฟีนิกซ์', 3000000, { art: true }),
 
   // ── ป้ายหน้าชื่อ ── (fx = อนิเมชัน · ในรายชื่อสมาชิกเป็นภาพนิ่ง)
   ...[['b-sakura', '🌸', 'ซากุระ'], ['b-star', '⭐', 'ดาว'], ['b-pill', '💊', 'ยาเม็ด'], ['b-clover', '🍀', 'โคลเวอร์'], ['b-paw', '🐾', 'รอยเท้า'], ['b-drop', '💧', 'หยดน้ำ'], ['b-moon', '🌙', 'จันทร์']]
