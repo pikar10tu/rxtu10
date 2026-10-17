@@ -64,12 +64,7 @@
           </span>
         </div>
 
-        <div class="tw-actions">
-          <button class="tw-edit" @click="pickOpen = true"><Emoji char="🛡️" /> จัดทีม</button>
-          <button class="tw-fight" :disabled="busy || !team.length" @click="onFight">
-            <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
-          </button>
-        </div>
+        <!-- ปุ่มสู้/จัดทีม ย้ายไปแถบติดล่างจอ (.tw-bar ท้ายหน้า) — user เคาะจากเดโม 17 ต.ค. 2026 -->
         <button v-if="floor < AUTO_CLIMB_MAX" class="tw-auto" :disabled="busy || !team.length" @click="startAuto">
           <Emoji char="⏩" /> ไต่รวดจนกว่าจะแพ้ <small>(ถึงชั้น {{ AUTO_CLIMB_MAX - 1 }})</small>
         </button>
@@ -103,6 +98,19 @@
 
       <!-- 🪨 ศิลาจารึก — ยอดเกิน 100 ต่อคนต่อซีซั่น ข้ามการรีเซต (0 read เพิ่ม · roster rows) -->
       <TowerStele :rows="membersStore.rosterRows" :me="meUid" />
+
+      <!-- 🔻 แถบสู้ติดล่างจอ: sticky ใน #main-content (padding ล่าง 28px → bottom/margin -28px ให้ชิดขอบจริง) (ตัว scroll จริง ซึ่งจบเหนือ bottom-nav อยู่แล้ว)
+           ⇒ ไม่ต้อง fixed/Teleport/z-index · อยู่ท้ายหน้าเสมอ เลื่อนไปไหนก็กดสู้ได้ -->
+      <div class="tw-bar">
+        <button class="tw-bar-team" :aria-label="team.length ? 'จัดทีม' : 'ยังไม่ได้จัดทีม — จัดทีม'" @click="pickOpen = true">
+          <template v-if="team.length"><Emoji v-for="(p, i) in team" :key="i" :char="defOf(p.id).emoji" /></template>
+          <template v-else><Emoji char="🛡️" /></template>
+          <small>จัดทีม</small>
+        </button>
+        <button class="tw-fight" :disabled="busy || !team.length" @click="onFight">
+          <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
+        </button>
+      </div>
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
@@ -341,9 +349,13 @@ function onSheetFight() {
 .tw-mon:active { transform: scale(.92); }
 .tw-empty { font-size: .76rem; color: var(--muted); }
 .tw-vs { text-align: center; font-weight: 800; font-size: .72rem; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 4px; }
-.tw-actions { display: flex; gap: 8px; padding: 6px 16px 16px; }
-.tw-edit { border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); display: flex; align-items: center; gap: 4px; }
-.tw-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+.tw-bar { position: sticky; bottom: -28px; z-index: 5; display: flex; gap: 8px; align-items: stretch; margin: 12px -14px -28px; padding: 10px 14px 12px;
+  background: color-mix(in srgb, #fff 90%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-top: var(--bw) solid var(--line); box-shadow: 0 -6px 16px -10px rgba(43,53,80,.25); }
+.tw-bar-team { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 76px; min-height: 48px; padding: 4px 8px;
+  border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; font-family: inherit; cursor: pointer; box-shadow: var(--pop); font-size: 1.05rem; line-height: 1; }
+.tw-bar-team small { font-size: .7rem; font-weight: 800; color: var(--primary-dark, var(--primary)); }
+.tw-bar-team:active { transform: translateY(1px); }
 .tw-fight { flex: 1; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .tw-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .tw-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
