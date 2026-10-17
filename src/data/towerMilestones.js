@@ -33,16 +33,34 @@ export const TOWER_MILESTONES = [
   { f: 100, coins: 50000, tickets: 10, big: true },
 ]
 
+// 🏯 Endless (ชั้น 101+, user เคาะ 17 ต.ค. 2026 "เล็กๆน้อยๆ ต่อ 10 ชั้น") — สร้างจากสูตร ไม่จำกัดขั้น
+//    สิบคี่ (110/130…) = ⚡ตั๋วพลังงาน · สิบคู่ (120/140…) = 💊ยาแก้แพ้ · ทุก 50 = ก้อนใหญ่ขึ้น
+export function endlessMilestone(f) {
+  if (f % 50 === 0) return { f, coins: 10000, energy: 2, antiLoss: 1, big: true }
+  return (f / 10) % 2 === 1 ? { f, coins: 5000, energy: 1 } : { f, coins: 5000, antiLoss: 1 }
+}
+
+/** ทุกขั้นตั้งแต่ชั้น 10 ถึงชั้น upTo (รวม Endless) */
+export function milestonesUpTo(upTo) {
+  const list = TOWER_MILESTONES.filter(m => m.f <= upTo)
+  for (let f = 110; f <= upTo; f += 10) list.push(endlessMilestone(f))
+  return list
+}
+
 /** ขั้นที่ไปถึงแล้วแต่ยังไม่รับ */
 export const claimableMilestones = (best, claims) =>
-  TOWER_MILESTONES.filter(m => (best || 0) >= m.f && !(claims || []).includes(m.f))
+  milestonesUpTo(best || 0).filter(m => !(claims || []).includes(m.f))
 
-/** ขั้นถัดไปที่ยังไปไม่ถึง (null = ครบแล้ว) */
-export const nextMilestone = (best) => TOWER_MILESTONES.find(m => (best || 0) < m.f) || null
+/** ขั้นถัดไปที่ยังไปไม่ถึง (Endless ⇒ มีเสมอ) */
+export function nextMilestone(best) {
+  const b = best || 0
+  return TOWER_MILESTONES.find(m => b < m.f) || endlessMilestone(Math.floor(b / 10) * 10 + 10)
+}
 
-/** รวมรางวัลหลายขั้น → { coins, tickets, antiLoss } */
+/** รวมรางวัลหลายขั้น → { coins, tickets, antiLoss, energy } */
 export function sumRewards(list) {
   return list.reduce((s, m) => ({
-    coins: s.coins + (m.coins || 0), tickets: s.tickets + (m.tickets || 0), antiLoss: s.antiLoss + (m.antiLoss || 0),
-  }), { coins: 0, tickets: 0, antiLoss: 0 })
+    coins: s.coins + (m.coins || 0), tickets: s.tickets + (m.tickets || 0),
+    antiLoss: s.antiLoss + (m.antiLoss || 0), energy: s.energy + (m.energy || 0),
+  }), { coins: 0, tickets: 0, antiLoss: 0, energy: 0 })
 }

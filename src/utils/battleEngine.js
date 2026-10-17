@@ -35,6 +35,8 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     const m = statMult(W, u, i)
     if (m.atk !== 1) u.atk *= m.atk
     if (m.hp !== 1) { u.maxHp *= m.hp; u.hp = u.maxHp }
+    // 🏯 หอคอยเกิน 100 (Endless) — บอทคูณ atk/hp ตามชั้น (towerFloors.endlessBoost) · ไม่มี boost = ไฟต์ปกติเป๊ะ
+    if (p?.boost > 1) { u.atk *= p.boost; u.maxHp *= p.boost; u.hp = u.maxHp }
     return u
   }
   const A = (teamA || []).map((p, i) => build(p, i, 'A'))

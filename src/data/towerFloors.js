@@ -6,7 +6,13 @@ import { wave1Pets } from '../utils/petCatalog.js'
 import { BATTLE_SLOTS } from './residence.js'
 import { currentSeasonId } from '../utils/pvpSeason.js'
 
-export const TOWER_MAX = 100
+export const TOWER_MAX = 100   // "ยอดหอคอย" (ฉายา/ข่าว/รางวัลซีซั่น) — เกินจากนี้ = Endless ไต่ต่อได้ไม่จำกัด
+
+// 🏯 Endless (user เคาะ 17 ต.ค. 2026): ชั้น 101+ = ทีมแบบชั้น 70–100 (legendary V) แต่บอทคูณ atk/hp ชั้นละ +0.5%
+//    ซิม 17 ต.ค.: ทีม legendary V ที่ดีที่สุด ชนะ ~90% @+0% · ~40% @+15% (ชั้น 130) · ~3% @+30% (ชั้น 160)
+//    ไต่ซ้ำได้ฟรี ⇒ กำแพงนุ่มราวชั้น 150–160 · ไม่เพิ่มรายได้ idle (BONUS_CAP_FLOOR เดิม)
+export const ENDLESS_BOOST_PER_FLOOR = 0.005
+export const endlessBoost = (f) => f > TOWER_MAX ? 1 + ENDLESS_BOOST_PER_FLOOR * (Math.floor(f) - TOWER_MAX) : 1
 
 const ELS = ['fist', 'scissors', 'paper']
 const RARITY_BY_TIER = ['common', 'rare', 'epic', 'legendary']
@@ -77,12 +83,13 @@ function seasonSalt(season) {
 
 /** ชั้น → ทีมบอท (rarity/เกรด/จำนวน/ธาตุ ตามชั้น · หน้าตัวสลับตามซีซั่น) */
 export function getFloorTeam(floor, season = currentSeasonId()) {
-  const f = clamp(Math.floor(floor) || 1, 1, TOWER_MAX)
+  const f = Math.max(1, Math.floor(floor) || 1)    // ไม่ตันที่ 100 แล้ว (Endless)
   const rand = rng((f * 2654435761 + seasonSalt(season) * 40503) >>> 0)
   const rarity = RARITY_BY_TIER[tierOf(f)]
   const grade = botGrade(f)
   const count = botCount(f)
-  const elements = floorElements(f, count)
+  const elements = floorElements(f, count)         // f ≥ 70 ใช้สูตรเคาน์เตอร์ต่อเนื่องได้เลย
+  const boost = endlessBoost(f)
   const team = []
   for (let i = 0; i < count; i++) {
     const element = elements[i]
@@ -93,7 +100,7 @@ export function getFloorTeam(floor, season = currentSeasonId()) {
     const fallback = catalog.filter(p => p.element === element)
     const src = pool.length ? pool : fallback
     const def = src[Math.floor(rand() * src.length)]
-    team.push({ id: def.id, rarity: def.rarity, element: def.element, grade })
+    team.push({ id: def.id, rarity: def.rarity, element: def.element, grade, ...(boost > 1 ? { boost } : {}) })
   }
   return team
 }
@@ -131,9 +138,10 @@ const ZONES = [
   { name: 'ปราการอสูร',      art: '👹', color: '#c084fc', from: 41, to: 55 },
   { name: 'ยอดหอคอยมังกร',  art: '🐉', color: '#fbbf24', from: 56, to: 69 },
   { name: 'บัลลังก์ราชันย์',  art: '👑', color: '#5b21b6', from: 70, to: 100, royal: true },
+  { name: 'ห้วงนิรันดร์',     art: '🌌', color: '#0f766e', from: 101, to: Infinity, royal: true, endless: true },
 ]
 export function floorZone(floor) {
-  const f = clamp(Math.floor(floor) || 1, 1, TOWER_MAX)
+  const f = Math.max(1, Math.floor(floor) || 1)
   return ZONES.find(z => f >= z.from && f <= z.to) || ZONES[ZONES.length - 1]
 }
 export const TOWER_BONUS_FLOORS = [20, 40, 60, 70]  // หมุดเหรียญ — ถึงชั้น 70 (โบนัส flat หลังจากนั้น)

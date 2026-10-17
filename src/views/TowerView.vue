@@ -12,7 +12,7 @@
       <SeasonClaimBanner mode="tower" />
       <SeasonCountdown kind="tower" />
       <TowerMilestones :open-now="msOpen" :best="best" :claims="claims" :claimable="claimable" :busy="msBusy" @claim="onClaimMs" />
-      <TowerPath :floor="displayFloor" :best="displayBest" :max="TOWER_MAX" :crowd="crowd"
+      <TowerPath :floor="displayFloor" :best="displayBest" :max="pathMax" :crowd="crowd"
                  @pick="sheetFloor = $event" />
 
       <!-- การ์ดชั้นปัจจุบัน -->
@@ -24,7 +24,11 @@
             <div class="tw-zone-floor">ชั้น {{ floor }} <span class="tw-zone-best">· สูงสุด {{ best }}</span></div>
           </div>
         </div>
-        <div v-if="zone.royal" class="tw-max-cue">
+        <div v-if="zone.endless" class="tw-max-cue">
+          <div class="tw-max-cue-l1">ห้วงนิรันดร์ — บอทแกร่งขึ้นชั้นละ +{{ boostPct }}% (ตอนนี้ +{{ ((endlessBoost(floor) - 1) * 100).toFixed(1) }}%)</div>
+          <div class="tw-max-cue-l2">ไต่ได้ไม่จำกัด · ทุก 10 ชั้นมีของรางวัลเล็กๆ · แพ้ได้ลองใหม่ฟรี</div>
+        </div>
+        <div v-else-if="zone.royal" class="tw-max-cue">
           <div class="tw-max-cue-l1">พลังบอทช่วงนี้ตันแล้ว (เกรด V ทุกตัว)</div>
           <div class="tw-max-cue-l2">แพ้ชนะวัดที่สายกับการจัดทีม — <Emoji char="✊" /> ข่ม <Emoji char="✌️" /> · <Emoji char="✌️" /> ข่ม <Emoji char="✋" /> · <Emoji char="✋" /> ข่ม <Emoji char="✊" /></div>
         </div>
@@ -35,7 +39,7 @@
           <div v-if="nextGain > 0" class="tw-bonus-next">
             ชนะชั้น {{ floor }} → {{ (bonus + nextGain).toLocaleString() }}/วัน <b>(+{{ nextGain.toLocaleString() }})</b>
           </div>
-          <div v-else class="tw-bonus-cap">{{ best >= TOWER_MAX ? 'เพดานรายได้เต็มแล้ว · สูงสุดของหอคอย' : 'เพดานรายได้เต็มแล้ว · ไต่ต่อเพื่ออันดับ' }}</div>
+          <div v-else class="tw-bonus-cap">{{ best >= TOWER_MAX ? 'เพดานรายได้เต็มแล้ว · ไต่ต่อเพื่ออันดับ+รางวัลขั้น' : 'เพดานรายได้เต็มแล้ว · ไต่ต่อเพื่ออันดับ' }}</div>
         </div>
 
         <div class="tw-row">
@@ -65,7 +69,7 @@
             <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
           </button>
         </div>
-        <div v-if="floor >= TOWER_MAX && best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตหอคอยครบแล้ว!</div>
+        <div v-if="best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตยอดหอคอยแล้ว! ไต่ต่อในห้วงนิรันดร์ได้เลย</div>
       </div>
 
       <!-- อันดับหอคอย — หัวตาราง 3 อันดับ + หน้าต่างรอบตัวเรา (เดิมโชว์แค่ top 3 คนอันดับกลางเลยไม่รู้สึกอะไร)
@@ -118,7 +122,7 @@ import { useTower } from '../composables/useTower.js'
 import { towerRanking, TOP_COUNT } from '../utils/towerRivals.js'
 import { buildFloorCrowd } from '../utils/towerCrowd.js'
 import { getPetDef } from '../data/index.js'
-import { floorZone, towerBonusGain, BONUS_CAP_FLOOR } from '../data/towerFloors.js'
+import { floorZone, towerBonusGain, BONUS_CAP_FLOOR, endlessBoost, ENDLESS_BOOST_PER_FLOOR } from '../data/towerFloors.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
@@ -190,6 +194,9 @@ const sheetFloor = ref(null)
 // ถ้าไม่หน่วง marker จะไปถึงที่ใหม่ก่อนคนดูจะเห็น = ไม่มีอนิเมชันไต่ให้ดู
 const holdPath    = ref(false)
 const displayFloor = ref(floor.value)
+// เส้นทางไต่: 100 แถวเดิม · เกินยอดแล้วต่อแถวทีละ 10 ชั้นให้เห็นขั้นรางวัลถัดไปเสมอ
+const pathMax = computed(() => Math.max(TOWER_MAX, Math.ceil((displayFloor.value + 1) / 10) * 10))
+const boostPct = (ENDLESS_BOOST_PER_FLOOR * 100).toFixed(1)
 const displayBest  = ref(best.value)
 
 watch([floor, best], ([f, b]) => {
@@ -237,7 +244,7 @@ async function onFight() {
         ? `รายได้รายวัน ${bonusBefore.toLocaleString()} → ${(bonusBefore + gainOfFight).toLocaleString()} (+${gainOfFight.toLocaleString()}/วัน)`
         // gain 0 ได้ 2 ทาง: เลยเพดานจริง หรือ best สูงกว่าชั้นที่สู้ (แอดมินรีเซตชั้น)
         // ทางหลังยังไม่เต็มเพดาน — ห้ามเขียนว่าเต็ม และห้ามอ้างโบนัสของชั้นที่เพิ่งสู้ (ต่ำกว่าของจริง)
-        : `ขึ้นชั้น ${Math.min(TOWER_MAX, r.cleared + 1)} · รายได้รายวันเท่าเดิม ${bonusBefore.toLocaleString()}/วัน${atCap ? ' (เต็มเพดานแล้ว)' : ''}`,
+        : `ขึ้นชั้น ${r.cleared + 1} · รายได้รายวันเท่าเดิม ${bonusBefore.toLocaleString()}/วัน${atCap ? ' (เต็มเพดานแล้ว)' : ''}`,
     }
     else releasePath()           // fight() คืน null (ยังไม่ได้จัดทีม) → ปล่อยเลย
   } catch (e) {

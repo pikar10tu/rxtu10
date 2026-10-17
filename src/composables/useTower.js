@@ -13,6 +13,7 @@ import { useUsageStore } from '../stores/usage.js'
 import { claimableMilestones, sumRewards, milestonesOpen } from '../data/towerMilestones.js'
 import { currentSeasonId } from '../utils/pvpSeason.js'
 import { ANTI_LOSS } from '../utils/antiLoss.js'
+import { ENERGY_TICKET } from '../utils/pvpEnergy.js'
 
 export function useTower() {
   const auth = useAuthStore()
@@ -62,7 +63,7 @@ export function useTower() {
     const won = result.winner === 'A'
     await recordStats(result, team.value, won)
     if (won) {
-      const nextFloor = Math.min(TOWER_MAX, cleared + 1)
+      const nextFloor = cleared + 1   // Endless — ไม่ตันที่ TOWER_MAX
       const nextBest = Math.max(best.value, cleared)
       await auth.patchUser(
         { towerFloor: nextFloor, towerBest: nextBest },
@@ -102,15 +103,17 @@ export function useTower() {
         ...(r.coins ? { coins: (u.coins || 0) + r.coins } : {}),
         ...(r.tickets ? { freeGachaTickets: (u.freeGachaTickets || 0) + r.tickets } : {}),
         ...(r.antiLoss ? { antiLoss: (u.antiLoss || 0) + r.antiLoss } : {}),
+        ...(r.energy ? { [ENERGY_TICKET.field]: (u[ENERGY_TICKET.field] || 0) + r.energy } : {}),
       },
       {
         towerClaims: nextClaims,
         ...(r.coins ? { coins: increment(r.coins) } : {}),
         ...(r.tickets ? { freeGachaTickets: increment(r.tickets) } : {}),
         ...(r.antiLoss ? { antiLoss: increment(r.antiLoss) } : {}),
+        ...(r.energy ? { [ENERGY_TICKET.field]: increment(r.energy) } : {}),
       },
     )
-    const parts = [r.coins && `🪙 ${r.coins.toLocaleString()}`, r.tickets && `🎟️ ×${r.tickets}`, r.antiLoss && `${ANTI_LOSS.emoji} ×${r.antiLoss}`].filter(Boolean)
+    const parts = [r.coins && `🪙 ${r.coins.toLocaleString()}`, r.tickets && `🎟️ ×${r.tickets}`, r.antiLoss && `${ANTI_LOSS.emoji} ×${r.antiLoss}`, r.energy && `${ENERGY_TICKET.emoji} ×${r.energy}`].filter(Boolean)
     toast(ok ? `รับรางวัลขั้นแล้ว ${parts.join(' · ')}` : 'รับรางวัลไม่สำเร็จ', ok ? 'success' : 'error')
     return ok
   }

@@ -8,20 +8,19 @@
         <small v-if="!openNow">เริ่มซีซั่น ต.ค. 2026 หลังแจกรางวัลซีซั่น ก.ย. · ดูรายการรางวัลได้ก่อน</small>
         <small v-else-if="claimable.length">ถึงแล้ว {{ claimable.length }} ขั้น รอรับอยู่</small>
         <small v-else-if="next">อีก {{ next.f - best }} ชั้นถึงชั้น {{ next.f }} · {{ rewardText(next) }}</small>
-        <small v-else>รับครบทุกขั้นของซีซั่นนี้แล้ว</small>
-      </span>
+              </span>
       <button v-if="claimable.length" class="tms-go" :disabled="busy" @click="$emit('claim')">รับเลย</button>
       <button v-else class="tms-more" :aria-expanded="open" @click="open = !open">{{ open ? 'ซ่อน' : 'ดูทั้งหมด' }}</button>
     </div>
     <div v-if="next && openNow" class="tms-bar"><i :style="{ width: ((best % 10) * 10) + '%' }" /></div>
     <div v-if="open || claimable.length" class="tms-list">
-      <div v-for="m in TOWER_MILESTONES" :key="m.f" class="tms-row"
+      <div v-for="m in shown" :key="m.f" class="tms-row"
            :class="{ done: openNow && claims.includes(m.f), can: openNow && best >= m.f && !claims.includes(m.f), big: m.big }">
         <span class="tms-f">{{ m.f }}</span>
         <span class="tms-r">{{ rewardText(m) }}</span>
         <span class="tms-s">{{ !openNow ? '' : claims.includes(m.f) ? 'รับแล้ว' : best >= m.f ? 'ถึงแล้ว' : `อีก ${m.f - best}` }}</span>
       </div>
-      <div class="tms-note">หอคอยรีเซตทุกซีซั่น รางวัลขั้นก็รับใหม่ได้ทุกซีซั่น · ชั้น 100 ได้ฉายา "ผู้พิชิตยอดหอคอย" ด้วย</div>
+      <div class="tms-note">หอคอยรีเซตทุกซีซั่น รางวัลขั้นก็รับใหม่ได้ทุกซีซั่น · ชั้น 100 ได้ฉายา "ผู้พิชิตยอดหอคอย" · เกิน 100 ไต่ต่อได้ไม่จำกัด ทุก 10 ชั้นมีรางวัลเล็กๆ</div>
     </div>
   </div>
 </template>
@@ -29,7 +28,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
-import { TOWER_MILESTONES, nextMilestone } from '../../data/towerMilestones.js'
+import { milestonesUpTo, nextMilestone } from '../../data/towerMilestones.js'
+import { ENERGY_TICKET } from '../../utils/pvpEnergy.js'
 import { ANTI_LOSS } from '../../utils/antiLoss.js'
 
 const props = defineProps({
@@ -42,10 +42,17 @@ const props = defineProps({
 defineEmits(['claim'])
 const open = ref(false)
 const next = computed(() => nextMilestone(props.best))
+// 10 ขั้นหลัก + Endless ถึงขั้นถัดไปอีก 3 ขั้น (โชว์แค่ 2 ขั้นที่ผ่านมาแล้วต่อจาก 100 กันรายการยาว)
+const shown = computed(() => {
+  const list = milestonesUpTo(Math.max(100, Math.floor(props.best / 10) * 10 + 30))
+  const cut = Math.floor(props.best / 10) * 10 - 20
+  return list.filter(m => m.f <= 100 || m.f >= cut)
+})
 const rewardText = (m) => [
   m.coins && `🪙 ${m.coins.toLocaleString()}`,
   m.tickets && `🎟️ ×${m.tickets}`,
   m.antiLoss && `${ANTI_LOSS.emoji} ${ANTI_LOSS.name} ×${m.antiLoss}`,
+  m.energy && `${ENERGY_TICKET.emoji} ${ENERGY_TICKET.name} ×${m.energy}`,
 ].filter(Boolean).join(' + ')
 </script>
 

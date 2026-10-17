@@ -83,7 +83,8 @@ test('floorZone: 5 โซนใหม่ ขอบเขตถูก', () => {
 
 test('floorZone: clamp นอกช่วง', () => {
   assert.equal(floorZone(0).name, 'ลานประลอง')
-  assert.equal(floorZone(999).name, 'บัลลังก์ราชันย์')
+  assert.equal(floorZone(999).name, 'ห้วงนิรันดร์')
+  assert.equal(floorZone(101).name, 'ห้วงนิรันดร์')
 })
 
 test('TOWER_BONUS_FLOORS = หมุดเหรียญถึงชั้น 70 เท่านั้น', () => {
@@ -158,4 +159,11 @@ test('towerBonusGain: ไต่ทีละชั้นจาก 0 ถึงเ�
   let sum = 0
   for (let f = 1; f <= TOWER_MAX; f++) sum += towerBonusGain(f, f - 1)
   assert.equal(sum, getTowerBonus(BONUS_CAP_FLOOR))
+})
+
+test('Endless: ชั้น ≤100 ไม่มี boost · 101+ คูณชั้นละ 0.5% · legendary V', () => {
+  assert.ok(getFloorTeam(100).every(p => !p.boost))
+  const t = getFloorTeam(150)
+  assert.ok(t.every(p => p.rarity === 'legendary' && p.grade === 5 && Math.abs(p.boost - 1.25) < 1e-9))
+  assert.notDeepEqual(getFloorTeam(150).map(p => p.id + p.element), getFloorTeam(100).map(p => p.id + p.element))
 })

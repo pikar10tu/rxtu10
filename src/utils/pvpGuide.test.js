@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildPvpGuide, buildHof } from './pvpGuide.js'
 import { canUseAntiLoss } from './antiLoss.js'
+const TOWER_MS_100 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 import { claimableMilestones, nextMilestone, sumRewards, milestonesOpen, prevSeasonId } from '../data/towerMilestones.js'
 
 const row = (ids, r = 1000, pw = 0, pl = 0) => ({ tm: ids.map(i => ({ i, g: 5 })), r, pw, pl })
@@ -43,8 +44,11 @@ test('ยาแก้แพ้ใช้ได้เฉพาะตาล่า�
 test('รางวัลขั้นหอคอย', () => {
   assert.deepEqual(claimableMilestones(35, [10]).map(m => m.f), [20, 30])
   assert.equal(nextMilestone(35).f, 40)
-  assert.equal(nextMilestone(100), null)
-  assert.deepEqual(sumRewards(claimableMilestones(100, [])), { coins: 108000, tickets: 50, antiLoss: 6 })
+  assert.equal(nextMilestone(100).f, 110)
+  assert.deepEqual(sumRewards(claimableMilestones(100, [])), { coins: 108000, tickets: 50, antiLoss: 6, energy: 0 })
+  // Endless: 110 ⚡ · 120 💊 · 130 ⚡ · 140 💊 · 150 ก้อนใหญ่
+  assert.deepEqual(sumRewards(claimableMilestones(150, TOWER_MS_100)), { coins: 30000, tickets: 0, antiLoss: 3, energy: 4 })
+  assert.equal(nextMilestone(155).f, 160)
 })
 
 test('รางวัลขั้นเปิดตั้งแต่ ต.ค. 2026 หลังแจกซีซั่นก่อนเสร็จ', () => {
