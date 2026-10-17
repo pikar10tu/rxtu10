@@ -366,7 +366,6 @@ async function save() {
 .me-card { padding: 18px 14px 14px; }
 .me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 .me-av-box { position: relative; margin-bottom: 4px; }
-.me-av-box:has(.cz-art) { margin: 34px 22px 30px; }   /* กรอบลายวาดยื่นออก ~41% ของรูป — กันทับชื่อข้างๆ */
 .me-avatar { width: 92px; height: 92px; }
 .me-cam { position: absolute; right: -2px; bottom: -2px; z-index: 3; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff;
   background: var(--primary); color: #fff; display: grid; place-items: center; font-size: .9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(43,53,80,.25); }

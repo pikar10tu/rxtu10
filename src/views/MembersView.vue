@@ -200,7 +200,6 @@ function titleOf(m) {
 .mv-av-wrap { position: relative; display: flex; }   /* flex = ไม่มีช่องใต้บรรทัด ป้ายเลเวลเกาะมุมรูปเป๊ะ */
 /* ใส่กรอบจากร้าน = วง/ของประดับยื่นออกนอกรูป ⇒ เว้นบน-ล่างเพิ่ม ไม่ให้ชื่อชิดรูป */
 .mv-av-wrap:has(.cz-fw) { margin: 4px 0 6px; }
-.mv-av-wrap:has(.cz-art) { margin: 22px 0 18px; }   /* กรอบลายวาดยื่นออก ~41% ของรูป */
 /* ใส่กรอบแล้ว วงสีสายซ้อนกับกรอบดูเหลื่อม ⇒ เปลี่ยนเป็นขอบขาวบางๆ ให้กรอบเป็นตัวเอก */
 .mv-av-wrap:has(.cz-fw) .mv-avatar { border-color: #fff; }
 .mv-avatar {

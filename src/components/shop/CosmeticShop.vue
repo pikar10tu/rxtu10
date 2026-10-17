@@ -139,9 +139,6 @@ async function doWear(id) {
 .cs-sn { font-weight: 800; font-size: .95rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cs-mini { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 1.3rem; background: #eef4fb; position: relative; z-index: 1; }
 .cs-sample :deep(.cz-fw) { font-size: 1.3rem; }
-/* กรอบลายวาดยื่นออก ~41% ของรูปทุกด้าน (cz-art) — เผื่อที่ไม่ให้ทับชื่อ/โดนขอบการ์ดตัด */
-.cs-sample:has(.cz-art) { height: 78px; }
-.cs-pv :deep(.cz-fw:has(.cz-art)) { margin: 30px 0 18px; }
 .cs-sb { font-size: 1.6rem; }
 .cs-sg { position: relative; display: block; width: 100%; height: 46px; border-radius: 10px; overflow: hidden; }
 .cs-nm { font-size: .72rem; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
