@@ -33,6 +33,7 @@ const routes = [
     { path: '/play/games/stacker', name: 'stacker', component: () => import('../views/StackerView.vue') },
     { path: '/play/pharmateam', name: 'pharmateam', component: () => import('../views/PharmaTeamView.vue') },
     { path: '/play/spyfall', name: 'spyfall', component: () => import('../views/SpyfallView.vue') },
+    { path: '/play/poker', name: 'poker', component: () => import('../views/PokerView.vue') },
     { path: '/fun-facts', name: 'funFacts', component: () => import('../views/FunFactsView.vue') },
     // URL ที่ไม่รู้จัก (ลิงก์เก่า/พิมพ์ผิด) → กลับหน้าแรก แทนที่จะขึ้นจอว่างเปล่า
     { path: '/:pathMatch(.*)*', redirect: '/' },

@@ -5,7 +5,9 @@
     "playlog": {
       "$game": {
         ".read": "auth != null && auth.token.email === 'prawich.aum@dome.tu.ac.th'",
-        ".indexOn": ["at"],
+        ".indexOn": [
+          "at"
+        ],
         "$entry": {
           ".write": "auth != null && !data.exists() && newData.child('uids').child('0').exists()",
           ".validate": "newData.child('size').isNumber() && newData.child('size').val() >= 1 && newData.child('size').val() <= 10"
@@ -62,7 +64,9 @@
       "board": {
         ".read": "auth != null",
         "$size": {
-          ".indexOn": ["level"],
+          ".indexOn": [
+            "level"
+          ],
           "$game": {
             ".write": "auth != null && !data.exists() && newData.child('uids').child('0').exists()",
             ".validate": "newData.child('level').isNumber() && newData.child('level').val() >= 1 && newData.child('level').val() <= 200"
@@ -89,6 +93,76 @@
             "$a": {
               ".write": "auth != null && data.parent().parent().child('players').child(auth.uid).exists()"
             }
+          }
+        }
+      }
+    },
+    "poker": {
+      "rooms": {
+        ".read": "auth != null",
+        "$room": {
+          ".write": "auth != null && !newData.exists() && (!data.child('players').exists() || data.child('meta/touchedAt').val() < now - 1800000)",
+          "meta": {
+            ".write": "auth != null && (!data.exists() || data.child('hostUid').val() === auth.uid || (data.parent().child('players').child(auth.uid).exists() && (!data.parent().child('players').child(data.child('hostUid').val()).exists() || data.parent().child('players').child(data.child('hostUid').val()).child('away').val() === true)))"
+          },
+          "players": {
+            "$uid": {
+              ".write": "auth != null && ((auth.uid === $uid && (!newData.exists() || !data.parent().parent().child('banned').child($uid).exists())) || data.parent().parent().child('meta/hostUid').val() === auth.uid)"
+            }
+          },
+          "banned": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid"
+          },
+          "table": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid"
+          },
+          "state": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid"
+          },
+          "lastHand": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            ".validate": "newData.isNumber()"
+          },
+          "acts": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && data.parent().parent().child('players').child(auth.uid).exists()"
+            }
+          }
+        }
+      },
+      "secrets": {
+        "$room": {
+          ".write": "auth != null && (root.child('poker/rooms').child($room).child('meta/hostUid').val() === auth.uid || (!newData.exists() && !root.child('poker/rooms').child($room).exists()))",
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid"
+          }
+        }
+      },
+      "dealer": {
+        "$room": {
+          ".read": "auth != null && root.child('poker/rooms').child($room).child('meta/hostUid').val() === auth.uid",
+          ".write": "auth != null && (root.child('poker/rooms').child($room).child('meta/hostUid').val() === auth.uid || (!newData.exists() && !root.child('poker/rooms').child($room).exists()))"
+        }
+      },
+      "stats": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "net": {
+            ".validate": "newData.isNumber()"
+          },
+          "hands": {
+            ".validate": "newData.isNumber()"
+          },
+          "wins": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
           }
         }
       }
