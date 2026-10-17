@@ -104,6 +104,21 @@
         <div :key="potBump" class="pk-pot" :class="{ bump: potBump }">กองกลาง {{ potTotal(pub).toLocaleString() }}</div>
 
         <div v-if="flashMsg" :key="flashMsg.key" class="pk-flash" :class="flashMsg.kind">{{ flashMsg.big }}<small v-if="flashMsg.small">{{ flashMsg.small }}</small></div>
+        <!-- เอฟเฟกต์ SVG: เกทับ = วงชมพู · ออลอิน = คลื่นกระแทก+สายฟ้า · ชนะ = รัศมี + ชิปร่วง -->
+        <svg v-if="burst && burst.kind !== 'win'" :key="burst.key" class="pk-fx" :class="burst.kind" viewBox="0 0 200 200" aria-hidden="true">
+          <circle v-for="i in (burst.kind === 'allin' ? 3 : 1)" :key="i" cx="100" cy="100" r="20" :style="{ animationDelay: (i - 1) * .14 + 's' }" />
+          <g v-if="burst.kind === 'allin'" class="pk-fx-bolt">
+            <path v-for="a in 8" :key="a" d="M100 64 L104 40 L98 44 L102 18" :transform="`rotate(${a * 45} 100 100)`" />
+          </g>
+        </svg>
+        <template v-if="burst?.kind === 'win'">
+          <svg :key="burst.key" class="pk-fx win" viewBox="0 0 200 200" aria-hidden="true">
+            <g class="pk-rays"><path v-for="a in 12" :key="a" d="M100 100 L92 0 L108 0 Z" :transform="`rotate(${a * 30} 100 100)`" /></g>
+          </svg>
+          <svg v-for="c in chipRain" :key="burst.key + '-' + c.i" class="pk-chipfall" :style="c.style" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" :fill="c.color" /><circle cx="12" cy="12" r="7" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 2.5" /><circle cx="12" cy="12" r="3.5" fill="#fff" opacity=".85" />
+          </svg>
+        </template>
         <div v-if="winBox" class="pk-winbox"><div><Emoji char="🏆" /> {{ winBox.names }} ชนะ<b>+{{ winBox.amount.toLocaleString() }}</b>{{ winBox.hand }}</div></div>
       </div>
 
@@ -114,7 +129,7 @@
             <div class="pk-me-cards"><PokerCard v-for="c in myCards" :key="c" :c="c" :hl="hl(c)" /></div>
             <div class="pk-me-info">
               ชิป <b>{{ (pub.players[uid]?.stack ?? 0).toLocaleString() }}</b>{{ pub.button === uid ? ' · D' : '' }}
-              <div class="pk-hn">{{ pub.players[uid]?.folded ? 'หมอบแล้ว' : myHandName }}</div>
+              <div class="pk-hn">{{ pub.players[uid]?.folded ? 'หมอบแล้ว' : myHandDetail }}</div>
               <div class="pk-mybar"><i :style="{ width: L ? timeLeftPct + '%' : '0%' }"></i></div>
             </div>
           </div>
@@ -124,20 +139,20 @@
         <div v-if="res" class="pk-res">
           <b v-if="res.won?.[uid]"><Emoji char="🏆" /> คุณได้ +{{ res.won[uid].toLocaleString() }}<br></b>
           <span v-for="(pt, i) in res.pots" :key="i">
-            {{ res.pots.length > 1 ? (i ? 'กองย่อย ' : 'กองหลัก ') : '' }}{{ pt.amount.toLocaleString() }} → {{ pt.winners.map(nameOf).join(', ') }}<template v-if="res.showdown"> ({{ res.shown[pt.winners[0]]?.name }})</template><br>
+            {{ res.pots.length > 1 ? (i ? 'กองย่อย ' : 'กองหลัก ') : '' }}{{ pt.amount.toLocaleString() }} → {{ pt.winners.map(nameOf).join(', ') }}<template v-if="res.showdown"> ({{ handLabel(res.shown[pt.winners[0]]) }})</template><br>
           </span>
           <span class="pk-hint">มือถัดไปใน {{ nextSec }} วิ</span>
         </div>
 
         <div v-else-if="L && raiseOpen" class="pk-rp">
-          <div class="pk-rp-q">จะเกทับเป็นเท่าไหร่?</div>
+          <div class="pk-rp-q">จะเกทับเป็นเท่าไหร่? <span class="pk-rp-amt">{{ raiseTo.toLocaleString() }}</span></div>
           <div class="pk-rp-grid">
             <button v-for="o in presets" :key="o.v" class="pk-rp-opt" :class="{ on: raiseTo === o.v }" @click="raiseTo = o.v">
               <small>{{ o.t }}</small><b>{{ o.v.toLocaleString() }}</b>
             </button>
           </div>
-          <label class="pk-rz"><span class="pk-hint">ปรับเอง</span>
-            <input v-model.number="raiseTo" type="range" :min="L.minTo" :max="L.maxTo" :step="pub.sb" aria-label="ยอดเกทับ">
+          <label class="pk-rz"><span class="pk-hint">ปรับเอง</span><output class="pk-rz-out">{{ raiseTo.toLocaleString() }}</output>
+            <input v-model.number="raiseTo" type="range" @input="sfx('tap')" :min="L.minTo" :max="L.maxTo" :step="pub.sb" aria-label="ยอดเกทับ">
           </label>
           <div class="pk-rp-btns">
             <button class="pk-a fold" @click="raiseOpen = false">ยกเลิก</button>
@@ -197,6 +212,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import PlayLogPanel from '../components/shared/PlayLogPanel.vue'
 import { usePoker, START_STACK, BLINDS, TURN_MS, AWAY_HANDS } from '../composables/usePoker.js'
 import { legal, evaluate, potTotal, MIN_PLAYERS, MAX_PLAYERS } from '../utils/pokerEngine.js'
+import { sfx } from '../utils/sfx.js'
 
 const router = useRouter()
 const {
@@ -233,6 +249,13 @@ const nameOf = (id) => room.value?.table?.[id]?.name || room.value?.players?.[id
 const res = computed(() => (pub.value?.phase === 'showdown' ? pub.value.result : null))
 const myCards = computed(() => (secret.value?.handNo === pub.value?.handNo ? secret.value.cards : null))
 const L = computed(() => (pub.value ? legal(pub.value, uid.value) : null))
+const handLabel = (s) => s?.detail || s?.name || ''
+const myEval = computed(() => (myCards.value && pub.value.board.length ? evaluate([...myCards.value, ...pub.value.board]) : null))
+const myHandDetail = computed(() => {
+  if (myEval.value) return myEval.value.detail
+  const c = myCards.value
+  return c && c[0][0] === c[1][0] ? `คู่ ${c[0][0] === 'T' ? '10' : c[0][0]} ในมือ` : ''
+})
 const myHandName = computed(() => {
   const c = myCards.value
   if (!c) return null
@@ -280,7 +303,7 @@ const seats = computed(() => {
     const la = lastActs.value[id]
     let pill = '', pillKind = '', pillKey = 0
     if (won) { pill = `+${won.toLocaleString()}`; pillKind = 'win'; pillKey = 'w' + p.handNo }
-    else if (shown) { pill = shown.name; pillKind = 'hand' }
+    else if (shown) { pill = handLabel(shown); pillKind = 'hand' }
     else if (!presence || presence.away) { pill = '💤 หลุด'; pillKind = 'away' }
     else if (!pl) { pill = 'รอมือหน้า'; pillKind = 'away' }
     else if (la) { pill = textOf(la, pl); pillKind = la.auto ? 'fold' : kindOf(la, pl); pillKey = `${p.handNo}-${la.i}` }
@@ -306,6 +329,7 @@ watch(() => pub.value && `${pub.value.handNo}-${pub.value.seq}`, (k, old) => {
   const kind = kindOf(e, pl)
   if (!['raise', 'call', 'allin'].includes(kind) || e.auto) return
   potBump.value++
+  if (kind === 'raise' || kind === 'allin') fireBurst(kind)
   flashMsg.value = {
     key: k, kind,
     big: `${nameOf(e.uid)} ${kind === 'call' ? 'คอล' : kind === 'raise' ? 'เกทับ' : 'ออลอิน!'}`,
@@ -314,6 +338,44 @@ watch(() => pub.value && `${pub.value.handNo}-${pub.value.seq}`, (k, old) => {
   clearTimeout(flashT)
   flashT = setTimeout(() => { flashMsg.value = null }, 1300)
 })
+// ── เอฟเฟกต์ SVG ──
+const burst = ref(null)
+let burstT = null
+const CHIP_COLORS = ['#f28bb0', '#3593cf', '#4cc9a0', '#fcd34d', '#d1435b']
+const chipRain = ref([])
+function fireBurst(kind) {
+  clearTimeout(burstT)
+  burst.value = { kind, key: Date.now() }
+  if (kind === 'win') {
+    chipRain.value = Array.from({ length: 16 }, (_, i) => ({
+      i, color: CHIP_COLORS[i % CHIP_COLORS.length],
+      style: { left: (4 + Math.random() * 88) + '%', animationDelay: (Math.random() * .5).toFixed(2) + 's', animationDuration: (1.1 + Math.random() * .7).toFixed(2) + 's', width: (16 + Math.random() * 10) + 'px' },
+    }))
+  }
+  burstT = setTimeout(() => { burst.value = null }, kind === 'win' ? 2600 : 1100)
+}
+
+// ── เสียง (+สั่นตอนถึงตาเรา) ──
+const SND = { check: 'pk_check', fold: 'pk_fold', call: 'pk_chip', raise: 'pk_raise', allin: 'pk_allin' }
+watch(() => pub.value && `${pub.value.handNo}-${pub.value.seq}`, (k, old) => {
+  const p = pub.value
+  if (!p || !old) return
+  const e = [...p.log].reverse().find(x => x.uid)
+  if (e && !e.auto && p.seq > 1) sfx(SND[kindOf(e, p.players[e.uid])] || 'tap')
+})
+watch(() => pub.value?.board.length, (n, o) => { if (n > (o || 0)) setTimeout(() => sfx('pk_deal'), 250) })
+watch(() => pub.value?.handNo, (n, o) => { if (n && o && n !== o) sfx('pk_deal') })
+watch(() => pub.value?.toAct === uid.value && pub.value?.phase !== 'showdown', (mine) => {
+  if (!mine) return
+  setTimeout(() => sfx('pk_turn'), 300)
+  try { navigator.vibrate?.(40) } catch { /* ไม่รองรับก็ไม่เป็นไร */ }
+})
+watch(() => res.value && pub.value.handNo, (k) => {
+  if (!k) return
+  fireBurst('win')
+  setTimeout(() => sfx(res.value?.won?.[uid.value] ? 'pk_win' : res.value?.showdown ? 'pk_lose' : 'pk_chip'), 200)
+})
+
 const winBox = computed(() => {
   const r = res.value
   if (!r) return null
@@ -322,7 +384,7 @@ const winBox = computed(() => {
   return {
     names: ws.map(([w]) => nameOf(w)).join(' + '),
     amount: ws.reduce((s, [, v]) => s + v, 0),
-    hand: r.showdown ? r.shown[ws[0][0]]?.name : 'คนอื่นหมอบหมด',
+    hand: r.showdown ? handLabel(r.shown[ws[0][0]]) : 'คนอื่นหมอบหมด',
   }
 })
 
@@ -330,7 +392,7 @@ const winBox = computed(() => {
 const tickNow = ref(now())
 let clockTimer = null
 onMounted(() => { clockTimer = setInterval(() => { tickNow.value = now() }, 200) })
-onUnmounted(() => { clearInterval(clockTimer); clearTimeout(flashT) })
+onUnmounted(() => { clearInterval(clockTimer); clearTimeout(flashT); clearTimeout(burstT) })
 const timeLeftPct = computed(() => Math.max(0, Math.min(100, ((pub.value?.deadline || 0) - tickNow.value) / TURN_MS * 100)))
 const nextSec = computed(() => Math.max(0, Math.ceil(((pub.value?.nextAt || 0) - tickNow.value) / 1000)))
 
@@ -431,7 +493,7 @@ watch(roomId, id => { if (id) stopRooms(); else { listenRooms(); loadStats() } }
 .neg { color: var(--red); }
 
 /* โต๊ะ */
-.pk-table { position: relative; background: radial-gradient(ellipse at 50% 40%, var(--felt), var(--felt2)); border-radius: 28px; padding: 14px 10px; color: #fff; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--pop-lg); }
+.pk-table { position: relative; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, var(--felt), var(--felt2)); border-radius: 28px; padding: 14px 10px; color: #fff; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--pop-lg); }
 .pk-seats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .pk-seat { background: rgba(255,255,255,.12); border-radius: 14px; padding: 6px 4px 5px; text-align: center; font-size: .78rem; border: 2px solid transparent; position: relative; transition: border-color .2s, box-shadow .2s, transform .2s; min-width: 0; }
 .pk-seat.turn { border-color: #fde68a; }
@@ -494,7 +556,23 @@ watch(roomId, id => { if (id) stopRooms(); else { listenRooms(); loadStats() } }
 .pk-a:disabled { opacity: .4; cursor: not-allowed; }
 .pk-res { background: var(--mint-light); border-radius: 12px; padding: 10px; font-size: .88rem; line-height: 1.55; }
 .pk-rp { display: flex; flex-direction: column; gap: 8px; background: var(--accent-light); border-radius: 14px; padding: 10px; }
-.pk-rp-q { font-weight: 800; }
+.pk-rp-q { font-weight: 800; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.pk-rp-amt { font-size: 1.5rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.pk-rz-out { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; order: 3; }
+/* SVG FX */
+.pk-fx { position: absolute; left: 50%; top: 50%; width: 260px; height: 260px; margin: -130px 0 0 -130px; pointer-events: none; overflow: visible; }
+.pk-fx circle { fill: none; stroke-width: 6; transform-origin: 100px 100px; animation: pk-ring .9s ease-out forwards; }
+.pk-fx.raise circle { stroke: #f28bb0; }
+.pk-fx.allin circle { stroke: #fcd34d; stroke-width: 8; }
+.pk-fx-bolt path { fill: none; stroke: #fde68a; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; transform-origin: 100px 100px; animation: pk-bolt .7s ease-out forwards; }
+@keyframes pk-ring { 0% { transform: scale(.3); opacity: 1 } 100% { transform: scale(4.5); opacity: 0 } }
+@keyframes pk-bolt { 0% { opacity: 0; transform: scale(.5) } 30% { opacity: 1 } 100% { opacity: 0; transform: scale(1.6) } }
+.pk-fx.win { width: 420px; height: 420px; margin: -210px 0 0 -210px; }
+.pk-rays { transform-origin: 100px 100px; animation: pk-rays 2.6s linear forwards; }
+.pk-rays path { fill: rgba(252,211,77,.28); }
+@keyframes pk-rays { 0% { transform: rotate(0) scale(.3); opacity: 0 } 15% { opacity: 1; transform: rotate(20deg) scale(1) } 80% { opacity: 1 } 100% { transform: rotate(110deg) scale(1.05); opacity: 0 } }
+.pk-chipfall { position: absolute; top: -30px; height: auto; pointer-events: none; animation: pk-fall 1.4s cubic-bezier(.4,0,.8,1) forwards; opacity: 0; filter: drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
+@keyframes pk-fall { 0% { transform: translateY(0) rotate(0); opacity: 1 } 85% { opacity: 1 } 100% { transform: translateY(300px) rotate(540deg); opacity: 0 } }
 .pk-rp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
 .pk-rp-opt { border: 2px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 1px; font: inherit; cursor: pointer; }
 .pk-rp-opt small { font-size: .75rem; color: rgba(0,0,0,.5); }

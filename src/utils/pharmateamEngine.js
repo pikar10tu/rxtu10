@@ -6,23 +6,41 @@
 //  ทุกฟังก์ชันแก้ state ตรงๆ และคืน true ถ้ามีอะไรเปลี่ยน (ให้หัวห้องรู้ว่าต้องเขียน)
 // ════════════════════════════════════════════════════════════
 
+// prompt(target, rnd) สุ่มประโยคจากหลายแบบ — เล่นซ้ำแล้วไม่จำเจ (user ติ 17 ต.ค. "คำสั่งไม่หลากหลาย")
+const say = (...lines) => (v, rnd = Math.random) => { const l = lines[Math.floor(rnd() * lines.length)]; return typeof l === 'function' ? l(v) : l }
+export const SPAM_MIN = 3, SPAM_MAX = 8   // บดพาราสุ่มจำนวนครั้งต่อคำสั่ง (เดิม 5 ตายตัว)
 export const CONTROL_CATALOG = [
-  { base: 'mortar', type: 'spam', label: 'โกร่งบดยาพารา', prompt: () => 'บดพาราเซตามอล 5 ครั้งรัวๆ!', targetHits: 5 },
-  { base: 'uv', type: 'toggle', label: 'แสง UV ฆ่าเชื้อ', prompt: (s) => `${s ? 'เปิด' : 'ดับ'}ไฟแสง UV ในคลีนรูม!` },
-  { base: 'ph', type: 'slider', label: 'ปรับ pH น้ำเกลือ', prompt: (v) => `ปรับค่า pH น้ำเกลือเป็น ${v}!`, min: 4, max: 9 },
-  { base: 'fridge', type: 'slider', label: 'ตู้แช่วัคซีน (°C)', prompt: (v) => `ตั้งอุณหภูมิตู้แช่วัคซีนที่ ${v}°C!`, min: 2, max: 8 },
-  { base: 'syrup', type: 'button', label: 'เติมน้ำเชื่อม Simple Syrup', prompt: () => 'เติม Simple Syrup ด่วน!' },
-  { base: 'wfi', type: 'button', label: 'ฉีดน้ำปราศจากเชื้อ WFI', prompt: () => 'ฉีดน้ำปราศจากเชื้อ WFI!' },
-  { base: 'laminar', type: 'toggle', label: 'ตู้ดูดควัน Laminar', prompt: (s) => `${s ? 'เปิด' : 'ปิด'}ตู้ดูดควัน Laminar!` },
-  { base: 'capsule', type: 'dial', label: 'ขนาดแคปซูล', prompt: (s) => `หมุนเลือกแคปซูลเป็น ${s}!`, options: ['เบอร์ 0', 'เบอร์ 1', 'เบอร์ 2'] },
-  { base: 'paraben', type: 'button', label: 'เติมสารกันเสีย Paraben', prompt: () => 'เติมสารกันเสีย Paraben ด่วน!' },
-  { base: 'centrifuge', type: 'slider', label: 'ความเร็วเครื่องเหวี่ยง (RPMx100)', prompt: (v) => `เร่งเครื่องเหวี่ยงไปที่ระดับ ${v}!`, min: 1, max: 5 },
-  { base: 'shake', type: 'button', label: 'เขย่ายาแขวนตะกอน (Suspension)', prompt: () => 'เขย่ายาแขวนตะกอน (Suspension)!' },
-  { base: 'autoclave', type: 'hold', label: 'อบฆ่าเชื้อ Autoclave', prompt: () => 'กดอบฆ่าเชื้อ Autoclave ค้างไว้ 2 วินาที!', holdDuration: 2000 },
+  { base: 'mortar', type: 'spam', label: 'โกร่งบดยาพารา', targetHits: 5,
+    prompt: say(n => `บดพาราเซตามอล ${n} ครั้งรัวๆ!`, n => `ตำโกร่งพารา ${n} ที!`, n => `บดยาเม็ดพารา ${n} ครั้ง ให้ละเอียด!`, n => `คนไข้ปวดหัว! บดพารา ${n} ครั้ง!`) },
+  { base: 'uv', type: 'toggle', label: 'แสง UV ฆ่าเชื้อ',
+    prompt: say(s => `${s ? 'เปิด' : 'ดับ'}ไฟแสง UV ในคลีนรูม!`, s => s ? 'ฆ่าเชื้อด่วน! เปิด UV!' : 'คนจะเข้าคลีนรูม! ปิด UV!', s => `สวิตช์ UV: ${s ? 'ON' : 'OFF'}!`) },
+  { base: 'ph', type: 'slider', label: 'ปรับ pH น้ำเกลือ', min: 4, max: 9,
+    prompt: say(v => `ปรับค่า pH น้ำเกลือเป็น ${v}!`, v => `น้ำเกลือต้อง pH ${v} เท่านั้น!`, v => `pH เพี้ยน! ดันไปที่ ${v}!`) },
+  { base: 'fridge', type: 'slider', label: 'ตู้แช่วัคซีน (°C)', min: 2, max: 8,
+    prompt: say(v => `ตั้งอุณหภูมิตู้แช่วัคซีนที่ ${v}°C!`, v => `วัคซีนจะเสีย! ตู้เย็น ${v} องศา!`, v => `Cold chain! ปรับตู้เป็น ${v}°C!`) },
+  { base: 'syrup', type: 'button', label: 'เติมน้ำเชื่อม Simple Syrup',
+    prompt: say('เติม Simple Syrup ด่วน!', 'ยาขมไป! เติมน้ำเชื่อม!', 'เด็กไม่ยอมกินยา! ใส่ Simple Syrup!') },
+  { base: 'wfi', type: 'button', label: 'ฉีดน้ำปราศจากเชื้อ WFI',
+    prompt: say('ฉีดน้ำปราศจากเชื้อ WFI!', 'ละลายผงยาด้วย WFI ด่วน!', 'Water for Injection มาเลย!') },
+  { base: 'laminar', type: 'toggle', label: 'ตู้ดูดควัน Laminar',
+    prompt: say(s => `${s ? 'เปิด' : 'ปิด'}ตู้ดูดควัน Laminar!`, s => s ? 'จะผสมยาเคมี! เปิด Laminar!' : 'ผสมเสร็จแล้ว ปิด Laminar!', s => `Laminar flow: ${s ? 'ON' : 'OFF'}!`) },
+  { base: 'capsule', type: 'dial', label: 'ขนาดแคปซูล', options: ['เบอร์ 0', 'เบอร์ 1', 'เบอร์ 2'],
+    prompt: say(s => `หมุนเลือกแคปซูลเป็น ${s}!`, s => `บรรจุยาลงแคปซูล${s}!`, s => `เปลี่ยนแคปซูลเป็น${s} เร็ว!`) },
+  { base: 'paraben', type: 'button', label: 'เติมสารกันเสีย Paraben',
+    prompt: say('เติมสารกันเสีย Paraben ด่วน!', 'ยาน้ำขึ้นรา! ใส่ Paraben!', 'กันเชื้อขึ้น! เติม Paraben!') },
+  { base: 'centrifuge', type: 'slider', label: 'ความเร็วเครื่องเหวี่ยง (RPMx100)', min: 1, max: 5,
+    prompt: say(v => `เร่งเครื่องเหวี่ยงไปที่ระดับ ${v}!`, v => `ปั่นแยกเลือด! เครื่องเหวี่ยงระดับ ${v}!`, v => `Centrifuge ตั้งที่ ${v}!`) },
+  { base: 'shake', type: 'button', label: 'เขย่ายาแขวนตะกอน (Suspension)',
+    prompt: say('เขย่ายาแขวนตะกอน (Suspension)!', 'ตะกอนนอนก้น! เขย่าขวดเลย!', 'Shake well before use!') },
+  { base: 'autoclave', type: 'hold', label: 'อบฆ่าเชื้อ Autoclave', holdDuration: 1000,
+    prompt: say('กดอบฆ่าเชื้อ Autoclave ค้างไว้ 1 วิ!', 'เครื่องมือผ่าตัดเปื้อน! Autoclave ค้างไว้!', 'นึ่งฆ่าเชื้อ! กดค้าง Autoclave!') },
   // ปุ่มอันตราย: กดตอนมีคำสั่ง = ปกติ · กดมั่ว = โดนผลข้างเคียงเอง · มั่วซ้ำ = ลามไปเพื่อน
-  { base: 'diazepam', type: 'button', hazard: 'sleepy', label: 'จ่ายยานอนหลับ Diazepam', prompt: () => 'จ่าย Diazepam ให้คนไข้ชัก!' },
-  { base: 'dimen', type: 'button', hazard: 'dizzy', label: 'จ่ายยาแก้เมารถ Dimenhydrinate', prompt: () => 'จ่าย Dimenhydrinate ให้คนไข้เมารถ!' },
-  { base: 'atropine', type: 'button', hazard: 'blurry', label: 'หยอดตา Atropine', prompt: () => 'หยอดตา Atropine ขยายม่านตา!' },
+  { base: 'diazepam', type: 'button', hazard: 'sleepy', label: 'จ่ายยานอนหลับ Diazepam',
+    prompt: say('จ่าย Diazepam ให้คนไข้ชัก!', 'คนไข้ชักเกร็ง! Diazepam ด่วน!', 'Status epilepticus! ให้ Diazepam!') },
+  { base: 'dimen', type: 'button', hazard: 'dizzy', label: 'จ่ายยาแก้เมารถ Dimenhydrinate',
+    prompt: say('จ่าย Dimenhydrinate ให้คนไข้เมารถ!', 'คนไข้เมาเรือ! Dimenhydrinate!', 'คลื่นไส้จะอ้วก! จ่ายยาแก้เมา!') },
+  { base: 'atropine', type: 'button', hazard: 'blurry', label: 'หยอดตา Atropine',
+    prompt: say('หยอดตา Atropine ขยายม่านตา!', 'จักษุแพทย์รอตรวจ! หยอด Atropine!', 'ขยายม่านตาด่วน! Atropine!') },
 ]
 const CATALOG_BY_BASE = Object.fromEntries(CONTROL_CATALOG.map(c => [c.base, c]))
 
@@ -165,7 +183,7 @@ export function assignInstruction(s, speakerUid, now, rnd = Math.random) {
   const { uid: targetUid, c } = pick(avail, rnd)
   const cat = CATALOG_BY_BASE[c.base]
   let target = true
-  if (c.type === 'spam') { target = c.targetHits; c.hits = 0 } // นับใหม่ทุกคำสั่ง
+  if (c.type === 'spam') { target = SPAM_MIN + Math.floor(rnd() * (SPAM_MAX - SPAM_MIN + 1)); c.hits = 0 } // สุ่มจำนวน · นับใหม่ทุกคำสั่ง
   else if (c.type === 'toggle') target = !c.state
   else if (c.type === 'slider') {
     let v = c.min + Math.floor(rnd() * (c.max - c.min + 1))
@@ -176,7 +194,7 @@ export function assignInstruction(s, speakerUid, now, rnd = Math.random) {
   const duration = lv(s).duration
   speaker.inst = {
     id: `i${now}_${Math.floor(rnd() * 1e6)}`,
-    prompt: cat.prompt(target),
+    prompt: cat.prompt(target, rnd),
     targetUid, controlId: c.id, target,
     duration, deadline: now + duration,
   }
@@ -212,7 +230,7 @@ export function applyAction(s, uid, controlId, value, now, rnd = Math.random) {
     if (!inst || inst.targetUid !== uid || inst.controlId !== controlId) continue
     let ok = false
     if (c.type === 'button') ok = true
-    else if (c.type === 'hold') ok = !!c.holdStart && now - c.holdStart >= (c.holdDuration || 2000) - HOLD_TOLERANCE
+    else if (c.type === 'hold') ok = !!c.holdStart && now - c.holdStart >= (c.holdDuration || 1000) - HOLD_TOLERANCE
     else if (c.type === 'spam') ok = c.hits >= inst.target
     else ok = value === inst.target
     if (ok) { matched = spUid; break }

@@ -18,6 +18,18 @@ test('เทียบไพ่: kicker · wheel แพ้ 6-high · ฟลัช
   assert.equal(E('Ah Kh Qh Jh Th 2c 2d').score, E('As Ks Qs Js Ts 3c 3d').score)
 })
 
+test('ชื่อไพ่บอกเลข', () => {
+  assert.equal(E('7s 7h 7d Kc 2s 3d 9h').detail, 'ตอง 7')
+  assert.equal(E('Js Jd 4c 4h As 2d 8c').detail, 'ทูแพร์ J กับ 4')
+  assert.equal(E('Th Tc 9s 6d 3h 2c 4s').detail, 'คู่ 10')
+  assert.equal(E('3s 3h 8s 8h 8d Kc 2d').detail, 'ฟูลเฮาส์ ตอง 8 คู่ 3')
+  assert.equal(E('Ah 2d 3c 4d 5h Js Ks').detail, 'สเตรท A–5')
+  assert.equal(E('5c 6h 7d 8s 9c Kd 2h').detail, 'สเตรท 5–9')
+  assert.equal(E('Ad Jd 8d 5d 2d Ks Kh').detail, 'ฟลัช ♦ A สูงสุด')
+  assert.equal(E('Ah Kh Qh Jh Th 2c 2d').detail, 'รอยัลฟลัช ♥')
+  assert.equal(E('Ac Qd 9h 6s 3c 2d 4h').detail, 'ไพ่สูง A')
+})
+
 test('สำรับ 52 ใบไม่ซ้ำ', () => assert.equal(new Set(newDeck()).size, 52))
 
 const seats = (...stacks) => stacks.map((s, i) => ({ uid: 'p' + i, stack: s }))

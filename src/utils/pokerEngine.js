@@ -63,7 +63,30 @@ export function evaluate(cards) {
       const r = eval5(five)
       if (!best || r.score > best.score) best = { ...r, best: five }
     }
-  return { ...best, name: HAND_NAMES[best.cat] }
+  return { ...best, name: HAND_NAMES[best.cat], detail: describe(best.cat, best.best) }
+}
+
+// ชื่อไพ่แบบบอกเลข: "ตอง 7" "ทูแพร์ J กับ 4" "ฟูลเฮาส์ 8 พ่วงคู่ 3" (user ขอ 17 ต.ค.)
+const RN = (v) => ({ 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' }[v] || String(v))
+const SUIT_SYM = { s: '♠', h: '♥', d: '♦', c: '♣' }
+export function describe(cat, five) {
+  const vals = five.map(rv).sort((a, b) => b - a)
+  const cnt = {}
+  for (const v of vals) cnt[v] = (cnt[v] || 0) + 1
+  const g = Object.entries(cnt).map(([v, n]) => [n, +v]).sort((a, b) => b[0] - a[0] || b[1] - a[1]).map(x => x[1])
+  const hi = vals[0] === 14 && vals[1] === 5 ? 5 : vals[0]   // wheel สูงสุดคือ 5
+  const lo = hi === 5 && vals[0] === 14 ? 'A' : RN(hi - 4)
+  switch (cat) {
+    case 8: return hi === 14 ? `รอยัลฟลัช ${SUIT_SYM[five[0][1]]}` : `สเตรทฟลัช ${lo}–${RN(hi)} ${SUIT_SYM[five[0][1]]}`
+    case 7: return `โฟร์การ์ด ${RN(g[0])}`
+    case 6: return `ฟูลเฮาส์ ตอง ${RN(g[0])} คู่ ${RN(g[1])}`
+    case 5: return `ฟลัช ${SUIT_SYM[five[0][1]]} ${RN(vals[0])} สูงสุด`
+    case 4: return `สเตรท ${lo}–${RN(hi)}`
+    case 3: return `ตอง ${RN(g[0])}`
+    case 2: return `ทูแพร์ ${RN(g[0])} กับ ${RN(g[1])}`
+    case 1: return `คู่ ${RN(g[0])}`
+    default: return `ไพ่สูง ${RN(vals[0])}`
+  }
 }
 
 // ── เริ่มมือ ──
@@ -245,7 +268,7 @@ function finish(hand) {
   pub.toAct = null
   pub.result = {
     showdown, pots: results, won,
-    shown: showdown ? Object.fromEntries(alive.map(u => [u, { cards: hand.holes[u], name: ranks[u].name, best: ranks[u].best }])) : {},
+    shown: showdown ? Object.fromEntries(alive.map(u => [u, { cards: hand.holes[u], name: ranks[u].name, detail: ranks[u].detail, best: ranks[u].best }])) : {},
   }
   return hand
 }

@@ -63,7 +63,7 @@
         <div v-if="me?.effect" class="pt-fxbadge" v-html="em(`${me.effect.label} ${fxLeft} วิ`)"></div>
         <div class="pt-spill">
           <div v-for="b in spill" :key="b.id" class="pt-blob" :style="{ left: b.x + 'px', top: b.y + 'px', opacity: b.o }"
-            @pointerdown.prevent="rubStart(b, $event)" @pointermove="rubMove(b, $event)" @pointerup="b.lx = null"></div>
+            @pointerdown.prevent="wipeStart(b, $event)" @pointerup="wipeEnd(b)" @pointercancel="wipeEnd(b)" @lostpointercapture="wipeEnd(b)"><span>{{ b.p ? 'อีกนิด!' : 'กดค้าง!' }}</span></div>
         </div>
       </div>
 
@@ -87,7 +87,7 @@
             <div class="pt-evemoji"><Emoji char="🙈" /></div>
             <div class="pt-evhint">คว่ำหน้าจอลงค้างไว้ 1 วินาที</div>
             <button class="pt-evfb" @pointerdown.prevent="flipHoldStart($event)" @pointerup="flipHoldEnd" @pointercancel="flipHoldEnd" @lostpointercapture="flipHoldEnd">
-              <div class="pt-holdfill" :style="{ height: flipPct + '%' }"></div><span>ไม่มีเซ็นเซอร์? กดค้าง 2 วิ</span>
+              <div class="pt-holdfill" :style="{ height: flipPct + '%' }"></div><span>ไม่มีเซ็นเซอร์? กดค้าง 1 วิ</span>
             </button>
           </template>
         </div>
@@ -238,7 +238,7 @@ const holdPct = reactive({})
 const holds = {}
 function holdStart(c, e) {
   try { e.currentTarget.setPointerCapture(e.pointerId) } catch (_) { /* ไม่รองรับก็ไม่เป็นไร */ }
-  const need = c.holdDuration || 2000, t0 = Date.now()
+  const need = c.holdDuration || 1000, t0 = Date.now()
   sfx.click(); send(c, 'start') // หัวห้องจับเวลาเองจากจุดนี้
   const beep = setInterval(sfx.tick, 250)
   const loop = () => {
@@ -264,17 +264,25 @@ watch(() => me.value?.effect && me.value.effect.type + me.value.effect.until, (k
     const W = window.innerWidth, H = window.innerHeight
     spill.value = Array.from({ length: 3 }, (_, i) => ({
       id: key + i, x: Math.random() * Math.max(0, Math.min(W, 500) - 150), y: H * 0.35 + Math.random() * Math.max(0, H * 0.55 - 130),
-      o: 1, rubbed: 0, lx: null, ly: null,
+      o: 1, p: 0, raf: null,
     }))
   } else spill.value = []
 })
-function rubStart(b, e) { b.lx = e.clientX; b.ly = e.clientY; try { e.currentTarget.setPointerCapture(e.pointerId) } catch (_) { /* */ } }
-function rubMove(b, e) {
-  if (b.lx == null) return
-  b.rubbed += Math.hypot(e.clientX - b.lx, e.clientY - b.ly); b.lx = e.clientX; b.ly = e.clientY
-  b.o = Math.max(0, 1 - b.rubbed / 500)
-  if (b.rubbed >= 500) { spill.value = spill.value.filter(x => x !== b); sfx.ok() }
+// คราบยา: กดค้างทีละก้อนให้จางหาย (เดิมต้องถู — user บอกถูยาก 17 ต.ค.)
+const noZoom = (e) => e.preventDefault()
+const WIPE_MS = 600
+function wipeStart(b, e) {
+  try { e.currentTarget.setPointerCapture(e.pointerId) } catch (_) { /* */ }
+  const t0 = Date.now() - b.p * WIPE_MS
+  sfx.tick()
+  const loop = () => {
+    b.p = Math.min(1, (Date.now() - t0) / WIPE_MS); b.o = 1 - b.p * 0.85
+    if (b.p >= 1) { spill.value = spill.value.filter(x => x !== b); sfx.ok(); return }
+    b.raf = requestAnimationFrame(loop)
+  }
+  b.raf = requestAnimationFrame(loop)
 }
+function wipeEnd(b) { cancelAnimationFrame(b.raf); b.raf = null }
 
 // ── เหตุการณ์ทั้งทีม ──
 const SHAKE_NEED = 12
@@ -309,7 +317,7 @@ function flipHoldStart(e) {
   try { e.currentTarget.setPointerCapture(e.pointerId) } catch (_) { /* */ }
   flipT0 = Date.now()
   const loop = () => {
-    const p = Math.min(1, (Date.now() - flipT0) / 2000); flipPct.value = p * 100
+    const p = Math.min(1, (Date.now() - flipT0) / 1000); flipPct.value = p * 100
     if (p >= 1) { flipHoldEnd(); evComplete(); return }
     flipRaf = requestAnimationFrame(loop)
   }
@@ -351,6 +359,9 @@ onMounted(() => {
   document.addEventListener('visibilitychange', onVis)
   redTimer = setInterval(flushRed, 250)
   window.addEventListener('devicemotion', onMotion)
+  // กันซูม: iOS ไม่สน touch-action กับ pinch/ดับเบิลแทปเร็วๆ บางจังหวะ → ดักเองระหว่างอยู่ในเกม (user เจอ 17 ต.ค.)
+  document.addEventListener('gesturestart', noZoom, { passive: false })
+  document.addEventListener('dblclick', noZoom, { passive: false })
   window.addEventListener('deviceorientation', onOrient)
 })
 onBeforeUnmount(() => {
@@ -360,6 +371,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', onVis)
   try { wakeLock?.release() } catch (e) { /* */ }
   window.removeEventListener('devicemotion', onMotion)
+  document.removeEventListener('gesturestart', noZoom)
+  document.removeEventListener('dblclick', noZoom)
   window.removeEventListener('deviceorientation', onOrient)
   Object.keys(holds).forEach(id => stopHold({ id }))
   flipHoldEnd()
@@ -370,7 +383,7 @@ onBeforeUnmount(() => {
 /* ธีมขาว-เขียว (17 ต.ค. 2026 user เลือก — เดิมเป็นจอมืดแบบอาร์เคด) · คงสีแรงไว้เฉพาะเหตุการณ์ทั้งทีมให้รู้ว่าด่วน */
 .pt { position: fixed; inset: 0; z-index: 1000; color: var(--ink); display: flex; justify-content: center;
   background: linear-gradient(180deg, #ffffff 0%, #f1fbf6 100%);
-  font-family: 'Kanit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; overscroll-behavior: none; }
+  font-family: 'Kanit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; overscroll-behavior: none; touch-action: manipulation; }
 .pt * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .pt-screen { position: relative; width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -429,7 +442,7 @@ onBeforeUnmount(() => {
 .pt-blob { position: absolute; width: 150px; height: 130px; pointer-events: auto; touch-action: none;
   background: radial-gradient(circle at 40% 40%, #a3e635 0%, #65a30d 55%, rgba(101,163,13,0) 72%);
   border-radius: 45% 55% 60% 40% / 50% 40% 60% 50%; }
-.pt-blob::after { content: 'ถู!'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #1a2e05; font-weight: 900; font-size: .8rem; opacity: .7; }
+.pt-blob span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #1a2e05; font-weight: 900; font-size: .85rem; opacity: .75; pointer-events: none; }
 
 /* เหตุการณ์ทั้งทีม — ยังกะพริบสีด่วน แต่โทนชมพูแดงให้เข้าธีม */
 .pt-event { position: absolute; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;

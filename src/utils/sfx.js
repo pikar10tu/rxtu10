@@ -303,6 +303,28 @@ const SOUNDS = {
   p_buff:   () => { tone(523, 0, 0.2, { type: 'triangle', vol: 0.35, slide: 1047 }) },
   p_aim:    () => { tone(2000, 0, 0.03, { type: 'square', vol: 0.2 }); tone(2000, 0.08, 0.03, { type: 'square', vol: 0.2 }) },
   p_chain:  () => { for (let i = 0; i < 4; i++) tone(900 + (i % 2) * 500, i * 0.035, 0.04, { type: 'sawtooth', vol: 0.15 }) },
+
+  // ── Poker (17 ต.ค. user ขอให้ตื่นเต้นขึ้น) ──
+  pk_deal:  () => { for (let i = 0; i < 3; i++) noise(i * 0.07, 0.05, { vol: 0.3, hp: 2500 }) },             // แจกไพ่ ฟึ่บๆ
+  pk_turn:  () => { tone(880, 0, 0.09, { type: 'triangle', vol: 0.5 }); tone(1320, 0.1, 0.16, { type: 'triangle', vol: 0.5 }) }, // ถึงตาเรา
+  pk_check: () => { tone(300, 0, 0.05, { type: 'sine', vol: 0.5 }); tone(300, 0.09, 0.05, { type: 'sine', vol: 0.5 }) },        // เคาะโต๊ะ ก๊อกๆ
+  pk_fold:  () => { noise(0, 0.12, { vol: 0.2, hp: 1200 }); tone(260, 0, 0.15, { type: 'triangle', vol: 0.2, slide: 180 }) },
+  pk_chip:  () => { tone(2200, 0, 0.04, { type: 'square', vol: 0.12 }); tone(2600, 0.045, 0.04, { type: 'square', vol: 0.12 }); tone(2400, 0.09, 0.05, { type: 'square', vol: 0.1 }) }, // ชิปกระทบกัน
+  pk_raise: () => {
+    tone(330, 0, 0.25, { type: 'sawtooth', vol: 0.18, slide: 880 })
+    for (let i = 0; i < 4; i++) tone(2200 + i * 200, 0.2 + i * 0.04, 0.04, { type: 'square', vol: 0.1 })
+  },
+  pk_allin: () => {
+    tone(70, 0, 0.6, { type: 'sine', vol: 1, slide: 45 }); noise(0, 0.35, { vol: 0.35, hp: 120 })              // ตูม
+    arp([392, 523, 659, 784], 0.07, { type: 'sawtooth', vol: 0.18, d: 0.18 })
+    for (let i = 0; i < 6; i++) tone(2000 + (i % 3) * 300, 0.3 + i * 0.035, 0.04, { type: 'square', vol: 0.1 })
+  },
+  pk_win:   () => {
+    arp([523, 659, 784, 1047], 0.08, { type: 'triangle', vol: 0.6, d: 0.2 })
+    tone(1568, 0.34, 0.5, { type: 'sine', vol: 0.3 }); tone(2093, 0.4, 0.45, { type: 'sine', vol: 0.15 })
+    for (let i = 0; i < 10; i++) tone(2000 + (i % 4) * 250, 0.45 + i * 0.05, 0.04, { type: 'square', vol: 0.08 }) // ชิปไหลเข้า
+  },
+  pk_lose:  () => { tone(392, 0, 0.18, { type: 'triangle', vol: 0.3, slide: 330 }); tone(294, 0.18, 0.3, { type: 'triangle', vol: 0.3, slide: 220 }) },
 }
 
 // กันเสียงเดียวกันยิงซ้อนถี่เกิน (โหมดเร่ง/หมัดลูกหลายหมัดในจังหวะเดียว) — ต่อชื่อ
