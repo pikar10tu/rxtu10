@@ -8,9 +8,15 @@
       </span>
     </div>
     <!-- เก็บทั้งหมด (โผล่เมื่อพร้อมตั้งแต่ 2 แปลง — แปลงเดียวกดที่แปลงเองเร็วกว่า) -->
-    <button v-if="readyIdx.length >= 2" class="farm-harvest-all" @click="onHarvestAll">
-      <Emoji char="🧺" /> เก็บทั้งหมด ({{ readyIdx.length }} แปลง)
-    </button>
+    <!-- เก็บทั้งหมด + เก็บแล้วปลูกพืชเดิมซ้ำ (write เดียว) — แปลงเดียวก็ขึ้นปุ่มปลูกซ้ำ เพราะประหยัดการเปิดแผ่นเมล็ด -->
+    <div v-if="readyIdx.length" class="farm-harvest-row">
+      <button v-if="readyIdx.length >= 2" class="farm-harvest-all" @click="onHarvestAll(false)">
+        <Emoji char="🧺" /> เก็บทั้งหมด ({{ readyIdx.length }})
+      </button>
+      <button class="farm-harvest-all replant" @click="onHarvestAll(true)">
+        <Emoji char="🔁" /> เก็บแล้วปลูกซ้ำ{{ readyIdx.length >= 2 ? '' : ` (${readyIdx.length})` }}
+      </button>
+    </div>
     <div class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} <Emoji v-for="c in upcoming.crops" :key="c.id" :char="c.emoji" /></template></div>
 
     <!-- plots -->
@@ -81,6 +87,7 @@
       :open="pickIndex !== null"
       :choices="farm.seedChoices.value"
       :coins="coins"
+      :empty-count="emptyCount"
       @pick="onPick"
       @close="pickIndex = null"
     />
@@ -142,7 +149,13 @@ const bookOpen = ref(false)
 
 const pickIndex = ref(null)
 function openPicker(i) { pickIndex.value = i }
-function onPick(seedId) { const i = pickIndex.value; pickIndex.value = null; if (i !== null) farm.plant(i, seedId) }
+function onPick(seedId, all) {
+  const i = pickIndex.value; pickIndex.value = null
+  if (i === null) return
+  if (all) farm.plantAll(seedId)
+  else farm.plant(i, seedId)
+}
+const emptyCount = computed(() => plots.value.filter(p => !p).length)
 
 // reactive plot status (re-evaluates as `now` ticks)
 function stat(plot) { return farm.status(plot, now.value) }
@@ -161,7 +174,7 @@ function emojiStyle(plot) {
 // แปลงที่พร้อมเก็บ (ใช้ stat เดียวกับที่แปลงแสดงป้าย "พร้อม!")
 const readyIdx = computed(() => plots.value.map((p, i) => (p && stat(p).ready ? i : -1)).filter(i => i >= 0))
 // เก็บทั้งหมด: จับตำแหน่ง/อีโมจิทุกแปลงก่อน (หลัง harvestAll แปลงว่างทันที — เหตุผลเดียวกับ onHarvest)
-async function onHarvestAll() {
+async function onHarvestAll(replant = false) {
   const to = invHeadEl.value?.getBoundingClientRect()
   const flights = readyIdx.value.map(i => ({ i, from: plotEls.value[i]?.getBoundingClientRect(), crop: stat(plots.value[i]).crop }))
   await farm.harvestAll(({ golds }) => {
@@ -171,7 +184,7 @@ async function onHarvestAll() {
       const char = g.has(f.i) ? goldEmoji(f.crop) : f.crop?.emoji
       if (f.from && char) setTimeout(() => flyTo({ emoji: char, from: f.from, to, count: 1, size: g.has(f.i) ? 40 : 26, onArrive: popBasket }), k * 70)
     })
-  })
+  }, { replant })
 }
 
 // เก็บเกี่ยว: ต้องจับตำแหน่งแปลง "ก่อน" เรียก harvest เพราะ patchUser เป็น optimistic update
@@ -334,6 +347,9 @@ const invList = computed(() => [
 .plot-add .plot-hint { font-size: .72rem; font-weight: 700; }
 .farm-harvest-all { width: 100%; margin: 6px 0 8px; font: inherit; font-size: .9rem; font-weight: 800; color: #fff; border: 0; border-radius: 14px; padding: 11px;
   background: linear-gradient(135deg, #4cc9a0, #7fd9b8); box-shadow: var(--pop); cursor: pointer; animation: fh-pulse 1.6s ease-in-out infinite; }
+.farm-harvest-row { display: flex; gap: 8px; margin: 6px 0 8px; }
+.farm-harvest-row .farm-harvest-all { margin: 0; flex: 1; padding: 11px 6px; }
+.farm-harvest-all.replant { background: linear-gradient(135deg, #f59e0b, #fbbf24); animation: none; }
 .farm-harvest-all:active { transform: translateY(1px); }
 @keyframes fh-pulse { 50% { box-shadow: 0 0 0 4px rgba(76,201,160,.25), var(--pop); } }
 </style>

@@ -18,9 +18,10 @@ export const GRADE_LABELS = ['','I','II','III','IV','V'];
 
 // ── ELEMENT SYSTEM ──
 export const ELEMENTS = {
-    fist:    { emoji:'✊', beats:'scissors' },
-    scissors:{ emoji:'✌️', beats:'paper'   },
-    paper:   { emoji:'✋', beats:'fist'     },
+    // icon = เหรียญวาดเอง public/elements/*.webp (scripts/element-icons.mjs) ใช้กับ <Emoji> · emoji = ใช้ในข้อความ
+    fist:    { emoji:'✊', icon:'el:fist',     beats:'scissors' },
+    scissors:{ emoji:'✌️', icon:'el:scissors', beats:'paper'   },
+    paper:   { emoji:'✋', icon:'el:paper',    beats:'fist'     },
 };
 export const _EL_NAME = { fist:'✊ จู่โจม', scissors:'✌️ สมดุล', paper:'✋ พิทักษ์' };
 // ชื่อสายกลาง (ล้วน ไม่มี emoji) — ใช้ทุกที่ที่โชว์ชื่อสาย · emoji ดึงจาก ELEMENTS แยก

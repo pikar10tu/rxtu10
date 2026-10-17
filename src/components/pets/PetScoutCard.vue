@@ -45,7 +45,7 @@ useEscapeKey(() => !!props.pet, () => emit('close'))
 
 const def = computed(() => getPetDef(props.pet?.id) || { emoji: '❓', name: '?', element: 'scissors', rarity: 'common' })
 const passive = computed(() => passiveOf(def.value))
-const elEmoji = computed(() => ELEMENTS[def.value.element]?.emoji || '✊')
+const elEmoji = computed(() => ELEMENTS[def.value.element]?.icon || 'el:fist')
 const elName = computed(() => EL_NAME[def.value.element] || def.value.element)
 const rarityLabel = computed(() => RARITY[props.pet?.rarity || def.value.rarity]?.label || def.value.rarity)
 const gradeLabel = computed(() => GRADE_LABELS[Math.min(GRADE_LABELS.length - 1, Math.max(0, props.pet?.grade || 0))])

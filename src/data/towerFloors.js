@@ -132,13 +132,14 @@ export function towerBonusGain(floor, best) {
 }
 
 // floor → โซนแฟนซี (UI) — 5 โซน · โซนที่ 5 = ช่วงตัน "วัดฝีมือ"
+// key → แบนเนอร์ public/tower/<key>.webp (scripts/tower-art.mjs) · art = อีโมจิสำรอง
 const ZONES = [
-  { name: 'ลานประลอง',      art: '🛡️', color: '#84cc16', from: 1,  to: 20 },
-  { name: 'หอเวทเก่า',       art: '🔮', color: '#60a5fa', from: 21, to: 40 },
-  { name: 'ปราการอสูร',      art: '👹', color: '#c084fc', from: 41, to: 55 },
-  { name: 'ยอดหอคอยมังกร',  art: '🐉', color: '#fbbf24', from: 56, to: 69 },
-  { name: 'บัลลังก์ราชันย์',  art: '👑', color: '#5b21b6', from: 70, to: 100, royal: true },
-  { name: 'ห้วงนิรันดร์',     art: '🌌', color: '#0f766e', from: 101, to: Infinity, royal: true, endless: true },
+  { key: 'arena',   name: 'ลานประลอง',      art: '🛡️', color: '#84cc16', from: 1,  to: 20 },
+  { key: 'magic',   name: 'หอเวทเก่า',       art: '🔮', color: '#60a5fa', from: 21, to: 40 },
+  { key: 'demon',   name: 'ปราการอสูร',      art: '👹', color: '#c084fc', from: 41, to: 55 },
+  { key: 'dragon',  name: 'ยอดหอคอยมังกร',  art: '🐉', color: '#fbbf24', from: 56, to: 69 },
+  { key: 'royal',   name: 'บัลลังก์ราชันย์',  art: '👑', color: '#5b21b6', from: 70, to: 100, royal: true },
+  { key: 'endless', name: 'ห้วงนิรันดร์',     art: '🌌', color: '#0f766e', from: 101, to: Infinity, royal: true, endless: true },
 ]
 export function floorZone(floor) {
   const f = Math.max(1, Math.floor(floor) || 1)

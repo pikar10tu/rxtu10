@@ -17,7 +17,7 @@
             </div>
             <div class="pd-tags">
               <span class="pd-tag">{{ RARITY[pet.rarity]?.label }}</span>
-              <span class="pd-tag"><Emoji :char="ELEMENTS[elDef]?.emoji || '✊'" /> {{ EL_NAME[elDef] || elDef }}</span>
+              <span class="pd-tag"><Emoji :char="ELEMENTS[elDef]?.icon || 'el:fist'" /> {{ EL_NAME[elDef] || elDef }}</span>
               <HelpButton topic="element" style="width:18px;height:18px;font-size: .7rem" />
             </div>
           </div>

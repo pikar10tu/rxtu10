@@ -54,7 +54,7 @@
         >
           <span v-if="teamSlots.includes(p.id)" class="pt-cell-team">ช่อง {{ teamSlots.indexOf(p.id) + 1 }}</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
-          <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.emoji || '✊'" /></span>
+          <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.icon || 'el:fist'" /></span>
           <span v-if="balTagOf(p.id)" class="pt-cell-bal" :class="balTagOf(p.id).kind" :title="`ปรับสมดุล: ${balTagOf(p.id).label}`" :aria-label="`ปรับสมดุล: ${balTagOf(p.id).label}`"><Emoji :char="balTagOf(p.id).icon" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>

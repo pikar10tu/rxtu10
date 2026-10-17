@@ -21,6 +21,13 @@
       {{ presets.presets[viewIdx].length ? 'ใช้ทีมนี้' : 'ใส่เพ็ทก่อนถึงจะใช้ทีมนี้ได้' }}
     </button>
 
+    <!-- ศัตรูที่จะเจอ (เปิดจากหอคอย) — จัดทีมได้โดยไม่ต้องปิดออกไปดู · ป้ายชนะทาง/แพ้ทางบนการ์ดคลังนับจากแถวนี้ -->
+    <div v-if="enemies.length" class="tp-foes">
+      <span class="tp-foes-l">{{ enemyLabel }}</span>
+      <span v-for="(e, i) in enemies" :key="i" class="tp-foe">
+        <Emoji :char="defOf(e.id).emoji" /><span class="tp-foe-el"><Emoji :char="ELEMENTS[e.element]?.icon || 'el:fist'" /></span>
+      </span>
+    </div>
     <!-- วิธีเลือกแบบเดียวกับตู้โชว์ (utils/slotEdit.js): แตะช่อง = เลือก · แตะอีกช่อง = สลับ · ✕ = เอาออก
          ใส่เสร็จ = เลิกเลือก (ไม่กระโดดเอง) · เต็มแล้วต้องเลือกช่องก่อน ถึงจะแทน (ไม่แทนเงียบๆ) -->
     <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, minmax(0, 96px))` }">
@@ -75,6 +82,10 @@
         <span class="tp-emoji"><Emoji :char="defOf(p.id).emoji" /></span>
         <span class="tp-name">{{ defOf(p.id).name }}</span>
         <PetStatLine :pet="p" />
+        <span v-if="enemies.length && (mu(p.id).win || mu(p.id).lose)" class="tp-mu">
+          <i v-if="mu(p.id).win" class="w">ชนะทาง {{ mu(p.id).win }}</i>
+          <i v-if="mu(p.id).lose" class="l">แพ้ทาง {{ mu(p.id).lose }}</i>
+        </span>
         <!-- เลือกช่องที่มีเพ็ทอยู่ = เทียบ ATK/HP กับตัวเดิม (ไม่มีเลข "พลังทีม" — user สั่ง 3 ต.ค.) -->
         <span v-if="cmpOf(p)" class="tp-cmp">
           <i :class="cmpOf(p).atk >= 0 ? 'up' : 'down'"><Emoji char="⚔️" />{{ cmpOf(p).atk >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).atk) }}</i>
@@ -110,9 +121,17 @@ import { toSlots } from '../../utils/teamSlots.js'
 import { tapSlot, tapItem, removeAt, compact } from '../../utils/slotEdit.js'
 import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForms.js'
 import { teamSynergy } from '../../utils/teamSynergy.js'
+import { matchupOf } from '../../utils/matchup.js'
 import { readPresets, editPresetPatch, usePresetPatch } from '../../utils/teamPresets.js'
 
-const props = defineProps({ open: { type: Boolean, default: false }, inline: { type: Boolean, default: false } })
+const props = defineProps({
+  open: { type: Boolean, default: false },
+  inline: { type: Boolean, default: false },
+  // ศัตรูที่รู้ตัวแล้ว [{id, element}] — ว่าง = ไม่โชว์แถวศัตรู/ป้ายชนะทาง (สนามสุ่มคู่ ยังไม่รู้คู่ตอนจัดทีม)
+  enemies: { type: Array, default: () => [] },
+  enemyLabel: { type: String, default: 'ศัตรู' },
+})
+const mu = (id) => matchupOf(defOf(id).element, props.enemies)
 // หน้าเต็ม /team ใช้กล่องเปล่าแทนแผ่นเลื่อน — ตรรกะเดียวกันทุกอย่าง
 const InlineBox = defineComponent({ name: 'InlineBox', inheritAttrs: false, setup: (_, { slots }) => () => h('div', { class: 'tp-inline' }, slots.default?.()) })
 defineEmits(['update:open'])
@@ -170,7 +189,7 @@ const statusIdle = computed(() => !pendingId.value && edit.value.sel == null && 
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
 const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
 const rarityColor = (id) => RARITY[defOf(id).rarity]?.color || '#94a3b8'
-const elEmoji = (id) => ELEMENTS[defOf(id).element]?.emoji || '✊'
+const elEmoji = (id) => ELEMENTS[defOf(id).element]?.icon || 'el:fist'
 
 // ทีมตามลำดับออกตีจริง = ช่องที่มีเพ็ท เรียงตามช่อง
 // rarity อ่านแบบเดียวกับเอนจิน: inst.rarity || def.rarity || 'common' (resolveBattleTeam)
@@ -295,6 +314,14 @@ function pick(id) {
 .tp-cmp { display: flex; flex-direction: column; align-items: center; font-size: .7rem; font-weight: 700; line-height: 1.25; }
 .tp-cmp i { font-style: normal; }
 .tp-cmp .up { color: #17805c; } .tp-cmp .down { color: #c2415c; }
+.tp-foes { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 0 8px; padding: 6px 10px; border-radius: 12px; background: #fdf0f4; border: var(--bw) solid #f3c6d6; }
+.tp-foes-l { font-size: .74rem; font-weight: 800; color: #b0386a; margin-right: 2px; }
+.tp-foe { position: relative; font-size: 1.35rem; line-height: 1; }
+.tp-foe-el { position: absolute; right: -7px; bottom: -4px; font-size: .7rem; }
+.tp-mu { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 2px; }
+.tp-mu i { font-style: normal; font-size: .7rem; font-weight: 800; line-height: 1.3; padding: 0 4px; border-radius: 999px; white-space: nowrap; }
+.tp-mu .w { color: #17805c; background: #dff5ea; }
+.tp-mu .l { color: #c2415c; background: #fde7ef; }
 .tp-pool { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .tp-pet { position: relative; border: 1.5px solid color-mix(in srgb, var(--rc) 55%, #fff); border-radius: 14px; background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 10%, #fff), #fff 70%); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 14px 2px 6px; font-family: inherit; transition: transform .1s; }
 .tp-pet:active { transform: scale(.95); }

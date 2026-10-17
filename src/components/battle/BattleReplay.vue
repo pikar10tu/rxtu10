@@ -337,7 +337,7 @@ const BASE_URL = import.meta.env.BASE_URL
 const REPLAY_CFG = { resultDelayMs: 900 }
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓' }
-const elEmoji = (p) => ELEMENTS[p?.element]?.emoji || '✊'
+const elEmoji = (p) => ELEMENTS[p?.element]?.icon || 'el:fist'
 
 const idx = ref(0)
 const round = ref(1)
@@ -1528,7 +1528,7 @@ const insp = computed(() => {
     passName: degree ? 'เอาหน่อยเว้ย องศา!' : passiveTitle(passiveOf(def), p.id, teamIds.value[uid[0]] || null),
     passIcon: degree ? '💖' : passiveOf(def)?.icon,
     passDesc: degree ? `ได้รับกำลังใจจากซัน: พลังโจมตีและเลือดสูงสุด +${solPct}% · ไม่มีผลฤดู` : null,
-    elEmoji: ELEMENTS[def.element]?.emoji || '✊', elName: EL_NAME[def.element] || def.element,
+    elEmoji: ELEMENTS[def.element]?.icon || 'el:fist', elName: EL_NAME[def.element] || def.element,
   }
 })
 

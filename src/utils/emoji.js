@@ -44,10 +44,15 @@ export function fluentFile(emoji) {
   // สร้างด้วย scripts/herb-icons.mjs (ไม่มีอีโมจิจริงของพืชพวกนี้)
   const h = herbKey(emoji)
   if (h) return `herbs/${h.id}${h.gold ? '-gold' : ''}.webp`
+  // เหรียญสายเพ็ท 'el:fist' → public/elements/fist.webp (scripts/element-icons.mjs)
+  const el = typeof emoji === 'string' ? EL_RE.exec(emoji) : null
+  if (el) return `elements/${el[1]}.webp`
   const cp = emojiCodepoint(emoji)
   return cp ? `emoji/fluent/${cp}.webp` : ''
 }
 
+const EL_RE = /^el:(fist|scissors|paper)$/
+const EL_FALLBACK = { 'el:fist': '✊', 'el:scissors': '✌️', 'el:paper': '✋' }
 const HERB_RE = /^herb:([a-z0-9]+)(:gold)?$/
 /** 'herb:tomato:gold' → { id:'tomato', gold:true } · อย่างอื่น → null */
 export function herbKey(s) {
@@ -55,7 +60,7 @@ export function herbKey(s) {
   return m ? { id: m[1], gold: !!m[2] } : null
 }
 /** ตัวอักษรสำรองตอนโหลดรูปไม่ได้ — คีย์ herb: แสดงเป็นข้อความดิบไม่ได้ */
-export const emojiFallback = (s) => (herbKey(s) ? '🌿' : s)
+export const emojiFallback = (s) => (herbKey(s) ? '🌿' : EL_FALLBACK[s] || s)
 
 // emoji ดิบ (base pictographic + VS16/ZWJ/skin-tone) — เดียวกับ scripts/fetch-fluent
 const EMOJI_RE = /\p{Extended_Pictographic}(️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*/gu

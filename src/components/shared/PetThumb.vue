@@ -27,7 +27,7 @@ const props = defineProps({
 const def = computed(() => getPetDef(props.pet?.id || props.pet?.species) || { emoji: '❓', element: 'scissors', rarity: 'common' })
 const grade = computed(() => props.pet?.grade || 0)
 const gradeLabel = computed(() => GRADE_LABELS[Math.min(grade.value, GRADE_LABELS.length - 1)] || grade.value)
-const elEmoji = computed(() => ELEMENTS[def.value.element]?.emoji || '✊')
+const elEmoji = computed(() => ELEMENTS[def.value.element]?.icon || 'el:fist')
 const rarityColor = computed(() => RARITY[props.pet?.rarity || def.value.rarity]?.color || '#cbd5e1')
 const stat = computed(() => {
   const p = props.pet || {}

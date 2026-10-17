@@ -150,26 +150,54 @@ export function useFarm() {
   }
 
   // เก็บทุกแปลงที่พร้อมใน write เดียว (roadmap #6)
-  // คืน { n, golds } — n = จำนวนที่เก็บ (0 = ไม่มีแปลงพร้อม) · golds = index แปลงที่ออกทอง
-  async function harvestAll(onCollected) {
+  // replant = ปลูกพืชเดิมลงแปลงที่เพิ่งเก็บทันที (เงินไม่พอ = แปลงนั้นปล่อยว่าง) · ยังเป็น write เดียว
+  // คืน { n, golds, replanted } — n = จำนวนที่เก็บ (0 = ไม่มีแปลงพร้อม) · golds = index แปลงที่ออกทอง
+  async function harvestAll(onCollected, { replant = false } = {}) {
     const now = Date.now()
     const next = clonePlots()
     const inv = { ...inventory.value }
     const bag = newHarvestBag()
     const golds = []
-    let n = 0
+    let n = 0, replanted = 0, cost = 0
+    let wallet = auth.userData?.coins || 0
     next.forEach((p, i) => {
       if (!p || !status(p, now).ready) return
       if (collect(p.seedId, inv, bag)) golds.push(i)
       next[i] = null
       n++
+      const c = replant && getCrop(p.seedId)
+      if (c && cropsForLevel(level.value).some(x => x.id === c.id) && wallet >= c.seedCost) {
+        next[i] = { seedId: c.id, plantedAt: now }
+        wallet -= c.seedCost; cost += c.seedCost; replanted++
+      }
     })
-    if (!n) { toast('ยังไม่มีแปลงที่พร้อมเก็บ', 'info'); return { n: 0, golds } }
+    if (!n) { toast('ยังไม่มีแปลงที่พร้อมเก็บ', 'info'); return { n: 0, golds, replanted: 0 } }
     onCollected?.({ n, golds })
-    await commit(next, { inventory: inv, extra: bag.extra() })
+    const dq = replanted ? bumpDailyQuest(auth.userData?.dailyQuest, 'farm', new Date().toISOString().slice(0, 10), replanted) : null
+    await commit(next, { inventory: inv, extra: bag.extra(), coinDelta: -cost, dailyQuest: dq })
     sfx('harvest')
-    toast(golds.length ? `เก็บเกี่ยวทั้งหมด ${n} แปลง · ✨ ได้พืชทอง ${golds.length} ผล!` : `เก็บเกี่ยวทั้งหมด ${n} แปลง!`, 'success')
-    return { n, golds }
+    const head = golds.length ? `เก็บเกี่ยว ${n} แปลง · ✨ ได้พืชทอง ${golds.length} ผล!` : `เก็บเกี่ยว ${n} แปลง!`
+    const tail = !replant ? '' : replanted === n ? ` · ปลูกซ้ำครบ` : ` · ปลูกซ้ำได้ ${replanted}/${n} (เหรียญไม่พอ)`
+    toast(head + tail, 'success')
+    return { n, golds, replanted }
+  }
+
+  // ปลูกพืชชนิดเดียวลงทุกแปลงว่างใน write เดียว · เหรียญพอกี่แปลงปลูกเท่านั้น
+  async function plantAll(seedId) {
+    const crop = getCrop(seedId)
+    if (!crop) return 0
+    const next = clonePlots()
+    const empty = next.map((p, i) => (p ? -1 : i)).filter(i => i >= 0)
+    if (!empty.length) { toast('ไม่มีแปลงว่าง', 'info'); return 0 }
+    const can = Math.min(empty.length, Math.floor((auth.userData?.coins || 0) / crop.seedCost))
+    if (can <= 0) { toast(`เหรียญไม่พอ! เมล็ด ${crop.name} ราคา ${crop.seedCost} เหรียญ`, 'error'); return 0 }
+    const now = Date.now()
+    empty.slice(0, can).forEach(i => { next[i] = { seedId, plantedAt: now } })
+    const dq = bumpDailyQuest(auth.userData?.dailyQuest, 'farm', new Date().toISOString().slice(0, 10), can)
+    await commit(next, { coinDelta: -crop.seedCost * can, dailyQuest: dq })
+    sfx('plant')
+    toast(can === empty.length ? `ปลูก ${crop.name} ${can} แปลงแล้ว` : `ปลูก ${crop.name} ได้ ${can}/${empty.length} แปลง (เหรียญไม่พอ)`, 'success')
+    return can
   }
 
   async function sell(cropId, qty = null) {
@@ -235,6 +263,6 @@ export function useFarm() {
     level, ceiling, plotsUnlocked, plotCount, nextPlot,
     plots, inventory, harvests, gold, goldFound, seedChoices, upcomingSeed,
     status,
-    plant, harvest, harvestAll, sell, sellGold, sellAll, unlockPlot,
+    plant, plantAll, harvest, harvestAll, sell, sellGold, sellAll, unlockPlot,
   }
 }

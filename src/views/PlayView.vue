@@ -140,7 +140,7 @@ const team = computed(() => resolveBattleTeam(authStore.userData?.activePets, au
 const teamFaces = computed(() => Array.from({ length: BATTLE_SLOTS }, (_, i) => {
   const u = team.value[i]; const def = u && getPetDef(u.id)
   if (!def) return null
-  return { emoji: def.emoji, color: (RARITY[u.rarity || def.rarity] || RARITY.common).color, el: ELEMENTS[def.element]?.emoji || '✊' }
+  return { emoji: def.emoji, color: (RARITY[u.rarity || def.rarity] || RARITY.common).color, el: ELEMENTS[def.element]?.icon || 'el:fist' }
 }))
 const petCount = computed(() => (authStore.userData?.pets || []).length)
 // การ์ดฟาร์ม: แปลงย่อ (สูงสุด 10 ช่องแรก) — พร้อมเก็บ = กรอบทอง · ว่าง = ＋

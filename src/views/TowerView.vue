@@ -17,8 +17,9 @@
 
       <!-- การ์ดชั้นปัจจุบัน -->
       <div class="tw-card">
-        <div class="tw-zone" :class="{ 'tw-zone-royal': zone.royal }" :style="{ background: zoneBg }">
-          <div class="tw-zone-art"><Emoji :char="zone.art" /></div>
+        <!-- แบนเนอร์โซนวาดเอง public/tower/<key>.webp (scripts/tower-art.mjs · user เคาะ 17 ต.ค. 2026) · สีพื้นเดิมเป็นสำรองตอนรูปยังไม่โหลด -->
+        <div class="tw-zone tw-zone-art-bg" :class="{ 'tw-zone-royal': zone.royal }" :style="{ background: zoneBg }">
+          <img v-if="zone.key" class="tw-zone-img" :src="zoneImg" alt="" aria-hidden="true" decoding="async">
           <div class="tw-zone-txt">
             <div class="tw-zone-name">{{ zone.name }}</div>
             <div class="tw-zone-floor">ชั้น {{ floor }} <span class="tw-zone-best">· สูงสุด {{ best }}</span></div>
@@ -105,7 +106,7 @@
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
-    <TeamPicker v-model:open="pickOpen" />
+    <TeamPicker v-model:open="pickOpen" :enemies="botTeam" :enemy-label="`ศัตรูชั้น ${floor}`" />
     <TowerRankSheet v-model:open="rankOpen" :rows="rivals ? rivals.all : []" />
     <BattleReplay :data="replay" theme="tower" exitable :exit-label="autoOn ? 'หยุดไต่รวด ✕' : 'ออก ✕'" @close="onReplayClose" @done="onReplayDone" />
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
@@ -226,6 +227,7 @@ const fightLabel = computed(() => nextGain.value > 0
   : `สู้ชั้น ${floor.value}`)
 
 const zone = computed(() => floorZone(floor.value))
+const zoneImg = computed(() => `${import.meta.env.BASE_URL}tower/${zone.value.key}.webp`)
 const zoneBg = computed(() => zone.value.royal
   ? 'linear-gradient(135deg, var(--ink) 0%, #5b21b6 100%)'
   : `linear-gradient(135deg, ${zone.value.color}, ${zone.value.color}bb)`)
@@ -315,13 +317,15 @@ function onSheetFight() {
 
 .tw-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
 .tw-zone { display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: #fff; }
-.tw-zone-art { font-size: 2rem; }
+.tw-zone-art-bg { position: relative; overflow: hidden; aspect-ratio: 320 / 110; align-items: flex-end; }
+.tw-zone-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tw-zone-art-bg .tw-zone-txt { position: relative; text-shadow: 0 1px 4px rgba(0,0,0,.55); }
 .tw-zone-name { font-family: var(--font-display); font-size: 1.3rem; line-height: 1; }
 .tw-zone-floor { font-size: .78rem; font-weight: 700; margin-top: 3px; }
 .tw-zone-best { opacity: .8; font-weight: 600; }
 .tw-zone-royal { border-bottom: 2px solid var(--gold); }
 .tw-zone-royal .tw-zone-name { color: var(--gold); }
-.tw-zone-royal .tw-zone-art { filter: drop-shadow(0 0 6px rgba(255,176,32,.7)); }
+
 .tw-max-cue { margin: 10px 16px 0; padding: 8px 10px; border-radius: 10px; background: var(--primary-light); border: 1.5px dashed var(--primary); font-size: .74rem; font-weight: 700; color: var(--ink); line-height: 1.45; }
 .tw-max-cue-l1 { font-weight: 800; }
 .tw-max-cue-l2 { font-weight: 600; }
