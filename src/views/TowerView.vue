@@ -96,6 +96,21 @@
         <div v-if="rivals.chaseName && rivals.chaseGap > 0" class="tw-rival-chase"><Emoji char="🔥" /> ตามหลัง {{ rivals.chaseName }} อยู่ {{ rivals.chaseGap }} ชั้น!</div>
         <button class="tw-rival-all" @click="rankOpen = true">ดูอันดับทั้งหมด ({{ rivals.total }})</button>
       </div>
+
+      <!-- 🏛️ จารึกหอคอย — สถิติเกินชั้น 100 ข้ามซีซั่น (roster/current.towerHall · แอดมินบันทึกตอนแจกรางวัลซีซั่น) -->
+      <div v-if="hall.length" class="tw-rival tw-hall">
+        <div class="tw-rival-head">
+          <span><Emoji char="🏛️" /> จารึกหอคอย</span>
+          <span class="tw-rival-rank">คนที่เคยไต่เกินชั้น 100 · ไม่หายตอนรีเซต</span>
+        </div>
+        <ol class="tw-rival-list">
+          <li v-for="(e, i) in hall" :key="e.uid" class="tw-rival-row" :class="{ 'tw-rival-me': e.uid === meUid }">
+            <span class="tw-rival-medal">{{ medal(i + 1) }}</span>
+            <span class="tw-rival-name">{{ e.name }} <small class="tw-hall-s">ซีซั่น {{ seasonMonthLabel(e.season, true) }}</small></span>
+            <span class="tw-rival-floor">ชั้น {{ e.floor }}</span>
+          </li>
+        </ol>
+      </div>
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
@@ -129,6 +144,7 @@ import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
 import HelpButton from '../components/help/HelpButton.vue'
+import { seasonMonthLabel } from '../utils/pvpSeason.js'
 import TowerPath from '../components/tower/TowerPath.vue'
 import SeasonCountdown from '../components/shared/SeasonCountdown.vue'
 import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
@@ -139,6 +155,7 @@ import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
+const hall = computed(() => membersStore.rosterTowerHall || [])
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
 loadMsOpen()
 const msBusy = ref(false)
@@ -305,6 +322,7 @@ function onSheetFight() {
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }
 .tw-login { text-align: center; color: var(--muted); padding: 30px 0; font-size: .85rem; }
 
+.tw-hall-s { font-size: .68rem; font-weight: 600; color: var(--muted); }
 .tw-rival { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
 .tw-rival-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
 .tw-rival-head > span:first-child { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); flex-shrink: 0; }

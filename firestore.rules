@@ -180,6 +180,8 @@ service cloud.firestore {
                .affectedKeys().hasOnly([request.auth.uid])
           // hof (ท็อป 3 ซีซั่นที่แล้ว · ไกด์สนาม) แอดมินเขียนเท่านั้น
           && request.resource.data.get('hof', null) == resource.data.get('hof', null)
+          // towerHall (จารึกหอคอยเกิน 100 ข้ามซีซั่น) แอดมินเขียนเท่านั้น
+          && request.resource.data.get('towerHall', null) == resource.data.get('towerHall', null)
         ) || isAdmin();
       allow create, delete: if isAdmin();
     }
