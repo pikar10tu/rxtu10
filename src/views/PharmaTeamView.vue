@@ -151,13 +151,13 @@ watch(() => room.value?.state?.status === 'gameover' ? room.value.state.gameId :
 <style scoped>
 .ptv { max-width: 480px; margin: 0 auto; padding: 8px 12px 24px; }
 .ptv-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.ptv-back { all: unset; cursor: pointer; font-weight: 700; color: #4f46e5; padding: 6px 4px; width: 52px; }
+.ptv-back { all: unset; cursor: pointer; font-weight: 700; color: var(--primary); padding: 6px 4px; width: 52px; }
 .ptv-title { font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 6px; }
 .ptv-demo { font-size: .7rem; font-weight: 800; background: #fde68a; color: #92400e; border-radius: 8px; padding: 1px 6px; }
 .ptv-warn { background: #fff7ed; border: 1px solid #fed7aa; color: #7c2d12; border-radius: 14px; padding: 10px 12px; font-size: .85rem; line-height: 1.5; margin-bottom: 12px; }
 .ptv-err { background: #fee2e2; color: #991b1b; border-radius: 10px; padding: 8px 10px; font-size: .85rem; margin-bottom: 10px; }
-.ptv-create { width: 100%; padding: 14px; border: none; border-radius: 14px; background: #059669; color: #fff; font-weight: 800; font-size: 1.05rem;
-  box-shadow: 0 4px #047857; cursor: pointer; }
+.ptv-create { width: 100%; padding: 14px; border: none; border-radius: 14px; background: var(--mint); color: #fff; font-weight: 800; font-size: 1.05rem;
+  box-shadow: 0 4px #3fb48e; cursor: pointer; }
 .ptv-create:disabled { background: #9ca3af; box-shadow: none; }
 .ptv-sub { font-weight: 800; margin: 16px 0 8px; font-size: .95rem; }
 .ptv-empty, .ptv-hint { color: rgba(0,0,0,.5); font-size: .85rem; text-align: center; margin: 10px 0; }
@@ -167,7 +167,7 @@ watch(() => room.value?.state?.status === 'gameover' ? room.value.state.gameId :
 .ptv-room-names { font-size: .75rem; color: rgba(0,0,0,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ptv-count { font-size: .8rem; color: rgba(0,0,0,.55); }
 .ptv-tag { font-size: .75rem; background: #e0e7ff; color: #3730a3; border-radius: 8px; padding: 3px 8px; }
-.ptv-join { border: none; border-radius: 10px; background: #4f46e5; color: #fff; font-weight: 700; padding: 8px 12px; cursor: pointer; }
+.ptv-join { border: none; border-radius: 10px; background: var(--primary); color: #fff; font-weight: 700; padding: 8px 12px; cursor: pointer; }
 .ptv-join:disabled { background: #9ca3af; }
 .ptv-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
 .ptv-tab { flex: 1; border: var(--bw) solid var(--line); background: #fff; border-radius: 10px; padding: 6px 0; font-weight: 700; font-size: .8rem; cursor: pointer; }
@@ -176,7 +176,7 @@ watch(() => room.value?.state?.status === 'gameover' ? room.value.state.gameId :
 .ptv-brow.mine { border-color: var(--primary); background: #eef6ff; }
 .ptv-rank { font-weight: 800; width: 20px; text-align: center; color: rgba(0,0,0,.5); }
 .ptv-bnames { flex: 1; min-width: 0; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ptv-blv { font-weight: 800; color: #059669; }
+.ptv-blv { font-weight: 800; color: var(--mint); }
 .ptv-lobby { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; padding: 4px 14px 14px; }
 .ptv-players { list-style: none; padding: 0; margin: 0 0 14px; }
 .ptv-players li { padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,.08); font-weight: 600; }

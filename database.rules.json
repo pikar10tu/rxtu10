@@ -2,6 +2,52 @@
   "rules": {
     ".read": false,
     ".write": false,
+    "spyfall": {
+      "rooms": {
+        ".read": "auth != null",
+        "$room": {
+          ".write": "auth != null && !newData.exists() && !data.child('players').exists()",
+          "meta": {
+            ".write": "auth != null && (!data.exists() || data.child('hostUid').val() === auth.uid || (data.parent().child('players').child(auth.uid).exists() && !data.parent().child('players').child(data.child('hostUid').val()).exists()))"
+          },
+          "players": {
+            "$uid": {
+              ".write": "auth != null && ((auth.uid === $uid && (!newData.exists() || !data.parent().parent().child('banned').child($uid).exists())) || data.parent().parent().child('meta/hostUid').val() === auth.uid)"
+            }
+          },
+          "banned": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid"
+          },
+          "state": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid"
+          },
+          "lastRound": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            ".validate": "newData.isNumber()"
+          },
+          "acts": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && data.parent().parent().child('players').child(auth.uid).exists()"
+            }
+          }
+        }
+      },
+      "secrets": {
+        "$room": {
+          ".write": "auth != null && (root.child('spyfall/rooms').child($room).child('meta/hostUid').val() === auth.uid || (!newData.exists() && !root.child('spyfall/rooms').child($room).exists()))",
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid"
+          }
+        }
+      },
+      "dealer": {
+        "$room": {
+          ".read": "auth != null && root.child('spyfall/rooms').child($room).child('meta/hostUid').val() === auth.uid",
+          ".write": "auth != null && (root.child('spyfall/rooms').child($room).child('meta/hostUid').val() === auth.uid || (!newData.exists() && !root.child('spyfall/rooms').child($room).exists()))"
+        }
+      }
+    },
     "pharmateam": {
       "board": {
         ".read": "auth != null",

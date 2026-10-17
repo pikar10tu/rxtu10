@@ -77,10 +77,16 @@
         </div>
       </template>
 
-      <!-- ── PharmaTeam (เดโม) — เกมทีมเล่นสดหลายจอ · ไม่ผูกเหรียญ/เควส ไม่ขึ้นกับ arcadeOpen ── -->
+      <!-- ── เล่นด้วยกัน — เกมเล่นสดหลายจอบน RTDB · แถบเล็กท้ายหน้า (user ชอบที่ไม่เด่น 17 ต.ค.)
+           ไม่ผูกเหรียญ/เควส ไม่ขึ้นกับ arcadeOpen ── -->
+      <div class="pt-group-title"><Emoji char="👥" /> เล่นด้วยกัน <span class="pt-beta">beta</span></div>
       <RouterLink to="/play/pharmateam" class="pt-entry">
-        <Emoji char="🧪" /> PharmaTeam <span class="pt-entry-tag">(ทดสอบ)</span>
+        <Emoji char="🧪" /> PharmaTeam
         <span class="pt-entry-sub">เกมทีม 2–6 คน ›</span>
+      </RouterLink>
+      <RouterLink to="/play/spyfall" class="pt-entry">
+        <Emoji char="🕵️" /> Pharm Spyfall
+        <span class="pt-entry-sub">หาสปาย 3–8 คน ›</span>
       </RouterLink>
     </template>
     <div v-else class="play-login">เข้าสู่ระบบเพื่อเล่น</div>
@@ -170,7 +176,10 @@ const plotCells = computed(() => farm.plots.value.slice(0, 10).map(p => {
 .s-pet { background: #efedff; } .s-farm { background: var(--mint-light); } .s-style { background: var(--accent-light); }
 .shop-dot { top: 8px; right: 8px; width: 11px; height: 11px; }
 .hall:focus-visible, .shop:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pt-entry { display: flex; align-items: center; gap: 6px; margin-top: 14px; padding: 8px 12px; border: var(--bw) solid var(--line);
+.pt-group-title { margin-top: 16px; font-size: .78rem; font-weight: 700; color: rgba(0,0,0,.5); }
+.pt-beta { font-size: .7rem; font-weight: 800; background: var(--mint-light); color: #2f7d63; border-radius: 6px; padding: 1px 6px; margin-left: 2px; }
+.pt-entry + .pt-entry { margin-top: 6px; }
+.pt-entry { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 8px 12px; border: var(--bw) solid var(--line);
   border-radius: 12px; font-size: .85rem; font-weight: 700; color: inherit; text-decoration: none; }
 .pt-entry-tag { color: rgba(0,0,0,.45); font-weight: 600; }
 .pt-entry-sub { margin-left: auto; font-size: .75rem; color: rgba(0,0,0,.5); font-weight: 600; }
