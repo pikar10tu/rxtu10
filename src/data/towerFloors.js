@@ -144,4 +144,19 @@ export function floorZone(floor) {
   const f = Math.max(1, Math.floor(floor) || 1)
   return ZONES.find(z => f >= z.from && f <= z.to) || ZONES[ZONES.length - 1]
 }
+// ⏩ ไต่รวด (user ขอ 17 ต.ค. 2026): กดทีเดียวสู้ต่อจนแพ้ — ใช้ได้เฉพาะชั้นต่ำกว่านี้ (70+ = โซนวัดการจัดทีม ต้องกดเอง)
+export const AUTO_CLIMB_MAX = 70
+
+// 📰 ข่าวกระดานหอคอย — กันรก: ยิงเฉพาะ "ทำสถิติใหม่ของซีซั่น" ข้ามหมุดเหล่านี้ (ไต่ซ้ำหลังรีเซตชั้นไม่ยิง)
+//    ชั้น 100 มีเลนข่าวยาวของตัวเองอยู่แล้ว (tower100) · เกิน 100 ยิงทุก 50 ชั้น · ข้ามหลายหมุดทีเดียว = ยิงหมุดสูงสุดอันเดียว
+export const TOWER_NEWS_FLOORS = [30, 50, 70]
+/** best ก่อน → best หลัง ⇒ ชั้นที่ควรขึ้นข่าว (0 = ไม่ขึ้น) */
+export function towerNewsFloor(prevBest, newBest) {
+  const a = Math.floor(prevBest) || 0, b = Math.floor(newBest) || 0
+  if (b <= a) return 0
+  const endless = Math.floor(b / 50) * 50
+  if (endless > TOWER_MAX && endless > a) return endless
+  return [...TOWER_NEWS_FLOORS].reverse().find(f => f > a && f <= b) || 0
+}
+
 export const TOWER_BONUS_FLOORS = [20, 40, 60, 70]  // หมุดเหรียญ — ถึงชั้น 70 (โบนัส flat หลังจากนั้น)

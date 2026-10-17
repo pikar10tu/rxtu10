@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { getFloorTeam, getTowerBonus, towerBonusGain, TOWER_MAX, floorZone, botCount, botGrade, TOWER_BONUS_FLOORS, BONUS_CAP_FLOOR, TOWER_BONUS_MIN } from './towerFloors.js'
+import { towerNewsFloor, getFloorTeam, getTowerBonus, towerBonusGain, TOWER_MAX, floorZone, botCount, botGrade, TOWER_BONUS_FLOORS, BONUS_CAP_FLOOR, TOWER_BONUS_MIN } from './towerFloors.js'
 
 test('TOWER_MAX = 100', () => { assert.equal(TOWER_MAX, 100) })
 
@@ -166,4 +166,15 @@ test('Endless: ชั้น ≤100 ไม่มี boost · 101+ คูณชั
   const t = getFloorTeam(150)
   assert.ok(t.every(p => p.rarity === 'legendary' && p.grade === 5 && Math.abs(p.boost - 1.125) < 1e-9))
   assert.notDeepEqual(getFloorTeam(150).map(p => p.id + p.element), getFloorTeam(100).map(p => p.id + p.element))
+})
+
+test('towerNewsFloor: เฉพาะสถิติใหม่ข้ามหมุด · หมุดสูงสุดอันเดียว · เกิน 100 ทุก 50', () => {
+  assert.equal(towerNewsFloor(0, 29), 0)
+  assert.equal(towerNewsFloor(29, 30), 30)
+  assert.equal(towerNewsFloor(10, 69), 50)        // ไต่รวดข้าม 30+50 → 50 อันเดียว
+  assert.equal(towerNewsFloor(50, 50), 0)         // ไม่ใช่สถิติใหม่
+  assert.equal(towerNewsFloor(60, 40), 0)
+  assert.equal(towerNewsFloor(99, 100), 0)        // 100 ไปเลน news
+  assert.equal(towerNewsFloor(140, 150), 150)
+  assert.equal(towerNewsFloor(150, 160), 0)
 })

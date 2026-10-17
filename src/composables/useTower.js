@@ -4,7 +4,7 @@ import { useToast } from './useToast.js'
 import { useRosterSync } from './useRosterSync.js'
 import { useNewsPost } from './useNewsPost.js'
 import { simulateBattle } from '../utils/battleEngine.js'
-import { getFloorTeam, getTowerBonus, TOWER_MAX } from '../data/towerFloors.js'
+import { getFloorTeam, getTowerBonus, TOWER_MAX, AUTO_CLIMB_MAX, towerNewsFloor } from '../data/towerFloors.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { doc, setDoc, getDoc, increment, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -28,14 +28,19 @@ export function useTower() {
   const bonus = computed(() => getTowerBonus(best.value))
 
   // best-effort: เขียนสถิติราย species (increment-only) — fail เงียบ ไม่ขวางการเล่น
-  async function recordStats(result, playerTeam, won) {
+  // ไต่รวดรวมทุกไฟต์เป็น batch เดียว (statsList = ผล computeBattleStats หลายไฟต์)
+  async function recordStats(statsList) {
     try {
-      const stats = computeBattleStats(result.log, playerTeam, won)
-      const ids = Object.keys(stats)
+      const sum = {}
+      for (const st of statsList) for (const [id, s] of Object.entries(st)) {
+        const t = (sum[id] ||= { battles: 0, wins: 0, kills: 0, deaths: 0, dmgDealt: 0, dmgTaken: 0 })
+        for (const k in t) t[k] += s[k] || 0
+      }
+      const ids = Object.keys(sum)
       if (!ids.length) return
       const batch = writeBatch(db)
       for (const id of ids) {
-        const s = stats[id]
+        const s = sum[id]
         batch.set(doc(db, 'battleStats', id), {
           battles: increment(s.battles), wins: increment(s.wins),
           kills: increment(s.kills), deaths: increment(s.deaths),
@@ -47,24 +52,31 @@ export function useTower() {
     } catch (e) { console.error('[battleStats]', e) }
   }
 
-  async function fight() {
+  /** สู้ชั้นปัจจุบัน 1 ไฟต์ — ซิมอย่างเดียว ยังไม่บันทึก
+   *  🔒 ผลนับต่อเมื่อดูรีเพลย์จบถึงหน้าสรุป แล้ว TowerView เรียก `commit()` (user สั่ง 17 ต.ค. 2026)
+   *     กดออก/ปิดแอประหว่างรีเพลย์ = ไม่นับ ⇒ ใช้ปุ่มออกข้ามรีเพลย์เพื่อเก็บชัยชนะไม่ได้ · แพ้ไม่มีอะไรให้บันทึกอยู่แล้ว */
+  function fight() {
     if (!team.value.length) { toast('จัดทีมก่อนนะ (อย่างน้อย 1 ตัว)', 'info'); return null }
+    // ⚠️ หยิบทุกอย่างที่ผูกกับ floor/best ไว้ตอนนี้ — patchUser ใน commit อัปเดต optimistic แบบ synchronous
+    //    (บั๊กจริง 24 ส.ค.: อ่าน botTeam ทีหลังได้ทีมชั้นถัดไป จอ replay วาดศัตรูผิดตัว · CLAUDE.md ข้อ 9)
     const cleared = floor.value
-    // ⚠️ ต้องหยิบทีมบอทออกมาเก็บไว้ "ก่อน" patchUser — botTeam เป็น computed ที่ผูกกับ floor
-    //    ซึ่ง patchUser อัปเดต optimistic แบบ synchronous ⇒ อ่าน botTeam.value อีกทีตอน return
-    //    จะได้ทีมของ "ชั้นถัดไป" ไม่ใช่ชั้นที่เพิ่งสู้
-    //    อาการ: ชนะชั้น 1 (บอท 1 ตัว) แล้วจอ replay วาดการ์ดศัตรู 2 ใบของชั้น 2 ทั้งที่ log มีแค่ B0
-    //    → ตี B0 ตาย log จบทันที = "ศัตรูมีสองตัว ตีตายตัวเดียวเกมจบเลย" (เจอจริง 24 ส.ค.)
-    //    ชั้นสูงกว่านั้นจำนวนเท่ากันเลยไม่สะดุดตา แต่สปีชีส์/ธาตุ/maxHp ที่วาดก็ผิดตัวเหมือนกัน
-    //    (หลอดเลือดหดผิดสัดส่วน เพราะ maxHp มาจากเพ็ทคนละตัวกับที่ engine คำนวณ)
+    const players = team.value
     const bots = botTeam.value
-    const seed = Date.now()
-    const result = simulateBattle(team.value, bots, seed)
+    const result = simulateBattle(players, bots, Date.now())
     const won = result.winner === 'A'
-    await recordStats(result, team.value, won)
-    if (won) {
-      const nextFloor = cleared + 1   // Endless — ไม่ตันที่ TOWER_MAX
-      const nextBest = Math.max(best.value, cleared)
+    let committed = false
+    async function commit() {
+      if (committed) return
+      committed = true
+      let stats = null
+      try { stats = computeBattleStats(result.log, players, won) } catch (e) { console.error('[battleStats]', e) }
+      if (stats) await recordStats([stats])
+      if (!won) return
+      // อ่าน best สด ณ ตอน commit (กันแท็บอื่น/รีเซตระหว่างดู) · floor ต้องยังเป็นชั้นที่สู้ ไม่งั้นข้าม (กดซ้ำ/สองแท็บ)
+      if (floor.value !== cleared) return
+      const prevBest = best.value
+      const nextFloor = cleared + 1                 // Endless — ไม่ตันที่ TOWER_MAX
+      const nextBest = Math.max(prevBest, cleared)
       // 🪨 ศิลาจารึก: ยอดสูงสุดต่อซีซั่นที่เกิน 100 → users.towerRecords[season] (รีเซตซีซั่นไม่แตะ · roster พ่วงเป็น th)
       const season = currentSeasonId()
       const recs = auth.userData?.towerRecords || {}
@@ -73,13 +85,12 @@ export function useTower() {
         { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { towerRecords: { ...recs, [season]: cleared } } : {}) },
         { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { [`towerRecords.${season}`]: cleared } : {}) },
       )
-      // ข่าวกระดาน: ชั้นลงท้าย 0 เข้าเลน roster · ชั้นสุดท้ายไปเลน news (อยู่ยาว) และไม่ยิงซ้ำ
-      // ⚠️ ใช้ `cleared` ที่หยิบไว้ก่อน patchUser — floor.value ตอนนี้เป็นชั้นถัดไปแล้ว (CLAUDE.md ข้อ 9)
-      const topFloor = cleared === TOWER_MAX
-      syncRosterRow({ event: (!topFloor && cleared % 10 === 0) ? { k: 'tw', v: cleared, t: Date.now() } : null })
-      if (topFloor) postNews({ type: 'tower100', icon: '🏰', msg: `${myName()} พิชิตหอคอยชั้น ${TOWER_MAX} สำเร็จ` })
+      // ข่าวกระดาน: เฉพาะสถิติใหม่ข้ามหมุด (towerNewsFloor) · ชั้น 100 ไปเลน news (อยู่ยาว) ครั้งแรกของซีซั่นเท่านั้น
+      const nf = towerNewsFloor(prevBest, nextBest)
+      syncRosterRow({ event: (nf && nf !== TOWER_MAX) ? { k: 'tw', v: nf, t: Date.now() } : null })
+      if (prevBest < TOWER_MAX && nextBest >= TOWER_MAX) postNews({ type: 'tower100', icon: '🏰', msg: `${myName()} พิชิตหอคอยชั้น ${TOWER_MAX} สำเร็จ` })
     }
-    return { result, botTeam: bots, playerTeam: team.value, won, cleared }
+    return { result, botTeam: bots, playerTeam: players, won, cleared, commit }
   }
 
   // รางวัลขั้น (ทุก 10 ชั้น) — รับทุกขั้นที่ถึงแล้วในครั้งเดียว · towerClaims ถูกล้างตอนแอดมินรีเซตหอคอย
@@ -122,5 +133,5 @@ export function useTower() {
     return ok
   }
 
-  return { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen }
+  return { floor, best, team, botTeam, bonus, fight, TOWER_MAX, AUTO_CLIMB_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen }
 }

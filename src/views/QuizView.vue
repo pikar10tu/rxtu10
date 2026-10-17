@@ -226,7 +226,8 @@ import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc,
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
-import { bumpGlobalStat } from '../composables/useGlobalStats.js'
+import { bumpGlobalStat, bumpQuizToday } from '../composables/useGlobalStats.js'
+import { quizDayMilestone } from '../utils/newsFeed.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import { shuffle, shuffleChoices } from '../utils/quizShuffle.js'
@@ -730,6 +731,11 @@ async function finish() {
   // เลนนี้เป็น write เพิ่มจริง (ควิซไม่เคย sync roster) จึงคุมให้ถี่ต่ำด้วยเกณฑ์ 10 ข้อติด
   const tier = bestStreak.value >= 30 ? 30 : bestStreak.value >= 20 ? 20 : bestStreak.value >= 10 ? 10 : 0
   if (ok && tier) syncRosterRow({ event: { k: 'qz', v: tier, t: Date.now() } })
+  // ข่าวรวมรุ่น: ข้อสอบวันนี้ครบหลักร้อย — คนที่ส่งแล้วข้ามหลักเป็นเจ้าของข่าว (await ทีหลัง ไม่ขวางจอผล)
+  if (ok) bumpQuizToday(answered.value).then(r => {
+    const m = r && quizDayMilestone(r.before, r.after)
+    if (m) syncRosterRow({ event: { k: 'qd', v: m, t: Date.now() } })
+  })
 }
 </script>
 

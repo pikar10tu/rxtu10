@@ -81,6 +81,9 @@ const KINDS = {
   tw: { icon: '🏰', text: (who, e) => `${who} ไต่หอคอยถึงชั้น ${e.v}` },
   pg: { icon: '🐾', text: (who, e) => `${who} อัปเกรดเพ็ทถึงเกรด ${GRADE_ROMAN[e.v] || e.v}` },
   qz: { icon: '📚', text: (who, e) => `${who} ตอบควิซถูกรวด ${e.v} ข้อ` },
+  // ทั้งรุ่นทำข้อสอบวันนี้ครบหลักร้อย — v = จำนวน · anon = ไม่โชว์ชื่อ/รูป (user สั่ง "บอกแค่สถิติรวม")
+  //    เก็บใน ev ของคนที่ส่งข้อข้ามหลักเพราะเป็นเลนที่เขียนได้ แต่ตอนอ่านตัด uid ทิ้ง ⇒ ไม่ถูกรวมกลุ่มกับข่าวคนนั้น
+  qd: { icon: '📝', anon: true, text: (_who, e) => `วันนี้ทั้งรุ่นทำข้อสอบครบ ${(Number(e.v) || 0).toLocaleString()} ข้อแล้ว` },
   mg: { icon: '🎮', text: (who, e) => `${who} ทำคะแนน ${gameName(e.g)} ขึ้นอันดับ ${e.v} ของรุ่น` },
   ta: { icon: '⏱️', text: (who, e) => `${who} ทำสถิติ Time Attack ${taLabel(e.g)} ขึ้นอันดับ ${e.v} ของรุ่น` },
   hs: { icon: '🏠', text: houseText },
@@ -90,6 +93,12 @@ const KINDS = {
   ac: { icon: achIcon, text: achText },
   // กาชาได้ตำนาน (ย้ายจากเลน news 1 ต.ค. 2026 — เลนนั้นโหลดแค่ 5 doc เปิดรัวคืนเดียวดันข่าวคนอื่นตกหมด)
   lg: { icon: '✨', text: legText },
+}
+
+/** ข้ามหลักร้อยไหม (before → after) ⇒ หลักร้อยสูงสุดที่ข้าม หรือ 0 */
+export const quizDayMilestone = (before, after) => {
+  const m = Math.floor((Number(after) || 0) / 100) * 100
+  return m > 0 && m > (Number(before) || 0) ? m : 0
 }
 
 /** ต่อข่าวใหม่ไว้หน้าสุด แล้วตัดท้ายให้เหลือ EVENT_MAX — คู่แฝดของ pushHistory */
@@ -167,7 +176,7 @@ export function buildFeed(rows, newsDocs, { now = Date.now(), myUid = null } = {
       if (!t || now - t > EVENT_TTL_MS) continue
       const who = uid === myUid ? 'คุณ' : (row?.n || '?')
       const icon = typeof def.icon === 'function' ? def.icon(e) : def.icon
-      items.push({ id: `${uid}:${i}:${t}`, uid, icon, text: def.text(who, e), t })
+      items.push({ id: `${uid}:${i}:${t}`, uid: def.anon ? null : uid, icon, text: def.text(who, e), t })
     }
   }
 

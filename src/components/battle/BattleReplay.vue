@@ -21,6 +21,8 @@
       <ArenaFloor :arena-ref="arenas.bot" side="bot" :zone="seam?.zBot || null" />
     </div>
     <div v-if="seam" class="br-seam" :style="{ top: seam.y + 'px' }"></div>
+    <!-- ออกระหว่างดู (exitable) — ใช้เฉพาะจอที่ผลถูกบันทึกก่อนเปิดรีเพลย์แล้ว (หอคอย) · ออกแล้วผลไม่หาย -->
+    <button v-if="exitable && !resultReady" class="br-exit" @pointerdown.stop @click="$emit('close')">{{ exitLabel }}</button>
     <!-- ฉาก VS (สนามประลอง/ท้าสู้) แทน READY/GO: ครึ่งบนสไลด์ลง ครึ่งล่างสไลด์ขึ้น ชนที่เส้นกลาง · แตะข้ามได้ -->
     <div v-if="introPhase === 'vs'" class="br-vsi" :style="{ '--sy': (seam ? seam.y + 'px' : '50%') }" @click="skipIntro">
       <div class="br-vsi-h top"><ArenaFloor mode="thumb" :arena-ref="arenas.top" side="top" /><span class="br-vsi-n"><b>{{ sideTop.name }}</b>{{ arenaNameOf(arenas.top) }}</span></div>
@@ -270,6 +272,8 @@ import { displayName, duoPartnerOf, degreeFormActive, seasonOfSlot, seasonText, 
 const props = defineProps({
   data: { type: Object, default: null },
   theme: { type: String, default: 'tower' },   // 'arena' | 'tower' — สนามดีฟอลต์ครึ่งบน ถ้า data.arenas ไม่ส่งมา
+  exitable: Boolean,
+  exitLabel: { type: String, default: 'ออก ✕' },
 })
 
 // ── พื้นครึ่งสนาม ──
@@ -317,7 +321,7 @@ function watchSeam() {
   seamRO.observe(ovRef.value); seamRO.observe(boxRef.value)
   measureSeam()
 }
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'done'])
 
 const router = useRouter()
 // ปิด overlay ไฟต์ก่อนแล้วค่อยเปลี่ยนหน้า — ไม่งั้น overlay ค้างทับหน้าใหม่
@@ -408,6 +412,8 @@ const resultOpen = ref(false)
 useEscapeKey(resultOpen, () => { resultOpen.value = false })    // modal สรุปโชว์อยู่
 useEscapeKey(() => !!inspectUid.value, () => closeInspect())     // ปิด inspect แล้วไฟต์ต้องเดินต่อเหมือนกดปุ่มปิด
 const resultReady = ref(false)   // จบไฟต์+ผ่านจังหวะรอแล้ว — ใช้โชว์ปุ่มลอย "ดูสรุป" ตอน peek
+// แจ้งจอแม่ว่าเล่นจบถึงหน้าสรุปแล้ว (หอคอยไต่รวดใช้ต่อไฟต์ถัดไป)
+watch(() => resultReady.value, (v) => { if (v) emit('done') })
 let resultTimer = null
 let introTimer = null
 let gen = 0                      // generation guard — reset/skip เพิ่มค่า เพื่อให้ promise chain ค้างจาก wait() รู้ตัวว่าโดนยกเลิก
@@ -1622,6 +1628,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.br-exit { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 10px; z-index: 30; font: inherit; font-size: .78rem; font-weight: 800; color: #fff; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
 .br-ov { position: fixed; inset: 0; z-index: 420; background: #0f172a; display: flex; align-items: center; justify-content: center; padding: 16px; }
 /* กดค้างเร่งได้ทั้งจอ (1 ต.ค.) ⇒ ต้องกันเลือกข้อความทั้งจอด้วย ไม่งั้นกดค้างแล้วขึ้น select all/แว่นขยาย (เพื่อนแจ้ง 3 ต.ค.) */
 .br-ov { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }

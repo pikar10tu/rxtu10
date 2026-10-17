@@ -28,3 +28,19 @@ export async function fetchGlobalStats() {
     return { ...DEFAULT_GLOBAL_STATS }
   }
 }
+
+// 📚 ข้อสอบที่ทั้งรุ่นทำ "วันนี้" (เวลาไทย) — stats/global.quizByDay[YYYY-MM-DD] (user ขอ 17 ต.ค. 2026)
+// เพิ่มแล้วอ่านกลับ 1 read เพื่อรู้ว่าเราเป็นคนข้ามหลักร้อยไหม · ชนกันพร้อมกันอาจคลาด/ซ้ำได้นิดหน่อย ยอมรับได้
+export const bkkDay = (t = Date.now()) => new Date(t + 7 * 3600e3).toISOString().slice(0, 10)
+export async function bumpQuizToday(n) {
+  if (!(n > 0)) return null
+  try {
+    const day = bkkDay()
+    const ref = doc(db, 'stats', 'global')
+    await setDoc(ref, { quizByDay: { [day]: increment(n) } }, { merge: true })
+    const snap = await getDoc(ref)
+    useUsageStore().track(1, 1)
+    const after = Number(snap.data()?.quizByDay?.[day]) || 0
+    return { before: Math.max(0, after - n), after }
+  } catch (e) { console.warn('[globalStats] quizByDay failed', e); return null }
+}

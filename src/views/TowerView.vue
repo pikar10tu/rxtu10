@@ -69,6 +69,9 @@
             <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
           </button>
         </div>
+        <button v-if="floor < AUTO_CLIMB_MAX" class="tw-auto" :disabled="busy || !team.length" @click="startAuto">
+          <Emoji char="⏩" /> ไต่รวดจนกว่าจะแพ้ <small>(ถึงชั้น {{ AUTO_CLIMB_MAX - 1 }})</small>
+        </button>
         <div v-if="best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตยอดหอคอยแล้ว! ไต่ต่อในห้วงนิรันดร์ได้เลย</div>
       </div>
 
@@ -104,7 +107,7 @@
 
     <TeamPicker v-model:open="pickOpen" />
     <TowerRankSheet v-model:open="rankOpen" :rows="rivals ? rivals.all : []" />
-    <BattleReplay :data="replay" theme="tower" @close="onReplayClose" />
+    <BattleReplay :data="replay" theme="tower" exitable :exit-label="autoOn ? 'หยุดไต่รวด ✕' : 'ออก ✕'" @close="onReplayClose" @done="onReplayDone" />
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
     <FloorSheet :floor="sheetFloor" :crowd="crowd" :current-floor="floor"
                 @close="sheetFloor = null" @fight="onSheetFight" />
@@ -117,7 +120,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink } from 'vue-router'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { buildLoseTip } from '../utils/loseTip.js'
 import { useMembersStore } from '../stores/members.js'
@@ -143,7 +146,7 @@ import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
-const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
+const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, AUTO_CLIMB_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
 loadMsOpen()
 const msBusy = ref(false)
 async function onClaimMs() {
@@ -230,8 +233,8 @@ const zoneBg = computed(() => zone.value.royal
 async function onFight() {
   if (busy.value) return
   busy.value = true
-  holdPath.value = true          // ต้องตั้งก่อน await — patchUser ข้างใน fight() ขยับ floor ทันที
-  // ⚠️ ต้องหยิบก่อน await — patchUser ใน fight() ขยับ best แบบ synchronous (CLAUDE.md ข้อ 9)
+  holdPath.value = true          // หน่วงเส้นทางไว้จนปิดรีเพลย์ — commit ตอนรีเพลย์จบจะขยับ floor ทันที
+  // ⚠️ ต้องหยิบก่อน commit — patchUser ขยับ best แบบ synchronous (CLAUDE.md ข้อ 9)
   //    อ่านทีหลังจะได้โบนัส "หลังชนะ" ทั้งคู่ = ส่วนต่างกลายเป็น 0 ทุกครั้ง
   const bonusBefore = bonus.value
   const gainOfFight = nextGain.value
@@ -244,11 +247,11 @@ async function onFight() {
       loseTip: buildLoseTip('tower', authStore.userData),
       arenas: { top: 'tower', bot: rosterArena(authStore.userData) },   // ครึ่งบน = พื้นหอคอย · ครึ่งล่าง = สนามเรา
       // รางวัลเดียวของหอคอยคือรายได้/วัน — จอชนะต้องพูดเรื่องเงิน ไม่ใช่แค่ "ขึ้นชั้น"
-      rewardText: gainOfFight > 0
+      rewardText: (autoOn.value ? `⏩ ไต่รวดชั้นที่ ${autoCount.value + (r.won ? 1 : 0)} · ` : '') + (gainOfFight > 0
         ? `รายได้รายวัน ${bonusBefore.toLocaleString()} → ${(bonusBefore + gainOfFight).toLocaleString()} (+${gainOfFight.toLocaleString()}/วัน)`
         // gain 0 ได้ 2 ทาง: เลยเพดานจริง หรือ best สูงกว่าชั้นที่สู้ (แอดมินรีเซตชั้น)
         // ทางหลังยังไม่เต็มเพดาน — ห้ามเขียนว่าเต็ม และห้ามอ้างโบนัสของชั้นที่เพิ่งสู้ (ต่ำกว่าของจริง)
-        : `ขึ้นชั้น ${r.cleared + 1} · รายได้รายวันเท่าเดิม ${bonusBefore.toLocaleString()}/วัน${atCap ? ' (เต็มเพดานแล้ว)' : ''}`,
+        : `ขึ้นชั้น ${r.cleared + 1} · รายได้รายวันเท่าเดิม ${bonusBefore.toLocaleString()}/วัน${atCap ? ' (เต็มเพดานแล้ว)' : ''}`),
     }
     else releasePath()           // fight() คืน null (ยังไม่ได้จัดทีม) → ปล่อยเลย
   } catch (e) {
@@ -259,7 +262,41 @@ async function onFight() {
   }
 }
 
+// ⏩ ไต่รวด (user 17 ต.ค. 2026): ต้องนั่งดูทุกไฟต์เหมือนกดเอง — ชนะแล้วรอหน้าสรุปแป๊บ แล้วพาไปชั้นต่อไปให้
+//    จบเมื่อ: แพ้ · ถึง AUTO_CLIMB_MAX · ผู้เล่นกดหยุด/ปิด (ทุกการปิดด้วยมือ = หยุด)
+const AUTO_NEXT_MS = 1600
+const autoOn = ref(false)
+const autoCount = ref(0)
+let autoTimer = null
+function startAuto() {
+  autoOn.value = true
+  autoCount.value = 0
+  onFight()
+}
+function stopAuto() {
+  autoOn.value = false
+  clearTimeout(autoTimer)
+}
+// 🔒 รีเพลย์เล่นจบถึงหน้าสรุป = ค่อยนับผล (useTower.fight → commit) · ออกก่อนหน้านี้ = ไม่นับ
+async function onReplayDone() {
+  const r = replay.value
+  if (!r) return
+  await r.commit()
+  if (!autoOn.value) return
+  if (!r.won) { stopAuto(); return }
+  autoCount.value++
+  if (floor.value >= AUTO_CLIMB_MAX) { stopAuto(); return }
+  autoTimer = setTimeout(() => {
+    if (!autoOn.value) return
+    replay.value = null
+    releasePath()
+    onFight()
+  }, AUTO_NEXT_MS)
+}
+onUnmounted(stopAuto)
+
 function onReplayClose() {
+  stopAuto()
   replay.value = null
   releasePath()
 }
@@ -309,6 +346,9 @@ function onSheetFight() {
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }
 .tw-login { text-align: center; color: var(--muted); padding: 30px 0; font-size: .85rem; }
 
+.tw-auto { display: block; width: 100%; margin-top: 8px; font: inherit; font-weight: 800; font-size: .84rem; color: var(--ink); background: #fff; border: var(--bw) dashed var(--line); border-radius: 12px; padding: 9px; cursor: pointer; }
+.tw-auto small { font-weight: 600; color: var(--muted); }
+.tw-auto:disabled { opacity: .5; }
 .tw-rival { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
 .tw-rival-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
 .tw-rival-head > span:first-child { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); flex-shrink: 0; }

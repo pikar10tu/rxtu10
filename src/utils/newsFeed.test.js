@@ -192,3 +192,11 @@ test('pushLegendaryEvent เปิดรัวได้ตำนานหลา�
   const one = buildFeed({ u1: { n: 'มายด์', ev: pushLegendaryEvent([], legs[0], NOW) } }, [], { now: NOW })
   assert.equal(one[0].text, `มายด์ เปิดแคปซูลได้ ${PETS.find(p => p.id === legs[0]).name}`)
 })
+
+test('quizDayMilestone: ข้ามหลักร้อย → หลักสูงสุด', async () => {
+  const { quizDayMilestone } = await import('./newsFeed.js')
+  assert.equal(quizDayMilestone(90, 110), 100)
+  assert.equal(quizDayMilestone(100, 130), 0)
+  assert.equal(quizDayMilestone(180, 320), 300)
+  assert.equal(quizDayMilestone(0, 40), 0)
+})
