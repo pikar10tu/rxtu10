@@ -65,9 +65,13 @@ export function useTower() {
     if (won) {
       const nextFloor = cleared + 1   // Endless — ไม่ตันที่ TOWER_MAX
       const nextBest = Math.max(best.value, cleared)
+      // 🪨 ศิลาจารึก: ยอดสูงสุดต่อซีซั่นที่เกิน 100 → users.towerRecords[season] (รีเซตซีซั่นไม่แตะ · roster พ่วงเป็น th)
+      const season = currentSeasonId()
+      const recs = auth.userData?.towerRecords || {}
+      const newRec = cleared > TOWER_MAX && cleared > (recs[season] || 0)
       await auth.patchUser(
-        { towerFloor: nextFloor, towerBest: nextBest },
-        { towerFloor: nextFloor, towerBest: nextBest },
+        { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { towerRecords: { ...recs, [season]: cleared } } : {}) },
+        { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { [`towerRecords.${season}`]: cleared } : {}) },
       )
       // ข่าวกระดาน: ชั้นลงท้าย 0 เข้าเลน roster · ชั้นสุดท้ายไปเลน news (อยู่ยาว) และไม่ยิงซ้ำ
       // ⚠️ ใช้ `cleared` ที่หยิบไว้ก่อน patchUser — floor.value ตอนนี้เป็นชั้นถัดไปแล้ว (CLAUDE.md ข้อ 9)

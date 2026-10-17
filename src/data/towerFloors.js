@@ -8,10 +8,10 @@ import { currentSeasonId } from '../utils/pvpSeason.js'
 
 export const TOWER_MAX = 100   // "ยอดหอคอย" (ฉายา/ข่าว/รางวัลซีซั่น) — เกินจากนี้ = Endless ไต่ต่อได้ไม่จำกัด
 
-// 🏯 Endless (user เคาะ 17 ต.ค. 2026): ชั้น 101+ = ทีมแบบชั้น 70–100 (legendary V) แต่บอทคูณ atk/hp ชั้นละ +0.5%
+// 🏯 Endless (user เคาะ 17 ต.ค. 2026): ชั้น 101+ = ทีมแบบชั้น 70–100 (legendary V) แต่บอทคูณ atk/hp ชั้นละ +0.25% (user ลดจาก 0.5%)
 //    ซิม 17 ต.ค.: ทีม legendary V ที่ดีที่สุด ชนะ ~90% @+0% · ~40% @+15% (ชั้น 130) · ~3% @+30% (ชั้น 160)
-//    ไต่ซ้ำได้ฟรี ⇒ กำแพงนุ่มราวชั้น 150–160 · ไม่เพิ่มรายได้ idle (BONUS_CAP_FLOOR เดิม)
-export const ENDLESS_BOOST_PER_FLOOR = 0.005
+//    ไต่ซ้ำได้ฟรี ⇒ ที่ 0.25%: ชั้น 160 ≈ 40% · ชั้น 220 ≈ 3% (กำแพงนุ่มราว 200–220) · ไม่เพิ่มรายได้ idle (BONUS_CAP_FLOOR เดิม)
+export const ENDLESS_BOOST_PER_FLOOR = 0.0025
 export const endlessBoost = (f) => f > TOWER_MAX ? 1 + ENDLESS_BOOST_PER_FLOOR * (Math.floor(f) - TOWER_MAX) : 1
 
 const ELS = ['fist', 'scissors', 'paper']

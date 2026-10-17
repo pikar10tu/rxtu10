@@ -75,6 +75,8 @@ export function buildRosterRow(u, prev) {
     pm: d.photoMini ?? null,
     g:  d.guestStatus ?? null,
     tb: num(d.towerBest, 0),
+    // ศิลาจารึกหอคอย: { 'YYYY-MM': ชั้นสูงสุดที่เกิน 100 } ข้ามซีซั่น — ใส่เฉพาะเมื่อมี
+    ...(d.towerRecords && Object.keys(d.towerRecords).length ? { th: d.towerRecords } : {}),
     // เรต "ของซีซั่นปัจจุบัน" — ไม่ใช่เรตดิบ เพราะ soft-reset จะถูกเขียนจริงต่อเมื่อเจ้าตัวบุกครั้งแรกของเดือน
     // ถ้าเขียนดิบ วันที่ 1 ของเดือน เจ้าตัวเห็นเรตบีบแล้วแต่ทั้งชั้นปียังเห็นเรตเดือนก่อน (คนเลิกเล่นค้างถาวร)
     r:  num(pvp.rating, PVP_RATING_START),

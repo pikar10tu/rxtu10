@@ -161,9 +161,9 @@ test('towerBonusGain: ไต่ทีละชั้นจาก 0 ถึงเ�
   assert.equal(sum, getTowerBonus(BONUS_CAP_FLOOR))
 })
 
-test('Endless: ชั้น ≤100 ไม่มี boost · 101+ คูณชั้นละ 0.5% · legendary V', () => {
+test('Endless: ชั้น ≤100 ไม่มี boost · 101+ คูณชั้นละ 0.25% · legendary V', () => {
   assert.ok(getFloorTeam(100).every(p => !p.boost))
   const t = getFloorTeam(150)
-  assert.ok(t.every(p => p.rarity === 'legendary' && p.grade === 5 && Math.abs(p.boost - 1.25) < 1e-9))
+  assert.ok(t.every(p => p.rarity === 'legendary' && p.grade === 5 && Math.abs(p.boost - 1.125) < 1e-9))
   assert.notDeepEqual(getFloorTeam(150).map(p => p.id + p.element), getFloorTeam(100).map(p => p.id + p.element))
 })

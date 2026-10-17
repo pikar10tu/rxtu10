@@ -25,8 +25,8 @@
           </div>
         </div>
         <div v-if="zone.endless" class="tw-max-cue">
-          <div class="tw-max-cue-l1">ห้วงนิรันดร์ — บอทแกร่งขึ้นชั้นละ +{{ boostPct }}% (ตอนนี้ +{{ ((endlessBoost(floor) - 1) * 100).toFixed(1) }}%)</div>
-          <div class="tw-max-cue-l2">ไต่ได้ไม่จำกัด · ทุก 10 ชั้นมีของรางวัลเล็กๆ · แพ้ได้ลองใหม่ฟรี</div>
+          <div class="tw-max-cue-l1"><Emoji char="🌌" /> เพ็ทศัตรูได้รับผลกระทบจากห้วงลึก สเตตัสเปลี่ยนไป</div>
+          <div class="tw-max-cue-l2">พลังโจมตี/พลังชีวิต +{{ ((endlessBoost(floor) - 1) * 100).toFixed(2).replace(/\.?0+$/, '') }}% · ยิ่งลึกยิ่งแรง ชั้นละ +{{ boostPct }}% · ทุก 10 ชั้นมีรางวัล</div>
         </div>
         <div v-else-if="zone.royal" class="tw-max-cue">
           <div class="tw-max-cue-l1">พลังบอทช่วงนี้ตันแล้ว (เกรด V ทุกตัว)</div>
@@ -97,20 +97,8 @@
         <button class="tw-rival-all" @click="rankOpen = true">ดูอันดับทั้งหมด ({{ rivals.total }})</button>
       </div>
 
-      <!-- 🏛️ จารึกหอคอย — สถิติเกินชั้น 100 ข้ามซีซั่น (roster/current.towerHall · แอดมินบันทึกตอนแจกรางวัลซีซั่น) -->
-      <div v-if="hall.length" class="tw-rival tw-hall">
-        <div class="tw-rival-head">
-          <span><Emoji char="🏛️" /> จารึกหอคอย</span>
-          <span class="tw-rival-rank">คนที่เคยไต่เกินชั้น 100 · ไม่หายตอนรีเซต</span>
-        </div>
-        <ol class="tw-rival-list">
-          <li v-for="(e, i) in hall" :key="e.uid" class="tw-rival-row" :class="{ 'tw-rival-me': e.uid === meUid }">
-            <span class="tw-rival-medal">{{ medal(i + 1) }}</span>
-            <span class="tw-rival-name">{{ e.name }} <small class="tw-hall-s">ซีซั่น {{ seasonMonthLabel(e.season, true) }}</small></span>
-            <span class="tw-rival-floor">ชั้น {{ e.floor }}</span>
-          </li>
-        </ol>
-      </div>
+      <!-- 🪨 ศิลาจารึก — ยอดเกิน 100 ต่อคนต่อซีซั่น ข้ามการรีเซต (0 read เพิ่ม · roster rows) -->
+      <TowerStele :rows="membersStore.rosterRows" :me="meUid" />
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
@@ -144,7 +132,7 @@ import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
 import HelpButton from '../components/help/HelpButton.vue'
-import { seasonMonthLabel } from '../utils/pvpSeason.js'
+import TowerStele from '../components/tower/TowerStele.vue'
 import TowerPath from '../components/tower/TowerPath.vue'
 import SeasonCountdown from '../components/shared/SeasonCountdown.vue'
 import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
@@ -155,7 +143,6 @@ import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
-const hall = computed(() => membersStore.rosterTowerHall || [])
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
 loadMsOpen()
 const msBusy = ref(false)
@@ -213,7 +200,7 @@ const holdPath    = ref(false)
 const displayFloor = ref(floor.value)
 // เส้นทางไต่: 100 แถวเดิม · เกินยอดแล้วต่อแถวทีละ 10 ชั้นให้เห็นขั้นรางวัลถัดไปเสมอ
 const pathMax = computed(() => Math.max(TOWER_MAX, Math.ceil((displayFloor.value + 1) / 10) * 10))
-const boostPct = (ENDLESS_BOOST_PER_FLOOR * 100).toFixed(1)
+const boostPct = String(ENDLESS_BOOST_PER_FLOOR * 100)
 const displayBest  = ref(best.value)
 
 watch([floor, best], ([f, b]) => {
@@ -322,7 +309,6 @@ function onSheetFight() {
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }
 .tw-login { text-align: center; color: var(--muted); padding: 30px 0; font-size: .85rem; }
 
-.tw-hall-s { font-size: .68rem; font-weight: 600; color: var(--muted); }
 .tw-rival { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
 .tw-rival-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
 .tw-rival-head > span:first-child { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); flex-shrink: 0; }

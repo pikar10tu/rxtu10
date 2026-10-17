@@ -515,7 +515,6 @@ import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
 import { computeSeasonRewards, seasonRewardMails } from '../utils/seasonRewards.js'
 import { buildHof } from '../utils/pvpGuide.js'
-import { mergeTowerHall } from '../utils/towerHall.js'
 import { getArena } from '../data/arenas.js'
 import { currentSeasonId, seasonMonthLabel } from '../utils/pvpSeason.js'
 import { PVP_RATING_START } from '../utils/pvpRating.js'
@@ -742,14 +741,6 @@ async function paySeason() {
       if (hof) await updateDoc(doc(db, 'roster', 'current'), { hof })
       usage.track(1, hof ? 1 : 0)
     } catch (e) { console.error('[season hof]', e) }
-    // 🏛️ จารึกหอคอย — คนที่ไต่เกิน 100 ซีซั่นนี้ (towerBest ก่อนรีเซต จาก spUserDocs) · สะสมข้ามซีซั่น · พลาดไม่ขวางการแจก
-    try {
-      const rs = await getDoc(doc(db, 'roster', 'current'))
-      const users = spUserDocs.map(d => { const x = d.data(); return { uid: d.id, nickname: stripTrailingEmoji(x.nickname || x.name?.split(' ')[0] || '') || '?', towerBest: x.towerBest || 0 } })
-      const towerHall = mergeTowerHall(rs.data()?.towerHall || null, users, season)
-      if (towerHall.length) await updateDoc(doc(db, 'roster', 'current'), { towerHall })
-      usage.track(1, towerHall.length ? 1 : 0)
-    } catch (e) { console.error('[season towerHall]', e) }
     await setDoc(payRef, { [season]: { status: 'done', mails: p.mails, at: serverTimestamp() } }, { merge: true })
     usage.track(1, ops.length + 2)
     toast(`แจกรางวัลซีซั่น ${label} แล้ว ${p.mails} ฉบับ`, 'success')
@@ -850,8 +841,7 @@ async function rebuildRoster() {
     const rows = buildRosterFromUsers(snap.docs.map(d => ({ uid: d.id, data: d.data() })), prevRows)
     // hof (ท็อป 3 ซีซั่นที่แล้ว) ไม่ได้อยู่ใน user doc — พ่วงต่อ ไม่งั้นกดทีนึงไกด์สนามหาย
     const hof = prev.exists() ? (prev.data().hof || null) : null
-    const towerHall = prev.exists() ? (prev.data().towerHall || null) : null   // จารึกหอคอยก็เหมือนกัน
-    await setDoc(doc(db, 'roster', 'current'), { rows, updatedAt: serverTimestamp(), ...(hof ? { hof } : {}), ...(towerHall ? { towerHall } : {}) })
+    await setDoc(doc(db, 'roster', 'current'), { rows, updatedAt: serverTimestamp(), ...(hof ? { hof } : {}) })
     usage.track(0, 1)
     toast(`สร้าง roster แล้ว ${Object.keys(rows).length} คน`, 'success')
   } catch (e) {
