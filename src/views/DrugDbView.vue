@@ -1,5 +1,5 @@
 <!-- src/views/DrugDbView.vue — ฐานข้อมูลยา (17 ต.ค. 2026)
-     การ์ดยาภาษาไทยสรุปจากฉลาก FDA (DailyMed) · ข้อมูล data/drugDb.json สร้างจาก D:\RXTU\drugdb
+     ข้อมูลยาภาษาไทย จากฐานข้อมูล DailyMed (US FDA) · ข้อมูล data/drugDb.json สร้างจาก D:\RXTU\drugdb
      ปิดด้วย flag drugDbOpen — ตอนนี้แอดมินเห็นคนเดียว · ข้อความในการ์ดมี <b> ของเราเอง (v-html ปลอดภัย ไม่มี input ผู้ใช้) -->
 <template>
   <div class="tab-content dd-wrap">

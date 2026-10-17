@@ -300,7 +300,7 @@ const DOORS = computed(() => [
   { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: 'สรุปโรคจากเพื่อน RxTU10', badge: 0 },
   { key: 'flash', emoji: '🧠', title: 'แฟลชการ์ด',   sub: `ทบทวนกลุ่มยา ${DECK.length} ตัว`, badge: queueSize.value || 0 },
   { key: 'tool',  emoji: '🧮', title: 'เครื่องคำนวณ', sub: 'CrCl · ยาน้ำเด็ก', badge: 0 },
-  { key: 'drug',  emoji: '💊', title: 'ฐานข้อมูลยา', sub: 'การ์ดยาภาษาไทย สรุปจากฉลาก FDA', badge: 0, soon: !drugDbOpen.value },
+  { key: 'drug',  emoji: '💊', title: 'ฐานข้อมูลยา', sub: 'ข้อมูลยาภาษาไทย จากฐานข้อมูล DailyMed (US FDA)', badge: 0, soon: !drugDbOpen.value },
 ])
 const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
 const TOOLS = [
