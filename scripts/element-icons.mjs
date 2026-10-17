@@ -19,34 +19,31 @@ export const EL_ART = {
   paper:    { c: '#3b82f6', l: '#93c5fd', d: '#1e3a8a' },
 }
 
-const finger = (x, y, w, len, rot = 0) =>
-  `<rect x="${x - w / 2}" y="${y - len}" width="${w}" height="${len + w / 2}" rx="${w / 2}" transform="rotate(${rot} ${x} ${y})"/>`
-
-// รูปทรงมือ (กรอบ 48×48) — วาดชุดเดียว ใช้สองรอบ: รอบแรก stroke หนาเป็นขอบ รอบสองเติมขาว ⇒ ขอบรวมเนียน
+// รูปทรงมือ (กรอบ 48×48, แกนกลาง x=24) — วาดชุดเดียว ใช้สองรอบ: รอบแรก stroke หนาเป็นขอบ รอบสองเติมขาว ⇒ ขอบรวมเนียน
+// 17 ต.ค. รอบ 2: user ติ "นิ้วเบี้ยว" → นิ้วกว้างเท่ากัน เรียงตรง สมมาตรรอบแกนกลาง (เลิกหมุนนิ้วทีละท่อน)
+const rr = (x, y, w, h, r) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}"/>`
+const PALM = rr(13, 21, 22, 17, 7) + rr(17.5, 34, 13, 9, 2.5)            // ฝ่ามือ + ข้อมือ
+const fingersUp = (xs, tops, w = 5.6) => xs.map((x, i) => rr(x - w / 2, tops[i], w, 26 - tops[i], w / 2)).join('')
 const HAND = {
-  // ✊ ค้อน — กำปั้น 4 ข้อนิ้ว + นิ้วโป้งพาดหน้า
+  // ✊ ค้อน — 4 ข้อนิ้วงอ เท่ากัน + นิ้วโป้งพาดขวาง
   fist: {
-    shapes: `<rect x="11" y="15" width="27" height="22" rx="8"/>`
-      + [14.6, 21.2, 27.8, 34.4].map(x => `<circle cx="${x}" cy="17" r="4.1"/>`).join('')
-      + `<rect x="17" y="33" width="15" height="9" rx="2"/>`
-      + `<path d="M10 27q1-5 7-5h12a3.6 3.6 0 0 1 0 7.2H17q-6 0-7-2.2Z"/>`,
-    lines: `<path d="M17.9 14.5v6M24.5 14.5v6M31.1 14.5v6" /><path d="M17 25.6h11"/>`,
+    shapes: rr(13, 14, 22, 24, 6.5) + [13, 18.5, 24, 29.5].map(x => rr(x, 12.5, 5.5, 12, 2.75)).join('')
+      + rr(17.5, 34, 13, 9, 2.5),
+    lines: [18.5, 24, 29.5].map(x => `<path d="M${x} 13.5v9"/>`).join(''),
+    over: rr(11.5, 24.5, 18.5, 6.6, 3.3),   // นิ้วโป้งพาดหน้า — วาดทับพร้อมขอบของตัวเอง ไม่งั้นกลืนกับกำปั้น
   },
-  // ✌️ กรรไกร — สองนิ้วชูเป็นตัว V + กำนิ้วที่เหลือ
+  // ✌️ กรรไกร — นิ้วชี้+กลางแยกเป็นตัว V สมมาตร + นิ้วโป้งพับทับนิ้วที่เหลือ
   scissors: {
-    shapes: finger(20, 25, 6.4, 18, -16) + finger(28, 25, 6.4, 18, 16)
-      + `<rect x="13" y="22" width="23" height="17" rx="7.5"/>`
-      + `<rect x="18" y="35" width="14" height="8" rx="2"/>`
-      + `<path d="M12 31q1-5 7-5h9a3.4 3.4 0 0 1 0 6.8H19q-6 0-7-1.8Z"/>`,
-    lines: `<path d="M24 23.5v4"/><path d="M19 29.4h8"/>`,
+    shapes: `<g transform="rotate(-11 21 26)">${rr(18.2, 7, 5.6, 21, 2.8)}</g><g transform="rotate(11 27 26)">${rr(24.2, 7, 5.6, 21, 2.8)}</g>`
+      + PALM,
+    lines: `<path d="M24 23v4"/>`,
+    over: rr(12.5, 28, 17.5, 6.4, 3.2),
   },
-  // ✋ กระดาษ — แบมือ 4 นิ้ว + นิ้วโป้งกาง
+  // ✋ กระดาษ — แบมือ 4 นิ้วตั้งตรง ปลายไล่ระดับธรรมชาติ + นิ้วโป้งกางเฉียงซ้าย
   paper: {
-    shapes: finger(16.4, 24, 5.4, 11, -8) + finger(21.6, 23, 5.6, 15, -3) + finger(27, 23, 5.6, 14.5, 3) + finger(32.2, 24, 5.2, 11, 9)
-      + finger(13, 31, 5.6, 11, -50)
-      + `<rect x="13" y="21" width="22" height="19" rx="8"/>`
-      + `<rect x="17" y="36" width="14" height="8" rx="2"/>`,
-    lines: ``,
+    shapes: fingersUp([15.9, 21.3, 26.7, 32.1], [8.5, 5.5, 6.5, 10]) + PALM
+      + `<g transform="rotate(-42 15 31)">${rr(12.2, 18, 5.6, 14, 2.8)}</g>`,
+    lines: [18.6, 24, 29.4].map((x, i) => `<path d="M${x} ${[9.5, 9, 11][i]}v13"/>`).join(''),
   },
 }
 
@@ -61,10 +58,11 @@ export function elementSVG(k) {
 <circle cx="24" cy="24" r="22" fill="url(#c)" stroke="${e.d}" stroke-width="1.6"/>
 <circle cx="24" cy="24" r="18.6" fill="none" stroke="#fff" stroke-width=".8" opacity=".28"/>
 <path d="M9 16a17 13 0 0 1 30 0" stroke="#fff" stroke-width="2.2" fill="none" opacity=".32" stroke-linecap="round"/>
-<g transform="translate(24 24.5) scale(.8) translate(-24.5 -28)">
+<g transform="translate(24 24.5) scale(.82) translate(-24 -25)">
   <g fill="${e.d}" stroke="${e.d}" stroke-width="3.4" stroke-linejoin="round">${h.shapes}</g>
   <g fill="url(#h)">${h.shapes}</g>
-  <g fill="none" stroke="${e.d}" stroke-width="1" stroke-linecap="round" opacity=".55">${h.lines}</g>
+  <g fill="none" stroke="${e.d}" stroke-width="1.1" stroke-linecap="round" opacity=".6">${h.lines}</g>
+  ${h.over ? `<g fill="url(#h)" stroke="${e.d}" stroke-width="1.3">${h.over}</g>` : ''}
 </g>
 </svg>`
 }
