@@ -152,6 +152,8 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
       // 🔒 sub = หมัดลูกใน beat เดียวกัน (cleave/multiStrike) — battleBeats ให้ timing ZERO
       //    ถ้าไม่ตั้ง flag นี้ ทุกเป้ารองจะกลายเป็น "จังหวะหมัด" ใหม่ = ไฟต์ยืดทันที (กฎเหล็กพัง)
       ...(sub ? { sub: true } : {}),
+      // 🤍 echo = หมัดตีซ้ำของมาสก์กระต่าย — รีเพลย์รวบทุกหมัดซ้ำให้ยาวรวมเท่าหมัดปกติ 1 หมัด (user 18 ต.ค. 2026) · แสดงผลล้วน
+      ...(tier?.echo ? { echo: true } : {}),
       // ดาเมจเชื้อที่ทะลุมาในหมัดนี้ แตกเป็นชั้นละก้อน — **ของฝั่งจอล้วน** (BattleReplay เด้งเลขย่อย
       // แล้วหักออกจากเลขหลัก เพื่อให้ผลรวมบนจอ = เลือดที่หายจริง) · ไม่มีใครเอาไปคิดดาเมจต่อ
       ...(hitRes.pierceHits?.length ? { pierceHits: hitRes.pierceHits } : {}),
@@ -286,7 +288,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     // 🤍 หมัดซ้ำของมาสก์ประกายแสง (กระต่าย) — เป้าเดิม beat เดิม · ไม่คริต (แบบเดียวกับ cleave)
     for (let i = 0; i < (mod.bonusHits || 0); i++) {
       if (tg.hp <= 0 || att.hp <= 0) break
-      if (strike(att, tg, foes, base * (mod.bonusPct / 100), { crit: false, eff }, true, forced)) killed = true
+      if (strike(att, tg, foes, base * (mod.bonusPct / 100), { crit: false, eff, echo: true }, true, forced)) killed = true
     }
     // เป้ารองของ cleave — ดาเมจลดตาม pct · ยังอยู่ beat เดียวกัน
     // ⚠️ ไม่ใช่หมัดที่ถูกบังคับ แม้เป้าหลักจะถูก taunt ดึงมาก็ตาม — ส่ง false เสมอ (สเปกงานย่อยนี้)

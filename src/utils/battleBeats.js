@@ -400,8 +400,35 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
     const t = out[i].timing
     out[i] = { ...out[i], duo: true, timing: { windup: t.windup * DUO_AIR, motion: t.motion * DUO_AIR, hitstop: t.hitstop * DUO_AIR, tail: t.tail * DUO_AIR } }
   }
+  // 🤍 หมัดตีซ้ำของมาสก์กระต่าย (echo) — หมัดแรกเล่นปกติ แล้วหมัดซ้ำทั้งหมดแบ่งเวลาของหมัดปกติ 1 หมัดกัน
+  //    (user 18 ต.ค. 2026: "ตีกี่ครั้งรวบให้เวลาเท่าหมัดปกติ 1 หมัด") · เดิม sub กินเวลา 0 = หมัดซ้ำลงพร้อมกันหมด
+  //    บีตที่มีหมัดปิดไฟต์อยู่ด้วย ปล่อยตามกฎ finishGroup เดิม (เวลาทั้งก้อนเป็นของใบปิดเกม)
+  spaceEchoes(out)
   const spread = spreadHits(out, hitSpread)
   return rng ? shuffleOpening(spread, openCut, rng) : spread
+}
+
+/** ให้เวลากับหมัด echo ในแต่ละบีต: รวมกันเท่าหมัด hit 1 หมัด แบ่งเท่าๆ กัน (แก้ array เดิม — เรียกจาก buildBeats เท่านั้น) */
+export function spaceEchoes(beats) {
+  const h = timingOf('hit')
+  const total = h.windup + h.motion + h.hitstop + h.tail
+  let group = []
+  const flush = () => {
+    const echoes = group.filter(i => beats[i].echo && beats[i].kind === 'sub')
+    if (echoes.length && !group.some(i => beats[i].kind === 'finish')) {
+      const each = total / echoes.length
+      for (const i of echoes) beats[i] = { ...beats[i], timing: { windup: 0, motion: 0, hitstop: each * 0.35, tail: each * 0.65 } }
+    }
+    group = []
+  }
+  for (let i = 0; i < beats.length; i++) {
+    const b = beats[i]
+    if (b.t !== 'attack') continue
+    if (!b.sub) flush()          // หมัดหลักใบใหม่ = เริ่มบีตใหม่
+    group.push(i)
+  }
+  flush()
+  return beats
 }
 
 /** แบ่งเวลาของหมัดปกติใหม่ตาม weight — ผลรวมเวลาของหมัดปกติทั้งไฟต์เท่าเดิมเป๊ะ (ไม่แก้ array เดิม) */
@@ -481,7 +508,9 @@ export function shuffleOpening(beats, openCut, rng) {
 /** คูณเวลาตาม pace (รสนิยม) และ ff (กดค้างเร่ง) — ไม่แก้ beat เดิม */
 export function scaleTiming(beat, { pace = 1, ff = false } = {}) {
   const t = (beat && beat.timing) || ZERO
-  const ffK = (ff && beat && beat.kind) ? (FF_SCALE[beat.kind] ?? 1) : 1
+  // 🤍 หมัดซ้ำกระต่าย (echo) เร่งตามหมัดปกติ — รวมกันต้องเท่า 1 หมัดทั้งตอนเล่นปกติและตอนเร่ง
+  const fk = beat?.echo && beat.kind === 'sub' ? 'hit' : beat?.kind
+  const ffK = (ff && fk) ? (FF_SCALE[fk] ?? 1) : 1
   const k = pace * ffK
   return { windup: t.windup * k, motion: t.motion * k, hitstop: t.hitstop * k, tail: t.tail * k }
 }

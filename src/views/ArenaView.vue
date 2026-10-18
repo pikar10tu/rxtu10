@@ -79,7 +79,7 @@
     </template>
     <div v-else class="ar-login">เข้าสู่ระบบเพื่อเล่น</div>
 
-    <TeamPicker v-model:open="pickOpen" />
+    <TeamPicker v-model:open="pickOpen" context="สนามประลอง · ทีมนี้ใช้ทั้งบุกและตั้งรับ" done-label="เสร็จ" @done="pickOpen = false" />
     <ArenaSheet v-model:open="arenaOpen" />
     <BattleReplay :data="replay" theme="arena" @close="replay = null">
       <!-- 💊 ยาแก้แพ้: แพ้แล้วกดใช้ได้เฉพาะบนจอนี้ -->

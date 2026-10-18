@@ -114,7 +114,7 @@
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
-    <TeamPicker v-model:open="pickOpen" :enemies="botTeam" :enemy-label="`ศัตรูชั้น ${floor}`" />
+    <TeamPicker v-model:open="pickOpen" :enemies="botTeam" :enemy-label="`ศัตรูชั้น ${floor}`" :context="`หอคอยชั้น ${floor}`" :done-label="fightLabel" @done="pickOpen = false; onFight()" />
     <TowerRankSheet v-model:open="rankOpen" :rows="rivals ? rivals.all : []" />
     <BattleReplay :data="replay" theme="tower" exitable :exit-label="autoOn ? 'หยุดไต่รวด ✕' : 'ออก ✕'" @close="onReplayClose" @done="onReplayDone" />
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />

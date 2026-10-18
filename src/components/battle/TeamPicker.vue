@@ -1,127 +1,121 @@
-<!-- TeamPicker — จัดทีม (= activePets, 3 ช่องคงที่ = BATTLE_SLOTS) ใช้ร่วมหอคอย+สนามประลอง+หน้าเพ็ท
-     โมเดล "ช่องคือเคอร์เซอร์" (ref: Epic Seven / Summoners War / Honkai Star Rail / FEH):
-       · แตะช่อง = ย้ายเคอร์เซอร์ไปช่องนั้น (แค่นั้น ไม่เด้งโมดัล)
-       · แตะการ์ดในคลัง = ลงช่องที่เคอร์เซอร์อยู่ — ทีมเต็มก็ยังกดได้ = สลับตัวทันที
-       · ปุ่ม ⋯ มุมช่อง = เปิดหน้าข้อมูลเพ็ท (ดู/วิวัฒน์/ถอด)
-     เดิมแตะช่อง = เปิดโมดัล แต่แตะคลัง = สลับเข้า/ออก ทั้งที่หน้าตาเป็นปุ่มเหมือนกัน → ผู้เล่นงง
-     และทีมเต็มแล้วคลังจะจางกดไม่ได้ทั้งแถบ โดยไม่บอกว่าต้องไปถอดตัวเก่าก่อน
-     ตรรกะช่องอยู่ที่ utils/teamSlots.js (pure + มีเทส) — ที่นี่เหลือแค่ผูกสาย -->
+<!-- TeamPicker — จัดทีม (= activePets, 3 ช่องคงที่ = BATTLE_SLOTS) ใช้ร่วม /team + หอคอย + สนามประลอง + หน้าฉัน
+     รีเวิร์ค 18 ต.ค. 2026 (user เคาะจากเดโม · อ้าง 7DS Grand Cross): หน้าทีม = ทีมล้วน ไม่มีคลังกางให้เผลอกด
+       · แตะช่อง  = หน้าต่างเลือกตัว (PetPickSheet) ตัวเดิมอยู่ช่องแรกเสมอ · เทียบก่อนกดยืนยัน
+       · กดค้าง  = การ์ดเต็มแบบดูอย่างเดียว (PetDetailModal peek)
+       · ลาก     = สลับตำแหน่งในทีม (ขยับก่อนครบเวลากดค้าง = ลาก — composables/usePress.js)
+       · ใต้ช่อง (เว้นห่าง) = ATK / HP / ชื่อสกิล + Lv.1 — Lv.1 โชว์ที่นี่ที่เดียว (ใบ้ระบบเลเวลสกิลที่จะมา · ห้ามใส่ในการ์ด)
+     ไม่ใช่ inline (เปิดจากหอคอย/สนาม/หน้าฉัน) = หน้าเต็มจอ ไม่ใช่แผ่นเลื่อน — กันแผ่นซ้อนแผ่นซ้อนการ์ด 3 ชั้น
+     ชั้น: หน้าเต็มจอ z400 · หน้าต่างเลือกตัว z405 · การ์ด z410 · ตัวลาก z420 · Esc ปิดทีละชั้นจากบนสุด -->
 <template>
-  <component :is="inline ? InlineBox : BottomSheet" :open="open" icon="⚔️" title="จัดทีมต่อสู้" @update:open="$emit('update:open', $event)">
-    <!-- ทีม 1/2/3 (utils/teamPresets.js) — ทีมที่ "ใช้อยู่" คือทีมเดียวที่ลงทุกที่เหมือนเดิม · ชุดอื่นจัดเก็บไว้สลับได้ -->
-    <div class="tp-presets" role="tablist" aria-label="ทีมที่จัดไว้">
-      <button v-for="(p, i) in presets.presets" :key="i" type="button" role="tab" class="tp-preset"
-        :class="{ on: viewIdx === i }" :aria-selected="viewIdx === i" @click="viewIdx = i">
-        <span class="tp-preset-n">ทีม {{ i + 1 }}</span>
-        <span v-if="!inline" class="tp-preset-faces"><template v-if="p.length"><Emoji v-for="id in p" :key="id" :char="defOf(id).emoji" /></template><template v-else>ว่าง</template></span>
-        <span v-if="presets.idx === i" class="tp-preset-use">ใช้อยู่</span>
-      </button>
-    </div>
-    <button v-if="viewIdx !== presets.idx" type="button" class="tp-use" :disabled="!presets.presets[viewIdx].length" @click="useThis">
-      {{ presets.presets[viewIdx].length ? 'ใช้ทีมนี้' : 'ใส่เพ็ทก่อนถึงจะใช้ทีมนี้ได้' }}
-    </button>
+  <Teleport to="body" :disabled="inline">
+    <div v-if="inline || open" :class="inline ? 'tp-inline' : 'tp-full'">
+      <div v-if="!inline" class="tp-bar">
+        <button type="button" class="tp-back" aria-label="กลับ" @click="close">‹</button>
+        <div class="tp-bar-t">
+          <b><Emoji char="⚔️" /> จัดทีม</b>
+          <small v-if="context">{{ context }}</small>
+        </div>
+      </div>
 
-    <!-- ศัตรูที่จะเจอ (เปิดจากหอคอย) — จัดทีมได้โดยไม่ต้องปิดออกไปดู · ป้ายชนะทาง/แพ้ทางบนการ์ดคลังนับจากแถวนี้ -->
-    <div v-if="enemies.length" class="tp-foes">
-      <span class="tp-foes-l">{{ enemyLabel }}</span>
-      <span v-for="(e, i) in enemies" :key="i" class="tp-foe">
-        <Emoji :char="defOf(e.id).emoji" /><span class="tp-foe-el"><Emoji :char="ELEMENTS[e.element]?.icon || 'el:fist'" /></span>
-      </span>
-    </div>
-    <!-- วิธีเลือกแบบเดียวกับตู้โชว์ (utils/slotEdit.js): แตะช่อง = เลือก · แตะอีกช่อง = สลับ · ✕ = เอาออก
-         ใส่เสร็จ = เลิกเลือก (ไม่กระโดดเอง) · เต็มแล้วต้องเลือกช่องก่อน ถึงจะแทน (ไม่แทนเงียบๆ) -->
-    <div class="tp-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, minmax(0, 96px))` }">
-      <div v-for="(id, i) in edit.slots" :key="i" class="tp-slotwrap">
-        <button
-          type="button" class="tp-slot" :class="{ filled: id, sel: edit.sel === i, target: pendingId }"
-          :style="id ? { '--rc': rarityColor(id) } : null"
-          :aria-pressed="edit.sel === i"
-          :aria-label="id ? `ช่อง ${i + 1} ${defOf(id).name}` : `ช่อง ${i + 1} ว่าง`"
-          @click="onSlot(i)"
-        >
-          <span class="tp-slotno">{{ i + 1 }}</span>
-          <template v-if="id">
-            <PetThumb :pet="slotPetOf(id)" :stats="false" />
-            <span class="tp-slotname">{{ displayName(id, defOf(id).name, teamNow) }}</span>
-            <!-- ATK/HP แบบหน้ารีเพลย์ (เลขดิบ ยังไม่รวมบัฟทีม — user สั่ง 3 ต.ค.) -->
-            <span class="tp-stats"><span class="tp-atk">{{ statOf(slotPetOf(id)).atk }}</span><span class="tp-hp">{{ statOf(slotPetOf(id)).hp }}</span></span>
-            <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
-          </template>
-          <span v-else class="tp-empty">＋</span>
+      <div :class="inline ? '' : 'tp-scroll'">
+        <!-- ทีม 1/2/3 (utils/teamPresets.js) — ทีมที่ "ใช้อยู่" คือทีมเดียวที่ลงทุกที่ · ชุดอื่นจัดเก็บไว้สลับได้ -->
+        <div class="tp-presets" role="tablist" aria-label="ทีมที่จัดไว้">
+          <button v-for="(p, i) in presets.presets" :key="i" type="button" role="tab" class="tp-preset"
+            :class="{ on: viewIdx === i }" :aria-selected="viewIdx === i" @click="viewIdx = i">
+            <span class="tp-preset-n">ทีม {{ i + 1 }}</span>
+            <span v-if="presets.idx === i" class="tp-preset-use">ใช้อยู่</span>
+          </button>
+        </div>
+        <button v-if="viewIdx !== presets.idx" type="button" class="tp-use" :disabled="!presets.presets[viewIdx].length" @click="useThis">
+          {{ presets.presets[viewIdx].length ? 'ใช้ทีมนี้' : 'ใส่เพ็ทก่อนถึงจะใช้ทีมนี้ได้' }}
         </button>
-        <button v-if="id" type="button" class="tp-x" :aria-label="`เอา ${defOf(id).name} ออกจากทีม`" @click.stop="onRemove(i)">✕</button>
-        <button v-if="id" type="button" class="tp-more" :aria-label="`ดูข้อมูล ${defOf(id).name}`" @click.stop="detailId = id">ⓘ</button>
+
+        <!-- ศัตรูที่จะเจอ (เปิดจากหอคอย) · ป้ายชนะทาง/แพ้ทางอยู่ในหน้าต่างเลือกตัว -->
+        <div v-if="enemies.length" class="tp-foes">
+          <span class="tp-foes-l">{{ enemyLabel }}</span>
+          <span v-for="(e, i) in enemies" :key="i" class="tp-foe">
+            <Emoji :char="defOf(e.id).emoji" /><span class="tp-foe-el"><Emoji :char="ELEMENTS[e.element]?.icon || 'el:fist'" /></span>
+          </span>
+        </div>
+
+        <template v-if="owned.length">
+          <div class="tp-slots">
+            <div
+              v-for="(id, i) in edit.slots" :key="i"
+              class="tp-slot" :class="{ filled: id, drop: dropAt === i, dragging: dragFrom === i }"
+              :data-slot="i" tabindex="0" role="button"
+              :style="id ? { '--rc': rarityColor(id) } : null"
+              :aria-label="id ? `ช่อง ${i + 1} ${defOf(id).name} — แตะเพื่อเปลี่ยนตัว` : `ช่อง ${i + 1} ว่าง — แตะเพื่อใส่`"
+              v-on="slotPress[i]"
+            >
+              <span class="tp-slotno">{{ i + 1 }}</span>
+              <template v-if="id">
+                <!-- รูปใหญ่เต็มการ์ด (WebP 256px ละเอียดพอ) แทน PetThumb ย่อ — user บอก 18 ต.ค. ตัวเล็กไป -->
+                <span class="tp-el"><Emoji :char="ELEMENTS[defOf(id).element]?.icon || 'el:fist'" /></span>
+                <span v-if="slotPetOf(id).grade" class="tp-gr">{{ GRADE_LABELS[slotPetOf(id).grade] }}</span>
+                <span class="tp-face"><Emoji :char="defOf(id).emoji" /></span>
+                <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
+              </template>
+              <span v-else class="tp-empty">＋</span>
+            </div>
+          </div>
+          <p class="tp-howto">แตะ = เปลี่ยนตัว · กดค้าง = ดูการ์ด · ลาก = สลับตำแหน่ง · ช่อง 1 ออกตีก่อน</p>
+
+          <div v-if="synergy.length" class="tp-syn">
+            <span v-for="s in synergy" :key="s.key" class="tp-syn-chip" :class="{ off: !s.ok }">
+              <Emoji :char="s.icon" /> {{ s.text }}
+            </span>
+          </div>
+
+          <!-- สเตตัสใต้ทีม (แบบ 7DS) — ตั้งใจเว้นห่างจากการ์ด · เปิดหน้าต่างเลือกตัวแล้วโดนบังได้ ไม่เป็นไร -->
+          <div class="tp-stats">
+            <div v-for="(id, i) in edit.slots" :key="i" class="tp-stat">
+              <template v-if="id">
+                <div class="tp-stat-name">{{ displayName(id, defOf(id).name, teamNow) }}</div>
+                <div class="tp-stat-row"><span>ATK</span><b>{{ statOf(slotPetOf(id)).atk }}</b></div>
+                <div class="tp-stat-row"><span>HP</span><b>{{ statOf(slotPetOf(id)).hp }}</b></div>
+                <div class="tp-stat-sk">{{ passiveOf({ id })?.name || 'ไม่มีทักษะ' }} <span v-if="passiveOf({ id })" class="tp-lv">Lv.1</span></div>
+              </template>
+              <div v-else class="tp-stat-empty">—</div>
+            </div>
+          </div>
+        </template>
+        <div v-else class="tp-none">
+          ยังไม่มีเพ็ท — ไปอัญเชิญตัวแรกก่อนนะ
+          <RouterLink to="/shop" class="tp-none-cta">ไปอัญเชิญเลย →</RouterLink>
+        </div>
+      </div>
+
+      <div v-if="!inline && doneLabel" class="tp-cta">
+        <button type="button" class="tp-cta-btn" :disabled="!activeIds.length" @click="emit('done')">{{ doneLabel }}</button>
       </div>
     </div>
+  </Teleport>
 
-    <div v-if="synergy.length" class="tp-syn">
-      <span v-for="s in synergy" :key="s.key" class="tp-syn-chip" :class="{ off: !s.ok }">
-        <Emoji :char="s.icon" /> {{ s.text }}
-      </span>
-    </div>
-
-    <!-- 3 ต.ค. 2026 ลดความรก: ข้อความสอนวิธีใช้เหลือบรรทัดเดียว (ไม่มีกล่อง) · กล่องสีขึ้นเฉพาะตอนกำลังเลือก/ถือตัว -->
-    <div class="tp-status" :class="{ warn: statusWarn, pend: pendingId, idle: statusIdle }">
-      {{ status }}
-      <button v-if="pendingId" type="button" class="tp-pend-x" @click="pendingId = null">ยกเลิก</button>
-    </div>
-
-    <!-- ฟิลเตอร์สายแยกแถว + ระดับ + เฉพาะในทีม (user เคาะ 3 ต.ค. 2026) · ใช้ร่วมกับหน้าคลัง (utils/petFilter.js) -->
-    <PetFilterBar v-if="owned.length" v-model="flt" :count="poolPets.length" :compact="inline" />
-    <div class="tp-pool">
-      <button
-        v-for="p in poolPets" :key="p.id"
-        class="tp-pet" :class="{ active: slotNoOf(p.id) > 0, away: expeditionIds.has(p.id), pending: pendingId === p.id }"
-        :style="{ '--rc': rarityColor(p.id) }"
-        :aria-label="defOf(p.id).name"
-        @click="pick(p.id)"
-      >
-        <span v-if="expeditionIds.has(p.id)" class="tp-away"><Emoji char="🗺️" /></span>
-        <span v-else-if="slotNoOf(p.id) > 0" class="tp-inteam">ช่อง {{ slotNoOf(p.id) }}</span>
-        <span class="tp-el"><Emoji :char="elEmoji(p.id)" /></span>
-        <span class="tp-emoji"><Emoji :char="defOf(p.id).emoji" /></span>
-        <span class="tp-name">{{ defOf(p.id).name }}</span>
-        <PetStatLine :pet="p" />
-        <span v-if="enemies.length && (mu(p.id).win || mu(p.id).lose)" class="tp-mu">
-          <i v-if="mu(p.id).win" class="w">ชนะทาง {{ mu(p.id).win }}</i>
-          <i v-if="mu(p.id).lose" class="l">แพ้ทาง {{ mu(p.id).lose }}</i>
-        </span>
-        <!-- เลือกช่องที่มีเพ็ทอยู่ = เทียบ ATK/HP กับตัวเดิม (ไม่มีเลข "พลังทีม" — user สั่ง 3 ต.ค.) -->
-        <span v-if="cmpOf(p)" class="tp-cmp">
-          <i :class="cmpOf(p).atk >= 0 ? 'up' : 'down'"><Emoji char="⚔️" />{{ cmpOf(p).atk >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).atk) }}</i>
-          <i :class="cmpOf(p).hp >= 0 ? 'up' : 'down'"><Emoji char="❤️" />{{ cmpOf(p).hp >= 0 ? '▲' : '▼' }}{{ Math.abs(cmpOf(p).hp) }}</i>
-        </span>
-      </button>
-      <div v-if="owned.length && !poolPets.length" class="tp-none">ไม่มีเพ็ทที่ตรงกับตัวกรอง</div>
-      <div v-if="!owned.length" class="tp-none">
-        ยังไม่มีเพ็ท — ไปอัญเชิญตัวแรกก่อนนะ
-        <RouterLink to="/shop" class="tp-none-cta">ไปอัญเชิญเลย →</RouterLink>
-      </div>
-    </div>
-
-    <PetDetailModal :pet-id="detailId" @close="detailId = null" />
-  </component>
+  <PetPickSheet
+    :open="sheetSlot !== null" :slot-index="sheetSlot ?? 0" :slots="edit.slots" :owned="owned" :favs="favs" :enemies="enemies"
+    @close="sheetSlot = null" @choose="onChoose" @remove="onRemove" @peek="peekId = $event"
+  />
+  <PetDetailModal :pet-id="peekId" peek @close="peekId = null" />
 </template>
 
 <script setup>
 import Emoji from '../shared/Emoji.vue'
-import BottomSheet from '../shared/BottomSheet.vue'
 import PetDetailModal from '../pets/PetDetailModal.vue'
-import PetStatLine from '../shared/PetStatLine.vue'
-import PetThumb from '../shared/PetThumb.vue'
+import PetPickSheet from './PetPickSheet.vue'
 import { useRosterSync } from '../../composables/useRosterSync.js'
 import { useToast } from '../../composables/useToast.js'
-import { computed, ref, watch, defineComponent, h } from 'vue'
-import PetFilterBar from '../pets/PetFilterBar.vue'
-import { filterPets, sortPets, statOf, DEFAULT_FILTER } from '../../utils/petFilter.js'
+import { pressHandlers } from '../../composables/usePress.js'
+import { fluentFile } from '../../utils/emoji.js'
+import { computed, ref, watch, onUnmounted } from 'vue'
+import { statOf } from '../../utils/petFilter.js'
 import { useAuthStore } from '../../stores/auth.js'
-import { getPetDef, RARITY, ELEMENTS } from '../../data/index.js'
+import { getPetDef, RARITY, ELEMENTS, GRADE_LABELS, passiveOf } from '../../data/index.js'
 import { BATTLE_SLOTS } from '../../data/residence.js'
 import { toSlots } from '../../utils/teamSlots.js'
-import { tapSlot, tapItem, removeAt, compact } from '../../utils/slotEdit.js'
+import { removeAt, compact } from '../../utils/slotEdit.js'
 import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForms.js'
 import { teamSynergy } from '../../utils/teamSynergy.js'
-import { matchupOf } from '../../utils/matchup.js'
 import { readPresets, editPresetPatch, usePresetPatch } from '../../utils/teamPresets.js'
 
 const props = defineProps({
@@ -130,99 +124,61 @@ const props = defineProps({
   // ศัตรูที่รู้ตัวแล้ว [{id, element}] — ว่าง = ไม่โชว์แถวศัตรู/ป้ายชนะทาง (สนามสุ่มคู่ ยังไม่รู้คู่ตอนจัดทีม)
   enemies: { type: Array, default: () => [] },
   enemyLabel: { type: String, default: 'ศัตรู' },
+  context: { type: String, default: '' },     // บรรทัดใต้หัว บอกว่ามาจากไหน เช่น "หอคอยชั้น 34"
+  doneLabel: { type: String, default: '' },   // ปุ่มล่างสุด เช่น "เริ่มสู้" — ว่าง = ไม่มีปุ่ม (กลับด้วย ‹)
 })
-const mu = (id) => matchupOf(defOf(id).element, props.enemies)
-// หน้าเต็ม /team ใช้กล่องเปล่าแทนแผ่นเลื่อน — ตรรกะเดียวกันทุกอย่าง
-const InlineBox = defineComponent({ name: 'InlineBox', inheritAttrs: false, setup: (_, { slots }) => () => h('div', { class: 'tp-inline' }, slots.default?.()) })
-defineEmits(['update:open'])
-
+const emit = defineEmits(['update:open', 'done'])
+const close = () => emit('update:open', false)
 
 const auth = useAuthStore()
 const { syncRosterRow } = useRosterSync()
 const { toast } = useToast()
-const detailId = ref(null)
 const owned = computed(() => auth.userData?.pets || [])
-// เพ็ทที่กำลังออกผจญภัย — เอาเข้าทีมไม่ได้จนกว่าจะกลับ (แต่ยังกดได้ เพื่อเด้งเหตุผลบอก)
-// ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ
-// ⇒ ไม่ล็อกเพ็ทที่ค้างสถานะ 'กำลังผจญภัย' อีก (จัดลงทีมได้เลย)
-const expeditionIds = computed(() => new Set())
-const battleSlots = computed(() => BATTLE_SLOTS)
+const favs = computed(() => auth.userData?.petFavs || [])
 const ownedIds = computed(() => new Set(owned.value.map(p => p.id)))
-// active เฉพาะตัวที่ยังครอบครอง ตัดให้ยาวไม่เกิน battleSlots
 const activeIds = computed(() =>
-  (auth.userData?.activePets || []).filter(id => id && ownedIds.value.has(id)).slice(0, battleSlots.value))
-const presets = computed(() => readPresets(auth.userData, ownedIds.value, battleSlots.value))
+  (auth.userData?.activePets || []).filter(id => id && ownedIds.value.has(id)).slice(0, BATTLE_SLOTS))
+const presets = computed(() => readPresets(auth.userData, ownedIds.value, BATTLE_SLOTS))
 const viewIdx = ref(0)   // ทีมที่กำลังดู/แก้ (ไม่จำเป็นต้องเป็นทีมที่ใช้อยู่)
-watch(() => props.open, (o) => { if (o) viewIdx.value = presets.value.idx }, { immediate: true })
+const shown = computed(() => props.inline || props.open)
 const viewIds = computed(() => presets.value.presets[viewIdx.value] || [])
-const slots = computed(() => toSlots(viewIds.value, battleSlots.value))
-/** ตัวนี้อยู่ช่องที่เท่าไหร่ (1-based) · 0 = ไม่ได้อยู่ในทีม */
-const slotNoOf = (id) => edit.value.slots.indexOf(id) + 1
 
-// สถานะแก้ไขในแผ่นนี้ — ช่องว่างค้างไว้ระหว่างแก้ (ตัวอื่นไม่เลื่อน) · บันทึกแบบตัดช่องว่าง (เอนจินต้องการทีมติดกัน)
-const edit = ref({ slots: [], sel: null })
-watch(() => props.open, (o) => { if (o) edit.value = { slots: slots.value.slice(), sel: null } }, { immediate: true })
-watch(viewIdx, () => { edit.value = { slots: slots.value.slice(), sel: null }; pendingId.value = null })
-// ทีมเปลี่ยนจากที่อื่น (เช่นกด ถอด ในหน้าข้อมูลเพ็ท ⓘ) → ตามให้ทัน · ของที่เราแก้เองตรงกันอยู่แล้ว ไม่รีเซ็ตช่องว่าง
+// สถานะแก้ไข — ช่องว่างค้างไว้ระหว่างแก้ (ตัวอื่นไม่เลื่อน) · บันทึกแบบตัดช่องว่าง (เอนจินต้องการทีมติดกัน)
+const edit = ref({ slots: [] })
+const sheetSlot = ref(null)
+const peekId = ref(null)
+watch(shown, (o) => {
+  if (!o) { sheetSlot.value = null; peekId.value = null; return }
+  viewIdx.value = presets.value.idx
+  edit.value = { slots: toSlots(viewIds.value, BATTLE_SLOTS) }
+}, { immediate: true })
+watch(viewIdx, () => { edit.value = { slots: toSlots(viewIds.value, BATTLE_SLOTS) }; sheetSlot.value = null })
+// ทีมเปลี่ยนจากที่อื่น → ตามให้ทัน · ของที่เราแก้เองตรงกันอยู่แล้ว ไม่รีเซ็ตช่องว่าง
 watch(viewIds, (ids) => {
-  if (ids.join() !== compact(edit.value.slots).join()) edit.value = { slots: toSlots(ids, battleSlots.value), sel: null }
+  if (ids.join() !== compact(edit.value.slots).join()) edit.value = { slots: toSlots(ids, BATTLE_SLOTS) }
 })
-
-const selId = computed(() => (edit.value.sel == null ? null : edit.value.slots[edit.value.sel]))
-const hasEmpty = computed(() => edit.value.slots.some(x => !x))
-const statusWarn = ref(false)
-// ทีมเต็ม + ยังไม่เลือกช่อง แล้วแตะเพ็ทในคลัง → "ถือ" ตัวนั้นไว้ แล้วแตะช่องไหนก็แทนช่องนั้นทันที
-// (เดิมขึ้นแค่ข้อความเตือน ต้องไปแตะช่องแล้วกลับมาแตะเพ็ทซ้ำ — user บอก 1 ต.ค. 2026 ว่าไม่สะดวก)
-const pendingId = ref(null)
-watch(() => props.open, () => { pendingId.value = null })
-const status = computed(() => {
-  if (pendingId.value) return `จะใส่ ${defOf(pendingId.value).name} · แตะช่องข้างบนที่อยากให้แทน`
-  const i = edit.value.sel
-  if (i != null && selId.value) return `เลือกช่อง ${i + 1} (${defOf(selId.value).name}) · แตะตัวข้างล่างเพื่อใส่แทน หรือแตะช่องอื่นเพื่อสลับ`
-  if (i != null) return `เลือกช่อง ${i + 1} (ว่าง) · แตะตัวข้างล่างเพื่อใส่`
-  // หน้าเต็ม (/team) มี "ช่อง 1 ออกตีก่อน" ที่หัวหน้าแล้ว · แผ่นเลื่อน (หอคอย/สนาม) ไม่มี ⇒ ใส่ไว้ตรงนี้
-  const lead = props.inline ? '' : 'ช่อง 1 ออกตีก่อน · '
-  return lead + (hasEmpty.value ? 'แตะตัวข้างล่างเพื่อใส่' : 'แตะตัวข้างล่างเพื่อแทน') + ' · แตะสองช่อง = สลับลำดับ'
-})
-const statusIdle = computed(() => !pendingId.value && edit.value.sel == null && !statusWarn.value)
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
 const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
-const rarityColor = (id) => RARITY[defOf(id).rarity]?.color || '#94a3b8'
-const elEmoji = (id) => ELEMENTS[defOf(id).element]?.icon || 'el:fist'
+const rarityColor = (id) => RARITY[slotPetOf(id).rarity || defOf(id).rarity]?.color || '#94a3b8'
 
-// ทีมตามลำดับออกตีจริง = ช่องที่มีเพ็ท เรียงตามช่อง
 // rarity อ่านแบบเดียวกับเอนจิน: inst.rarity || def.rarity || 'common' (resolveBattleTeam)
 const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({
-  id,
-  rarity: slotPetOf(id)?.rarity || defOf(id).rarity || 'common'
+  id, rarity: slotPetOf(id)?.rarity || defOf(id).rarity || 'common',
 })))
 const formOn = computed(() => degreeFormActive(teamNow.value))
 const synergy = computed(() => teamSynergy(edit.value.slots))
 
-/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา
- *  คืน {icon, text} แยกกัน (ไม่ใช่ string รวม) เพื่อให้ icon เดินผ่าน <Emoji> เสมอ — ไม่ใช่ OS glyph */
+/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา (icon แยกเพื่อเดินผ่าน <Emoji>) */
 function earthTag(i) {
   if (edit.value.slots[i] !== 'earth') return null
   if (formOn.value) return { icon: '🌗', text: 'องศา · นับเป็น common' }
-  const pos = edit.value.slots.slice(0, i).filter(Boolean).length
-  const s = seasonOfSlot(pos)
+  const s = seasonOfSlot(edit.value.slots.slice(0, i).filter(Boolean).length)
   return { icon: s.icon, text: s.label }
 }
 
-
-const flt = ref({ ...DEFAULT_FILTER })
-const poolPets = computed(() => sortPets(filterPets(owned.value, flt.value, edit.value.slots), flt.value.sort))
-function cmpOf(p) {
-  const cur = selId.value
-  if (!cur || cur === p.id) return null
-  const a = statOf(p), b = statOf(slotPetOf(cur))
-  return { atk: a.atk - b.atk, hp: a.hp - b.hp }
-}
-
 async function save(next) {
-  const i = viewIdx.value
-  const patch = editPresetPatch(presets.value, i, next)
+  const patch = editPresetPatch(presets.value, viewIdx.value, next)
   await auth.patchUser(patch, patch)
   if (patch.activePets) syncRosterRow()   // ทีมที่ใช้เปลี่ยน → คู่ต่อสู้ใน Arena ต้องเห็นทีมใหม่
 }
@@ -233,106 +189,155 @@ async function useThis() {
   if (ok) { syncRosterRow(); toast(`ใช้ทีม ${i + 1} แล้ว`, 'success') }
   else toast('เปลี่ยนทีมไม่สำเร็จ', 'error')
 }
-
-function apply(res) {
+function setSlots(next) {
   const before = compact(edit.value.slots).join()
-  edit.value = { slots: res.slots, sel: res.sel }
-  if (compact(res.slots).join() !== before) save(compact(res.slots))
+  edit.value = { slots: next }
+  if (compact(next).join() !== before) save(compact(next))
 }
-function onSlot(i) {
-  statusWarn.value = false
-  if (pendingId.value) {
-    const id = pendingId.value
-    pendingId.value = null
-    apply(tapItem({ slots: edit.value.slots, sel: i }, id))
-    return
+
+// เลือกจากหน้าต่าง: ตัวที่อยู่ช่องอื่นแล้ว = สลับช่องกัน · ตัวใหม่ = แทนตัวเดิม (ตัวเดิมออกจากทีม)
+function onChoose(id) {
+  const i = sheetSlot.value
+  if (i == null) return
+  const next = edit.value.slots.slice()
+  const at = next.indexOf(id)
+  if (at >= 0) { next[at] = next[i]; next[i] = id } else next[i] = id
+  sheetSlot.value = null
+  setSlots(next)
+}
+function onRemove() {
+  const i = sheetSlot.value
+  if (i == null) return
+  sheetSlot.value = null
+  setSlots(removeAt({ slots: edit.value.slots, sel: null }, i).slots)
+}
+
+// ── ลากสลับตำแหน่ง ──
+const dragFrom = ref(null)
+const dropAt = ref(null)
+let ghost = null
+const slotUnder = (x, y) => {
+  if (ghost) ghost.style.display = 'none'
+  const el = document.elementFromPoint(x, y)?.closest('[data-slot]')
+  if (ghost) ghost.style.display = ''
+  return el ? Number(el.dataset.slot) : null
+}
+function dragFor(i) {
+  return {
+    start(e) {
+      const id = edit.value.slots[i]
+      if (!id) return
+      dragFrom.value = i
+      ghost = document.createElement('div')
+      ghost.className = 'tp-ghost'
+      const src = fluentFile(defOf(id).emoji)   // WebP เท่านั้น (CLAUDE.md ข้อ 17) · ไม่มีไฟล์ = ตัวอักษรอีโมจิ
+      if (src) { const img = document.createElement('img'); img.src = src; img.alt = ''; ghost.appendChild(img) } else ghost.textContent = defOf(id).emoji
+      document.body.appendChild(ghost)
+      this.move(e)
+    },
+    move(e) {
+      if (!ghost) return
+      ghost.style.left = `${e.clientX}px`; ghost.style.top = `${e.clientY}px`
+      const j = slotUnder(e.clientX, e.clientY)
+      dropAt.value = (j != null && j !== i) ? j : null
+    },
+    end(_e, cancelled) {
+      const j = dropAt.value
+      ghost?.remove(); ghost = null
+      dragFrom.value = null; dropAt.value = null
+      if (cancelled || j == null || !edit.value.slots[i]) return
+      const next = edit.value.slots.slice();
+      [next[i], next[j]] = [next[j], next[i]]
+      setSlots(next)
+    },
   }
-  apply(tapSlot(edit.value, i))
 }
-function onRemove(i) { statusWarn.value = false; pendingId.value = null; apply(removeAt(edit.value, i)) }
-function pick(id) {
-  if (expeditionIds.value.has(id)) {
-    toast(`${defOf(id).name} กำลังออกผจญภัย — รอกลับมาก่อนถึงจะจัดลงทีมได้`, 'info')
-    return
-  }
-  statusWarn.value = false
-  if (pendingId.value === id) { pendingId.value = null; return }   // แตะตัวที่ถืออยู่ซ้ำ = ยกเลิก
-  pendingId.value = null
-  const res = tapItem(edit.value, id)
-  if (res.event === 'full') { pendingId.value = id; return }   // ทีมเต็ม → ถือไว้ รอแตะช่องที่จะแทน
-  apply(res)
+onUnmounted(() => ghost?.remove())
+// listener ต่อช่องสร้างครั้งเดียว (สร้างใหม่ทุกเรนเดอร์ = สถานะกดค้าง/ลากหายกลางคัน)
+const slotPress = Array.from({ length: BATTLE_SLOTS }, (_, i) => pressHandlers({
+  onTap: () => { sheetSlot.value = i },
+  onLong: () => { const id = edit.value.slots[i]; if (id) peekId.value = id; else sheetSlot.value = i },
+  drag: dragFor(i),
+}))
+
+// Esc ปิดทีละชั้น — ฟังแบบ capture ให้ได้ก่อนโมดัลการ์ด (ที่ปิดตัวเองอยู่แล้ว) จะได้ไม่ปิดซ้อนสองชั้น
+function onKey(e) {
+  if (e.key !== 'Escape' || !shown.value) return
+  if (peekId.value) return
+  if (sheetSlot.value !== null) { sheetSlot.value = null; return }
+  if (!props.inline) close()
 }
+watch(shown, (o) => (o ? window.addEventListener('keydown', onKey, true) : window.removeEventListener('keydown', onKey, true)), { immediate: true })
+onUnmounted(() => window.removeEventListener('keydown', onKey, true))
 </script>
 
 <style scoped>
+.tp-full { position: fixed; inset: 0; z-index: 400; display: flex; flex-direction: column; background: linear-gradient(170deg, #fde8f1, #e3f3fc 55%, #e2f7ee); }
+.tp-bar { flex: none; width: 100%; max-width: 520px; margin: 0 auto; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px; }
+.tp-back { border: var(--bw) solid var(--line); background: #fff; width: 40px; height: 40px; border-radius: 12px; font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--ink); box-shadow: var(--pop); }
+.tp-bar-t { display: flex; flex-direction: column; min-width: 0; }
+.tp-bar-t b { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--ink); }
+.tp-bar-t small { font-size: .74rem; color: var(--muted); }
+.tp-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 16px 20px; width: 100%; max-width: 520px; margin: 0 auto; }
+.tp-cta { flex: none; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255,255,255,.85); border-top: 1px solid rgba(43,53,80,.08); }
+.tp-cta-btn { display: block; width: 100%; max-width: 488px; margin: 0 auto; border: 0; border-radius: 14px; padding: 13px; font: inherit; font-size: 1rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: var(--pop); cursor: pointer; }
+.tp-cta-btn:disabled { opacity: .5; cursor: default; }
+.tp-inline { padding-bottom: 8px; }
+
 .tp-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
-.tp-preset { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 7px 4px; border-radius: 12px; border: var(--bw) solid var(--line); background: #fff; font-family: inherit; color: var(--ink); cursor: pointer; }
+.tp-preset { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 4px; border-radius: 12px; border: var(--bw) solid var(--line); background: #fff; font-family: inherit; color: var(--ink); cursor: pointer; }
 .tp-preset.on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, #fff); box-shadow: 0 0 0 1px var(--primary); }
 .tp-preset-n { font-size: .78rem; font-weight: 800; }
-.tp-preset-faces { font-size: .9rem; min-height: 1.2em; color: var(--muted); }
-.tp-preset-faces:empty { display: none; }
 .tp-preset-use { font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 7px; }
 .tp-use { width: 100%; margin-bottom: 8px; border: 0; border-radius: 12px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .9rem; color: #fff; background: linear-gradient(135deg, #6d4fd0, #a36bd8); cursor: pointer; }
 .tp-use:disabled { opacity: .5; cursor: default; }
-.tp-slots { display: grid; gap: 10px; margin: 4px 0; justify-content: center; }
-.tp-slotwrap { position: relative; }
-.tp-slot { position: relative; width: 100%; aspect-ratio: .82; padding: 14px 4px 6px; font-family: inherit; border-radius: 16px; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  border: 2px dashed #b9d7ea; background: rgba(255,255,255,.7); transition: transform .12s, box-shadow .15s; }
-.tp-slot.filled { border: 2px solid var(--rc); background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 16%, #fff), #fff 70%); box-shadow: var(--pop); }
-.tp-slot.sel { box-shadow: 0 0 0 3px var(--accent), var(--pop); transform: translateY(-3px); }
-.tp-slot.sel::after { content: 'เลือกอยู่'; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); font-size: .7rem; font-weight: 800; color: #fff; background: var(--accent); border-radius: 999px; padding: 0 7px; white-space: nowrap; }
-.tp-slotno { position: absolute; top: 5px; left: 7px; font-size: .7rem; font-weight: 800; color: var(--muted); }
-.tp-slotname { font-size: .7rem; font-weight: 700; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tp-season { display: block; font-size: .7rem; font-weight: 700; color: var(--primary); margin-top: 2px; white-space: nowrap; }
-.tp-empty { color: #8ec6e8; font-size: 1.5rem; }
-.tp-x, .tp-more { position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #fff; font-family: inherit; font-size: .7rem; font-weight: 800; cursor: pointer; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(43,53,80,.25); z-index: 2; }
-.tp-x { top: -7px; right: -7px; background: #e0719a; color: #fff; }
-.tp-more { bottom: -7px; right: -7px; background: #fff; color: var(--primary-dark); }
-.tp-syn { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0 2px; }
-.tp-syn-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 600; color: var(--ink); padding: 3px 9px; border-radius: 999px; background: var(--mint-light); border: var(--bw) solid var(--line); }
-.tp-syn-chip.off { background: transparent; color: var(--muted); opacity: .85; border-style: dashed; }
-.tp-status { font-size: .76rem; font-weight: 600; color: var(--ink); text-align: center; margin-top: 16px; padding: 7px 10px; background: var(--primary-light); border-radius: 12px; transition: background .2s; }
-.tp-status.warn { background: #fde7ef; color: #b0386a; }
-.tp-status.pend { background: #fde7ef; color: #b0386a; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-.tp-pend-x { border: 0; background: #fff; color: #b0386a; border-radius: 999px; padding: 3px 10px; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
-/* ถือเพ็ทรอแทน: ช่องทุกช่องกระพริบขอบชมพูบอกว่า "แตะตรงนี้" · การ์ดที่ถือยกขึ้น */
-.tp-slot.target { box-shadow: 0 0 0 3px var(--accent), var(--pop); animation: tp-target 1s ease-in-out infinite alternate; }
-@keyframes tp-target { to { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent), var(--pop); } }
-.tp-pet.pending { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); transform: translateY(-3px); }
-.tp-status.idle { font-size: .7rem; font-weight: 500; color: var(--muted); background: none; margin: 12px 0 10px; padding: 0; }
-
-.tp-inline { padding-bottom: 8px; }
-/* 3 ต.ค. 2026 แบบกะทัดรัด (หน้า /team) — ปุ่มทีมแถวเตี้ย · ช่องเตี้ย · ATK/HP แบบรีเพลย์ใต้ชื่อ */
-.tp-inline .tp-preset { flex-direction: row; justify-content: center; gap: 6px; padding: 5px 4px; }
-.tp-inline .tp-slot { aspect-ratio: auto; padding: 12px 6px 8px; }
-.tp-inline .tp-slot :deep(.ptc) { width: 62%; }
-.tp-stats { display: flex; justify-content: space-between; width: 88%; margin-top: 2px; }
-.tp-atk, .tp-hp { font-size: .72rem; font-weight: 800; color: #fff; line-height: 1; padding: 2px 6px; border-radius: 999px; min-width: 18px; text-align: center; }
-.tp-atk { background: #f59e0b; }
-.tp-hp { background: #16a34a; }
-.tp-cmp { display: flex; flex-direction: column; align-items: center; font-size: .7rem; font-weight: 700; line-height: 1.25; }
-.tp-cmp i { font-style: normal; }
-.tp-cmp .up { color: #17805c; } .tp-cmp .down { color: #c2415c; }
 .tp-foes { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 0 8px; padding: 6px 10px; border-radius: 12px; background: #fdf0f4; border: var(--bw) solid #f3c6d6; }
 .tp-foes-l { font-size: .74rem; font-weight: 800; color: #b0386a; margin-right: 2px; }
 .tp-foe { position: relative; font-size: 1.35rem; line-height: 1; }
 .tp-foe-el { position: absolute; right: -7px; bottom: -4px; font-size: .7rem; }
-.tp-mu { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 2px; }
-.tp-mu i { font-style: normal; font-size: .7rem; font-weight: 800; line-height: 1.3; padding: 0 4px; border-radius: 999px; white-space: nowrap; }
-.tp-mu .w { color: #17805c; background: #dff5ea; }
-.tp-mu .l { color: #c2415c; background: #fde7ef; }
-.tp-pool { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.tp-pet { position: relative; border: 1.5px solid color-mix(in srgb, var(--rc) 55%, #fff); border-radius: 14px; background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 10%, #fff), #fff 70%); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 14px 2px 6px; font-family: inherit; transition: transform .1s; }
-.tp-pet:active { transform: scale(.95); }
-.tp-pet.active { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-2); }
-.tp-emoji { font-size: 1.7rem; line-height: 1; }
-.tp-name { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-/* ออกผจญภัย = จางบอกว่าใช้ไม่ได้ตอนนี้ แต่ยังกดได้ (กดแล้วเด้งเหตุผล ไม่ใช่เงียบเหมือน :disabled เดิม) */
-.tp-pet.away { opacity: .45; }
-.tp-away { position: absolute; top: 2px; right: 3px; font-size: .7rem; line-height: 1; }
-.tp-inteam { position: absolute; top: 2px; right: 3px; font-size: .7rem; font-weight: 800; line-height: 1.3; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 5px; }
-.tp-el { position: absolute; top: 2px; left: 3px; font-size: .72rem; line-height: 1; }
-.tp-none { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: .76rem; color: rgba(0,0,0,.4); padding: 16px 0; }
+
+.tp-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.tp-slot { position: relative; aspect-ratio: .8; padding: 24px 6px 10px; border-radius: 20px; cursor: pointer; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border: 2px dashed #b9d7ea; background: rgba(255,255,255,.7); transition: transform .15s, box-shadow .15s, opacity .15s;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.tp-slot.filled { border: 2px solid var(--rc); background:
+  radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--rc) 30%, #fff) 0, transparent 62%),
+  linear-gradient(175deg, color-mix(in srgb, var(--rc) 22%, #fff), #fff 78%); box-shadow: var(--pop); }
+.tp-slot.pressing { transform: scale(.96); }
+.tp-slot.dragging { opacity: .35; }
+.tp-slot.drop { box-shadow: 0 0 0 3px var(--primary), var(--pop); transform: scale(1.03); }
+.tp-slot:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.tp-slotno { position: absolute; top: 7px; left: 50%; transform: translateX(-50%); min-width: 22px; padding: 1px 7px; border-radius: 999px; text-align: center;
+  font-size: .74rem; font-weight: 800; line-height: 1.4; color: #fff; background: var(--rc, #9cc8e4); }
+.tp-el { position: absolute; top: 6px; left: 7px; font-size: 1.15rem; line-height: 1; }
+.tp-gr { position: absolute; top: 6px; right: 7px; font-size: .78rem; font-weight: 800; line-height: 1.35; color: #fff; background: color-mix(in srgb, var(--rc) 80%, #1e293b); border-radius: 8px; padding: 1px 7px; }
+.tp-face { flex: 1; display: flex; align-items: center; justify-content: center; font-size: clamp(50px, 15vw, 80px); line-height: 1; pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(43,53,80,.18)); }
+.tp-slotname { font-size: .9rem; font-weight: 800; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-season { font-size: .72rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+.tp-empty { flex: 1; display: flex; align-items: center; color: #8ec6e8; font-size: 2.2rem; }
+.tp-howto { font-size: .7rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
+.tp-syn { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 0; }
+.tp-syn-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 600; color: var(--ink); padding: 3px 9px; border-radius: 999px; background: var(--mint-light); border: var(--bw) solid var(--line); }
+.tp-syn-chip.off { background: transparent; color: var(--muted); opacity: .85; border-style: dashed; }
+
+.tp-stats { margin-top: 44px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px 10px; border-radius: 16px; background: rgba(255,255,255,.72); border: var(--bw) solid var(--line); }
+.tp-stat { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: .95rem; }
+.tp-stat-name { font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp-stat-row { display: flex; justify-content: space-between; gap: 4px; font-variant-numeric: tabular-nums; }
+.tp-stat-row span { font-size: .76rem; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.tp-stat-sk { margin-top: 3px; font-size: .82rem; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
+.tp-lv { font-weight: 800; color: var(--primary-dark, #3a9fd6); white-space: nowrap; }
+.tp-stat-empty { color: var(--muted); text-align: center; }
+
+.tp-none { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: .8rem; color: var(--muted); padding: 24px 0; }
 .tp-none-cta { border: var(--bw) solid var(--line); background: var(--primary); color: #fff; border-radius: 11px; padding: 9px 18px; font-weight: 800; font-size: .8rem; text-decoration: none; box-shadow: var(--pop); }
+</style>
+
+<style>
+/* ตัวที่ลากตามนิ้ว — อยู่ที่ body (ไม่ scoped) เหนือทุกชั้น */
+.tp-ghost { position: fixed; z-index: 420; pointer-events: none; width: 84px; aspect-ratio: .78; border-radius: 16px; background: #fff;
+  box-shadow: 0 14px 40px rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; font-size: 2.6rem; transform: translate(-50%, -60%) rotate(-4deg); }
+.tp-ghost img { width: 62%; height: auto; }
 </style>

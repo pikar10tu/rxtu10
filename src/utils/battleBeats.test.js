@@ -694,3 +694,25 @@ test('joinDuoOpening: ใบยกแรกของคู่หูถูกย�
   assert.ok(show.duo, 'แบนเนอร์คู่ติดธง duo')
   assert.equal(Math.round(sum(show.timing)), Math.round(sum(timingOf('openShow')) * 1.5), 'ค้าง ×1.5')
 })
+
+test('🤍 หมัดซ้ำกระต่าย (echo): หมัดแรกปกติ · หมัดซ้ำทั้งหมดรวมกันยาวเท่าหมัดปกติ 1 หมัด', () => {
+  const dur = (b) => b.timing.windup + b.timing.motion + b.timing.hitstop + b.timing.tail
+  const log = [
+    { t: 'attack', side: 'A', attacker: 'A0', target: 'B0', dmg: 10, targetHpAfter: 90 },
+    { t: 'attack', side: 'A', attacker: 'A0', target: 'B0', dmg: 5, targetHpAfter: 85, sub: true, echo: true },
+    { t: 'attack', side: 'A', attacker: 'A0', target: 'B0', dmg: 5, targetHpAfter: 80, sub: true, echo: true },
+    { t: 'attack', side: 'A', attacker: 'A0', target: 'B0', dmg: 5, targetHpAfter: 75, sub: true, echo: true },
+    { t: 'attack', side: 'B', attacker: 'B0', target: 'A0', dmg: 5, targetHpAfter: 95 },
+  ]
+  const bs = buildBeats(log, { A0: 100, B0: 100 })
+  const one = dur({ timing: timingOf('hit') })
+  assert.equal(bs[0].kind, 'hit')
+  const echoSum = dur(bs[1]) + dur(bs[2]) + dur(bs[3])
+  assert.ok(Math.abs(echoSum - one) < 1e-6, `หมัดซ้ำรวม ${echoSum} ต้องเท่า ${one}`)
+  assert.ok(Math.abs(dur(bs[1]) - dur(bs[3])) < 1e-6, 'แบ่งเท่าๆ กัน')
+})
+test('🤍 echo ตอนเร่ง: หมัดซ้ำรวมกันเร่งเท่าหมัดปกติ', () => {
+  const b = { kind: 'sub', echo: true, timing: { windup: 0, motion: 0, hitstop: 100, tail: 100 } }
+  const t = scaleTiming(b, { ff: true })
+  assert.equal(t.hitstop + t.tail, 200 * FF_SCALE.hit)
+})

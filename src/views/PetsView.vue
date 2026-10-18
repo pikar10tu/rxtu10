@@ -4,29 +4,17 @@
       <button class="pt-back" aria-label="กลับ" @click="$router.push('/play/pets')">‹</button>
       <span><Emoji char="🐾" /> สัตว์เลี้ยง</span>
       <HelpButton topic="pets" style="margin-left:auto" />
+      <button v-if="authStore.isLoggedIn" class="pt-to-team" @click="$router.push('/team')">จัดทีม →</button>
     </div>
 
     <template v-if="authStore.isLoggedIn">
-      <div class="pt-team">
-        <div class="pt-team-head">
-          <span><Emoji char="⚔️" /> ทีมต่อสู้ ({{ teamSlots.filter(Boolean).length }}/{{ battleSlots }})</span>
-          <button class="pt-team-edit" @click="$router.push('/team')"><Emoji char="⚙️" /> จัดทีม</button>
-        </div>
-        <div class="pt-team-slots" :style="{ gridTemplateColumns: `repeat(${battleSlots}, 78px)` }">
-          <div v-for="(id, i) in teamSlots" :key="i" class="pt-team-slot" :class="{ filled: id }" :style="id ? { '--rc': rarityColor(teamPetOf(id).rarity) } : null" @click="id ? sel = id : $router.push('/team')">
-            <span class="pt-team-no">{{ i + 1 }}</span>
-            <PetThumb v-if="id" :pet="teamPetOf(id)" />
-            <span v-else class="pt-team-empty">＋</span>
-          </div>
-        </div>
-      </div>
-
+      <!-- 18 ต.ค. 2026 (user เคาะ แบบ 7DS): หน้าคลังไว้ดูตัว/อ่านสกิล/วิวัฒน์อย่างเดียว — ทีมไปจัดที่ /team
+           ไม่มีกล่องทีม ไม่มีป้าย "ช่อง N" (มีหลายทีม ใส่แล้วงง) ไม่มี ATK/HP บนการ์ด ต้องแตะดูก่อน -->
       <div class="pt-summary">
         <div><b>{{ pets.length }}</b>/{{ catalog.length }} <small>ชนิด</small></div>
         <div><b>{{ totalIncome.toLocaleString() }}</b><small><Emoji char="🪙" />/วัน</small></div>
         <div><b>{{ species }}</b><small>สายพันธุ์</small></div>
       </div>
-      <div class="pt-hint">แตะตัวไหนก็ได้เพื่อดูรายละเอียด · วิวัฒน์ · ใส่/เปลี่ยนตัวในทีม</div>
 
       <!-- แจ้งครั้งเดียวว่าเพ็ทที่ถืออยู่เปลี่ยนกลไก — ไม่ใช้ป๊อปอัป ไม่ส่งจดหมาย (user เคาะ 10 ก.ย.)
            ขึ้นเฉพาะคนที่มีเพ็ทในรายการจริง ⇒ คนที่ไม่ได้รับผลกระทบจะไม่โดนกวน -->
@@ -44,7 +32,7 @@
       </div>
 
       <template v-else>
-      <PetFilterBar v-model="flt" :count="shown.length" />
+      <PetFilterBar v-model="flt" />
       <div v-if="!shown.length" class="pt-empty">ไม่มีเพ็ทที่ตรงกับตัวกรอง</div>
       <div class="pt-grid">
         <button
@@ -52,13 +40,13 @@
           class="pt-cell" :style="{ '--rc': rarityColor(p.rarity) }"
           @click="sel = p.id"
         >
-          <span v-if="teamSlots.includes(p.id)" class="pt-cell-team">ช่อง {{ teamSlots.indexOf(p.id) + 1 }}</span>
+          <span v-if="favSet.has(p.id)" class="pt-cell-fav" aria-label="ตัวโปรด">♥</span>
           <span v-if="p.copies > 0" class="pt-cell-copies">×{{ p.copies }}</span>
           <span class="pt-cell-el"><Emoji :char="ELEMENTS[defOf(p.id).element]?.icon || 'el:fist'" /></span>
           <span v-if="balTagOf(p.id)" class="pt-cell-bal" :class="balTagOf(p.id).kind" :title="`ปรับสมดุล: ${balTagOf(p.id).label}`" :aria-label="`ปรับสมดุล: ${balTagOf(p.id).label}`"><Emoji :char="balTagOf(p.id).icon" /></span>
           <span class="pt-cell-emoji"><Emoji :char="p.emoji" /></span>
           <span class="pt-cell-name">{{ p.name }}</span>
-          <PetStatLine :pet="p" />
+          <span v-if="p.grade" class="pt-cell-gr">{{ GRADE_LABELS[p.grade] }}</span>
         </button>
       </div>
       </template>
@@ -92,12 +80,9 @@ import { RARITY, PETS, ELEMENTS, GRADE_LABELS } from '../data/index.js'
 import { PET_PASSIVES, PASSIVE_V2_CHANGED } from '../data/petPassives.js'
 import { balanceTagOf } from '../utils/balanceTag.js'
 import { petDailyCoins } from '../utils/petUtils.js'
-import { BATTLE_SLOTS } from '../data/residence.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import PetFilterBar from '../components/pets/PetFilterBar.vue'
-import PetStatLine from '../components/shared/PetStatLine.vue'
-import { filterPets, sortPets, DEFAULT_FILTER } from '../utils/petFilter.js'
-import PetThumb from '../components/shared/PetThumb.vue'
+import { filterPets, sortCollection, DEFAULT_FILTER } from '../utils/petFilter.js'
 import { obtainablePets } from '../utils/petCatalog.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 
@@ -129,23 +114,17 @@ const sel = ref(null)
 const flt = ref({ ...DEFAULT_FILTER })
 
 const pets = computed(() => authStore.userData?.pets || [])
-const battleSlots = computed(() => BATTLE_SLOTS)
-const teamSlots = computed(() => {
-  const owned = new Set(pets.value.map(p => p.id))
-  const a = (authStore.userData?.activePets || []).filter(id => id && owned.has(id)).slice(0, battleSlots.value)
-  while (a.length < battleSlots.value) a.push(null)
-  return a
-})
+const favs = computed(() => authStore.userData?.petFavs || [])
+const favSet = computed(() => new Set(favs.value))
 const defOf = (id) => PETS.find(p => p.id === id) || { emoji: '❓' }
 const balTagOf = (id) => balanceTagOf(id)
-const teamPetOf = (id) => pets.value.find(p => p.id === id) || { id }
 const totalIncome = computed(() => pets.value.reduce((s, p) => s + petDailyCoins(p), 0))
 const species = computed(() => new Set(pets.value.map(p => p.id)).size)
 
 const rarityColor = (r) => RARITY[r]?.color || '#94a3b8'
 const RANK = { legendary: 0, epic: 1, rare: 2, common: 3 }
-// คลังที่โชว์ = กรองสาย/ระดับ/ในทีม + เรียง (utils/petFilter.js · 3 ต.ค. 2026)
-const shown = computed(() => sortPets(filterPets(pets.value, flt.value, teamSlots.value), flt.value.sort))
+// คลังที่โชว์ = กรองสาย/โปรด/ระดับ + เรียง โปรด→เกรด→ระดับ→ออกใหม่ก่อน (utils/petFilter.js · 18 ต.ค. 2026)
+const shown = computed(() => sortCollection(filterPets(pets.value, flt.value, [], favs.value), favs.value))
 const sorted = computed(() => pets.value.slice().sort((a, b) =>
   (RANK[a.rarity] - RANK[b.rarity]) || ((b.grade || 0) - (a.grade || 0)) || a.name.localeCompare(b.name)
 ))
@@ -155,20 +134,12 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--ink); margin-bottom: 14px; }
 .pt-back { border: var(--bw) solid var(--line); background: #fff; width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; cursor: pointer; line-height: 1; box-shadow: var(--pop); }
 .pt-back:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pt-team { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 12px; margin-bottom: 10px; }
-.pt-team-head { display: flex; align-items: center; justify-content: space-between; font-size: .8rem; font-weight: 800; margin-bottom: 8px; }
-.pt-team-edit { border: var(--bw) solid var(--line); background: #fff; border-radius: 10px; padding: 5px 12px; font-family: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); }
-.pt-team-edit:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.pt-team-slots { display: grid; gap: 8px; justify-content: center; }
-.pt-team-slot { aspect-ratio: 1; border: 2px dashed rgba(0,0,0,.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; background: #f8fafc; }
-.pt-team-slot.filled { border: none; background: none; cursor: pointer; }
-.pt-team-empty { color: rgba(0,0,0,.25); font-size: 1.4rem; }
+.pt-to-team { border: 0; border-radius: 999px; padding: 8px 14px; font-family: inherit; font-size: .8rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: var(--pop); cursor: pointer; white-space: nowrap; }
 .pt-summary { display: flex; background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; margin-bottom: 10px; }
 .pt-summary > div { flex: 1; text-align: center; padding: 12px 4px; border-right: 1px solid var(--border, #efe7fb); }
 .pt-summary > div:last-child { border-right: none; }
 .pt-summary b { font-size: 1.05rem; font-weight: 800; }
 .pt-summary small { display: block; font-size: .7rem; color: rgba(0,0,0,.45); }
-.pt-hint { font-size: .7rem; color: rgba(0,0,0,.5); margin-bottom: 12px; }
 .pt-empty { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; color: rgba(0,0,0,.45); padding: 30px 16px; font-size: .85rem; }
 .pt-empty-cta { border: var(--bw) solid var(--line); background: var(--primary); color: #fff; border-radius: 12px; padding: 11px 20px; font-weight: 800; font-size: .85rem; text-decoration: none; box-shadow: var(--pop); }
 .pt-empty-cta:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
@@ -202,17 +173,8 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-soon-head small { color: rgba(0,0,0,.45); font-size: .75rem; }
 .pt-cell.soon { background: #f1f5f9; border-color: rgba(0,0,0,.15); box-shadow: none; cursor: default; }
 .pt-cell-emoji.shade { filter: brightness(0); opacity: .38; }
-.pt-cell-team { position: absolute; top: -5px; right: -5px; background: var(--primary); color: #fff; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; border: 2px solid #fff; }
 
-/* ═══ จัดใหม่ 25 ก.ย. 2026 — การ์ดย้อมสีตามความหายาก (--rc) · เข้าชุดกับหน้าจัดทีม ═══ */
-.pt-team { border-radius: 20px; padding: 14px; background: linear-gradient(150deg, #e6dcfd, #fff 65%); }
-.pt-team-head { font-size: .88rem; }
-.pt-team-edit { border: 0; background: linear-gradient(135deg, #8b6ee0, #b9a6ef); color: #fff; border-radius: 999px; padding: 6px 14px; box-shadow: var(--pop); }
-.pt-team-slots { gap: 10px; padding-top: 9px; }
-.pt-team-slot { position: relative; border: 2px dashed #c9b8f4; border-radius: 16px; background: rgba(255,255,255,.65); }
-.pt-team-slot.filled { border: 2px solid var(--rc); background: linear-gradient(170deg, color-mix(in srgb, var(--rc) 16%, #fff), #fff 70%); box-shadow: var(--pop); }
-.pt-team-no { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--rc, #c9b8f4); color: #fff; border: 1.5px solid #fff; font-size: .68rem; font-weight: 800; line-height: 1.45; text-align: center; z-index: 2; }
-.pt-team-empty { color: #b9a6ef; }
+/* ═══ จัดใหม่ 25 ก.ย. 2026 — การ์ดย้อมสีตามความหายาก (--rc) ═══ */
 .pt-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: none; border: 0; box-shadow: none; overflow: visible; }
 .pt-summary > div { border: var(--bw) solid var(--line); border-right: var(--bw) solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--pop); }
 .pt-grid { gap: 10px; }
@@ -222,6 +184,7 @@ const sorted = computed(() => pets.value.slice().sort((a, b) =>
 .pt-cell-name { color: var(--ink); }
 .pt-cell-el { background: rgba(255,255,255,.8); }
 .pt-cell-grade { background: var(--rc); }
-.pt-cell-team { background: #8b6ee0; }
 .pt-cell.soon { background: rgba(255,255,255,.55); border: 1.5px dashed #cbd5e1; }
+.pt-cell-fav { position: absolute; bottom: 3px; right: 6px; font-size: .74rem; line-height: 1; color: #e0719a; }
+.pt-cell-gr { font-size: .7rem; font-weight: 800; color: #fff; background: var(--rc); border-radius: 999px; padding: 0 7px; line-height: 1.4; }
 </style>

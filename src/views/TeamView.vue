@@ -5,7 +5,7 @@
     <div class="page-title tv-head">
       <button class="tv-back" aria-label="กลับ" @click="back">‹</button>
       <span><Emoji char="⚔️" /> จัดทีม</span>
-      <small class="tv-note">ช่อง 1 ออกตีก่อน</small>
+      <button class="tv-coll" @click="router.push('/pets')"><Emoji char="🐾" /> คลังเพ็ท</button>
     </div>
     <button class="tv-patch" @click="patchOpen = true">
       <Emoji char="📋" /> {{ PATCH_NOTES.title }} — ดูว่าตัวไหนบัฟ/เนิฟ <span v-if="patchFresh" class="tv-new">ใหม่</span> <span class="tv-go">›</span>
@@ -39,7 +39,7 @@ const back = () => (window.history.state?.back ? router.back() : router.push('/p
 .tv-head { display: flex; align-items: center; gap: 8px; }
 .tv-back { all: unset; cursor: pointer; font-size: 1.6rem; font-weight: 800; line-height: 1; padding: 0 6px 2px 0; color: var(--ink); }
 .tv-back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.tv-note { margin-left: auto; font-size: .74rem; font-weight: 600; color: var(--muted); }
+.tv-coll { margin-left: auto; border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font-family: inherit; font-size: .78rem; font-weight: 700; color: var(--ink); cursor: pointer; box-shadow: var(--pop); }
 .tv-patch { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%;
   margin: 0 0 10px; padding: 9px 12px; border-radius: 12px; background: #fff; border: var(--bw) solid var(--line); box-shadow: var(--pop);
   font-size: .82rem; font-weight: 700; color: var(--ink); }

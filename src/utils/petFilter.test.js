@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { filterPets, sortPets, statOf, DEFAULT_FILTER } from './petFilter.js'
+import { filterPets, sortPets, sortCollection, statOf, DEFAULT_FILTER } from './petFilter.js'
 import { PETS } from '../data/index.js'
 
 const pick = (pred) => PETS.find(pred)
@@ -34,4 +34,21 @@ test('ไม่แก้ array ต้นฉบับ', () => {
   const copy = pets.map(p => p.id).join()
   sortPets(pets, 'hp')
   assert.equal(pets.map(p => p.id).join(), copy)
+})
+test('กรองเฉพาะตัวโปรด', () => {
+  const r = filterPets(pets, { ...DEFAULT_FILTER, rarity: 'fav' }, [], [com.id])
+  assert.deepEqual(r.map(p => p.id), [com.id])
+})
+test('เรียงคลัง: โปรด → เกรด → ระดับ → ออกใหม่ก่อน', () => {
+  const [l1, l2] = PETS.filter(p => p.rarity === 'legendary')
+  const c1 = PETS.find(p => p.rarity === 'common')
+  const xs = [
+    { id: l1.id, rarity: 'legendary', grade: 2 },
+    { id: l2.id, rarity: 'legendary', grade: 2 },
+    { id: c1.id, rarity: 'common', grade: 0 },
+  ]
+  assert.deepEqual(sortCollection(xs).map(p => p.id), [l2.id, l1.id, c1.id])       // เท่ากันหมด → ตัวหลังใน PETS (ใหม่กว่า) ก่อน
+  assert.equal(sortCollection(xs, [c1.id])[0].id, c1.id)                             // โปรดขึ้นบนสุด
+  xs[0].grade = 3
+  assert.equal(sortCollection(xs)[0].id, l1.id)                                      // เกรดชนะระดับ/วันที่
 })

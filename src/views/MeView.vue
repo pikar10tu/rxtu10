@@ -41,7 +41,7 @@
         <span v-if="!guard.length" class="me-guard-none">ยังไม่ได้จัด</span>
         <button class="me-guard-edit" @click="teamOpen = true"><Emoji char="⚙️" /> จัดทีม</button>
       </div>
-      <TeamPicker v-model:open="teamOpen" />
+      <TeamPicker v-model:open="teamOpen" context="ทีมนี้ใช้ทั้งบุกและตั้งรับ" done-label="เสร็จ" @done="teamOpen = false" />
 
       <div class="me-stats">
         <div class="me-stat"><Emoji char="🪙" /><b>{{ (auth.userData?.coins || 0).toLocaleString() }}</b><small>เหรียญ</small></div>

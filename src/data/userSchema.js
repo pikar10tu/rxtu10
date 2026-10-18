@@ -69,6 +69,7 @@ export const USER_DEFAULTS = {
   stardust: {},           // 🌟 ประกายดาว {common,rare,epic,legendary} (utils/stardust.js)
   teamPresets: {},        // ทีม 1/2/3 {"0":[ids],...} · ชุดที่ใช้ = activePets (utils/teamPresets.js)
   teamPresetIdx: 0,
+  petFavs: [],            // ♥ ตัวโปรดในคลังเพ็ท [speciesId] — ขึ้นบนสุดในคลัง/หน้าเลือกตัว (18 ต.ค. 2026)
   towerClaims: [],        // รางวัลขั้นหอคอยที่รับแล้ว [10,20,…] · ล้างพร้อมรีเซตหอคอยตอนแจกซีซั่น
   welcomeGiftV1: false,   // one-time: ส่งจดหมายของขวัญต้อนรับแล้ว (กัน client ส่งซ้ำ)
   welcomeBoxSeen: false,  // เห็น Welcome box ต้อนรับแล้ว (กัน popup เด้งซ้ำ)

@@ -1377,6 +1377,17 @@ async function applyAttack(beat) {
   const w = beat.weight ?? 0
 
   // หมัดลูก: ไม่มีงบเวลาของตัวเอง (อยู่ในหมัดหลักที่กำลังพุ่งอยู่) → ลง impact แล้วออกทันที
+  // 🤍 หมัดซ้ำของกระต่าย (echo) มีงบเวลาของตัวเอง (battleBeats.spaceEchoes) — รวมทุกหมัดซ้ำ = 1 หมัดปกติ
+  //    แต่ละหมัดพุ่งสั้นๆ ไม่ง้าง = ต่อยรัว ย้ำๆๆ (user 18 ต.ค. 2026) · ใช้ท่า hit เบาๆ แต่ย่อเวลาเหลือช่องของตัวเอง
+  if (beat.kind === 'sub' && beat.echo) {
+    const slot = t.windup + t.motion + t.hitstop + t.tail
+    const jab = { windup: 0, motion: slot * 0.35, hitstop: slot * 0.15, tail: slot * 0.5 }
+    if (!ranged && slot > 0) fx?.lunge(els[beat.attacker], beat.attacker, beat.target, jab, 'hit', 0.25, lungeStyle(beat))
+    await wait(jab.motion); if (g !== gen) return
+    applyImpact(beat, g, t)
+    await wait(jab.hitstop + jab.tail)
+    return
+  }
   if (beat.kind === 'sub') { applyImpact(beat, g, t); return }
 
   if (beat.kind !== 'sub') fx?.auraHide(beat.attacker, t.windup + t.motion + t.hitstop + Math.min(t.tail, 220))
