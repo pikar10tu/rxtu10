@@ -31,8 +31,8 @@
           <div v-for="c in controls" :key="c.id" class="pt-card" :class="{ hazard: c.hazard }">
             <div class="pt-label"><Emoji v-if="c.hazard" char="⚠️" /> {{ c.label }}</div>
 
-            <button v-if="c.type === 'button'" class="pt-btn" @pointerdown.prevent="tap(c, true, $event)">กดจ่ายยา</button>
-            <button v-else-if="c.type === 'spam'" class="pt-btn spam" @pointerdown.prevent="tap(c, true, $event)">บดรัวๆ!</button>
+            <button v-if="c.type === 'button'" class="pt-btn" @pointerdown.prevent="tap(c, true, $event)">{{ c.cta || 'กดจ่ายยา' }}</button>
+            <button v-else-if="c.type === 'spam'" class="pt-btn spam" @pointerdown.prevent="tap(c, true, $event)">{{ c.cta || 'บดรัวๆ!' }}</button>
 
             <div v-else-if="c.type === 'toggle'" class="pt-toggle" :class="{ on: local[c.id] ?? c.state }"
               @pointerdown.prevent="toggle(c)"><div class="pt-thumb"></div></div>
@@ -42,7 +42,7 @@
                 :value="local[c.id] ?? c.value"
                 @input="e => { local[c.id] = +e.target.value; sfx.tick() }"
                 @change="e => send(c, +e.target.value)">
-              <div class="pt-sval">{{ local[c.id] ?? c.value }}</div>
+              <div class="pt-sval">{{ (local[c.id] ?? c.value) * (c.scale || 1) }}</div>
             </template>
 
             <div v-else-if="c.type === 'dial'" class="pt-seg">

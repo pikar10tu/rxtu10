@@ -155,7 +155,7 @@ test('Endless: ไม่มีชนะ ด่าน 6+ ต่อได้เร
   assert.equal(levelConfig(1).perPlayer, 16)
   assert.equal(levelConfig(5).perPlayer, 24)
   assert.ok(levelConfig(8).duration < levelConfig(6).duration)
-  assert.equal(levelConfig(100).duration, 4000)
+  assert.equal(levelConfig(100).duration, 5500)
   assert.equal(levelConfig(100).damage, 30)
   assert.match(levelConfig(7).name, /^Lv.7 /)
   const s = newGame(roster(2), 0)

@@ -34,6 +34,49 @@ export const CONTROL_CATALOG = [
     prompt: say('เขย่ายาแขวนตะกอน (Suspension)!', 'ตะกอนนอนก้น! เขย่าขวดเลย!', 'Shake well before use!') },
   { base: 'autoclave', type: 'hold', label: 'อบฆ่าเชื้อ Autoclave', holdDuration: 1000,
     prompt: say('กดอบฆ่าเชื้อ Autoclave ค้างไว้ 1 วิ!', 'เครื่องมือผ่าตัดเปื้อน! Autoclave ค้างไว้!', 'นึ่งฆ่าเชื้อ! กดค้าง Autoclave!') },
+  // ── เพิ่ม 18 ต.ค. 2026 (user: อุปกรณ์ซ้ำ อยากได้ทั้งสาย Care และ Sci) · คำสั่งสั้น ชัด ชื่อยา/ชื่อเฉพาะใช้อังกฤษ ──
+  // สาย Care
+  { base: 'nac', type: 'button', label: 'ยาต้านพิษ NAC', cta: 'ให้ยา',
+    prompt: say('Paracetamol overdose! ให้ NAC!', 'กินพาราเกินขนาด! NAC ด่วน!', 'ตับจะพัง! จ่าย NAC!') },
+  { base: 'naloxone', type: 'button', label: 'Naloxone', cta: 'ให้ยา',
+    prompt: say('Opioid overdose! Naloxone!', 'คนไข้หายใจช้า! ให้ Naloxone!', 'Morphine เกินขนาด! Naloxone ด่วน!') },
+  { base: 'adrenaline', type: 'button', label: 'Adrenaline', cta: 'ฉีด',
+    prompt: say('Anaphylaxis! ฉีด Adrenaline!', 'แพ้ยาช็อก! Adrenaline ด่วน!', 'ปากบวม หายใจไม่ออก! Adrenaline!') },
+  { base: 'charcoal', type: 'button', label: 'Activated charcoal', cta: 'ให้ยา',
+    prompt: say('กินสารพิษมา! ให้ Activated charcoal!', 'Poisoning! Charcoal ด่วน!', 'ดูดซับพิษ! ให้ Charcoal!') },
+  { base: 'route', type: 'dial', label: 'ช่องทางให้ยา', options: ['PO', 'IV', 'IM', 'SC'],
+    prompt: say(s => `เปลี่ยนเป็นให้ทาง ${s}!`, s => `ปรับ route เป็น ${s}!`, s => `ให้ยาแบบ ${s} เร็ว!`) },
+  { base: 'label', type: 'dial', label: 'ฉลากยา', options: ['ก่อนอาหาร', 'หลังอาหาร', 'ก่อนนอน'],
+    prompt: say(s => `ติดฉลาก “${s}”!`, s => `เปลี่ยนฉลากเป็น “${s}”!`, s => `ฉลากยา: ใส่ “${s}”!`) },
+  { base: 'inhaler', type: 'dial', label: 'อุปกรณ์พ่นยา', options: ['MDI', 'Spacer', 'Nebulizer'],
+    prompt: say(s => `เปลี่ยนเป็น ${s}!`, s => `พ่นยาด้วย ${s}!`, s => `หยิบ ${s} มาเลย!`) },
+  { base: 'drip', type: 'slider', label: 'หยดน้ำเกลือ (หยด/นาที)', min: 1, max: 6, scale: 10,
+    prompt: say(v => `ปรับเรทน้ำเกลือ ${v * 10} หยด/นาที!`, v => `ตั้งหยดน้ำเกลือ ${v * 10} หยด/นาที!`, v => `ปรับ IV drip เป็น ${v * 10} หยด/นาที!`) },
+  { base: 'warfarin', type: 'slider', label: 'ขนาด Warfarin (mg)', min: 1, max: 5,
+    prompt: say(v => `Titrate Warfarin เป็น ${v} mg!`, v => `INR เพี้ยน! Warfarin ${v} mg!`, v => `ปรับ Warfarin ${v} mg!`) },
+  { base: 'highalert', type: 'toggle', label: 'ป้าย High Alert Drug',
+    prompt: say(s => s ? 'ติดป้าย High Alert ที่ KCl!' : 'เก็บป้าย High Alert!', s => s ? 'แปะป้าย High Alert ด่วน!' : 'ถอดป้าย High Alert ออก!', s => s ? 'ยาอันตราย! ติดป้าย High Alert!' : 'ย้ายยาแล้ว! ถอดป้าย High Alert!') },
+  { base: 'count', type: 'spam', label: 'ถาดนับเม็ดยา', targetHits: 5, cta: 'นับเม็ดยา',
+    prompt: say(n => `นับยาใส่ซอง ${n} เม็ด!`, n => `นับเม็ดยาอีก ${n} เม็ด!`, n => `ใบสั่งยา ${n} เม็ด! นับเลย!`) },
+  { base: 'counsel', type: 'hold', label: 'ให้คำปรึกษาคนไข้', holdDuration: 1000,
+    prompt: say('คนไข้พ่นยาไม่เป็น! กดค้างอธิบาย!', 'Counseling! กดค้างไว้!', 'ลุงลืมกินยา! กดค้างอธิบาย!') },
+  // สาย Sci
+  { base: 'titrate', type: 'spam', label: 'บิวเรต Titrate', targetHits: 5, cta: 'หยด',
+    prompt: say(n => `Titrate อีก ${n} หยด!`, n => `ใกล้ end point! Titrate ${n} หยด!`, n => `หยดบิวเรต ${n} หยด!`) },
+  { base: 'mesh', type: 'dial', label: 'ตะแกรงร่อน (mesh)', options: ['20', '40', '60', '80'],
+    prompt: say(s => `เปลี่ยนตะแกรง mesh ${s}!`, s => `ร่อนผ่าน mesh ${s}!`, s => `ใช้ตะแกรงเบอร์ ${s}!`) },
+  { base: 'solvent', type: 'dial', label: 'ตัวทำละลาย', options: ['Water', 'Ethanol', 'Hexane'],
+    prompt: say(s => `สกัดด้วย ${s}!`, s => `เปลี่ยนตัวทำละลายเป็น ${s}!`, s => `เปลี่ยน solvent เป็น ${s}!`) },
+  { base: 'press', type: 'slider', label: 'แรงตอกเม็ดยา', min: 1, max: 9,
+    prompt: say(v => `ปรับแรงตอกเป็นระดับ ${v}!`, v => `เม็ดยาร่วน! ตอกระดับ ${v}!`, v => `ปรับเครื่องตอกเป็น ${v}!`) },
+  { base: 'waterbath', type: 'slider', label: 'Water bath (°C)', min: 30, max: 40,
+    prompt: say(v => `ตั้ง Water bath ${v}°C!`, v => `ตั้งอ่างน้ำ ${v} องศา!`, v => `Dissolution test! ตั้งน้ำ ${v}°C!`) },
+  { base: 'coating', type: 'toggle', label: 'หม้อเคลือบเม็ดยา',
+    prompt: say(s => `${s ? 'เปิด' : 'ปิด'}หม้อเคลือบ!`, s => s ? 'ยาขม! เปิดหม้อเคลือบ!' : 'เคลือบเสร็จ! ปิดหม้อ!', s => `${s ? 'เปิด' : 'ปิด'} Coating pan!`) },
+  { base: 'vortex', type: 'hold', label: 'Vortex', holdDuration: 1000,
+    prompt: say('กดค้าง Vortex!', 'หลอดยังไม่เข้ากัน! กดค้าง Vortex!', 'ผสมตัวอย่าง! Vortex!') },
+  { base: 'lyo', type: 'button', label: 'Freeze dryer', cta: 'เปิดเครื่อง',
+    prompt: say('Freeze dry วัคซีน!', 'ทำผงแห้ง! กด Freeze dryer!', 'Lyophilize เลย!') },
   // ปุ่มอันตราย: กดตอนมีคำสั่ง = ปกติ · กดมั่ว = โดนผลข้างเคียงเอง · มั่วซ้ำ = ลามไปเพื่อน
   { base: 'diazepam', type: 'button', hazard: 'sleepy', label: 'จ่ายยานอนหลับ Diazepam',
     prompt: say('จ่าย Diazepam ให้คนไข้ชัก!', 'คนไข้ชักเกร็ง! Diazepam ด่วน!', 'Status epilepticus! ให้ Diazepam!') },
@@ -47,13 +90,15 @@ const CATALOG_BY_BASE = Object.fromEntries(CONTROL_CATALOG.map(c => [c.base, c])
 // ด่าน 1–5 ตั้งมือ · ด่าน 6+ ไม่มีที่สิ้นสุด (แบบ Spaceteam: เล่นจนเลือดหมด สถิติ = ด่านไกลสุด)
 // perPlayer = คำสั่งที่ต้องทำต่อคน (ถูกคูณ 2 จากโปรโตไทป์ — user สั่ง 16 ต.ค. ให้ด่านยาวขึ้น)
 export const LEVELS = [
+  // เวลาต่อคำสั่งไล่ลงทีละน้อย (18 ต.ค. 2026 user: เดิม 12→10→9→8→7 วิ ก้าวกระโดดเกิน + อุปกรณ์เยอะอยู่แล้ว)
   { name: 'ห้องจ่ายยา OPD',        perPlayer: 16, controls: 4, duration: 12000, damage: 10 },
-  { name: 'ห้องผสมยา Compounding',  perPlayer: 18, controls: 4, duration: 10000, damage: 12 },
-  { name: 'คลีนรูม IV Admixture',   perPlayer: 20, controls: 5, duration: 9000,  damage: 15 },
-  { name: 'โรงงานยา GMP',           perPlayer: 22, controls: 5, duration: 8000,  damage: 18 },
-  { name: 'ER วิกฤตพิษ!',           perPlayer: 24, controls: 6, duration: 7000,  damage: 20 },
+  { name: 'ห้องผสมยา Compounding',  perPlayer: 18, controls: 4, duration: 11000, damage: 12 },
+  { name: 'คลีนรูม IV Admixture',   perPlayer: 20, controls: 5, duration: 10000, damage: 15 },
+  { name: 'โรงงานยา GMP',           perPlayer: 22, controls: 5, duration: 9500,  damage: 18 },
+  { name: 'ER วิกฤตพิษ!',           perPlayer: 24, controls: 6, duration: 9000,  damage: 20 },
 ]
-const ENDLESS_ROOMS = ['ICU ยามดึก', 'ห้องยาเคมีบำบัด', 'คลังวัคซีนไฟดับ', 'รถพยาบาลฉุกเฉิน', 'ห้องผ่าตัดด่วน', 'แผนกพิษวิทยา']
+const ENDLESS_ROOMS = ['ICU ยามดึก', 'ห้องยาเคมีบำบัด', 'คลังวัคซีนไฟดับ', 'รถพยาบาลฉุกเฉิน', 'ห้องผ่าตัดด่วน', 'แผนกพิษวิทยา',
+  'ร้านยาตอนตีสอง', 'แล็บเคมีวิเคราะห์', 'ออกหน่วยเยี่ยมบ้าน', 'ห้องยาเด็ก']
 
 // ค่าของด่านไหนก็ได้ · หลังด่าน 5 เวลาต่อคำสั่งหดทีละ 0.25 วิ (ต่ำสุด 4 วิ) ดาเมจขึ้นทีละ 1 (สูงสุด 30)
 export function levelConfig(level) {
@@ -63,7 +108,7 @@ export function levelConfig(level) {
     name: `Lv.${level} ${ENDLESS_ROOMS[(k - 1) % ENDLESS_ROOMS.length]}`,
     perPlayer: 24,
     controls: 6,
-    duration: Math.max(4000, 7000 - 250 * k),
+    duration: Math.max(5500, 9000 - 150 * k),   // หลังด่าน 5 ลดทีละ 0.15 วิ ต่ำสุด 5.5 วิ
     damage: Math.min(30, 20 + k),
   }
 }
@@ -142,7 +187,7 @@ export function startLevel(s, level, now, rnd = Math.random) {
     for (let i = 0; i < per; i++) {
       const cat = shuffled[(idx * per + i) % shuffled.length]
       const c = { id: `${cat.base}_${idx}`, base: cat.base, type: cat.type, label: cat.label }
-      for (const k of ['min', 'max', 'options', 'holdDuration', 'targetHits', 'hazard']) if (cat[k] != null) c[k] = cat[k]
+      for (const k of ['min', 'max', 'options', 'holdDuration', 'targetHits', 'hazard', 'cta', 'scale']) if (cat[k] != null) c[k] = cat[k]
       if (c.type === 'toggle') c.state = false
       if (c.type === 'slider') c.value = c.min
       if (c.type === 'dial') c.value = c.options[0]
@@ -155,8 +200,8 @@ export function startLevel(s, level, now, rnd = Math.random) {
   })
   ids.forEach(uid => assignInstruction(s, uid, now, rnd))
 
-  // เหตุการณ์ทั้งทีม: ด่าน 1–2 มี 1 ครั้ง ด่าน 3+ มี 2 ครั้ง
-  const count = level <= 2 ? 1 : 2
+  // เหตุการณ์ทั้งทีม (18 ต.ค. 2026 user: ขึ้นบ่อยเกิน): ด่าน 1–2 ไม่มี · 3–5 มี 1 ครั้ง · 6+ มี 2 ครั้ง
+  const count = level <= 2 ? 0 : level <= 5 ? 1 : 2
   s.eventTimes = []
   for (let i = 0; i < count; i++) s.eventTimes.push(now + 8000 + rnd() * 12000 + i * 18000)
   log(s, `🚀 เริ่ม ${L.name}! สื่อสารคำสั่งให้เพื่อนด่วน!`, now)
