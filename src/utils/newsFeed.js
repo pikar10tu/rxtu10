@@ -102,9 +102,15 @@ export const quizDayMilestone = (before, after) => {
 }
 
 /** ต่อข่าวใหม่ไว้หน้าสุด แล้วตัดท้ายให้เหลือ EVENT_MAX — คู่แฝดของ pushHistory */
+/** หอคอยเกินชั้นนี้ (Endless) ขึ้นข่าวถี่ทุก 5 ชั้น ⇒ ข่าวใหม่ทับข่าว Endless เก่าของตัวเอง (user ขอ 18 ต.ค. 2026 กันรก)
+ *  ต้องตรงกับ TOWER_MAX ใน data/towerFloors.js */
+export const TOWER_ENDLESS_FROM = 100
+const isEndlessTw = (e) => e?.k === 'tw' && Number(e.v) > TOWER_ENDLESS_FROM
+
 export function pushEvent(list, ev) {
-  const prev = Array.isArray(list) ? list : []
+  let prev = Array.isArray(list) ? list : []
   if (!ev || !ev.k || !KINDS[ev.k]) return prev      // ข่าวเสีย = ไม่แตะของเดิม
+  if (isEndlessTw(ev)) prev = prev.filter(e => !isEndlessTw(e))
   return [ev, ...prev].slice(0, EVENT_MAX)
 }
 

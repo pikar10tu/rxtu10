@@ -168,13 +168,16 @@ test('Endless: ชั้น ≤100 ไม่มี boost · 101+ คูณชั
   assert.notDeepEqual(getFloorTeam(150).map(p => p.id + p.element), getFloorTeam(100).map(p => p.id + p.element))
 })
 
-test('towerNewsFloor: เฉพาะสถิติใหม่ข้ามหมุด · หมุดสูงสุดอันเดียว · เกิน 100 ทุก 50', () => {
+test('towerNewsFloor: เฉพาะสถิติใหม่ข้ามหมุด · หมุดสูงสุดอันเดียว · เกิน 100 ทุก 5', () => {
   assert.equal(towerNewsFloor(0, 29), 0)
   assert.equal(towerNewsFloor(29, 30), 30)
   assert.equal(towerNewsFloor(10, 69), 50)        // ไต่รวดข้าม 30+50 → 50 อันเดียว
   assert.equal(towerNewsFloor(50, 50), 0)         // ไม่ใช่สถิติใหม่
   assert.equal(towerNewsFloor(60, 40), 0)
   assert.equal(towerNewsFloor(99, 100), 0)        // 100 ไปเลน news
-  assert.equal(towerNewsFloor(140, 150), 150)
-  assert.equal(towerNewsFloor(150, 160), 0)
+  assert.equal(towerNewsFloor(99, 104), 0)        // 100 ไปเลน news · 104 ยังไม่ถึงหมุด
+  assert.equal(towerNewsFloor(100, 105), 105)
+  assert.equal(towerNewsFloor(104, 113), 110)     // ข้าม 105+110 → 110 อันเดียว
+  assert.equal(towerNewsFloor(150, 154), 0)
+  assert.equal(towerNewsFloor(154, 155), 155)
 })

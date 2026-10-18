@@ -8,10 +8,17 @@ const NOW = 1_800_000_000_000
 test('pushEvent ต่อหน้าสุด ตัดเหลือ EVENT_MAX', () => {
   let list = []
   const N = EVENT_MAX + 2
-  for (let i = 1; i <= N; i++) list = pushEvent(list, { k: 'tw', v: i * 10, t: NOW + i })
+  for (let i = 1; i <= N; i++) list = pushEvent(list, { k: 'qz', v: i * 10, t: NOW + i })
   assert.equal(list.length, EVENT_MAX)
   assert.equal(list[0].v, N * 10)
   assert.equal(list[2].v, (N - 2) * 10)
+})
+
+test('pushEvent หอคอย Endless ทับข่าว Endless เก่าของตัวเอง แต่ไม่แตะข่าวหอคอย ≤100 และข่าวอื่น', () => {
+  let ev = [{ k: 'tw', v: 70, t: NOW - 3 }, { k: 'qz', v: 10, t: NOW - 2 }]
+  ev = pushEvent(ev, { k: 'tw', v: 105, t: NOW - 1 })
+  ev = pushEvent(ev, { k: 'tw', v: 110, t: NOW })
+  assert.deepEqual(ev.map(e => e.v), [110, 70, 10])
 })
 
 test('pushEvent entry เสีย = ไม่แตะของเดิม', () => {
