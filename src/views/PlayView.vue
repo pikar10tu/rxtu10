@@ -90,7 +90,7 @@
       </RouterLink>
       <RouterLink to="/play/poker" class="pt-entry">
         <Emoji char="🃏" /> Poker
-        <span class="pt-entry-sub">ชิปในโต๊ะ 2–6 คน ›</span>
+        <span class="pt-entry-sub">ไพ่ 2–6 คน ›</span>
       </RouterLink>
     </template>
     <div v-else class="play-login">เข้าสู่ระบบเพื่อเล่น</div>

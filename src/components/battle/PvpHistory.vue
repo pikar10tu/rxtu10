@@ -43,7 +43,7 @@
       </div>
     </template>
 
-    <div v-if="open" class="ph-note"><Emoji char="🤝" /> = ท้าสู้กระชับมิตร (ไม่มีเหรียญ ไม่กระทบแต้ม) · กดชื่อเพื่อดูโปรไฟล์/ท้ากลับ · เก็บ {{ HISTORY_MAX }} รายการล่าสุดของแต่ละคน</div>
+    <div v-if="open" class="ph-note"><Emoji char="🤝" /> = ท้าสู้กระชับมิตร (ไม่มีเหรียญ ไม่กระทบแต้ม) · กดชื่อเพื่อดูโปรไฟล์/ท้ากลับ</div>
   </div>
 </template>
 
@@ -52,7 +52,7 @@ import Emoji from '../shared/Emoji.vue'
 import { ref, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { useMembersStore } from '../../stores/members.js'
-import { myAttacks, defenseLog, agoLabel, HISTORY_MAX } from '../../utils/pvpHistory.js'
+import { myAttacks, defenseLog, agoLabel } from '../../utils/pvpHistory.js'
 
 // startOpen: หน้าฉันกางไว้เสมอ (สนามประลองยังพับเมื่อว่างตามเดิม) · open(uid) = กดชื่อ → ผู้ใช้หน้าแม่เปิดโปรไฟล์
 const props = defineProps({ startOpen: { type: Boolean, default: false } })

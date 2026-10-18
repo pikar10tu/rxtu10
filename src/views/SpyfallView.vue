@@ -92,7 +92,7 @@
         </div>
         <div class="sfv-turn"><Emoji char="🎤" /> คนเริ่มถาม: <b>{{ st.roster[st.starterUid] }}</b><span v-if="st.starterUid === uid"> (คุณ)</span></div>
 
-        <div class="sfv-label">{{ MODES[st.mode].label }}ที่เป็นไปได้ <small>· แตะขีดฆ่าได้ (เห็นคนเดียว)</small></div>
+        <div class="sfv-label">{{ MODES[st.mode].label }}ที่เป็นไปได้ <small>· แตะขีดฆ่าได้</small></div>
         <div class="sfv-grid">
           <button v-for="w in st.options" :key="w" class="sfv-opt" :class="{ x: crossed.has(w) }" @click="toggleCross(w)">{{ w }}</button>
         </div>
@@ -130,7 +130,7 @@
             <span class="sfv-tag" :class="id === st.result.spyUid ? 'off' : ''">{{ id === st.result.spyUid ? 'สปาย' : st.result.roles?.[id] }}</span>
           </li>
         </ul>
-        <button v-if="isHost" class="sfv-main" @click="backToLobby">เล่นรอบใหม่ (กลับล็อบบี้)</button>
+        <button v-if="isHost" class="sfv-main" @click="backToLobby">เล่นรอบใหม่</button>
         <div v-else class="sfv-hint">รอหัวห้องเริ่มรอบใหม่…</div>
       </div>
 

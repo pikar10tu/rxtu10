@@ -16,7 +16,7 @@
     <template v-if="!roomId">
       <div class="pk-warn">
         <b>Texas Hold'em 2–{{ MAX_PLAYERS }} คน</b><br>
-        ชิปมีแค่ในโต๊ะ ทุกคนเริ่ม {{ START_STACK.toLocaleString() }} · หมดแล้วเติมให้อัตโนมัติ · ไม่เกี่ยวกับเหรียญในแอป
+        ทุกคนเริ่ม {{ START_STACK.toLocaleString() }} ชิป · หมดแล้วเติมให้ · ไม่ใช้เหรียญในแอป
       </div>
       <button class="pk-main" @click="createRoom">+ สร้างโต๊ะ</button>
       <div class="pk-sub">โต๊ะที่เปิดอยู่</div>
@@ -33,7 +33,7 @@
         </button>
       </div>
 
-      <div class="pk-sub">กำไร / ขาดทุนสะสม <small>(ทุกโต๊ะ · ไว้ขำๆ)</small></div>
+      <div class="pk-sub">กำไร / ขาดทุนสะสม</div>
       <div v-if="!stats.length" class="pk-empty">ยังไม่มีใครเล่นจบสักมือ</div>
       <table v-else class="pk-lb">
         <tr v-for="(s, i) in stats.slice(0, 15)" :key="s.uid" :class="{ me: s.uid === uid }">
@@ -176,10 +176,9 @@
             <td class="n" :class="t.net > 0 ? 'pos' : t.net < 0 ? 'neg' : ''">{{ signed(t.net) }}</td>
           </tr>
         </table>
-        <div class="pk-hint">หลุด/ปัดแอปทิ้ง: ถึงตาหมอบให้ · ไม่แจกมือใหม่ · หายเกิน {{ AWAY_HANDS }} มือ = ลุกจากโต๊ะ · กลับมาทันนั่งต่อชิปเดิม</div>
       </div>
 
-      <button v-if="isHost && res" class="pk-leave host" @click="backToLobby">พักโต๊ะ (กลับล็อบบี้ ชิปยังอยู่)</button>
+      <button v-if="isHost && res" class="pk-leave host" @click="backToLobby">พักโต๊ะ</button>
       <button class="pk-leave" :class="{ armed: quitArm }" @click="onQuit">{{ quitArm ? 'แตะอีกครั้งเพื่อลุกจากโต๊ะ' : 'ลุกจากโต๊ะ' }}</button>
     </template>
 
@@ -210,7 +209,7 @@ import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
 import PlayLogPanel from '../components/shared/PlayLogPanel.vue'
-import { usePoker, START_STACK, BLINDS, TURN_MS, AWAY_HANDS } from '../composables/usePoker.js'
+import { usePoker, START_STACK, BLINDS, TURN_MS } from '../composables/usePoker.js'
 import { legal, evaluate, potTotal, MIN_PLAYERS, MAX_PLAYERS } from '../utils/pokerEngine.js'
 import { sfx } from '../utils/sfx.js'
 
