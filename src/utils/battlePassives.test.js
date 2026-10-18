@@ -97,7 +97,7 @@ test('stealStats: ไม่มีศัตรู = ไม่มี event ไม�
 test('teamHp (whale): เพิ่ม maxHp ทั้งทีม และเลือดเต็มตาม', () => {
   const team = [u('whale'), u('cat', { uid: 'A1' })]
   applyAuras(team, [])
-  assert.equal(Math.round(team[1].maxHp), 1100)
+  assert.equal(Math.round(team[1].maxHp), 1150)
   assert.equal(team[1].hp, team[1].maxHp)
 })
 
@@ -119,9 +119,23 @@ test('หมาป่า: บัฟเฉพาะเพื่อนสายจ
   const fistMate = mk('A1', '__blank__', 'fist')
   const paperMate = mk('A2', '__blank__', 'paper')
   applyAuras([wolf, fistMate, paperMate], [])
-  assert.equal(Math.round(fistMate.atk), 104, 'เพื่อนสายจู่โจมได้ 4%')
-  assert.equal(Math.round(wolf.atk), 104, 'ตัวหมาป่าเองก็สายจู่โจม จึงได้ด้วย')
+  assert.equal(Math.round(fistMate.atk), 115, 'เพื่อนสายจู่โจมได้ 15%')
+  assert.equal(Math.round(wolf.atk), 115, 'ตัวหมาป่าเองก็สายจู่โจม จึงได้ด้วย')
   assert.equal(paperMate.atk, 100, 'สายอื่นต้องไม่ได้อะไร')
+})
+
+test('🐺🌕 หมาป่าเดียวดาย: ทีมมีหมาป่าตัวเดียว = พลังโจมตีและเลือด +120% (หลังบัฟสาย) · มีเพื่อน = ไม่ติด', () => {
+  const mk = (uid, id) => ({ uid, side: 'A', id, element: 'fist', hp: 100, maxHp: 100, atk: 100 })
+  const solo = mk('A0', 'wolf')
+  const ev = applyAuras([solo], [])
+  assert.equal(Math.round(solo.atk), Math.round(115 * 2.2))
+  assert.equal(Math.round(solo.maxHp), 220)
+  assert.equal(solo.hp, solo.maxHp)
+  assert.ok(ev.find(e => e.lone && e.name === 'หมาป่าเดียวดาย'))
+  const pack = [mk('A0', 'wolf'), mk('A1', '__blank__')]
+  const ev2 = applyAuras(pack, [])
+  assert.equal(Math.round(pack[0].atk), 115)
+  assert.ok(!ev2.some(e => e.lone))
 })
 
 test('teamAtkPerElement ถูกลบออกจากระบบแล้ว (ค่าคงที่ที่ไม่มีใครอ่าน อันตรายกว่าค่าที่ผิด)', () => {
@@ -138,7 +152,7 @@ test('teamAtkPerElement ถูกลบออกจากระบบแล้�
 test('enemyVuln (owl): ไปลงที่ศัตรู ไม่ใช่ทีมตัวเอง', () => {
   const team = [u('owl')], foes = [u('cat', { uid: 'B0', side: 'B' })]
   applyAuras(team, foes)
-  assert.equal(foes[0].vuln, 0.06)
+  assert.equal(foes[0].vuln, 0.12)
   assert.equal(team[0].vuln, undefined)
 })
 
@@ -311,10 +325,20 @@ test('atkWhenFull (hamster): แรงเฉพาะตอนเลือดเ
   assert.equal(runOnAttack(u('hamster', { hp: 999 }), foe, [foe], () => 0.5).atkMult, 1)
 })
 
-test('multiStrike (rabbit): ตี 2 ทีเมื่อสุ่มติด · อยู่ใน beat เดียว (strikes ไม่ใช่ beat ใหม่)', () => {
-  const foe = u('cat', { uid: 'B0' })
-  assert.equal(runOnAttack(u('rabbit'), foe, [foe], () => 0.1).strikes, 2)
-  assert.equal(runOnAttack(u('rabbit'), foe, [foe], () => 0.9).strikes, 1)
+test('🤍 sparkMark (rabbit): หมัดแรกแปะมาสก์ · หมัดถัดไปตีซ้ำตามมาสก์ที่มีอยู่ · มีเพดาน · ไม่ดึง rand', () => {
+  const rabbit = u('rabbit')
+  const foe = u('cat', { uid: 'B0', side: 'B' })
+  const noRand = () => { throw new Error('ห้ามดึง rand') }
+  const r1 = runOnAttack(rabbit, foe, [foe], noRand)
+  assert.equal(r1.bonusHits || 0, 0)
+  assert.equal(psOf(foe).spark, 1)
+  const r2 = runOnAttack(rabbit, foe, [foe], noRand)
+  assert.equal(r2.bonusHits, 1)
+  assert.equal(r2.bonusPct, 50)
+  assert.equal(psOf(foe).spark, 2)
+  for (let i = 0; i < 10; i++) runOnAttack(rabbit, foe, [foe], noRand)
+  assert.equal(psOf(foe).spark, 5, 'เพดาน 5 มาสก์')
+  assert.equal(runOnAttack(rabbit, foe, [foe], noRand).bonusHits, 5)
 })
 
 test('berserk: ยิ่งเลือดหายยิ่งแรง นับเป็นขั้นละ 10%', () => {
@@ -1060,7 +1084,7 @@ test('🪨 ขั้น 3 ต้องไม่หลุดเพดานคว
   for (const [id, p] of Object.entries(PET_PASSIVES)) {
     for (const part of partsOf(p)) {
       const v = passiveValueAt(part, PASSIVE_MAX_LEVEL)
-      if (part.effect === 'dodge') assert.ok(v.pct <= 25, `${id} หลบ ${v.pct}% สูงเกินจนไฟต์ยืด`)
+      if (part.effect === 'dodge') assert.ok(v.pct <= 40, `${id} หลบ ${v.pct}% สูงเกินจนไฟต์ยืด`)
       if (part.effect === 'damageReduction') assert.ok(v.pct <= 35, `${id} ลดดาเมจ ${v.pct}% สูงเกิน`)
       if (part.effect === 'guardian') assert.ok(v.pct <= 100, `${id} รับแทน ${v.pct}% เกิน 100% เป็นไปไม่ได้`)
       if (part.effect === 'revive') assert.ok(v.pct <= 70, `${id} ฟื้น ${v.pct}% สูงเกิน`)
@@ -1123,7 +1147,7 @@ test('PET_PASSIVES: ทุกตัวมี short และเติมเล�
 
 test('effectText: ขั้นสูงขึ้นแล้วเลขต้องขยับ (ตัวที่ step ไม่เป็น 0)', () => {
   assert.notEqual(effectText(PET_PASSIVES.whale, 1), effectText(PET_PASSIVES.whale, 3))
-  assert.match(effectText(PET_PASSIVES.whale, 3), /16/)
+  assert.match(effectText(PET_PASSIVES.whale, 3), /21/)
 })
 
 test('effectText: ฟีนิกซ์กับแมวต้องอ่านต่างกัน (เดิมชนกันที่ "กันตายได้ 1 ครั้ง")', () => {
@@ -1143,8 +1167,8 @@ test('STATUS_ICON/STATUS_TEXT: มี duoRegen แล้ว (คู่หู �
 
 test('effectText: aura ที่ลงฝั่งตรงข้ามมีข้อความมุมผู้รับแยก (onTarget)', () => {
   const owl = PET_PASSIVES.owl
-  assert.equal(effectText(owl, 1), 'ศัตรูทุกตัวได้รับดาเมจ +6%')
-  assert.equal(effectText(owl, 1, { onTarget: true }), 'รับดาเมจเพิ่ม 6%')
+  assert.equal(effectText(owl, 1), 'ศัตรูทุกตัวได้รับดาเมจ +12%')
+  assert.equal(effectText(owl, 1, { onTarget: true }), 'รับดาเมจเพิ่ม 12%')
   // ตัวที่ไม่มี shortOn ต้องตกกลับไป short เหมือนเดิม ไม่ใช่ค่าว่าง
   assert.equal(effectText(PET_PASSIVES.whale, 1, { onTarget: true }), effectText(PET_PASSIVES.whale, 1))
 })
@@ -1879,8 +1903,8 @@ test('🦁 สิงโต: ครบ 3 สายได้บัฟทั้ง�
   ]
   const full = mk()
   applyAuras(full, [])
-  assert.equal(Math.round(full[0].atk), 112)    // 12% (ขึ้นจาก 10% ตามเมต้าซิม 27 ก.ย. 2026)
-  assert.equal(Math.round(full[1].maxHp), 1120)
+  assert.equal(Math.round(full[0].atk), 115)    // 15% (ขึ้นจาก 10% ตามเมต้าซิม 27 ก.ย. 2026)
+  assert.equal(Math.round(full[1].maxHp), 1150)
   assert.equal(full[1].hp, full[1].maxHp)          // เลือดเต็มหลอดใหม่
 
   const missing = [mk()[0], mk()[1], u('hedgehog', { uid: 'A2', element: 'fist', atk: 100, maxHp: 1000, hp: 1000 })]
@@ -1915,7 +1939,7 @@ test('👾 ไวรัส: ชั้นขึ้นจากหมัดไว�
   assert.equal(psOf(foe).infect.n, 7)               // ไม่จำกัดชั้นแล้ว (29 ก.ย. 2026 แอนตี้ทีมถึก)
 
   const res = runOnHit(foe, 50, mate, [foe], () => 0.99)
-  assert.equal(Math.round(res.pierce), 70)          // 7 ชั้น × 10% ของ atk ไวรัส (100)
+  assert.equal(Math.round(res.pierce), 56)          // 7 ชั้น × 8% ของ atk ไวรัส (100)
   assert.equal(psOf(foe).infect.n, 7)               // เชื้อไม่หายตอนระเบิด
   const burst = res.events.find(e => e.effect === 'infectBurst')
   assert.ok(burst, 'ต้องมี event ระเบิดให้จอเล่า')
@@ -1928,7 +1952,7 @@ test('👾 ไวรัส: ดาเมจเชื้อไม่ถูกห�
   runOnHit(foe, 100, virus, [foe], () => 0.99)      // ชั้นที่ 1
   const res = runOnHit(foe, 100, virus, [foe], () => 0.99)
   assert.ok(res.dmg < 100, 'หมัดหลักต้องถูกลดตามปกติ')
-  assert.equal(Math.round(res.pierce), 10)          // 1 ชั้น × 10% — ไม่โดนลด 90% ด้วย
+  assert.equal(Math.round(res.pierce), 8)           // 1 ชั้น × 8% — ไม่โดนลด 90% ด้วย
 })
 
 test('🦍 กอริลลา: ท้าชนดึงเป้ามาที่ตัวเอง และมาก่อน targetLowest ของกริฟฟิน', () => {
@@ -1986,8 +2010,8 @@ test('🐗 หมูป่า: ดาเมจบวกตาม % เลือ�
     return Math.round(runOnAttack(boar, foe, [foe], () => 0.5).atkMult * 100) / 100
   }
   assert.equal(mult(100), 1)      // เลือดเต็ม = ไม่ได้อะไร
-  assert.equal(mult(40), 1.6)     // หาย 60% = +60%
-  assert.equal(mult(10), 1.9)     // หาย 90% = +90%
+  assert.equal(mult(40), 1.84)    // หาย 60% = 6 ขั้น × 14%
+  assert.equal(mult(10), 2.26)     // หาย 90% = 9 ขั้น × 14%
 })
 
 test('🐗 หมูป่า: เลือดเต็ม = ไม่มี event ให้จอเล่า', () => {
@@ -2002,8 +2026,8 @@ test('🦡 แบดเจอร์: เป้าเลือดสูงสุ�
   const mult = (maxHp) => Math.round(runOnAttack(badger, foe(maxHp), [foe(maxHp)], () => 0.5).atkMult * 100) / 100
   assert.equal(mult(499), 1)
   assert.equal(mult(500), 1)
-  assert.equal(mult(501), 1.3)
-  assert.equal(mult(5000), 1.3)
+  assert.equal(mult(501), 1.5)
+  assert.equal(mult(5000), 1.5)
 })
 
 test('🦡 แบดเจอร์: ทะเบียนต้องไม่มีคีย์ max หลงเหลือ (สัญญาเปลี่ยนแล้วตั้งแต่ 10 ก.ย.)', () => {
@@ -2018,11 +2042,11 @@ test('🦇 ค้างคาว: ทั้งทีมดูดเลือด�
     u('blank', { uid: 'A1', maxHp: 1000, hp: 500 }),
   ]
   applyAuras(team, [])
-  assert.equal(team[0].lifestealPct, 10)
-  assert.equal(team[1].lifestealPct, 10)
+  assert.equal(team[0].lifestealPct, 15)
+  assert.equal(team[1].lifestealPct, 15)
 
   const out = runOnDealt(team[1], team, 100)
-  assert.equal(team[1].hp, 510)                     // 10% ของดาเมจ 100
+  assert.equal(team[1].hp, 515)                     // 15% ของดาเมจ 100
   const e = out.events.find(x => x.effect === 'teamLifesteal')
   assert.ok(e && e.fxKind === 'heal')
   assert.deepEqual(e.targets, ['A1'])
@@ -2084,12 +2108,12 @@ test('🐢 เต่า: ทั้งทีมลดดาเมจ · ตัว
   ]
   applyAuras(team, [])
   // 15% (ขึ้นจาก 10% ตามเมต้าซิม 27 ก.ย. 2026)
-  assert.equal(team[0].teamDrPct, 30)                // เจ้าของ 2 เท่า
-  assert.equal(team[1].teamDrPct, 15)
+  assert.equal(team[0].teamDrPct, 36)                // เจ้าของ 2 เท่า (18%)
+  assert.equal(team[1].teamDrPct, 18)
 
   const att = u('blank', { uid: 'B0', side: 'B', atk: 100 })
-  assert.equal(Math.round(runOnHit(team[0], 100, att, team, () => 0.99).dmg), 70)
-  assert.equal(Math.round(runOnHit(team[1], 100, att, team, () => 0.99).dmg), 85)
+  assert.equal(Math.round(runOnHit(team[0], 100, att, team, () => 0.99).dmg), 64)
+  assert.equal(Math.round(runOnHit(team[1], 100, att, team, () => 0.99).dmg), 82)
 })
 
 test('🐭 หนู: ขโมยพลังและเลือดจากศัตรูทุกตัวตอนเริ่มไฟต์ · ศัตรูเสียจริง', () => {
@@ -2100,10 +2124,10 @@ test('🐭 หนู: ขโมยพลังและเลือดจาก�
   ]
   runSetup(me, foes)
   // 5% (ขึ้นจาก 3% ตามเมต้าซิม 27 ก.ย. 2026)
-  assert.equal(Math.round(foes[0].atk), 190)        // เสียไป 5%
-  assert.equal(Math.round(foes[1].maxHp), 950)
-  assert.equal(Math.round(me[0].atk), 115)          // ได้ 10 + 5
-  assert.equal(Math.round(me[0].maxHp), 1150)
+  assert.equal(Math.round(foes[0].atk), 178)        // เสียไป 11.2%
+  assert.equal(Math.round(foes[1].maxHp), 888)
+  assert.equal(Math.round(me[0].atk), 134)          // ได้ 22.4 + 11.2
+  assert.equal(Math.round(me[0].maxHp), 1336)
   assert.equal(me[0].hp, me[0].maxHp)               // ได้เลือดมาเต็มก้อนที่ขโมยได้
 })
 
@@ -2124,7 +2148,7 @@ test('🐭 หนู: ขโมยก่อนออร่าเสมอ — �
   const B = [u('blank', { uid: 'B0', side: 'B', atk: 100, maxHp: 1000, hp: 1000 })]
   runSetup(A, B)
   applyAuras(A, B)
-  assert.equal(Math.round(A[0].atk), 118)           // (100 + 5) × 1.12 (mouse 5% ↑ / lion 12% ↑ ตามเมต้าซิม 27 ก.ย. 2026)
+  assert.equal(Math.round(A[0].atk), 128)           // (100 + 11.2) × 1.15 (mouse 5% ↑ / lion 12% ↑ ตามเมต้าซิม 27 ก.ย. 2026)
 })
 
 test('🦄 ยูนิคอร์น: ตีแล้วฟื้นเพื่อนที่บอบช้ำสุดตามดาเมจจริง (ไม่ใช่ต้นรอบอีกแล้ว)', () => {
@@ -2132,7 +2156,7 @@ test('🦄 ยูนิคอร์น: ตีแล้วฟื้นเพื�
   const hurt = u('blank',   { uid: 'A1', maxHp: 1000, hp: 300 })
   const ok   = u('blank',   { uid: 'A2', maxHp: 1000, hp: 900 })
   const out = runOnDealt(uni, [uni, hurt, ok], 100)
-  assert.equal(hurt.hp, 320)                        // 20% ของดาเมจ 100
+  assert.equal(hurt.hp, 340)                        // 40% ของดาเมจ 100
   assert.equal(ok.hp, 900)
   const e = out.events.find(x => x.effect === 'healOnAttack')
   assert.ok(e && e.fxKind === 'heal')
@@ -2140,6 +2164,21 @@ test('🦄 ยูนิคอร์น: ตีแล้วฟื้นเพื�
 
   // ไม่ทำงานที่ต้นรอบอีกแล้ว
   assert.equal(runOnRound([uni, hurt, ok]).filter(x => x.effect === 'healLowestAlly').length, 0)
+})
+
+test('🦄 ยูนิคอร์น: ฮีลติดแล้วล้างสถานะร้ายบนเป้านั้นอย่างละ 1 (เชื้อ · มาสก์ · แช่แข็ง)', () => {
+  const uni  = u('unicorn', { uid: 'A0', maxHp: 1000, hp: 1000 })
+  const hurt = u('blank',   { uid: 'A1', maxHp: 1000, hp: 300 })
+  const st = psOf(hurt)
+  st.infect = { n: 2, from: uni }; st.spark = 1; st.skip = 1
+  const out = runOnDealt(uni, [uni, hurt], 100)
+  assert.equal(st.infect.n, 1)
+  assert.equal(st.spark, 0)
+  assert.equal(st.skip, 0)
+  const e = out.events.find(x => x.effect === 'cleanse')
+  assert.deepEqual(e.left, { infect: 1, spark: 0, skip: 0 })
+  runOnDealt(uni, [uni, hurt], 100)
+  assert.equal(st.infect, undefined, 'ชั้นสุดท้ายหมด = ลบเชื้อทิ้ง')
 })
 
 test('🦄 + 🦇 ในทีมเดียวกัน: สองผลนี้ต้องได้ event ของตัวเองครบ ไม่มีใบไหนถูกกลืน', () => {
@@ -2176,14 +2215,14 @@ test('👾 ไวรัส: pierceHits แตกชั้นละก้อน �
 })
 
 test('👾 ไวรัส: ปัดเศษแบบสะสม — ทุกชั้นต้องรวมได้เท่ายอดเดิมแม้หารไม่ลงตัว', () => {
-  const virus = u('virus', { uid: 'A0', atk: 33, hp: 1000 })     // 10% ของ 33 = 3.3 ต่อชั้น
+  const virus = u('virus', { uid: 'A0', atk: 33, hp: 1000 })     // 8% ของ 33 = 2.64 ต่อชั้น
   const foe   = u('panda', { uid: 'B0', side: 'B', element: 'paper', atk: 10, maxHp: 9000, hp: 9000 })
   for (let i = 0; i < 5; i++) runOnHit(foe, 10, virus, [foe], () => 0.99)
   const res = runOnHit(foe, 10, virus, [foe], () => 0.99)
   const burst = res.events.find(e => e.effect === 'infectBurst')
   assert.equal(burst.hits.length, 5)
   assert.equal(burst.hits.reduce((s, n) => s + n, 0), burst.amount)
-  assert.equal(burst.amount, Math.round(33 * 0.1 * 5))            // 16.5 → 17
+  assert.equal(burst.amount, Math.round(33 * 0.08 * 5))           // 13.2 → 13
 })
 
 test('👾 ไวรัส: ยังไม่ติดเชื้อ = ไม่มี pierceHits ให้ใบ attack แบก (จอไม่ต้องเด้งอะไรเลย)', () => {
@@ -2235,13 +2274,13 @@ test('rarityBoost: ☀️ ขั้นบันไดตามระดับ co
   assert.equal(Math.round(team[0].atk), 10, 'Sol เองไม่ได้')
 })
 
-test('ร่างองศา: Earth นับเป็น common ได้บัฟ +50 + ถูกปิดฤดู', () => {
+test('ร่างองศา: Earth นับเป็น common ได้บัฟ +60 ของตัวเอง (18 ต.ค. 2026) + ถูกปิดฤดู', () => {
   const team = [U('sol', 'legendary', 0), U('earth', 'legendary', 1), U('lion', 'legendary', 2)]
   applyForms(team)
   applyAuras(team, [])
   assert.equal(team[1].countsAs, 'common')
   assert.equal(psOf(team[1]).formed, true)
-  assert.equal(Math.round(team[1].atk), 15)
+  assert.equal(Math.round(team[1].atk), 16)
 })
 
 test('มี common ในทีม ⇒ Earth ไม่แปลงร่าง ไม่ได้บัฟ', () => {
@@ -2306,8 +2345,8 @@ test('👾 ไวรัส: แปะเชื้อแล้วเป้าร�
   const sp = r1.events.find(e => e.effect === 'infectSplash')
   assert.ok(sp, 'ต้องมี event infectSplash')
   assert.deepEqual(sp.targets, ['B1'])
-  assert.equal(sp.amounts.B1, 10)                 // 1 ชั้น × 10% ของ atk 100
-  assert.equal(b1.hp, 990)
+  assert.equal(sp.amounts.B1, 8)                  // 1 ชั้น × 8% ของ atk 100
+  assert.equal(b1.hp, 992)
   assert.equal(sp.hpMap.B1, 99)
   assert.equal(r1.pierce, 0, 'เป้าหลักหมัดแรกยังไม่ติดเชื้อ = ไม่มีดาเมจเชื้อ')
   assert.deepEqual(r1.splash, [b1])

@@ -17,7 +17,7 @@ test('บัฟจากทีมตัวเอง: คุณวาฬในท
     assert.equal(b.ownerName, 'คุณวาฬ')
     assert.equal(b.buff, true)
     assert.equal(b.foeSide, false)
-    assert.match(b.label, /10/)          // effectText เติมเลขจริงให้แล้ว
+    assert.match(b.label, /15/)          // effectText เติมเลขจริงให้แล้ว
   }
   assert.equal(find(s.B0, 'teamHp'), undefined, 'aura ต้องไม่ข้ามไปทีมศัตรู')
 })
@@ -31,7 +31,7 @@ test('ดีบัฟข้ามฝั่ง: นกฮูกอยู่ที
   assert.equal(b.ownerUid, 'B0')
   assert.equal(b.ownerName, 'นกฮูก')
   // ⚠️ ข้อความต้องเป็นมุม "ผู้รับ" — มุมเจ้าของ ("ศัตรูทุกตัวรับดาเมจเพิ่ม") อ่านกลับด้านทันที
-  assert.equal(b.label, 'รับดาเมจเพิ่ม 6%')
+  assert.equal(b.label, 'รับดาเมจเพิ่ม 12%')
   assert.equal(find(s.B0, 'enemyVuln'), undefined, 'เจ้าของ aura ไม่ควรติดดีบัฟของตัวเอง')
 })
 

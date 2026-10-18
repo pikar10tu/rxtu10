@@ -21,7 +21,7 @@ test('projectileOf: emoji ประจำตัวยังอ่านได้
 })
 
 test('passiveOf: คืน passive จริงแล้ว (ระบบ passive เปิด 27 ส.ค.) · id ที่ไม่รู้จัก = null', () => {
-  assert.equal(passiveOf(PETS.find(p => p.id === 'wolf')).name, 'สัญชาตญาณฝูง')
+  assert.equal(passiveOf(PETS.find(p => p.id === 'wolf')).name, 'หมาป่าไม่เดียวดาย')
   assert.equal(passiveOf({ id: 'ไม่มีจริง' }), null)
   assert.equal(passiveOf(null), null)
 })

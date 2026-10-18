@@ -114,7 +114,7 @@ test('result.units: ทีมมีคุณวาฬ → maxHp ทั้งท�
   // ⚠️ เทียบค่าตรงๆ อย่าเทียบเป็นอัตราส่วนของเลขที่ปัดแล้ว — ฐานจริง 59.5 ปัดเป็น 60
   //    ทำให้ 65/60 = 1.083 ทั้งที่คณิตข้างในถูก (59.5 x 1.1 = 65.45)
   const raw = buildCombatant({ rarity: 'legendary', element: 'fist', grade: 0 }).maxHp
-  assert.equal(withWhale.units.A1.maxHp, Math.round(raw * 1.1))
+  assert.equal(withWhale.units.A1.maxHp, Math.round(raw * 1.15))
   assert.equal(without.units.A1.maxHp, Math.round(raw))
   assert.equal(withWhale.units.B0.maxHp, without.units.B0.maxHp, 'aura ต้องไม่ข้ามไปทีมศัตรู')
 })

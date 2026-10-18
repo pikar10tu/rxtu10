@@ -266,7 +266,7 @@ test('ยังไม่มีเพ็ทตัวไหนถือ stackAtk �
 test('ชื่อพาสสีฟชุดใหม่ของ P3 ตรงตามที่ user เคาะ', () => {
   assert.equal(PET_PASSIVES.whale.name, 'อ้อมกอดเบลูก้า')
   assert.equal(PET_PASSIVES.qilin.name, 'กลืนกินฝันร้าย')
-  assert.equal(PET_PASSIVES.mouse.name, 'หัวขโมยตัวจิ๋ว')
+  assert.equal(PET_PASSIVES.mouse.name, 'พลังโอเลี้ยง')
   assert.equal(PET_PASSIVES.genie.name, 'พรข้อสุดท้าย')
 })
 
@@ -354,15 +354,15 @@ test('DUO_TITLES: ทุก id ต้องมีตัวตนจริง แ
 test('บาลานซ์รอบ 1 (27 ก.ย. 2026): ค่าขั้น 1 ตามที่ user เคาะ', () => {
   const v = (id, eff) => passiveValueAt(partWithEffect(PET_PASSIVES[id], eff), 1)
   assert.equal(v('bahamut', 'aoeOpener').pct, 100)
-  assert.deepEqual(v('earth', 'season'), { hot: 20, rain: 12, cold: 30 })
+  assert.deepEqual(v('earth', 'season'), { hot: 20, rain: 12, cold: 23.5 })
   assert.equal(v('mammoth', 'armorStack').pct, 25)
   assert.equal(v('mammoth', 'armorStack').count, 2)
-  assert.deepEqual(v('lion', 'elementTrinity'), { pct: 12, hpPct: 12 })
+  assert.deepEqual(v('lion', 'elementTrinity'), { pct: 15, hpPct: 15 })
   assert.deepEqual(v('luna', 'moonPhase'), { dark: 75, half: 200, full: 325 })
   assert.equal(v('hamster', 'atkWhenFull').pct, 300)
   assert.equal(v('hedgehog', 'thorns').pct, 60)
-  assert.equal(v('mouse', 'stealStats').pct, 5)
+  assert.equal(v('mouse', 'stealStats').pct, 11.2)
   assert.equal(v('cat', 'cheatDeath').atkPct, 80)
   assert.equal(v('butterfly', 'healLowestAlly').pct, 20)
-  assert.equal(v('turtle', 'teamDamageReduction').pct, 15)
+  assert.equal(v('turtle', 'teamDamageReduction').pct, 18)
 })

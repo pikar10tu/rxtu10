@@ -6,7 +6,7 @@ const find = (r, key) => r.find(x => x.key === key)
 
 test('สิงโตครบ 3 สาย → ok พร้อมเลข · ไม่ครบ → บอกสายที่ขาด', () => {
   const ok = find(teamSynergy(['lion', 'gorilla', 'luna']), 'lion')     // fist · paper · scissors
-  assert.equal(ok.ok, true); assert.match(ok.text, /12%/)
+  assert.equal(ok.ok, true); assert.match(ok.text, /15%/)
   const no = find(teamSynergy(['lion', 'bahamut', 'gorilla']), 'lion')   // ขาด scissors
   assert.equal(no.ok, false); assert.match(no.text, /✂️|กรรไกร|scissors/)
 })

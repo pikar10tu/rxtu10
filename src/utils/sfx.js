@@ -79,6 +79,16 @@ function wobble(f, t = 0, d = 0.4, { type = 'sawtooth', vol = 0.5, slide = null,
 }
 
 // เสียงซ่าผ่าน lowpass (ทุ้ม) — ลมหายใจ/คำราม
+// 💥 คริ "ตูมแตก" (18 ต.ค. 2026 user เลือกจากห้องฟังเสียง — เดิมติ๊งเบาๆ ฟังไม่ออกว่าคริ)
+//    เบสลงลึกยาว + เสียงแตก (rumble lowpass) + ฉ่าแหลม + ติ๊งสองชั้น · เรียกต่อจากเสียงหมัดสายนั้น
+function critBoom() {
+  tone(95, 0, 0.45, { type: 'sine', vol: 1, slide: 32 })
+  tone(190, 0, 0.12, { type: 'square', vol: 0.35, slide: 60 })
+  rumble(0, 0.32, { vol: 0.75, lp: 2600 })
+  noise(0.02, 0.12, { vol: 0.4, hp: 5000 })
+  tone(1568, 0, 0.16, { type: 'square', vol: 0.3 }); tone(2093, 0.045, 0.16, { type: 'square', vol: 0.3 })
+}
+
 function rumble(t = 0, d = 0.5, { vol = 0.5, lp = 600 } = {}) {
   const a = ctx, t0 = a.currentTime + t
   const buf = a.createBuffer(1, Math.max(1, Math.floor(a.sampleRate * d)), a.sampleRate)
@@ -172,9 +182,9 @@ const SOUNDS = {
 
   // ── สนามรบ (BattleReplay) ──
   // หมัดตามสาย: w = weight 0–1 (ความแรงจริงของหมัด) · crit = ติ๊งแหลมซ้อน
-  hit_fist:     ({ w = 0.5, crit } = {}) => { tone(140 - w * 40, 0, 0.12 + w * 0.08, { type: 'sine', vol: 0.6 + w * 0.4, slide: 60 }); noise(0, 0.06, { vol: 0.25 + w * 0.2, hp: 300 }); if (crit) tone(1760, 0.02, 0.1, { type: 'square', vol: 0.2 }) },
-  hit_scissors: ({ w = 0.5, crit } = {}) => { noise(0, 0.09 + w * 0.05, { vol: 0.35 + w * 0.25, hp: 3500 }); tone(1200, 0, 0.07, { type: 'sawtooth', vol: 0.12, slide: 500 }); if (crit) tone(1760, 0.02, 0.1, { type: 'square', vol: 0.2 }) },
-  hit_paper:    ({ w = 0.5, crit } = {}) => { noise(0, 0.14 + w * 0.06, { vol: 0.3 + w * 0.2, hp: 1200 }); tone(420, 0, 0.12, { type: 'triangle', vol: 0.35, slide: 260 }); if (crit) tone(1760, 0.02, 0.1, { type: 'square', vol: 0.2 }) },
+  hit_fist:     ({ w = 0.5, crit } = {}) => { tone(140 - w * 40, 0, 0.12 + w * 0.08, { type: 'sine', vol: 0.6 + w * 0.4, slide: 60 }); noise(0, 0.06, { vol: 0.25 + w * 0.2, hp: 300 }); if (crit) critBoom() },
+  hit_scissors: ({ w = 0.5, crit } = {}) => { noise(0, 0.09 + w * 0.05, { vol: 0.35 + w * 0.25, hp: 3500 }); tone(1200, 0, 0.07, { type: 'sawtooth', vol: 0.12, slide: 500 }); if (crit) critBoom() },
+  hit_paper:    ({ w = 0.5, crit } = {}) => { noise(0, 0.14 + w * 0.06, { vol: 0.3 + w * 0.2, hp: 1200 }); tone(420, 0, 0.12, { type: 'triangle', vol: 0.35, slide: 260 }); if (crit) critBoom() },
   hit_sub:      () => noise(0, 0.04, { vol: 0.2, hp: 2000 }),
   ko:           () => { tone(330, 0, 0.35, { type: 'square', vol: 0.25, slide: 90 }); noise(0.05, 0.25, { vol: 0.25, hp: 200 }) },
   boom:         () => { tone(90, 0, 0.5, { type: 'sine', vol: 1, slide: 40 }); noise(0, 0.4, { vol: 0.45, hp: 150 }) },
@@ -275,6 +285,8 @@ const SOUNDS = {
   // 🌙 ลูน่า: อาร์เพจจิโอเบาลอย — ข้างจันทร์
   luna:   () => { arp([659, 880, 1319], 0.12, { type: 'sine', vol: 0.4, d: 0.5 }) },
   // ❄️ แช่แข็ง: เสียงหวีดสูงไถลลง + ซ่าเย็น
+  // 🐺🌕 หอน: ขึ้นช้าๆ ค้าง แล้วลากลง (สองเสียงซ้อนให้ดูไกล)
+  howl:   () => { wobble(330, 0, 1.1, { type: 'sine', vol: 0.45, slide: 520, rate: 5, depth: 12 }); wobble(520, 0.9, 0.7, { type: 'sine', vol: 0.35, slide: 300, rate: 5, depth: 10 }); tone(660, 0.15, 0.9, { type: 'triangle', vol: 0.08, slide: 780 }) },
   freeze: () => { tone(2400, 0, 0.25, { type: 'sine', vol: 0.25, slide: 1200 }); noise(0, 0.2, { vol: 0.2, hp: 5000 }) },
   aura:     () => { tone(392, 0, 0.35, { type: 'sawtooth', vol: 0.18 }); tone(523, 0.12, 0.4, { type: 'sawtooth', vol: 0.18 }); tone(784, 0.24, 0.45, { type: 'triangle', vol: 0.3 }) },
   open_crit:  () => { noise(0, 0.12, { vol: 0.3, hp: 5000 }); tone(1568, 0.05, 0.3, { type: 'triangle', vol: 0.3 }) },

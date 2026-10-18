@@ -193,12 +193,18 @@ export function liveBuffs(sources, beats, idx, uid = null) {
   //    `e.stacks[uid]` ก่อนเสมอ ห้ามอ่าน `e.amount` ตรงๆ (นั่นคือชั้นสูงสุดของก้อน ไม่ใช่ของ uid นี้)
   //    `infectSpread` ยังเป็นเป้าเดียวเสมอ ไม่มี `stacks` เลย fallback ไป amount ได้ตามเดิม
   if (uid) {
-    let n = 0, from = null
+    let n = 0, from = null, sp = 0, spFrom = null
     for (const e of played) {
       if (e?.t !== 'passive') continue
       if ((e.effect === 'infect' || e.effect === 'infectSpread') && (e.targets || []).includes(uid)) {
         n = (e.stacks && e.stacks[uid] != null) ? e.stacks[uid] : (e.amount || 0)
         from = e
+      }
+      if (e.effect === 'sparkMark' && (e.targets || []).includes(uid)) { sp = e.stacks?.[uid] ?? e.amount ?? 0; spFrom = e }
+      // 🦄 ยูนิคอร์นล้างสถานะ — ทับเลขชั้นด้วยค่าที่เหลือหลังล้าง
+      if (e.effect === 'cleanse' && (e.targets || []).includes(uid)) {
+        if (e.left?.infect != null) n = e.left.infect
+        if (e.left?.spark != null) sp = e.left.spark
       }
     }
     if (n > 0) {
@@ -210,6 +216,15 @@ export function liveBuffs(sources, beats, idx, uid = null) {
         skillName: from?.name || '', skillIcon: from?.icon || STATUS_ICON.infect,
         ownerUid: from?.uid || '', ownerName: def.name, ownerEmoji: def.emoji,
         self: false, buff: false, foeSide: true, stacks: n, maxStacks: 0,
+      })
+    }
+    if (sp > 0) {
+      const def = getPetDef(spFrom?.petId) || { name: '?', emoji: '❓' }
+      out.push({
+        key: `sparkMark:${uid}`, effect: 'sparkMark', icon: STATUS_ICON.sparkMark, label: STATUS_TEXT.sparkMark,
+        skillName: spFrom?.name || '', skillIcon: spFrom?.icon || STATUS_ICON.sparkMark,
+        ownerUid: spFrom?.uid || '', ownerName: def.name, ownerEmoji: def.emoji,
+        self: false, buff: false, foeSide: true, stacks: sp, maxStacks: 0,
       })
     }
   }

@@ -742,6 +742,7 @@ const teamIds = computed(() => ({
 }))
 /** ชื่อที่ควรพิมพ์บนชิป/แบนเนอร์ของ event นี้ (log ยังแบกชื่อจริงไว้เสมอ) */
 function skillTitle(e) {
+  if (e.lone) return 'หมาป่าเดียวดาย'   // 🐺🌕 กิมมิคลับ (18 ต.ค. user)
   if (e.fxKind === 'chain') return 'ฟาดต่อเนื่อง!'   // 👹 ฟาดล้มแล้วตีต่อ (29 ก.ย. user)
   if (e.lastArmor) return 'เกราะแตกหมดแล้ว!'
   // ❄️ ฤดูหนาวบอกผลเสมอ (29 ก.ย. user)
@@ -861,6 +862,7 @@ const OPEN_SFX = {
   teamDamageReduction: 'open_wall', enemyVuln: 'curse',
 }
 function openSfx(e) {
+  if (e.lone) return sfx('howl')   // 🐺🌕 หมาป่าเดียวดาย
   if (isDuoEvent(e)) return sfx('duo')
   if (LEGEND_SFX[e.petId]) return sfx(LEGEND_SFX[e.petId])
   sfx(OPEN_SFX[e.effect] || (e.fxKind === 'debuff' ? 'curse' : e.fxKind === 'damage' ? 'p_fire' : 'aura'))
@@ -1062,7 +1064,7 @@ function playShowtime(e) {
       team: Object.keys(maxHp).filter(u => u[0] === side && (hp.value[u] ?? 100) > 0) })
     if (e.effect !== 'rarityBoost') return   // ซัน: ยังเล่นดวงอาทิตย์ต่อด้วย
   }
-  if (e.effect === 'infect' || e.effect === 'infectSpread') return   // 👾 แปะเชื้อ = แค่ป้ายชั้น · ควันแตกตอนโดนตี (landBurst)
+  if (e.effect === 'infect' || e.effect === 'infectSpread' || e.effect === 'sparkMark') return   // 👾 แปะเชื้อ = แค่ป้ายชั้น · ควันแตกตอนโดนตี (landBurst)
   if (e.effect === 'infectBurst' && !e.landing) return
   if (tuning.value.showtime === false || !hasShowtime(e.petId)) return
   const side = e.uid[0]
@@ -1097,7 +1099,7 @@ function landBurst(targetUid) {
 }
 
 function firePassiveFx(e) {
-  if (e.effect === 'infect' && !e.landing) { pendingInfect.set(e.uid, e); return }
+  if ((e.effect === 'infect' || e.effect === 'sparkMark') && !e.landing) { pendingInfect.set(e.uid, e); return }   // 🤍 มาสก์กระต่ายก็รอหมัดถึงก่อน
   if (e.effect === 'infectBurst' && !e.landing && e.targets?.[0]) { pendingBurst.set(e.targets[0], e); return }
   // 🦣 เกราะก็ log ก่อนหมัด (onHit) → พักไว้ แตกตอนหมัดกระทบจริง
   if (e.fxKind === 'armor' && !e.landing) { pendingArmor.set(e.uid, e); return }
@@ -1176,6 +1178,14 @@ function firePassiveFx(e) {
   if (e.effect === 'infect' || e.effect === 'infectSpread') {
     for (const t of on) fx?.stateMark(t, '🦠', (e.stacks && e.stacks[t] != null) ? e.stacks[t] : (e.amount || 0))
     sfx('virus')
+  }
+  // 🤍 มาสก์ประกายแสงของกระต่าย — ป้ายค้างบนการ์ดเป้าแบบเดียวกับชั้นเชื้อ
+  if (e.effect === 'sparkMark') for (const t of on) fx?.stateMark(t, '🤍', e.stacks?.[t] ?? e.amount ?? 0)
+  // 🦄 ล้างสถานะ: ป้ายบนการ์ดลดตามที่เหลือ (0 = ป้ายหาย)
+  if (e.effect === 'cleanse') for (const t of on) {
+    if (e.left?.infect != null) fx?.stateMark(t, '🦠', e.left.infect)
+    if (e.left?.spark != null) fx?.stateMark(t, '🤍', e.left.spark)
+    if (e.left?.skip != null) fx?.stateMark(t, '❄️', e.left.skip)
   }
 
   // 🌙 หมัดนี้ใช้ข้างไหนไปแล้ว ⇒ ไอคอนบนการ์ดเลื่อนไปข้างถัดไป
@@ -1520,7 +1530,7 @@ const insp = computed(() => {
   const atk = Math.round(ds?.atk ?? c.atk), hpMax = Math.round(ds?.maxHp ?? c.maxHp)
   // 🌍 ร่างองศา (อยู่กับซอล ไม่มีตัวธรรมดา): ทักษะกลายเป็นรับแสงซอล — ชื่อ+คำอธิบายสั้นตามจริง · ไม่เข้าเงื่อนไข = ของเดิม
   const degree = def.id === 'earth' && degreeFormActive(sideTeam(uid[0]))
-  const solPct = degree ? (passiveOf(getPetDef('sol'))?.parts?.find(x => x.effect === 'rarityBoost')?.value?.common ?? 0) : 0
+  const solPct = degree ? (passiveOf(getPetDef('sol'))?.parts?.find(x => x.effect === 'rarityBoost')?.value?.degree ?? 0) : 0
   return {
     def, grade: p.grade || 0, atk, hpMax,
     hpNow: curHp(uid), passive: passiveOf(def),

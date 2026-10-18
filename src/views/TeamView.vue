@@ -7,19 +7,30 @@
       <span><Emoji char="⚔️" /> จัดทีม</span>
       <small class="tv-note">ช่อง 1 ออกตีก่อน</small>
     </div>
+    <button class="tv-patch" @click="patchOpen = true">
+      <Emoji char="📋" /> {{ PATCH_NOTES.title }} — ดูว่าตัวไหนบัฟ/เนิฟ <span v-if="patchFresh" class="tv-new">ใหม่</span> <span class="tv-go">›</span>
+    </button>
+    <PatchNotesSheet v-model:open="patchOpen" />
     <TeamPicker v-if="authStore.isLoggedIn" inline :open="true" />
     <div v-else class="tv-empty">เข้าสู่ระบบก่อนนะ</div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
+import PatchNotesSheet from '../components/battle/PatchNotesSheet.vue'
+import { PATCH_NOTES } from '../data/patchNotes.js'
+import { BALANCE_PATCH } from '../data/petPassives.js'
 import { useAuthStore } from '../stores/auth.js'
 const authStore = useAuthStore()
 const router = useRouter()
 // มาจากหน้าไหนกลับหน้านั้น · เปิดตรงจากลิงก์ (ไม่มีประวัติ) = กลับโหมดเพ็ท
+const patchOpen = ref(false)
+// ป้าย "ใหม่" อยู่ตามอายุป้ายบาลานซ์บนการ์ด (BALANCE_PATCH.days)
+const patchFresh = Date.now() - new Date(BALANCE_PATCH.date + 'T00:00:00').getTime() < BALANCE_PATCH.days * 864e5
 const back = () => (window.history.state?.back ? router.back() : router.push('/play/pets'))
 </script>
 
@@ -29,5 +40,11 @@ const back = () => (window.history.state?.back ? router.back() : router.push('/p
 .tv-back { all: unset; cursor: pointer; font-size: 1.6rem; font-weight: 800; line-height: 1; padding: 0 6px 2px 0; color: var(--ink); }
 .tv-back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .tv-note { margin-left: auto; font-size: .74rem; font-weight: 600; color: var(--muted); }
+.tv-patch { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 6px; width: 100%;
+  margin: 0 0 10px; padding: 9px 12px; border-radius: 12px; background: #fff; border: var(--bw) solid var(--line); box-shadow: var(--pop);
+  font-size: .82rem; font-weight: 700; color: var(--ink); }
+.tv-patch:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.tv-new { font-size: .7rem; font-weight: 800; color: #fff; background: #d2564b; padding: 1px 7px; border-radius: 999px; }
+.tv-go { margin-left: auto; color: var(--muted); font-size: 1.1rem; }
 .tv-empty { text-align: center; color: var(--muted); padding: 30px 0; }
 </style>

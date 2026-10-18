@@ -193,6 +193,11 @@ export function applyAuras(team, foes) {
           // บัฟเฉพาะเพื่อนที่อยู่สายที่ระบุ — ตัวสายอื่นในทีมไม่ได้อะไร
           // (ของเดิม teamAtkPerElement บัฟ *ทั้งทีม* โดยคูณตามจำนวนเพื่อนสายนั้น ⇒ ยิ่งกองยิ่งบาน)
           for (const t of team) if (t.element === v.element) t.atk *= (1 + v.pct / 100)
+          // 🌕 หมาป่าเดียวดาย: ทั้งทีมมีแค่หมาป่าตัวนี้ตัวเดียว ⇒ +120% พลังโจมตีและเลือดสูงสุด (กิมมิคลับ ไม่อยู่ในคำอธิบาย)
+          if (team.length === 1 && u.id === 'wolf') {
+            u.atk *= 2.2; u.maxHp *= 2.2; u.hp = u.maxHp
+            e.lone = true; e.name = 'หมาป่าเดียวดาย'; e.icon = '🌕'
+          }
           break
         case 'teamRegen':
           // ใช้ช่องเดียวกับ duo whale🔗seal — ถ้ามีทั้งคู่ก็บวกกัน (ตั้งใจ)
@@ -225,7 +230,7 @@ export function applyAuras(team, foes) {
           e.boosts = {}   // uid → % ที่ได้ (จอใช้วาดออร่าตามแรงบัฟ — แสดงผลล้วน)
           for (const t of team) {
             if (t === u) continue
-            const pct = v[t.countsAs || t.rarity] || 0
+            const pct = (psOf(t).formed && v.degree != null) ? v.degree : (v[t.countsAs || t.rarity] || 0)   // 🌍 ร่างองศาได้ของตัวเอง
             if (!pct) continue
             e.boosts[t.uid] = pct
             t.atk *= 1 + pct / 100
@@ -462,6 +467,19 @@ export function runOnAttack(att, target, foes, rand, attTeam = null) {
           res.events.push(ev(att, p, part, { targets: [att.uid], fxKind: 'buff' }))
         }
         break
+      case 'sparkMark': {
+        // 🤍 กระต่าย: มาสก์ที่มีอยู่ก่อนหมัดนี้ = จำนวนหมัดตีซ้ำ · แล้วแปะเพิ่ม 1 (ไม่เกิน max · 0 = ไม่จำกัด)
+        //    หมัดซ้ำไม่ผ่าน runOnAttack ⇒ ไม่เพิ่มมาสก์เองโดยโครงสร้าง · ไม่ดึง rand
+        const tg = res.target
+        if (!tg) break
+        const st = psOf(tg)
+        const n = st.spark || 0
+        if (n > 0) { res.bonusHits = n; res.bonusPct = v.pct }
+        const next = v.max > 0 ? Math.min(v.max, n + 1) : n + 1
+        st.spark = next
+        res.events.push(ev(att, p, part, { targets: [tg.uid], amount: next, stacks: { [tg.uid]: next }, bonus: n, fxKind: 'debuff' }))
+        break
+      }
       case 'multiStrike':
         if (rand() * 100 < v.chance) {
           res.strikes = 2
@@ -575,6 +593,15 @@ export function runOnDealt(attacker, attTeam, dealt) {
     if (amount > 0) {
       out.events.push(ev(attacker, ap, part, { targets: [t.uid], amount,
         hpPct: Math.round((t.hp / t.maxHp) * 100), fxKind: 'heal' }))
+      // 🦄 ล้างสถานะ (18 ต.ค. 2026 user ทาง B): ฮีลติดจริงทุกครั้ง = ลดสถานะร้ายบนเป้านั้นอย่างละ 1
+      //    🦠 ชั้นเชื้อ · 🤍 มาสก์ประกายแสง · ❄️ สแตคแช่แข็ง — ไม่ดึง rand
+      const st = psOf(t), left = {}
+      if (st.infect?.n > 0) { st.infect.n -= 1; left.infect = st.infect.n; if (!st.infect.n) delete st.infect }
+      if (st.spark > 0) { st.spark -= 1; left.spark = st.spark }
+      if (st.skip > 0) { st.skip -= 1; left.skip = st.skip }
+      if (Object.keys(left).length) {
+        out.events.push(ev(attacker, ap, part, { targets: [t.uid], left, fxKind: 'buff', effect: 'cleanse' }))
+      }
     }
   }
 

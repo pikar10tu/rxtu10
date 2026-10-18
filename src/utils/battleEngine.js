@@ -283,6 +283,11 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
       if (tg.hp <= 0 || att.hp <= 0) break
       if (strike(att, tg, foes, perHit, { crit, eff }, i > 0, forced)) killed = true
     }
+    // 🤍 หมัดซ้ำของมาสก์ประกายแสง (กระต่าย) — เป้าเดิม beat เดิม · ไม่คริต (แบบเดียวกับ cleave)
+    for (let i = 0; i < (mod.bonusHits || 0); i++) {
+      if (tg.hp <= 0 || att.hp <= 0) break
+      if (strike(att, tg, foes, base * (mod.bonusPct / 100), { crit: false, eff }, true, forced)) killed = true
+    }
     // เป้ารองของ cleave — ดาเมจลดตาม pct · ยังอยู่ beat เดียวกัน
     // ⚠️ ไม่ใช่หมัดที่ถูกบังคับ แม้เป้าหลักจะถูก taunt ดึงมาก็ตาม — ส่ง false เสมอ (สเปกงานย่อยนี้)
     // 🔴 สเปก §7.6 ข้อ 6: เช็ค att.hp > 0 เหมือนกัน — เข้าถึงได้จริงวันนี้ (🐕 เซอร์เบอรัสถือ cleave) หมัดหลัก

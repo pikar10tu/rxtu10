@@ -83,7 +83,7 @@ export const PET_PASSIVES = {
   },
   whale: {
     name: 'อ้อมกอดเบลูก้า', icon: '💧',
-    parts: [{ hook: 'aura', effect: 'teamHp', value: { pct: 10 }, step: { pct: 3 } }],
+    parts: [{ hook: 'aura', effect: 'teamHp', value: { pct: 15 }, step: { pct: 3 } }],
     desc: 'ทุกตัวในทีม เลือดสูงสุด +{pct}%',
     short: 'ทั้งทีม เลือดสูงสุด +{pct}%',
   },
@@ -100,7 +100,7 @@ export const PET_PASSIVES = {
     name: 'อาณัติเจ้าป่า', icon: '👑',
     // เลขรอบจูน 11 ก.ย.: วัดแยกได้ +47 เมื่อทีมครบ 3 สาย (สนามมาตรฐานวัดตัวนี้ไม่ได้เลย — ทีมเป็นสายเดียวกันหมด)
     // 12/12 (ขึ้นจาก 10/10 ตามเมต้าซิม 27 ก.ย. 2026)
-    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 12, hpPct: 12 },
+    parts: [{ hook: 'aura', effect: 'elementTrinity', value: { pct: 15, hpPct: 15 },
               step: { pct: 3, hpPct: 3 } }],
     desc: 'ถ้าทีมมีเพ็ทครบทั้ง 3 สาย ทุกตัวในทีมได้พลังโจมตี +{pct}% และเลือดสูงสุด +{hpPct}%',
     short: 'ทีมครบ 3 สาย: ทั้งทีมพลังโจมตี +{pct}% เลือด +{hpPct}%',
@@ -110,7 +110,7 @@ export const PET_PASSIVES = {
     // 🔴 ดาเมจเชื้อ "ทะลุทุกอย่าง" (ช่อง pierce) — เป็นสิทธิพิเศษของตัวนี้ตัวเดียว
     //    ถ้าวันหน้าแจกให้ตัวอื่น มันจะกลายเป็นแค่ "ดาเมจเพิ่ม" อีกอันหนึ่ง และไวรัสจะไม่มีเหตุผลที่จะมีอยู่
     // step.max = 0 — เพดานชั้นเป็นของที่โตแล้วพัง (7 ชั้น = +56% ต่อหมัดของทั้งทีม)
-    parts: [{ hook: 'onAttack', effect: 'infect', value: { pct: 10, max: 0 }, step: { pct: 3, max: 0 } }],   // max 0 = ไม่จำกัดชั้น (29 ก.ย. 2026)
+    parts: [{ hook: 'onAttack', effect: 'infect', value: { pct: 8, max: 0 }, step: { pct: 3, max: 0 } }],   // max 0 = ไม่จำกัดชั้น (29 ก.ย. 2026)
     desc: 'ทุกครั้งที่ไวรัสโจมตี ศัตรูทุกตัวติดเชื้อ +1 ชั้น (ไม่จำกัดชั้น) · ทุกตัวในทีมที่โจมตีศัตรูติดเชื้อ สร้างดาเมจเพิ่มชั้นละ {pct}% ของพลังโจมตีไวรัส ไม่ถูกลดด้วยการป้องกันใดๆ',
     short: 'โจมตีแล้วศัตรูทุกตัวติดเชื้อ · ดาเมจเพิ่มชั้นละ {pct}% ทะลุการป้องกัน',
   },
@@ -153,13 +153,13 @@ export const PET_PASSIVES = {
   },
   unicorn: {
     name: 'เขาศักดิ์สิทธิ์', icon: '✨',
-    parts: [{ hook: 'onAttack', effect: 'healOnAttack', value: { pct: 20 }, step: { pct: 6 } }],
-    desc: 'ทุกครั้งที่โจมตี ฟื้นเลือดให้เพื่อนที่เลือดเหลือน้อยที่สุด {pct}% ของดาเมจที่ทำได้',
-    short: 'โจมตีแล้วฟื้นเลือดเพื่อนที่เลือดน้อยสุด {pct}% ของดาเมจ',
+    parts: [{ hook: 'onAttack', effect: 'healOnAttack', value: { pct: 40 }, step: { pct: 6 } }],
+    desc: 'ทุกครั้งที่โจมตี ฟื้นเลือดให้เพื่อนที่เลือดเหลือน้อยที่สุด {pct}% ของดาเมจที่ทำได้ · และล้างสถานะร้ายบนตัวนั้นอย่างละ 1 (ชั้นเชื้อ · มาสก์ประกายแสง · แช่แข็ง)',
+    short: 'โจมตีแล้วฟื้นเลือดเพื่อนที่เลือดน้อยสุด {pct}% ของดาเมจ + ล้างสถานะร้าย 1',
   },
   fairy: {
     name: 'ละอองเวทมนตร์', icon: '✨',
-    parts: [{ hook: 'aura', effect: 'teamCrit', value: { pct: 8 }, step: { pct: 3 } }],
+    parts: [{ hook: 'aura', effect: 'teamCrit', value: { pct: 15 }, step: { pct: 3 } }],
     desc: 'ทุกตัวในทีม โอกาสคริติคอล +{pct}%',
     short: 'ทั้งทีม โอกาสคริติคอล +{pct}%',
   },
@@ -179,52 +179,56 @@ export const PET_PASSIVES = {
     name: 'ยิ่งเจ็บยิ่งบ้า', icon: '🐗',
     // pct 10 = 1:1 กับ % เลือดที่หายไป (user เคาะ 10 ก.ย.) — เอนจินคิดเป็นขั้นละ 10% อยู่แล้ว
     // เลข "10%" ใน desc พิมพ์ตรงๆ ได้ เพราะเป็นค่าคงที่ของเอนจิน (stepsOf10) ไม่ใช่ค่าที่จูนได้
-    parts: [{ hook: 'onAttack', effect: 'berserk', value: { pct: 10 }, step: { pct: 2.5 } }],
+    parts: [{ hook: 'onAttack', effect: 'berserk', value: { pct: 14 }, step: { pct: 2.5 } }],
     desc: 'เลือดที่เสียไปทุก 10% ของเลือดสูงสุด ดาเมจ +{pct}%',
     short: 'เสียเลือดทุก 10% ดาเมจ +{pct}%',
   },
   badger: {
     name: 'ล้มยักษ์', icon: '🦡',
     // 30% รอบจูน 11 ก.ย. — ตัวแก้ทางที่ไม่ค่อยได้ทำงาน (ตารางเฉลี่ยมองไม่เห็นเลย) ต้องคุ้มเมื่อทำงานจริง
-    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 30 }, step: { pct: 8 } }],
+    parts: [{ hook: 'onAttack', effect: 'giantSlayer', value: { pct: 50 }, step: { pct: 8 } }],
     desc: 'เมื่อโจมตีศัตรูที่มีเลือดสูงสุดมากกว่าตัวเอง ดาเมจ +{pct}%',
     short: 'เป้าเลือดสูงสุดมากกว่า: ดาเมจ +{pct}%',
   },
   bat: {
     name: 'พันธะเลือด', icon: '🩸',
-    parts: [{ hook: 'aura', effect: 'teamLifesteal', value: { pct: 10 }, step: { pct: 3 } }],
+    parts: [{ hook: 'aura', effect: 'teamLifesteal', value: { pct: 15 }, step: { pct: 3 } }],
     desc: 'ทุกตัวในทีม ฟื้นเลือด {pct}% ของดาเมจที่ตัวเองทำได้',
     short: 'ทั้งทีม ดูดเลือด {pct}% ของดาเมจ',
   },
 
   // ── Rare ────────────────────────────────────────────────────
   wolf: {
-    name: 'สัญชาตญาณฝูง', icon: '🐺',
-    parts: [{ hook: 'aura', effect: 'teamAtkElement', value: { pct: 4, element: 'fist' }, step: { pct: 1.5 } }],
+    name: 'หมาป่าไม่เดียวดาย', icon: '🐺',
+    // 🌕 กิมมิคลับ (18 ต.ค. 2026 user · ไม่เขียนในคำอธิบายโดยตั้งใจ): ทีมมีหมาป่าตัวเดียว ⇒ แบนเนอร์ "หมาป่าเดียวดาย" + เสียงหอน
+    //    พลังโจมตีและเลือดสูงสุด +120% (ดู teamAtkElement ใน applyAuras)
+    parts: [{ hook: 'aura', effect: 'teamAtkElement', value: { pct: 15, element: 'fist' }, step: { pct: 1.5 } }],
     desc: 'เพื่อนสายจู่โจมทุกตัวในทีม พลังโจมตี +{pct}%',
     short: 'สายจู่โจมในทีม พลังโจมตี +{pct}%',
   },
   shark: {
     name: 'เขี้ยวกระหาย', icon: '🦈',
-    parts: [{ hook: 'onAttack', effect: 'execute', value: { pct: 25, below: 30 }, step: { pct: 8, below: 3 } }],
+    parts: [{ hook: 'onAttack', effect: 'execute', value: { pct: 45, below: 45 }, step: { pct: 8, below: 3 } }],
     desc: 'ดาเมจ +{pct}% เมื่อโจมตีศัตรูที่เลือดเหลือต่ำกว่า {below}%',
     short: 'เป้าเลือดต่ำกว่า {below}%: ดาเมจ +{pct}%',
   },
   fox: {
     name: 'เงาลวงตา', icon: '🦊',
-    parts: [{ hook: 'onHit', effect: 'dodge', value: { pct: 12 }, step: { pct: 3 } }],
+    parts: [{ hook: 'onHit', effect: 'dodge', value: { pct: 25 }, step: { pct: 5 } }],
     desc: 'มีโอกาส {pct}% หลบการโจมตีได้ทั้งหมด',
     short: 'โอกาสหลบ {pct}%',
   },
   rabbit: {
-    name: 'ฝีเท้าสายลม', icon: '🐰',
-    parts: [{ hook: 'onAttack', effect: 'multiStrike', value: { chance: 30, pct: 60 }, step: { chance: 8, pct: 5 } }],
-    desc: 'มีโอกาส {chance}% โจมตี 2 ครั้งติดกัน ครั้งละ {pct}% ของดาเมจปกติ',
-    short: 'โอกาส {chance}% โจมตี 2 ครั้ง (ครั้งละ {pct}%)',
+    // 🤍 รีเวิร์ค 18 ต.ค. 2026 (user): เดิม multiStrike สุ่มตี 2 ครั้ง → ตีแปะมาสก์ ยิ่งแปะยิ่งตีซ้ำหลายที
+    //    เตรียมไว้รับบอสเกราะนับจำนวนครั้งตี · หมัดซ้ำไม่เพิ่มมาสก์ · max = เพดานมาสก์ต่อเป้า
+    name: 'ประกายแสงสีขาว', icon: '🤍',
+    parts: [{ hook: 'onAttack', effect: 'sparkMark', value: { pct: 50, max: 5 }, step: { pct: [10, 15], max: 0 } }],
+    desc: 'ทุกครั้งที่โจมตี แปะมาสก์ประกายแสงบนเป้า 1 มาสก์ (สูงสุด {max}) · ถ้าเป้ามีมาสก์อยู่แล้ว จะตีซ้ำเพิ่มตามจำนวนมาสก์ ครั้งละ {pct}% ของดาเมจปกติ (หมัดที่ตีซ้ำไม่เพิ่มมาสก์)',
+    short: 'แปะมาสก์ทุกหมัด · ตีซ้ำตามจำนวนมาสก์ ครั้งละ {pct}%',
   },
   owl: {
     name: 'นัยน์ตาหยั่งรู้', icon: '🦉',
-    parts: [{ hook: 'aura', effect: 'enemyVuln', value: { pct: 6 }, step: { pct: 2 } }],
+    parts: [{ hook: 'aura', effect: 'enemyVuln', value: { pct: 12 }, step: { pct: 2 } }],
     desc: 'ศัตรูทุกตัวได้รับดาเมจเพิ่ม {pct}%',
     short: 'ศัตรูทุกตัวได้รับดาเมจ +{pct}%',
     // ⚠️ aura ที่ลงฝั่งตรงข้าม ป้ายไปโผล่บน "ตัวที่โดน" ⇒ ข้อความมุมเจ้าของอ่านกลับด้านทันที
@@ -246,7 +250,7 @@ export const PET_PASSIVES = {
   hedgehog: {
     name: 'เกราะหนาม', icon: '🦔',
     // 60% (ขึ้นจาก 8% ตามเมต้าซิม 27 ก.ย. 2026 — common ตัวนี้แทบไม่มีที่ยืนที่ 8%)
-    parts: [{ hook: 'onHit', effect: 'thorns', value: { pct: 60 }, step: { pct: 3 } }],
+    parts: [{ hook: 'onHit', effect: 'thorns', value: { pct: 60 }, step: { pct: 15 } }],
     desc: 'สะท้อน {pct}% ของดาเมจที่ได้รับ กลับไปที่ผู้โจมตี',
     short: 'สะท้อนดาเมจ {pct}% ใส่ผู้โจมตี',
   },
@@ -260,10 +264,10 @@ export const PET_PASSIVES = {
     short: 'เลือดเต็ม: ดาเมจ +{pct}% · ช่อง 1 ทีมโจมตีก่อน',
   },
   mouse: {
-    name: 'หัวขโมยตัวจิ๋ว', icon: '🫳',
+    name: 'พลังโอเลี้ยง', icon: '🫳',
     // 🔴 hook `setup` เท่านั้น — ห้ามขยับ maxHp กลางไฟต์เด็ดขาด (จะ re-compute แล้วพังทั้งไฟต์)
     // 5% (ขึ้นจาก 3% ตามเมต้าซิม 27 ก.ย. 2026)
-    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 5 }, step: { pct: 1 } }],
+    parts: [{ hook: 'setup', effect: 'stealStats', value: { pct: 11.2 }, step: { pct: 1 } }],
     desc: 'เมื่อเริ่มการต่อสู้ ขโมยพลังโจมตีและเลือดสูงสุด {pct}% จากศัตรูทุกตัว',
     short: 'เริ่มการต่อสู้: ขโมยพลังโจมตี+เลือด {pct}% จากศัตรูทุกตัว',
   },
@@ -296,7 +300,7 @@ export const PET_PASSIVES = {
     //    P3 ใส่ตามนั้นและให้ sim เป็นคนหั่น — ห้ามหั่นเงียบในเฟสนี้
     // "สองเท่า" ใน desc พิมพ์ตรงๆ ได้ เพราะเอนจินบวกให้เจ้าของรอบที่สองตายตัว ไม่ใช่ค่าที่จูนได้
     // 15% (ขึ้นจาก 10% ตามเมต้าซิม 27 ก.ย. 2026)
-    parts: [{ hook: 'aura', effect: 'teamDamageReduction', value: { pct: 15 }, step: { pct: 3 } }],
+    parts: [{ hook: 'aura', effect: 'teamDamageReduction', value: { pct: 18 }, step: { pct: 3 } }],
     desc: 'ทุกตัวในทีมได้รับดาเมจลดลง {pct}% · เต่าเองลดลงเป็นสองเท่า',
     short: 'ทั้งทีมรับดาเมจ −{pct}% · เต่าเอง ×2',
   },
@@ -305,15 +309,15 @@ export const PET_PASSIVES = {
   sol: {
     name: 'แสงนำทาง', icon: '🌟',
     // ขั้นบันไดตามระดับ: ธรรมดา 50 · หายาก 30 · เอพิค 15 · ตำนาน 0 (29 ก.ย. 2026 user · เดิม 50/40/30/0) — กันซอลครองเมต้าด้วยทีมตำนานล้วน
-    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { common: 50, rare: 30, epic: 15, legendary: 0 },
-              step: { common: 0, rare: 0, epic: 0, legendary: 0 } }],
-    desc: 'เพื่อนในทีมได้พลังโจมตีและเลือดสูงสุดเพิ่มตามระดับ: ธรรมดา +{common}% · หายาก +{rare}% · เอพิค +{epic}% (ตำนานไม่ได้)',
+    parts: [{ hook: 'aura', effect: 'rarityBoost', value: { common: 50, rare: 30, epic: 15, legendary: 0, degree: 60 },   // degree = 🌍 เอิร์ธร่างองศา (18 ต.ค. 2026 user · เดิมได้เท่า common)
+              step: { common: 0, rare: 0, epic: 0, legendary: 0, degree: 0 } }],
+    desc: 'เพื่อนในทีมได้พลังโจมตีและเลือดสูงสุดเพิ่มตามระดับ: ธรรมดา +{common}% · หายาก +{rare}% · เอพิค +{epic}% (ตำนานไม่ได้) · เอิร์ธร่างองศาได้ +{degree}%',
     short: 'เพื่อนพลังโจมตี+เลือด: ธรรมดา {common}% · หายาก {rare}% · เอพิค {epic}%',
   },
   earth: {
     name: 'ฤดูกาลหมุนเวียน', icon: '🌏',
     // rain 12 (ลดจาก 25 ตามเมต้าซิม 27 ก.ย. 2026 — ร้อน/หนาวเท่าเดิม)
-    parts: [{ hook: 'onRoundEnd', effect: 'season', value: { hot: 20, rain: 12, cold: 30 },
+    parts: [{ hook: 'onRoundEnd', effect: 'season', value: { hot: 20, rain: 12, cold: 23.5 },
               step: { hot: 5, rain: 5, cold: 5 } }],
     desc: 'ทำงานตอนจบแต่ละรอบ ผลขึ้นกับช่องที่วาง: ช่อง 1 ☀️ ทั้งทีมพลังโจมตี +{hot}% ในรอบถัดไป · ช่อง 2 🌧️ ทั้งทีมฟื้นเลือด {rain}% ของเลือดที่เสียไป · ช่อง 3 ❄️ ศัตรูแต่ละตัวมีโอกาส {cold}% ถูกแช่แข็ง 1 ตา · ถ้าทีมมีซอลแต่ไม่มีเพ็ทระดับธรรมดา จะเปลี่ยนเป็นร่างองศา (นับเป็นระดับธรรมดา ไม่มีผลฤดู)',
     short: 'จบรอบ: ช่อง 1 พลังโจมตี +{hot}% · ช่อง 2 ฟื้นเลือด {rain}% · ช่อง 3 แช่แข็ง {cold}%',
@@ -337,7 +341,9 @@ export function passiveValueAt(node, level = 1) {
   const lv = Math.max(1, Math.min(PASSIVE_MAX_LEVEL, Math.round(level || 1)))
   const out = { ...(node.value || {}) }
   for (const [k, inc] of Object.entries(node.step || {})) {
-    if (typeof out[k] === 'number' && inc) out[k] = Math.round((out[k] + inc * (lv - 1)) * 10) / 10
+    // step เป็นอาร์เรย์ = เพิ่มไม่เท่ากันต่อขั้น ([ขั้น2, ขั้น3] สะสม) เช่น 🐰 50 → 60 → 75 (18 ต.ค. 2026 user)
+    const add = Array.isArray(inc) ? inc.slice(0, lv - 1).reduce((a, b) => a + b, 0) : (inc || 0) * (lv - 1)
+    if (typeof out[k] === 'number' && add) out[k] = Math.round((out[k] + add) * 10) / 10
   }
   return out
 }
@@ -451,6 +457,7 @@ export const STATUS_ICON = {
   // ⚠️ ไม่ใช่ 🛡️ ของ guardian ด้วยเหตุผลเดียวกัน — armorStack กับ guardian คนละความหมาย
   //    (guardian = เพื่อนรับแทนให้, armorStack = เกราะของตัวเองกันหมัดทั้งดอก) จึงเลือกไอคอนคนละตัว
   infect: '🦠', taunt: '📢', armorStack: '🏰',
+  sparkMark: '🤍',   // 🐰 มาสก์ประกายแสง (18 ต.ค. 2026) — ลงบนเป้าแบบเดียวกับ infect
   // ── ต.ค. 2569 ฟากฟ้า ──
   rarityBoost: '🌟', season: '🌏', moonPhase: '🌕',
   // infectBurst ไม่ต้องมีป้ายของตัวเอง — เป็น fxKind: 'damage' (event ระเบิดครั้งเดียว ไม่ใช่สถานะติดตัว)
@@ -482,7 +489,7 @@ export const STATUS_TEXT = {
   berserk: 'ยิ่งเลือดหายยิ่งแรง', giantSlayer: 'ตีเป้าตัวใหญ่กว่าแรงขึ้น',
   healOnAttack: 'ตีแล้วฟื้นเลือดเพื่อน', stealStats: 'ขโมยพลังจากศัตรู',
   // ── P2b ──
-  infect: 'ติดเชื้อ ยิ่งโดนตียิ่งเจ็บ', taunt: 'บังคับให้ศัตรูตีตัวเอง', armorStack: 'มีเกราะกันหมัดเต็มใบ',
+  infect: 'ติดเชื้อ ยิ่งโดนตียิ่งเจ็บ', sparkMark: 'ติดประกายแสง กระต่ายตีซ้ำตามจำนวนมาสก์', taunt: 'บังคับให้ศัตรูตีตัวเอง', armorStack: 'มีเกราะกันหมัดเต็มใบ',
   // 'grit' ไม่มีคำอธิบายป้ายที่นี่โดยตั้งใจ — เหตุผลเดียวกับที่ไม่มีใน STATUS_ICON ด้านบน
   // ── ต.ค. 2569 ฟากฟ้า ──
   rarityBoost: 'ได้แสงนำทางตามระดับ', season: 'ส่งฤดูกาลทุกจบรอบ', moonPhase: 'หมัดวนตามข้างจันทร์',
@@ -508,7 +515,7 @@ export const SELF_STATUS_EFFECTS = new Set([
  *  ไม่ได้มาจาก part hook 'aura' (ค่าคงที่ตั้งแต่ต้นไฟต์) แต่มาจาก hook 'onAttack' ที่สะสมชั้นระหว่างไฟต์
  *  ลงบนตัวเป้าโดยตรง (state จริงอยู่ที่ psOf(target).infect ไม่ใช่ค่าคงที่จาก part) ⇒ aurasOf() หาไม่เจอ
  *  P2c ต้องอ่านชั้นสแตคจาก state runtime นั้นเอง ไม่ใช่ผ่าน buffSources/aurasOf ของกลุ่มสองกลุ่มบน */
-export const FOE_STATUS_EFFECTS = new Set(['infect'])
+export const FOE_STATUS_EFFECTS = new Set(['infect', 'sparkMark'])
 /** สูงสุดกี่ป้ายต่อการ์ด — วัดใหม่ 11 ก.ย. 2026 ด้วยคลัง 33 ตัว (`scripts/badge-load-sim.mjs`,
  *  ทีมสุ่ม 5,000 คู่ = การ์ด 30,000 ใบ): เฉลี่ย 1.15 · เพดาน 3 ตัดป้ายทิ้ง 0.6% · เพดาน 4 ตัดทิ้ง 0.0%
  *  ⇒ ขยับเป็น 4 · สเปกเดาว่าเพ็ทใหม่จะทำให้ชนเพดานบ่อยกว่าเดิมมาก แต่วัดแล้วไม่จริง
@@ -520,20 +527,20 @@ export const STATUS_MAX = 4
 export const PASSIVE_V2_CHANGED = ['cat', 'phoenix', 'cerberus', 'trex', 'wolf', 'ouroboros', 'qilin',
   'bahamut', 'mammoth', 'turtle', 'mouse', 'unicorn', 'hamster']
 
-// ป้ายบาลานซ์รอบ 1 (27 ก.ย. 2026) — ขึ้นบนการ์ด 14 วันแล้วหายเอง · รอบหน้าแทนทั้งก้อน
-// ตัวใหม่ ต.ค. (ซอล/เอิร์ธ/ลูน่า) ไม่ติดป้าย — ยังไม่มีใครได้ (user)
+// ป้ายบาลานซ์รอบ 2 (18 ต.ค. 2026) — ขึ้นบนการ์ด 14 วันแล้วหายเอง · รอบหน้าแทนทั้งก้อน
+// ⚠️ date = วันที่ push จริง — ถ้าเลื่อน push ให้แก้วันตาม ไม่งั้นป้ายหายเร็วกว่ากำหนด
 export const BALANCE_PATCH = {
-  date: '2026-09-27', days: 14,
-  tags: { lion: 'buff', hamster: 'buff', hedgehog: 'buff', mouse: 'buff', cat: 'buff', butterfly: 'buff', turtle: 'buff',
-          bahamut: 'nerf', mammoth: 'nerf',
-          kirin: 'rework', simurgh: 'rework', trex: 'rework', virus: 'rework' },
+  date: '2026-10-18', days: 14,
+  tags: { shark: 'buff', sol: 'buff', mouse: 'buff', whale: 'buff', turtle: 'buff', boar: 'buff', bat: 'buff', lion: 'buff', wolf: 'buff', fox: 'buff', owl: 'buff', badger: 'buff', fairy: 'buff', unicorn: 'rework', hedgehog: 'buff',
+          earth: 'nerf', virus: 'nerf',
+          rabbit: 'rework' },
 }
 
 /** ป้ายไหนสำคัญกว่าเมื่อพื้นที่ไม่พอ — เลขน้อย = มาก่อน · ไม่อยู่ในนี้ = 50 (เรียงตามลำดับเดิม)
  *  🔑 เกณฑ์: "อ่านแล้วเปลี่ยนความเข้าใจว่าไฟต์กำลังเป็นยังไง" มาก่อน "บัฟตัวเลขที่รู้ก็ทำอะไรไม่ได้"
  *  ⚠️ ยังต้องมีแม้เพดานจะพอ เพราะป้ายชั้นเชื้อ (ชั้น FX) มาแย่งพื้นที่เดียวกันบนการ์ด */
 export const BADGE_PRIORITY = {
-  infect: 0, armorStack: 1, taunt: 2, guardian: 3, cheatDeath: 4, revive: 4, saveAlly: 4,
+  infect: 0, sparkMark: 0, armorStack: 1, taunt: 2, guardian: 3, cheatDeath: 4, revive: 4, saveAlly: 4,
   stackAtk: 10, atkOnHit: 10, hunt: 10, berserk: 11, giantSlayer: 11, stealStats: 12,
   elementTrinity: 20, enemyVuln: 21, teamDamageReduction: 22, dodge: 23, thorns: 23,
   teamLifesteal: 30, healOnAttack: 30, teamHp: 31, teamAtk: 31, teamAtkElement: 31,
