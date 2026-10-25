@@ -13,9 +13,10 @@
 
     <template v-else>
       <div class="dg-how">
-        <b>ชนะครบ 3 ด่านในตาเดียว ได้ฟักทอง</b>
-        <span v-if="left">โบนัส ×{{ BONUS_MULT }} วันนี้เหลือ <span class="dg-candy-inline"><Emoji v-for="i in left" :key="i" char="🍬" /></span></span>
-        <span v-else>โบนัส ×{{ BONUS_MULT }} วันนี้หมดแล้ว</span>
+        <!-- สำนวน user 25 ต.ค. 2026: เดิม "…ได้ฟักทอง / โบนัส ×5 วันนี้หมดแล้ว" อ่านแล้วงง -->
+        <b>ฝ่าฟักทอง 3 ด่านรวด รับฟักทองตามระดับ</b>
+        <span v-if="left">{{ DUNGEON_BONUS_RUNS }} ตาแรกของวันจะใช้ลูกกวาด ทำให้ได้รับฟักทอง {{ BONUS_MULT }} เท่า · เหลือ <span class="dg-candy-inline"><Emoji v-for="i in left" :key="i" char="🍬" /></span></span>
+        <span v-else>วันนี้ลูกกวาดหมดแล้ว ยังลุยต่อได้ แต่ได้ฟักทองปกติ · พรุ่งนี้มาใหม่</span>
       </div>
 
       <div class="dg-team">
