@@ -22,11 +22,11 @@ export const PUMPKIN_DUNGEON = {
   ev: 'hw26',          // เปิดเฉพาะตอนอีเวนต์นี้เปิด · รางวัลเป็นแต้มอีเวนต์
   tiers: [
     // ด่าน 1–2 = ลูกกระจ๊อก ตีแป๊บเดียวผ่าน (user 25 ต.ค.) · ความยากจริงอยู่ที่ด่าน 3
-    { t: 1, label: 'ขั้นแรก', hint: 'มือใหม่ผ่านได้', reward: 1, waves: [
+    { t: 1, label: 'ระดับเริ่มต้น', hint: 'เบบี้ฟักทองตัวร้าย', reward: 1, waves: [
       { team: [G], grade: 0, boost: 0.4 }, { team: [G, P], grade: 0, boost: 0.4 }, { team: [P, G, P], grade: 0, boost: 0.6 }] },
-    { t: 2, label: 'ขั้นกลาง', hint: 'ทีมกลางๆ', reward: 2, waves: [
+    { t: 2, label: 'ระดับยาก', hint: 'ฟักทองวัยหนุ่ม', reward: 2, waves: [
       { team: [G, P], grade: 0, boost: 0.5 }, { team: [P, G], grade: 0, boost: 0.6 }, { team: [P, G, P], grade: 1, boost: 1 }] },
-    { t: 3, label: 'ขั้นสุดท้าย', hint: 'ต้องเก่งหน่อย', reward: 3, waves: [
+    { t: 3, label: 'ระดับฝันร้าย', hint: 'แด๊ดดี้ฟักทอง', reward: 3, waves: [
       { team: [G, P], grade: 1, boost: 0.6 }, { team: [P, G], grade: 1, boost: 0.7 }, { team: [P, G, P], grade: 3, boost: 1.1 }] },
   ],
 }
