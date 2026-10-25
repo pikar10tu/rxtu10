@@ -15,6 +15,7 @@ import { BATTLE_SLOTS } from '../data/residence.js'
 import { PVP_RATING_START } from './pvpRating.js'
 import { applySeasonReset, currentSeasonId } from './pvpSeason.js'
 import { rosterCos } from './cosmetics.js'
+import { mbtiOf } from '../data/mbti.js'
 import { rosterArena } from './arenas.js'
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d)
@@ -91,6 +92,8 @@ export function buildRosterRow(u, prev) {
     ...(ar ? { ar } : {}),
     // ฉายาที่สวม (docId achievement เช่น home_13 / tower_champ__2026-09) — หน้ารวมโชว์ใต้ชื่อ
     // ⚠️ หน้ารวมไม่ได้เช็คกับ subcollection (ไม่มี read ต่อคน) = trust-based · การ์ดโปรไฟล์ยังเช็คจริงเสมอ
+    // MBTI (2–4 ตัวอักษร) — ใช้แค่หน้าฉัน "ใครในรุ่นเป็นแบบเดียวกัน" · ไม่โชว์ในหน้าสมาชิก (user 25 ต.ค. 2026)
+    ...(mbtiOf(d.mbti) ? { mb: mbtiOf(d.mbti).code } : {}),
     ...(d.equipTitle ? { ti: String(d.equipTitle).slice(0, 60) } : {}),
     ...(ta4  ? { ta4 }  : {}),
     ...(ta15 ? { ta15 } : {}),

@@ -330,6 +330,20 @@ export const PET_PASSIVES = {
     desc: 'ดาเมจเปลี่ยนตามข้างจันทร์ วนทุกครั้งที่โจมตี: 🌑 จันทร์ดับ {dark}% → 🌙 เสี้ยว {half}% → 🌕 เต็มดวง {full}% ของดาเมจปกติ',
     short: 'ดาเมจวน 🌑 {dark}% → 🌙 {half}% → 🌕 {full}%',
   },
+
+  // ── มอนสเตอร์ดันเจี้ยน (data/monsters.js — ไม่ใช่เพ็ท) · สกิลง่ายๆ ตัวเดียว (user 25 ต.ค. 2026) ──
+  'mon-pumpkin': {
+    name: 'เมล็ดสุดท้าย', icon: '🕯️',
+    parts: [{ hook: 'onDeath', effect: 'deathHealTeam', value: { pct: 30 }, step: { pct: 0 } }],
+    desc: 'ตอนล้ม ฟื้นเลือดเพื่อนที่ยังอยู่ทุกตัว {pct}% ของเลือดสูงสุด',
+    short: 'ล้มแล้วฟื้นเลือดเพื่อน {pct}%',
+  },
+  'mon-ghost': {
+    name: 'ตัวโปร่งใส', icon: '💨',
+    parts: [{ hook: 'onHit', effect: 'dodge', value: { pct: 20 }, step: { pct: 0 } }],
+    desc: 'มีโอกาส {pct}% หลบการโจมตีได้ทั้งหมด',
+    short: 'โอกาสหลบ {pct}%',
+  },
 }
 
 /** ค่าของ part นั้นที่ขั้นนั้น (ขั้น 1 = ค่าตั้งต้น) · clamp ขั้นไว้ 1..PASSIVE_MAX_LEVEL
@@ -444,6 +458,7 @@ export const STATUS_ICON = {
   teamHp: '❤️', teamAtk: '⚔️', teamAtkElement: '⚔️', teamCrit: '💥', enemyVuln: '🎯',
   guardian: '🛡️', damageReduction: '🧱', dodge: '💨', thorns: '⚡',
   revive: '🧿', saveAlly: '🧿', cheatDeath: '🧿', stackAtk: '⬆️',
+  deathHealTeam: '🕯️',   // 🎃 มอนฟักทองในดันเจี้ยน
   duoRegen: '💧',
   // 🦖 ทีเร็กซ์ (27 ก.ย. 2026 บาลานซ์รอบ 1): ย้ายออกจาก stackAtk → effect ใหม่ 'hunt' (ไม่มีเพดาน)
   hunt: '📈',
@@ -480,6 +495,7 @@ export const STATUS_TEXT = {
   guardian: 'มีเพื่อนรับแทนให้', damageReduction: 'ลดดาเมจที่ได้รับ', dodge: 'มีโอกาสหลบ',
   thorns: 'ตีแล้วเจ็บกลับ', revive: 'ตายแล้วฟื้นคืนชีพได้ 1 ครั้ง', saveAlly: 'กันเพื่อนตายได้ 1 ครั้ง',
   cheatDeath: 'รอดตายด้วยเลือด 1 ได้ 1 ครั้ง', stackAtk: 'ยิ่งฆ่ายิ่งแรง',
+  deathHealTeam: 'ล้มแล้วฟื้นเลือดเพื่อน',
   duoRegen: 'ทีมฟื้นเลือดทุกรอบ',
   hunt: 'ยิ่งตียิ่งแรง สะสมไม่มีเพดาน',
   windup: 'ง้างตะบองอยู่ ตาถัดไปฟาดแรง',
@@ -503,7 +519,7 @@ export const TEAM_AURA_EFFECTS = new Set(['teamHp', 'teamAtk', 'teamAtkElement',
 export const FOE_AURA_EFFECTS = new Set(['enemyVuln'])
 /** สถานะติดตัวที่ไม่ต้องพึ่งใคร — ป้ายลงเฉพาะเจ้าตัว */
 export const SELF_STATUS_EFFECTS = new Set([
-  'guardian', 'damageReduction', 'dodge', 'thorns', 'revive', 'saveAlly', 'cheatDeath', 'stackAtk',
+  'guardian', 'damageReduction', 'dodge', 'thorns', 'revive', 'saveAlly', 'cheatDeath', 'stackAtk', 'deathHealTeam',
   'atkOnHit', 'berserk', 'giantSlayer', 'stealStats', 'healOnAttack', 'hunt', 'windup',
   // ── P2b ── สถานะติดตัวเจ้าของสกิลเอง (คนละกลุ่มกับ infect ด้านล่าง ที่ลงบน "ตัวที่ถูกตี" แทน)
   'taunt', 'armorStack',
@@ -540,7 +556,7 @@ export const BALANCE_PATCH = {
  *  🔑 เกณฑ์: "อ่านแล้วเปลี่ยนความเข้าใจว่าไฟต์กำลังเป็นยังไง" มาก่อน "บัฟตัวเลขที่รู้ก็ทำอะไรไม่ได้"
  *  ⚠️ ยังต้องมีแม้เพดานจะพอ เพราะป้ายชั้นเชื้อ (ชั้น FX) มาแย่งพื้นที่เดียวกันบนการ์ด */
 export const BADGE_PRIORITY = {
-  infect: 0, sparkMark: 0, armorStack: 1, taunt: 2, guardian: 3, cheatDeath: 4, revive: 4, saveAlly: 4,
+  infect: 0, sparkMark: 0, armorStack: 1, taunt: 2, guardian: 3, cheatDeath: 4, revive: 4, saveAlly: 4, deathHealTeam: 4,
   stackAtk: 10, atkOnHit: 10, hunt: 10, berserk: 11, giantSlayer: 11, stealStats: 12,
   elementTrinity: 20, enemyVuln: 21, teamDamageReduction: 22, dodge: 23, thorns: 23,
   teamLifesteal: 30, healOnAttack: 30, teamHp: 31, teamAtk: 31, teamAtkElement: 31,

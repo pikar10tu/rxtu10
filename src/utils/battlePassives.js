@@ -927,6 +927,17 @@ export function runOnDeath(unit, team, attacker = null) {
     out.events.push(ev(g, gp, gpart, { targets: [unit.uid], hpPct: 1, fxKind: 'save' }))
     break
   }
+
+  // 3) ตายจริง (ไม่มีใครกันไว้) — 🎃 มอนฟักทองดันเจี้ยน: ฟื้นเลือดเพื่อนที่ยังอยู่ทุกตัว
+  //    ไม่ดึง rand() ⇒ ไฟต์ที่ไม่มีมอนนี้ลำดับสุ่มเท่าเดิมเป๊ะ
+  if (!out.prevented && part && part.effect === 'deathHealTeam') {
+    const v = valOf(part, unit)
+    const mates = alive(team).filter(u => u !== unit && u.hp < u.maxHp)
+    for (const m of mates) {
+      const h = healUnit(m, v.pct)
+      out.events.push(ev(unit, p, part, { targets: [m.uid], ...h, fxKind: 'heal' }))
+    }
+  }
   return out
 }
 

@@ -18,6 +18,8 @@
            เหรียญ + รายได้ + ปุ่มเก็บ → นาฬิกาพลิกวันสอบขนาดเต็ม (user สั่งให้ยังเด่นอยู่) → งานถัดไป → บ้าน -->
       <DailyCard />
       <ExamCountdown />
+      <!-- อีเวนต์ประจำเดือน — ทางเข้าร้านแต้มอีเวนต์จากหน้าแรก (user 25 ต.ค. 2026) -->
+      <EventBanner />
       <!-- งานถัดไปที่ควรทำ — โชว์ทีละอย่าง ซ่อนตัวเองเมื่อไม่มีอะไรค้าง -->
       <NextActionCard @sheet="onCardSheet" />
       <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
@@ -57,6 +59,7 @@ import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
 import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
+import EventBanner from '../components/shared/EventBanner.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
 import NextActionCard from '../components/home/NextActionCard.vue'
 import ExamCountdown from '../components/study/ExamCountdown.vue'
@@ -72,6 +75,7 @@ const showQuest = ref(false)
 // จุดแดงเควส = วันนี้ยังไม่กดรับรางวัล
 const questPending = computed(() =>
   questNotClaimed(authStore.userData?.dailyQuest, new Date().toISOString().slice(0, 10))
+  || (authStore.isLoggedIn && !authStore.userData?.mbtiQuest)   // เควสครั้งเดียว MBTI ยังไม่ทำ
 )
 
 // โหลดจดหมายตั้งแต่เข้า Home เพื่อให้จุดแดงโชว์ได้โดยไม่ต้องเปิดแผงก่อน

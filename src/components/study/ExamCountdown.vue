@@ -125,4 +125,14 @@ function fmtRange(e) {
 .ec-cap { font-size: .7rem; font-weight: 700; letter-spacing: .02em; opacity: .9; }
 @keyframes ec-flip { from { transform: rotateX(-90deg); } to { transform: rotateX(0); } }
 @media (max-width: 340px) { .ec-tile { width: 26px; height: 38px; font-size: 1.45rem; } .ec-flip { gap: 7px; } }
+
+</style>
+<style>
+/* ไม่ scoped — Vue ตัดส่วนหลัง :global() ทิ้งใน scoped style ⇒ เขียนตรงนี้แทน */
+/* ── ธีมอีเวนต์ฮาโลวีน (html.ev-hw ตั้งใน App.vue เฉพาะช่วงอีเวนต์ ⇒ หมดอีเวนต์กลับเป็นแบบเดิมเอง) ── */
+html.ev-hw .ec-card { position: relative; overflow: hidden; background: linear-gradient(135deg, #f97316 0%, #c2410c 45%, #6d28d9 100%); }
+html.ev-hw .ec-card::before { content: '🦇'; position: absolute; top: 6px; right: 12px; font-size: 1.1rem; opacity: .85; transform: rotate(-12deg); pointer-events: none; }
+html.ev-hw .ec-card::after { content: '🎃'; position: absolute; bottom: -6px; left: -4px; font-size: 2.2rem; opacity: .22; pointer-events: none; }
+html.ev-hw .ec-tile { background: linear-gradient(#fff7ed 0 49%, #ffedd5 51% 100%); color: #7c2d12; }
+
 </style>

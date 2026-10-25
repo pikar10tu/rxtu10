@@ -51,7 +51,8 @@
           <Emoji :char="ENERGY_TICKET.emoji" /> <Emoji char="🪙" /> {{ ENERGY_TICKET.price.toLocaleString() }}
         </button>
       </div>
-      <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0 || !myTeam.length" @click="onFind">
+      <!-- หาคู่ = เปิดหน้าจัดทีมก่อน (user 25 ต.ค. 2026) แล้วปุ่ม "หาคู่ต่อสู้" ในนั้นถึงเริ่มสุ่มจริง -->
+      <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0" @click="pickFight = true; pickOpen = true">
         <span class="ar-find-main"><Emoji char="⚔️" /> หาคู่ต่อสู้</span>
         <span class="ar-find-sub">{{ findSub }}</span>
       </button>
@@ -79,7 +80,7 @@
     </template>
     <div v-else class="ar-login">เข้าสู่ระบบเพื่อเล่น</div>
 
-    <TeamPicker v-model:open="pickOpen" context="สนามประลอง · ทีมนี้ใช้ทั้งบุกและตั้งรับ" done-label="เสร็จ" @done="pickOpen = false" />
+    <TeamPicker v-model:open="pickOpen" context="สนามประลอง · ทีมนี้ใช้ทั้งบุกและตั้งรับ" :done-label="pickFight ? '⚔️ หาคู่ต่อสู้' : 'เสร็จ'" @done="onPickDone" @update:open="v => { if (!v) pickFight = false }" />
     <ArenaSheet v-model:open="arenaOpen" />
     <BattleReplay :data="replay" theme="arena" @close="replay = null">
       <!-- 💊 ยาแก้แพ้: แพ้แล้วกดใช้ได้เฉพาะบนจอนี้ -->
@@ -161,6 +162,12 @@ async function onAntiLoss() {
 }
 
 const pickOpen = ref(false)
+const pickFight = ref(false)   // เปิดหน้าจัดทีมจากปุ่มหาคู่ = ปุ่มล่างเริ่มหาคู่เลย
+function onPickDone() {
+  const go = pickFight.value
+  pickOpen.value = false; pickFight.value = false
+  if (go) onFind()
+}
 const arenaOpen = ref(false)
 const myArena = computed(() => rosterArena(authStore.userData))
 const replay = ref(null)

@@ -108,6 +108,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
@@ -305,6 +306,10 @@ async function finish(reason) {
   const snapCorrect = correct.value
   const grant = snapCorrect * QUIZ_COIN_PER_CORRECT
   coinsEarned.value = grant
+  // แต้มอีเวนต์ (เหมือน QuizView)
+  const ev = activeEvent()
+  const evPts = quizPts(ev, snapAnswered, snapCorrect)
+  const evp = grantPatch(auth.userData, ev, evPts, increment)
 
   // ⚠️ CLAUDE.md ข้อ 9 — หยิบค่าก่อนเรียก patchUser (หลังเรียกแล้ว userData เปลี่ยนทันที)
   const before = auth.userData?.timeAttack?.[m.bestField] || 0
@@ -373,6 +378,7 @@ async function finish(reason) {
       coins: (auth.userData?.coins || 0) + grant,
       timeAttack: { ...(auth.userData?.timeAttack || {}), [m.bestField]: best },
       quizDoneTotal: (auth.userData?.quizDoneTotal || 0) + snapAnswered,
+      ...(evp ? evp.local : {}),
       dailyQuest: dq,
       ...(touchedQcards ? { study: optimisticStudy } : {}),
     },
@@ -381,13 +387,15 @@ async function finish(reason) {
       // dot-notation — เขียนทั้งก้อนจะทับสถิติของอีกโหมด
       [`timeAttack.${m.bestField}`]: best,
       quizDoneTotal: increment(snapAnswered),
+      ...(evp ? evp.server : {}),
       dailyQuest: dq,
       ...qcServer,   // dot-notation เท่านั้น — ห้ามส่ง study ทั้งก้อน ไม่งั้นทับ study.cards
     },
   )
   if (!ok) { toast('บันทึกผลไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error'); return }
   bumpGlobalStat('quizTotal', snapAnswered)
-  if (grant) toast(`ได้ ${grant.toLocaleString()}🪙 จาก Time Attack`, 'success')
+  const evTxt = evPts ? ` + ${evPts}${ev.pt}` : ''
+  if (grant || evPts) toast(`ได้ ${grant ? grant.toLocaleString() + '🪙' : ''}${grant ? evTxt : evTxt.slice(3)} จาก Time Attack`, 'success')
   // สถิติใหม่เท่านั้นที่ต้องขึ้นกระดาน · ที่ 1 ของรุ่นไปเลนข่าวอยู่ยาว อันดับ 2-3 อยู่เลน roster
   // อันดับคำนวณจาก rosterRows ที่กระดานบนจอนี้โหลดไว้แล้ว — ไม่มีในมือ = ไม่ยิงข่าว (ห้ามอ่านเพิ่ม)
   if (isNew) {

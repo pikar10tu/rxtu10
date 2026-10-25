@@ -7,12 +7,13 @@ import { canUpgrade } from './petGrade.js'
 const TEXT = {
   tower: 'ทีมยังสู้ชั้นนี้ไม่ไหว — ลองเสริมทีมก่อนไต่ต่อ',
   arena: 'อยากชนะบ้าง? ลองเสริมทีมก่อนบุกรอบหน้า',
+  dungeon: 'ขั้นนี้ยังยากไปหน่อย ลองขั้นที่ง่ายกว่า หรือเสริมทีมก่อน',
 }
 
 /**
  * ปุ่มตามสถานะจริงของคนนั้น — คนที่เหรียญไม่พอไม่ควรถูกส่งไปหน้าที่กดอะไรไม่ได้
  * ปุ่มอัพขั้นเพ็ทมีเสมอ (user ขอ 1 ต.ค. 2026 — เดิมโชว์แค่ตอนสุ่มไม่ได้) · ถ้ามีตัวพร้อมอัพจริงบอกจำนวน + ขึ้นก่อน
- * @param {'tower'|'arena'} mode
+ * @param {'tower'|'arena'|'dungeon'} mode
  * @param {{coins?:number, freeGachaTickets?:number, pets?:object[]}} userData
  * @returns {{text:string, actions:{label:string,to:string}[]}|null}
  */

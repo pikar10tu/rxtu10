@@ -91,6 +91,9 @@ export const USER_DEFAULTS = {
   // ⚠️ pvpAttackDate/pvpAttacksUsed/pvpBoardNonce/pvpRefreshAt = ฟิลด์ตาย (28 ก.ย. 2026 เปลี่ยนเป็นพลังงาน+สุ่มคู่)
   pvpEnergy: null,       // พลังงาน ณ pvpEnergyAt (null = เต็ม) · utils/pvpEnergy.js
   pvpEnergyAt: null,     // ms จุดเริ่มนับเติมครั้งถัดไป
+  mbti: null,
+  mbtiQuest: false,   // one-time: รับรางวัลเควสตั้ง MBTI แล้ว   // 🧠 'ENFJ' ฯลฯ (data/mbti.js) · โชว์ในการ์ดโปรไฟล์เท่านั้น
+  evt: { id: null, pts: 0, buy: {} },   // 🎃 แต้มอีเวนต์ประจำเดือน (data/events.js · utils/event.js) · id เก่า = เริ่มนับใหม่
   pvpEnergyTicket: 0,    // ⚡ ตั๋วพลังงาน (utils/pvpEnergy.js ENERGY_TICKET)
   pvpLoseStreak: 0,      // แพ้ติดกันกี่ตา — ใช้ตัดสินโอกาสเจอหุ่นซ้อมมือใหม่ (utils/pvpBot.js)
   pvpDaily: null,        // { date, n, claimed } รางวัลตีครบ 5/วัน · utils/pvpDaily.js

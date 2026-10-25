@@ -73,6 +73,10 @@ export const ACHIEVEMENTS = {
   gag_fbi:     { title: 'FBI มาเอง', icon: '🕵️', type: 'secret', desc: 'เปิดดูโปรไฟล์เพื่อน 10 คนติดโดยไม่ไปหน้าอื่น', flavor: 'รู้หมดว่าใครเลี้ยงอะไร' },
   gag_mirror:  { title: 'กระจกวิเศษ', icon: '🪞', type: 'secret', desc: 'จิ้มรูปตัวเองในหน้าฉัน 7 ครั้งรัวๆ', flavor: 'ใครงามเลิศในปฐพี' },
   gag_dj:      { title: 'ดีเจมือใหม่', icon: '🎧', type: 'secret', desc: 'เปิดปิดเสียงรัวๆ 6 ครั้ง', flavor: 'เปิด… ปิด… เปิด…' },
+  // ── อีเวนต์ฮาโลวีน 2026 (user 25 ต.ค.) · ปลดผ่าน grantSecret ใน EventView/DungeonView ──
+  hw_king:     { title: 'ราชาแห่งฮาโลวีน', icon: '👑', type: 'secret', desc: 'แลกกรอบราชาฟักทองในอีเวนต์ฮาโลวีน 2026', flavor: 'มงกุฎนี้ทำจากฟักทองล้วน' },
+  hw_hunter:   { title: 'นักล่าฟักทอง', icon: '🎃', type: 'secret', desc: 'เก็บฟักทองครบ 500 ลูกในอีเวนต์ฮาโลวีน 2026', flavor: 'ทั้งไร่เป็นของเราแล้ว' },
+  hw_style:    { title: 'แต่งเต็มฮาโลวีน', icon: '🦇', type: 'secret', desc: 'มีของแต่งตัวฮาโลวีนครบทั้ง 4 หมวด (กรอบ สีชื่อ ป้าย พื้นการ์ด)', flavor: 'ทริกออร์ทรีตทั้งตัว' },
   gag_owl:     { title: 'นกฮูกราตรี', icon: '🦉', type: 'secret', desc: 'ทำข้อสอบจบชุดช่วงตี 1–ตี 4', flavor: 'ร่างกายต้องการการนอนนะ' },
   // private = คนอื่นมาส่องเห็นแค่ชื่อ ไม่เห็นว่าทำอะไรมา (เจ้าของเห็นครบ) · user ขอ 29 ก.ย. 2026
   selflove:    { title: 'selflove', icon: '💅', type: 'secret', private: true, desc: 'กดใจข่าวตัวเองครบ 100 ครั้ง', flavor: 'รักตัวเองให้เป็น ก่อนจะไปรักคนอื่น' },

@@ -4,6 +4,7 @@
 // ════════════════════════════════════════
 
 import { PET_PASSIVES } from './petPassives.js'
+import { getMonster } from './monsters.js'
 
 // ── RARITY SYSTEM ── (label ไทย · income จริงอยู่ที่ utils/petUtils.js ไม่ใช่ที่นี่)
 export const RARITY = {
@@ -81,7 +82,8 @@ export const PETS = [
   { id:"turtle",    emoji:"🐢", name:"เต่า",      rarity:"common", element:"paper",    flavor:"ช้าก็จริง\nแต่ไม่เคยพัง" },
 ];
 
-export const getPetDef = (id) => PETS.find(p => p.id === id) || null;
+// มอนดันเจี้ยนไม่อยู่ใน PETS (ไม่หลุดเข้ากาชา) แต่รีเพลย์ต้องวาดหน้าได้ ⇒ หาต่อที่ data/monsters.js
+export const getPetDef = (id) => PETS.find(p => p.id === id) || getMonster(id) || null;
 
 // รูปแบบการตีใน replay (data ล้วน ปรับได้) — default melee
 /**

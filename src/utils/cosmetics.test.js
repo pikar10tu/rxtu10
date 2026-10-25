@@ -9,12 +9,13 @@ test('แคตตาล็อก: id ไม่ซ้ำ · ทุกชิ้�
   assert.equal(new Set(ids).size, ids.length)
   for (const c of COSMETICS) {
     assert.ok(['n', 'f', 'b', 'g'].includes(c.kind), c.id)
-    assert.ok(c.price > 0 && c.tier >= 1 && c.tier <= 4, c.id)
+    // ของอีเวนต์ (ev) ไม่มีราคาเหรียญ — ใช้ pk (แต้มอีเวนต์) แทน
+    assert.ok((c.ev ? c.pk > 0 : c.price > 0) && c.tier >= 1 && c.tier <= 4, c.id)
   }
   for (const k of ['n', 'f', 'b', 'g']) {
     for (let t = 1; t < 4; t++) {
-      const hi = Math.max(...COSMETICS.filter(c => c.kind === k && c.tier === t).map(c => c.price))
-      const lo = Math.min(...COSMETICS.filter(c => c.kind === k && c.tier === t + 1).map(c => c.price))
+      const hi = Math.max(...COSMETICS.filter(c => !c.ev && c.kind === k && c.tier === t).map(c => c.price))
+      const lo = Math.min(...COSMETICS.filter(c => !c.ev && c.kind === k && c.tier === t + 1).map(c => c.price))
       assert.ok(hi < lo, `${k} ระดับ ${t} แพงกว่า ${t + 1}`)
     }
   }
@@ -40,4 +41,8 @@ test('ใส่/ถอด + กันค่าเพี้ยน: ใส่ข�
   assert.deepEqual(rosterCos(u), { n: 'n-sky', g: 'g-pink' })
   assert.equal(rosterCos({}), null)
   assert.equal(getCosmetic('g-pink').kind, 'g')
+})
+
+test('ของอีเวนต์ซื้อด้วยเหรียญไม่ได้', () => {
+  assert.equal(canBuy({ coins: 1e9 }, 'f-hw-king').ok, false)
 })

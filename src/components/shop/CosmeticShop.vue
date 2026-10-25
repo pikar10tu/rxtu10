@@ -29,6 +29,7 @@
             <span v-else class="cs-sg"><CosBg :id="c.id" /></span>
           </span>
           <span class="cs-nm">{{ c.label }}</span>
+          <span v-if="c.ev" class="cs-lim">ลิมิเต็ด</span>
           <span v-if="wearing === c.id" class="cs-st on">ใส่อยู่</span>
           <span v-else-if="owns(c.id)" class="cs-st">มีแล้ว</span>
           <span v-else class="cs-price"><Emoji char="🪙" /> {{ fmt(c.price) }}</span>
@@ -79,7 +80,9 @@ const coins = computed(() => auth.userData?.coins || 0)
 const mine = computed(() => cosOf(auth.userData))
 const owns = (id) => mine.value.owned.includes(id)
 const wearing = computed(() => mine.value[kind.value])
-const itemsOf = (t) => COSMETICS.filter(c => c.kind === kind.value && c.tier === t)
+// ของอีเวนต์ (ev) แลกด้วยแต้มอีเวนต์ที่ /event เท่านั้น — ไม่ขายด้วยเหรียญ
+// แต่ของที่แลกแล้วต้องอยู่ที่นี่ถาวร (ร้านอีเวนต์หายตอนหมดอีเวนต์ ⇒ ไม่งั้นใส่/ถอดไม่ได้อีก)
+const itemsOf = (t) => COSMETICS.filter(c => c.kind === kind.value && c.tier === t && (!c.ev || owns(c.id)))
 // ลองใส่ = ของที่ใส่อยู่ทุกหมวด ทับด้วยชิ้นที่เลือกในหมวดนี้
 const tryOn = computed(() => ({ ...mine.value, ...(selected.value ? { [selected.value.kind]: selected.value.id } : {}) }))
 const bgItem = computed(() => getCosmetic(tryOn.value.g))
@@ -118,6 +121,7 @@ async function doWear(id) {
 </script>
 
 <style scoped>
+.cs-lim { font-size: .7rem; font-weight: 800; color: #fff; background: #f97316; border-radius: 999px; padding: 1px 8px; }
 .cs { display: flex; flex-direction: column; gap: 12px; }
 .cs-pv { position: relative; overflow: hidden; text-align: center; padding: 20px 14px 14px; border-radius: 22px; background: linear-gradient(150deg, #fde2ee, #fff 58%, var(--primary-light)); border: var(--bw) solid var(--line); box-shadow: var(--pop); }
 .cs-pv > :not(.cz-bgl) { position: relative; z-index: 1; }

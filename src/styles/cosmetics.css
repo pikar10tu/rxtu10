@@ -97,3 +97,101 @@
 .cz-name { display: inline-flex; align-items: center; justify-content: center; gap: 2px; max-width: 100%; }
 .cz-name > .cz-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cz-dark { color: #fff; }
+
+/* ══ อีเวนต์ฮาโลวีน 2026 (ev: hw26) ══
+   กรอบใช้สไตล์ยกระดับที่ user เคาะจากเดโม 25 ต.ค. (https://claude.ai/artifact/Sbqr1BFVFiHAQRWnz22yUR):
+   ขอบขาวคั่น + เงาใต้รูป · วงแหวนบางคมด้วย mask (ไม่ใช่แผ่นเต็มวง) · แสงวิ่ง · อีโมจิขอบขาวแบบสติกเกอร์
+   iOS < 15.4 ไม่รู้จัก mask → เห็นเป็นแผ่นสีเต็มวงแบบกรอบเดิม (ไม่พัง) */
+[class*="cz-n-hw-"] { -webkit-background-clip: text; background-clip: text; }
+.cz-n-hw-pump { background-image: linear-gradient(90deg, #ea580c, #f59e0b, #ea580c); background-size: 200% 100%; color: transparent; animation: cz-flow 6s linear infinite; }
+.cz-n-hw-candy { background-image: linear-gradient(180deg, #f5b40b 0 36%, #f97316 36% 68%, #b9a8a0 68%); color: transparent; }
+.cz-n-hw-toxic { color: #16a34a; text-shadow: 0 0 6px #86efac; }
+.cz-n-hw-ghost { color: #8b5cf6; text-shadow: 0 0 8px #e9d5ff, 0 0 2px #fff; }
+
+.cz-f-hw-candy, .cz-f-hw-web, .cz-f-hw-pumpkin, .cz-f-hw-bat, .cz-f-hw-ghost, .cz-f-hw-king {
+  --hw-ring: #f59e4b; --hw-w: 4px; --hw-gap: 3px;
+  box-shadow: 0 0 0 var(--hw-gap) #fff, 0 6px 14px -4px rgba(60, 40, 90, .35);
+}
+.cz-f-hw-candy::before, .cz-f-hw-web::before, .cz-f-hw-pumpkin::before, .cz-f-hw-bat::before, .cz-f-hw-ghost::before, .cz-f-hw-king::before,
+.cz-f-hw-candy::after, .cz-f-hw-web::after, .cz-f-hw-pumpkin::after, .cz-f-hw-bat::after, .cz-f-hw-ghost::after, .cz-f-hw-king::after {
+  content: ''; position: absolute; inset: calc(-1 * (var(--hw-w) + var(--hw-gap))); border-radius: 50%; pointer-events: none;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--hw-w)), #000 calc(100% - var(--hw-w) + .5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--hw-w)), #000 calc(100% - var(--hw-w) + .5px));
+}
+.cz-f-hw-candy::before, .cz-f-hw-web::before, .cz-f-hw-pumpkin::before, .cz-f-hw-bat::before, .cz-f-hw-ghost::before, .cz-f-hw-king::before { z-index: 0; background: var(--hw-ring); }
+/* แสงวิ่ง — z-index 2 ทับวง แต่อยู่นอกรูป (mask เหลือแค่แถบวงแหวน) */
+.cz-f-hw-candy::after, .cz-f-hw-web::after, .cz-f-hw-pumpkin::after, .cz-f-hw-bat::after, .cz-f-hw-ghost::after, .cz-f-hw-king::after {
+  z-index: 2; background: conic-gradient(from 0deg, transparent 0 300deg, rgba(255, 255, 255, .95) 330deg, transparent 360deg);
+  animation: cz-spin 3.2s linear infinite;
+}
+.cz-f-hw-candy { --hw-ring: repeating-conic-gradient(#fbbf24 0 20deg, #f97316 20deg 40deg, #fff 40deg 60deg); --hw-w: 5px; }
+.cz-f-hw-web { --hw-ring: linear-gradient(135deg, #ddd6fe, #a78bfa); }
+.cz-f-hw-pumpkin { --hw-ring: conic-gradient(#f97316, #fdba74, #ea580c, #fdba74, #f97316); --hw-w: 5px; }
+.cz-f-hw-bat { --hw-ring: conic-gradient(#7c3aed, #c4b5fd, #7c3aed); --hw-w: 5px; box-shadow: 0 0 0 var(--hw-gap) #fff, 0 0 16px 3px rgba(167, 139, 250, .55); }
+.cz-f-hw-ghost { --hw-ring: conic-gradient(#fff, #e9d5ff, #fff, #fed7aa, #fff); --hw-w: 6px; box-shadow: 0 0 0 var(--hw-gap) #fff, 0 0 22px 6px rgba(233, 213, 255, .95); }
+.cz-f-hw-ghost::before { animation: cz-spin 5s linear infinite; }
+.cz-f-hw-king { --hw-ring: conic-gradient(#9a3412, #fb923c, #ffe08a, #fb923c, #7c3aed, #fb923c, #9a3412); --hw-w: 6px; box-shadow: 0 0 0 var(--hw-gap) #fff, 0 0 18px 4px rgba(251, 146, 60, .55); }
+.cz-f-hw-king::before { animation: cz-spin 4s linear infinite; }
+[class*="cz-f-hw-"] .cz-deco, [class*="cz-f-hw-"] .cz-orbit i {
+  filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 2px 2px rgba(60, 40, 90, .3));
+}
+
+.cz-g-hw-night { background: linear-gradient(180deg, #c4b5fd, #fbcfe8); }
+.cz-g-hw-patch { background: linear-gradient(180deg, #fed7aa, #fde68a); }
+.cz-g-hw-night, .cz-g-hw-patch { position: relative; }
+
+/* ══ กรอบรูปยกระดับ — ทั้งร้าน (user เคาะจากเดโม 25 ต.ค. 2026: https://claude.ai/artifact/Sbqr1BFVFiHAQRWnz22yUR) ══
+   ทับกฎเดิมด้านบน · id เดิมทั้งหมด ⇒ คนที่ซื้อแล้วได้หน้าตาใหม่ฟรี ไม่ต้องย้ายข้อมูล
+   1) ขอบขาวคั่นระหว่างรูปกับวง (box-shadow ขาวบน .cz-fw)
+   2) วงแหวนบางคม: ::before เดิมเป็นแผ่นสีเต็มวงหลังรูป → ใช้ mask เหลือแค่แถบวง (iOS < 15.4 ไม่รู้จัก mask = เห็นแบบเดิม ไม่พัง)
+   3) แสงวิ่งรอบวง (::after) เฉพาะระดับ 2 ขึ้นไป
+   4) อีโมจิประดับขอบขาวแบบสติกเกอร์
+   เรืองแสงที่เดิมอยู่บน ::before ย้ายมาไว้ที่ .cz-fw เพราะ mask ตัดเงาของ ::before ทิ้ง
+   หน้ารวมสมาชิกใช้ .cz-still อยู่แล้ว = แสงวิ่ง/หมุนหยุดหมด ไม่หนักเครื่อง */
+.cz-f-sky, .cz-f-mint, .cz-f-rose, .cz-f-grape, .cz-f-plaingold, .cz-f-grad, .cz-f-cat, .cz-f-star,
+.cz-f-glow, .cz-f-flower, .cz-f-clover, .cz-f-bubble, .cz-f-gold, .cz-f-crown, .cz-f-rainbow, .cz-f-dragon, .cz-f-heaven {
+  --rw: 4px; --rg: 2px; --ring: #f4a6c8; --glow: 0 0 0 0 transparent;
+  box-shadow: 0 0 0 var(--rg) #fff, var(--glow);
+}
+.cz-f-sky::before, .cz-f-mint::before, .cz-f-rose::before, .cz-f-grape::before, .cz-f-plaingold::before, .cz-f-grad::before, .cz-f-cat::before, .cz-f-star::before,
+.cz-f-glow::before, .cz-f-flower::before, .cz-f-clover::before, .cz-f-bubble::before, .cz-f-gold::before, .cz-f-crown::before, .cz-f-rainbow::before, .cz-f-dragon::before, .cz-f-heaven::before {
+  content: ''; position: absolute; inset: calc(-1 * (var(--rw) + var(--rg))); border-radius: 50%; z-index: 0; pointer-events: none;
+  background: var(--ring); box-shadow: none; filter: none;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--rw)), #000 calc(100% - var(--rw) + .5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--rw)), #000 calc(100% - var(--rw) + .5px));
+}
+/* แสงวิ่ง — ระดับ 2+ */
+.cz-f-plaingold::after, .cz-f-grad::after, .cz-f-cat::after, .cz-f-star::after, .cz-f-glow::after, .cz-f-flower::after, .cz-f-clover::after, .cz-f-bubble::after,
+.cz-f-gold::after, .cz-f-crown::after, .cz-f-rainbow::after, .cz-f-dragon::after, .cz-f-heaven::after {
+  content: ''; position: absolute; inset: calc(-1 * (var(--rw) + var(--rg))); border-radius: 50%; z-index: 2; pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0 300deg, rgba(255,255,255,.9) 330deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--rw)), #000 calc(100% - var(--rw) + .5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--rw)), #000 calc(100% - var(--rw) + .5px));
+  animation: cz-spin 3.2s linear infinite;
+}
+/* สีวงแต่ละแบบ (คงโทนเดิม เพิ่มไล่เฉดให้มีมิติ) */
+.cz-f-sky { --ring: linear-gradient(135deg, #bfe7ff, #5bb4e5); }
+.cz-f-mint { --ring: linear-gradient(135deg, #c4f1dd, #4cc59a); }
+.cz-f-rose, .cz-f-cat, .cz-f-star { --ring: linear-gradient(135deg, #ffd0e3, #e97aa9); }
+.cz-f-grape { --ring: linear-gradient(135deg, #ddd2fb, #9a82e6); }
+.cz-f-plaingold { --ring: conic-gradient(#c8902c, #ffe08a, #e0b04a, #fff2c2, #c8902c); }
+.cz-f-grad { --rw: 5px; --ring: conic-gradient(#7cc8ef, #f4a6c8, #7fd9b8, #7cc8ef); }
+.cz-f-glow { --rw: 5px; --ring: conic-gradient(#7cc8ef, #b9a6ef, #f4a6c8, #7cc8ef); --glow: 0 0 16px 4px rgba(185,166,239,.6); }
+.cz-f-flower { --rw: 5px; --ring: linear-gradient(160deg, #ffd6e8, #f48fbf); }
+.cz-f-clover { --rw: 5px; --ring: linear-gradient(160deg, #c8f3de, #4cc59a); }
+.cz-f-bubble { --rw: 5px; --ring: linear-gradient(160deg, #e6f7ff, #8fd3f5); --glow: 0 0 12px 2px rgba(143,211,245,.5); }
+.cz-f-gold, .cz-f-crown { --rw: 6px; --ring: conic-gradient(#a16207, #fde68a, #fffbeb, #facc15, #a16207, #fde68a, #a16207); --glow: 0 0 20px 4px rgba(250,204,21,.5); }
+.cz-f-rainbow { --rw: 5px; --ring: conic-gradient(#ff8a80, #ffd166, #7ee2b8, #7cc8ef, #b39dfa, #ff9ec7, #ff8a80); }
+.cz-f-dragon { --rw: 6px; --ring: conic-gradient(#7a1b12, #e0452f, #ffb020, #e0452f, #7a1b12); --glow: 0 0 18px 4px rgba(224,69,47,.45); }
+.cz-f-heaven { --rw: 6px; --ring: conic-gradient(#fff, #ffd6ec, #bfe7ff, #fff4c2, #fff); --glow: 0 0 24px 8px rgba(191,231,255,.9); }
+/* วงที่หมุนอยู่เดิม ยังหมุนเหมือนเดิม */
+.cz-f-glow::before { animation: cz-spin 6s linear infinite; }
+.cz-f-rainbow::before { animation: cz-spin 6s linear infinite; }
+.cz-f-gold::before, .cz-f-crown::before { animation: cz-spin 5s linear infinite; }
+.cz-f-heaven::before { animation: cz-spin 4s linear infinite; }
+.cz-f-dragon::before { animation: cz-spin 2.5s linear infinite; }
+/* วงคู่/ลายจุด/เส้นประ/ขอบขาว ใช้แบบเดิม (มีช่องขาวในตัวอยู่แล้ว) */
+/* อีโมจิประดับทุกกรอบ = สติกเกอร์ขอบขาว */
+.cz-fw .cz-deco, .cz-fw .cz-orbit i {
+  filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 2px 2px rgba(60, 40, 90, .3));
+}

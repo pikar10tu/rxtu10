@@ -94,6 +94,8 @@
       </div>
 
       <div v-if="!inline && doneLabel" class="tp-cta">
+        <!-- ของเฉพาะโหมดเหนือปุ่มเริ่ม (เช่น ดันเจี้ยน: สวิตช์ตีซ้ำ + โบนัสที่เหลือ) -->
+        <slot name="cta-extra" />
         <button type="button" class="tp-cta-btn" :disabled="!activeIds.length" @click="emit('done')">{{ doneLabel }}</button>
       </div>
     </div>

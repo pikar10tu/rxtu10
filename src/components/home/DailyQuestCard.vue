@@ -21,6 +21,13 @@
       </button>
     </div>
 
+    <!-- เควสพิเศษทำครั้งเดียว — หายไปเองเมื่อทำแล้ว -->
+    <button v-if="!auth.userData?.mbtiQuest" class="dq-once" @click="go('/me#mbti')">
+      <span class="dq-once-tag">ครั้งเดียว</span>
+      <span class="dq-task-l"><Emoji char="🧠" /> ตั้ง MBTI ของคุณ</span>
+      <span class="dq-once-r"><Emoji char="🪙" /> {{ MBTI_QUEST_COINS.toLocaleString() }} ›</span>
+    </button>
+
     <button v-if="!claimed" class="dq-claim" :class="{ ready: claimable }" :disabled="!claimable || claiming" @click="claimReward">
       {{ claiming ? 'กำลังรับ…' : (claimable ? `รับรางวัล — รายได้ ×1.5 + ตั๋วฟรี ×${QUEST_TICKETS}` : 'ทำให้ครบเพื่อรับรางวัล') }}
     </button>
@@ -40,6 +47,7 @@ import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
 import { useAppConfig } from '../../composables/useAppConfig.js'
 import { questGoals, BUFF_MS, QUEST_TICKETS, questClaimable } from '../../utils/dailyQuest.js'
+import { MBTI_QUEST_COINS } from '../../data/mbti.js'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -103,6 +111,10 @@ async function claimReward() {
 </script>
 
 <style scoped>
+.dq-once { font: inherit; display: flex; align-items: center; gap: 8px; width: 100%; border: var(--bw) dashed #fdba74; background: #fff7ed; border-radius: 14px; padding: 10px 12px; cursor: pointer; color: var(--ink); text-align: left; margin-top: 8px; }
+.dq-once-tag { font-size: .7rem; font-weight: 800; color: #fff; background: #f97316; border-radius: 999px; padding: 2px 8px; flex-shrink: 0; }
+.dq-once .dq-task-l { flex: 1; font-size: .82rem; font-weight: 700; }
+.dq-once-r { font-size: .8rem; font-weight: 800; color: #b45309; white-space: nowrap; }
 .dq-body { display: flex; flex-direction: column; }
 .dq-prize { margin-bottom: 12px; padding: 9px 11px; border: 2px solid rgba(251,191,36,.5); border-radius: 10px; background: rgba(251,191,36,.12); }
 .dq-prize-head { font-size: .72rem; font-weight: 700; color: #b45309; margin-bottom: 5px; }

@@ -119,6 +119,15 @@
         <b class="br-mini-name"><Emoji v-if="miniView.icon" :char="miniView.icon" /> {{ miniView.name }}</b>
       </div>
 
+      <!-- 🗝️ ดันเจี้ยนหลายด่าน: ชนะด่านที่ยังไม่ใช่ด่านสุดท้าย = ฉากเปลี่ยนด่านแทนหน้าสรุป (user 25 ต.ค. 2026: หน้าสรุปกลางทางทำคนกดออก)
+           data.nextWave = { label: 'ด่าน 2/3' } · ผู้เรียกส่งข้อมูลด่านถัดไปมาแทนเอง (reset() ล้างฉากนี้) -->
+      <div v-if="waveTr" class="br-wave" aria-live="polite">
+        <div class="br-wave-in">
+          <b class="br-wave-ok">ผ่านด่าน!</b>
+          <span class="br-wave-next">{{ waveTr }} กำลังมา…</span>
+        </div>
+      </div>
+
       <!-- fx pool layer (pops/callouts/koPuff/projectile) — พิกัดสัมพัทธ์กับ .br-box -->
       <div class="br-fx-layer" ref="fxLayerEl"></div>
 
@@ -412,6 +421,7 @@ const resultOpen = ref(false)
 useEscapeKey(resultOpen, () => { resultOpen.value = false })    // modal สรุปโชว์อยู่
 useEscapeKey(() => !!inspectUid.value, () => closeInspect())     // ปิด inspect แล้วไฟต์ต้องเดินต่อเหมือนกดปุ่มปิด
 const resultReady = ref(false)   // จบไฟต์+ผ่านจังหวะรอแล้ว — ใช้โชว์ปุ่มลอย "ดูสรุป" ตอน peek
+const waveTr = ref(null)         // ฉากเปลี่ยนด่าน (ดันเจี้ยน) — ข้อความด่านถัดไป หรือ null
 // แจ้งจอแม่ว่าเล่นจบถึงหน้าสรุปแล้ว (หอคอยไต่รวดใช้ต่อไฟต์ถัดไป)
 watch(() => resultReady.value, (v) => { if (v) emit('done') })
 let resultTimer = null
@@ -642,7 +652,7 @@ function reset() {
   gen++                                                                     // ยกเลิก promise chain ค้างทุกตัว (applyAttack/step เช็ค gen ทุกจุด)
   prefs.value = readPrefs()     // อ่านใหม่ทุกไฟต์ — พาเนล Admin เปลี่ยนค่าแล้วยิงไฟต์ทดสอบต้องเห็นผลทันที
   clearTimeout(timer); clearTimeout(introTimer)
-  clearTimeout(resultTimer); resultOpen.value = false; resultReady.value = false
+  clearTimeout(resultTimer); resultOpen.value = false; resultReady.value = false; waveTr.value = null
   clearPending()                                                            // ตัด wait()/later()/nextFrame() ที่ค้างอยู่ทั้งหมด (windup/motion/hitstop/flash)
   stepGen = -1                                                              // ไม่มี chain ของ gen ใหม่วิ่งอยู่ (chain เก่าคนละ gen แล้ว ปลดตัวเองไม่ได้ — ดู step())
   introPhase.value = null                                                   // กันค้างตอน replay ใหม่
@@ -1627,6 +1637,11 @@ watch(done, (v) => {
   clearTimeout(holdTimer); clearTimeout(hintTimer)
   ffActive.value = false; holdHint.value = false
   if (resultReady.value) return
+  // ดันเจี้ยน: ชนะด่านกลางทาง → ฉากเปลี่ยนด่าน + บอกผู้เรียกให้ส่งด่านถัดไป (ไม่เปิดหน้าสรุป)
+  if (props.data?.nextWave && props.data?.won) {
+    resultTimer = setTimeout(() => { waveTr.value = props.data.nextWave.label; emit('done') }, REPLAY_CFG.resultDelayMs)
+    return
+  }
   resultTimer = setTimeout(() => { resultReady.value = true; resultOpen.value = true }, REPLAY_CFG.resultDelayMs)
 }, { immediate: true })
 // layout เปลี่ยน (หมุนจอ/ปรับขนาด) = center ที่ cache ไว้ใน fx ใช้ไม่ได้ ต้องวัดใหม่
@@ -2062,4 +2077,10 @@ onUnmounted(() => {
   font: 700 11px/1 system-ui, sans-serif; color: #fca5a5;
 }
 .brfx-mark-ico { width: 13px; height: 13px; display: block; }
+.br-wave { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(20, 12, 40, .55); animation: br-wave-fade .25s ease-out; pointer-events: none; }
+.br-wave-in { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 34px; border-radius: 22px; background: linear-gradient(120deg, #fb923c, #a78bfa); color: #fff; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); animation: br-wave-pop .45s cubic-bezier(.2, 1.4, .4, 1); }
+.br-wave-ok { font-size: 1.6rem; font-weight: 800; letter-spacing: .02em; }
+.br-wave-next { font-size: .95rem; font-weight: 700; opacity: .95; }
+@keyframes br-wave-fade { from { opacity: 0; } }
+@keyframes br-wave-pop { from { transform: scale(.6); opacity: 0; } }
 </style>

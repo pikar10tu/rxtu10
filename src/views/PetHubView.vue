@@ -23,27 +23,31 @@
         <RouterLink to="/pets" class="ph-btn"><Emoji char="📦" /> คลังเพ็ท</RouterLink>
       </div>
     </div>
-    <div class="ph-sec">ไปสู้</div>
-    <div class="play-grid">
-      <!-- ร้านเพ็ทไม่ต้องมีที่นี่ — เข้าจากร้านค้าบนหน้าเกมที่เดียว (user สั่ง 25 ก.ย. 2026) -->
-      <RouterLink to="/tower" class="game-card gc-tower">
-        <span v-if="towerDot" class="nav-dot gc-dot" aria-label="มีรางวัลซีซั่นรอรับ"></span>
-        <span class="gc-emoji"><Emoji char="🏯" /></span>
-        <span class="gc-name">ปีนหอคอย</span>
-        <span class="gc-badge grow">ชั้น {{ authStore.userData?.towerBest || 0 }} · เพิ่มรายได้รายวัน</span>
-      </RouterLink>
-
-      <RouterLink v-if="pvpOpen || authStore.isAdmin" to="/arena" class="game-card gc-arena">
+    <!-- เลือกเองว่าวันนี้จะไปลุยที่ไหน — 3 ทางน้ำหนักเท่ากัน ไม่ดันเข้าหอคอยอย่างเดียว (user เคาะจากเดโม 25 ต.ค. 2026) -->
+    <div class="ph-sec">วันนี้ไปลุยที่ไหนดี?</div>
+    <div class="go-list">
+      <RouterLink v-if="pvpOpen || authStore.isAdmin" to="/arena" class="go g-arena">
         <span v-if="arenaDot" class="nav-dot gc-dot" aria-label="มีรางวัลรอรับ"></span>
-        <span class="gc-emoji"><Emoji char="⚔️" /></span>
-        <span class="gc-name">สนามประลอง</span>
-        <span class="gc-badge grow">PvP · แต้มประลอง</span>
+        <span class="go-ic"><Emoji char="⚔️" /></span>
+        <span class="go-t"><b>ลุยสนามประลอง</b><small>สู้ทีมเพื่อนในรุ่น ไต่อันดับซีซั่น</small></span>
+        <span class="go-go">›</span>
       </RouterLink>
-      <SoonCard v-else emoji="⚔️" label="สนามประลอง" />
-
-      <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
-
-      <SoonCard emoji="🐲" label="บอสรวมรุ่น" />
+      <RouterLink to="/tower" class="go g-tower">
+        <span v-if="towerDot" class="nav-dot gc-dot" aria-label="มีรางวัลซีซั่นรอรับ"></span>
+        <span class="go-ic"><Emoji char="🏯" /></span>
+        <span class="go-t"><b>ไต่หอคอย</b><small>ชั้น {{ authStore.userData?.towerBest || 0 }} · ยิ่งสูงรายได้รายวันยิ่งเยอะ</small></span>
+        <span class="go-go">›</span>
+      </RouterLink>
+      <RouterLink v-if="dungeonOpen" to="/dungeon" class="go g-dun">
+        <span class="go-ic"><Emoji char="🎃" /></span>
+        <span class="go-t"><b>ลงดันเจี้ยน</b><small>ฟักทองบุก · ฟาร์มฟักทอง</small></span>
+        <span class="go-go">›</span>
+      </RouterLink>
+      <div v-else class="go g-soon">
+        <span class="go-ic"><Emoji char="🗝️" /></span>
+        <span class="go-t"><b>ลงดันเจี้ยน</b><small>เร็วๆ นี้</small></span>
+      </div>
+      <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 · บอสรวมรุ่นถอดการ์ด "เร็วๆ นี้" ออก 25 ต.ค. (ดันเจี้ยนมาแทนที่ช่องนี้) -->
     </div>
   </div>
 </template>
@@ -61,11 +65,15 @@ import { expeditionState } from '../utils/expedition.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { getPetDef } from '../data/index.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
+import { activeEvent } from '../utils/event.js'
+import { PUMPKIN_DUNGEON } from '../data/dungeons.js'
 
 const authStore = useAuthStore()
 const { pvpOpen, expeditionOpen } = useAppConfig()
 const { exp } = useExpedition()
 const { towerDot, arenaDot } = useNavDots()
+// ดันเจี้ยนตอนนี้มีแค่ดันฟักทอง — เปิดตามอีเวนต์ (ดันหิน/ดันทองยังไม่ทำ)
+const dungeonOpen = activeEvent()?.id === PUMPKIN_DUNGEON.ev
 // การ์ดหัว
 const team = computed(() => resolveBattleTeam(authStore.userData?.activePets, authStore.userData?.pets))
 const teamEmojis = computed(() => Array.from({ length: BATTLE_SLOTS }, (_, i) => getPetDef(team.value[i]?.id)?.emoji || null))
@@ -84,6 +92,20 @@ const expState = computed(() => expeditionState(exp.value, now.value))
 <style scoped>
 .ph-head { display: flex; align-items: center; gap: 8px; }
 .ph-back { text-decoration: none; color: var(--ink); font-size: 1.6rem; font-weight: 800; line-height: 1; width: 24px; }
+
+/* ทางไปลุย 3 ทาง */
+.go-list { display: flex; flex-direction: column; gap: 8px; }
+.go { position: relative; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #2b1f3d; border-radius: 18px; padding: 14px; box-shadow: var(--pop); border: var(--bw) solid var(--line); }
+.go:active { transform: translate(1px, 1px); }
+.go-ic { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,.7); display: grid; place-items: center; font-size: 1.7rem; flex-shrink: 0; }
+.go-t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.go-t b { font-size: 1rem; }
+.go-t small { font-size: .74rem; color: rgba(43,31,61,.72); }
+.go-go { font-size: 1.4rem; font-weight: 800; opacity: .5; }
+.g-arena { background: linear-gradient(120deg, #ffe4e6, #fecdd3); }
+.g-tower { background: linear-gradient(120deg, #ede9fe, #ddd6fe); }
+.g-dun { background: linear-gradient(120deg, #ffedd5, #fed7aa); }
+.g-soon { background: #f6f4f9; border-style: dashed; opacity: .75; }
 
 /* การ์ดเกม (ยกจาก PlayView เดิม) */
 .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

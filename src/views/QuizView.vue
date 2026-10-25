@@ -161,6 +161,7 @@
         </div>
         <div class="qv-stats">
           <div class="qv-stat coin"><b>{{ coinsEarned ? `+${coinsEarned.toLocaleString()}` : '0' }}</b><small>เหรียญ</small></div>
+          <div v-if="evNow" class="qv-stat coin"><b>{{ evEarned ? `+${evEarned}` : '0' }}</b><small>{{ evNow.pt }} {{ evNow.ptName }}</small></div>
           <div class="qv-stat"><b><Emoji char="🔥" /> {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
           <div class="qv-stat"><b>{{ sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
         </div>
@@ -222,6 +223,7 @@ import { useRouter } from 'vue-router'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
 import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch, deleteField, documentId, runTransaction } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -354,6 +356,8 @@ const streak = ref(0)
 const bestStreak = ref(0)
 const answered = ref(0)
 const coinsEarned = ref(0)
+const evEarned = ref(0)   // 🎃 แต้มอีเวนต์รอบนี้
+const evNow = activeEvent()
 const answers = ref([])
 
 const ZEN_BATCH = 15
@@ -581,7 +585,7 @@ async function startRedo() {
 
 // รีเซ็ต state รอบใหม่
 function resetRound() {
-  picked.value = null; correct.value = 0; answered.value = 0; coinsEarned.value = 0
+  picked.value = null; correct.value = 0; answered.value = 0; coinsEarned.value = 0; evEarned.value = 0
   streak.value = 0; bestStreak.value = 0
   answers.value = []
 }
@@ -636,6 +640,10 @@ async function finish() {
   const today = new Date().toISOString().slice(0, 10)
   const grant = correct.value * QUIZ_COIN_PER_CORRECT
   coinsEarned.value = grant
+  // แต้มอีเวนต์ — ได้จากข้อสอบเท่านั้น ตอบทุกข้อได้ + ถูกได้เพิ่ม (user เคาะ 25 ต.ค. 2026)
+  const ev = activeEvent()
+  evEarned.value = quizPts(ev, answered.value, correct.value)
+  const evp = grantPatch(authStore.userData, ev, evEarned.value, increment)
 
   if (!authStore.currentUser) return
 
@@ -709,6 +717,7 @@ async function finish() {
       dailyQuest: dq,
       ...(touchedQcards ? { study: optimisticStudy } : {}),
       ...(perfect ? { quizPerfectTotal: (authStore.userData?.quizPerfectTotal || 0) + 1 } : {}),
+      ...(evp ? evp.local : {}),
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
@@ -716,6 +725,7 @@ async function finish() {
       quizDoneTotal: increment(answered.value),
       dailyQuest: dq,
       ...(perfect ? { quizPerfectTotal: increment(1) } : {}),
+      ...(evp ? evp.server : {}),
       ...qcServer,   // dot-notation เท่านั้น — ห้ามส่ง study ทั้งก้อน ไม่งั้นทับ study.cards
     },
   )
@@ -725,7 +735,8 @@ async function finish() {
   } else {
     toast('บันทึกผลไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error')
   }
-  if (grant) toast(`ได้ ${grant}🪙 จากการทำข้อสอบ`, 'success')
+  if (grant) toast(`ได้ ${grant}🪙${ok && evEarned.value ? ` + ${evEarned.value}${ev.pt}` : ''} จากการทำข้อสอบ`, 'success')
+  else if (ok && evEarned.value) toast(`ได้ ${evEarned.value}${ev.pt} จากการทำข้อสอบ`, 'success')
 
   // ข่าวกระดาน: ยิงครั้งเดียวต่อรอบ ที่ขั้นสูงสุดที่ถึง (10/20/30)
   // เลนนี้เป็น write เพิ่มจริง (ควิซไม่เคย sync roster) จึงคุมให้ถี่ต่ำด้วยเกณฑ์ 10 ข้อติด

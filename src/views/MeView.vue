@@ -51,6 +51,7 @@
       </div>
       <TagChips :member="auth.userData" class="me-tags" />
       </section>
+      <MbtiPicker v-if="mbtiTop" class="me-mbti-top" />
 
       <!-- แท็บ: ประวัติการต่อสู้ (รวมท้าสู้กระชับมิตร) · ข่าวรุ่น · ความสำเร็จ -->
       <div class="me-tabs" role="tablist">
@@ -78,6 +79,9 @@
         </button>
       </nav>
 
+      <!-- MBTI ตั้งแล้ว = อยู่ล่างนี้ · ยังไม่ตั้ง = ขึ้นไปอยู่บนสุดใต้การ์ดโปรไฟล์ (user 25 ต.ค. 2026) -->
+      <MbtiPicker v-if="mbtiTop === false" />
+
       <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
       <details class="me-contact-fold">
         <summary><Emoji char="📞" /> ข้อมูลติดต่อ</summary>
@@ -101,10 +105,12 @@
 </template>
 
 <script setup>
+import MbtiPicker from '../components/members/MbtiPicker.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
@@ -177,6 +183,12 @@ const titleLabel = computed(() => {
   return def ? achievementTitle(def, date || null) : ''
 })
 onMounted(() => { if (!members.rosterReady) members.loadRoster() })
+// ตำแหน่งกล่อง MBTI ตัดสินครั้งเดียวตอนข้อมูลมาถึง — ไม่งั้นเลือกปุ๊บกล่องกระโดดหนีลงล่าง (รายชื่อคนแบบเดียวกันจะหลุดจอ)
+const mbtiTop = ref(null)
+watch(() => auth.userData, (u) => { if (u && mbtiTop.value === null) mbtiTop.value = !u.mbti }, { immediate: true })
+// มาจากเควส MBTI (/me#mbti) → เลื่อนลงไปที่กล่องเลือกให้เลย
+const route = useRoute()
+onMounted(() => { if (route.hash === '#mbti') setTimeout(() => document.getElementById('mbti')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300) })
 
 // กดชื่อในประวัติ → เปิดโปรไฟล์คนนั้น (มีปุ่มท้าสู้ในนั้นอยู่แล้ว = ท้ากลับ)
 const profileOf = ref(null)
@@ -301,6 +313,7 @@ async function save() {
 </script>
 
 <style scoped>
+.me-mbti-top { margin-top: 14px; }
 .me-pagetitle { margin-bottom: 16px; }
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
 .me-card > :not(.cz-bgl) { position: relative; z-index: 1; }

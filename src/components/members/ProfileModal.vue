@@ -18,6 +18,8 @@
         <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
         <div class="pf-chips">
           <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
+          <!-- MBTI — โชว์แค่ในการ์ดโปรไฟล์ · กดแล้วเด้งการ์ดอ่านเต็ม (user 25 ต.ค. 2026) -->
+          <button v-if="mbti" class="pf-chip pf-mbti" :style="{ background: mbti.color }" :title="mbti.groupLabel" @click="mbtiOpen = true"><Emoji :char="MBTI_ICON[mbti.code]" /> {{ mbti.code }} ›</button>
         </div>
         <div class="pf-chips" style="margin-top:5px"><TagChips :member="view" /></div>
       </div>
@@ -73,9 +75,12 @@
     </div>
   </div>
   </Teleport>
+  <MbtiCard :code="mbtiOpen ? mbti?.code : null" @close="mbtiOpen = false" />
 </template>
 
 <script setup>
+import { mbtiOf, MBTI_ICON } from '../../data/mbti.js'
+import MbtiCard from './MbtiCard.vue'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMembersStore } from '../../stores/members.js'
@@ -146,6 +151,9 @@ const title = computed(() => resolveTitle(achItems.value, view.value?.equipTitle
 
 // ระหว่างรอ doc เต็ม ใช้แถวย่อไปก่อน (ชื่อ/รูป/เลเวลมีครบแล้ว) — จอไม่กระพริบ
 const view = computed(() => ({ ...(props.member || {}), ...(full.value || {}) }))
+const mbti = computed(() => mbtiOf(view.value?.mbti))
+const mbtiOpen = ref(false)
+watch(() => props.member?.uid, () => { mbtiOpen.value = false })
 
 const petPopup = ref(null)
 
@@ -224,6 +232,7 @@ function startDuel() {
 </script>
 
 <style scoped>
+.pf-mbti { border: 0; font: inherit; cursor: pointer; }
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pf-box { scrollbar-gutter: stable; background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }

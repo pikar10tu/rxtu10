@@ -6,6 +6,8 @@
     <NewsBoard />
 
     <template v-if="authStore.isLoggedIn">
+      <!-- แบนเนอร์อีเวนต์ประจำเดือน — โผล่เฉพาะช่วงอีเวนต์ -->
+      <EventBanner />
       <!-- ── ห้องโถงเกม (P1 — user เลือก 4 ต.ค. 2026 หลังเพื่อนบอก "งงว่าต้องกดอะไรตรงไหน"):
            การ์ดละ "ทางเข้าเดียว" แตะตรงไหนก็เข้าโหมด · โชว์ของจริงเป็นข้อความ ไม่ใช่ปุ่ม
            ปุ่มลัด (จัดทีม/หอคอย/ประลอง/คลัง) อยู่ในหน้าโหมดเพ็ทที่เดียว ห้ามเติมกลับมาซ้ำที่นี่ ── -->
@@ -98,6 +100,7 @@
 </template>
 
 <script setup>
+import EventBanner from '../components/shared/EventBanner.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'

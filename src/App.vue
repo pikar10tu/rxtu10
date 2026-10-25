@@ -68,6 +68,11 @@ import LoginLanding       from './components/onboarding/LoginLanding.vue'
 import WelcomeBox         from './components/WelcomeBox.vue'
 import { onboardingGate } from './utils/onboarding.js'
 import { CONSENT_VERSION } from './firebase/config.js'
+import { activeEvent } from './utils/event.js'
+
+// ธีมอีเวนต์ประจำเดือน — คลาส ev-<skin> บน <html> (สีอยู่ท้าย style.css) · โทนสว่างเสมอ (user: ฮาโลวีนมืด = ตัวหนังสือหาย)
+const _ev = activeEvent()
+if (_ev?.skin) document.documentElement.classList.add('ev-' + _ev.skin)
 
 const authStore = useAuthStore()
 const usage = useUsageStore()

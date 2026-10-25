@@ -36,7 +36,8 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     if (m.atk !== 1) u.atk *= m.atk
     if (m.hp !== 1) { u.maxHp *= m.hp; u.hp = u.maxHp }
     // 🏯 หอคอยเกิน 100 (Endless) — บอทคูณ atk/hp ตามชั้น (towerFloors.endlessBoost) · ไม่มี boost = ไฟต์ปกติเป๊ะ
-    if (p?.boost > 1) { u.atk *= p.boost; u.maxHp *= p.boost; u.hp = u.maxHp }
+    //    ดันเจี้ยนใช้ boost < 1 ด้วย (มอนอ่อนกว่าค่าฐาน) — หอคอยส่งแค่ > 1 จึงเหมือนเดิมเป๊ะ
+    if (p?.boost > 0 && p.boost !== 1) { u.atk *= p.boost; u.maxHp *= p.boost; u.hp = u.maxHp }
     return u
   }
   const A = (teamA || []).map((p, i) => build(p, i, 'A'))

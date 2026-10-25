@@ -12,7 +12,7 @@ export function cosOf(u) {
 /** ซื้อได้ไหม → { ok, reason: 'unknown'|'owned'|'coins', price } */
 export function canBuy(u, id) {
   const item = getCosmetic(id)
-  if (!item) return { ok: false, reason: 'unknown', price: 0 }
+  if (!item || item.ev) return { ok: false, reason: 'unknown', price: 0 }   // ของอีเวนต์แลกด้วยแต้มอีเวนต์เท่านั้น
   if (cosOf(u).owned.includes(id)) return { ok: false, reason: 'owned', price: item.price }
   if ((u?.coins || 0) < item.price) return { ok: false, reason: 'coins', price: item.price }
   return { ok: true, reason: null, price: item.price }

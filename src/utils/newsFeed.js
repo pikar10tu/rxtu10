@@ -16,6 +16,7 @@ import { RESIDENCE_TIERS } from '../data/residence.js'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from './achievements.js'
 import { PETS } from '../data/index.js'
+import { getCosmetic } from '../data/cosmetics.js'
 
 /** เก็บกี่ข่าวต่อคน — ⚠️ เพิ่มแล้วต้องคำนวณขนาด doc ใหม่ (10×~35B×105คน ≈ 37KB จากลิมิต 1MB)
  *  roster โหลดทุกเซสชันอยู่แล้ว ⇒ อ่านเพิ่ม 0 · 3→10 (25 ก.ย. 2026 user ขอ ข่าวแสดงไม่ครบ)
@@ -93,6 +94,8 @@ const KINDS = {
   ac: { icon: achIcon, text: achText },
   // กาชาได้ตำนาน (ย้ายจากเลน news 1 ต.ค. 2026 — เลนนั้นโหลดแค่ 5 doc เปิดรัวคืนเดียวดันข่าวคนอื่นตกหมด)
   lg: { icon: '✨', text: legText },
+  // แลกของแต่งตัวชิ้นแพงจากร้านอีเวนต์ (ราคา ≥ NEWS_MIN_PK ใน EventView) — v = id ของแต่งตัว
+  eb: { icon: '🎃', text: (who, e) => `${who} แลก "${getCosmetic(e.v)?.label || 'ของลิมิเต็ด'}" จากร้านอีเวนต์` },
 }
 
 /** ข้ามหลักร้อยไหม (before → after) ⇒ หลักร้อยสูงสุดที่ข้าม หรือ 0 */

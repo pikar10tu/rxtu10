@@ -68,6 +68,25 @@ export const COSMETICS = [
   I('g', 3, 'g-stars', 'ท้องฟ้าดาว', 400000, { dark: true }), I('g', 3, 'g-sakura', 'ซากุระร่วง', 450000, { fall: '🌸' }),
   I('g', 3, 'g-sea', 'ใต้ทะเล', 450000, { rise: '🫧' }),
   I('g', 4, 'g-aurora', 'ออโรร่า', 2000000, { dark: true }), I('g', 4, 'g-heaven', 'สวรรค์', 3000000),
+
+  // ── อีเวนต์ฮาโลวีน 2026 (ev = id อีเวนต์ใน data/events.js · pk = ราคาเป็นแต้มอีเวนต์ · ไม่ขายในร้านเหรียญ) ──
+  //    กรอบชุดนี้ใช้สไตล์ยกระดับ (คลาส cz-fx ใน cosmetics.css: ขอบขาวคั่น+วงแหวนบาง+แสงวิ่ง+อีโมจิสติกเกอร์)
+  I('f', 2, 'f-hw-candy', 'ลูกกวาดข้าวโพด', 0, { ev: 'hw26', pk: 60 }),
+  I('f', 2, 'f-hw-web', 'ใยแมงมุม', 0, { ev: 'hw26', pk: 60, deco: [['🕸️', 'top:-9px;left:-9px;font-size:.5em'], ['🕷️', 'bottom:-6px;right:-6px;font-size:.38em']] }),
+  I('f', 3, 'f-hw-pumpkin', 'ฟักทองยิ้ม', 0, { ev: 'hw26', pk: 125, deco: [['🎃', 'bottom:-7px;right:-9px;font-size:.55em', 1], ['🍂', 'top:-9px;left:2px;font-size:.38em']] }),
+  I('f', 3, 'f-hw-bat', 'ค้างคาวบิน', 0, { ev: 'hw26', pk: 140, orbit: [['🦇', 'top:0;left:50%'], ['🦇', 'bottom:6%;left:4%;font-size:.7em']], orbitSec: 5 }),
+  I('f', 4, 'f-hw-ghost', 'ผีน้อยลอยวน', 0, { ev: 'hw26', pk: 210, orbit: [['👻', 'top:-2px;left:44%'], ['✨', 'bottom:0;left:30%;font-size:.7em'], ['🍬', 'top:45%;right:-4px;font-size:.7em']], orbitSec: 8 }),
+  I('f', 4, 'f-hw-king', 'ราชาฟักทอง', 0, { ev: 'hw26', pk: 250, deco: [['👑', 'top:-20px;left:50%;margin-left:-.38em;font-size:.75em', 1]], orbit: [['🎃', 'bottom:0;left:46%'], ['🦇', 'top:40%;left:-6px;font-size:.7em']], orbitSec: 6 }),
+  I('n', 2, 'n-hw-pump', 'ฟักทองไล่สี', 0, { ev: 'hw26', pk: 50 }),
+  I('n', 2, 'n-hw-candy', 'ลูกกวาดข้าวโพด', 0, { ev: 'hw26', pk: 60 }),
+  I('n', 3, 'n-hw-toxic', 'ยาพิษเรืองแสง', 0, { ev: 'hw26', pk: 100 }),
+  I('n', 3, 'n-hw-ghost', 'วิญญาณม่วง', 0, { ev: 'hw26', pk: 110 }),
+  I('b', 1, 'b-hw-pumpkin', 'ฟักทอง', 0, { ev: 'hw26', pk: 15, emoji: '🎃' }),
+  I('b', 1, 'b-hw-bat', 'ค้างคาว', 0, { ev: 'hw26', pk: 15, emoji: '🦇' }),
+  I('b', 2, 'b-hw-candle', 'เทียนไข', 0, { ev: 'hw26', pk: 30, emoji: '🕯️' }),
+  I('b', 2, 'b-hw-potion', 'ยาเสกของแม่มด', 0, { ev: 'hw26', pk: 40, emoji: '🧪' }),
+  I('g', 3, 'g-hw-night', 'คืนผีพาสเทล', 0, { ev: 'hw26', pk: 130, rise: '👻' }),
+  I('g', 3, 'g-hw-patch', 'ไร่ฟักทอง', 0, { ev: 'hw26', pk: 120, fall: '🍂' }),
 ]
 
 const BY_ID = new Map(COSMETICS.map(c => [c.id, c]))

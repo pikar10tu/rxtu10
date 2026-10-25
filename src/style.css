@@ -654,3 +654,9 @@ body[data-world="farm"]   .page-title { color: #2f7d55; }
   /* keep the help FAB tucked at the right edge of the centered column */
   .help-fab { right: max(14px, calc(50vw - 280px + 14px)) !important; }
 }
+
+/* ── ธีมอีเวนต์ประจำเดือน (คลาสบน <html> ตั้งใน App.vue จาก data/events.js) ──
+   หลัก: เปลี่ยนแค่พื้นหลังโทนสว่าง ไม่แตะสีตัวอักษร — เว็บยังมีสีฮาร์ดโค้ดเยอะ ธีมมืดจะทำตัวหนังสือหาย */
+html.ev-hw body {
+  background: var(--bg) linear-gradient(180deg, #fff1e3 0%, #f6eefc 45%, #efe6fb 100%) fixed;
+}

@@ -7,30 +7,20 @@
       <span><Emoji char="⚔️" /> จัดทีม</span>
       <button class="tv-coll" @click="router.push('/pets')"><Emoji char="🐾" /> คลังเพ็ท</button>
     </div>
-    <button class="tv-patch" @click="patchOpen = true">
-      <Emoji char="📋" /> {{ PATCH_NOTES.title }} — ดูว่าตัวไหนบัฟ/เนิฟ <span v-if="patchFresh" class="tv-new">ใหม่</span> <span class="tv-go">›</span>
-    </button>
-    <PatchNotesSheet v-model:open="patchOpen" />
+    <!-- ปุ่ม "บาลานซ์รอบ 2 — ดูว่าตัวไหนบัฟ/เนิฟ" ถอดออก 25 ต.ค. 2026 (user สั่ง) · PatchNotesSheet + data/patchNotes.js เก็บไว้ใช้รอบหน้า -->
     <TeamPicker v-if="authStore.isLoggedIn" inline :open="true" />
     <div v-else class="tv-empty">เข้าสู่ระบบก่อนนะ</div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'
-import PatchNotesSheet from '../components/battle/PatchNotesSheet.vue'
-import { PATCH_NOTES } from '../data/patchNotes.js'
-import { BALANCE_PATCH } from '../data/petPassives.js'
 import { useAuthStore } from '../stores/auth.js'
 const authStore = useAuthStore()
 const router = useRouter()
 // มาจากหน้าไหนกลับหน้านั้น · เปิดตรงจากลิงก์ (ไม่มีประวัติ) = กลับโหมดเพ็ท
-const patchOpen = ref(false)
-// ป้าย "ใหม่" อยู่ตามอายุป้ายบาลานซ์บนการ์ด (BALANCE_PATCH.days)
-const patchFresh = Date.now() - new Date(BALANCE_PATCH.date + 'T00:00:00').getTime() < BALANCE_PATCH.days * 864e5
 const back = () => (window.history.state?.back ? router.back() : router.push('/play/pets'))
 </script>
 

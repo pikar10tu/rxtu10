@@ -66,7 +66,7 @@
 
         <!-- ปุ่มสู้/จัดทีม ย้ายไปแถบติดล่างจอ (.tw-bar ท้ายหน้า) — user เคาะจากเดโม 17 ต.ค. 2026 -->
         <button v-if="floor < AUTO_CLIMB_MAX" class="tw-auto" :disabled="busy || !team.length" @click="startAuto">
-          <Emoji char="⏩" /> ไต่รวดจนกว่าจะแพ้ <small>(ถึงชั้น {{ AUTO_CLIMB_MAX - 1 }})</small>
+          <Emoji char="⏩" /> ไต่ต่อเนื่อง
         </button>
         <div v-if="best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตยอดหอคอยแล้ว! ไต่ต่อในห้วงนิรันดร์ได้เลย</div>
       </div>
@@ -107,7 +107,8 @@
           <template v-else><Emoji char="🛡️" /></template>
           <small>จัดทีม</small>
         </button>
-        <button class="tw-fight" :disabled="busy || !team.length" @click="onFight">
+        <!-- กดสู้ = เปิดหน้าจัดทีมก่อนเสมอ (user 25 ต.ค. 2026: อย่างน้อยต้องได้ดู/เลือกทีม) · ปุ่มในหน้าจัดทีมเป็นตัวเริ่มจริง -->
+        <button class="tw-fight" :disabled="busy" @click="pickOpen = true">
           <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
         </button>
       </div>
@@ -116,7 +117,12 @@
 
     <TeamPicker v-model:open="pickOpen" :enemies="botTeam" :enemy-label="`ศัตรูชั้น ${floor}`" :context="`หอคอยชั้น ${floor}`" :done-label="fightLabel" @done="pickOpen = false; onFight()" />
     <TowerRankSheet v-model:open="rankOpen" :rows="rivals ? rivals.all : []" />
-    <BattleReplay :data="replay" theme="tower" exitable :exit-label="autoOn ? 'หยุดไต่รวด ✕' : 'ออก ✕'" @close="onReplayClose" @done="onReplayDone" />
+    <BattleReplay :data="replay" theme="tower" exitable :exit-label="autoOn ? 'หยุดไต่ต่อเนื่อง ✕' : 'ออก ✕'" @close="onReplayClose" @done="onReplayDone" />
+    <!-- สวิตช์ไต่ต่อเนื่อง + นับถอยหลัง (ของกลางกับตีซ้ำดันเจี้ยน) · เปิดกลางไฟต์ได้ด้วย -->
+    <AutoRepeatBar v-model="autoOn" :show="!!replay" label="ไต่ต่อเนื่อง" count-text="ไฟต์ถัดไปใน" :left="cd.left.value" @now="cd.now()"
+                   @update:model-value="v => { if (!v) cd.cancel(); else { autoLoss = 0 } }">
+      <template v-if="autoOn && autoCount"> · ผ่านแล้ว {{ autoCount }} ชั้น</template>
+    </AutoRepeatBar>
     <PetDetailModal :pet-id="detailId" @close="detailId = null" />
     <FloorSheet :floor="sheetFloor" :crowd="crowd" :current-floor="floor"
                 @close="sheetFloor = null" @fight="onSheetFight" />
@@ -140,6 +146,9 @@ import { getPetDef } from '../data/index.js'
 import { floorZone, towerBonusGain, BONUS_CAP_FLOOR, endlessBoost, ENDLESS_BOOST_PER_FLOOR } from '../data/towerFloors.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
+import AutoRepeatBar from '../components/battle/AutoRepeatBar.vue'
+import { useToast } from '../composables/useToast.js'
+import { useAutoCountdown } from '../composables/useAutoCountdown.js'
 import PetDetailModal from '../components/pets/PetDetailModal.vue'
 import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
@@ -257,7 +266,7 @@ async function onFight() {
       loseTip: buildLoseTip('tower', authStore.userData),
       arenas: { top: 'tower', bot: rosterArena(authStore.userData) },   // ครึ่งบน = พื้นหอคอย · ครึ่งล่าง = สนามเรา
       // รางวัลเดียวของหอคอยคือรายได้/วัน — จอชนะต้องพูดเรื่องเงิน ไม่ใช่แค่ "ขึ้นชั้น"
-      rewardText: (autoOn.value ? `⏩ ไต่รวดชั้นที่ ${autoCount.value + (r.won ? 1 : 0)} · ` : '') + (gainOfFight > 0
+      rewardText: (autoOn.value ? `⏩ ไต่ต่อเนื่องชั้นที่ ${autoCount.value + (r.won ? 1 : 0)} · ` : '') + (gainOfFight > 0
         ? `รายได้รายวัน ${bonusBefore.toLocaleString()} → ${(bonusBefore + gainOfFight).toLocaleString()} (+${gainOfFight.toLocaleString()}/วัน)`
         // gain 0 ได้ 2 ทาง: เลยเพดานจริง หรือ best สูงกว่าชั้นที่สู้ (แอดมินรีเซตชั้น)
         // ทางหลังยังไม่เต็มเพดาน — ห้ามเขียนว่าเต็ม และห้ามอ้างโบนัสของชั้นที่เพิ่งสู้ (ต่ำกว่าของจริง)
@@ -272,20 +281,24 @@ async function onFight() {
   }
 }
 
-// ⏩ ไต่รวด (user 17 ต.ค. 2026): ต้องนั่งดูทุกไฟต์เหมือนกดเอง — ชนะแล้วรอหน้าสรุปแป๊บ แล้วพาไปชั้นต่อไปให้
-//    จบเมื่อ: แพ้ · ถึง AUTO_CLIMB_MAX · ผู้เล่นกดหยุด/ปิด (ทุกการปิดด้วยมือ = หยุด)
-const AUTO_NEXT_MS = 1600
+// ⏩ ไต่ต่อเนื่อง (user 17 ต.ค. 2026 · ปรับ 25 ต.ค. ให้ใช้ระบบเดียวกับตีซ้ำดันเจี้ยน):
+//    จบไฟต์แล้วนับถอยหลัง 5 วิ (AutoRepeatBar) · ชนะ = ชั้นถัดไป · แพ้ = ลองชั้นเดิมใหม่ (เกมมีดวง)
+//    หยุดเมื่อ: แพ้ชั้นเดิมติดกัน AUTO_LOSS_MAX ครั้ง (กันวนไม่จบกับชั้นที่ทีมยังสู้ไม่ไหว) · ถึง AUTO_CLIMB_MAX · ปิดสวิตช์/กดออก
+const AUTO_LOSS_MAX = 5
+const { toast } = useToast()
 const autoOn = ref(false)
 const autoCount = ref(0)
-let autoTimer = null
+const autoLoss = ref(0)
+const cd = useAutoCountdown()
 function startAuto() {
   autoOn.value = true
   autoCount.value = 0
+  autoLoss.value = 0
   onFight()
 }
 function stopAuto() {
   autoOn.value = false
-  clearTimeout(autoTimer)
+  cd.cancel()
 }
 // 🔒 รีเพลย์เล่นจบถึงหน้าสรุป = ค่อยนับผล (useTower.fight → commit) · ออกก่อนหน้านี้ = ไม่นับ
 async function onReplayDone() {
@@ -293,15 +306,19 @@ async function onReplayDone() {
   if (!r) return
   await r.commit()
   if (!autoOn.value) return
-  if (!r.won) { stopAuto(); return }
-  autoCount.value++
+  if (r.won) { autoCount.value++; autoLoss.value = 0 }
+  else if (++autoLoss.value >= AUTO_LOSS_MAX) {
+    stopAuto()
+    toast(`แพ้ชั้นนี้ติดกัน ${AUTO_LOSS_MAX} ครั้ง หยุดไต่ต่อเนื่องก่อนนะ ลองเสริมทีมดู`, 'info')
+    return
+  }
   if (floor.value >= AUTO_CLIMB_MAX) { stopAuto(); return }
-  autoTimer = setTimeout(() => {
+  cd.start(() => {
     if (!autoOn.value) return
     replay.value = null
     releasePath()
     onFight()
-  }, AUTO_NEXT_MS)
+  })
 }
 onUnmounted(stopAuto)
 
@@ -314,7 +331,7 @@ function onReplayClose() {
 // กด "สู้ชั้นนี้" ในแผง → ปิดแผงแล้วยิงศึกเลย (ปุ่มโผล่เฉพาะตอนเป็นชั้นปัจจุบันอยู่แล้ว)
 function onSheetFight() {
   sheetFloor.value = null
-  onFight()
+  pickOpen.value = true   // ผ่านหน้าจัดทีมก่อนเหมือนปุ่มสู้หลัก
 }
 </script>
 
