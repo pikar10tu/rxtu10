@@ -98,7 +98,7 @@ export default {
   ],
   // questions go to the question bank only (P3), tagged with this summary as their source
   questions: [
-    {
+    { e: "GINA symptom control 4 ข้อใน 4 สัปดาห์: อาการกลางวัน > 2 ครั้ง/สัปดาห์ · ตื่นกลางคืนเพราะหอบ · ใช้ยาบรรเทา > 2 ครั้ง/สัปดาห์ · กิจกรรมถูกจำกัด · รายนี้มี ≥ 3 ข้อ = uncontrolled · intermittent/mild เป็นการจัดความรุนแรง ไม่ใช่ระดับการควบคุม",
       "case": "ผู้ป่วย 30 ปี 1 เดือนที่ผ่านมามีอาการกลางวันประมาณ 3 ครั้ง/สัปดาห์ ตอนกลางคืน 2 ครั้ง ใช้ยาบรรเทา 3–4 ครั้ง/สัปดาห์ ได้ Symbicort 160/4.5 1 สูด วันละ 2 ครั้ง และ salbutamol 2 puff prn · เคย admit ด้วย acute asthma 6 เดือนก่อน · PEFR 80% (ใช้ตอบข้อ 1–3) · ข้อมูล: budesonide ≥ 12 ปี low 180–600, medium 600–1200, high > 1200 µg",
       "q": "ประเมินการควบคุมโรคของผู้ป่วยรายนี้",
       "o": [
@@ -109,7 +109,7 @@ export default {
       ],
       "a": 0
     },
-    {
+    { e: "เคยนอนโรงพยาบาลจาก exacerbation ใน 12 เดือนเป็นปัจจัยเสี่ยงสำคัญของการกำเริบซ้ำ · PEFR 80% ยังไม่ต่ำ (ปัจจัยเสี่ยงคือ FEV1 < 60%) · การใช้ SABA และอาการหอบวี้ดใช้ประเมินการควบคุมอาการ", case: "ผู้ป่วย 30 ปี 1 เดือนที่ผ่านมามีอาการกลางวันประมาณ 3 ครั้ง/สัปดาห์ ตอนกลางคืน 2 ครั้ง ใช้ยาบรรเทา 3–4 ครั้ง/สัปดาห์ ได้ Symbicort 160/4.5 1 สูด วันละ 2 ครั้ง และ salbutamol 2 puff prn · เคย admit ด้วย acute asthma 6 เดือนก่อน · PEFR 80% · ข้อมูล: budesonide ≥ 12 ปี low 180–600, medium 600–1200, high > 1200 µg",
       "q": "ข้อใดเป็น risk factor ของ exacerbation ในผู้ป่วยรายนี้",
       "o": [
         "ค่า PEFR ที่วัดได้",
@@ -119,7 +119,7 @@ export default {
       ],
       "a": 2
     },
-    {
+    { e: "Budesonide 160 µg × 2 = 320 µg/วัน อยู่ในช่วง low dose (180–600) · ICS/LABA ขนาดต่ำเป็น step 3 · DPI (Turbuhaler) ต้องสูดเร็วแรง แต่ MDI ต้องสูดช้าและลึก · formoterol เป็น LABA ที่ onset เร็ว (1–3 นาที)", case: "ผู้ป่วย 30 ปี 1 เดือนที่ผ่านมามีอาการกลางวันประมาณ 3 ครั้ง/สัปดาห์ ตอนกลางคืน 2 ครั้ง ใช้ยาบรรเทา 3–4 ครั้ง/สัปดาห์ ได้ Symbicort 160/4.5 1 สูด วันละ 2 ครั้ง และ salbutamol 2 puff prn · เคย admit ด้วย acute asthma 6 เดือนก่อน · PEFR 80% · ข้อมูล: budesonide ≥ 12 ปี low 180–600, medium 600–1200, high > 1200 µg",
       "q": "ข้อใดถูกเกี่ยวกับยาที่ผู้ป่วยได้รับ",
       "o": [
         "ICS ที่ได้เป็น low-dose ICS",
@@ -129,7 +129,7 @@ export default {
       ],
       "a": 0
     },
-    {
+    { e: "SABA เช่น salbutamol พ่น 5–15 นาทีก่อนออกกำลังกายป้องกัน exercise-induced bronchoconstriction · budesonide เป็นยาควบคุมอาการ · prednisolone และ tiotropium ไม่ใช้ป้องกันก่อนออกกำลังกาย",
       "q": "ผู้ป่วย exercise-induced asthma ควรใช้ยาใดก่อนออกกำลังกาย ~15 นาที",
       "o": [
         "Salbutamol inhaler",
@@ -139,7 +139,7 @@ export default {
       ],
       "a": 0
     },
-    {
+    { e: "Exacerbation ที่ต้องนอนโรงพยาบาลควรได้ systemic corticosteroid (เช่น prednisolone 40–50 mg/วัน 5–7 วัน) · theophylline และ montelukast ไม่แนะนำในภาวะเฉียบพลัน · ไม่ให้ยาปฏิชีวนะถ้าไม่มีหลักฐานติดเชื้อ",
       "case": "ชาย 45 ปี หอบเหนื่อย HR 101 RR 24 ได้ fenoterol/ipratropium NB q15 min ×3 · admit ปีนี้ 3 ครั้ง · ยาประจำ: salbutamol MDI prn, budesonide/formoterol 160/4.5 2 puff bid, <b>propranolol 10 mg</b> (ใช้ตอบข้อ 5–7)",
       "q": "หลังได้ออกซิเจน 24 ชม. ผู้ป่วยควรได้ยาใด",
       "o": [
@@ -150,7 +150,7 @@ export default {
       ],
       "a": 2
     },
-    {
+    { e: "Budesonide/formoterol (ICS/LABA) ใช้ควบคุมอาการ · ipratropium/fenoterol (SAMA/SABA) ออกฤทธิ์เร็วกว่าและใช้ใน exacerbation ได้ · ICS ทำให้เกิดเชื้อราในช่องปากได้ จึงต้องบ้วนปากหลังพ่น", case: "ชาย 45 ปี หอบเหนื่อย HR 101 RR 24 ได้ fenoterol/ipratropium NB q15 min ×3 · admit ปีนี้ 3 ครั้ง · ยาประจำ: salbutamol MDI prn, budesonide/formoterol 160/4.5 2 puff bid, <b>propranolol 10 mg</b>",
       "q": "ข้อใดถูกต้อง",
       "o": [
         "Budesonide + formoterol ใช้ควบคุมอาการ",
@@ -160,7 +160,7 @@ export default {
       ],
       "a": 0
     },
-    {
+    { case: "ชาย 45 ปี หอบเหนื่อย HR 101 RR 24 ได้ fenoterol/ipratropium NB q15 min ×3 · admit ปีนี้ 3 ครั้ง · ยาประจำ: salbutamol MDI prn, budesonide/formoterol 160/4.5 2 puff bid, <b>propranolol 10 mg</b>",
       "q": "ผู้ป่วยควรได้รับยาต่างจากเดิมอย่างไรหลังออกจากโรงพยาบาล",
       "o": [
         "เพิ่ม tiotropium handihaler 1 puff OD",

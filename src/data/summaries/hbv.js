@@ -88,7 +88,7 @@ export default {
     { q: 'ยาตัวใดใช้รักษาไวรัสตับอักเสบบีได้', o: ['ATV/r', 'EFV', 'LPV/r', 'RPV', 'TDF'], a: 4, e: 'TDF รักษา hepatitis B ได้ ยาอื่นเป็นยาต้าน HIV ที่ไม่มีฤทธิ์ต่อ HBV' },
     { q: 'ชาย 37 ปี HBsAg negative, anti-HBs positive, anti-HBc positive, HBeAg negative, HBV DNA ไม่พบ ตรงกับข้อใด', o: ['Acute hepatitis B', 'Chronic hepatitis B', 'Post exposure', 'ได้รับวัคซีน', 'พาหะไวรัสตับอักเสบบี'], a: 2, e: 'Acute/chronic/พาหะต้องมี HBsAg positive · คนได้วัคซีนจะไม่มี anti-HBc positive (มีเฉพาะคนที่เคยติดจริง) จึงเป็น past exposure ที่หายแล้วมีภูมิ' },
     { q: 'หญิง 22 ปี HBsAg positive, anti-HBs negative, anti-HBc positive, IgM anti-HBc positive, HBeAg positive, HBV DNA 1,200 IU/mL, ALT 56, CrCl 130 ไม่มีอาการ เข้าได้กับข้อใด', o: ['Acute hepatitis B', 'Chronic hepatitis B', 'Post exposure', 'มีภูมิจากวัคซีน', 'พาหะไวรัสตับอักเสบบี'], a: 0, e: 'IgM anti-HBc positive บ่งบอกการติดเชื้อเฉียบพลัน แยกจาก chronic' },
-    { q: 'จากข้อที่แล้ว ควรเริ่มการรักษาอย่างไร', o: ['TDF', 'Entecavir', 'Lamivudine', 'Adefovir', 'ไม่ต้องเริ่มยา'], a: 4, e: 'ยังไม่เข้าเกณฑ์ (HBV DNA < 2,000 IU/mL ALT ยังไม่ถึง 2 เท่า) HBV ไม่จำเป็นต้องได้ยาทุกราย' },
+    { case: "หญิง 22 ปี HBsAg positive, anti-HBs negative, anti-HBc positive, IgM anti-HBc positive, HBeAg positive, HBV DNA 1,200 IU/mL, ALT 56, CrCl 130 ไม่มีอาการ", q: 'ควรเริ่มการรักษาอย่างไร', o: ['TDF', 'Entecavir', 'Lamivudine', 'Adefovir', 'ไม่ต้องเริ่มยา'], a: 4, e: 'ยังไม่เข้าเกณฑ์ (HBV DNA < 2,000 IU/mL ALT ยังไม่ถึง 2 เท่า) HBV ไม่จำเป็นต้องได้ยาทุกราย' },
     { q: 'ชาย 23 ปี วินิจฉัย acute hepatitis B แพทย์เริ่ม TDF เภสัชกรควรติดตามผลข้างเคียงใดมากที่สุด', o: ['Creatine kinase', 'EKG', 'BP', 'ค่าการทำงานของไต', 'ผื่นตามผิวหนัง'], a: 3, e: 'TDF มีผลข้างเคียง nephrotoxicity' },
   ],
 }
