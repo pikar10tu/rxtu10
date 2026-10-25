@@ -20,6 +20,7 @@
       <ExamCountdown />
       <!-- อีเวนต์ประจำเดือน — ทางเข้าร้านแต้มอีเวนต์จากหน้าแรก (user 25 ต.ค. 2026) -->
       <EventBanner />
+      <MbtiPromo />
       <!-- งานถัดไปที่ควรทำ — โชว์ทีละอย่าง ซ่อนตัวเองเมื่อไม่มีอะไรค้าง -->
       <NextActionCard @sheet="onCardSheet" />
       <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
@@ -60,6 +61,7 @@ import DailyCard from '../components/home/DailyCard.vue'
 import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import EventBanner from '../components/shared/EventBanner.vue'
+import MbtiPromo from '../components/home/MbtiPromo.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
 import NextActionCard from '../components/home/NextActionCard.vue'
 import ExamCountdown from '../components/study/ExamCountdown.vue'
