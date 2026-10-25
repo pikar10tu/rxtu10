@@ -14,7 +14,7 @@
     <div v-if="open" class="sheet-ov" @click.self="close">
       <div class="sheet-box">
         <div class="sheet-head">
-          <span class="sheet-title"><Emoji :char="icon" /> {{ title }}</span>
+          <span class="sheet-title"><Emoji :char="icon" /> {{ title }}<slot name="title-after" /></span>
           <span class="sheet-actions"><slot name="actions" /></span>
           <button class="sheet-x" aria-label="ปิด" @click="close">✕</button>
         </div>

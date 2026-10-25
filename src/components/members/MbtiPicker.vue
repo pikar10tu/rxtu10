@@ -15,7 +15,23 @@
     </button>
 
     <BottomSheet :open="open" @update:open="open = $event" icon="🧠" title="MBTI ทั้ง 16 แบบ">
+      <template #title-after>
+        <button class="mb-q" :class="{ on: showWhat }" aria-label="MBTI คืออะไร" @click="showWhat = !showWhat">?</button>
+      </template>
       <div class="mb-all">
+        <!-- MBTI คืออะไร (user 25 ต.ค. 2026: คนไม่รู้จักต้องอ่านเข้าใจในไม่กี่บรรทัด) -->
+        <div v-if="showWhat" class="mb-what">
+          <b>MBTI คืออะไร?</b>
+          <p>แบบทดสอบบุคลิกภาพที่แบ่งคนเป็น 16 แบบ จากความชอบ 4 ด้าน:</p>
+          <ul>
+            <li><b>E / I</b> — ได้พลังจากการเจอผู้คน หรือจากเวลาอยู่กับตัวเอง</li>
+            <li><b>S / N</b> — เชื่อข้อเท็จจริงตรงหน้า หรือมองภาพรวมและความเป็นไปได้</li>
+            <li><b>T / F</b> — ตัดสินใจด้วยเหตุผล หรือด้วยความรู้สึกของคน</li>
+            <li><b>J / P</b> — ชอบวางแผนให้ชัด หรือชอบยืดหยุ่นตามสถานการณ์</li>
+          </ul>
+          <p>เอาตัวอักษรที่ตรงกับเรามาต่อกัน เช่น INFJ · ทุกแบบมีจุดเด่นของตัวเอง เอาไว้รู้จักตัวเองและเพื่อนสนุกๆ</p>
+          <a class="mb-test" href="https://www.16personalities.com/th" target="_blank" rel="noopener">ทำแบบทดสอบภาษาไทย (~10 นาที) ›</a>
+        </div>
         <section v-for="(g, k) in MBTI_GROUPS" :key="k" class="mb-grp">
           <div class="mb-grp-h" :style="{ color: g.color }">{{ g.label }}</div>
           <div v-for="t in MBTI_TYPES.filter(x => x.group === k)" :key="t.code" :id="'mb-' + t.code" class="mb-type"
@@ -73,6 +89,7 @@ const { syncRosterRow } = useRosterSync()
 
 const cur = computed(() => mbtiOf(auth.userData?.mbti))
 const open = ref(false)
+const showWhat = ref(false)
 const openCode = ref(null)   // การ์ดที่กางอ่านอยู่ (ทีละใบ)
 const pick = ref(null)       // ที่เลือกในแผ่น ยังไม่บันทึก
 const saving = ref(false)
@@ -143,6 +160,12 @@ const byType = computed(() => {
 .mb-read { font: inherit; font-size: .8rem; font-weight: 800; align-self: flex-start; border: 0; background: color-mix(in srgb, var(--c) 12%, #fff); color: var(--c); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
 .mb-pick { font: inherit; font-size: .84rem; font-weight: 800; border: var(--bw) solid var(--c); color: var(--c); background: #fff; border-radius: 10px; padding: 8px; cursor: pointer; }
 .mb-pick.on { background: var(--c); color: #fff; }
+.mb-q { font: inherit; font-family: var(--font-body, inherit); font-size: .8rem; font-weight: 800; width: 22px; height: 22px; margin-left: 6px; vertical-align: middle; border-radius: 50%; border: var(--bw) solid var(--line); background: #fff; color: var(--primary); cursor: pointer; line-height: 1; padding: 0; }
+.mb-q.on { background: var(--primary); color: #fff; }
+.mb-what { background: #f5f8ff; border: var(--bw) solid var(--line); border-radius: 14px; padding: 10px 12px; font-size: .8rem; line-height: 1.6; color: var(--ink); display: flex; flex-direction: column; gap: 4px; }
+.mb-what p { margin: 0; }
+.mb-what ul { margin: 0; padding-left: 18px; }
+.mb-what .mb-test { text-align: left; margin-top: 2px; }
 .mb-test { font-size: .78rem; font-weight: 700; color: var(--primary); text-decoration: none; text-align: center; }
 .mb-dock { position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; gap: 8px; background: #fff; border-top: 1px solid var(--line); box-shadow: 0 -6px 12px rgba(43,53,80,.08); padding: 10px 4px; margin: 0 -4px; }
 .mb-dock-t { flex: 1; font-size: .84rem; font-weight: 800; color: var(--ink); }
