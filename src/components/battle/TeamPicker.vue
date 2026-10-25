@@ -79,9 +79,9 @@
                 <div class="tp-stat-row"><span>ATK</span><b>{{ statOf(slotPetOf(id)).atk }}</b></div>
                 <div class="tp-stat-row"><span>HP</span><b>{{ statOf(slotPetOf(id)).hp }}</b></div>
                 <div class="tp-stat-sk">{{ passiveOf({ id })?.name || 'ไม่มีทักษะ' }} </div>
-                <!-- ขั้นสกิล: Lv.+ขีด 5 ช่อง โชว์ที่นี่ที่เดียว (ระบบเลเวลสกิลยังไม่มา = Lv.1 เสมอ · เต็ม 5 ขีดเป็นชมพู) -->
-                <div v-if="passiveOf({ id })" class="tp-sklv"><b class="tp-lv">Lv.{{ SKILL_LV }}</b>
-                  <span class="tp-pips"><i v-for="n in 5" :key="n" :class="{ on: n <= SKILL_LV, max: SKILL_LV >= 5 }" /></span></div>
+                <!-- ขั้นสกิล: Lv.+ขีด 3 ช่อง (สกิลมี 3 ขั้น อัพด้วยหินในดันเจี้ยน) โชว์ที่นี่ที่เดียว · ระบบอัพยังไม่มา = Lv.1 เสมอ · ขั้น 3 = Lv.MAX ขีดเป็นชมพู -->
+                <div v-if="passiveOf({ id })" class="tp-sklv"><b class="tp-lv">{{ SKILL_LV >= SKILL_MAX ? 'Lv.MAX' : 'Lv.' + SKILL_LV }}</b>
+                  <span class="tp-pips"><i v-for="n in SKILL_MAX" :key="n" :class="{ on: n <= SKILL_LV, max: SKILL_LV >= SKILL_MAX }" /></span></div>
               </template>
               <div v-else class="tp-stat-empty">—</div>
             </div>
@@ -169,6 +169,7 @@ const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'commo
 const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
 const RANK_LETTER = { common: 'C', rare: 'R', epic: 'E', legendary: 'L' }
 const SKILL_LV = 1
+const SKILL_MAX = 3 // สกิลมี 3 ขั้น (Lv1 → Lv2 → Lv.MAX)
 const rarityOf = (id) => slotPetOf(id).rarity || defOf(id).rarity || 'common'
 const rarityColor = (id) => RARITY[slotPetOf(id).rarity || defOf(id).rarity]?.color || '#94a3b8'
 
@@ -339,7 +340,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey, true))
 .tp-stars i.on { color: #ffb800; text-shadow: 0 1px 0 #8a5a00; }
 .tp-sklv { display: flex; align-items: center; gap: 5px; font-size: .78rem; }
 .tp-pips { display: flex; gap: 2px; }
-.tp-pips i { width: 6px; height: 6px; border-radius: 2px; background: #dfe3ec; }
+.tp-pips i { width: 9px; height: 6px; border-radius: 2px; background: #dfe3ec; }
 .tp-pips i.on { background: #3a9fd6; }
 .tp-pips i.max { background: #ff8fab; }
 @media (prefers-reduced-motion: reduce) { .tp-rk span { animation: none; } }
