@@ -50,7 +50,7 @@ export function draftPayload(draft) {
     reviewNote: cleanText(d.reviewNote, LIMITS.reviewNote) || null,
     explanation: cleanText(d.explanation, LIMITS.explanation) || null,
     isPublished: !!d.isPublished,
-    domain: d.domain || null,
+    // domain ไม่เขียนแยกแล้ว — มากับ plePatch ข้างบน (derive จากกลุ่ม)
     examSets: Array.isArray(d.examSets) ? d.examSets : [],
     qhash: qhash(question),   // กันข้อซ้ำ + อัปเดตเมื่อโจทย์เปลี่ยน
   }

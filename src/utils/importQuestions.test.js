@@ -187,9 +187,9 @@ test('ไม่ส่ง domain แต่มี pleGroup → เดา domain �
   assert.equal(parseImport(one({ question: 'Q', choices: ['a', 'b'], pleGroup: 'other' })).rows[0].domain, 'law')
   assert.equal(parseImport(one({ question: 'Q', choices: ['a', 'b'], pleGroup: 'sci_chem' })).rows[0].domain, 'sci')
 })
-test('domain ที่ส่งมาชนะการเดาจากกลุ่ม', () => {
+test('มีกลุ่มโรค → domain ตามกลุ่มเสมอ แม้ไฟล์ระบุขัด', () => {
   const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], pleGroup: 'renal', domain: 'law' }))
-  assert.equal(r.rows[0].domain, 'law')
+  assert.equal(r.rows[0].domain, 'care')
 })
 test('domain ไม่ส่งมา → null', () => {
   const r = parseImport(one({ question: 'Q', choices: ['a', 'b'], answer: 0 }))

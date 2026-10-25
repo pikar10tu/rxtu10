@@ -79,7 +79,8 @@ function rowFromItem(item) {
       explanation: cleanText(item.explanation, LIMITS.explanation) || null,
       // ไม่ระบุ domain → เดาจากกลุ่มโรค (กลุ่ม 1–15 = care · ระบบอื่น = law · sci_* = sci)
       // ทุกกลุ่มผูก domain ไว้แล้วใน plecc.js จึงไม่ต้องให้คนทำไฟล์กรอกซ้ำ
-      domain: isDomainKey(item.domain) ? item.domain : (groupByKey(ple.fields.pleGroup)?.domain ?? null),
+      // มีกลุ่มโรค → domain ตามกลุ่มเสมอ (กันไฟล์ระบุขัดกัน) · ไม่มีกลุ่มค่อยใช้ค่าที่ไฟล์ระบุ
+      domain: groupByKey(ple.fields.pleGroup)?.domain ?? (isDomainKey(item.domain) ? item.domain : null),
       examSets,
       isPublished: false, // บังคับร่างเสมอ — ทีมวิชาการตรวจก่อน publish ทีละข้อ
     },

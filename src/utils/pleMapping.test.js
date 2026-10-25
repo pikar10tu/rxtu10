@@ -106,23 +106,33 @@ test('pleGroup ที่เป็นค่าขยะ → ตกไปใช้
 })
 
 // ── plePatch ──
-test('plePatch เขียนครบ 3 ฟิลด์เสมอ', () => {
+test('plePatch เขียนครบ 4 ฟิลด์เสมอ (domain ตามกลุ่ม)', () => {
   assert.deepEqual(plePatch('pulm', 'Asthma'),
-    { pleGroup: 'pulm', pleSub: 'Asthma', categories: ['Pulmonary (ปอด)', 'Asthma'] })
+    { pleGroup: 'pulm', pleSub: 'Asthma', categories: ['Pulmonary (ปอด)', 'Asthma'], domain: 'care' })
+  assert.equal(plePatch('sci_tech', null).domain, 'sci')
+  assert.equal(plePatch('other', null).domain, 'law')
 })
 test('plePatch ล้าง sub ที่ข้ามกลุ่มให้เป็น null', () => {
   assert.deepEqual(plePatch('pulm', 'Obesity'),
-    { pleGroup: 'pulm', pleSub: null, categories: ['Pulmonary (ปอด)'] })
+    { pleGroup: 'pulm', pleSub: null, categories: ['Pulmonary (ปอด)'], domain: 'care' })
 })
 test('plePatch กลุ่มมั่ว → null (ผู้เรียกต้องไม่เขียนอะไรเลย)', () => {
   assert.equal(plePatch('ไม่มี', null), null)
 })
 
 // ── migrationPlan ──
+test('migrationPlan ซ่อม domain ที่ขัดกับกลุ่ม (care แต่อยู่ sci_tech / ไม่มี domain)', () => {
+  const bank = [
+    { id: 'x', pleGroup: 'sci_tech', pleSub: null, categories: ['เทคโนโลยีเภสัชกรรมและรูปแบบยาเตรียม'], domain: 'care' },
+    { id: 'y', pleGroup: 'other', pleSub: null, categories: ['ระบบอื่น'] },
+  ]
+  const p = migrationPlan(bank)
+  assert.deepEqual(p.updates.map(u => [u.id, u.patch.domain]), [['x', 'sci'], ['y', 'law']])
+})
 test('migrationPlan คืนเฉพาะข้อที่ค่าเปลี่ยนจริง', () => {
   const bank = [
     { id: 'a', categories: ['โรคหืด'] },                                        // ต้องแมพ
-    { id: 'b', pleGroup: 'pulm', pleSub: 'Asthma', categories: ['Pulmonary (ปอด)', 'Asthma'] }, // ตรงแล้ว
+    { id: 'b', pleGroup: 'pulm', pleSub: 'Asthma', categories: ['Pulmonary (ปอด)', 'Asthma'], domain: 'care' }, // ตรงแล้ว
     { id: 'c', categories: ['หมวดประหลาด'] },                                    // แมพไม่ได้
   ]
   const p = migrationPlan(bank)

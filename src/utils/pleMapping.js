@@ -174,12 +174,14 @@ export function pleFields(question) {
   return { group, sub: group ? inferSub(cats, group) : null, inferred: !!group }
 }
 
-// patch ที่จะเขียนลง Firestore เมื่อเลือกหมวดใหม่ — เขียน 3 ฟิลด์พร้อมกันเสมอ
-//  (categories ต้องตามเสมอ ไม่งั้น quiz filter/meta/หน้าคลังเห็นของเก่า)
+// patch ที่จะเขียนลง Firestore เมื่อเลือกหมวดใหม่ — เขียน 4 ฟิลด์พร้อมกันเสมอ
+//  (categories + domain ต้องตามเสมอ ไม่งั้น quiz filter/meta/หน้าคลังเห็นของเก่า)
+//  🔑 domain (care/sci/law) derive จากกลุ่มเหมือน categories — เดิมเป็นช่องแยกให้เลือกเอง
+//     วิชาการย้ายกลุ่มแล้ว domain ค้างของเก่า ⇒ ตัวกรอง Care/Sci ในควิซไม่เปลี่ยนตาม (26 ต.ค.)
 export function plePatch(groupKey, sub) {
   if (!isPleGroupKey(groupKey)) return null
   const cleanSub = isValidSub(groupKey, sub) ? (sub || null) : null
-  return { pleGroup: groupKey, pleSub: cleanSub, categories: categoriesFor(groupKey, cleanSub) }
+  return { pleGroup: groupKey, pleSub: cleanSub, categories: categoriesFor(groupKey, cleanSub), domain: groupByKey(groupKey).domain }
 }
 
 // แผนแมพทั้งคลัง (pure) — คืนเฉพาะข้อที่ค่าเปลี่ยนจริง + กองที่แมพไม่ได้
@@ -194,7 +196,8 @@ export function migrationPlan(questions) {
     const sameGroup = q.pleGroup === patch.pleGroup
     const sameSub = (q.pleSub || null) === patch.pleSub
     const sameCats = JSON.stringify(getCategories(q)) === JSON.stringify(patch.categories)
-    if (sameGroup && sameSub && sameCats) continue
+    const sameDomain = (q.domain || null) === patch.domain
+    if (sameGroup && sameSub && sameCats && sameDomain) continue
     updates.push({ id: q.id, patch })
   }
   return { updates, unmapped, total: (questions || []).length }

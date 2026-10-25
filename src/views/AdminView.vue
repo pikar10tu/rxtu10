@@ -531,7 +531,7 @@ import { plePatch } from '../utils/pleMapping.js'
 // categories ของข้อนี้หลุดจากที่ควรเป็นตาม pleGroup ไหม (= ร่องรอย client เก่าเขียนทับ)
 function pleCatsDrifted(q) {
   const d = plePatch(q?.pleGroup, q?.pleSub)
-  return !!d && JSON.stringify(getCategories(q)) !== JSON.stringify(d.categories)
+  return !!d && (JSON.stringify(getCategories(q)) !== JSON.stringify(d.categories) || (q.domain || null) !== d.domain)
 }
 import { distinctCategories } from '../utils/questionsFilter.js'
 import { useTopics } from '../composables/useTopics.js'
@@ -586,6 +586,7 @@ async function syncReviewSystem() {
         if (rederived && JSON.stringify(getCategories(q)) !== JSON.stringify(rederived.categories)) {
           patch.categories = rederived.categories
         }
+        if (rederived && (q.domain || null) !== rederived.domain) patch.domain = rederived.domain
         if (typeof q.rand !== 'number') patch.rand = Math.random()
         batch.update(doc(db, 'questions', q.id), patch)
       }

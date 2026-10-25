@@ -25,11 +25,8 @@
       <label class="qz-label">ชุดข้อสอบย้อนหลัง (ไม่บังคับ — 1 ข้ออยู่ได้หลายชุด)</label>
       <ExamSetSelect :modelValue="modelValue.examSets" @update:modelValue="v => set({ examSets: v })" />
 
-      <label class="qz-label">หมวดใหญ่ (domain)</label>
-      <select :value="modelValue.domain" class="qz-input" @change="set({ domain: $event.target.value || null })">
-        <option :value="null">— ไม่ระบุ —</option>
-        <option v-for="d in DOMAINS" :key="d.key" :value="d.key">{{ d.label }}</option>
-      </select>
+      <!-- domain (Care/Sci/Law) ไม่ให้เลือกเองแล้ว — ตามกลุ่มโรคอัตโนมัติ (plePatch) -->
+      <p class="qe-domain-hint">หมวดใหญ่: <b>{{ domainLabel(groupByKey(modelValue.ple?.group)?.domain) || 'เลือกกลุ่มโรคก่อน' }}</b> · ตามกลุ่มโรคอัตโนมัติ — ข้อที่ถามกลไก/โครงสร้าง/ตำรับ/วิเคราะห์ ให้เลือกกลุ่มฝั่ง Sci</p>
     </template>
 
     <label class="qz-label">คำอธิบายเฉลย (ไม่บังคับ)</label>
@@ -58,7 +55,8 @@ import { computed } from 'vue'
 import TopicSelect from './TopicSelect.vue'
 import ExamSetSelect from './ExamSetSelect.vue'
 import { LIMITS } from '../../utils/text.js'
-import { DOMAINS } from '../../data/domains.js'
+import { domainLabel } from '../../data/domains.js'
+import { groupByKey } from '../../data/plecc.js'
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -96,6 +94,7 @@ function removeChoice(i) {
 </script>
 
 <style scoped>
+.qe-domain-hint { font-size: .78rem; opacity: .8; margin: 6px 0 2px; line-height: 1.5; }
 .qz-label { display: block; font-size: .7rem; font-weight: 700; color: #64748b; margin: 10px 0 5px; }
 .qz-input { width: 100%; box-sizing: border-box; border: var(--bw) solid var(--line); border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: .82rem; resize: vertical; }
 .qz-input:focus { outline: none; box-shadow: var(--pop); }
