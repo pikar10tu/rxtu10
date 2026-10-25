@@ -52,8 +52,12 @@
               <template v-if="id">
                 <!-- รูปใหญ่เต็มการ์ด (WebP 256px ละเอียดพอ) แทน PetThumb ย่อ — user บอก 18 ต.ค. ตัวเล็กไป -->
                 <span class="tp-el"><Emoji :char="ELEMENTS[defOf(id).element]?.icon || 'el:fist'" /></span>
-                <span v-if="slotPetOf(id).grade" class="tp-gr">{{ GRADE_LABELS[slotPetOf(id).grade] }}</span>
                 <span class="tp-face"><Emoji :char="defOf(id).emoji" /></span>
+                <!-- ป้ายความหายากตัวใหญ่แบบ 7DS + ดาว = ขั้น (user เคาะจากเดโม 25 ต.ค.: Lilita One · 100% · ยิ่งหายากยิ่งใหญ่) -->
+                <span class="tp-rk" :data-r="rarityOf(id)" aria-hidden="true"><span>{{ RANK_LETTER[rarityOf(id)] }}</span></span>
+                <span class="tp-stars" :aria-label="`ขั้น ${slotPetOf(id).grade || 0} จาก 5`">
+                  <i v-for="n in 5" :key="n" :class="{ on: n <= (slotPetOf(id).grade || 0) }">★</i>
+                </span>
                 <span v-if="earthTag(i)" class="tp-season"><Emoji :char="earthTag(i).icon" /> {{ earthTag(i).text }}</span>
               </template>
               <span v-else class="tp-empty">＋</span>
@@ -74,7 +78,10 @@
                 <div class="tp-stat-name">{{ displayName(id, defOf(id).name, teamNow) }}</div>
                 <div class="tp-stat-row"><span>ATK</span><b>{{ statOf(slotPetOf(id)).atk }}</b></div>
                 <div class="tp-stat-row"><span>HP</span><b>{{ statOf(slotPetOf(id)).hp }}</b></div>
-                <div class="tp-stat-sk">{{ passiveOf({ id })?.name || 'ไม่มีทักษะ' }} <span v-if="passiveOf({ id })" class="tp-lv">Lv.1</span></div>
+                <div class="tp-stat-sk">{{ passiveOf({ id })?.name || 'ไม่มีทักษะ' }} </div>
+                <!-- ขั้นสกิล: Lv.+ขีด 5 ช่อง โชว์ที่นี่ที่เดียว (ระบบเลเวลสกิลยังไม่มา = Lv.1 เสมอ · เต็ม 5 ขีดเป็นชมพู) -->
+                <div v-if="passiveOf({ id })" class="tp-sklv"><b class="tp-lv">Lv.{{ SKILL_LV }}</b>
+                  <span class="tp-pips"><i v-for="n in 5" :key="n" :class="{ on: n <= SKILL_LV, max: SKILL_LV >= 5 }" /></span></div>
               </template>
               <div v-else class="tp-stat-empty">—</div>
             </div>
@@ -110,7 +117,7 @@ import { fluentFile } from '../../utils/emoji.js'
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { statOf } from '../../utils/petFilter.js'
 import { useAuthStore } from '../../stores/auth.js'
-import { getPetDef, RARITY, ELEMENTS, GRADE_LABELS, passiveOf } from '../../data/index.js'
+import { getPetDef, RARITY, ELEMENTS, passiveOf } from '../../data/index.js'
 import { BATTLE_SLOTS } from '../../data/residence.js'
 import { toSlots } from '../../utils/teamSlots.js'
 import { removeAt, compact } from '../../utils/slotEdit.js'
@@ -160,6 +167,9 @@ watch(viewIds, (ids) => {
 
 const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?', rarity: 'common', element: 'scissors' }
 const slotPetOf = (id) => owned.value.find(p => p.id === id) || { id }
+const RANK_LETTER = { common: 'C', rare: 'R', epic: 'E', legendary: 'L' }
+const SKILL_LV = 1
+const rarityOf = (id) => slotPetOf(id).rarity || defOf(id).rarity || 'common'
 const rarityColor = (id) => RARITY[slotPetOf(id).rarity || defOf(id).rarity]?.color || '#94a3b8'
 
 // rarity อ่านแบบเดียวกับเอนจิน: inst.rarity || def.rarity || 'common' (resolveBattleTeam)
@@ -311,7 +321,28 @@ onUnmounted(() => window.removeEventListener('keydown', onKey, true))
 .tp-slotno { position: absolute; top: 7px; left: 50%; transform: translateX(-50%); min-width: 22px; padding: 1px 7px; border-radius: 999px; text-align: center;
   font-size: .74rem; font-weight: 800; line-height: 1.4; color: #fff; background: var(--rc, #9cc8e4); }
 .tp-el { position: absolute; top: 6px; left: 7px; font-size: 1.15rem; line-height: 1; }
-.tp-gr { position: absolute; top: 6px; right: 7px; font-size: .78rem; font-weight: 800; line-height: 1.35; color: #fff; background: color-mix(in srgb, var(--rc) 80%, #1e293b); border-radius: 8px; padding: 1px 7px; }
+.tp-rk { position: absolute; left: 5px; bottom: 1px; z-index: 2; pointer-events: none; transform: skewX(-8deg);
+  font: 400 2.3rem/1 'Lilita One', 'Kanit', sans-serif; letter-spacing: -.02em; }
+.tp-rk span { display: block; color: transparent; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-stroke: 1.5px #2b3550; paint-order: stroke fill; filter: drop-shadow(2px 2px 0 #fff) drop-shadow(2px 3px 0 #2b3550); }
+.tp-rk[data-r=common] { font-size: 1.9rem; }
+.tp-rk[data-r=common] span { background-image: linear-gradient(180deg, #f1f5f9 0, #cbd5e1 45%, #94a3b8 55%, #e2e8f0); }
+.tp-rk[data-r=rare] { font-size: 2.1rem; }
+.tp-rk[data-r=rare] span { background-image: linear-gradient(180deg, #e0f2ff 0, #7cc0ff 45%, #2563eb 55%, #93c5fd); }
+.tp-rk[data-r=epic] span { background-image: linear-gradient(180deg, #fae8ff 0, #e879f9 40%, #7c3aed 56%, #c4b5fd); }
+.tp-rk[data-r=legendary] { font-size: 2.6rem; }
+.tp-rk[data-r=legendary] span { background-image: linear-gradient(180deg, #fffbe0 0, #fde047 38%, #f59e0b 52%, #ff7ab6 78%, #fde68a);
+  background-size: 100% 200%; animation: tp-gold 2.4s ease-in-out infinite alternate; }
+@keyframes tp-gold { to { background-position: 0 100%; } }
+.tp-stars { position: absolute; right: 6px; bottom: 8px; z-index: 2; display: flex; flex-direction: column-reverse; font-size: .7rem; line-height: 1; pointer-events: none; }
+.tp-stars i { font-style: normal; color: #d7dbe6; text-shadow: 0 1px 0 #fff; }
+.tp-stars i.on { color: #ffb800; text-shadow: 0 1px 0 #8a5a00; }
+.tp-sklv { display: flex; align-items: center; gap: 5px; font-size: .78rem; }
+.tp-pips { display: flex; gap: 2px; }
+.tp-pips i { width: 6px; height: 6px; border-radius: 2px; background: #dfe3ec; }
+.tp-pips i.on { background: #3a9fd6; }
+.tp-pips i.max { background: #ff8fab; }
+@media (prefers-reduced-motion: reduce) { .tp-rk span { animation: none; } }
 .tp-face { flex: 1; display: flex; align-items: center; justify-content: center; font-size: clamp(50px, 15vw, 80px); line-height: 1; pointer-events: none;
   filter: drop-shadow(0 6px 8px rgba(43,53,80,.18)); }
 .tp-slotname { font-size: .9rem; font-weight: 800; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
