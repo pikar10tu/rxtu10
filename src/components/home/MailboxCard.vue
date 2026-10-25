@@ -103,7 +103,7 @@ async function onClaim(m) {
 .mb-ico { font-size: 1.3rem; flex-shrink: 0; }
 .mb-body { flex: 1; min-width: 0; }
 .mb-item-title { font-weight: 800; font-size: .8rem; color: #1e293b; }
-.mb-item-text { font-size: .72rem; color: rgba(0,0,0,.6); line-height: 1.4; margin-top: 2px; }
+.mb-item-text { font-size: .72rem; color: rgba(0,0,0,.6); line-height: 1.4; margin-top: 2px; white-space: pre-line; overflow-wrap: anywhere; }
 .mb-meta { font-size: .7rem; color: rgba(0,0,0,.4); margin-top: 4px; }
 .mb-action { flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
 .mb-del { border: none; background: rgba(0,0,0,.06); border-radius: 9px; width: 36px; height: 36px; cursor: pointer; font-size: .9rem; display: inline-flex; align-items: center; justify-content: center; }

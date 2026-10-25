@@ -1912,6 +1912,9 @@ onUnmounted(() => {
 /* FX pool styles — ไม่ scoped (element สร้าง imperative ไม่มี data-v-*) · namespace .brfx-* กันชน global */
 .br-fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
 
+/* ── ลำดับเลเยอร์ใน .br-box (ล่าง→บน) ── อย่าใส่เลขนอกตารางนี้
+   0 พื้นสนาม · 2 ไอคอนสถานะ · 4 ม่านหรี่ · 5 การ์ดเจ้าของสกิล · 6 fx (เลข/ประกาย)
+   7 แบนเนอร์เล็ก · 8 แบนเนอร์ใหญ่ · 10 READY/GO · 11 ป้ายเร่ง/fps · 30 ผ่านด่าน */
 /* ── สปอตไลต์สกิล ────────────────────────────────────────────
    z-index 4 = ใต้ fx layer (6) เพื่อให้เลข/ประกายของ "ผล" ที่ลงตามมาลอยเหนือฉากหรี่
    🚫 ห้าม backdrop-filter/blur — iOS Safari เพนต์ไม่ไหว (เคสกระตุกที่แก้ไป 4 รอบกว่าจะเจอ)
@@ -1924,7 +1927,7 @@ onUnmounted(() => {
 .br-spot-dim { position: fixed; inset: 0; z-index: 4; background: #0f172a; opacity: 0; will-change: opacity; }
 /* แบนเนอร์ถาวร: ไม่มี .on = ซ่อน (ม่านโปร่ง · แถบจาง) — อนิเมชันผูกกับ .on เท่านั้น จึงเริ่มใหม่ทุกครั้งที่ .on กลับมา */
 .br-spot.on .br-spot-dim { animation: br-spot-dim-in var(--spot-delay, 180ms) ease-out forwards; }
-.br-cut { position: relative; z-index: 7;   /* > ชั้น fx (6) — ออร่า/หัวใจห้ามทับแบนเนอร์ใหญ่ (จอจริง 29 ก.ย.) */ width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
+.br-cut { position: relative; z-index: 8;   /* > fx (6) และ > แบนเนอร์เล็ก (7) — ใหญ่ต้องอยู่บนสุดของฉาก (user 25 ต.ค.: เล็กทับใหญ่) */ width: 112%; flex: none; height: 88px; display: flex; align-items: center; gap: 12px; padding: 0 12%;
   transform: skewY(-5deg); background: linear-gradient(90deg, var(--cut-a, #2563eb) 0%, var(--cut-a, #2563eb) 35%, var(--cut-b, #0f172a) 100%); box-shadow: 0 0 0 3px #fff;
   will-change: transform, opacity; opacity: 0; }
 .br-spot.on .br-cut { opacity: 1; animation: br-cut-in-l var(--spot-in, 240ms) cubic-bezier(.2,.9,.3,1.1) var(--spot-delay, 180ms) both; }
@@ -1940,7 +1943,7 @@ onUnmounted(() => {
 .br-cut-who { font-size: .7rem; font-weight: 800; letter-spacing: .05em; color: rgba(255,255,255,.8); }
 .br-cut-name { font-size: 1.1rem; font-weight: 800; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 /* แบนเนอร์เล็ก — ทีมเราขึ้นครึ่งล่างจากซ้าย · ศัตรูครึ่งบนจากขวา · transform/opacity ล้วน */
-.br-mini { position: absolute; left: 0; top: 50%; margin-top: -18px;   /* กลางจอ (แนวเส้น VS) — ซ้าย=ทีมเรา ขวา=ศัตรู เหมือนแบนเนอร์ใหญ่ (user 29 ก.ย.: บน/ล่างบัง) */ z-index: 8; display: flex; align-items: center; gap: 6px; max-width: 38%;   /* z 8 > ชั้น fx 6 = ออร่า/เลขไม่ทับ · 38% ไม่ชนป้าย VS */
+.br-mini { position: absolute; left: 0; top: 50%; margin-top: -18px;   /* กลางจอ (แนวเส้น VS) — ซ้าย=ทีมเรา ขวา=ศัตรู เหมือนแบนเนอร์ใหญ่ (user 29 ก.ย.: บน/ล่างบัง) */ z-index: 7; display: flex; align-items: center; gap: 6px; max-width: 38%;   /* z 7: > fx 6 (ออร่า/เลขไม่ทับ) แต่ < แบนเนอร์ใหญ่ 8 · 38% ไม่ชนป้าย VS */
   padding: 4px 14px 4px 6px; border-radius: 0 999px 999px 0; background: linear-gradient(90deg, var(--cut-a, #2563eb), var(--cut-b, #1e3a8a));
   box-shadow: 0 0 0 2px #fff; pointer-events: none; opacity: 0; transform: translateX(-105%); }
 .br-mini.foe { left: auto; right: 0; flex-direction: row-reverse; padding: 4px 6px 4px 14px; border-radius: 999px 0 0 999px;
