@@ -640,7 +640,7 @@ async function finish() {
   const today = new Date().toISOString().slice(0, 10)
   const grant = correct.value * QUIZ_COIN_PER_CORRECT
   coinsEarned.value = grant
-  // แต้มอีเวนต์ — ได้จากข้อสอบเท่านั้น ตอบทุกข้อได้ + ถูกได้เพิ่ม (user เคาะ 25 ต.ค. 2026)
+  // แต้มอีเวนต์ — ได้จากข้อสอบเท่านั้น เฉพาะข้อที่ตอบถูก 2 ลูก (user 26 ต.ค. 2026)
   const ev = activeEvent()
   evEarned.value = quizPts(ev, answered.value, correct.value)
   const evp = grantPatch(authStore.userData, ev, evEarned.value, increment)
