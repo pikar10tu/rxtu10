@@ -42,13 +42,13 @@ export const COSMETICS = [
   I('f', 2, 'f-cat', 'หูแมว', 120000, { deco: [['🔺', 'top:-9px;left:6%;font-size:.55em;transform:rotate(-20deg)'], ['🔺', 'top:-9px;right:6%;font-size:.55em;transform:rotate(20deg)']] }),
   I('f', 2, 'f-star', 'ดาวมุม', 120000, { deco: [['⭐', 'top:-6px;right:-4px;font-size:.6em'], ['⭐', 'bottom:-4px;left:-4px;font-size:.45em']] }),
   I('f', 3, 'f-glow', 'ออร่าเรืองแสง', 350000),
-  I('f', 3, 'f-flower', 'ซากุระ', 400000, { deco: [['🌸', 'top:-6px;left:-4px;font-size:.6em', 1], ['🌸', 'bottom:-4px;right:-4px;font-size:.6em', 1], ['🌸', 'top:-8px;right:4px;font-size:.4em']] }),
+  I('f', 3, 'f-flower', 'ซากุระ', 400000, { deco: [['🌸', 'top:-6px;right:-4px;font-size:.6em', 1], ['🌸', 'bottom:-4px;left:-4px;font-size:.6em', 1], ['🌸', 'top:-8px;left:4px;font-size:.4em']] }),
   I('f', 3, 'f-clover', 'ใบโคลเวอร์', 400000, { deco: [['🍀', 'top:-6px;right:-4px;font-size:.6em', 1], ['🍀', 'bottom:-4px;left:-4px;font-size:.5em', 1]] }),
   I('f', 3, 'f-bubble', 'ฟองสบู่', 450000, { orbit: [['🫧', 'top:0;left:50%'], ['🫧', 'bottom:10%;left:0'], ['🫧', 'top:40%;right:-4px;font-size:.7em']], orbitSec: 9 }),
   I('f', 4, 'f-gold', 'กรอบทองหมุน', 1500000, { orbit: [['⭐', 'top:0;left:50%'], ['✨', 'bottom:0;left:40%']] }),
   I('f', 4, 'f-crown', 'มงกุฎราชา', 1800000, { deco: [['👑', 'top:-18px;left:50%;margin-left:-.35em;font-size:.7em', 1]] }),
   I('f', 4, 'f-rainbow', 'รุ้งหมุน', 1800000),
-  I('f', 4, 'f-dragon', 'มังกรวน', 2500000, { orbit: [['🐉', 'top:-4px;left:44%;font-size:1.2em']], orbitSec: 4 }),
+  I('f', 4, 'f-dragon', 'มังกรวน', 2500000, { orbit: [['🐉', 'top:-4px;left:44%;font-size:1.2em']], orbitSec: 4, orbitFace: true }),
   I('f', 4, 'f-heaven', 'ออร่าสวรรค์', 3500000, { orbit: [['✨', 'top:0;left:50%'], ['☁️', 'bottom:0;left:40%'], ['🕊️', 'top:45%;left:-6px']] }),
 
   // ── ป้ายหน้าชื่อ ── (fx = อนิเมชัน · ในรายชื่อสมาชิกเป็นภาพนิ่ง)
@@ -72,10 +72,10 @@ export const COSMETICS = [
   // ── อีเวนต์ฮาโลวีน 2026 (ev = id อีเวนต์ใน data/events.js · pk = ราคาเป็นแต้มอีเวนต์ · ไม่ขายในร้านเหรียญ) ──
   //    กรอบชุดนี้ใช้สไตล์ยกระดับ (คลาส cz-fx ใน cosmetics.css: ขอบขาวคั่น+วงแหวนบาง+แสงวิ่ง+อีโมจิสติกเกอร์)
   I('f', 2, 'f-hw-candy', 'ลูกกวาดข้าวโพด', 0, { ev: 'hw26', pk: 60 }),
-  I('f', 2, 'f-hw-web', 'ใยแมงมุม', 0, { ev: 'hw26', pk: 60, deco: [['🕸️', 'top:-9px;left:-9px;font-size:.5em'], ['🕷️', 'bottom:-6px;right:-6px;font-size:.38em']] }),
-  I('f', 3, 'f-hw-pumpkin', 'ฟักทองยิ้ม', 0, { ev: 'hw26', pk: 125, deco: [['🎃', 'bottom:-7px;right:-9px;font-size:.55em', 1], ['🍂', 'top:-9px;left:2px;font-size:.38em']] }),
+  I('f', 2, 'f-hw-web', 'ใยแมงมุม', 0, { ev: 'hw26', pk: 60, deco: [['🕸️', 'top:-9px;left:-9px;font-size:.5em'], ['🕷️', 'bottom:-6px;left:-6px;font-size:.38em']] }),
+  I('f', 3, 'f-hw-pumpkin', 'ฟักทองยิ้ม', 0, { ev: 'hw26', pk: 125, deco: [['🎃', 'bottom:-7px;left:-9px;font-size:.55em', 1], ['🍂', 'top:-9px;right:2px;font-size:.38em']] }),
   I('f', 3, 'f-hw-bat', 'ค้างคาวบิน', 0, { ev: 'hw26', pk: 140, orbit: [['🦇', 'top:0;left:50%'], ['🦇', 'bottom:6%;left:4%;font-size:.7em']], orbitSec: 5 }),
-  I('f', 4, 'f-hw-ghost', 'ผีน้อยลอยวน', 0, { ev: 'hw26', pk: 210, orbit: [['👻', 'top:-2px;left:44%'], ['✨', 'bottom:0;left:30%;font-size:.7em'], ['🍬', 'top:45%;right:-4px;font-size:.7em']], orbitSec: 8 }),
+  I('f', 4, 'f-hw-ghost', 'ผีน้อยลอยวน', 0, { ev: 'hw26', pk: 210, orbit: [['👻', 'top:-4px;left:42%'], ['👻', 'bottom:4%;left:2%'], ['👻', 'bottom:4%;right:2%']], orbitSec: 8 }),
   I('f', 4, 'f-hw-king', 'ราชาฟักทอง', 0, { ev: 'hw26', pk: 250, deco: [['👑', 'top:-20px;left:50%;margin-left:-.38em;font-size:.75em', 1]], orbit: [['🎃', 'bottom:0;left:46%'], ['🦇', 'top:40%;left:-6px;font-size:.7em']], orbitSec: 6 }),
   I('n', 2, 'n-hw-pump', 'ฟักทองไล่สี', 0, { ev: 'hw26', pk: 50 }),
   I('n', 2, 'n-hw-candy', 'ลูกกวาดข้าวโพด', 0, { ev: 'hw26', pk: 60 }),

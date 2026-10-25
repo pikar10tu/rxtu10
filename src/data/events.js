@@ -27,9 +27,9 @@ export const EVENTS = [
     coinRate: 100,
     // ของจิปาถะ — field = ฟิลด์ใน user doc ที่มีอยู่แล้ว · max = แลกได้สูงสุดต่อคน
     misc: [
-      { id: 'm-energy', emoji: '⚡', label: 'ตั๋วพลังงาน PvP', note: 'เติมพลังงาน PvP 5 ครั้ง', field: 'pvpEnergyTicket', price: 15, max: 10 },
-      { id: 'm-antiloss', emoji: '💊', label: 'ยาแก้แพ้', note: 'กันเสียแต้มตอนแพ้ PvP 1 ครั้ง', field: 'antiLoss', price: 20, max: 5 },
-      { id: 'm-gacha', emoji: '🎟️', label: 'ตั๋วอัญเชิญฟรี', note: 'สุ่มเพ็ท 1 ครั้ง', field: 'freeGachaTickets', price: 80, max: 3 },
+      { id: 'm-energy', emoji: '⚡', label: 'ตั๋วพลังงาน PvP', note: 'เติมพลังงาน PvP 5 ครั้ง', field: 'pvpEnergyTicket', price: 15, max: 20 },
+      { id: 'm-antiloss', emoji: '💊', label: 'ยาแก้แพ้', note: 'กันเสียแต้มตอนแพ้ PvP 1 ครั้ง', field: 'antiLoss', price: 20, max: 20 },
+      { id: 'm-gacha', emoji: '🎟️', label: 'ตั๋วอัญเชิญฟรี', note: 'สุ่มเพ็ท 1 ครั้ง', field: 'freeGachaTickets', price: 8, max: 20 },
     ],
   },
 ]

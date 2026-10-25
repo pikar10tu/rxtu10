@@ -52,8 +52,12 @@
 .cz-f-heaven::before { inset: -7px; background: conic-gradient(#fff, #ffd6ec, #bfe7ff, #fff4c2, #fff); box-shadow: 0 0 22px 8px rgba(191,231,255,.95); animation: cz-spin 4s linear infinite; }
 .cz-f-dragon::before { inset: -6px; background: conic-gradient(#7a1b12, #e0452f, #ffb020, #e0452f, #7a1b12); box-shadow: 0 0 16px 4px rgba(224,69,47,.55); animation: cz-spin 2.5s linear infinite; }
 .cz-deco { position: absolute; z-index: 2; line-height: 1; pointer-events: none; }
-.cz-orbit { position: absolute; inset: -14px; z-index: 2; animation: cz-spin 7s linear infinite; pointer-events: none; }
-.cz-orbit i { position: absolute; font-style: normal; font-size: 15px; }
+.cz-orbit { position: absolute; inset: -14px; z-index: 2; animation: cz-spin var(--osec, 7s) linear infinite; pointer-events: none; }
+.cz-orbit i { position: absolute; font-style: normal; font-size: 15px; line-height: 1; }
+/* หัวตั้งตลอด: ตัวลูกหมุนสวนทางด้วยรอบเดียวกัน (user 25 ต.ค. 2026 · ผี/ค้างคาว/ฟอง/ดาว ฯลฯ) */
+.cz-orbit:not(.cz-face) i { animation: cz-spin var(--osec, 7s) linear infinite reverse; }
+/* มังกร: หมุนตามวง + กลับซ้ายขวา — รูป Fluent หันซ้าย แต่วงหมุนตามเข็ม ⇒ ต้องหันขวาถึงจะพุ่งไปทางที่วิ่ง */
+.cz-face i { transform: scaleX(-1); }
 .cz-float { animation: cz-bob 2.4s ease-in-out infinite; }
 @keyframes cz-spin { to { transform: rotate(360deg); } }
 @keyframes cz-bob { 50% { transform: translateY(-4px); } }

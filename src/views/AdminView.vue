@@ -376,7 +376,7 @@
       <!-- ───── กระดานข่าว ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="📢" /> กระดานข่าว</span></div>
-        <div class="admin-hint">โพสต์ประกาศ — ทุกคนจะเห็นบนหน้า Home</div>
+        <div class="admin-hint">โพสต์ประกาศ — ทุกคนจะเห็นบนหน้า Home · รายการด้านล่างคือเลน news (ประกาศ+ข่าวครั้งแรกของรุ่น) 20 อันล่าสุด — ข่าวรายคน (หอคอย/สนาม/ควิซ ฯลฯ) อยู่ในแถว roster ไม่โชว์ที่นี่</div>
         <div class="news-form">
           <input v-model="newsIcon" class="news-icon-in" maxlength="2" />
           <input v-model="newsMsg" :maxlength="LIMITS.news" class="admin-search" style="margin:0;flex:1" placeholder="ข้อความข่าว…" @keyup.enter="postNews" />
@@ -384,7 +384,8 @@
         </div>
         <ul v-if="newsList.length" class="news-admin-list">
           <li v-for="n in newsList" :key="n.id" class="news-admin-row">
-            <span><Emoji :char="n.icon" /> {{ n.msg }}</span>
+            <span><Emoji :char="n.icon" /> {{ n.msg }}
+              <small class="news-meta">{{ NEWS_TYPE_LABEL[n.type] || 'ประกาศแอดมิน' }} · {{ newsWhen(n.ts) }}</small></span>
             <button class="news-del" @click="delNews(n.id)"><Emoji char="🗑️" /></button>
           </li>
         </ul>
@@ -1070,6 +1071,8 @@ function fmtTs(ts) {
 const newsIcon = ref('📢')
 const newsMsg = ref('')
 const newsList = ref([])
+const NEWS_TYPE_LABEL = { achievement: 'ความสำเร็จ', legendary: 'ตำนาน', tower100: 'หอคอย 100', record1: 'สถิติที่ 1', instructor: 'อาจารย์' }
+const newsWhen = (ts) => ts?.toDate ? ts.toDate().toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
 const postingNews = ref(false)
 
 async function loadNews() {
@@ -1378,6 +1381,7 @@ async function saveEcon(m) {
 .news-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .news-admin-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; background: rgba(0,0,0,.03); font-size: .76rem; }
 .news-admin-row span { flex: 1; word-break: break-word; }
+.news-meta { display: block; font-size: .66rem; color: rgba(0,0,0,.45); margin-top: 1px; }
 .news-del { border: none; background: none; cursor: pointer; font-size: .9rem; flex-shrink: 0; }
 .maint-preview { position: fixed; inset: 0; z-index: 230; }
 .maint-preview-x { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 231; border: 2px solid #2b3550; background: #fff; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }

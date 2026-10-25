@@ -95,6 +95,8 @@ const KINDS = {
   // กาชาได้ตำนาน (ย้ายจากเลน news 1 ต.ค. 2026 — เลนนั้นโหลดแค่ 5 doc เปิดรัวคืนเดียวดันข่าวคนอื่นตกหมด)
   lg: { icon: '✨', text: legText },
   // แลกของแต่งตัวชิ้นแพงจากร้านอีเวนต์ (ราคา ≥ NEWS_MIN_PK ใน EventView) — v = id ของแต่งตัว
+  // ทั้งรุ่นส่งแต้มอีเวนต์ให้แม่มดครบหมุด (evGiveMilestone) — anon แบบ qd · ใช้ pt ของอีเวนต์ที่เปิดตอนข่าวเกิดไม่ได้ ⇒ ฟักทองตายตัว (อีเวนต์หน้าค่อยเพิ่ม g)
+  ew: { icon: '🎃', anon: true, text: (_who, e) => `ทั้งรุ่นส่งฟักทองให้แม่มดครบ ${(Number(e.v) || 0).toLocaleString()} ลูกแล้ว` },
   eb: { icon: '🎃', text: (who, e) => `${who} แลก "${getCosmetic(e.v)?.label || 'ของลิมิเต็ด'}" จากร้านอีเวนต์` },
 }
 
@@ -102,6 +104,16 @@ const KINDS = {
 export const quizDayMilestone = (before, after) => {
   const m = Math.floor((Number(after) || 0) / 100) * 100
   return m > 0 && m > (Number(before) || 0) ? m : 0
+}
+
+/** หมุดแต้มอีเวนต์รวมรุ่น (user 25 ต.ค. 2026): 10 50 100 500 แล้วทุกหลักพัน */
+const EV_MARKS = [10, 50, 100, 500]
+export const evGiveMilestone = (before, after) => {
+  const b = Number(before) || 0, a = Number(after) || 0
+  if (a <= b) return 0
+  const k = Math.floor(a / 1000) * 1000
+  if (k >= 1000 && k > b) return k
+  return EV_MARKS.filter(m => m > b && m <= a).pop() || 0
 }
 
 /** ต่อข่าวใหม่ไว้หน้าสุด แล้วตัดท้ายให้เหลือ EVENT_MAX — คู่แฝดของ pushHistory */

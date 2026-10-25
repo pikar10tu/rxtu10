@@ -44,3 +44,17 @@ export async function bumpQuizToday(n) {
     return { before: Math.max(0, after - n), after }
   } catch (e) { console.warn('[globalStats] quizByDay failed', e); return null }
 }
+
+// 🎃 ของที่ทั้งรุ่นส่งให้แม่มด (แลกของ+แลกเหรียญ) — stats/global.evGive[evId] (user ขอ 25 ต.ค. 2026)
+// แบบเดียวกับ bumpQuizToday: เพิ่มแล้วอ่านกลับ 1 read เพื่อรู้ว่าเราเป็นคนข้ามหมุดไหม · write ครั้งเดียวต่อการแลก
+export async function bumpEventGive(evId, n) {
+  if (!evId || !(n > 0)) return null
+  try {
+    const ref = doc(db, 'stats', 'global')
+    await setDoc(ref, { evGive: { [evId]: increment(n) } }, { merge: true })
+    const snap = await getDoc(ref)
+    useUsageStore().track(1, 1)
+    const after = Number(snap.data()?.evGive?.[evId]) || 0
+    return { before: Math.max(0, after - n), after }
+  } catch (e) { console.warn('[globalStats] evGive failed', e); return null }
+}

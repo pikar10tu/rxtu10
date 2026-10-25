@@ -207,3 +207,15 @@ test('quizDayMilestone: ข้ามหลักร้อย → หลักส
   assert.equal(quizDayMilestone(180, 320), 300)
   assert.equal(quizDayMilestone(0, 40), 0)
 })
+
+test('evGiveMilestone: 10 50 100 500 แล้วทุกหลักพัน', async () => {
+  const { evGiveMilestone: m } = await import('./newsFeed.js')
+  assert.equal(m(0, 9), 0)
+  assert.equal(m(5, 10), 10)
+  assert.equal(m(8, 60), 50)
+  assert.equal(m(100, 499), 0)
+  assert.equal(m(450, 1200), 1000)
+  assert.equal(m(1500, 2100), 2000)
+  assert.equal(m(2100, 2900), 0)
+  assert.equal(m(2999, 7000), 7000)
+})

@@ -81,14 +81,16 @@ export function useTower() {
       const season = currentSeasonId()
       const recs = auth.userData?.towerRecords || {}
       const newRec = cleared > TOWER_MAX && cleared > (recs[season] || 0)
+      // ข่าวชั้น 100 ซ้ำ (เห็นในแอดมิน 25 ต.ค. 2026: คนเดียวขึ้น 10 ครั้งใน 2 สัปดาห์) ⇒ ล็อกด้วย t100 = ซีซั่นที่โพสต์แล้ว
+      const post100 = prevBest < TOWER_MAX && nextBest >= TOWER_MAX && auth.userData?.t100 !== season
       await auth.patchUser(
-        { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { towerRecords: { ...recs, [season]: cleared } } : {}) },
-        { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { [`towerRecords.${season}`]: cleared } : {}) },
+        { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { towerRecords: { ...recs, [season]: cleared } } : {}), ...(post100 ? { t100: season } : {}) },
+        { towerFloor: nextFloor, towerBest: nextBest, ...(newRec ? { [`towerRecords.${season}`]: cleared } : {}), ...(post100 ? { t100: season } : {}) },
       )
       // ข่าวกระดาน: เฉพาะสถิติใหม่ข้ามหมุด (towerNewsFloor) · ชั้น 100 ไปเลน news (อยู่ยาว) ครั้งแรกของซีซั่นเท่านั้น
       const nf = towerNewsFloor(prevBest, nextBest)
       syncRosterRow({ event: (nf && nf !== TOWER_MAX) ? { k: 'tw', v: nf, t: Date.now() } : null })
-      if (prevBest < TOWER_MAX && nextBest >= TOWER_MAX) postNews({ type: 'tower100', icon: '🏰', msg: `${myName()} พิชิตหอคอยชั้น ${TOWER_MAX} สำเร็จ` })
+      if (post100) postNews({ type: 'tower100', icon: '🏰', msg: `${myName()} พิชิตหอคอยชั้น ${TOWER_MAX} สำเร็จ` })
     }
     return { result, botTeam: bots, playerTeam: players, won, cleared, commit }
   }

@@ -16,6 +16,7 @@
       <div v-if="ev.story" class="ev-story">
         <div class="ev-story-h"><Emoji char="🧙‍♀️" /> คำขอจากแม่มดใจดี</div>
         <p v-for="(line, i) in ev.story" :key="i">{{ line }}</p>
+        <div v-if="given !== null" class="ev-given">ทั้งรุ่นส่ง<Emoji :char="ev.pt" />ให้แม่มดแล้ว <b>{{ given.toLocaleString() }}</b> ลูก</div>
       </div>
 
       <div class="ev-how">
@@ -86,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { increment } from 'firebase/firestore'
 import Emoji from '../components/shared/Emoji.vue'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
@@ -102,6 +103,8 @@ import { useRosterSync } from '../composables/useRosterSync.js'
 import { avatarUrl, fallbackAvatar } from '../utils/avatar.js'
 import { sfx } from '../utils/sfx.js'
 import { grantSecret } from '../composables/useAchievements.js'
+import { fetchGlobalStats, bumpEventGive } from '../composables/useGlobalStats.js'
+import { evGiveMilestone } from '../utils/newsFeed.js'
 
 // ของแต่งตัวราคาตั้งแต่นี้ขึ้นกระดานข่าวตอนแลก (user: เอาเฉพาะของแพง) = ผีน้อยลอยวน 210 · ราชาฟักทอง 250
 const NEWS_MIN_PK = 200
@@ -112,6 +115,23 @@ const { confirm } = useConfirm()
 const { syncRosterRow } = useRosterSync()
 
 const ev = activeEvent()
+
+// 🎃 ยอดรวมรุ่นที่ส่งให้แม่มด (stats/global.evGive) — อ่านครั้งเดียวตอนเปิดหน้า · แลกแล้วเขียน+อ่านกลับ
+const given = ref(null)
+onMounted(async () => {
+  if (!ev) return
+  const g = await fetchGlobalStats()
+  given.value = Number(g.evGive?.[ev.id]) || 0
+})
+/** นับยอดรวมรุ่น + ข้ามหมุด (evGiveMilestone) ⇒ ข่าวกระดานแบบไม่ระบุชื่อ · ไม่ await จากฝั่งเรียก */
+function giveToWitch(n) {
+  bumpEventGive(ev.id, n).then(r => {
+    if (!r) return
+    given.value = r.after
+    const m = evGiveMilestone(r.before, r.after)
+    if (m) syncRosterRow({ event: { k: 'ew', v: m, t: Date.now() } })
+  })
+}
 const selected = ref(null)
 const busy = ref(false)
 
@@ -160,6 +180,7 @@ async function doRedeem() {
   if (!done) { toast('แลกไม่สำเร็จ', 'error'); return }
   sfx('coin')
   toast(it.type === 'cos' ? `ได้ "${it.label}" แล้ว ใส่ให้เลย` : `ได้ ${it.label} 1 ชิ้น`, 'success')
+  giveToWitch(it.price)
   if (it.type === 'cos') {
     // ของแพงขึ้นกระดานข่าว (เกาะ write แถว roster ที่ต้องทำอยู่แล้ว · 0 write เพิ่ม)
     syncRosterRow(it.price >= NEWS_MIN_PK ? { event: { k: 'eb', v: it.id, t: Date.now() } } : {})
@@ -174,6 +195,7 @@ async function doExchange() {
   // ⚠️ หยิบค่าก่อน patchUser (CLAUDE.md ข้อ 9)
   const r = exchangePatch(auth.userData, ev, exN.value)
   if (!r.ok) return
+  const amt = r.coins / ev.coinRate
   const ok = await confirm(`แลก ${exN.value} ${ev.ptName} เป็น ${r.coins.toLocaleString()} เหรียญ?`)
   if (!ok) return
   busy.value = true
@@ -185,6 +207,7 @@ async function doExchange() {
   if (!done) { toast('แลกไม่สำเร็จ', 'error'); return }
   sfx('coin')
   toast(`ได้ ${r.coins.toLocaleString()} เหรียญ`, 'success')
+  giveToWitch(amt)
 }
 
 async function doWear() {
@@ -209,6 +232,8 @@ async function doWear() {
 .ev-story-h { position: relative; z-index: 1; font-weight: 800; font-size: .95rem; margin-bottom: 6px; color: #fed7aa; }
 .ev-story p { position: relative; z-index: 1; margin: 0 0 6px; font-size: .82rem; line-height: 1.65; }
 .ev-story p:last-child { margin-bottom: 0; font-weight: 700; color: #fff; }
+.ev-given { position: relative; z-index: 1; margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(254, 215, 170, .4); font-size: .8rem; color: #fed7aa; }
+.ev-given b { color: #fff; font-size: .95rem; }
 .ev-how { background: linear-gradient(120deg, #fed7aa, #ddd6fe); border-radius: 18px; padding: 12px 14px; font-size: .84rem; line-height: 1.6; color: #2b1f3d; display: flex; flex-direction: column; gap: 2px; }
 .ev-end { font-size: .74rem; color: #4c3a63; }
 .ev-gos { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
