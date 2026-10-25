@@ -134,13 +134,13 @@ export default {
       "q": "ผลข้างเคียงใดเสี่ยงพบได้จาก colchicine",
       "o": [
         "Rhabdomyolysis",
-        "Neuropathy",
-        "GI bleeding",
-        "Liver function abnormalities",
+        "Hyperkalemia",
+        "Hypoglycemia",
+        "Hypertension",
         "ถูกทุกข้อ"
       ],
       "a": 0,
-      "e": "พบได้โดยเฉพาะเมื่อใช้ร่วม simvastatin"
+      "e": "Colchicine ทำให้เกิด myopathy/rhabdomyolysis ได้ โดยเฉพาะเมื่อใช้ร่วมกับ statin (เช่น simvastatin) หรือยายับยั้ง CYP3A4/P-gp และในผู้ป่วยไตเสื่อม · ตัวเลือกอื่นไม่ใช่อาการไม่พึงประสงค์ของ colchicine (ปรับตัวเลือกเพราะเดิม neuropathy ก็เป็น ADR ได้จริง ทำให้มีคำตอบถูกมากกว่าหนึ่ง)"
     }
   ],
 }

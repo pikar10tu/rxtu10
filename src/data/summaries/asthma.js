@@ -168,7 +168,8 @@ export default {
         "ให้ antibiotic",
         "หยุด propranolol"
       ],
-      "a": 0
+      "a": 3,
+      "e": "🤖 ปรับแก้โดย AI: Propranolol เป็น non-selective beta-blocker ปิดกั้น β2 ที่หลอดลม ทำให้หลอดลมหดเกร็งและลดผลของ β2-agonist เป็นสาเหตุที่ควรแก้ก่อนในผู้ป่วยที่ admit บ่อย จึงควรหยุด propranolol (ถ้าจำเป็นต้องใช้ beta-blocker ให้เลือก cardioselective ขนาดต่ำ) (เดิมเฉลย: เพิ่ม tiotropium)"
     }
   ],
 }
