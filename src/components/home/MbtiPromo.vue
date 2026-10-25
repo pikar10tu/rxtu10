@@ -1,9 +1,10 @@
 <!-- ป้ายชวนตั้ง MBTI (user 25 ต.ค. 2026) — แถวเล็กใต้แบนเนอร์อีเวนต์บน Home
-     หายเองเมื่อรับรางวัลเควสแล้ว (mbtiQuest = true · ตั้งครั้งแรกได้รางวัลทันทีใน MbtiPicker) -->
+     โชว์เมื่อยังไม่มี MBTI (ลบออกก็กลับมา) · รางวัลมีแค่ครั้งแรก (mbtiQuest) ⇒ รับแล้วไม่บอกรางวัล -->
 <template>
-  <RouterLink v-if="auth.isLoggedIn && auth.userData && !auth.userData.mbtiQuest" to="/me#mbti" class="mbp">
+  <RouterLink v-if="auth.isLoggedIn && auth.userData && !auth.userData.mbti" to="/me#mbti" class="mbp">
     <span class="mbp-ic"><Emoji char="🧠" /></span>
-    <span class="mbp-txt">ตั้ง MBTI ในโปรไฟล์ รับ {{ MBTI_QUEST_COINS.toLocaleString() }} <Emoji char="🪙" /></span>
+    <span v-if="!auth.userData.mbtiQuest" class="mbp-txt">ตั้ง MBTI ในโปรไฟล์ รับ {{ MBTI_QUEST_COINS.toLocaleString() }} <Emoji char="🪙" /></span>
+    <span v-else class="mbp-txt">ยังไม่ได้ตั้ง MBTI ในโปรไฟล์</span>
     <span class="mbp-go">ไปตั้ง ›</span>
   </RouterLink>
 </template>
