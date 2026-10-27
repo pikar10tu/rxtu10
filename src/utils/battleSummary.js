@@ -17,7 +17,8 @@ export function computeBattleSummary(log, playerTeam, botTeam) {
   //    🔴 วันไหนมีคนใส่ดาเมจจริงลงใบ silent เลขในหน้าสรุปจะขยับเงียบๆ — มีเทสตรึงไว้ในไฟล์เทสแล้ว
   for (const e of log || []) {
     if (e.t !== 'attack') continue
-    const a = units[e.attacker], t = units[e.target]
+    // 👽 หมัดควบคุมจิตใจ: คนตีบนจอ = ตัวที่ถูกควบคุม แต่เครดิตดาเมจ/การฆ่าเป็นของเอเลี่ยน (e.credit)
+    const a = units[e.credit || e.attacker], t = units[e.target]
     if (a) { a.dmgDealt += e.dmg || 0; if (e.dead) a.kills += 1 }
     if (t) { t.dmgTaken += e.dmg || 0; if (e.dead) t.dead = true }
   }

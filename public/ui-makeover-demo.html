@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RxTU10 — Fluent 3D Asset Suite (45 บ้าน 3D + 42 ของตกแต่งโปรไฟล์ 3D)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f3fd;
+      --surface: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: rgba(43, 53, 80, 0.12);
+      --primary: #7c3aed;
+      --gold: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #f3e8ff 0%, #eef8fd 50%, #ecfdf6 100%) fixed;
+      color: var(--text);
+      padding: 20px 16px 70px;
+      min-height: 100vh;
+    }
+
+    /* ── Header & Controls ── */
+    .demo-header {
+      max-width: 1080px;
+      margin: 0 auto 16px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border: 2px solid #fff;
+      border-radius: 24px;
+      padding: 18px 22px;
+      box-shadow: 0 12px 30px rgba(30, 27, 75, 0.08);
+    }
+    .demo-title h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1e1b4b;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .demo-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 999px;
+      box-shadow: 0 3px 0 #5b21b6, inset 0 1.5px 0 rgba(255,255,255,0.45);
+    }
+    .demo-sub {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Section Tabs */
+    .demo-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 12px;
+    }
+    .tab-btn {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      color: #475569;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #cbd5e1, inset 0 1px 0 #fff;
+      transition: transform 0.1s;
+    }
+    .tab-btn:active { transform: translateY(2px); }
+    .tab-btn.active {
+      background: linear-gradient(180deg, #6366f1 0%, #4338ca 100%);
+      color: #fff;
+      border-color: #3730a3;
+      box-shadow: 0 3px 0 #312e81, 0 6px 14px rgba(67, 56, 202, 0.28), inset 0 1.5px 0 rgba(255,255,255,0.4);
+    }
+
+    /* Interactive Control Bar */
+    .ctrl-bar {
+      max-width: 1080px;
+      margin: 0 auto 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 2px solid #fff;
+      border-radius: 20px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .ctrl-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #334155;
+      margin-right: 4px;
+    }
+    .lvl-pill {
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      color: #334155;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #cbd5e1, inset 0 1px 0 #fff;
+    }
+    .lvl-pill.active {
+      background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%);
+      color: #fff;
+      border-color: #b45309;
+      text-shadow: 0 1px 2px rgba(120, 53, 15, 0.5);
+      box-shadow: 0 2.5px 0 #b45309, 0 4px 10px rgba(245, 158, 11, 0.35);
+    }
+    .var-pill {
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid #c084fc;
+      background: #faf5ff;
+      color: #6b21a8;
+      cursor: pointer;
+    }
+    .var-pill.active {
+      background: linear-gradient(180deg, #a855f7, #7c3aed);
+      color: #fff;
+      border-color: #581c87;
+      box-shadow: 0 2.5px 0 #581c87;
+    }
+
+    /* ── Phone Comparison Grid ── */
+    .compare-grid {
+      max-width: 1080px;
+      margin: 0 auto 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+    .phone-col {
+      background: #f6f3fd;
+      border-radius: 30px;
+      border: 4px solid #fff;
+      box-shadow: 0 14px 34px rgba(30, 27, 75, 0.12), 0 0 0 1px rgba(43, 53, 80, 0.1);
+      overflow: hidden;
+    }
+    .phone-col.after-col {
+      box-shadow: 0 20px 44px rgba(124, 58, 237, 0.22), 0 0 0 2.5px #a855f7;
+    }
+    .col-banner {
+      padding: 11px 16px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .col-banner.before { background: #e2e8f0; color: #475569; }
+    .col-banner.after {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed, #db2777);
+      color: #fff;
+    }
+    .col-tag {
+      font-size: 0.7rem;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.22);
+    }
+    .before .col-tag { background: rgba(15,23,42,0.08); color: #334155; }
+
+    .phone-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sec-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: -4px;
+    }
+    .sec-label span.file-ref {
+      font-family: monospace;
+      font-size: 0.7rem;
+      background: rgba(15,23,42,0.06);
+      padding: 1px 6px;
+      border-radius: 5px;
+      color: #475569;
+    }
+    .fluent-em {
+      width: 1.25em; height: 1.25em;
+      vertical-align: -0.22em; object-fit: contain;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       1. RESIDENCE CARD
+       ═══════════════════════════════════════════════════════════ */
+    .res-card-before {
+      background: #fff; border: 1.5px solid #cbd5e1;
+      border-radius: 16px; padding: 13px 14px;
+    }
+    .rc-top { display: flex; align-items: center; gap: 12px; }
+    .rc-art-before {
+      width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem; position: relative;
+    }
+    .rc-lv {
+      position: absolute; bottom: -5px; right: -5px;
+      font-size: 0.7rem; font-weight: 800; color: #fff;
+      background: #f59e0b; padding: 1px 6px; border-radius: 999px;
+      border: 1.5px solid #fff;
+    }
+    .rc-info { flex: 1; min-width: 0; }
+    .rc-label { font-size: 0.7rem; font-weight: 700; color: #64748b; }
+    .rc-name { font-size: 0.96rem; font-weight: 800; color: #0f172a; }
+    .rc-perks { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .rc-perk {
+      font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+      background: #f1f5f9; color: #334155;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .rc-perk.gold { background: #fef3c7; color: #92400e; }
+    .rc-perk.green { background: #dcfce7; color: #166534; }
+    .rc-progress { margin-top: 10px; height: 7px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .rc-progress-fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
+    .rc-up-btn {
+      margin-top: 10px; width: 100%; padding: 9px 12px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
+      font-family: inherit; font-size: 0.78rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    }
+
+    .res-card-after {
+      background: #fff; border-radius: 22px; overflow: hidden;
+      border: 2px solid #fff;
+      box-shadow: 0 10px 24px rgba(30, 27, 75, 0.1), 0 3px 0 #cbd5e1;
+    }
+    .res-banner-wrap {
+      position: relative; height: 185px; overflow: hidden; background: #1e1b4b;
+    }
+    .res-banner-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: center 45%;
+    }
+    .res-banner-scrim {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.38) 0%, rgba(15, 23, 42, 0) 42%, rgba(15, 23, 42, 0.86) 100%);
+    }
+    .res-banner-content {
+      position: relative; z-index: 2; height: 100%; padding: 11px 14px;
+      display: flex; flex-direction: column; justify-content: space-between; color: #fff;
+    }
+    .res-tier-top { display: flex; align-items: center; justify-content: space-between; }
+    .res-tier-chip {
+      font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.58); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    .res-tier-lv-badge {
+      font-size: 0.72rem; font-weight: 900; padding: 3px 11px; border-radius: 999px;
+      background: linear-gradient(180deg, #fde047 0%, #f59e0b 65%, #d97706 100%);
+      color: #451a03; border: 1.5px solid #fff;
+      box-shadow: 0 3px 0 #92400e;
+    }
+    .res-banner-title { font-size: 1.12rem; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.85); }
+    .res-banner-sub { font-size: 0.72rem; color: #fde68a; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.85); }
+    .res-after-body { padding: 12px 14px 14px; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); }
+    .rc-perk-3d {
+      font-size: 0.7rem; font-weight: 800; padding: 3px 9px; border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+      border: 1px solid #cbd5e1; box-shadow: 0 2px 0 #cbd5e1; color: #334155;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .rc-perk-3d.gold {
+      background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
+      border-color: #f59e0b; box-shadow: 0 2px 0 #d97706; color: #78350f;
+    }
+    .rc-up-btn-3d {
+      margin-top: 11px; width: 100%; padding: 10px 14px;
+      border: 1.5px solid #6d28d9; border-radius: 14px;
+      background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+      color: #fff; font-family: inherit; font-size: 0.8rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+      box-shadow: 0 4px 0 #4c1d95;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       2. PROFILE & COSMETICS CARD (MeView.vue Before vs After)
+       ═══════════════════════════════════════════════════════════ */
+    .me-card-before {
+      position: relative; overflow: hidden;
+      border-radius: 20px; padding: 18px 14px 14px;
+      background: linear-gradient(165deg, #fce7f3 0%, #ffffff 55%);
+      border: 2px solid #f472b6;
+      text-align: center;
+    }
+    .me-av-before-wrap {
+      position: relative; width: 78px; height: 78px; margin: 0 auto 8px;
+      border-radius: 50%; padding: 3px;
+      background: linear-gradient(135deg, #f472b6, #a855f7);
+    }
+    .me-av-img {
+      width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+      background: #fff; border: 2px solid #fff;
+    }
+    .me-deco-old { position: absolute; font-size: 0.95rem; pointer-events: none; }
+    .me-nick-row {
+      font-size: 1.05rem; font-weight: 900; color: #1e1b4b;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .me-title-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 5px; padding: 3px 11px; border-radius: 999px;
+      background: #fef3c7; border: 1px solid #f59e0b;
+      font-size: 0.72rem; font-weight: 800; color: #92400e;
+    }
+
+    /* AFTER: Profile Card with 3D Frame, 3D Scenic Background & 3D Badges */
+    .me-card-after {
+      position: relative; overflow: hidden;
+      border-radius: 24px; padding: 22px 14px 14px;
+      background: #fff;
+      border: 2.5px solid #fff;
+      box-shadow: 0 12px 28px rgba(124, 58, 237, 0.16), 0 4px 0 #cbd5e1;
+      text-align: center;
+    }
+    .me-3d-bg {
+      position: absolute; top: 0; left: 0; right: 0; height: 152px;
+      width: 100%; object-fit: cover; z-index: 0;
+    }
+    .me-3d-bg-fade {
+      position: absolute; top: 0; left: 0; right: 0; height: 156px; z-index: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0) 45%, #ffffff 100%);
+    }
+    .me-hero-after { position: relative; z-index: 2; }
+    .me-av-3d-wrap {
+      position: relative; width: 114px; height: 114px;
+      margin: 0 auto 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .me-av-3d-photo {
+      width: 66px; height: 66px; border-radius: 50%;
+      object-fit: cover; background: #fffbeb;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .me-av-3d-frame {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; pointer-events: none;
+      filter: drop-shadow(0 5px 8px rgba(15, 23, 42, 0.28));
+    }
+    .me-badge-3d {
+      width: 26px; height: 26px; object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.22));
+    }
+    .me-showcase-row {
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+    }
+    .me-trophy-slot {
+      background: linear-gradient(180deg, #fefce8 0%, #fef3c7 100%);
+      border: 1.5px solid #fde047; border-radius: 14px;
+      padding: 4px 9px; display: flex; align-items: center; gap: 5px;
+      font-size: 0.7rem; font-weight: 800; color: #78350f;
+      box-shadow: 0 2.5px 0 #eab308;
+    }
+
+    /* Mix & Match Customizer Controls inside Profile Card */
+    .mix-box {
+      margin-top: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .mix-row {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+      margin-bottom: 6px;
+    }
+    .mix-row:last-child { margin-bottom: 0; }
+    .mix-lbl { font-size: 0.7rem; font-weight: 800; color: #475569; min-width: 68px; }
+    .mix-btn {
+      font-family: inherit; font-size: 0.7rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 999px;
+      border: 1px solid #cbd5e1; background: #fff; color: #334155;
+      cursor: pointer;
+    }
+    .mix-btn.active {
+      background: #7c3aed; color: #fff; border-color: #5b21b6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       3. PET THUMB & GACHA
+       ═══════════════════════════════════════════════════════════ */
+    .pet-showcase-card {
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 12px 14px;
+    }
+    .pet-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; margin-top: 10px; }
+    .ptc-before {
+      position: relative; aspect-ratio: 1; border-radius: 12px;
+      background: rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center;
+      border: 2px solid #cbd5e1;
+    }
+    .ptc-before .ptc-face img { width: 34px; height: 34px; }
+    .ptc-before .ptc-el img { width: 14px; height: 14px; }
+    .ptc-before .ptc-el { position: absolute; top: 3px; left: 4px; }
+    .ptc-before .ptc-gr {
+      position: absolute; top: -5px; right: -5px; background: #1e293b; color: #fff;
+      font-size: 0.7rem; font-weight: 800; padding: 0 5px; border-radius: 999px; border: 1.5px solid #fff;
+    }
+    .ptc-before .ptc-atk, .ptc-before .ptc-hp {
+      position: absolute; bottom: 2px; font-size: 0.7rem; font-weight: 800;
+      color: #fff; padding: 1px 4px; border-radius: 999px; line-height: 1.2;
+    }
+    .ptc-before .ptc-atk { left: 2px; background: #f59e0b; }
+    .ptc-before .ptc-hp { right: 2px; background: #dc2626; }
+
+    .ptc-after {
+      position: relative; aspect-ratio: 1; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ptc-after.r-common {
+      background: radial-gradient(circle at 35% 25%, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%);
+      border: 2.5px solid #94a3b8;
+      box-shadow: 0 5px 0 #64748b, inset 0 2.5px 2px #ffffff;
+    }
+    .ptc-after.r-rare {
+      background: radial-gradient(circle at 35% 25%, #eff6ff 0%, #93c5fd 68%, #3b82f6 100%);
+      border: 2.5px solid #2563eb;
+      box-shadow: 0 5px 0 #1d4ed8, inset 0 2.5px 3px rgba(255,255,255,0.9);
+    }
+    .ptc-after.r-epic {
+      background: radial-gradient(circle at 35% 25%, #faf5ff 0%, #d8b4fe 62%, #9333ea 100%);
+      border: 2.5px solid #7e22ce;
+      box-shadow: 0 5px 0 #581c87, inset 0 2.5px 3px rgba(255,255,255,0.9);
+    }
+    .ptc-after.r-legendary {
+      background: radial-gradient(circle at 35% 25%, #fefce8 0%, #fde047 50%, #f59e0b 90%, #d97706 100%);
+      border: 2.5px solid #b45309;
+      box-shadow: 0 5px 0 #92400e, 0 6px 16px rgba(245,158,11,0.4), inset 0 3px 4px #ffffff;
+    }
+    .ptc-pedestal-3d {
+      position: absolute; bottom: 11px; width: 68%; height: 15px; border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(148,163,184,0.5) 100%);
+      box-shadow: 0 3px 0 rgba(15,23,42,0.22);
+    }
+    .ptc-after .ptc-face { position: relative; z-index: 2; transform: translateY(-4px); filter: drop-shadow(0 5px 4px rgba(15,23,42,0.25)); }
+    .ptc-after .ptc-face img { width: 42px; height: 42px; display: block; }
+    .ptc-after .ptc-el { position: absolute; top: -6px; left: -6px; z-index: 3; width: 24px; height: 24px; }
+    .ptc-after .ptc-el img { width: 100%; height: 100%; }
+    .ptc-after .ptc-gr {
+      position: absolute; top: -6px; right: -6px; z-index: 3;
+      background: linear-gradient(180deg, #4338ca 0%, #1e1b4b 100%);
+      color: #fde047; font-size: 0.7rem; font-weight: 900; padding: 1px 6px; border-radius: 999px; border: 1.5px solid #fbbf24;
+    }
+    .ptc-after .ptc-atk, .ptc-after .ptc-hp {
+      position: absolute; bottom: -6px; z-index: 3; font-size: 0.7rem; font-weight: 900; color: #fff;
+      padding: 1px 6px; border-radius: 999px; border: 1.5px solid #fff;
+    }
+    .ptc-after .ptc-atk { left: -3px; background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 2px 0 #92400e; }
+    .ptc-after .ptc-hp { right: -3px; background: linear-gradient(180deg, #f87171 0%, #dc2626 100%); box-shadow: 0 2px 0 #991b1b; }
+
+    /* Gacha */
+    .gb-before {
+      position: relative; overflow: hidden; border-radius: 16px; padding: 14px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 52%, #e0e7ff 100%);
+      border: 1.5px solid #f5d0fe;
+    }
+    .gb-before-top { display: flex; align-items: center; gap: 12px; }
+    .mm-css { width: 46px; display: flex; flex-direction: column; align-items: center; }
+    .mm-dome { width: 40px; height: 28px; border-radius: 22px 22px 6px 6px; background: rgba(255,255,255,0.8); border: 2px solid #f59e0b; }
+    .mm-body { width: 34px; height: 18px; background: #ec4899; border-radius: 3px 3px 7px 7px; border: 2px solid #be185d; border-top: none; }
+
+    .gb-after {
+      position: relative; overflow: hidden; border-radius: 22px;
+      background: linear-gradient(135deg, #fffbeb 0%, #fce7f3 48%, #ede9fe 100%);
+      border: 2px solid #fff; box-shadow: 0 10px 24px rgba(124, 58, 237, 0.16), 0 4px 0 #d8b4fe;
+      padding: 14px;
+    }
+    .gb-after-top { display: flex; align-items: center; gap: 12px; }
+    .gb-3d-machine { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(109, 40, 217, 0.22)); }
+    .gb-theme-pill {
+      display: inline-flex; font-size: 0.7rem; font-weight: 800;
+      background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%);
+      padding: 2px 10px; border-radius: 999px; color: #fff; margin-bottom: 4px;
+    }
+    .door-preview-box {
+      margin-top: 12px; border-radius: 16px; overflow: hidden; height: 132px;
+      position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .door-before { background: radial-gradient(circle, #2e1065, #0f0722 70%); border: 1px solid #4c1d95; }
+    .cr-stage-before { width: 68px; height: 92px; position: relative; }
+    .cr-door-css { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(180deg, #4c1d95, #1e1b4b); border: 1.5px solid #a78bfa; transition: transform 0.55s ease; }
+    .cr-door-css.L { left: 0; border-radius: 8px 0 0 8px; }
+    .cr-door-css.R { right: 0; border-radius: 0 8px 8px 0; }
+    .door-open .cr-door-css.L { transform: translateX(-80%); }
+    .door-open .cr-door-css.R { transform: translateX(80%); }
+
+    .door-after { background: radial-gradient(circle, #fef08a 0%, #a855f7 38%, #1e1b4b 85%); border: 2px solid #fbbf24; }
+    .cr-stage-3d { width: 128px; height: 128px; position: relative; }
+    .cr-door-3d { position: absolute; top: 2px; height: 124px; width: 62px; object-fit: cover; transition: transform 0.6s cubic-bezier(.2, .9, .25, 1.1); }
+    .cr-door-3d.L { left: 2px; object-position: left center; }
+    .cr-door-3d.R { right: 2px; object-position: right center; }
+    .door-open .cr-door-3d.L { transform: translateX(-82%) rotate(-4deg); }
+    .door-open .cr-door-3d.R { transform: translateX(82%) rotate(4deg); }
+    .door-hint {
+      position: absolute; bottom: 6px; right: 8px; z-index: 5; font-size: 0.7rem; font-weight: 800;
+      background: rgba(15, 23, 42, 0.7); color: #fde68a; padding: 2px 9px; border-radius: 999px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       4. CATALOG SECTIONS (42 Profile Cosmetics + 45 Residences)
+       ═══════════════════════════════════════════════════════════ */
+    .catalog-box {
+      max-width: 1080px;
+      margin: 0 auto 28px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #fff;
+      border-radius: 26px;
+      padding: 22px;
+      box-shadow: 0 14px 34px rgba(30, 27, 75, 0.08);
+    }
+    .cat-head {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .cos-cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .cos-cat-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .cos-cat-card:hover {
+      transform: translateY(-3px);
+      border-color: #a855f7;
+      box-shadow: 0 8px 18px rgba(124, 58, 237, 0.14);
+    }
+    .cos-cat-card img {
+      width: 92px; height: 92px; object-fit: contain;
+      margin: 0 auto 6px; display: block;
+      filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.15));
+    }
+    .cos-cat-card.bg-card img {
+      width: 100%; height: 76px; object-fit: cover; border-radius: 10px;
+    }
+    .cos-cat-name { font-size: 0.76rem; font-weight: 800; color: #1e1b4b; }
+    .cos-cat-file { font-family: monospace; font-size: 0.7rem; color: #7c3aed; margin-top: 2px; }
+
+    .cat-tier-row { margin-bottom: 22px; }
+    .cat-tier-title {
+      font-size: 0.95rem; font-weight: 800; color: #1e1b4b;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+    }
+    .cat-tier-title span.lv-tag {
+      background: #1e1b4b; color: #fff; font-size: 0.72rem;
+      padding: 2px 9px; border-radius: 999px;
+    }
+    .cat-3grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .cat-item {
+      background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 18px;
+      overflow: hidden; cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .cat-item:hover { transform: translateY(-3px); border-color: #a855f7; }
+    .cat-item img { width: 100%; height: 170px; object-fit: cover; display: block; }
+    .cat-item-foot {
+      padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.76rem; font-weight: 800; color: #334155;
+    }
+    .cat-path {
+      font-family: monospace; font-size: 0.7rem; color: #7c3aed;
+      background: #f3e8ff; padding: 2px 7px; border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="demo-header">
+    <div class="demo-title">
+      <h1>
+        <img class="fluent-em" src="emoji/fluent/2728.svg" alt="✨" style="width:28px;height:28px;">
+        RxTU10 — Fluent 3D Asset Suite (45 บ้าน 3D + 42 ของตกแต่งโปรไฟล์ 3D)
+        <span class="demo-badge">91 ไฟล์ WebP พร้อมใช้</span>
+      </h1>
+      <p class="demo-sub">งานอาร์ตสไตล์ <b>Microsoft Fluent 3D Emoji</b> ครบทั้ง <b>45 ฉากบ้าน (Lv.1–15 × A/B/C)</b> และ <b>42 ของตกแต่งโปรไฟล์ 3D (กรอบรูป 12 · พื้นการ์ด 12 · ป้ายชื่อ 12 · ตราตู้โชว์ 6)</b></p>
+    </div>
+    <div class="demo-tabs">
+      <button class="tab-btn active" onclick="filterSection('all', this)">🔥 ดูทั้งหมด (All-in-One)</button>
+      <button class="tab-btn" onclick="filterSection('cos-catalog', this)">🎀 แค็ตตาล็อกของตกแต่งโปรไฟล์ 3D (42 ชิ้น)</button>
+      <button class="tab-btn" onclick="filterSection('catalog', this)">🏠 แค็ตตาล็อกบ้านครบ 45 แบบ (Lv.1–15 × 3)</button>
+      <button class="tab-btn" onclick="filterSection('profile', this)">👤 ลองแต่งตัวโปรไฟล์ 3D (MeView)</button>
+      <button class="tab-btn" onclick="filterSection('residence', this)">🏡 การ์ดบ้าน (ResidenceCard)</button>
+    </div>
+  </header>
+
+  <!-- Interactive Switcher Bar -->
+  <div class="ctrl-bar" id="res-ctrl">
+    <div class="ctrl-row">
+      <span class="ctrl-label">🏠 เลือกเลเวลบ้าน (1–15):</span>
+      <div id="lv-buttons" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+    </div>
+    <div class="ctrl-row" style="justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span class="ctrl-label">🎨 สลับดูแบบบ้าน (3 Variants):</span>
+        <button class="var-pill active" id="var-a" onclick="setVariant('a')">แบบ A (Option A)</button>
+        <button class="var-pill" id="var-b" onclick="setVariant('b')">แบบ B (Option B)</button>
+        <button class="var-pill" id="var-c" onclick="setVariant('c')">แบบ C (Option C)</button>
+      </div>
+      <span id="current-file-indicator" style="font-family:monospace;font-size:0.75rem;font-weight:700;background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:8px;">ไฟล์ปัจจุบัน: public/residence-3d/lv6-a.webp</span>
+    </div>
+  </div>
+
+  <!-- Side-by-Side Phone Comparison -->
+  <main class="compare-grid" id="compare-main">
+
+    <!-- ═════════════════════════════════════════════
+         LEFT COLUMN: BEFORE (Current Production UI)
+         ═════════════════════════════════════════════ -->
+    <section class="phone-col before-col">
+      <div class="col-banner before">
+        <span>📱 BEFORE — หน้าตาปัจจุบันในแอป</span>
+        <span class="col-tag">Emoji + CSS ล้วน</span>
+      </div>
+
+      <div class="phone-body">
+
+        <!-- 1. Profile Cosmetics BEFORE -->
+        <div class="demo-sec" data-sec="profile">
+          <div class="sec-label"><span>การ์ดโปรไฟล์เดิม (อีโมจิแปะขอบ CSS)</span><span class="file-ref">MeView.vue + CosFrame</span></div>
+          <div class="me-card-before" style="margin-top:6px;">
+            <div class="me-av-before-wrap">
+              <img class="me-av-img" src="emoji/fluent/1f431.svg" alt="avatar">
+              <span class="me-deco-old" style="top:-8px;left:4px;transform:rotate(-20deg);">🔺</span>
+              <span class="me-deco-old" style="top:-8px;right:4px;transform:rotate(20deg);">🔺</span>
+              <span class="me-deco-old" style="bottom:-4px;right:-4px;">🌸</span>
+            </div>
+            <div class="me-nick-row">
+              <span>🌸</span>
+              <span>ภก.หมอซ่า ท้าหอคอย</span>
+            </div>
+            <div class="me-title-pill">🎖️ เศรษฐีพันล้านประจำรุ่น</div>
+            <div style="font-size:0.74rem;color:#64748b;margin-top:6px;">🏢 เซฟเฮาส์ตึกแถวรีโนเวท · Lv.6</div>
+          </div>
+        </div>
+
+        <!-- 2. Residence Card BEFORE -->
+        <div class="demo-sec" data-sec="residence">
+          <div class="sec-label"><span>ที่อยู่อาศัยเดิม (กล่อง 56×56px)</span><span class="file-ref">ResidenceCard.vue</span></div>
+          <div class="res-card-before" style="margin-top:6px;">
+            <div class="rc-top">
+              <div class="rc-art-before">
+                <span id="before-res-emoji">🏢</span>
+                <span class="rc-lv" id="before-res-lv">Lv.6</span>
+              </div>
+              <div class="rc-info">
+                <div class="rc-label">ที่อยู่อาศัย</div>
+                <div class="rc-name" id="before-res-name">เซฟเฮาส์ตึกแถวรีโนเวท</div>
+                <div class="rc-perks">
+                  <span class="rc-perk gold" id="before-res-inc">🪙 +5,000/วัน</span>
+                  <span class="rc-perk" id="before-res-plot">🌱 8 แปลง</span>
+                  <span class="rc-perk" id="before-res-egg">🥚 3 ฟอง</span>
+                  <span class="rc-perk green">🏪 ตลาดเปิด</span>
+                </div>
+              </div>
+            </div>
+            <div class="rc-progress"><div class="rc-progress-fill" id="before-res-bar" style="width:40%;background:#06b6d4;"></div></div>
+            <button class="rc-up-btn">
+              <span id="before-res-next">⬆️ อัปเป็นเลเวลถัดไป</span>
+              <span id="before-res-cost">🪙 32,000</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. PetThumb & Gacha BEFORE -->
+        <div class="demo-sec" data-sec="gacha">
+          <div class="sec-label"><span>การ์ดเพ็ท & ตู้กาชาเดิม</span><span class="file-ref">PetThumb + GachaBanner</span></div>
+          <div class="pet-showcase-card" style="margin-top:6px;">
+            <div class="pet-row">
+              <div class="ptc-before" style="border-color:#94a3b8;"><span class="ptc-el"><img src="elements/fist.webp" alt=""></span><span class="ptc-gr">I</span><span class="ptc-face"><img src="emoji/fluent/1f425.svg" alt=""></span><span class="ptc-atk">24</span><span class="ptc-hp">95</span></div>
+              <div class="ptc-before" style="border-color:#3b82f6;"><span class="ptc-el"><img src="elements/scissors.webp" alt=""></span><span class="ptc-gr">II</span><span class="ptc-face"><img src="emoji/fluent/1f98a.svg" alt=""></span><span class="ptc-atk">42</span><span class="ptc-hp">140</span></div>
+              <div class="ptc-before" style="border-color:#a855f7;"><span class="ptc-el"><img src="elements/paper.webp" alt=""></span><span class="ptc-gr">IV</span><span class="ptc-face"><img src="emoji/fluent/1f984.svg" alt=""></span><span class="ptc-atk">78</span><span class="ptc-hp">260</span></div>
+              <div class="ptc-before" style="border-color:#f59e0b;"><span class="ptc-el"><img src="elements/fist.webp" alt=""></span><span class="ptc-gr">V</span><span class="ptc-face"><img src="emoji/fluent/1f409.svg" alt=""></span><span class="ptc-atk">135</span><span class="ptc-hp">450</span></div>
+            </div>
+          </div>
+          <div class="gb-before" style="margin-top:10px;">
+            <div class="gb-before-top">
+              <div class="mm-css"><div class="mm-dome"></div><div class="mm-body"></div></div>
+              <div>
+                <div style="font-size:0.7rem;font-weight:800;color:#7c3aed;">✨ ตู้หมุนแคปซูล</div>
+                <div style="font-size:0.95rem;font-weight:900;">สุ่มเพ็ทเข้าบ้าน</div>
+              </div>
+            </div>
+            <div class="door-preview-box door-before" id="door-box-before" onclick="toggleDoors()">
+              <img src="emoji/fluent/1f409.svg" alt="🐉" style="width:40px;height:40px;">
+              <div class="cr-stage-before"><div class="cr-door-css L"></div><div class="cr-door-css R"></div></div>
+              <span class="door-hint">👆 คลิกเทียบประตูสุ่ม</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═════════════════════════════════════════════
+         RIGHT COLUMN: AFTER (Fluent 3D Clay Makeover)
+         ═════════════════════════════════════════════ -->
+    <section class="phone-col after-col">
+      <div class="col-banner after">
+        <span>✨ AFTER — สไตล์ Fluent 3D Emoji & Clay</span>
+        <span class="col-tag">42 โปรไฟล์ 3D + 45 บ้าน 3D</span>
+      </div>
+
+      <div class="phone-body">
+
+        <!-- 1. Profile Cosmetics AFTER (Mix & Match Studio) -->
+        <div class="demo-sec" data-sec="profile">
+          <div class="sec-label"><span>สตูดิโอแต่งโปรไฟล์ 3D (กดผสมกรอบ/พื้นหลัง/ป้ายได้ 42 ชิ้น!)</span><span class="file-ref">public/cosmetics-3d/</span></div>
+          <div class="me-card-after" style="margin-top:6px;">
+            <img id="me-3d-bg-img" class="me-3d-bg" src="cosmetics-3d/bg-rxlab.webp" alt="3D Profile Background">
+            <div class="me-3d-bg-fade"></div>
+
+            <div class="me-hero-after">
+              <div class="me-av-3d-wrap">
+                <img class="me-av-3d-photo" src="emoji/fluent/1f431.svg" alt="avatar">
+                <img id="me-3d-frame-img" class="me-av-3d-frame" src="cosmetics-3d/frame-rx-alchemist.webp" alt="3D Frame">
+              </div>
+
+              <div class="me-nick-row">
+                <img id="me-3d-badge-img" class="me-badge-3d" src="cosmetics-3d/badge-wingedpill.webp" alt="3D Badge">
+                <span>ภก.หมอซ่า ท้าหอคอย</span>
+              </div>
+
+              <div class="me-title-pill" style="background:linear-gradient(180deg,#fef9c3,#fde047);border-color:#f59e0b;box-shadow:0 2px 0 #d97706;">
+                <img class="me-badge-3d" src="cosmetics-3d/badge-emperorcrown.webp" alt="" style="width:18px;height:18px;">
+                เศรษฐีพันล้านประจำรุ่น
+              </div>
+
+              <div class="me-showcase-row">
+                <div class="me-trophy-slot">
+                  <img class="me-badge-3d" src="cosmetics-3d/emblem-arena.webp" alt="">
+                  <span>แชมป์ประลอง</span>
+                </div>
+                <div class="me-trophy-slot">
+                  <img class="me-badge-3d" src="cosmetics-3d/emblem-tower.webp" alt="">
+                  <span>ชั้น 100</span>
+                </div>
+                <div class="me-trophy-slot">
+                  <img class="me-badge-3d" src="cosmetics-3d/emblem-herb.webp" alt="">
+                  <span>เซียนสมุนไพร</span>
+                </div>
+              </div>
+
+              <!-- Mix & Match Controls -->
+              <div class="mix-box">
+                <div class="mix-row" id="mix-frames">
+                  <span class="mix-lbl">🖼️ กรอบรูป 3D:</span>
+                </div>
+                <div class="mix-row" id="mix-bgs">
+                  <span class="mix-lbl">🌈 พื้นการ์ด 3D:</span>
+                </div>
+                <div class="mix-row" id="mix-badges">
+                  <span class="mix-lbl">✨ ป้ายชื่อ 3D:</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Residence Card AFTER -->
+        <div class="demo-sec" data-sec="residence">
+          <div class="sec-label"><span>Idea B: บ้าน 3D Clay (ลองกดสลับ A / B / C ด้านบน)</span><span class="file-ref">public/residence-3d/</span></div>
+          <div class="res-card-after" style="margin-top:6px;">
+            <div class="res-banner-wrap">
+              <img id="after-res-img" class="res-banner-img" src="residence-3d/lv6-a.webp" alt="Residence 3D Diorama">
+              <div class="res-banner-scrim"></div>
+              <div class="res-banner-content">
+                <div class="res-tier-top">
+                  <span class="res-tier-chip" id="after-res-era">🏢 ยุคสร้างตัว · แบบ A</span>
+                  <span class="res-tier-lv-badge" id="after-res-lv">LEVEL 6 / 15</span>
+                </div>
+                <div>
+                  <div class="res-banner-sub">ที่อยู่อาศัยปัจจุบัน</div>
+                  <div class="res-banner-title" id="after-res-name">เซฟเฮาส์ตึกแถวรีโนเวท</div>
+                </div>
+              </div>
+            </div>
+            <div class="res-after-body">
+              <div class="rc-perks" style="margin-top:0;">
+                <span class="rc-perk-3d gold" id="after-res-inc"><img class="fluent-em" src="emoji/fluent/1fa99.svg" alt=""> +5,000/วัน</span>
+                <span class="rc-perk-3d" id="after-res-plot"><img class="fluent-em" src="emoji/fluent/1f331.svg" alt=""> 8 แปลง</span>
+                <span class="rc-perk-3d" id="after-res-egg"><img class="fluent-em" src="emoji/fluent/1f95a.svg" alt=""> 3 ฟอง</span>
+                <span class="rc-perk-3d"><img class="fluent-em" src="emoji/fluent/1f3ea.svg" alt=""> ตลาดเปิด</span>
+              </div>
+              <div class="rc-progress"><div class="rc-progress-fill" id="after-res-bar" style="width:40%;background:linear-gradient(90deg,#06b6d4,#6366f1);"></div></div>
+              <button class="rc-up-btn-3d">
+                <span id="after-res-next">⬆️ อัปเป็นเลเวลถัดไป</span>
+                <span id="after-res-cost">🪙 32,000</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. PetThumb & Gacha AFTER -->
+        <div class="demo-sec" data-sec="gacha">
+          <div class="sec-label"><span>กรอบเพ็ทนูน 3D + ตู้กาชาแคปซูล 3D</span><span class="file-ref">public/demo-3d/</span></div>
+          <div class="pet-showcase-card" style="margin-top:6px;background:linear-gradient(180deg,#ffffff,#faf5ff);">
+            <div class="pet-row">
+              <div class="ptc-after r-common"><div class="ptc-pedestal-3d"></div><span class="ptc-el"><img src="elements/fist.webp" alt=""></span><span class="ptc-gr">I</span><span class="ptc-face"><img src="emoji/fluent/1f425.svg" alt=""></span><span class="ptc-atk">24</span><span class="ptc-hp">95</span></div>
+              <div class="ptc-after r-rare"><div class="ptc-pedestal-3d"></div><span class="ptc-el"><img src="elements/scissors.webp" alt=""></span><span class="ptc-gr">II</span><span class="ptc-face"><img src="emoji/fluent/1f98a.svg" alt=""></span><span class="ptc-atk">42</span><span class="ptc-hp">140</span></div>
+              <div class="ptc-after r-epic"><div class="ptc-pedestal-3d"></div><span class="ptc-el"><img src="elements/paper.webp" alt=""></span><span class="ptc-gr">IV</span><span class="ptc-face"><img src="emoji/fluent/1f984.svg" alt=""></span><span class="ptc-atk">78</span><span class="ptc-hp">260</span></div>
+              <div class="ptc-after r-legendary"><div class="ptc-pedestal-3d"></div><span class="ptc-el"><img src="elements/fist.webp" alt=""></span><span class="ptc-gr">★V</span><span class="ptc-face"><img src="emoji/fluent/1f409.svg" alt=""></span><span class="ptc-atk">135</span><span class="ptc-hp">450</span></div>
+            </div>
+          </div>
+          <div class="gb-after" style="margin-top:10px;">
+            <div class="gb-after-top">
+              <img class="gb-3d-machine" src="demo-3d/gacha-machine.webp" alt="3D Gacha Machine">
+              <div>
+                <span class="gb-theme-pill">🌌 ตู้หมุนแคปซูล 3D · Pharmaverse</span>
+                <div style="font-size:1.02rem;font-weight:900;color:#3b0764;">สุ่มแคปซูลเพ็ทข้ามมิติ</div>
+              </div>
+            </div>
+            <div class="door-preview-box door-after" id="door-box-after" onclick="toggleDoors()">
+              <div style="text-align:center;">
+                <img src="emoji/fluent/1f409.svg" alt="🐉" style="width:54px;height:54px;filter:drop-shadow(0 0 14px #fbbf24);">
+                <div style="font-size:0.7rem;font-weight:900;color:#fef08a;">★ LEGENDARY BAHAMUT ★</div>
+              </div>
+              <div class="cr-stage-3d">
+                <img class="cr-door-3d L" src="demo-3d/door-left.webp" alt="Left 3D Door">
+                <img class="cr-door-3d R" src="demo-3d/door-right.webp" alt="Right 3D Door">
+              </div>
+              <span class="door-hint">👆 คลิกเปิดประตูคริสตัล 3D</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FULL 42 PROFILE COSMETICS CATALOG
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="catalog-box demo-sec" data-sec="cos-catalog" id="cos-catalog-section">
+    <div class="cat-head">
+      <div>
+        <h2 style="font-size:1.2rem;font-weight:900;color:#1e1b4b;">🎀 แค็ตตาล็อกของตกแต่งโปรไฟล์ 3D ทั้งหมด 42 ชิ้น (`public/cosmetics-3d/`)</h2>
+        <p style="font-size:0.82rem;color:#64748b;">คลิกที่ชิ้นไหนก็ได้เพื่อลองสวมใส่บนการ์ดโปรไฟล์ด้านบนทันที! ทุกชิ้นไดคัทพื้นหลังโปร่งใสเป็น <code>.webp</code> พร้อมใช้</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:10px;color:#4c1d95;">🖼️ 1. กรอบรูปโปรไฟล์ 3D (12 ไฟล์ · `320×320` Transparent WebP)</h3>
+    <div class="cos-cat-grid" id="cat-frames-grid"></div>
+
+    <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:10px;color:#4c1d95;">🌈 2. พื้นหลังหัวการ์ดโปรไฟล์ 3D (12 ไฟล์ · `640×360` WebP)</h3>
+    <div class="cos-cat-grid" id="cat-bgs-grid"></div>
+
+    <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:10px;color:#4c1d95;">✨ 3. ป้ายหน้าชื่อ & ตราเกียรติยศตู้โชว์ 3D (18 ไฟล์ · `256×256` Transparent WebP)</h3>
+    <div class="cos-cat-grid" id="cat-badges-grid"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FULL 45 RESIDENCE CATALOG (15 Levels × 3 Variants A, B, C)
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="catalog-box demo-sec" data-sec="catalog" id="catalog-section">
+    <div class="cat-head">
+      <div>
+        <h2 style="font-size:1.2rem;font-weight:900;color:#1e1b4b;">🏠 แค็ตตาล็อกภาพบ้าน 15 ระดับ × 3 แบบ (รวม 45 ไฟล์ WebP)</h2>
+        <p style="font-size:0.82rem;color:#64748b;">คลิกที่การ์ดใบไหนก็ได้เพื่อส่งขึ้นไปแสดงผลบนการ์ดตัวอย่างด้านบน · ไฟล์ทั้งหมดอยู่ที่ <code>public/residence-3d/lv{1..15}-{a|b|c}.webp</code></p>
+      </div>
+    </div>
+    <div id="catalog-container"></div>
+  </section>
+
+  <script>
+    const FRAMES = [
+      { id: 'frame-rx-alchemist', label: '🧪 เภสัชแปรธาตุ Rx' },
+      { id: 'frame-catsakura',    label: '🌸 หูแมวซากุระ' },
+      { id: 'frame-crown',        label: '👑 มงกุฎราชา' },
+      { id: 'frame-dragon',       label: '🐉 มังกรสวรรค์' },
+      { id: 'frame-star',         label: '⭐ ดาวตกพาสเทล' },
+      { id: 'frame-clover',       label: '🍀 โคลเวอร์นำโชค' },
+      { id: 'frame-bubble',       label: '🫧 ฟองสบู่ไข่มุก' },
+      { id: 'frame-rainbow',      label: '🌈 สายรุ้งปุยเมฆ' },
+      { id: 'frame-heaven',       label: '🪽 ปีกนางฟ้าสวรรค์' },
+      { id: 'frame-boba',         label: '🧋 ชานมไข่มุก' },
+      { id: 'frame-cyber',        label: '🎧 หูฟังเกมมิ่ง' },
+      { id: 'frame-phoenix',      label: '🔥 ขนนกฟีนิกซ์' },
+    ];
+
+    const BGS = [
+      { id: 'bg-rxlab',        label: '🧪 ห้องปรุงยาเภสัช' },
+      { id: 'bg-sakura',       label: '🌸 สวนเมฆซากุระ' },
+      { id: 'bg-sea',          label: '🪼 โลกใต้ทะเล' },
+      { id: 'bg-aurora',       label: '🌌 แสงเหนือออโรร่า' },
+      { id: 'bg-stars',        label: '🌙 ท้องฟ้าดูดาว' },
+      { id: 'bg-heaven',       label: '🏛️ วิมานสวรรค์' },
+      { id: 'bg-greenhouse',   label: '🌿 เรือนกระจกสมุนไพร' },
+      { id: 'bg-candycafe',    label: '🧁 คาเฟ่ขนมหวาน' },
+      { id: 'bg-cybercity',    label: '🌆 เมืองไซเบอร์' },
+      { id: 'bg-sunsetbeach',  label: '🏖️ ชายหาดยามเย็น' },
+      { id: 'bg-crystalcave',  label: '💎 ถ้ำคริสตัล' },
+      { id: 'bg-dragonthrone', label: '🪙 โถงสมบัติทองคำ' },
+    ];
+
+    const BADGES = [
+      { id: 'badge-wingedpill',   label: '💊 แคปซูลติดปีก' },
+      { id: 'badge-rxpotion',     label: '⚗️ โพชันโกร่งทอง' },
+      { id: 'badge-tube',         label: '🧪 หลอดทดลองเวท' },
+      { id: 'badge-rxchick',      label: '🐣 ลูกเจี๊ยบเภสัช' },
+      { id: 'badge-ribbonbow',    label: '🎀 โบว์หัวใจทอง' },
+      { id: 'badge-dango',        label: '🍡 ดังโงะซากุระ' },
+      { id: 'badge-unicorn',      label: '🦄 ยูนิคอร์นเขาทอง' },
+      { id: 'badge-soulfire',     label: '🔥 ลูกไฟวิญญาณ' },
+      { id: 'badge-prismgem',     label: '💎 เพชรปริซึมรุ้ง' },
+      { id: 'badge-diamondwing',  label: '🪽 เพชรติดปีกสวรรค์' },
+      { id: 'badge-emperorcrown', label: '👑 มงกุฎจักรพรรดิ' },
+      { id: 'trophy-dragon',      label: '🏆 ถ้วยมังกรทอง' },
+      { id: 'emblem-arena',       label: '⚔️ เหรียญประลอง' },
+      { id: 'emblem-tower',       label: '🏯 เหรียญหอคอย' },
+      { id: 'emblem-wealth',      label: '💠 เหรียญเศรษฐี' },
+      { id: 'emblem-scholar',     label: '🎓 เหรียญท็อปควิซ' },
+      { id: 'emblem-herb',        label: '🌱 เหรียญสมุนไพร' },
+      { id: 'emblem-secret',      label: '🪞 เหรียญกระจกลับ' },
+    ];
+
+    // Populate Mix & Match buttons + Cosmetics Catalog
+    const mixF = document.getElementById('mix-frames');
+    const catF = document.getElementById('cat-frames-grid');
+    FRAMES.forEach((f, idx) => {
+      const b = document.createElement('button');
+      b.className = 'mix-btn' + (idx === 0 ? ' active' : '');
+      b.textContent = f.label;
+      b.onclick = () => {
+        mixF.querySelectorAll('.mix-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('me-3d-frame-img').src = `cosmetics-3d/${f.id}.webp`;
+      };
+      mixF.appendChild(b);
+
+      const card = document.createElement('div');
+      card.className = 'cos-cat-card';
+      card.onclick = () => { b.click(); window.scrollTo({top:0,behavior:'smooth'}); };
+      card.innerHTML = `<img src="cosmetics-3d/${f.id}.webp" loading="lazy"><div class="cos-cat-name">${f.label}</div><div class="cos-cat-file">${f.id}.webp</div>`;
+      catF.appendChild(card);
+    });
+
+    const mixG = document.getElementById('mix-bgs');
+    const catG = document.getElementById('cat-bgs-grid');
+    BGS.forEach((g, idx) => {
+      const b = document.createElement('button');
+      b.className = 'mix-btn' + (idx === 0 ? ' active' : '');
+      b.textContent = g.label;
+      b.onclick = () => {
+        mixG.querySelectorAll('.mix-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('me-3d-bg-img').src = `cosmetics-3d/${g.id}.webp`;
+      };
+      mixG.appendChild(b);
+
+      const card = document.createElement('div');
+      card.className = 'cos-cat-card bg-card';
+      card.onclick = () => { b.click(); window.scrollTo({top:0,behavior:'smooth'}); };
+      card.innerHTML = `<img src="cosmetics-3d/${g.id}.webp" loading="lazy"><div class="cos-cat-name">${g.label}</div><div class="cos-cat-file">${g.id}.webp</div>`;
+      catG.appendChild(card);
+    });
+
+    const mixB = document.getElementById('mix-badges');
+    const catB = document.getElementById('cat-badges-grid');
+    BADGES.forEach((bd, idx) => {
+      const b = document.createElement('button');
+      b.className = 'mix-btn' + (idx === 0 ? ' active' : '');
+      b.textContent = bd.label;
+      b.onclick = () => {
+        mixB.querySelectorAll('.mix-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('me-3d-badge-img').src = `cosmetics-3d/${bd.id}.webp`;
+      };
+      mixB.appendChild(b);
+
+      const card = document.createElement('div');
+      card.className = 'cos-cat-card';
+      card.onclick = () => { b.click(); window.scrollTo({top:0,behavior:'smooth'}); };
+      card.innerHTML = `<img src="cosmetics-3d/${bd.id}.webp" loading="lazy"><div class="cos-cat-name">${bd.label}</div><div class="cos-cat-file">${bd.id}.webp</div>`;
+      catB.appendChild(card);
+    });
+
+    const ALL_TIERS = [
+      { level: 1,  era: '🪙 ยุคสู้ชีวิต', name: 'ปูหนังสือพิมพ์ริมทาง', emoji: '📰', inc: '+300/วัน', plot: '4 แปลง', egg: '2 ฟอง', cost: '🪙 700', descA: 'เสาไฟริมทาง + มาม่าคัพ + ตำราเภสัช', descB: 'ม้านั่งสวนสาธารณะ + ตะเกียง + โกร่งบดยา', descC: 'มุมตึกอิฐอบอุ่น + น้องแมวส้มนอนบนหมอน' },
+      { level: 2,  era: '🪙 ยุคสู้ชีวิต', name: 'เพิงกล่องกระดาษใต้สะพานลอย', emoji: '📦', inc: '+600/วัน', plot: '5 แปลง', egg: '2 ฟอง', cost: '🪙 1,800', descA: 'กล่องลังเดี่ยวใต้เสาสะพาน + ไฟประดับ', descB: 'ป้อมกล่องลัง 2 ชั้นปักธงใต้บันไดสะพานลอย', descC: 'เต็นท์ผ้าใบพาสเทลคลุมกล่องลัง + ชั้นหนังสือ' },
+      { level: 3,  era: '🪙 ยุคสู้ชีวิต', name: 'ห้องเช่ารูหนู', emoji: '🚪', inc: '+1,000/วัน', plot: '6 แปลง', egg: '2 ฟอง', cost: '🪙 4,000', descA: 'ห้องพาสเทลฟูกพื้น + พัดลม + โต๊ะอ่านหนังสือ', descB: 'ห้องเพดานลาด + ตู้เย็นมินิ + วิวตึกกลางคืน', descC: 'หอพักเตียงสองชั้น + โต๊ะคอมพิวเตอร์ใต้เตียง' },
+      { level: 4,  era: '🪙 ยุคสู้ชีวิต', name: 'ห้องแถวไม้เก่าท้ายซอย', emoji: '🏚️', inc: '+1,800/วัน', plot: '6 แปลง', egg: '3 ฟอง', cost: '🪙 8,000', descA: 'บ้านไม้ 2 ชั้นหลังคาสังกะสี + ตู้ไปรษณีย์แดง', descB: 'บ้านไม้หัวมุมประดับโคมไฟอบอุ่น + จักรยาน', descC: 'ห้องแถวไม้ประตูบานเฟี้ยมเปิดรับแสง + น้องหมาเฝ้าบ้าน' },
+      { level: 5,  era: '🏢 ยุคสร้างตัว', name: 'ห้องแบ่งเช่าใต้หลังคา', emoji: '🏠', inc: '+3,000/วัน', plot: '7 แปลง', egg: '3 ฟอง', cost: '🪙 16,000', descA: 'ห้องใต้หลังคาอิฐส้มหน้าต่างกลม + สวนดาดฟ้า', descB: 'ห้องใต้หลังคาสไตล์ยุโรปพาสเทล + ระเบียงจิบกาแฟ', descC: 'เคบินไม้บนดาดฟ้าตึก + กล้องดูดาว' },
+      { level: 6,  era: '🏢 ยุคสร้างตัว', name: 'เซฟเฮาส์ตึกแถวรีโนเวท', emoji: '🏢', inc: '+5,000/วัน', plot: '8 แปลง', egg: '3 ฟอง', cost: '🪙 32,000', descA: 'ตึกแถวมิ้นต์-ครีม กันสาดเขียวขาว + ป้ายไฟ Rx', descB: 'ตึกแถวโมเดิร์นลอฟต์สีกรมท่า + สวนสมุนไพรดาดฟ้า', descC: 'ตึกแถวหัวมุมสีชมพูพาสเทลสไตล์คาเฟ่บูทีค' },
+      { level: 7,  era: '🏢 ยุคสร้างตัว', name: 'คอนโด High-Rise ชั้นสูง', emoji: '🏙️', inc: '+8,000/วัน', plot: '8 แปลง', egg: '4 ฟอง', cost: '🪙 58,000', descA: 'คอนโดกระจกสูงเสียดฟ้า + สวนและลานจอด ฮ. ดาดฟ้า', descB: 'คอนโดตึกคู่เชื่อมสะพานลอยฟ้า + สระว่ายน้ำ Infinity', descC: 'ระเบียงห้องหัวมุมชั้นสูงชมวิวไฟเมืองยามค่ำคืน' },
+      { level: 8,  era: '🏢 ยุคสร้างตัว', name: 'ทาวน์โฮม 3 ชั้นในเมือง', emoji: '🏘️', inc: '+12,000/วัน', plot: '9 แปลง', egg: '4 ฟอง', cost: '🪙 105,000', descA: 'ทาวน์โฮมโมเดิร์นสีคราม-ขาว + รถเก๋งแดงจอดหน้าบ้าน', descB: 'ทาวน์โฮมนอร์ดิกหลังคาจั่วไม้ + ระเบียงต้นไม้ชั้น 3', descC: 'ทาวน์เฮาส์คลาสสิกยุโรป 3 ชั้น + เสาไฟวินเทจ' },
+      { level: 9,  era: '🏰 ยุคประสบความสำเร็จ', name: 'บ้านพักตากอากาศริมทะเล', emoji: '🏖️', inc: '+18,000/วัน', plot: '10 แปลง', egg: '4 ฟอง', cost: '🪙 190,000', descA: 'พูลวิลล่าโมเดิร์นสีขาวริมหาด + สระเทอร์ควอยซ์', descB: 'วิลล่าริมทะเลหลังคามุงจากสไตล์บาหลี + เฉลียงไม้', descC: 'บ้านพักริมทะเลสีคอรัลพาสเทลพร้อมท่าเทียบเรือใบ' },
+      { level: 10, era: '🏰 ยุคประสบความสำเร็จ', name: 'คฤหาสน์หรูพร้อมสระว่ายน้ำ', emoji: '🏛️', inc: '+26,000/วัน', plot: '10 แปลง', egg: '5 ฟอง', cost: '🪙 350,000', descA: 'คฤหาสน์เสาโรมันสีขาว-ลาเวนเดอร์ + น้ำพุและสระใหญ่', descB: 'คฤหาสน์โมเดิร์นกระจกทอง Beverly Hills + สระน้ำตก', descC: 'ชาโตว์ฝรั่งเศสหลังคาฟ้าพาสเทล + สวนน้ำพุหงส์' },
+      { level: 11, era: '🏰 ยุคประสบความสำเร็จ', name: 'เพนต์เฮาส์ลอยฟ้า', emoji: '🌆', inc: '+38,000/วัน', plot: '11 แปลง', egg: '5 ฟอง', cost: '🪙 650,000', descA: 'เพนต์เฮาส์โดมแก้วเหนือปุยเมฆ + สระว่ายน้ำลอยฟ้า', descB: 'เพนต์เฮาส์ไซเบอร์พังก์พาสเทล + ลานจอดเฮลิคอปเตอร์ส่วนตัว', descC: 'ยอดตึกทองคำ Art Deco เหนือเมฆยามเย็น + แชนเดอเลียร์' },
+      { level: 12, era: '🏰 ยุคประสบความสำเร็จ', name: 'คฤหาสน์บนเกาะส่วนตัว', emoji: '🏝️', inc: '+55,000/วัน', plot: '12 แปลง', egg: '6 ฟอง', cost: '🪙 1,100,000', descA: 'คฤหาสน์หลังคาทองคำบนเกาะส่วนตัว + เรือยอชต์', descB: 'เกาะสวรรค์น้ำตกและลากูนสีฟ้าใส + เครื่องบินทะเล', descC: 'วิลล่าบนเกาะภูเขาไฟเรืองแสง + สะพานแขวนข้ามเวิ้งอ่าว' },
+      { level: 13, era: '🚀 ยุคเหนือระดับ', name: 'คฤหาสน์ลอยตัวกลางมหาสมุทร', emoji: '🌊', inc: '+75,000/วัน', plot: '13 แปลง', egg: '7 ฟอง', cost: '🪙 1,900,000', descA: 'เกาะลอยน้ำทรงกลมสีไข่มุก-โรสโกลด์กลางทะเลเรืองแสง', descB: 'พีระมิดแก้วทองคำลอยน้ำพร้อมวงแหวนพลังงาน', descC: 'วิมานดอกบัวลอยน้ำพาสเทลพร้อมโดมคริสตัลและน้ำตก' },
+      { level: 14, era: '🚀 ยุคเหนือระดับ', name: 'มหานครใต้บาดาล', emoji: '🔱', inc: '+100,000/วัน', plot: '14 แปลง', egg: '7 ฟอง', cost: '🪙 3,200,000', descA: 'พระราชวังแอตแลนติสในโดมฟองอากาศยักษ์ + แมงกะพรุนเรืองแสง', descB: 'ปราสาทปะการังคริสตัลสีม่วง-ทอง + ปลากระเบนราหู', descC: 'มหานครอุโมงค์แก้วใต้น้ำล้ำยุค + เรือดำน้ำสีทอง' },
+      { level: 15, era: '🚀 ยุคเหนือระดับ (MAX)', name: 'สวนสวรรค์เหนือน่านฟ้า', emoji: '☁️', inc: '+140,000/วัน', plot: '15 แปลง', egg: '8 ฟอง', cost: 'MAX', descA: 'ปราสาทโดมทองคำบนปุยเมฆ + สะพานรุ้งพาสเทลและคริสตัล', descB: 'เกาะลอยฟ้าต้นไม้โลกสีทองอร่าม + น้ำตกสวรรค์', descC: 'วิมานโอลิมปัสวงแหวนทองคำ + สะพานแก้วและแสงออโรร่า' }
+    ];
+
+    let curLevel = 6;
+    let curVar = 'a';
+
+    const lvWrap = document.getElementById('lv-buttons');
+    ALL_TIERS.forEach(t => {
+      const b = document.createElement('button');
+      b.className = 'lvl-pill' + (t.level === curLevel ? ' active' : '');
+      b.id = 'btn-lv-' + t.level;
+      b.textContent = `Lv.${t.level} ${t.emoji}`;
+      b.title = t.name;
+      b.onclick = () => selectRes(t.level, curVar);
+      lvWrap.appendChild(b);
+    });
+
+    const catWrap = document.getElementById('catalog-container');
+    ALL_TIERS.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'cat-tier-row';
+      row.innerHTML = `
+        <div class="cat-tier-title">
+          <span class="lv-tag">Lv.${t.level}</span>
+          <span>${t.emoji} ${t.name}</span>
+          <small style="color:#64748b;font-weight:600;">(${t.inc} · ${t.plot} · ${t.egg})</small>
+        </div>
+        <div class="cat-3grid">
+          <div class="cat-item" onclick="selectRes(${t.level}, 'a'); window.scrollTo({top:0,behavior:'smooth'})">
+            <img src="residence-3d/lv${t.level}-a.webp" loading="lazy" alt="Lv.${t.level} A">
+            <div class="cat-item-foot">
+              <span><b>แบบ A:</b> ${t.descA}</span>
+              <span class="cat-path">lv${t.level}-a.webp</span>
+            </div>
+          </div>
+          <div class="cat-item" onclick="selectRes(${t.level}, 'b'); window.scrollTo({top:0,behavior:'smooth'})">
+            <img src="residence-3d/lv${t.level}-b.webp" loading="lazy" alt="Lv.${t.level} B">
+            <div class="cat-item-foot">
+              <span><b>แบบ B:</b> ${t.descB}</span>
+              <span class="cat-path">lv${t.level}-b.webp</span>
+            </div>
+          </div>
+          <div class="cat-item" onclick="selectRes(${t.level}, 'c'); window.scrollTo({top:0,behavior:'smooth'})">
+            <img src="residence-3d/lv${t.level}-c.webp" loading="lazy" alt="Lv.${t.level} C">
+            <div class="cat-item-foot">
+              <span><b>แบบ C:</b> ${t.descC}</span>
+              <span class="cat-path">lv${t.level}-c.webp</span>
+            </div>
+          </div>
+        </div>
+      `;
+      catWrap.appendChild(row);
+    });
+
+    function selectRes(lv, v) {
+      curLevel = lv;
+      curVar = v;
+      document.querySelectorAll('#lv-buttons .lvl-pill').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-lv-' + lv)?.classList.add('active');
+
+      ['a', 'b', 'c'].forEach(k => {
+        document.getElementById('var-' + k)?.classList.toggle('active', k === v);
+      });
+
+      const t = ALL_TIERS[lv - 1];
+      const nextT = ALL_TIERS[lv] || null;
+      const pct = Math.round((lv / 15) * 100);
+      const fileRel = `residence-3d/lv${lv}-${v}.webp`;
+
+      document.getElementById('current-file-indicator').textContent = `ไฟล์ปัจจุบัน: public/${fileRel}`;
+
+      document.getElementById('before-res-emoji').textContent = t.emoji;
+      document.getElementById('before-res-lv').textContent = 'Lv.' + t.level;
+      document.getElementById('before-res-name').textContent = t.name;
+      document.getElementById('before-res-inc').textContent = '🪙 ' + t.inc;
+      document.getElementById('before-res-plot').textContent = '🌱 ' + t.plot;
+      document.getElementById('before-res-egg').textContent = '🥚 ' + t.egg;
+      document.getElementById('before-res-next').textContent = nextT ? `⬆️ อัปเป็น ${nextT.name}` : '🏆 พิชิตระดับสูงสุดแล้ว!';
+      document.getElementById('before-res-cost').textContent = t.cost;
+      document.getElementById('before-res-bar').style.width = pct + '%';
+
+      document.getElementById('after-res-era').textContent = `${t.era} · แบบ ${v.toUpperCase()}`;
+      document.getElementById('after-res-lv').textContent = `LEVEL ${t.level} / 15`;
+      document.getElementById('after-res-name').textContent = t.name;
+      document.getElementById('after-res-img').src = fileRel;
+      document.getElementById('after-res-inc').innerHTML = `<img class="fluent-em" src="emoji/fluent/1fa99.svg" alt=""> ${t.inc}`;
+      document.getElementById('after-res-plot').innerHTML = `<img class="fluent-em" src="emoji/fluent/1f331.svg" alt=""> ${t.plot}`;
+      document.getElementById('after-res-egg').innerHTML = `<img class="fluent-em" src="emoji/fluent/1f95a.svg" alt=""> ${t.egg}`;
+      document.getElementById('after-res-next').textContent = nextT ? `⬆️ อัปเป็น ${nextT.name}` : '🏆 พิชิตระดับสูงสุดแล้ว!';
+      document.getElementById('after-res-cost').textContent = t.cost;
+      document.getElementById('after-res-bar').style.width = pct + '%';
+    }
+
+    function setVariant(v) {
+      selectRes(curLevel, v);
+    }
+
+    function toggleDoors() {
+      document.getElementById('door-box-before').classList.toggle('door-open');
+      document.getElementById('door-box-after').classList.toggle('door-open');
+    }
+
+    function filterSection(sec, btn) {
+      document.querySelectorAll('.demo-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mainGrid = document.getElementById('compare-main');
+      const catSec = document.getElementById('catalog-section');
+      const cosCatSec = document.getElementById('cos-catalog-section');
+      if (sec === 'catalog') {
+        mainGrid.style.display = 'none';
+        cosCatSec.style.display = 'none';
+        catSec.style.display = 'block';
+        return;
+      }
+      if (sec === 'cos-catalog') {
+        mainGrid.style.display = 'none';
+        catSec.style.display = 'none';
+        cosCatSec.style.display = 'block';
+        return;
+      }
+      mainGrid.style.display = 'grid';
+      catSec.style.display = sec === 'all' ? 'block' : 'none';
+      cosCatSec.style.display = sec === 'all' ? 'block' : 'none';
+      document.querySelectorAll('.compare-grid .demo-sec').forEach(el => {
+        el.style.display = (sec === 'all' || el.dataset.sec === sec) ? 'block' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

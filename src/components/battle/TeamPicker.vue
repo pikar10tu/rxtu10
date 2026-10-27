@@ -18,17 +18,15 @@
       </div>
 
       <div :class="inline ? '' : 'tp-scroll'">
-        <!-- ทีม 1/2/3 (utils/teamPresets.js) — ทีมที่ "ใช้อยู่" คือทีมเดียวที่ลงทุกที่ · ชุดอื่นจัดเก็บไว้สลับได้ -->
+        <!-- ทีม 1/2/3 (utils/teamPresets.js) — 27 ต.ค. 2026 user: ทีมที่เปิดดูอยู่ล่าสุด = ทีมที่ใช้ (ไม่มีปุ่ม "ใช้ทีมนี้" แล้ว)
+             เดิมกดแท็บดูทีมแต่ลืมกดใช้ → กดสู้ได้ทีมเก่า (พลาดกันบ่อย) · แท็บว่างไม่เปลี่ยนทีมที่ใช้จนกว่าจะใส่เพ็ท -->
         <div class="tp-presets" role="tablist" aria-label="ทีมที่จัดไว้">
           <button v-for="(p, i) in presets.presets" :key="i" type="button" role="tab" class="tp-preset"
-            :class="{ on: viewIdx === i }" :aria-selected="viewIdx === i" @click="viewIdx = i">
+            :class="{ on: viewIdx === i }" :aria-selected="viewIdx === i" @click="pickTab(i)">
             <span class="tp-preset-n">ทีม {{ i + 1 }}</span>
-            <span v-if="presets.idx === i" class="tp-preset-use">ใช้อยู่</span>
           </button>
         </div>
-        <button v-if="viewIdx !== presets.idx" type="button" class="tp-use" :disabled="!presets.presets[viewIdx].length" @click="useThis">
-          {{ presets.presets[viewIdx].length ? 'ใช้ทีมนี้' : 'ใส่เพ็ทก่อนถึงจะใช้ทีมนี้ได้' }}
-        </button>
+        <div v-if="!presets.presets[viewIdx].length" class="tp-use">ทีมนี้ยังว่าง ใส่เพ็ทก่อนนะ</div>
 
         <!-- ศัตรูที่จะเจอ (เปิดจากหอคอย) · ป้ายชนะทาง/แพ้ทางอยู่ในหน้าต่างเลือกตัว -->
         <div v-if="enemies.length" class="tp-foes">
@@ -96,7 +94,7 @@
       <div v-if="!inline && doneLabel" class="tp-cta">
         <!-- ของเฉพาะโหมดเหนือปุ่มเริ่ม (เช่น ดันเจี้ยน: สวิตช์ตีซ้ำ + โบนัสที่เหลือ) -->
         <slot name="cta-extra" />
-        <button type="button" class="tp-cta-btn" :disabled="!activeIds.length" @click="emit('done')">{{ doneLabel }}</button>
+        <button type="button" class="tp-cta-btn" :disabled="!viewIds.length" @click="emit('done')">{{ doneLabel }}</button>
       </div>
     </div>
   </Teleport>
@@ -145,8 +143,6 @@ const { toast } = useToast()
 const owned = computed(() => auth.userData?.pets || [])
 const favs = computed(() => auth.userData?.petFavs || [])
 const ownedIds = computed(() => new Set(owned.value.map(p => p.id)))
-const activeIds = computed(() =>
-  (auth.userData?.activePets || []).filter(id => id && ownedIds.value.has(id)).slice(0, BATTLE_SLOTS))
 const presets = computed(() => readPresets(auth.userData, ownedIds.value, BATTLE_SLOTS))
 const viewIdx = ref(0)   // ทีมที่กำลังดู/แก้ (ไม่จำเป็นต้องเป็นทีมที่ใช้อยู่)
 const shown = computed(() => props.inline || props.open)
@@ -182,25 +178,30 @@ const teamNow = computed(() => edit.value.slots.filter(Boolean).map(id => ({
 const formOn = computed(() => degreeFormActive(teamNow.value))
 const synergy = computed(() => teamSynergy(edit.value.slots))
 
-/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง หรือบอกว่ากลายเป็นองศา (icon แยกเพื่อเดินผ่าน <Emoji>) */
+/** ป้ายใต้ช่องของ 🌍 — ฤดูของตำแหน่งจริง · ร่างองศาไม่มีป้าย ให้ไปเจอเองในไฟต์ (26 ต.ค. user) (icon แยกเพื่อเดินผ่าน <Emoji>) */
 function earthTag(i) {
   if (edit.value.slots[i] !== 'earth') return null
-  if (formOn.value) return { icon: '🌗', text: 'องศา · นับเป็น common' }
+  if (formOn.value) return null
   const s = seasonOfSlot(edit.value.slots.slice(0, i).filter(Boolean).length)
   return { icon: s.icon, text: s.label }
 }
 
 async function save(next) {
-  const patch = editPresetPatch(presets.value, viewIdx.value, next)
+  let patch = editPresetPatch(presets.value, viewIdx.value, next)
+  // แก้ทีมที่เปิดดูอยู่ (มีเพ็ท) = ทีมนี้คือทีมที่ใช้ทันที
+  if (next.length && viewIdx.value !== presets.value.idx) patch = { ...patch, activePets: next.slice(), teamPresetIdx: viewIdx.value }
   await auth.patchUser(patch, patch)
   if (patch.activePets) syncRosterRow()   // ทีมที่ใช้เปลี่ยน → คู่ต่อสู้ใน Arena ต้องเห็นทีมใหม่
 }
-async function useThis() {
-  const i = viewIdx.value
+/** แตะแท็บทีม = เปิดดู และถ้ามีเพ็ทก็ใช้ทีมนั้นเลย (ไม่มี toast — สลับแท็บเป็นเรื่องปกติ) */
+async function pickTab(i) {
+  const prev = viewIdx.value
+  viewIdx.value = i
+  if (i === presets.value.idx || !presets.value.presets[i].length) return
   const patch = usePresetPatch(presets.value, i)
   const ok = await auth.patchUser(patch, patch)
-  if (ok) { syncRosterRow(); toast(`ใช้ทีม ${i + 1} แล้ว`, 'success') }
-  else toast('เปลี่ยนทีมไม่สำเร็จ', 'error')
+  if (ok) syncRosterRow()
+  else { viewIdx.value = prev; toast('เปลี่ยนทีมไม่สำเร็จ', 'error') }   // กลับแท็บเดิม — กันจอโชว์ทีมที่ไม่ได้ใช้จริง (รีวิว 28 ต.ค.)
 }
 function setSlots(next) {
   const before = compact(edit.value.slots).join()
@@ -301,9 +302,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey, true))
 .tp-preset { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 4px; border-radius: 12px; border: var(--bw) solid var(--line); background: #fff; font-family: inherit; color: var(--ink); cursor: pointer; }
 .tp-preset.on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, #fff); box-shadow: 0 0 0 1px var(--primary); }
 .tp-preset-n { font-size: .78rem; font-weight: 800; }
-.tp-preset-use { font-size: .7rem; font-weight: 800; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 7px; }
-.tp-use { width: 100%; margin-bottom: 8px; border: 0; border-radius: 12px; padding: 10px; font-family: inherit; font-weight: 800; font-size: .9rem; color: #fff; background: linear-gradient(135deg, #6d4fd0, #a36bd8); cursor: pointer; }
-.tp-use:disabled { opacity: .5; cursor: default; }
+.tp-use { margin-bottom: 8px; text-align: center; font-size: .8rem; font-weight: 700; color: var(--muted); }   /* แท็บทีมว่าง — ข้อความเตือน ไม่ใช่ปุ่มแล้ว */
 .tp-foes { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 0 8px; padding: 6px 10px; border-radius: 12px; background: #fdf0f4; border: var(--bw) solid #f3c6d6; }
 .tp-foes-l { font-size: .74rem; font-weight: 800; color: #b0386a; margin-right: 2px; }
 .tp-foe { position: relative; font-size: 1.35rem; line-height: 1; }

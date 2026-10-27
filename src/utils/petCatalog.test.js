@@ -62,7 +62,7 @@ test('wave1Pets ไม่มี wave 2 ขึ้นไป', () => {
 })
 
 test('ไม่มีอีเวนต์ = แจกได้แค่ wave 1 (ดีฟอลต์ปลอดภัย)', () => {
-  const ids = releasedPets(null).map(p => p.id)
+  const ids = releasedPets(null, PRE_AUTO).map(p => p.id)
   assert.deepEqual(ids, wave1Pets().map(p => p.id))
   assert.ok(ids.length > 0)
   // เพ็ท wave 1 ทุกตัวต้องหลุดออกมา — wave 2/3 (รวมฟากฟ้า Task A 4) ยังไม่ปล่อยจนกว่าอีเวนต์จะจบ
@@ -87,34 +87,39 @@ test('endsAt แบบ Firestore Timestamp ({seconds}) อ่านได้เ�
 
 test('อีเวนต์รูปพัง/ไม่มี endsAt = ถือว่ายังไม่เปิด (ห้าม fail-open)', () => {
   for (const ev of [{}, { endsAt: null }, { endsAt: 'พรุ่งนี้' }, 'ไม่ใช่ออบเจกต์']) {
-    assert.deepEqual(releasedPets(ev, 9e12).map(p => p.id), wave1Pets().map(p => p.id))
+    // ⏰ ก่อนตู้ auto รุ่น 4 (1 พ.ย. 2026) — หลังจากนั้นตารางในโค้ดเปิดรุ่นใหม่ตามเวลาได้จริง (data/gachaThemes.js)
+    assert.deepEqual(releasedPets(ev, PRE_AUTO).map(p => p.id), wave1Pets().map(p => p.id))
   }
 })
 
 test('ลำดับในคลังไม่สลับ — ผลสุ่มของทุกระบบอ่านด้วยดัชนี', () => {
-  const ids = releasedPets(null).map(p => p.id)
+  const ids = releasedPets(null, PRE_AUTO).map(p => p.id)
   assert.deepEqual(ids, PETS.filter(p => waveOf(p) === 1).map(p => p.id))
 })
 
 const WAVE2 = ['lion', 'virus', 'gorilla', 'boar', 'badger', 'bat']
 const WAVE3 = ['sol', 'earth', 'luna']
+// พ.ย. 2026 (wave 4 · ตู้ auto ตามเวลา) — ตัวที่ลงโค้ดแล้ว · เทสซ่อน/เปิดตามเวลาอยู่ ghost.test.js
+const WAVE4_DONE = ['ghost', 'comet', 'nemesis', 'robot', 'alien', 'ufo']
+const PRE_AUTO = Date.parse('2026-10-15T00:00:00+07:00')
 
 test('เพ็ทรุ่น 2 อยู่ในคลัง แต่แจกไม่ได้จนกว่าอีเวนต์จะหมดเวลา · รุ่น 3 (ฟากฟ้า) เข้าคลังแล้วด้วย (Task A 4)', () => {
-  assert.equal(PETS.length, 36)
-  const live = new Set(releasedPets(null).map(p => p.id))
+  assert.equal(PETS.length, 36 + WAVE4_DONE.length)
+  const live = new Set(releasedPets(null, PRE_AUTO).map(p => p.id))
   for (const id of [...WAVE2, ...WAVE3]) {
     assert.ok(PETS.some(p => p.id === id), `${id} ไม่อยู่ในคลัง`)
     assert.equal(live.has(id), false, `${id} หลุดออกมาแจกได้`)
   }
-  assert.equal(releasedPets(null).length, 27)
+  assert.equal(releasedPets(null, PRE_AUTO).length, 27)
 })
 
 test('สัดส่วนชั้น/สายของคลังเต็มตรงสเปก (12/12/12 · 15 legend · 9 epic) — รวมฟากฟ้า wave 3', () => {
   const by = (k, v) => PETS.filter(p => p[k] === v).length
-  assert.equal(by('element', 'fist'), 12)
-  assert.equal(by('element', 'scissors'), 12)
-  assert.equal(by('element', 'paper'), 12)
-  assert.equal(by('rarity', 'legendary'), 15)
+  const w4 = (k, v) => WAVE4_DONE.filter(id => PETS.find(p => p.id === id)?.[k] === v).length   // พ.ย. ทยอยลง
+  assert.equal(by('element', 'fist') - w4('element', 'fist'), 12)
+  assert.equal(by('element', 'scissors') - w4('element', 'scissors'), 12)
+  assert.equal(by('element', 'paper') - w4('element', 'paper'), 12)
+  assert.equal(by('rarity', 'legendary') - w4('rarity', 'legendary'), 15)
   assert.equal(by('rarity', 'epic'), 9)
   assert.equal(by('rarity', 'rare'), 6)
   assert.equal(by('rarity', 'common'), 6)

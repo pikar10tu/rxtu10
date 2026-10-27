@@ -40,7 +40,7 @@ test('เพ็ททุกตัวในแค็ตตาล็อกมี p
 test('passive ทุกอันมีฟิลด์ครบและ hook ที่รู้จัก', () => {
   // 'setup' เข้ามาตอน P3a (🐭 หนูเป็นเพ็ทจริงตัวแรกที่ใช้ — เอนจินรองรับตั้งแต่ P2a แล้ว)
   // 'onRoundEnd' เข้ามา ต.ค. 2569 ฟากฟ้า (🌍 เอิร์ธ — runOnRoundEnd ยังเป็นโครงเปล่า Task 5 เป็นคนเติมตรรกะ)
-  const HOOKS = ['setup', 'aura', 'onStart', 'onRound', 'onRoundEnd', 'onAttack', 'onHit', 'onKill', 'onDeath', 'onAnyDeath']
+  const HOOKS = ['setup', 'aura', 'onStart', 'onRound', 'onRoundEnd', 'onAttack', 'onHit', 'onKill', 'onDeath', 'onAnyDeath', 'onDied']
   for (const [id, p] of Object.entries(PET_PASSIVES)) {
     assert.ok(p.name && p.icon && p.desc, `${id} ฟิลด์ไม่ครบ`)
     const parts = partsOf(p)
@@ -522,7 +522,7 @@ test('dodge (fox): หลบแล้วดาเมจเป็น 0', () => {
 })
 
 test('thorns (hedgehog): สะท้อนกลับผู้ตี', () => {
-  const r = runOnHit(u('hedgehog'), 100, u('cat'), [u('hedgehog')], () => 0.5)
+  const r = runOnHit(u('hedgehog'), 100, u('cat', { side: 'B' }), [u('hedgehog')], () => 0.5)
   assert.ok(r.thorns > 0)
   assert.equal(r.events[0].targets[0], 'A0')
 })
@@ -2170,13 +2170,13 @@ test('🦄 ยูนิคอร์น: ฮีลติดแล้วล้า�
   const uni  = u('unicorn', { uid: 'A0', maxHp: 1000, hp: 1000 })
   const hurt = u('blank',   { uid: 'A1', maxHp: 1000, hp: 300 })
   const st = psOf(hurt)
-  st.infect = { n: 2, from: uni }; st.spark = 1; st.skip = 1
+  st.infect = { n: 2, from: uni }; st.spark = 1; st.status = { freeze: { n: 1 } }
   const out = runOnDealt(uni, [uni, hurt], 100)
   assert.equal(st.infect.n, 1)
   assert.equal(st.spark, 0)
-  assert.equal(st.skip, 0)
+  assert.equal(st.status.freeze, undefined, 'แช่แข็งหมด = ลบออกจากทะเบียน')
   const e = out.events.find(x => x.effect === 'cleanse')
-  assert.deepEqual(e.left, { infect: 1, spark: 0, skip: 0 })
+  assert.deepEqual(e.left, { infect: 1, spark: 0, freeze: 0 })
   runOnDealt(uni, [uni, hurt], 100)
   assert.equal(st.infect, undefined, 'ชั้นสุดท้ายหมด = ลบเชื้อทิ้ง')
 })
@@ -2325,8 +2325,8 @@ test('ฤดูหนาว (ช่อง 2): rand < 30% → ศัตรูไ�
   const foes = [U('a', 'common', 0, 'B'), U('b', 'common', 1, 'B')]
   const rolls = [0.1, 0.9]
   const out = runOnRoundEnd(team, foes, () => rolls.shift())
-  assert.equal(foes[0].ps.skip, 1)
-  assert.ok(!foes[1].ps?.skip)
+  assert.equal(foes[0].ps.status.freeze.n, 1)
+  assert.ok(!foes[1].ps?.status?.freeze)
   assert.deepEqual(out[0].targets, ['B0'])
 })
 

@@ -307,12 +307,13 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
       //    (skillShow) ไปให้ตาที่ถูกข้าม — แบนเนอร์ขึ้นชื่อ "แช่แข็ง" พร้อมเสียงประจำตัว แล้วใช้โชว์ไทม์ทิ้ง
       //    ก่อนที่สกิลจริงจะได้พูดอะไรเลย ⇒ ต้องตกไปทาง 'skill'/'skillQuiet' เสมอ และห้ามนับเข้า `shown`
       //    (ตัวเองยังไม่ได้โชว์ไทม์จริง — ครั้งหน้าที่สกิลจริงทำงานต้องยังมีสิทธิ์ได้ skillShow)
-      const isFreezeSkip = e.fxKind === 'skip'
+      // 🧾 ดาเมจ/ฟื้นจากสถานะท้ายตา (statusTick) ก็เป็นผลบนตัวเหยื่อ ไม่ใช่สกิลของมัน — กันแบบเดียวกัน
+      const isFreezeSkip = e.fxKind === 'skip' || e.effect === 'statusTick'
       // 👹 ตาง้างของโอนิ (27 ก.ย. 2026) ไม่มีหมัดตามมา = ต้องเป็น beat ของตัวเองทุกครั้ง (ห้าม skillQuiet 0ms
       //    ไม่งั้นตาง้างครั้งที่ 2+ หายวับ) · ต่างจากตาที่ถูกแช่แข็ง: ง้างคือสกิลจริง ⇒ ครั้งแรกได้โชว์ไทม์
       //    (แบนเนอร์ขึ้นพร้อมชาร์จ — user เคาะ) ครั้งต่อไปได้ 'skill'
       const isWindup = e.fxKind === 'windup'
-      if (CLUTCH_EFFECTS.has(e.effect)) pKind.set(i, 'skillMoment')
+      if (CLUTCH_EFFECTS.has(e.effect) || e.boo) pKind.set(i, 'skillMoment')   // 👻 แบร่ = โมเมนต์ ค้างจังหวะยาวให้ผีโฉบครบ
       else if (BANNER_EVERY_TIME_EFFECTS.has(e.effect)) { pKind.set(i, lastOfGroup ? 'skillShow' : 'bannerQuiet'); if (lastOfGroup) shown.add(uid) }
       else if (!lastOfGroup && !isWindup) pKind.set(i, 'skillQuiet')
       else if (!isFreezeSkip && first && showPets?.has(e.petId) && !shown.has(uid)) { pKind.set(i, 'skillShow'); shown.add(uid) }
@@ -328,7 +329,7 @@ export function buildBeats(log, maxHpByUid, { rng = null, showPets = null, hitSp
     const procs = new Map()
     for (let i = openCut; i < evts.length; i++) {
       const e = evts[i]
-      if (!e || e.t !== 'passive' || e.fxKind === 'skip' || !pKind.has(i)) continue
+      if (!e || e.t !== 'passive' || e.fxKind === 'skip' || e.effect === 'statusTick' || !pKind.has(i)) continue
       const nx = evts[i + 1]
       if (nx && nx.t === 'passive' && groupIdOf(nx) === groupIdOf(e)) continue   // ไม่ใช่ใบท้ายก้อน
       const k = pKind.get(i)

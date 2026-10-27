@@ -122,7 +122,7 @@ export function createBattleFx() {
       inner.append(bg, n, tag); e.appendChild(inner); e.__n = n
       pool.pop.push(e)
     }
-    for (let i = 0; i < 4; i++) pool.call.push(mkEl('brfx-call'))
+    for (let i = 0; i < 8; i++) pool.call.push(mkEl('brfx-call'))   // 4 → 8: แบนเนอร์สถานะติดหลายเป้าพร้อมกัน (ฤดูหนาว 4 ตัว)
     for (let i = 0; i < 2; i++) { const e = mkImg('brfx-puff'); imgSrc(e, '💀'); pool.puff.push(e) }
     pool.ring = [mkEl('brfx-ring')]
     pool.burst = [mkImg('brfx-burst'), mkImg('brfx-burst')]
@@ -142,7 +142,8 @@ export function createBattleFx() {
     // ⚠️ ห้ามสร้าง element ใหม่ตอนเลขเปลี่ยนกลางไฟต์ — พูลมีไว้เพื่อไม่ให้มี DOM เกิดใหม่ระหว่างเล่น
     // 6 → 12: คีย์เป็น uid+icon (ไม่ใช่ uid เฉยๆ) แล้ว ⇒ ❄️ ×3 ตัว + 🦠 ×1 ตัวพร้อมกันเกิน 6 ช่องได้
     // (ทีม 4v4 ติดแช่แข็งพร้อมกันหลายตัวจากฤดูหนาว/luna) ตราส่วนเกินเคยหายไปเงียบๆ
-    for (let i = 0; i < 12; i++) {
+    // 12 → 24 (27 ต.ค.): ทะเบียนสถานะใหม่ (🔥 ☠️ 😱 💫 …) ตัวเดียวติดได้หลายป้ายพร้อมกัน
+    for (let i = 0; i < 24; i++) {
       const e = mkEl('brfx-mark')
       const ico = document.createElement('img')
       ico.className = 'brfx-mark-ico'; ico.setAttribute('aria-hidden', 'true')
@@ -215,12 +216,14 @@ export function createBattleFx() {
   // 🔴 'miss'/'block' แยกออกมา 26 ก.ย. — เดิมหลบ (dodge) ยืมป้าย 'weak' ตอนที่มันยังเป็นป้ายเทา "ไม่โดน"
   //    พอ 'weak' ถูกเปลี่ยนคำเป็น "ชนะทาง" ⇒ จิ้งจอกหลบแล้วจอขึ้นว่าชนะทางธาตุ (ผิดความหมาย) · CSS ใช้สีของ weak
   const CALL_TEXT = { super: 'แพ้ทาง! ⚡', survive: 'รอด!', miss: 'หลบ! 💨', block: 'กันได้ 🛡️', weak: 'ชนะทาง 🛡️', frozen: 'เยือกแข็ง! ❄️', taunt: 'ยั่วยุ! 💢' }
-  function callout(uid, kind) {
+  // kind 'status' (27 ต.ค.): แบนเนอร์สถานะตามทะเบียน — text/color มาจากผู้เรียก (ติด = ไอคอน+ชื่อ · ทำงาน = ไอคอน)
+  function callout(uid, kind, text, color) {
     const el = take('call')
     el.getAnimations?.().forEach(a => a.cancel())
     el.className = 'brfx brfx-call ' + (kind === 'miss' || kind === 'block' || kind === 'frozen' ? 'weak' : kind)
+    el.style.background = kind === 'status' && color ? color : ''
     // คู่คำที่ user เลือก 28 ส.ค.: แพ้ทาง / ชนะทาง (เดิมใช้ 'ต้านทาน' ซึ่งไม่เข้าคู่กับ 'แพ้ทาง')
-    el.textContent = CALL_TEXT[kind] || CALL_TEXT.weak
+    el.textContent = kind === 'status' ? text : (CALL_TEXT[kind] || CALL_TEXT.weak)
     const base = baseXform(uid, 0, -16); if (!base) return
     el.style.opacity = '1'
     const a = el.animate([
@@ -369,7 +372,10 @@ export function createBattleFx() {
   // ตำแหน่งของแต่ละไอคอน — 🦠 อยู่จุดเดิม (บนกลางการ์ด) ห้ามขยับ (มีอยู่ก่อนแล้ว/ผ่านตาผู้ใช้มานาน)
   // ❄️ ขยับไปมุมตรงข้าม (บนขวา) กันทับ 🦠 สนิทเวลาการ์ดเดียวกันติดทั้งคู่พร้อมกัน (ฤดูหนาว/luna)
   // ไอคอนใหม่ที่ยังไม่ได้กำหนด = ใช้ตำแหน่งเดิม (ไม่ทำ default พัง)
-  const MARK_OFFSET = { '❄️': { dx: 24, dy: -14 } }
+  // 🧾 ทะเบียนสถานะ (27 ต.ค.): ซ้าย = ดาเมจต่อเนื่อง/ปรับค่า · ขวา = ข้ามตา
+  const MARK_OFFSET = { '❄️': { dx: 24, dy: -14 }, '💫': { dx: 24, dy: 6 }, '😱': { dx: 24, dy: 26 },
+    '🔥': { dx: -24, dy: -14 }, '☠️': { dx: -24, dy: 6 }, '💔': { dx: -24, dy: 26 },
+    '🛸': { dx: 0, dy: -30 }, '🥀': { dx: -24, dy: 46 }, '🚫': { dx: 24, dy: 46 }, '💪': { dx: -24, dy: 46 }, '💚': { dx: 24, dy: 46 } }
   const DEFAULT_MARK_OFFSET = { dx: 0, dy: -30 }
   function stateMark(uid, char, n) {
     const key = markKey(uid, char)
@@ -566,6 +572,51 @@ export function createBattleFx() {
     el.style.visibility = 'hidden'
     setTimeout(() => { if (auras.get(uid) === el) el.style.visibility = '' }, ms / rate)
   }
+  /** 🧾 ป้ายสถานะเขย่า (27 ต.ค. มาตรฐาน §8.10) — เขย่าที่ "ป้าย" ไม่ใช่การ์ด
+   *  เพราะตอนติดสถานะการ์ดเป้ามักกำลังเล่นท่าโดนตีอยู่ (การ์ด 1 ใบ = 1 อนิเมชันตามข้อบังคับ v3) */
+  function markShake(uid, char) {
+    const el = markOn.get(markKey(uid, char)); if (!el) return
+    const base = el.style.transform
+    const kf = [0, -4, 4, -3, 3, 0].map((x, i) => ({ transform: `${base} translateX(${x}px) rotate(${i % 2 ? -8 : 8}deg) scale(${i === 1 ? 1.35 : 1})` }))
+    kf[kf.length - 1] = { transform: base }
+    const a = el.animate(kf, { duration: 420 / rate, easing: 'ease-out' })
+    anims.add(a); a.finished.catch(() => {}).finally(() => anims.delete(a))
+  }
+  /** 👻 ผีน้อยแบร่! (สเปก §8.9) — 👻 ตัวใหญ่โฉบขึ้นจากล่างกลางจอ + คำว่า "แบร่!" · ไม่มีแฟลช
+   *  ชิ้นสร้างครั้งเดียวต่อไฟต์ (lazy) อยู่ชั้น FX · transform/opacity ล้วน · คืน ms ที่ใช้ */
+  let booEls = null
+  function boo() {
+    if (!layer || !boxEl) return 0
+    if (!booEls) {
+      const g = mkImg('brfx-boo'); imgSrc(g, '👻')
+      const t = mkEl('brfx-boo-t'); t.textContent = 'แบร่!'
+      booEls = { g, t }
+    }
+    const r = boxEl.getBoundingClientRect()
+    const cx = r.width / 2, cy = r.height / 2
+    const size = Math.min(r.width * 0.42, 190)
+    const { g, t } = booEls
+    const at = (dy, rot, sc) => `translate(${(cx - size / 2).toFixed(1)}px, ${(cy - size / 2 + dy).toFixed(1)}px) rotate(${rot}deg) scale(${sc})`
+    g.style.width = g.style.height = size + 'px'
+    const ms = 1400 / rate
+    const a = g.animate([
+      { transform: at(r.height * 0.6, -25, 1), opacity: 0, offset: 0 },
+      { transform: at(-size * 0.06, 6, 1.04), opacity: 1, offset: .32 },
+      { transform: at(0, 0, 1), opacity: 1, offset: .45 },
+      { transform: at(0, 0, 1), opacity: 1, offset: .82 },
+      { transform: at(-10, 0, 1.12), opacity: 0, offset: 1 },
+    ], { duration: ms, easing: 'cubic-bezier(.2,1.1,.4,1)', fill: 'forwards' })
+    const tx = (sc, rot) => `translate(${cx.toFixed(1)}px, ${(cy + size * 0.42).toFixed(1)}px) translate(-50%, 0) rotate(${rot}deg) scale(${sc})`
+    const b = t.animate([
+      { transform: tx(0, -12), opacity: 0, offset: 0 },
+      { transform: tx(0, -12), opacity: 0, offset: .22 },
+      { transform: tx(1.15, -6), opacity: 1, offset: .4 },
+      { transform: tx(1, -6), opacity: 1, offset: .82 },
+      { transform: tx(1.1, -6), opacity: 0, offset: 1 },
+    ], { duration: ms, easing: 'ease-out', fill: 'forwards' })
+    for (const x of [a, b]) { anims.add(x); x.finished.catch(() => {}).finally(() => anims.delete(x)) }
+    return ms
+  }
   // ❄️ ถึงตาแต่โดนแช่ — การ์ดสั่นเหมือนพยายามขยับแต่ติดน้ำแข็ง (transform ล้วน · อนิเมชันเดียวบนการ์ด)
   function frozenShake(uid, ms = 380) {
     const el = getEl(uid); if (!el || !F('cardLunge')) return
@@ -591,6 +642,6 @@ export function createBattleFx() {
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,
     lunge, squashTarget, targetReacts, shake, ko, dangerRing, dangerClearAll,
-    stateMark, stateMarkClear, stateMarkClearAll,
+    stateMark, stateMarkClear, stateMarkClearAll, markShake, boo,
   }
 }

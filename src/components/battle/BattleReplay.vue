@@ -58,7 +58,7 @@
           <span v-if="chipOn['B'+i]" class="br-chip" :class="{ out: chipOn['B'+i].out, charge: chipOn['B'+i].hold, moon: chipOn['B'+i].tone === 'moon', luna: chipOn['B'+i].tone === 'luna' }">
             <Emoji :char="chipOn['B'+i].icon" /> {{ chipOn['B'+i].name }}
           </span>
-          <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
+          <span class="br-face" :class="{ dark: p.id === 'nemesis' }"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp">
             <div class="br-hp-ghost" :style="{ transform: 'scaleX(' + hpPct('B'+i) / 100 + ')' }"></div>
             <div class="br-hp-fill" :style="{ transform: 'scaleX(' + hpPct('B'+i) / 100 + ')' }"></div>
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <div class="br-vs" ref="vsRef"><Emoji char="⚔️" /> {{ data.vsLabel ?? ('ชั้น ' + data.cleared) }}</div>
+      <div class="br-vs" ref="vsRef" :class="{ hush: introPhase }"><Emoji char="⚔️" /> {{ data.vsLabel ?? ('ชั้น ' + data.cleared) }}</div>
 
       <div class="br-team">
         <div v-for="(p, i) in data.playerTeam" :key="'A'+i" :ref="el => setEl('A'+i, el)"
@@ -84,7 +84,7 @@
           <span v-if="chipOn['A'+i]" class="br-chip" :class="{ out: chipOn['A'+i].out, charge: chipOn['A'+i].hold, moon: chipOn['A'+i].tone === 'moon', luna: chipOn['A'+i].tone === 'luna' }">
             <Emoji :char="chipOn['A'+i].icon" /> {{ chipOn['A'+i].name }}
           </span>
-          <span class="br-face"><Emoji :char="defOf(p.id).emoji" /></span>
+          <span class="br-face" :class="{ dark: p.id === 'nemesis' }"><Emoji :char="defOf(p.id).emoji" /></span>
           <div class="br-hp">
             <div class="br-hp-ghost" :style="{ transform: 'scaleX(' + hpPct('A'+i) / 100 + ')' }"></div>
             <div class="br-hp-fill mine" :style="{ transform: 'scaleX(' + hpPct('A'+i) / 100 + ')' }"></div>
@@ -257,6 +257,7 @@
 <script setup>
 import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import Emoji from '../shared/Emoji.vue'
+import { STATUSES } from '../../data/statuses.js'
 import ArenaFloor from './ArenaFloor.vue'
 import { getArena } from '../../data/arenas.js'
 import { parseArenaRef } from '../../utils/arenas.js'
@@ -1108,6 +1109,15 @@ function landBurst(targetUid) {
   firePassiveFx({ ...e, landing: true })
 }
 
+/** 🧾 มาตรฐานเอฟเฟกต์สถานะ (สเปก §8.10–8.11): ป้ายบนการ์ด + ป้ายเขย่า + แบนเนอร์สีประจำสถานะ
+ *  applied = ตอนติด → แบนเนอร์ "ไอคอน ชื่อ" · ตอนทำงาน → ไอคอนอย่างเดียว · n = 0 → ป้ายหาย (ไม่มีแบนเนอร์ค้าง) */
+function statusFx(uid, id, n, applied) {
+  const d = STATUSES[id]; if (!d || !uid) return
+  fx?.stateMark(uid, d.icon, n)
+  if (n) fx?.markShake(uid, d.icon)
+  fx?.callout(uid, 'status', applied ? `${d.icon} ${d.name}` : d.icon, d.color)
+}
+
 function firePassiveFx(e) {
   if ((e.effect === 'infect' || e.effect === 'sparkMark') && !e.landing) { pendingInfect.set(e.uid, e); return }   // 🤍 มาสก์กระต่ายก็รอหมัดถึงก่อน
   if (e.effect === 'infectBurst' && !e.landing && e.targets?.[0]) { pendingBurst.set(e.targets[0], e); return }
@@ -1186,26 +1196,56 @@ function firePassiveFx(e) {
   //    (เช่นตัวหนึ่งชนเพดานก่อน) ⇒ ต้องอ่านชั้นต่อเป้าจาก e.stacks[uid] ก่อนเสมอ ห้ามใช้ e.amount
   //    ทั้งก้อน (นั่นคือชั้นสูงสุดในก้อน ไม่ใช่ของ t ตัวนี้) · infectSpread ยังเป้าเดียวเสมอ ไม่มี stacks
   if (e.effect === 'infect' || e.effect === 'infectSpread') {
-    for (const t of on) fx?.stateMark(t, '🦠', (e.stacks && e.stacks[t] != null) ? e.stacks[t] : (e.amount || 0))
+    for (const t of on) statusFx(t, 'infect', (e.stacks && e.stacks[t] != null) ? e.stacks[t] : (e.amount || 0), true)
     sfx('virus')
   }
   // 🤍 มาสก์ประกายแสงของกระต่าย — ป้ายค้างบนการ์ดเป้าแบบเดียวกับชั้นเชื้อ
-  if (e.effect === 'sparkMark') for (const t of on) fx?.stateMark(t, '🤍', e.stacks?.[t] ?? e.amount ?? 0)
-  // 🦄 ล้างสถานะ: ป้ายบนการ์ดลดตามที่เหลือ (0 = ป้ายหาย)
+  if (e.effect === 'sparkMark') for (const t of on) statusFx(t, 'spark', e.stacks?.[t] ?? e.amount ?? 0, true)
+  // 🧾 แปะสถานะจากทะเบียน (สกิลใหม่ทุกตัวยิง effect 'statusApply' + statusId + stacks ต่อเป้า)
+  // 👻 แบร่! ตัวใหญ่กลางจอ (ปิดตามสวิตช์โชว์ไทม์) แล้วค่อยติดหวาดกลัว
+  if (e.boo && tuning.value.showtime !== false) fx?.boo()
+  if (e.effect === 'statusApply' && e.statusId) for (const t of on) statusFx(t, e.statusId, e.stacks?.[t] ?? 1, true)
+  // 🧾 สถานะทำงานท้ายตา (🔥 ☠️ 💚) / 😱 ตอนข้ามตา — ป้ายเขย่า + แบนเนอร์ไอคอน + เลขดาเมจ
+  if (e.effect === 'statusTick' && e.statusId) {
+    for (const t of on) statusFx(t, e.statusId, e.left ?? 0, false)
+    if (e.fxKind === 'damage' && e.amount > 0) fx?.pop(on[0], { dmg: e.amount, weight: 0.4 })
+  }
+  // 🛸 ลักพาตัว: การ์ดเป้าเทาโปร่ง + ป้าย 🛸 ค้าง + แบนเนอร์ "🛸 ถูกลักพาตัว" · ปล่อย = กลับมาชัด (ตกกระแทกใช้ทางดาเมจ hpPct)
+  if (e.effect === 'abduct') for (const t of on) {
+    highlight(t, 'away', true)
+    fx?.stateMark(t, '🛸', 1); fx?.markShake(t, '🛸')
+    fx?.callout(t, 'status', '🛸 โดนลักพาตัว', '#6d28d9')
+  }
+  if (e.effect === 'ufoRelease') for (const t of on) { highlight(t, 'away', false); fx?.stateMark(t, '🛸', 0) }
+  if (e.effect === 'ufoDrop' && e.amount > 0) { fx?.pop(on[0], { dmg: e.amount, weight: 0.5 }); fx?.callout(on[0], 'status', '💥 ตกกระแทก', '#6d28d9') }
+  // 👽 ควบคุมจิตใจ: แบนเนอร์บนตัวที่ถูกควบคุม (หมัดที่ตามมามี mind: true ใช้ท่าตีปกติ)
+  if (e.effect === 'mindControl') for (const t of on) fx?.callout(t, 'status', '👽 ถูกควบคุม', '#16a34a')
+  // ☄️ พรดาวหาง: ป้ายสถานะร้ายที่ล้างหาย + ติดโล่พร 🌠 (ฟื้นเลือดใช้ทางฮีลกลางด้านล่าง)
+  if (e.effect === 'cometBless') for (const t of on) {
+    for (const id of e.cleansed || []) if (STATUSES[id]) fx?.stateMark(t, STATUSES[id].icon, 0)
+    statusFx(t, 'blessShield', 1, true)
+  }
+  // 🦄 ☄️ ล้างสถานะ: ป้ายบนการ์ดลดตามที่เหลือ (0 = ป้ายหาย) · คีย์ = id ในทะเบียน
   if (e.effect === 'cleanse') for (const t of on) {
-    if (e.left?.infect != null) fx?.stateMark(t, '🦠', e.left.infect)
-    if (e.left?.spark != null) fx?.stateMark(t, '🤍', e.left.spark)
-    if (e.left?.skip != null) fx?.stateMark(t, '❄️', e.left.skip)
+    for (const [id, n] of Object.entries(e.left || {})) if (STATUSES[id]) fx?.stateMark(t, STATUSES[id].icon, n)
   }
 
   // 🌙 หมัดนี้ใช้ข้างไหนไปแล้ว ⇒ ไอคอนบนการ์ดเลื่อนไปข้างถัดไป
   if (e.effect === 'moonPhase' || e.effect === 'fullMoon') moonNext.value = { ...moonNext.value, [e.uid]: ((e.phase ?? 0) + 1) % 3 }
   // ❄️ ฤดูหนาว: ตราแช่แข็งค้างบนการ์ดที่โดน จนกว่าจะถึงตาที่ถูกข้าม
   // ❄️ targets ว่าง = แช่ไม่โดนใคร (ห้าม fallback ไปแปะที่เอิร์ธ)
-  if (e.fxKind === 'freeze') { for (const t of (e.targets || [])) { fx?.stateMark(t, '❄️', e.stacks?.[t] ?? 1); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
+  if (e.fxKind === 'freeze') { for (const t of (e.targets || [])) { statusFx(t, 'freeze', e.stacks?.[t] ?? 1, true); if (tuning.value.showtime !== false) fx?.showtime('freeze', { owner: t }) } sfx('freeze') }
   // ⏸️ ถึงตาที่ถูกแช่แข็ง: ป้าย "แข็ง!" แล้วเอาตราออก
   // ❄️ ถึงตาแต่ติดแช่: สั่น → น้ำแข็งแตก → สแตคลด 1 (หมด = ป้ายหาย) · log เก่าไม่มี left = หายเลยแบบเดิม
-  if (e.fxKind === 'skip') { fx?.frozenShake(e.uid); fx?.callout(e.uid, 'frozen'); fx?.stateMark(e.uid, '❄️', e.left ?? 0); if (tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid }) }
+  // 🧾 ทะเบียนสถานะ (27 ต.ค.): ตาเดียวลดสถานะข้ามตาทุกตัว (lefts) · แบนเนอร์ = ไอคอนป้ายหลัก · log เก่าไม่มี lefts = ❄️ แบบเดิม
+  if (e.fxKind === 'skip') {
+    fx?.frozenShake(e.uid)
+    const lefts = e.lefts || { freeze: e.left ?? 0 }
+    for (const [id, n] of Object.entries(lefts)) if (STATUSES[id]) fx?.stateMark(e.uid, STATUSES[id].icon, n)
+    const main = STATUSES[e.statusId || 'freeze']
+    fx?.callout(e.uid, 'status', main.icon, main.color)
+    if ((e.statusId || 'freeze') === 'freeze' && tuning.value.showtime !== false) fx?.showtime('thaw', { owner: e.uid })
+  }
 
   const PSFX = { heal: 'p_heal', revive: 'p_revive', guard: 'p_guard', armor: 'p_guard', save: 'p_save', dodge: 'p_dodge',
     thorns: 'p_thorns', damage: 'p_fire', cleave: 'p_cleave', buff: 'p_buff', chain: 'p_chain', aim: 'p_aim',
@@ -1747,6 +1787,8 @@ onUnmounted(() => {
 .br-unit.foe { border-color: rgba(248,113,113,.35); }
 .br-unit.me  { border-color: rgba(52,211,153,.4); }
 .br-face { font-size: 2rem; line-height: 1; }
+/* 👤 เนเมซิสเป็นเงาดำล้วน — บนการ์ดพื้นเข้มมองไม่เห็น (เจอจากไฟต์ทดลอง 27 ต.ค.) ⇒ ขอบเรืองแสงขาว */
+.br-face.dark { filter: drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 0 6px rgba(196,181,253,.7)); }
 .br-el { position: absolute; top: 3px; left: 3px; font-size: .8rem; background: rgba(0,0,0,.45); border-radius: 8px; padding: 1px 3px; line-height: 1; }
 /* Phase 2b: ตัด card lift/shake/glow (::after) ทิ้ง — ไฮไลต์เหลือแค่ border-color (ถูก, ไม่ re-raster)
    windup/acting เดิม telegraph ย้ายไป fx.ring (brfx-ring, plain DOM/WAAPI นอก Vue reactivity) แล้ว
@@ -1755,6 +1797,11 @@ onUnmounted(() => {
 .br-unit.acting, .br-unit.windup { border-color: #fde68a; }
 .br-unit.flash { border-color: #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
+/* 🛸 ถูกลักพาตัว (นอกสนาม) — เทาโปร่งแต่ยังอ่านได้ ต่างจากตาย (.25 + เทาเต็ม) */
+.br-unit.away > * { opacity: .45; filter: grayscale(.7); }   /* จางเฉพาะของในการ์ด — ป้าย ::after ด้านล่างชัดเต็ม */
+/* ป้ายค้างบนการ์ดตลอดที่ถูกดูด (user 27 ต.ค.: สถานะนี้มีผลต่อไฟต์มาก ต้องเขียนชัด) · ไม่ใช่สถานะร้าย ล้างไม่ได้ · pseudo-element นิ่ง ไม่ re-raster */
+.br-unit.away::after { content: 'โดนลักพาตัว'; position: absolute; left: 50%; top: 42%; transform: translateX(-50%) rotate(-8deg);
+  white-space: nowrap; font-size: .7rem; font-weight: 800; color: #fff; background: #6d28d9; border-radius: 6px; padding: 1px 6px; }
 
 /* --br-hp-h ฯลฯ = ตัวแปรจูนจากห้องแล็บ ตั้งบน body · fallback = ค่าที่ user เลือกจากห้องเทียบ v4 (26 ก.ย. 2026)
    เดิม 7px / ผีขาวจาง .75 / .45s หลัง .16s ⇒ "ตามไม่ค่อยทันว่าเลือดลด" */
@@ -1797,6 +1844,8 @@ onUnmounted(() => {
 .br-vs { text-align: center; color: rgba(255,255,255,.85); font-weight: 800; font-size: .82rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 12px;
   /* เส้นกลางสนาม (.br-seam) วิ่งผ่านกลางแถวนี้พอดี ⇒ ป้ายต้องมีพื้นรอง ไม่งั้นเส้นขีดทับตัวอักษร · padding บน/ล่างคงเดิม = เส้นกลางไม่ขยับ */
   align-self: center; background: rgba(15,23,42,.82); border-radius: 999px; }
+/* READY?/GO! ขึ้นตรงกลางพอดีแถวนี้ = ทับป้าย (เจอจากไฟต์ทดลอง 27 ต.ค.) ⇒ ซ่อนป้ายระหว่าง intro · visibility ไม่ขยับ layout (เส้นกลางวัดจากแถวนี้) */
+.br-vs.hush { visibility: hidden; }
 
 .br-ctrl { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .br-btn { border: 2px solid #fff; background: rgba(255,255,255,.14); color: #fff; border-radius: 12px; padding: 10px 22px; font-family: inherit; font-weight: 800; cursor: pointer; transition: background .12s; }
@@ -2065,6 +2114,10 @@ onUnmounted(() => {
 /* ขนาดเลขมาจาก battleFx.pop() (0.86 + weight × 1.0 rem) แบบต่อเนื่อง — ไม่มีคลาสตามชั้นแล้ว */
 
 .brfx-call.survive { background: #34d399; color: #06371f; }
+.brfx-boo { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; z-index: 6; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)); }
+.brfx-boo-t { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; z-index: 7; white-space: nowrap;
+  font-size: 2.4rem; font-weight: 900; color: #fff; -webkit-text-stroke: 2px #7c3aed; paint-order: stroke fill; }
+.brfx-call.status { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }   /* 🧾 แบนเนอร์สถานะ — พื้นสีมาจากทะเบียน (inline) */
 
 /* วงแหวนโซนอันตราย — เต้นด้วย opacity ล้วนบน pool element ที่ promote ถาวรแล้ว */
 .brfx-danger {

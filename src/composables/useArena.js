@@ -26,6 +26,7 @@ import { hashStr } from '../utils/seededRng.js'
 import { activeWeekly } from '../data/pvpWeekly.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { buildLoseTip } from '../utils/loseTip.js'
+import { checkSeasonLockNow } from './useSeasonLock.js'
 import { ANTI_LOSS, ANTI_LOSS_DAILY, canUseAntiLoss } from '../utils/antiLoss.js'
 
 // คีย์วันที่รายวัน (UTC) — ใช้ toISOString ให้ตรงกับ daily-reset อื่นของแอป
@@ -144,6 +145,8 @@ export function useArena() {
 
   // บุก: ตรวจสอบโควต้า+ทีม → จำลองการสู้ → เขียนผล → คืน replayData
   async function fight() {
+    // 🔒 ปิดช่วงเปลี่ยนซีซั่น (23:45 → แอดมินแจกเสร็จ) — เช็คสดจาก config ทุกครั้งที่กด (utils/seasonLock.js)
+    if ((await checkSeasonLockNow()).locked) { toast('ซีซั่นจบแล้ว กำลังคำนวณผลคะแนนและรางวัลประจำเดือน เปิดอีกครั้งเร็วๆ นี้นะ', 'info'); return null }
     if (attacksLeft.value <= 0) {
       const m = Math.ceil(energy.value.nextMs / 60000)
       toast(`พลังงานหมด อีก ${m} นาทีได้เพิ่ม 1 หน่วย`, 'info')
@@ -190,6 +193,7 @@ export function useArena() {
 
   // 💊 ยาแก้แพ้: คืนแต้มที่เพิ่งเสียตานี้ (ตัวนับแพ้ยังนับ — แค่แต้มไม่ลด)
   async function useAntiLoss(loss) {
+    if ((await checkSeasonLockNow()).locked) { toast('ซีซั่นจบแล้ว กำลังคำนวณผลคะแนนและรางวัลประจำเดือน', 'info'); return false }   // กระดานแช่แข็งช่วงปิด (รีวิว 28 ต.ค.)
     if (!canAntiLoss(loss)) return false
     const nextPvp = { ...seasonPvp.value, rating: loss.from }
     const left = antiLoss.value - 1

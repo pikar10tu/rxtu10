@@ -11,7 +11,7 @@
 // 🔑 ชื่อ/ตัวเด่นของธีมรายเดือนมาจาก data/gachaThemes.js (themeOf(wave)) ก่อนเสมอ — คอนฟิกเป็นแค่ fallback
 //    สำหรับ wave ที่ยังไม่มีธีมลงทะเบียน (data/gachaThemes.js)
 import { themeOf } from '../data/gachaThemes.js'
-import { eventWave } from './petCatalog.js'
+import { eventWave, effectiveEvent } from './petCatalog.js'
 
 /** ตัวเด่นตั้งต้น = legendary รุ่น 2 ทั้งสามตัว · อยู่ในโค้ดเพื่อไม่ให้แอดมินต้องพิมพ์ id เอง (user เคาะ 11 ก.ย.)
  *  คอนฟิกยังทับได้ เผื่ออีเวนต์รอบหน้าใช้ตัวอื่น */
@@ -27,6 +27,7 @@ function endsAtMs(ev) {
 /** สถานะอีเวนต์ ณ เวลา now — `active` เป็นจริงจนถึงวินาที endsAt พอดี
  *  ชื่อ/ตัวเด่นมาจาก themeOf(wave) ก่อนเสมอ (ทะเบียนธีมรายเดือน) · คอนฟิกเป็นแค่ fallback สำหรับ wave ที่ยังไม่ลงทะเบียนธีม */
 export function eventState(gachaEvent, now = Date.now()) {
+  gachaEvent = effectiveEvent(gachaEvent, now)   // ⏰ แถวธีม auto เปิด/ปิดตามนาฬิกา
   const endsAt = endsAtMs(gachaEvent)
   const active = endsAt !== null && now <= endsAt
   const wave = eventWave(gachaEvent)
@@ -37,6 +38,7 @@ export function eventState(gachaEvent, now = Date.now()) {
     active, wave, endsAt, featured,
     name: theme?.name || gachaEvent?.name || 'อัญเชิญพิเศษ',
     msLeft: active ? endsAt - now : 0,
+    auto: !!gachaEvent?.auto,
   }
 }
 

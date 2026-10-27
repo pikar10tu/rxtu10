@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from './useToast.js'
+import { checkSeasonLockNow } from './useSeasonLock.js'
 import { useRosterSync } from './useRosterSync.js'
 import { useNewsPost } from './useNewsPost.js'
 import { simulateBattle } from '../utils/battleEngine.js'
@@ -55,8 +56,10 @@ export function useTower() {
   /** สู้ชั้นปัจจุบัน 1 ไฟต์ — ซิมอย่างเดียว ยังไม่บันทึก
    *  🔒 ผลนับต่อเมื่อดูรีเพลย์จบถึงหน้าสรุป แล้ว TowerView เรียก `commit()` (user สั่ง 17 ต.ค. 2026)
    *     กดออก/ปิดแอประหว่างรีเพลย์ = ไม่นับ ⇒ ใช้ปุ่มออกข้ามรีเพลย์เพื่อเก็บชัยชนะไม่ได้ · แพ้ไม่มีอะไรให้บันทึกอยู่แล้ว */
-  function fight() {
+  async function fight() {
     if (!team.value.length) { toast('จัดทีมก่อนนะ (อย่างน้อย 1 ตัว)', 'info'); return null }
+    // 🔒 ปิดช่วงเปลี่ยนซีซั่น (23:45 → แอดมินแจกเสร็จ) · หยิบ floor ฯลฯ หลัง await นี้ (ยังไม่มี patchUser ก่อนหน้า)
+    if ((await checkSeasonLockNow()).locked) { toast('ซีซั่นจบแล้ว กำลังคำนวณผลคะแนนและรางวัลประจำเดือน เปิดอีกครั้งเร็วๆ นี้นะ', 'info'); return null }
     // ⚠️ หยิบทุกอย่างที่ผูกกับ floor/best ไว้ตอนนี้ — patchUser ใน commit อัปเดต optimistic แบบ synchronous
     //    (บั๊กจริง 24 ส.ค.: อ่าน botTeam ทีหลังได้ทีมชั้นถัดไป จอ replay วาดศัตรูผิดตัว · CLAUDE.md ข้อ 9)
     const cleared = floor.value

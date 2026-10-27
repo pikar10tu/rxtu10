@@ -7,13 +7,15 @@
 //    👹 windup เป็นข้อยกเว้นเดียวที่เพิ่ม beat จริง (ตาง้าง + ฟาดน็อกตีต่อ 1 ครั้ง) — เพดานอยู่ในเอนจิน
 import { PET_PASSIVES, passiveValueAt, partsAt, partAt, partWithEffect } from '../data/petPassives.js'
 import { degreeFormActive, seasonOfSlot } from './petForms.js'
+import { applyStatus, cleanseOne, cleanseAll, canHeal, debuffCount } from './battleStatus.js'
 
 export const passiveFor = (unit) => PET_PASSIVES[unit?.id] || null
 
 /** ค่าของ part นั้นตามขั้นที่เพ็ทอัพไว้ (ยังไม่มีระบบหิน ⇒ undefined = ขั้น 1)
  *  ⚠️ ห้ามอ่าน part.value ตรงๆ ในตรรกะ — ไม่งั้นพอระบบหินมา ค่าจะไม่ขยับตามขั้น */
 const valOf = (part, unit) => passiveValueAt(part, unit?.passiveLv)
-const alive = (t) => t.filter(u => u.hp > 0)
+// 🛸 บนสนาม = ยังไม่ตาย และไม่ถูกยูเอฟโอดูด (ps.away) — ตัวที่ถูกดูดไม่ได้รับ/ไม่ใช้สกิลใดๆ
+const alive = (t) => t.filter(u => u.hp > 0 && !u.ps?.away)
 const pctOf = (v, pct) => v * (pct / 100)
 
 /** "อัตราส่วนนี้เป็นกี่ขั้นละ 10%" — ปัดลง แต่ต้องไม่พลาดที่เส้นพอดี
@@ -87,6 +89,7 @@ function ev(unit, p, part, extra = {}) {
  *  ⚠️ ผู้เล่นต้องเห็นเลขจริง (+15) ไม่ใช่ % ของสูตร และหลอดเลือดต้องขยับตาม */
 function healUnit(u, pct) {
   const before = u.hp
+  if (!canHeal(u)) return { amount: 0, hpPct: Math.round((u.hp / u.maxHp) * 100) }   // 🚫 ห้ามฟื้น
   u.hp = Math.min(u.maxHp, u.hp + pctOf(u.maxHp, pct))
   return { amount: Math.round(u.hp - before), hpPct: Math.round((u.hp / u.maxHp) * 100) }
 }
@@ -295,7 +298,7 @@ export function runOnStart(team, foes) {
         out.push(ev(u, p, part, { targets: targets.map(t => t.uid), amount: Math.round(dmg), fxKind: 'damage' }))
       } else if (part.effect === 'teamHealOpener') {
         const targets = alive(team)
-        for (const t of targets) t.hp = Math.min(t.maxHp, t.hp + pctOf(t.maxHp, v.pct))
+        for (const t of targets) if (canHeal(t)) t.hp = Math.min(t.maxHp, t.hp + pctOf(t.maxHp, v.pct))
         out.push(ev(u, p, part, { targets: targets.map(t => t.uid), amount: v.pct, fxKind: 'heal' }))
       }
     }
@@ -334,6 +337,17 @@ export function runOnRound(team) {
         if (!t || t.hp >= t.maxHp) continue
         const h = healUnit(t, v.pct)
         out.push(ev(u, p, part, { targets: [t.uid], ...h, fxKind: 'heal' }))
+      } else if (part.effect === 'cometBless') {
+        // ☄️ ดาวหาง (สเปก §2.2 + §8.14): ต้นรอบ (โดนแช่แข็งก็ยังให้พร) · เป้า = เพื่อน (รวมตัวเอง) ที่ติด
+        //    สถานะร้าย "หลายชนิด" ที่สุด · เสมอ/ไม่มีใครติด = % เลือดน้อยสุด · เสมออีก = ช่องซ้ายสุด · ไม่ดึง rand
+        const t = alive(team).slice().sort((a, b) =>
+          debuffCount(b) - debuffCount(a) || (a.hp / a.maxHp) - (b.hp / b.maxHp) || a.slot - b.slot)[0]
+        if (!t) continue
+        const gone = cleanseAll(t)
+        const h = healUnit(t, v.heal)
+        applyStatus(t, 'blessShield', { n: 1, val: v.shield })
+        out.push(ev(u, p, part, { targets: [t.uid], ...h, cleansed: gone, left: Object.fromEntries(gone.map(id => [id, 0])),
+          statusId: 'blessShield', fxKind: 'heal' }))
       } else if (part.effect === 'stackAtk') {
         // ไต่ชั้นทุกต้นรอบ (🐍) — เพดานและวิธีคิดเหมือน onKill/onAnyDeath ทุกประการ
         const st = psOf(u)
@@ -372,6 +386,7 @@ export function runOnRoundEnd(team, foes, rand) {
         out.push(ev(u, p, part, { effect: 'seasonHot', name: s.label, icon: s.icon, targets: alive(team).map(t => t.uid), amount: v.hot, fxKind: 'buff' }))
       } else if (s.key === 'rain') {
         for (const t of alive(team)) {
+          if (!canHeal(t)) continue   // 🚫 ห้ามฟื้น
           const before = t.hp
           t.hp = Math.min(t.maxHp, t.hp + (t.maxHp - t.hp) * v.rain / 100)
           const amount = Math.round(t.hp - before)
@@ -384,9 +399,10 @@ export function runOnRoundEnd(team, foes, rand) {
         // ❄️ แช่แข็ง = สแตคดีบัฟ (29 ก.ย. 2026 user): โดนซ้ำบวกเพิ่ม · ถึงตาตัวเองมีสแตค = ข้ามตาแล้วลด 1 (เอนจิน)
         //    รองรับกลไกแช่หลายตาในอนาคต (FREEZE_TURNS ต่อครั้ง) · stacks ส่งให้จอวาดเลขบนป้าย ❄️
         const stacks = {}
-        for (const f of hit) { const st = psOf(f); st.skip = (st.skip || 0) + FREEZE_TURNS; st.skipName = 'แช่แข็ง'; st.skipIcon = '❄️'; stacks[f.uid] = st.skip }
+        for (const f of hit) { const r = applyStatus(f, 'freeze', { n: FREEZE_TURNS, from: u }); if (r.ok) stacks[f.uid] = r.n }
+        const froze = hit.filter(f => stacks[f.uid] != null)   // บอสกันแช่แข็ง (immune) = ไม่นับว่าโดน
         // ยิงทุกจบรอบแม้แช่ไม่โดนใคร (29 ก.ย. user: "ควรทำงานไง หิมะตกแล้ว แช่โดนหรือไม่โดนก็อีกเรื่อง") · amount 0 = พลาดหมด
-        out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: hit.map(f => f.uid), amount: hit.length, stacks, fxKind: 'freeze' }))
+        out.push(ev(u, p, part, { effect: 'seasonCold', name: s.label, icon: s.icon, targets: froze.map(f => f.uid), amount: froze.length, stacks, fxKind: 'freeze' }))
       }
     }
   }
@@ -396,6 +412,19 @@ export function runOnRoundEnd(team, foes, rand) {
 /** ตัวที่ถูกบังคับให้เป็นเป้าในรอบนี้ (taunt) — คืน null ถ้าไม่มีใครบังคับ
  *  🔴 กอริลลา 2 ตัวในทีมเดียว = เอาช่องซ้ายสุดเสมอ · ต้อง deterministic ไม่งั้นรีเพลย์ไม่ตรงกับผลจริง
  *  🔴 ห้ามดึง rand ในฟังก์ชันนี้ — ลำดับการดึงสุ่มของเอนจินต้องไม่เปลี่ยน ไม่งั้นไฟต์เดิมทั้งเกมเพี้ยน */
+/** 👤 เนเมซิส (สเปก §8.8): ซ่อนตัวขณะเพื่อนในทีมยังอยู่ครบ (ไม่ตาย · ไม่ถูกดูด) */
+export function nemesisHidden(u, team) {
+  if (u.hp <= 0 || !partWithEffect(passiveFor(u), 'revenge')) return false
+  return team.every(x => x === u || (x.hp > 0 && !x.ps?.away))
+}
+/** ศัตรูที่เลือกเป็นเป้าได้ (เป้าหลัก · เป้าลาม · ดูด · ควบคุม) — ไม่เหลือตัวอื่น = เนเมซิสซ่อนไม่ได้ (กันไฟต์ค้าง)
+ *  ดาเมจทั้งทีม (🐉 🦠 🦣 สะท้อน) ไม่ผ่านตรงนี้ = ยังโดน */
+export function targetableFoes(foes) {
+  const al = alive(foes)
+  const vis = al.filter(u => !nemesisHidden(u, foes))
+  return vis.length ? vis : al
+}
+
 export function tauntTargetOf(foes) {
   for (const u of alive(foes)) {
     const part = partsAt(passiveFor(u), 'onRound').find(x => x.effect === 'taunt')
@@ -408,6 +437,18 @@ export function tauntTargetOf(foes) {
 //  onAttack — ก่อนคิดดาเมจ (คืนตัวปรับ ไม่แก้ state เอง)
 // ══════════════════════════════════════════════════════════════
 /** 👹 พาสสีฟง้าง/ฟาดของ unit นี้ (null = ไม่มี) — เอนจินใช้ตัดสินว่าตานี้ง้างหรือฟาด */
+/** 👽 "พลังที่สะสมไว้" ของตัวที่ถูกควบคุม (สเปก §2.3) — อ่านอย่างเดียว ไม่ขยับข้างจันทร์/ไม่ใช้ง้าง
+ *  🌙 ข้างจันทร์ปัจจุบัน · 👹 ง้างค้างอยู่ = ×ฟาด · ATK บนการ์ดรวมบัฟทุกอย่างอยู่แล้ว */
+export function storedPowerMult(u) {
+  const p = passiveFor(u), st = u.ps || {}
+  let m = 1
+  const mp = partWithEffect(p, 'moonPhase')
+  if (mp) { const v = valOf(mp, u); m *= [v.dark, v.half, v.full][st.moon || 0] / 100 }
+  const wp = partWithEffect(p, 'windup')
+  if (wp && st.wound) m *= valOf(wp, u).pct / 100
+  return m
+}
+
 export function windupOf(unit) {
   const part = partWithEffect(passiveFor(unit), 'windup')
   return part ? { part, v: valOf(part, unit) } : null
@@ -586,7 +627,7 @@ export function runOnDealt(attacker, attTeam, dealt) {
     //    และการเลือกเป้าใหม่ทุกหมัดลูกทำให้ "ฟื้นให้คนที่บอบช้ำที่สุด ณ วินาทีนั้น" ซึ่งเป็นพฤติกรรมที่ดีกว่า
     //    (คิดทีเดียวตอนจบ beat = เทเลือดก้อนเดียวใส่คนเดียว อาจล้นหลอดทิ้งทั้งที่อีกคนกำลังจะตาย)
     const t = lowestHpAlly(attTeam, attacker)
-    if (!t || t.hp >= t.maxHp) continue
+    if (!t || t.hp >= t.maxHp || !canHeal(t)) continue   // 🚫 ห้ามฟื้น = ฮีลไม่ติด ⇒ 🦄 ไม่ล้างด้วย
     const before = t.hp
     t.hp = Math.min(t.maxHp, t.hp + pctOf(dealt, valOf(part, attacker).pct))
     const amount = Math.round(t.hp - before)
@@ -595,10 +636,8 @@ export function runOnDealt(attacker, attTeam, dealt) {
         hpPct: Math.round((t.hp / t.maxHp) * 100), fxKind: 'heal' }))
       // 🦄 ล้างสถานะ (18 ต.ค. 2026 user ทาง B): ฮีลติดจริงทุกครั้ง = ลดสถานะร้ายบนเป้านั้นอย่างละ 1
       //    🦠 ชั้นเชื้อ · 🤍 มาสก์ประกายแสง · ❄️ สแตคแช่แข็ง — ไม่ดึง rand
-      const st = psOf(t), left = {}
-      if (st.infect?.n > 0) { st.infect.n -= 1; left.infect = st.infect.n; if (!st.infect.n) delete st.infect }
-      if (st.spark > 0) { st.spark -= 1; left.spark = st.spark }
-      if (st.skip > 0) { st.skip -= 1; left.skip = st.skip }
+      //    อ่านจากทะเบียนสถานะ (cleanseOne) — สถานะใหม่ทุกตัวล้างได้เองโดยไม่ต้องแก้ตรงนี้
+      const left = cleanseOne(t)
       if (Object.keys(left).length) {
         out.events.push(ev(attacker, ap, part, { targets: [t.uid], left, fxKind: 'buff', effect: 'cleanse' }))
       }
@@ -608,7 +647,7 @@ export function runOnDealt(attacker, attTeam, dealt) {
   // ดูดเลือดของทีม (teamLifesteal) — applyAuras แปะ % ไว้บนตัวละคร ที่นี่คือที่เดียวที่รู้ดาเมจจริง
   // 🔑 event ไม่ผ่าน ev() เพราะ "เจ้าของออร่า" อาจเป็นเพื่อนคนละตัวกับคนที่ได้ดูด — ชื่อ/ไอคอนของ
   //    พาสสีฟตัวเองจึงใช้ไม่ได้ · ใช้แพทเทิร์นเดียวกับ duoRegen ใน runOnRound (คำกลาง + ไอคอนของ *ผล*)
-  if (attacker.lifestealPct > 0) {
+  if (attacker.lifestealPct > 0 && canHeal(attacker)) {
     const before = attacker.hp
     attacker.hp = Math.min(attacker.maxHp, attacker.hp + pctOf(dealt, attacker.lifestealPct))
     const amount = Math.round(attacker.hp - before)
@@ -639,6 +678,8 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
   // pierceHits = ก้อน pierce แตกเป็น "ชั้นละก้อน" สำหรับฝั่งจอเท่านั้น (ผลรวมเท่ากับ Math.round(pierce) เป๊ะ)
   // 🔴 ห้ามเอาไปคิดดาเมจจริง — เอนจินหักด้วย res.pierce ตัวเต็ม (ยังไม่ปัด) เหมือนเดิมทุกประการ
   const res = { dmg, dodged: false, thorns: 0, pierce: 0, reflect: 0, pierceHits: [], events: [] }
+  // 👽 หมัดควบคุมจิตใจ: คนตีเป็นพวกเดียวกับเป้า ⇒ สกิลของคนตี/หนาม/สะท้อน/ชั้นโกรธ ไม่ทำงาน (สเปก §2.3)
+  const friendly = !!attacker && attacker.side === defender.side
 
   // 1) guardian ของ "เพื่อนในทีมเดียวกัน" — ต้องเช็คก่อนของตัว defender เอง
   // 🔑 ส่วนที่ผู้พิทักษ์รับไปถูกหักออกจากดาเมจ "ก่อน" teamDrPct และก่อน damageReduction ทุกตัว
@@ -696,6 +737,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
         break
       }
       case 'thorns':
+        if (friendly) break   // 👽 หมัดควบคุมจากเพื่อน — หนามไม่สวนเพื่อน
         res.thorns = pctOf(res.dmg, v.pct)
         if (res.thorns > 0 && attacker) {
           res.events.push(ev(defender, p, part, { targets: [attacker.uid], amount: Math.round(res.thorns), fxKind: 'thorns' }))
@@ -719,7 +761,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
         if (res.dmg <= 0) break
         if (st.armor <= 0) break
         st.armor -= 1
-        res.reflect = pctOf(res.dmg, v.pct)
+        res.reflect = friendly ? 0 : pctOf(res.dmg, v.pct)   // 👽 กันได้แต่ไม่สะท้อนใส่เพื่อน
         res.dmg = 0                                  // กันทั้งหมัด ไม่ใช่โล่ที่มีค่าเลือด
         // fxKind แยกเป็น 'armor' ของตัวเอง ไม่ใช่ 'guard' ของบากุ — ดูเหตุผลในดอคบล็อกของ ev()
         // (หน่วยของ amount ต่างกันคนละเรื่อง) · สแตคที่เหลือไปอยู่ฟิลด์ของตัวเอง `armorLeft`
@@ -740,7 +782,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
   // 🔴 อยู่นอกลูปโดยตั้งใจ: ถ้าอยู่ในลูป ผลจะขึ้นกับ *ลำดับ part ในข้อมูล* — เพ็ทที่เขียน
   //    [damageReduction, dodge] จะสะสมชั้น ส่วน [dodge, damageReduction] จะไม่สะสม ทั้งที่หลบเหมือนกัน
   //    (สเปก §7.4 ข้อ 6 เตือนเรื่องลำดับ part ไว้แล้ว — ตรงนี้คือการถอดความขึ้นกับลำดับออกให้หมด)
-  if (res.dmg > 0) {
+  if (res.dmg > 0 && !friendly) {   // 👽 โดนเพื่อนตีไม่ได้ชั้นโกรธ (กันฟาร์ม)
     for (const part of partsAt(p, 'onHit')) {
       if (part.effect !== 'atkOnHit') continue
       const v = valOf(part, defender)
@@ -766,7 +808,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
   // 🔑 เช็คทีมด้วย side ไม่ใช่ identity — attacker.side === inf.from.side ครอบทั้ง "ไวรัสเอง" และ "เพื่อนร่วมทีม"
   //    ในเงื่อนไขเดียว · from เป็น object เดิมของไวรัส (ไม่ใช่ uid) จึงยังอ่าน atk ได้แม้ไวรัสตายไปแล้ว
   const inf = psOf(defender).infect
-  if (inf && inf.n > 0 && attacker && inf.from && attacker.side === inf.from.side) {
+  if (!friendly && inf && inf.n > 0 && attacker && inf.from && attacker.side === inf.from.side) {
     const vp = passiveFor(inf.from)
     const vpart = partsAt(vp, 'onAttack').find(x => x.effect === 'infect')
     if (vpart) {
@@ -791,7 +833,7 @@ export function runOnHit(defender, dmg, attacker, team, rand, forced = false) {
     }
   }
 
-  const ap = passiveFor(attacker)
+  const ap = friendly ? null : passiveFor(attacker)   // 👽 สกิลของตัวที่ถูกควบคุมไม่ทำงาน
   for (const part of partsAt(ap, 'onAttack')) {
     if (part.effect !== 'infect') continue
     const v = valOf(part, attacker)
@@ -1021,6 +1063,42 @@ export function runOnKill(killer, team, foes) {
         out.events.push(e)
       }
     }
+  }
+  return out
+}
+
+// ══════════════════════════════════════════════════════════════
+//  onDied — หลังตัดสินแล้วว่า "ตายจริง" (runOnDeath ไม่กัน) · ไม่ใช่ช่องกันตาย
+//  👻 ผีน้อย: แบร่ใส่คนฆ่า → หวาดกลัว (สเปก unknown-visitors §8.9)
+//     คนฆ่าตายแล้ว/พวกเดียวกัน/ไม่มี → ศัตรู ATK สูงสุดที่ยังอยู่ · ไม่ดึง rand
+// ══════════════════════════════════════════════════════════════
+export function runOnDied(unit, foes, killer, unitTeam = []) {
+  const out = []
+  // 👤 เนเมซิส: เพื่อนตายจริง 1 ตัว = แค้น 1 ชั้น (ATK +pct% ของฐาน ต่อชั้น) + หมัดถัดไปพุ่งใส่คนฆ่า
+  for (const n of alive(unitTeam)) {
+    if (n === unit) continue
+    const np = passiveFor(n)
+    const part = partWithEffect(np, 'revenge')
+    if (!part) continue
+    const v = valOf(part, n), st = psOf(n)
+    const prev = st.revenge || 0
+    st.revenge = prev + 1
+    n.atk = n.atk / (1 + v.pct * prev / 100) * (1 + v.pct * st.revenge / 100)
+    if (killer && killer.side !== n.side) st.revengeOn = killer.uid
+    const e = ev(n, np, part, { targets: [n.uid], amount: st.revenge, fxKind: 'buff', ...(st.revengeOn ? { revengeOn: st.revengeOn } : {}) })
+    e.statsAfter = statsSnapshot(unitTeam)
+    out.push(e)
+  }
+  const p = passiveFor(unit)
+  for (const part of partsAt(p, 'onDied')) {
+    if (part.effect !== 'boo') continue
+    const v = valOf(part, unit)
+    let tg = killer && killer.side !== unit.side && killer.hp > 0 ? killer : null
+    if (!tg) tg = alive(foes).sort((a, b) => b.atk - a.atk)[0] || null
+    if (!tg) continue
+    const r = applyStatus(tg, 'fear', { n: v.n, from: unit, val: pctOf(unit.atk, v.pct) })
+    out.push(ev(unit, p, part, { effect: 'statusApply', statusId: 'fear', boo: true, targets: [tg.uid],
+      stacks: { [tg.uid]: r.n }, immune: !!r.immune, fxKind: 'debuff' }))
   }
   return out
 }

@@ -3,6 +3,8 @@
     <div class="page-title tw-head">
       <span><Emoji char="🏯" /> หอคอย</span>
       <span class="tw-head-r">
+        <!-- 27 ต.ค. 2026 (หน้ากระชับ): นับถอยหลังซีซั่นเป็นชิปบนหัว กดดูรางวัล -->
+        <SeasonCountdown v-if="authStore.isLoggedIn" kind="tower" compact />
         <HelpButton topic="tower" />
         <RouterLink to="/play/pets" class="tw-back">‹ กลับ</RouterLink>
       </span>
@@ -10,12 +12,7 @@
 
     <template v-if="authStore.isLoggedIn">
       <SeasonClaimBanner mode="tower" />
-      <SeasonCountdown kind="tower" />
-      <TowerMilestones :open-now="msOpen" :best="best" :claims="claims" :claimable="claimable" :busy="msBusy" @claim="onClaimMs" />
-      <TowerPath :floor="displayFloor" :best="displayBest" :max="pathMax" :crowd="crowd"
-                 @pick="sheetFloor = $event" />
-
-      <!-- การ์ดชั้นปัจจุบัน -->
+      <!-- การ์ดชั้นปัจจุบัน — อยู่บนสุด (user 27 ต.ค.: เห็นแบนเนอร์โซน+รายได้ก่อน ดูขลังกว่า) -->
       <div class="tw-card">
         <!-- แบนเนอร์โซนวาดเอง public/tower/<key>.webp (scripts/tower-art.mjs · user เคาะ 17 ต.ค. 2026) · สีพื้นเดิมเป็นสำรองตอนรูปยังไม่โหลด -->
         <div class="tw-zone tw-zone-art-bg" :class="{ 'tw-zone-royal': zone.royal }" :style="{ background: zoneBg }">
@@ -24,52 +21,32 @@
             <div class="tw-zone-name">{{ zone.name }}</div>
             <div class="tw-zone-floor">ชั้น {{ floor }} <span class="tw-zone-best">· สูงสุด {{ best }}</span></div>
           </div>
+          <!-- ทีมศัตรูวางบนแบนเนอร์ (เดิมเป็นแถวแยกใต้การ์ด) · แตะ = สอดแนม -->
+          <span class="tw-zone-foes">
+            <button v-for="(p, i) in botTeam" :key="i" class="tw-mon" @click="scout = p"><PetThumb :pet="p" /></button>
+          </span>
         </div>
         <div v-if="zone.endless" class="tw-max-cue">
           <div class="tw-max-cue-l1"><Emoji char="🌌" /> เพ็ทศัตรูได้รับผลกระทบจากห้วงลึก สเตตัสเปลี่ยนไป</div>
           <div class="tw-max-cue-l2">พลังโจมตี/พลังชีวิต +{{ ((endlessBoost(floor) - 1) * 100).toFixed(2).replace(/\.?0+$/, '') }}% · ยิ่งลึกยิ่งแรง ชั้นละ +{{ boostPct }}% · ทุก 10 ชั้นมีรางวัล</div>
         </div>
-        <div v-else-if="zone.royal" class="tw-max-cue">
-          <div class="tw-max-cue-l1">พลังบอทช่วงนี้ตันแล้ว (เกรด V ทุกตัว)</div>
-          <div class="tw-max-cue-l2">แพ้ชนะวัดที่สายกับการจัดทีม — <Emoji char="✊" /> ข่ม <Emoji char="✌️" /> · <Emoji char="✌️" /> ข่ม <Emoji char="✋" /> · <Emoji char="✋" /> ข่ม <Emoji char="✊" /></div>
-        </div>
+        <!-- โซนบัลลังก์: เดิมมีกล่อง "พลังบอทตันแล้ว · แพ้ชนะวัดที่สาย" — user 27 ต.ค. ให้เอาออก -->
         <!-- รายได้ 2 บรรทัด: ยอดรวมที่มีอยู่ (ไม่มี +) แล้วค่อยบอกส่วนต่างของชั้นถัดไป
              เดิมบรรทัดเดียวเขียน "+7,615/วัน" ทั้งที่เป็นยอดรวม → คนอ่านว่าไต่ชั้นเดียวได้เจ็ดพัน -->
+        <!-- รายได้บรรทัดเดียว (27 ต.ค.) · ยังแยกยอดรวม (ไม่มี +) กับส่วนต่างชั้นนี้ (มี +) ตามเหตุผลเดิม -->
         <div class="tw-bonus">
-          <div class="tw-bonus-now"><Emoji char="🪙" /> หอคอยให้รายได้ {{ bonus.toLocaleString() }}/วัน</div>
-          <div v-if="nextGain > 0" class="tw-bonus-next">
-            ชนะชั้น {{ floor }} → {{ (bonus + nextGain).toLocaleString() }}/วัน <b>(+{{ nextGain.toLocaleString() }})</b>
-          </div>
-          <div v-else class="tw-bonus-cap">{{ best >= TOWER_MAX ? 'เพดานรายได้เต็มแล้ว · ไต่ต่อเพื่ออันดับ+รางวัลขั้น' : 'เพดานรายได้เต็มแล้ว · ไต่ต่อเพื่ออันดับ' }}</div>
+          <span class="tw-bonus-now"><Emoji char="🪙" /> รายได้หอคอย {{ bonus.toLocaleString() }}/วัน</span>
+          <span v-if="nextGain > 0" class="tw-bonus-next">ชนะชั้นนี้ <b>+{{ nextGain.toLocaleString() }}</b></span>
+          <span v-else class="tw-bonus-cap">เพดานรายได้เต็มแล้ว</span>
         </div>
-
-        <div class="tw-row">
-          <span class="tw-label">ศัตรู</span>
-          <span class="tw-team">
-            <button v-for="(p, i) in botTeam" :key="i" class="tw-mon" @click="scout = p">
-              <PetThumb :pet="p" />
-            </button>
-          </span>
-        </div>
-        <div class="tw-vs"><Emoji char="⚔️" /> VS</div>
-        <div class="tw-row">
-          <span class="tw-label">ทีมคุณ</span>
-          <span class="tw-team">
-            <template v-if="team.length">
-              <button v-for="(p, i) in team" :key="i" class="tw-mon" @click="detailId = p.id">
-                <PetThumb :pet="p" />
-              </button>
-            </template>
-            <span v-else class="tw-empty">ยังไม่ได้จัดทีม</span>
-          </span>
-        </div>
-
-        <!-- ปุ่มสู้/จัดทีม ย้ายไปแถบติดล่างจอ (.tw-bar ท้ายหน้า) — user เคาะจากเดโม 17 ต.ค. 2026 -->
-        <button v-if="floor < AUTO_CLIMB_MAX" class="tw-auto" :disabled="busy || !team.length" @click="startAuto">
-          <Emoji char="⏩" /> ไต่ต่อเนื่อง
-        </button>
+        <!-- 27 ต.ค. 2026 (user จัดหน้าให้เลื่อนน้อยลง): แถว "ทีมคุณ" + VS ออก — ทีมโชว์ที่แถบสู้ล่างจออยู่แล้ว
+             ปุ่ม "ไต่ต่อเนื่อง" ย้ายเข้าหน้าจัดทีม (สวิตช์เหนือปุ่มเริ่ม แบบตีซ้ำของดันเจี้ยน) -->
         <div v-if="best >= TOWER_MAX" class="tw-clear"><Emoji char="🏆" /> พิชิตยอดหอคอยแล้ว! ไต่ต่อในห้วงนิรันดร์ได้เลย</div>
       </div>
+
+      <TowerMilestones :open-now="msOpen" :best="best" :claims="claims" :claimable="claimable" :busy="msBusy" @claim="onClaimMs" />
+      <TowerPath :floor="displayFloor" :best="displayBest" :max="pathMax" :crowd="crowd"
+                 @pick="sheetFloor = $event" />
 
       <!-- อันดับหอคอย — หัวตาราง 3 อันดับ + หน้าต่างรอบตัวเรา (เดิมโชว์แค่ top 3 คนอันดับกลางเลยไม่รู้สึกอะไร)
            best-effort ทั้งใบ: ไม่มีข้อมูล = ซ่อน -->
@@ -87,17 +64,26 @@
             <li v-if="u.kind === 'gap'" class="tw-rival-gap" aria-hidden="true">⋯</li>
             <li v-else class="tw-rival-row" :class="{ 'tw-rival-me': u.isMe }">
               <span class="tw-rival-medal">{{ medal(u.rank) }}</span>
-              <span class="tw-rival-name">{{ u.nickname }}<span v-if="u.isMe" class="tw-rival-badge">คุณ</span></span>
+              <span class="tw-rival-name">{{ u.nickname }}<span v-if="u.isMe" class="tw-rival-badge">คุณ</span>
+                <small v-if="u.isMe && rivals.chaseName && rivals.chaseGap > 0" class="tw-rival-chase-in"><Emoji char="🔥" /> ห่าง {{ rivals.chaseName }} {{ rivals.chaseGap }} ชั้น</small></span>
               <span class="tw-rival-floor">ชั้น {{ u.floor }}</span>
             </li>
           </template>
         </ol>
-        <div v-if="rivals.chaseName && rivals.chaseGap > 0" class="tw-rival-chase"><Emoji char="🔥" /> ตามหลัง {{ rivals.chaseName }} อยู่ {{ rivals.chaseGap }} ชั้น!</div>
-        <button class="tw-rival-all" @click="rankOpen = true">ดูอันดับทั้งหมด ({{ rivals.total }})</button>
+        <div class="tw-rival-foot">
+          <button class="tw-rival-all" @click="rankOpen = true">ดูอันดับทั้งหมด ({{ rivals.total }})</button>
+          <button v-if="steleCount" class="tw-rival-all" @click="steleOpen = true"><Emoji char="🪨" /> ศิลาจารึก</button>
+        </div>
       </div>
 
-      <!-- 🪨 ศิลาจารึก — ยอดเกิน 100 ต่อคนต่อซีซั่น ข้ามการรีเซต (0 read เพิ่ม · roster rows) -->
-      <TowerStele :rows="membersStore.rosterRows" :me="meUid" />
+      <!-- 🪨 ศิลาจารึก — ยอดเกิน 100 ต่อคนต่อซีซั่น ข้ามการรีเซต (0 read เพิ่ม · roster rows)
+           27 ต.ค.: เป็นปุ่มเปิดดู (เดิมกางเต็มท้ายหน้า ยาว) · ไม่มีใครเกิน 100 = ไม่มีปุ่ม -->
+      <button v-if="steleCount && !(rivals && rivals.total > 0)" class="tw-stele-btn" @click="steleOpen = true">
+        <Emoji char="🪨" /> ศิลาจารึกหอคอย <small>ผู้ก้าวข้ามชั้น 100 · {{ steleCount }} ซีซั่น</small><span aria-hidden="true">›</span>
+      </button>
+      <BottomSheet v-model:open="steleOpen" icon="🪨" title="ศิลาจารึกหอคอย">
+        <TowerStele :rows="membersStore.rosterRows" :me="meUid" />
+      </BottomSheet>
 
       <!-- 🔻 แถบสู้ติดล่างจอ: sticky ใน #main-content (padding ล่าง 28px → bottom/margin -28px ให้ชิดขอบจริง) (ตัว scroll จริง ซึ่งจบเหนือ bottom-nav อยู่แล้ว)
            ⇒ ไม่ต้อง fixed/Teleport/z-index · อยู่ท้ายหน้าเสมอ เลื่อนไปไหนก็กดสู้ได้ -->
@@ -115,7 +101,17 @@
     </template>
     <div v-else class="tw-login">เข้าสู่ระบบเพื่อเล่น</div>
 
-    <TeamPicker v-model:open="pickOpen" :enemies="botTeam" :enemy-label="`ศัตรูชั้น ${floor}`" :context="`หอคอยชั้น ${floor}`" :done-label="fightLabel" @done="pickOpen = false; onFight()" />
+    <TeamPicker v-model:open="pickOpen" :enemies="botTeam" :enemy-label="`ศัตรูชั้น ${floor}`" :context="`หอคอยชั้น ${floor}`" :done-label="fightLabel"
+                @done="pickOpen = false; autoOn ? startAuto() : onFight()">
+      <!-- ⏩ ไต่ต่อเนื่อง (27 ต.ค. ย้ายมาจากการ์ดชั้น) — ระหว่างสู้ยังเปิด/ปิดได้ที่แถบลอย AutoRepeatBar -->
+      <template v-if="floor < AUTO_CLIMB_MAX" #cta-extra>
+        <label class="tw-autosw">
+          <input type="checkbox" v-model="autoOn" />
+          <span class="tw-autosw-sw" aria-hidden="true"></span>
+          <span><b>ไต่ต่อเนื่อง</b><small>ชนะแล้วสู้ชั้นถัดไปเองจนกว่าจะแพ้หรือปิด</small></span>
+        </label>
+      </template>
+    </TeamPicker>
     <TowerRankSheet v-model:open="rankOpen" :rows="rivals ? rivals.all : []" />
     <BattleReplay :data="replay" theme="tower" exitable :exit-label="autoOn ? 'หยุดไต่ต่อเนื่อง ✕' : 'ออก ✕'" @close="onReplayClose" @done="onReplayDone" />
     <!-- สวิตช์ไต่ต่อเนื่อง + นับถอยหลัง (ของกลางกับตีซ้ำดันเจี้ยน) · เปิดกลางไฟต์ได้ด้วย -->
@@ -154,6 +150,8 @@ import PetScoutCard from '../components/pets/PetScoutCard.vue'
 import PetThumb from '../components/shared/PetThumb.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import TowerStele from '../components/tower/TowerStele.vue'
+import BottomSheet from '../components/shared/BottomSheet.vue'
+import { buildStele } from '../utils/towerStele.js'
 import TowerPath from '../components/tower/TowerPath.vue'
 import SeasonCountdown from '../components/shared/SeasonCountdown.vue'
 import SeasonClaimBanner from '../components/shared/SeasonClaimBanner.vue'
@@ -164,6 +162,7 @@ import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
+const steleOpen = ref(false)
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, AUTO_CLIMB_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
 loadMsOpen()
 const msBusy = ref(false)
@@ -177,6 +176,7 @@ const defOf = (id) => getPetDef(id) || { emoji: '❓', name: '?' }
 onMounted(() => { membersStore.loadRoster().catch(() => {}) })  // best-effort, 1 read
 
 const meUid = computed(() => authStore.currentUser?.uid || '')
+const steleCount = computed(() => buildStele(membersStore.rosterRows, meUid.value).length)   // 🪨 จำนวนซีซั่นบนศิลา (0 = ไม่มีปุ่ม)
 // เพื่อนปักหมุดรายชั้น — อ่าน rosterRows ดิบ (rosterUsers key ด้วย studentId แล้วตก guest)
 const crowd = computed(() => buildFloorCrowd(membersStore.rosterRows, meUid.value))
 
@@ -201,7 +201,8 @@ const rankRows = computed(() => {
   const r = rivals.value
   if (!r) return []
   const out = r.top.map(u => ({ ...u, kind: 'row' }))
-  const extra = r.around.filter(u => u.rank > TOP_COUNT)
+  // 27 ต.ค. (หน้ากระชับ): รอบตัวเราเหลือ ±1 อันดับ — ทั้งหมดดูได้ที่ "ดูอันดับทั้งหมด"
+  const extra = r.around.filter(u => u.rank > TOP_COUNT && (r.myRank == null || Math.abs(u.rank - r.myRank) <= 1))
   if (!extra.length) return out
   if (extra[0].rank > TOP_COUNT + 1) out.push({ kind: 'gap' })
   return out.concat(extra.map(u => ({ ...u, kind: 'row' })))
@@ -354,7 +355,12 @@ function onSheetFight() {
 .tw-max-cue { margin: 10px 16px 0; padding: 8px 10px; border-radius: 10px; background: var(--primary-light); border: 1.5px dashed var(--primary); font-size: .74rem; font-weight: 700; color: var(--ink); line-height: 1.45; }
 .tw-max-cue-l1 { font-weight: 800; }
 .tw-max-cue-l2 { font-weight: 600; }
-.tw-bonus { padding: 10px 16px 0; line-height: 1.5; }
+.tw-bonus { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 9px 16px 10px; line-height: 1.4; }
+.tw-zone-foes { margin-left: auto; position: relative; display: flex; gap: 4px; }
+.tw-zone-foes .tw-mon { width: 54px; }
+.tw-rival-foot { display: flex; gap: 6px; }
+.tw-rival-foot .tw-rival-all { flex: 1; }
+.tw-rival-chase-in { display: block; font-size: .7rem; font-weight: 700; color: #c2410c; }
 .tw-bonus-now { font-size: .76rem; color: #b45309; font-weight: 700; }
 .tw-bonus-next { font-size: .74rem; color: var(--ink); font-weight: 600; }
 .tw-bonus-next b { color: #15803d; font-weight: 800; }
@@ -379,9 +385,19 @@ function onSheetFight() {
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }
 .tw-login { text-align: center; color: var(--muted); padding: 30px 0; font-size: .85rem; }
 
-.tw-auto { display: block; width: 100%; margin-top: 8px; font: inherit; font-weight: 800; font-size: .84rem; color: var(--ink); background: #fff; border: var(--bw) dashed var(--line); border-radius: 12px; padding: 9px; cursor: pointer; }
-.tw-auto small { font-weight: 600; color: var(--muted); }
-.tw-auto:disabled { opacity: .5; }
+.tw-stele-btn { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 12px; font: inherit; font-weight: 800; font-size: .88rem; color: var(--ink); background: linear-gradient(135deg, #e7e5e4, #d6d3d1); border: var(--bw) solid var(--line); border-radius: 14px; padding: 11px 14px; cursor: pointer; text-align: left; }
+.tw-stele-btn small { font-weight: 600; font-size: .72rem; color: #57534e; }
+.tw-stele-btn span { margin-left: auto; font-size: 1.1rem; }
+.tw-autosw { display: flex; align-items: center; gap: 10px; background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; }
+.tw-autosw input { position: absolute; opacity: 0; pointer-events: none; }
+.tw-autosw-sw { width: 42px; height: 24px; border-radius: 999px; background: #d6cbe0; position: relative; flex-shrink: 0; transition: background .2s; }
+.tw-autosw-sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.tw-autosw input:checked + .tw-autosw-sw { background: var(--primary); }
+.tw-autosw input:checked + .tw-autosw-sw::after { transform: translateX(18px); }
+.tw-autosw input:focus-visible + .tw-autosw-sw { outline: 2px solid var(--primary); outline-offset: 2px; }
+.tw-autosw span:last-child { display: flex; flex-direction: column; }
+.tw-autosw b { font-size: .88rem; color: var(--ink); }
+.tw-autosw small { font-size: .72rem; color: var(--muted); }
 .tw-rival { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); margin-top: 12px; padding: 12px 14px; }
 .tw-rival-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
 .tw-rival-head > span:first-child { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); flex-shrink: 0; }

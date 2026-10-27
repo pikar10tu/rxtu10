@@ -283,7 +283,9 @@ onBeforeUnmount(clearTimers)
 .tp-box {
   height: clamp(300px, 45vh, 440px);
   overflow-y: auto;
-  overscroll-behavior: contain;   /* กันเลื่อนทะลุไปดันหน้าหลัก */
+  /* 27 ต.ค.: เดิม contain = นิ้ว/ล้อเมาส์บนหอคอยเลื่อนหน้าหลักไม่ได้เลย ต้องหาที่ว่างข้างๆ (เจอตอนรีวิว UI)
+     ⇒ auto: เลื่อนหอคอยจนสุดปลายแล้วต่อไปเลื่อนหน้าหลักได้ */
+  overscroll-behavior-y: auto;
   background: var(--bg);
 }
 

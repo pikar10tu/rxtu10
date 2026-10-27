@@ -8,6 +8,19 @@
 // 🔴 ดีฟอลต์ต้องปิดเสมอ: ไม่มี config / config รูปพัง = คืนแค่ wave 1
 //    (flag ใน Firestore เป็นค่าที่เดาจากรีโปไม่ได้ — fail-open แปลว่าเพ็ทที่ยังไม่เปิดตัวหลุดออกกาชาเงียบๆ)
 import { PETS } from '../data/index.js'
+import { GACHA_THEMES, themeWindow } from '../data/gachaThemes.js'
+
+/** ⏰ อีเวนต์ที่มีผลจริง ณ now: แถวธีม auto ที่ถึงเวลาเปิดแล้ว (wave สูงสุด) ชนะคอนฟิกที่ wave ต่ำกว่า
+ *  ยังไม่ถึงเวลา = คอนฟิกเดิม (ตัวเด่นรุ่นใหม่ซ่อนสนิท) · คอนฟิกที่แอดมินเขียนรุ่นใหม่กว่า = คอนฟิกชนะ */
+export function effectiveEvent(gachaEvent, now = Date.now()) {
+  let best = null
+  for (const w of Object.keys(GACHA_THEMES).map(Number)) {
+    const win = themeWindow(w)
+    if (win && now >= win.startsAt && (!best || w > best.wave)) best = { wave: w, endsAt: win.endsAt, auto: true }
+  }
+  if (!best) return gachaEvent
+  return best.wave >= eventWave(gachaEvent) ? best : gachaEvent
+}
 
 /** ms จาก endsAt ที่รับได้ทั้งเลขล้วนและ Firestore Timestamp — อ่านไม่ออกคืน null (= ยังไม่เปิด) */
 function endsAtMs(gachaEvent) {
@@ -33,6 +46,7 @@ export const wave1Pets = () => PETS.filter(p => waveOf(p) === 1)
 /** "ตู้ปกติ" แจกอะไรได้ตอนนี้ — รุ่นของอีเวนต์ปัจจุบันเข้าตู้ปกติเมื่ออีเวนต์จบเท่านั้น
  *  (user: ตู้คงที่เลือกได้ทุกตัว ยกเว้นตัวใหม่ของเดือนนั้น) · รุ่นที่ใหม่กว่าอีเวนต์ = ยังไม่เปิดตัว ไม่มีทางหลุด */
 export function releasedPets(gachaEvent = null, now = Date.now()) {
+  gachaEvent = effectiveEvent(gachaEvent, now)
   const w = eventWave(gachaEvent)
   const ends = endsAtMs(gachaEvent)
   const max = ends !== null && now > ends ? w : w - 1
@@ -41,6 +55,7 @@ export function releasedPets(gachaEvent = null, now = Date.now()) {
 
 /** "หาได้จริงตอนนี้" = ตู้ปกติ + รุ่นของอีเวนต์ถ้าตู้ธีมยังเปิด — ใช้กับตัวหาร x/y · เควสเก็บครบ */
 export function obtainablePets(gachaEvent = null, now = Date.now()) {
+  gachaEvent = effectiveEvent(gachaEvent, now)
   if (!eventOpen(gachaEvent, now)) return releasedPets(gachaEvent, now)
   const w = eventWave(gachaEvent)
   return PETS.filter(p => waveOf(p) <= w)

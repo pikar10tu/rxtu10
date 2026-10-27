@@ -36,6 +36,8 @@
         </Teleport>
       </section>
 
+      <AdminBattleLab />
+
       <!-- ───── ตู้อัญเชิญพิเศษ (config/app.gachaEvent) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="✨" /> ตู้อัญเชิญพิเศษ</span></div>
@@ -48,7 +50,8 @@
             <template v-if="gachaEv.active"><Emoji char="🟢" /> เปิดอยู่ · เหลือ {{ gachaEvLeft }}</template>
             <template v-else><Emoji char="⚪" /> ยังไม่มีอีเวนต์</template>
           </span>
-          <div class="ev-btns">
+          <div v-if="nextTheme.auto" class="admin-hint">⏰ ตู้ {{ nextTheme.name }} เปิดเองตามเวลา ({{ nextTheme.month }} 00:00 น. → สิ้นเดือน) ไม่ต้องกด</div>
+          <div v-else class="ev-btns">
             <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(7)">เริ่ม 7 วัน</button>
             <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(14)">เริ่ม 14 วัน</button>
             <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(30)">เริ่ม 30 วัน</button>
@@ -493,6 +496,7 @@
 </template>
 
 <script setup>
+import AdminBattleLab from '../components/admin/AdminBattleLab.vue'
 import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
 import { WEEKLY_EFFECTS, WEEKLY_DAYS, activeWeekly } from '../data/pvpWeekly.js'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'

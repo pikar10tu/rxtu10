@@ -302,6 +302,12 @@ test('ทุก effect ที่มีเพ็ทถือจริง ต้�
     'healOnAttack',   // ฟื้นตามดาเมจของหมัดนั้น
     'infect',         // ป้ายชั้นเชื้ออยู่ฝั่งเป้า (FOE_STATUS_EFFECTS) — เจ้าของไม่ได้ป้าย
     'elementTrinity', // ป้ายมีอยู่ แต่ยังโกหกได้ (buffSources เป็น static) — P3b เป็นคนซ่อม
+    'cometBless',     // ☄️ พรต้นรอบ — ป้ายโล่พร 🌠 อยู่ในทะเบียนสถานะ (data/statuses.js) ฝั่งผู้รับ
+    'revenge',        // 👤 ชั้นแค้นโชว์ผ่านเลข ATK บนการ์ด (statsAfter) · ⏳ ป้ายของตัวเองทำทีหลัง
+    'adaptArmor',     // 🤖 ชั้นลดดาเมจรายสาย — ⏳ ป้ายแยกสายทำทีหลัง (ตอนนี้ไม่ยิง event กันจังหวะช้า)
+    'mindControl',    // 👽 เหตุการณ์ครั้งเดียวต่อหมัด ไม่ค้างบนการ์ด
+    'abduct',         // 🛸 ป้าย "ถูกลักพาตัว" อยู่บนการ์ดตัวที่ถูกดูด (รีเพลย์) ไม่ใช่ป้ายพาสสีฟ
+    'boo',            // 👻 แบร่ตอนตาย — ป้ายอยู่ฝั่งเป้า (😱 จากทะเบียน data/statuses.js) เจ้าของตายไปแล้ว
   ])
   const GROUPS = [TEAM_AURA_EFFECTS, FOE_AURA_EFFECTS, SELF_STATUS_EFFECTS, FOE_STATUS_EFFECTS]
   for (const [id, p] of Object.entries(PET_PASSIVES)) {
