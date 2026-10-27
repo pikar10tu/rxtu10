@@ -126,12 +126,17 @@ test('คำอธิบายทุกตัวต้องเติมค่�
   }
 })
 
+// ค่าที่ตั้งใจซ่อนจากคำอธิบาย (user สั่ง · ให้ผู้เล่นไปเจอเองในไฟต์) — เพิ่มที่นี่พร้อมเหตุผลเท่านั้น
+const HIDDEN_ON_PURPOSE = {
+  sol: ['degree'],   // ☀️ ร่างองศา (คู่ 🌍) — 26 ต.ค. 2026 user: ไม่ต้องบอก ให้ไปเจอเองในไฟต์
+}
 test('desc ต้องแจ้งตัวเลขทุกตัวที่ข้อมูลมี (ค่าที่ไม่ถูกพูดถึง = ผู้เล่นไม่มีทางรู้)', () => {
   for (const [id, p] of Object.entries(PET_PASSIVES)) {
     const said = new Set([...String(p.desc || '').matchAll(/\{([\w.]+)\}/g)].map(m => m[1].split('.').pop()))
     for (const part of partsOf(p)) {
       for (const [k, v] of Object.entries(part.value || {})) {
         if (typeof v !== 'number') continue      // duoWith/element เป็นชื่อ ไม่ใช่ค่าที่ต้องบอก
+        if (HIDDEN_ON_PURPOSE[id]?.includes(k)) continue
         if (v === 0) continue   // ค่า 0 เขียนเป็นคำแทนเลข: ไวรัส max 0 = "ไม่จำกัดชั้น" · ซอล legendary 0 = "ตำนานไม่ได้"
         assert.ok(said.has(k), `${id} desc ไม่ได้บอกค่า ${k} (=${v}) → "${p.desc}"`)
       }
