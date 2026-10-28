@@ -1,3 +1,5 @@
+import { bossImmune, STATUSES as _S } from 'file:///D:/RXTU/rxtu10-v2/src/data/statuses.js'
+_S.doom = { kind: 'debuff', color: '#000', icon: '💀', name: 'โรคร้าย', stack: 'none' }
 // ════════════════════════════════════════════════════════════
 //  Battle engine — pure + deterministic (seeded) · พอร์ตจาก
 //  scripts/battle-sim.mjs (resolve) + บันทึก log ทุก action ให้ UI replay
@@ -7,10 +9,12 @@ import { BATTLE_CFG, buildCombatant } from 'file:///D:/RXTU/rxtu10-v2/src/data/b
 import { elementBeats } from 'file:///D:/RXTU/rxtu10-v2/src/data/index.js'
 import { weeklyRules, statMult } from 'file:///D:/RXTU/rxtu10-v2/src/data/pvpWeekly.js'
 import {
-  applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, statsSnapshot,
-  tauntTargetOf, psOf, windupOf,
+  applyForms, runSetup, applyAuras, initHunt, runOnStart, runOnRound, runOnRoundEnd, runOnAttack, runOnHit, runOnDealt, runOnDeath, runOnKill, runOnAnyDeath, runOnDied, statsSnapshot,
+  tauntTargetOf, psOf, windupOf, targetableFoes, storedPowerMult,
 } from 'file:///D:/RXTU/rxtu10-v2/src/utils/battlePassives.js'
-import { PET_PASSIVES } from 'file:///D:/RXTU/rxtu10-v2/src/data/petPassives.js'
+import { PET_PASSIVES, partWithEffect, passiveValueAt } from 'file:///D:/RXTU/rxtu10-v2/src/data/petPassives.js'
+import { STATUSES } from 'file:///D:/RXTU/rxtu10-v2/src/data/statuses.js'
+import { applyStatus, isImmune, consumeSkip, consumeBlessShield, turnEndTicks, statusAtkMult, statusDmgTakenMult, canHeal, clearOnDeath } from 'file:///D:/RXTU/rxtu10-v2/src/utils/battleStatus.js'
 
 // mulberry32 — RNG เดียวกับ sim
 function rng(seed) {
@@ -23,7 +27,8 @@ function rng(seed) {
   }
 }
 
-const alive = (t) => t.filter(f => f.hp > 0)
+// 🛸 "บนสนาม" = ยังไม่ตาย และไม่ถูกยูเอฟโอดูดอยู่ (ps.away) — ตัดสินแพ้ชนะยังดูเลือดจริงผ่าน releaseStranded()
+const alive = (t) => t.filter(f => f.hp > 0 && !f.ps?.away)
 
 /** teamA/teamB = array ของ {id,rarity,element,grade} (≤4) · seed = int */
 export function simulateBoss(teamA, teamB, seed, opts = {}) {
@@ -31,13 +36,19 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   // 🗓️ เอฟเฟกต์ประจำสัปดาห์ (data/pvpWeekly.js) — useArena ส่ง opts.weekly มาเฉพาะ PvP · ไม่ส่ง = ไฟต์ปกติเป๊ะ
   const W = weeklyRules(opts.weekly) || {}
   const build = (p, i, side) => {
-    const u = { ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `${side}${i}`, side }
+    const u = { ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `${side}${i}`, side, passiveLv: p?.passiveLv }
     const m = statMult(W, u, i)
     if (m.atk !== 1) u.atk *= m.atk
     if (m.hp !== 1) { u.maxHp *= m.hp; u.hp = u.maxHp }
     // 🏯 หอคอยเกิน 100 (Endless) — บอทคูณ atk/hp ตามชั้น (towerFloors.endlessBoost) · ไม่มี boost = ไฟต์ปกติเป๊ะ
     //    ดันเจี้ยนใช้ boost < 1 ด้วย (มอนอ่อนกว่าค่าฐาน) — หอคอยส่งแค่ > 1 จึงเหมือนเดิมเป๊ะ
     if (p?.boost > 0 && p.boost !== 1) { u.atk *= p.boost; u.maxHp *= p.boost; u.hp = u.maxHp }
+    // 🤖 โรบอท: เริ่มการต่อสู้ เลือดสูงสุด +hp% (สเปก §8.2) — ใส่ก่อน base = เลขบนการ์ดเป็นค่าที่บวกแล้ว
+    { const rp = partWithEffect(PET_PASSIVES[u.id], 'adaptArmor')
+      if (rp) { const v = passiveValueAt(rp, u.passiveLv); u.maxHp *= 1 + v.hp / 100; u.hp = u.maxHp; u.atk *= 1 - (v.weak || 0) / 100 } }
+    // 🐲 บอสต้านทานสถานะ (data/statuses.js bossImmune) · startStatus = สถานะติดตัวตั้งแต่เริ่ม (กลไกบอส/เทส)
+    if (p?.immune) u.immune = [...p.immune]
+    if (p?.startStatus) for (const x of p.startStatus) applyStatus(u, x.id, { n: x.n, val: x.val })
     return u
   }
   const A = (teamA || []).map((p, i) => build(p, i, 'A'))
@@ -92,6 +103,11 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   //    !countering`) กันสามทาง: ฟีนิกซ์สองตัวสวนกันไม่รู้จบ (countering กันเอง) และหมัดสวนไม่เกิดซ้อนใน
   //    ก้อนสะท้อนเกราะของตัวเอง (reflecting กัน) — แต่ปล่อยให้เกราะที่โดนหมัดสวนสะท้อนกลับได้จริง
   let countering = false
+  // 👽 หมัดควบคุมจิตใจกำลังบิน — คนฆ่าของหมัดนี้ = เอเลี่ยน ไม่ใช่ตัวที่ถูกควบคุม (สเปก §2.3)
+  let controlBy = null
+  let bossHook = null
+  let round = 0
+  let lastDodged = false
 
   /** หักเลือด 1 ครั้ง + บันทึก log · คืน true ถ้าเป้าตายจริง (ผ่าน onDeath แล้ว)
    *  forced = หมัดนี้ลงบนเป้าที่ถูก taunt บังคับมา (ไม่ใช่เป้าที่เลือกเอง) — ส่งต่อให้ runOnHit ตัดสินใจลดดาเมจ
@@ -101,16 +117,39 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     // onHit: guardian (เพื่อนรับแทน) → dodge → ลดดาเมจ → หนาม  (มุมของ "ผู้รับ" ล้วน)
     const attTeam = att.side === 'A' ? A : B
     const hitRes = runOnHit(tg, Math.max(0, mult), att, foes, rand, forced)
-    if (opts.onHitHook) opts.onHitHook(att, tg, hitRes, sub)
     for (const e of hitRes.events) log.push(e)
+    if (bossHook) bossHook(att, tg, hitRes)
+    // 🤖 โรบอท: ลดดาเมจจากสายของคนตี ตามชั้นที่สะสมของสายนั้น · หมัดที่โดนจริง (dmg > 0) ค่อยสะสมเพิ่ม
+    //    (หมัดแรกจากสายใหม่ยังเต็ม · หลบ/เกราะกัน = ไม่นับ · หมัดลูกนับทุกครั้ง) · ไม่ยิง event (เลี่ยงจังหวะช้า)
+    { const rp = partWithEffect(PET_PASSIVES[tg.id], 'adaptArmor')
+      if (rp && hitRes.dmg > 0 && att.element) {
+        const v = passiveValueAt(rp, tg.passiveLv), st = psOf(tg)
+        const ad = st.adapt || (st.adapt = {})
+        const cur = ad[att.element] || 0
+        hitRes.dmg *= 1 - cur / 100
+        ad[att.element] = Math.min(v.max, cur + v.pct)
+      } }
+    // ☄️ โล่พร: หมัดแรกที่โดนจริง (หลังหลบ/เกราะ/ลดดาเมจ) เบาลง · ไม่ลดหนาม/สะท้อน/ดาเมจทะลุ
+    { const bs = consumeBlessShield(tg, hitRes.dmg)
+      if (bs.used) {
+        hitRes.dmg = bs.dmg
+        log.push({ t: 'passive', uid: tg.uid, side: tg.side, petId: tg.id, name: STATUSES.blessShield.name, icon: STATUSES.blessShield.icon,
+          effect: 'statusTick', statusId: 'blessShield', left: 0, targets: [tg.uid], fxKind: 'guard', amount: 0 })
+      } }
     // onDealt: ผลฝั่ง "ผู้ตี" ที่ต้องรู้ดาเมจจริง (healOnAttack / teamLifesteal)
     // 🔒 ต้อง push ต่อท้าย hitRes.events ทันที — ลำดับ event ใน log คือสิ่งที่รีเพลย์เล่าตามตรงๆ
-    for (const e of runOnDealt(att, attTeam, hitRes.dmg + hitRes.pierce).events) log.push(e)
+    if (att.side !== tg.side) for (const e of runOnDealt(att, attTeam, hitRes.dmg + hitRes.pierce).events) log.push(e)   // 👽 ตีเพื่อน = ไม่ดูดเลือด/ไม่ฟื้น
     tg.hp -= hitRes.dmg
     // ดาเมจทะลุ (infect) — หักหลังสายลดจบแล้ว จึงไม่โดน guardian/dodge/DR/เกราะ
     // ยังอยู่ใน beat เดิม และ attack event คิด dmg จาก before-after อยู่แล้ว หลอดเลือดจึงตรงเอง
     if (hitRes.pierce > 0) tg.hp -= hitRes.pierce
     if (hitRes.thorns > 0) att.hp -= hitRes.thorns
+    // 🛸 ยูเอฟโอโดนตีจริง (ไม่หลบ · รวมหมัดลูก · ไม่นับหนาม/สะท้อน/เชื้อ) ครบ {hits} = ปล่อย + ตกกระแทก
+    //    นับหลังหักดาเมจแล้ว — หมัดที่ฆ่ายูเอฟโอ = ปล่อยแบบไม่ตก (ทาง resolveSilentDeath) ไม่ใช่ตก (รีวิว 28 ต.ค.)
+    if (tg.ps?.ufo && !hitRes.dodged && !reflecting && tg.hp > 0) {
+      tg.ps.ufo.hits++
+      if (tg.ps.ufo.hits >= ufoVal(tg).hits) ufoRelease(tg, true)
+    }
 
     // เกราะสะท้อน — ใส่ศัตรูทุกตัวของผู้รับ ผ่าน strike() ปกติ (โดนสายลดของฝั่งนั้นตามสเปก)
     // 🔒 sub: true ⇒ อยู่ beat เดิม ไม่เพิ่มจังหวะ · reflecting กันไม่ให้เกราะฝั่งตรงข้ามสะท้อนกลับมาวนไม่รู้จบ
@@ -154,6 +193,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       // 🔒 sub = หมัดลูกใน beat เดียวกัน (cleave/multiStrike) — battleBeats ให้ timing ZERO
       //    ถ้าไม่ตั้ง flag นี้ ทุกเป้ารองจะกลายเป็น "จังหวะหมัด" ใหม่ = ไฟต์ยืดทันที (กฎเหล็กพัง)
       ...(sub ? { sub: true } : {}),
+      ...(controlBy ? { mind: true, credit: controlBy.uid } : {}),
       // 🤍 echo = หมัดตีซ้ำของมาสก์กระต่าย — รีเพลย์รวบทุกหมัดซ้ำให้ยาวรวมเท่าหมัดปกติ 1 หมัด (user 18 ต.ค. 2026) · แสดงผลล้วน
       ...(tier?.echo ? { echo: true } : {}),
       // ดาเมจเชื้อที่ทะลุมาในหมัดนี้ แตกเป็นชั้นละก้อน — **ของฝั่งจอล้วน** (BattleReplay เด้งเลขย่อย
@@ -163,10 +203,12 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       targetHpAfter: hpAtHit > 0 ? Math.max(1, Math.round(hpAtHit)) : 0, dead: false,
     }
     log.push(entry)
+    if (!sub) lastDodged = !!hitRes.dodged   // หมัดหลักเท่านั้น — หมัดลูก/หมัดสวนไม่ทับ (รีวิว 28 ต.ค.)
+    const killerOf = controlBy || att   // 👽 หมัดควบคุม = เอเลี่ยนเป็นคนฆ่า
     // announced: true — ใบ 'attack' ข้างบนแบก dead ของเป้าหลักเองอยู่แล้ว
     // ไม่ต้องมีใบการตายเงียบซ้อนอีกใบ (สเปก §4.1) · อีก 3 จุดที่เรียกใช้ค่าเริ่มต้น false ถูกต้องแล้ว
     let dead = hpAtHit <= 0
-    if (dead) dead = resolveSilentDeath(tg, att, { announced: true })
+    if (dead) dead = resolveSilentDeath(tg, killerOf, { announced: true })
     entry.dead = dead
     // 🔴 สเปก §7.6: ตายเงียบ 2 ทางที่เหลือของ strike() นี้ — หนาม (att โดนสวนตอนบรรทัด 81) และ guardian
     //    (ผู้พิทักษ์ hitRes.guard โดนหักตอนอยู่ใน runOnHit) ต้องแก้ "หลัง" log เหตุการณ์ของหมัดนี้ (ก้อน
@@ -177,7 +219,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     resolveSilentDeath(att, tg)
     resolveSilentDeath(hitRes.guard, att)
     // 🦠 เป้ารองที่โดนดาเมจเชื้อตอนแปะ (infectSplash) — ตายเงียบหลังใบหมัด (เหตุมาก่อนผล)
-    for (const u of hitRes.splash || []) resolveSilentDeath(u, att)
+    for (const u of hitRes.splash || []) resolveSilentDeath(u, killerOf)
     return dead
   }
 
@@ -217,6 +259,8 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     }
     if (d.prevented) return false
     st._deathDone = true
+    clearOnDeath(unit)   // ตาย = ล้างทุกสถานะในทะเบียน (🦠 ย้ายตามกติกาเดิมใน onAnyDeath)
+    if (unit.ps?.ufo) ufoRelease(unit, false)   // 🛸 ยูเอฟโอตาย = ปล่อยทันที ไม่มีตกกระแทก
     // 💀 ใบบันทึกการตาย (P2c-2, สเปก §3–§4) — ยิงเฉพาะทางที่ไม่มีใบ attack ของตัวเองแบก dead อยู่แล้ว
     //    ใช้รูปแบบเดียวกับหมัดปกติโดยตั้งใจ: ผู้อ่าน log ที่มีอยู่ (battleSummary/battleBeats) เข้าใจทันที
     //    โดยไม่ต้องแก้ทีละที่ — "ผู้อ่านที่ลืมอัปเดต = พังเงียบ" คือตระกูลบั๊กที่กัดโปรเจกต์นี้มาหลายรอบ
@@ -233,14 +277,18 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       })
     }
     for (const e of runOnAnyDeath(unit, killerTeam, unitTeam, rand)) log.push(e)
+    for (const e of runOnDied(unit, killerTeam, killer, unitTeam)) log.push(e)   // 👻 แบร่ (หลังตายจริง)
     return true
   }
 
   // เลือกเป้า: ถูกบังคับ (taunt) มาก่อนเสมอ · ไม่งั้นสุ่มตามเดิม
   // 🔴 ต้องเช็ค taunt ก่อนเรียก rand() — ถ้าเรียก rand() แล้วค่อยทิ้งผล ลำดับสุ่มจะเลื่อนทั้งไฟต์
-  const pick = (foes) => {
+  const pick = (foes, att = null) => {
     const forced = tauntTargetOf(foes)
     if (forced) return forced
+    // 👤 ล้างแค้น: หมัดถัดไปพุ่งใส่คนฆ่าเพื่อน (ยั่วยุ 🦍 ยังชนะ · ตายแล้ว = ตีปกติ) · ไม่ดึง rand
+    const rv = att?.ps?.revengeOn
+    if (rv) { att.ps.revengeOn = null; const t = foes.find(u => u.uid === rv && u.hp > 0 && !u.ps?.away); if (t) return t }
     const al = alive(foes)
     return al.length ? al[Math.floor(rand() * al.length)] : null
   }
@@ -263,12 +311,24 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
    *     ก่อนเช็ค taunt ⇒ เรียกซ้ำได้โดยไม่ทำให้ลำดับสุ่มของไฟต์เลื่อน (ดู comment บน pick ด้านบน) */
   const hit = (att, foes) => {
     const forced = !!tauntTargetOf(foes)
-    let tg = pick(foes)
+    const tf = targetableFoes(foes)   // 👤 เนเมซิสซ่อนตัว = เลือกเป็นเป้า/เป้าลามไม่ได้
+    let tg = pick(tf, att)
     if (!tg) return false
     const attTeam = att.side === 'A' ? A : B
-    const mod = runOnAttack(att, tg, foes, rand, attTeam)
+    const mod = runOnAttack(att, tg, tf, rand, attTeam)
     for (const e of mod.events) log.push(e)
     tg = mod.target || tg
+    // 🛸 ยังไม่ได้ดูดใคร = หมัดนี้คือการดูดเป้า (หลบไม่ได้ · เกราะกันไม่ได้ · ไม่มีดาเมจ) · บอสกัน = ตีปกติ
+    if (ufoPart(att) && !att.ps?.ufo && !isImmune(tg, 'away')) {
+      if (tg.ps?.ufo) ufoRelease(tg, false)   // ดูดยูเอฟโออีกฝั่งที่กักใครอยู่ = ตัวนั้นถูกปล่อย (ไม่มีตกกระแทก)
+      psOf(tg).away = true
+      psOf(att).ufo = { uid: tg.uid, hits: 0, round }
+      const p = PET_PASSIVES[att.id]
+      log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: p.name, icon: p.icon,
+        effect: 'abduct', targets: [tg.uid], fxKind: 'debuff' })
+      return false
+    }
+    const ufoWeak = att.ps?.ufo ? ufoVal(att).pct / 100 : 1   // ระหว่างกักตัว ยูเอฟโอตีเบาลง
 
     let m = elementMult(att.element, tg.element)
     const eff = m > 1 ? 'super' : (m < 1 ? 'weak' : 'neutral')  // ธาตุล้วน ก่อนคูณ crit/variance
@@ -276,6 +336,8 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     if (crit) m *= critMult
     m *= 1 + (rand() * 2 - 1) * variance
     m *= mod.atkMult * (1 + (tg.vuln || 0))
+    m *= statusAtkMult(att) * statusDmgTakenMult(tg)   // 🥀 💪 💔 (ทะเบียนสถานะ)
+    m *= ufoWeak
     const base = att.atk * m
 
     // หมัดหลัก (multiStrike = ตีซ้ำเป้าเดิมใน beat เดียว ทีละ strikePct)
@@ -301,26 +363,106 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       if (x.unit.hp <= 0) continue
       if (strike(att, x.unit, foes, base * (x.pct / 100), { crit: false, eff: 'neutral' }, true, false)) killed = true
     }
+    // 👽 ควบคุมจิตใจ (สเปก §2.3): หมัดหลักโดนจริง + เป้ายังไม่ตาย ⇒ เป้าตีพวกเดียวกัน 1 ตัว (สุ่ม รวมตัวเอง)
+    //    แรง = pct% ของ ATK เป้า × พลังสะสม (🌙 👹) · 1 ตา = 1 ครั้ง · อยู่ใน beat เดิม (sub)
+    const mc = partWithEffect(PET_PASSIVES[att.id], 'mindControl')
+    if (mc && att.hp > 0 && tg.hp > 0 && !lastDodged && !tg.ps?.away && !isImmune(tg, 'control')) {
+      const tgTeam = tg.side === 'A' ? A : B
+      const pool = targetableFoes(tgTeam)   // 👤 เนเมซิสที่ซ่อนอยู่ถูกหมัดควบคุมเลือกไม่ได้
+      const victim = pool[Math.floor(rand() * pool.length)]
+      const v = passiveValueAt(mc, att.passiveLv)
+      const ap = PET_PASSIVES[att.id]
+      log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: ap.name, icon: ap.icon,
+        effect: 'mindControl', targets: [tg.uid], victim: victim.uid, fxKind: 'debuff' })
+      controlBy = att
+      try {
+        if (strike(tg, victim, tgTeam, tg.atk * v.pct / 100 * storedPowerMult(tg), { crit: false, eff: 'neutral' }, true)) killed = true
+      } finally { controlBy = null }
+    }
     return killed
   }
 
-  // ═══════════ BOSS MODE (sim prototype) ═══════════
-  // B[0] = บอส · B[1..] = ลูกน้อง · cfg = opts.boss
+  // 🧾 ดาเมจจากสถานะ (🔥 ☠️ 😱) — คนแปะเป็นคนฆ่า (user 27 ต.ค.) · ไม่มีคนแปะ/คนแปะเป็นพวกเดียวกัน
+  //    = ศัตรู ATK สูงสุดที่ยังอยู่ (resolveSilentDeath ต้องมี killer ฝั่งตรงข้าม)
+  const statusHurt = (u, dmg, id, from, left) => {
+    if (!(dmg > 0) || u.hp <= 0) return
+    const before = u.hp
+    u.hp -= dmg
+    const d = STATUSES[id]
+    log.push({ t: 'passive', uid: u.uid, side: u.side, petId: u.id, name: d.name, icon: d.icon,
+      effect: 'statusTick', statusId: id, left, targets: [u.uid], fxKind: 'damage', amount: Math.round(before - Math.max(0, u.hp)),
+      hpPct: Math.max(0, Math.round((Math.max(0, u.hp) / u.maxHp) * 100)) })
+    if (u.hp > 0) return
+    const foesOf = u.side === 'A' ? B : A
+    let killer = from && from.side !== u.side ? from : null
+    if (!killer) killer = alive(foesOf).sort((a, b) => b.atk - a.atk)[0] || foesOf[0]
+    resolveSilentDeath(u, killer)
+  }
+  const runTurnEnd = (u) => {
+    for (const r of turnEndTicks(u)) {
+      if (u.hp <= 0) break
+      if (r.dmg) statusHurt(u, r.dmg, r.id, r.from, r.left)
+      if (r.heal && canHeal(u)) {
+        const before = u.hp
+        u.hp = Math.min(u.maxHp, u.hp + r.heal)
+        const d = STATUSES[r.id]
+        log.push({ t: 'passive', uid: u.uid, side: u.side, petId: u.id, name: d.name, icon: d.icon,
+          effect: 'statusTick', statusId: r.id, left: r.left, targets: [u.uid], fxKind: 'heal', amount: Math.round(u.hp - before),
+          hpPct: Math.round((u.hp / u.maxHp) * 100) })
+      }
+    }
+  }
+
+  // ══ 🛸 ยูเอฟโอ (สเปก §2.1 + §8.7–8.8) ══════════════════════════════════════════
+  //  ps.ufo = { uid: ตัวที่ถูกดูด, hits: จำนวนครั้งที่ยูเอฟโอโดนตีแล้ว, round: รอบที่ดูด } บนตัวยูเอฟโอ
+  //  ตัวที่ถูกดูด ps.away = true → ไม่อยู่บนสนาม (alive() ไม่นับ · ไม่ได้ตา · สกิลหยุด · สถานะค้าง)
+  const ufoPart = (u) => partWithEffect(PET_PASSIVES[u?.id], 'abduct')
+  const ufoVal = (u) => passiveValueAt(ufoPart(u), u.passiveLv)
+  const unitByUid = (uid) => [...A, ...B].find(x => x.uid === uid)
+  /** ปล่อยตัวที่ยูเอฟโอ u ดูดไว้ · drop = ตกกระแทก % เลือดสูงสุด (ไม่ใช่หมัด · ไม่ผ่านการลด · ฆ่าได้ · คนฆ่า = ยูเอฟโอ) */
+  const ufoRelease = (u, drop) => {
+    const h = u.ps?.ufo; if (!h) return
+    u.ps.ufo = null
+    const v = unitByUid(h.uid); if (!v) return
+    v.ps.away = false
+    const p = PET_PASSIVES[u.id]
+    log.push({ t: 'passive', uid: u.uid, side: u.side, petId: u.id, name: p.name, icon: p.icon,
+      effect: 'ufoRelease', targets: [v.uid], fxKind: 'debuff' })
+    if (drop && v.hp > 0) {
+      const before = v.hp
+      v.hp -= v.maxHp * ufoVal(u).drop / 100
+      log.push({ t: 'passive', uid: u.uid, side: u.side, petId: u.id, name: p.name, icon: p.icon,
+        effect: 'ufoDrop', targets: [v.uid], fxKind: 'damage', amount: Math.round(before - Math.max(0, v.hp)),
+        hpPct: Math.max(0, Math.round((Math.max(0, v.hp) / v.maxHp) * 100)) })
+      if (v.hp <= 0) resolveSilentDeath(v, u)
+    }
+  }
+  /** ฝั่งไหนบนสนามตายหมด แต่ยังมีตัวถูกดูดค้าง = ปล่อยกลับมาสู้ต่อ (ตกกระแทก) — กันไฟต์ค้าง/ชนะผิด */
+  const releaseStranded = () => {
+    for (const side of [A, B]) {
+      if (alive(side).length) continue
+      for (const u of [...A, ...B]) if (u.ps?.ufo && side.some(x => x.uid === u.ps.ufo.uid)) ufoRelease(u, true)
+    }
+  }
+
+  // ═══════════ BOSS MODE (sim · ประกอบจากเอนจินจริงด้วย build-engine.mjs) ═══════════
+  if (opts.boss) {
   const cfg = opts.boss
   const boss = B[0]
   const bst = psOf(boss)
   boss.maxHp *= cfg.hpMul; boss.hp = boss.maxHp; boss.atk *= cfg.atkMul
+  boss.immune = bossImmune(cfg.allow || [])
   for (const m of B.slice(1)) { m.maxHp *= cfg.hpMul * 0.08; m.hp = m.maxHp; m.atk *= cfg.atkMul * 0.4 }
   const T = cfg.tier
   const night = T === 3
-  const actions = night ? 2 : 1
-  let round = 0
+  const actions = cfg.actions ?? (night ? 2 : 1)
   let enrage = 1
-  const stats = { smash: 0, doomKill: 0, cleanse: 0, breaks: 0 }
+  const stats = { smash: 0, doomKill: 0, cleanse: 0, breaks: 0, dmg: {} }
+  const doomOf = (u) => u.ps?.doomT || 0
+  const frozenBoss = () => (boss.ps?.status?.freeze?.n || 0) > 0
 
-  // --- hook ตอนโดนตี (โล่ · แช่แข็ง ×1.5 · อ่อนแรง) ---
-  opts.onHitHook = (att, tg, r) => {
-    if (tg !== boss) { const ts = psOf(tg); if (ts.bless && !r.dodged && r.dmg > 0) { r.dmg *= 0.7; ts.bless = false } return }
+  bossHook = (att, tg, r) => {
+    if (tg !== boss) return
     if (cfg.kind === 'shield' && bst.shield > 0) {
       r.dmg = 0; r.pierce = 0; r.pierceHits = []
       if (!r.dodged) {
@@ -331,15 +473,15 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       return
     }
     let m = 1
-    if (cfg.kind === 'hammer' && bst.skip > 0) m *= 1.5
-    if (cfg.kind === 'doom' && bst.weakUntil >= round) m *= 1.3
+    if (cfg.kind === 'hammer' && frozenBoss()) m *= cfg.freezeMult ?? 1.5
+    if (cfg.kind === 'doom' && bst.weakUntil >= round) m *= cfg.weakMult ?? 1.3
     r.dmg *= m
+    stats.dmg[att.id] = (stats.dmg[att.id] || 0) + r.dmg
   }
 
-  // --- ตั้งต้นบอส ---
   if (cfg.kind === 'shield') bst.shield = cfg.shield ?? [0, 6, 10, 15][T]
-  const maxHpOf = (u) => u.maxHp
-  if (cfg.kind === 'hammer') bst.lock = alive(A).reduce((b, u) => (!b || maxHpOf(u) > maxHpOf(b) ? u : b), null)
+  const lockPick = () => alive(A).reduce((b, u) => (!b || u.maxHp > b.maxHp ? u : b), null)
+  if (cfg.kind === 'hammer') bst.lock = lockPick()
 
   const bossHit = (target, mult) => {
     let m = elementMult(boss.element, target.element)
@@ -347,114 +489,233 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     m *= (1 + (target.vuln || 0))
     return strike(boss, target, A, boss.atk * enrage * mult * m, { crit: false, eff: 'neutral' }, false, false)
   }
-
   const bossAction = () => {
     if (boss.hp <= 0 || !alive(A).length) return
     if (bst.skip > 0) { bst.skip -= 1; if (cfg.kind === 'hammer') bst.count = 0; return }
+    const sk = consumeSkip(boss)
+    if (sk) { if (cfg.kind === 'hammer') bst.count = 0; return }
     if (cfg.kind === 'hammer') {
-      if (!bst.lock || bst.lock.hp <= 0) {
-        bst.lock = alive(A).reduce((b, u) => (!b || u.maxHp > b.maxHp ? u : b), null)
-        if (T >= 2) enrage *= 1.3
+      if (!bst.lock || bst.lock.hp <= 0 || bst.lock.ps?.away) {
+        bst.lock = lockPick()
+        if (T >= 2) enrage *= cfg.lockRage ?? 1.3
       }
+      if (!bst.lock) return
       bst.count = (bst.count || 0) + 1
-      const every = night && boss.hp < boss.maxHp / 2 ? 2 : [0, 4, 3, 3][T]
+      const every = night && boss.hp < boss.maxHp / 2 ? (cfg.everyLow ?? 2) : (cfg.every ?? [0, 4, 3, 3][T])
       if (bst.count >= every) {
         bst.count = 0; stats.smash++
-        const tg = bst.lock
-        const slot = A.indexOf(tg)
-        bossHit(tg, cfg.smashMult)
-        if (night) for (const j of [slot - 1, slot + 1]) { const n = A[j]; if (n && n.hp > 0) bossHit(n, cfg.smashMult * 0.3) }
+        const tg = bst.lock, slot = A.indexOf(tg)
+        // ทุบรัว: smashHits ครั้ง ครั้งละ smashPer (🤖 เก็บสแตคระหว่างทุบ · ☄️ โล่พรกันได้แค่ครั้งแรก)
+        for (let h = 0; h < (cfg.smashHits ?? 1); h++) { if (tg.hp <= 0 || tg.ps?.away) break; bossHit(tg, cfg.smashPer ?? cfg.smashMult) }
+        if (night && cfg.splash !== false) for (const j of [slot - 1, slot + 1]) { const n = A[j]; if (n && n.hp > 0 && !n.ps?.away) bossHit(n, (cfg.smashPer ?? cfg.smashMult) * (cfg.smashHits ?? 1) * 0.3) }
       } else bossHit(bst.lock, 1)
       return
     }
-    const tg = pick(A)
+    const tg = pick(targetableFoes(A))
     if (!tg) return
-    const doomed = cfg.kind === 'doom' && psOf(tg).doom > 0
-    bossHit(tg, doomed ? 1.5 : 1)
-  }
-
-  // --- เช็คล้างโรค: ยูนิคอร์นฟื้นตัวที่ติดโรค = ล้าง (กติกาใหม่: ล้างสถานะร้ายอย่างละ 1 รวมโรค) ---
-  let scanFrom = log.length
-  const scanCleanse = () => {
-    for (let k = scanFrom; k < log.length; k++) {
-      const e = log[k]
-      if (cfg.bflyCleanse && e.t === 'passive' && e.effect === 'healLowestAlly') { const v = alive(A).find(x => psOf(x).doom > 0); if (v) { psOf(v).doom = 0; stats.cleanse++; bst.weakUntil = round + 1 } }
-      if (e.t === 'passive' && e.effect === 'healOnAttack') for (const uid of e.targets || []) {
-        const u = A.find(x => x.uid === uid)
-        const v = cfg.uniSmart ? alive(A).find(x => psOf(x).doom > 0) : u
-        if (v && psOf(v).doom > 0) { psOf(v).doom = 0; stats.cleanse++; bst.weakUntil = round + 1 }
-      }
-    }
-    scanFrom = log.length
-  }
-
-  const bless = (c) => {
-    const al = alive(A)
-    const bad = al.filter(u => psOf(u).doom > 0 || psOf(u).skip > 0 || psOf(u).spark > 0)
-    const tg = (bad.length ? bad : al).reduce((b, u) => (!b || u.hp / u.maxHp < b.hp / b.maxHp ? u : b), null)
-    if (!tg) return
-    const st = psOf(tg)
-    if (st.doom > 0) { st.doom = 0; stats.cleanse++; bst.weakUntil = round + 1 }
-    st.skip = 0; st.spark = 0; delete st.infect
-    tg.hp = Math.min(tg.maxHp, tg.hp + tg.maxHp * (cfg.cometHeal ?? 20) / 100)
-    st.bless = true
+    bossHit(tg, cfg.kind === 'doom' && doomOf(tg) > 0 ? 1.5 : 1)
   }
   const doomKill = (u) => {
-    if (cfg.doomPct) { u.hp -= u.maxHp * cfg.doomPct / 100; stats.doomKill++; resolveSilentDeath(u, boss); return }
-    // โรคร้าย: 🐱 🧞 กันไม่ได้ (ปิดสิทธิ์ชั่วคราว) · ฟีนิกซ์ก็ถูกปิดไปด้วยในซิมนี้ (ประมาณ)
-    const st = psOf(u); const saved = { g: st.grit, uses: st.uses }
-    st.grit = 0; st.uses = 99
+    stats.doomKill++
+    if (cfg.doomPct) { u.hp -= u.maxHp * cfg.doomPct / 100; if (u.hp <= 0) resolveSilentDeath(u, boss); return }
+    // ตายแน่นอน: 🐱 🧞 กันไม่ได้ · 🐦‍🔥 ฟื้นได้
+    const st = psOf(u); const saved = { g: st.grit }
+    st.grit = 0
     const genies = A.filter(g => g.id === 'genie'); const gu = genies.map(g => psOf(g).uses)
     genies.forEach(g => { psOf(g).uses = 99 })
     u.hp = 0
     resolveSilentDeath(u, boss)
     genies.forEach((g, i) => { psOf(g).uses = gu[i] })
-    if (u.hp > 0) { st.grit = saved.g; st.uses = saved.uses }
-    stats.doomKill++
+    if (u.hp > 0) st.grit = saved.g
   }
-
-  const roundEnd = () => {
+  // โรคร้าย = สถานะ 'doom' n=1 (🦄 cleanseOne / ☄️ cleanseAll ล้างได้) + ตัวจับเวลา ps.doomT
+  const checkCleansed = () => {
+    for (const u of A) if (u.ps?.doomT > 0 && !(u.ps.status?.doom?.n > 0)) { u.ps.doomT = 0; if (u.hp > 0) { stats.cleanse++; bst.weakUntil = round + 1 } }
+  }
+  const bossRoundEnd = () => {
     for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
+    checkCleansed()
     if (cfg.kind === 'doom') {
-      for (const u of alive(A)) { const st = psOf(u); if (st.doom > 0) { st.doom -= 1; if (st.doom === 0) doomKill(u) } }
+      for (const u of alive(A)) if (u.ps.doomT > 0) { u.ps.doomT -= 1; if (u.ps.doomT === 0) { delete u.ps.status.doom; doomKill(u) } }
       const every = cfg.doomEvery ?? (T === 1 ? 2 : 1)
       if (round % every === 0) {
         const n = cfg.doomN ?? (night ? 2 : 1)
         let dur = cfg.doomDur ?? [0, 3, 2, 2][T]
         if (night && boss.hp < boss.maxHp / 2) dur = Math.max(1, dur - 1)
-        const cand = alive(A).filter(u => !(psOf(u).doom > 0)).sort((a, b) => b.atk - a.atk).slice(0, n)
-        for (const u of cand) psOf(u).doom = dur
+        const cand = alive(A).filter(u => !(doomOf(u) > 0)).sort((a, b) => b.atk - a.atk).slice(0, n)
+        for (const u of cand) { applyStatus(u, 'doom', { n: 1, from: boss }); u.ps.doomT = dur }
       }
     }
-    if (cfg.kind === 'shield' && bst.shield === 0 && T >= 2 && round - bst.brokeAt >= (cfg.regen ?? (T === 2 ? 3 : 2))) bst.shield = cfg.shield ?? [0, 6, 10, 15][T]
-    if (round >= 10 && (round - 10) % 3 === 0) enrage *= 1.2
+    if (cfg.kind === 'shield' && cfg.regen && bst.shield === 0 && T >= 2 && round - bst.brokeAt >= (cfg.regen ?? (T === 2 ? 3 : 2))) bst.shield = cfg.shield ?? [0, 6, 10, 15][T]
+    if (cfg.kind === 'shield' && bst.shield > 0 && cfg.growRound) boss.atk *= 1 + cfg.growRound   // โล่ยังอยู่ = บอสโตทุกรอบ (ตีช้า = โดนหนัก)
+    const ra = cfg.rageAt ?? 10
+    if (round >= ra && (round - ra) % 3 === 0) enrage *= cfg.rage ?? 1.2
   }
 
-  while (alive(A).length && boss.hp > 0 && round < 40) {
+  const maxR = cfg.maxRounds ?? 30
+  while (alive(A).length && boss.hp > 0 && round < maxR) {
     round++; log.push({ t: 'round', n: round })
+    for (const u of [...A, ...B]) { const h = u.ps?.ufo; if (h && u.hp > 0 && round - h.round >= ufoVal(u).hits) ufoRelease(u, true) }
     for (const e of [...runOnRound(A), ...runOnRound(B)]) log.push(e)
+    checkCleansed()
     for (const att of A) {
-      if (att.hp <= 0 || boss.hp <= 0) continue
+      if (att.hp <= 0 || att.ps?.away || boss.hp <= 0) continue
       const st = psOf(att)
-      if (st.skip > 0) { st.skip -= 1; continue }
-      if (att.id === 'comet') bless(att)
-      if (windupOf(att) && !st.wound) { st.wound = true; continue }
-      const wu = windupOf(att)
-      if (wu) { st.wound = false; st.smashing = true }
-      let killed = hit(att, B)
-      if (killed) for (const e of runOnKill(att, A, B).events) log.push(e)
-      if (wu && killed && att.hp > 0 && alive(B).length) { killed = hit(att, B) }
-      if (wu) st.smashing = false
-      scanCleanse()
-      // ลูกน้องตาย = โล่ +3
-      if (cfg.kind === 'shield') for (const m of B.slice(1)) if (m.hp <= 0 && !psOf(m)._counted) { psOf(m)._counted = true; bst.shield += 3 }
+      const sk = consumeSkip(att)
+      if (sk) { if (sk.selfDmg > 0) statusHurt(att, sk.selfDmg, 'fear', sk.dmgFrom, sk.left.fear) }
+      else if (windupOf(att) && !st.wound) st.wound = true
+      else {
+        const wu = windupOf(att)
+        if (wu) { st.wound = false; st.smashing = true }
+        let killed = hit(att, B)
+        if (killed) for (const e of runOnKill(att, A, B).events) log.push(e)
+        if (wu && killed && att.hp > 0 && alive(B).length) { killed = hit(att, B); if (killed) for (const e of runOnKill(att, A, B).events) log.push(e) }
+        if (wu) st.smashing = false
+      }
+      if (att.hp > 0) runTurnEnd(att)
+      checkCleansed()
+      if (cfg.kind === 'shield') for (const m of B.slice(1)) if (m.hp <= 0 && !psOf(m)._counted) { psOf(m)._counted = true; bst.shield += cfg.minionShield ?? 3 }
     }
     for (let k = 0; k < actions; k++) bossAction()
-    for (const m of B.slice(1)) if (m.hp > 0 && alive(A).length) {
-      const tg = pick(A); if (tg) strike(m, tg, A, m.atk * enrage * elementMult(m.element, tg.element), { crit: false, eff: 'neutral' }, false, false)
+    if (boss.hp > 0) runTurnEnd(boss)
+    for (const m of B.slice(1)) if (m.hp > 0 && !m.ps?.away && alive(A).length) {
+      if (consumeSkip(m)) continue
+      hit(m, A)
+      if (m.hp > 0) runTurnEnd(m)
     }
-    if (alive(A).length && boss.hp > 0) roundEnd()
+    releaseStranded()
+    if (alive(A).length && boss.hp > 0) bossRoundEnd()
   }
   const win = boss.hp <= 0 && alive(A).length > 0
   return { win, rounds: round, stats, bossHpPct: Math.max(0, boss.hp / boss.maxHp) }
+  }
+
+  const countAlive = (t) => t.reduce((n, f) => n + (f.hp > 0 ? 1 : 0), 0)
+  // หาตัวออกตี: ไล่จาก cursor ไปขวา วนกลับมาซ้าย เจอตัวแรกที่ยังไม่ตาย (-1 = ไม่มี)
+  const nextAttacker = (team, cursor) => {
+    const n = team.length
+    for (let k = 0; k < n; k++) { const i = (cursor + k) % n; if (team[i].hp > 0 && !team[i].ps?.away) return i }
+    return -1
+  }
+
+  // ใครก่อน: ฝั่งตัวเยอะกว่าตีก่อน · เท่ากัน → สุ่ม (ดึงจาก rand เดิม คง deterministic)
+  // 🐹 แฮมสเตอร์ช่อง 1 = ทีมได้ตีก่อนเสมอ (27 ก.ย. 2026)
+  //    มีทั้งสองฝั่ง = ฝั่ง A (คนกดหาห้อง/เจ้าของแมตช์) ตีก่อน (user เคาะ 3 ต.ค. 2026 · คำอธิบายพาสสีฟไม่ต้องแก้)
+  // ⚠️ ห้ามดึง rand() เพิ่มในเส้นทางนี้ — ลำดับสุ่มของไฟต์ต้องเหมือนเดิมเมื่อไม่มีแฮมสเตอร์
+  const ca = countAlive(A), cb = countAlive(B)
+  const leadA = A[0]?.id === 'hamster', leadB = B[0]?.id === 'hamster'
+  const first = leadA ? 'A' : leadB ? 'B'
+    : ca > cb ? 'A' : cb > ca ? 'B' : (rand() < 0.5 ? 'A' : 'B')
+  const cursor = { A: 0, B: 0 }
+  let cur = first, turns = 0
+  // 🔑 "รอบ" (user เคาะ 26 ก.ย. 2026) = ทุกตัวที่ยังมีชีวิตทั้งสองฝั่งได้ตาครบคนละ 1 ครั้ง
+  //    เดิม round++ ทุกครั้งที่วนกลับมาฝั่งที่ตีก่อน = ฝั่งละ 1 หมัด ⇒ 3v3 ต้อง 3 round กว่าทุกตัวจะตีครบ
+  //    pending = uid ที่ยังไม่ได้ตาในรอบนี้ · null = ต้องเปิดรอบใหม่ก่อนตาถัดไป
+  //    ตัวที่ตายกลางรอบไม่ต้องรอ · ตาที่ถูกข้าม (แช่แข็ง) นับเป็นตาแล้ว · ตีต่อของโอนิไม่ใช่ตาใหม่
+  let pending = null
+  const startRound = () => {
+    round++; log.push({ t: 'round', n: round })
+    // 🛸 ครบ {hits} รอบนับจากตอนดูด = ปล่อย + ตกกระแทก
+    for (const u of [...A, ...B]) {
+      const h = u.ps?.ufo
+      if (h && u.hp > 0 && round - h.round >= ufoVal(u).hits) ufoRelease(u, true)
+    }
+    for (const e of [...runOnRound(A), ...runOnRound(B)]) log.push(e)
+    pending = new Set([...alive(A), ...alive(B)].map(u => u.uid))
+  }
+  const endRoundIfDone = () => {
+    for (const uid of [...pending]) {
+      const u = (uid[0] === 'A' ? A : B).find(x => x.uid === uid)
+      if (!u || u.hp <= 0 || u.ps?.away) pending.delete(uid)
+    }
+    if (pending.size) return
+    for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
+    // 🗓️ ไฟไหม้/น้ำพุจบรอบ — event เดียวต่อรอบ ครอบทุกตัวบนสนาม (hpMap/amounts ต่อ uid ให้รีเพลย์)
+    //    ไหม้คิดจากเลือดปัจจุบัน จึงไม่มีทางฆ่าใคร (เหลือ ≥1) · ไม่ดึง rand() ⇒ ลำดับสุ่มของไฟต์ไม่เลื่อน
+    const re = W.roundEnd
+    if (re) {
+      const on = [...alive(A), ...alive(B)]
+      if (on.length) {
+        const amounts = {}, hpMap = {}
+        for (const u of on) {
+          const before = u.hp
+          if (re.burnPct) u.hp = Math.max(1, u.hp - u.hp * re.burnPct / 100)
+          if (re.healPct && canHeal(u)) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * re.healPct / 100)
+          amounts[u.uid] = Math.round(Math.abs(u.hp - before))
+          hpMap[u.uid] = Math.max(1, Math.round((u.hp / u.maxHp) * 100))
+        }
+        const burn = !!re.burnPct
+        log.push({ t: 'passive', uid: on[0].uid, side: on[0].side, petId: null,
+          name: burn ? 'สมรภูมิมอดไหม้' : 'น้ำพุชีวิต', icon: burn ? '🔥' : '💚',
+          effect: burn ? 'weeklyBurn' : 'weeklyHeal', fxKind: burn ? 'damage' : 'heal',
+          targets: on.map(u => u.uid), amount: 0, amounts, hpMap })
+      }
+    }
+    pending = null
+  }
+
+  while (turns < BATTLE_CFG.maxTurns && (releaseStranded(), alive(A).length && alive(B).length)) {
+    if (!pending) startRound()
+    const team = cur === 'A' ? A : B
+    const foes = cur === 'A' ? B : A
+    const ai = nextAttacker(team, cursor[cur])
+    if (ai !== -1) {
+      const att = team[ai]
+      const st = psOf(att)
+      const sk = consumeSkip(att)
+      if (sk) {
+        // ⏸️ ข้ามตา (❄️ แช่แข็ง · 💫 มึน · 😱 หวาดกลัว) — ตานี้หายไปทั้งตา แต่นับว่าได้ตาในรอบนี้แล้ว
+        //    1 ตาที่ถูกข้าม ลดสถานะข้ามตาทุกตัวตัวละ 1 (user 27 ต.ค.) · ป้ายหลัก = ตัวแรกตามทะเบียน
+        const d = STATUSES[sk.id]
+        log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id,
+          name: d.name, icon: d.icon, effect: 'frozen', statusId: sk.id, targets: [att.uid], fxKind: 'skip',
+          left: sk.left[sk.id], lefts: sk.left })   // left = สแตคที่เหลือของป้ายหลัก (รีเพลย์เดิมอ่านช่องนี้)
+        // 😱 กลัวจนเจ็บตัวเอง — คนแปะ (ผีน้อย) นับเป็นคนฆ่า
+        if (sk.selfDmg > 0) statusHurt(att, sk.selfDmg, 'fear', sk.dmgFrom, sk.left.fear)
+      } else if (windupOf(att) && !st.wound) {
+        // 👹 ง้าง (27 ก.ย. 2026) — ไม่ตี แต่นับว่าได้ตาในรอบแล้ว (เหมือนตาที่ถูกข้าม)
+        // 🔑 ตาแรกของไฟต์เป็นตาง้างเสมอ · ลำดับ if ต้องให้ skip มาก่อน ⇒ โดนแช่แข็งตอนง้างค้าง = wound ค้างไว้ ตาถัดไปฟาด
+        st.wound = true
+        const p = PET_PASSIVES[att.id]
+        log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: p.name, icon: p.icon,
+          effect: 'windup', targets: [att.uid], fxKind: 'windup' })
+      } else {
+        const wu = windupOf(att)
+        if (wu) { st.wound = false; st.smashing = true }   // runOnAttack อ่าน smashing แล้วคูณ pct%
+        let killed = hit(att, foes)
+        const onKill = () => { for (const e of runOnKill(att, team, foes).events) log.push(e) }
+        if (killed) onKill()
+        // 👹 ฟาดน็อก ⇒ ฟาดต่อ 1 ครั้ง (ไม่ใช่ตาใหม่ · สูงสุด 1 ครั้ง) — เพิ่ม beat จริงจึงนับ turns
+        // 🔴 เช็ค att.hp > 0 (โดนหนามสวนตายกลางหมัดได้ — ตายแล้วห้ามตีต่อ)
+        if (wu && killed && att.hp > 0 && alive(foes).length && turns < BATTLE_CFG.maxTurns) {
+          const p = PET_PASSIVES[att.id]
+          log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: p.name, icon: p.icon,
+            effect: 'windup', targets: [att.uid], fxKind: 'chain' })
+          turns++
+          killed = hit(att, foes)
+          if (killed) onKill()
+        }
+        if (wu) st.smashing = false
+      }
+      // 🔥 ท้ายตา: ดาเมจต่อเนื่องหลังตี (user 27 ต.ค.: "ได้ดิ้นรนก่อนแล้วค่อยตุย") · ตาที่ถูกข้ามก็ทำงาน
+      if (att.hp > 0) runTurnEnd(att)
+      pending.delete(att.uid)
+      cursor[cur] = (ai + 1) % team.length
+    }
+    turns++
+    cur = cur === 'A' ? 'B' : 'A'   // สลับฝั่งเสมอ
+    if (alive(A).length && alive(B).length) endRoundIfDone()
+  }
+
+  const pct = (t) => { const max = t.reduce((s, f) => s + f.maxHp, 0); return max ? t.reduce((s, f) => s + Math.max(0, f.hp), 0) / max : 0 }
+  releaseStranded()   // 🛸 หมดเวลาตอนอีกฝั่งเหลือแต่ตัวที่ถูกดูด = ปล่อยกลับก่อนตัดสิน (รีวิว 28 ต.ค.)
+  const aAlive = alive(A).length > 0, bAlive = alive(B).length > 0
+  const hpPctA = pct(A), hpPctB = pct(B)
+  let winner
+  if (aAlive && !bAlive) winner = 'A'
+  else if (bAlive && !aAlive) winner = 'B'
+  else winner = hpPctA >= hpPctB ? 'A' : 'B'
+
+  log.push({ t: 'end', winner, rounds: round, hpPctA, hpPctB })
+  return { winner, rounds: round, log, units, base }
 }

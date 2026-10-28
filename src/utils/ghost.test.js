@@ -56,11 +56,11 @@ test('👤 เนเมซิส: ซ่อนขณะเพื่อนคร�
   f1.hp = 0
   const ev = runOnDied(f1, [killer], killer, team).find(e => e.effect === 'revenge')
   assert.equal(ev.amount, 1)
-  assert.equal(Math.round(nem.atk), 125)
+  assert.equal(Math.round(nem.atk), 130)
   assert.equal(nem.ps.revengeOn, 'A0')
   assert.ok(!nemesisHidden(nem, team), 'เพื่อนไม่ครบ = โผล่')
   f2.hp = 0; runOnDied(f2, [killer], killer, team)
-  assert.equal(Math.round(nem.atk), 150, 'ชั้น 2 = +50% ของฐาน (ไม่ทบต้น)')
+  assert.equal(Math.round(nem.atk), 160, 'ชั้น 2 = +60% ของฐาน (ไม่ทบต้น)')
   // เหลือตัวเดียวก็เลือกได้
   assert.deepEqual(targetableFoes([nem]).map(u => u.uid), ['B0'])
 })

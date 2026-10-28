@@ -103,6 +103,15 @@ function lowestHpAlly(team, exclude) {
   }
   return best
 }
+/** 🦄 🦋 เป้าฮีล+ล้าง: เพื่อน (ไม่รวมตัวเอง) ที่ติดสถานะร้าย เลือด% น้อยสุดก่อน · ไม่มีใครติด = lowestHpAlly */
+function cleanseTargetAlly(team, exclude) {
+  let best = null
+  for (const u of alive(team)) {
+    if (u === exclude || debuffCount(u) === 0) continue
+    if (!best || u.hp / u.maxHp < best.hp / best.maxHp) best = u
+  }
+  return best || lowestHpAlly(team, exclude)
+}
 
 // ══════════════════════════════════════════════════════════════
 //  setup — ก่อน aura ทุกอย่าง (แก้ atk/maxHp ดิบได้)
@@ -333,10 +342,17 @@ export function runOnRound(team) {
         const h = healUnit(u, v.pct)
         out.push(ev(u, p, part, { targets: [u.uid], ...h, fxKind: 'heal' }))
       } else if (part.effect === 'healLowestAlly') {
-        const t = lowestHpAlly(team, u)
-        if (!t || t.hp >= t.maxHp) continue
+        // 🦋 (user 28 ต.ค.): เล็งเพื่อนที่ติดสถานะร้ายก่อน · ฟื้น + ล้างสถานะร้ายอย่างละ 1
+        const t = cleanseTargetAlly(team, u)
+        if (!t) continue
+        const hasBad = debuffCount(t) > 0
+        if (t.hp >= t.maxHp && !hasBad) continue
         const h = healUnit(t, v.pct)
         out.push(ev(u, p, part, { targets: [t.uid], ...h, fxKind: 'heal' }))
+        if (hasBad) {
+          const left = cleanseOne(t)
+          if (Object.keys(left).length) out.push(ev(u, p, part, { targets: [t.uid], left, fxKind: 'buff', effect: 'cleanse' }))
+        }
       } else if (part.effect === 'cometBless') {
         // ☄️ ดาวหาง (สเปก §2.2 + §8.14): ต้นรอบ (โดนแช่แข็งก็ยังให้พร) · เป้า = เพื่อน (รวมตัวเอง) ที่ติด
         //    สถานะร้าย "หลายชนิด" ที่สุด · เสมอ/ไม่มีใครติด = % เลือดน้อยสุด · เสมออีก = ช่องซ้ายสุด · ไม่ดึง rand
@@ -626,16 +642,18 @@ export function runOnDealt(attacker, attTeam, dealt) {
     //    สูตรเป็นเชิงเส้น (pct ของดาเมจ) ⇒ รวมทั้ง beat แล้วได้เท่ากับคิดทีเดียวจากดาเมจรวมเป๊ะ
     //    และการเลือกเป้าใหม่ทุกหมัดลูกทำให้ "ฟื้นให้คนที่บอบช้ำที่สุด ณ วินาทีนั้น" ซึ่งเป็นพฤติกรรมที่ดีกว่า
     //    (คิดทีเดียวตอนจบ beat = เทเลือดก้อนเดียวใส่คนเดียว อาจล้นหลอดทิ้งทั้งที่อีกคนกำลังจะตาย)
-    const t = lowestHpAlly(attTeam, attacker)
-    if (!t || t.hp >= t.maxHp || !canHeal(t)) continue   // 🚫 ห้ามฟื้น = ฮีลไม่ติด ⇒ 🦄 ไม่ล้างด้วย
+    // 🦄 เป้า (user 28 ต.ค.): เพื่อนที่ติดสถานะร้ายก่อน ไม่มีใครติด = เลือดน้อยสุด
+    const t = cleanseTargetAlly(attTeam, attacker)
+    if (!t || !canHeal(t)) continue   // 🚫 ห้ามฟื้น = ฮีลไม่ติด ⇒ 🦄 ไม่ล้างด้วย
+    const hasBad = debuffCount(t) > 0
+    if (t.hp >= t.maxHp && !hasBad) continue
     const before = t.hp
     t.hp = Math.min(t.maxHp, t.hp + pctOf(dealt, valOf(part, attacker).pct))
     const amount = Math.round(t.hp - before)
-    if (amount > 0) {
-      out.events.push(ev(attacker, ap, part, { targets: [t.uid], amount,
+    if (amount > 0 || hasBad) {
+      if (amount > 0) out.events.push(ev(attacker, ap, part, { targets: [t.uid], amount,
         hpPct: Math.round((t.hp / t.maxHp) * 100), fxKind: 'heal' }))
-      // 🦄 ล้างสถานะ (18 ต.ค. 2026 user ทาง B): ฮีลติดจริงทุกครั้ง = ลดสถานะร้ายบนเป้านั้นอย่างละ 1
-      //    🦠 ชั้นเชื้อ · 🤍 มาสก์ประกายแสง · ❄️ สแตคแช่แข็ง — ไม่ดึง rand
+      // 🦄 ล้างสถานะ (18 ต.ค. 2026 user ทาง B): ลดสถานะร้ายบนเป้านั้นอย่างละ 1
       //    อ่านจากทะเบียนสถานะ (cleanseOne) — สถานะใหม่ทุกตัวล้างได้เองโดยไม่ต้องแก้ตรงนี้
       const left = cleanseOne(t)
       if (Object.keys(left).length) {

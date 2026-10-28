@@ -8,10 +8,10 @@ import { resolveBattleTeam } from 'file:///D:/RXTU/rxtu10-v2/src/utils/petTeam.j
 const users = JSON.parse(fs.readFileSync(new URL('./teams.json', import.meta.url), 'utf8'))
 const KINDS = { hammer: 'fist', doom: 'paper', shield: 'scissors' }
 const DEF = {
-  // hpMul/atkMul คูณจากค่าฐานตำนานขั้น 3 (atk 25.5 · hp 90)
-  hammer: { 1: { hpMul: 6, atkMul: 0.8 }, 2: { hpMul: 10, atkMul: 1.1 }, 3: { hpMul: 14, atkMul: 1.2 }, smashMult: 3 },
-  doom:   { 1: { hpMul: 6, atkMul: 0.8 }, 2: { hpMul: 10, atkMul: 1.1 }, 3: { hpMul: 14, atkMul: 1.2 } },
-  shield: { 1: { hpMul: 6, atkMul: 0.8 }, 2: { hpMul: 10, atkMul: 1.1 }, 3: { hpMul: 14, atkMul: 1.2 } },
+  // hpMul/atkMul คูณจากค่าฐานตำนานขั้น 3 · จูนรอบ 2 (28 ต.ค. เอนจินจริง+เพ็ท พ.ย.)
+  hammer: { 1: { hpMul: 4, atkMul: 0.6 }, 2: { hpMul: 7.5, atkMul: 0.9 }, 3: { hpMul: 6.5, atkMul: 0.8 }, smashMult: 3, allow: ['freeze'] },
+  doom:   { 1: { hpMul: 4, atkMul: 0.6 }, 2: { hpMul: 7, atkMul: 0.85, doomEvery: 2 }, 3: { hpMul: 6, atkMul: 0.75 }, allow: [] },
+  shield: { 1: { hpMul: 3, atkMul: 0.6 }, 2: { hpMul: 5, atkMul: 0.85 }, 3: { hpMul: 4.5, atkMul: 0.7, shield: 10, regen: 3, grow: 0.03 }, allow: ['spark'] },
 }
 const kinds = process.argv[2] ? [process.argv[2]] : Object.keys(KINDS)
 const over = process.argv[3] ? JSON.parse(process.argv[3]) : {}
@@ -24,7 +24,7 @@ const bossTeam = (kind, T) => {
   if (kind === 'shield' && T === 3) out.push({ id: 'minion', rarity: 'common', element: 'scissors', grade: 0 }, { id: 'minion', rarity: 'common', element: 'scissors', grade: 0 })
   return out
 }
-const cfgOf = (kind, T) => ({ kind, tier: T, smashMult: 3, ...DEF[kind][T], ...(DEF[kind].smashMult ? { smashMult: DEF[kind].smashMult } : {}), ...(over[T] || {}) })
+const cfgOf = (kind, T) => ({ kind, tier: T, smashMult: DEF[kind].smashMult || 3, allow: DEF[kind].allow, ...DEF[kind][T], ...(over.all || {}), ...(over[T] || {}) })
 const run = (team, kind, T, seed) => simulateBoss(team, bossTeam(kind, T), seed, { boss: cfgOf(kind, T) })
 
 function owned(u) {
@@ -35,7 +35,8 @@ function owned(u) {
     const prev = seen.get(id)
     if (!prev || x.grade > prev.grade) seen.set(id, x)
   }
-  return [...seen.values()].sort((a, b) => (RANK[b.rarity] - RANK[a.rarity]) || (b.grade - a.grade)).slice(0, 12)
+  if (process.env.GIVE) for (const id of process.env.GIVE.split(',')) { const d = getPetDef(id); seen.set(id, { id, rarity: d.rarity, element: d.element, grade: 3 }) }
+  return [...seen.values()].sort((a, b) => (RANK[b.rarity] - RANK[a.rarity]) || (b.grade - a.grade)).slice(0, process.env.GIVE ? 13 : 12)
 }
 function combos(list) {
   const out = []
@@ -53,11 +54,14 @@ for (const kind of kinds) {
   const rows = []
   for (const u of users) {
     const pool = owned(u); if (pool.length < 3) continue
-    let best = null, bs = -1e9
-    for (const t of combos(pool)) { const s = score(t, kind, 2, 2); if (s > bs) { bs = s; best = t } }
     const active = resolveBattleTeam(u.activePets, u.pets)
-    const rate = (team) => [1, 2, 3].map(T => { let w = 0, rd = 0; for (let s = 0; s < R; s++) { const r = run(team, kind, T, s * 104729 + 7); if (r.win) { w++; rd += r.rounds } } return { w: w / R, rd: w ? rd / w : 0 } })
-    rows.push({ tb: u.towerBest || 0, best: best.map(x => x.id), r: rate(best), a: active.length === 3 ? rate(active) : null })
+    const one = (team, T) => { let w = 0, rd = 0; for (let s = 0; s < R; s++) { const r = run(team, kind, T, s * 104729 + 7); if (r.win) { w++; rd += r.rounds } } return { w: w / R, rd: w ? rd / w : 0 } }
+    const cs = combos(pool)
+    const bestT = [1, 2, 3].map(T => { let b = null, bs = -1e9; for (const t of cs) { const s = score(t, kind, T, 2); if (s > bs) { bs = s; b = t } } return b })
+    const best = bestT[2]
+    const rate = (team) => [1, 2, 3].map(T => one(team, T))
+    const r = [1, 2, 3].map(T => one(bestT[T - 1], T))
+    rows.push({ tb: u.towerBest || 0, best: best.map(x => x.id), r, a: active.length === 3 ? rate(active) : null })
   }
   const bands = [[0, 9], [10, 29], [30, 59], [60, 999]]
   console.log(`\n=== ${kind} === (${rows.length} คน · ทีมที่ดีที่สุดจากคลังตัวเอง)`)

@@ -50,6 +50,11 @@
         <button v-else class="ar-tk buy" :disabled="tkBusy" @click="onTicket('buy')">
           <Emoji :char="ENERGY_TICKET.emoji" /> <Emoji char="🪙" /> {{ ENERGY_TICKET.price.toLocaleString() }}
         </button>
+        <!-- 💊 จำนวนยาแก้แพ้ที่มี — เดิมเห็นแค่ตอนแพ้ เพื่อนลืมว่ายังเหลือ (ฟีดแบ็ก 28 ต.ค.) -->
+        <span class="ar-al-chip" :class="{ none: !antiLoss }" :aria-label="`${ANTI_LOSS.name} ${antiLoss} ชิ้น`"
+          :title="`${ANTI_LOSS.name} ${antiLoss} ชิ้น · แพ้แล้วกดใช้บนจอผลได้`">
+          <Emoji :char="ANTI_LOSS.emoji" /> {{ antiLoss }}
+        </span>
       </div>
       <!-- หาคู่ = เปิดหน้าจัดทีมก่อน (user 25 ต.ค. 2026) แล้วปุ่ม "หาคู่ต่อสู้" ในนั้นถึงเริ่มสุ่มจริง -->
       <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0" @click="pickFight = true; pickOpen = true">
@@ -295,6 +300,8 @@ function openProfile(uid) {
 .ar-tk small { font-weight: 700; opacity: .7; }
 .ar-tk.buy { background: #f1f5f9; color: #334155; }
 .ar-tk:disabled { opacity: .5; cursor: default; }
+.ar-al-chip { font-size: .72rem; font-weight: 800; white-space: nowrap; border-radius: 9px; padding: 5px 8px; background: #fce7f3; color: #9d174d; }
+.ar-al-chip.none { background: #f1f5f9; color: #94a3b8; }
 .ar-energy + .ar-find { border-radius: 0 0 16px 16px; }
 .ar-find { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; border: var(--bw) solid var(--line); border-radius: 16px; padding: 16px 12px; margin-bottom: 12px; font-family: inherit; color: #fff; background: linear-gradient(160deg, #e11d48, #f97316); box-shadow: var(--pop); cursor: pointer; }
 .ar-find:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
