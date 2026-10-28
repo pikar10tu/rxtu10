@@ -26,7 +26,11 @@
             <span class="tp-preset-n">ทีม {{ i + 1 }}</span>
           </button>
         </div>
-        <div v-if="!presets.presets[viewIdx].length" class="tp-use">ทีมนี้ยังว่าง ใส่เพ็ทก่อนนะ</div>
+        <div v-if="owned.length" class="tp-auto-row">
+          <span v-if="!presets.presets[viewIdx].length" class="tp-use">ทีมนี้ยังว่าง แตะ ＋ เพื่อเลือกเพ็ท หรือให้จัดให้ก็ได้</span>
+          <!-- ✨ จัดทีมอัตโนมัติ (user 28 ต.ค.): 3 ตัวพลังสูงสุด (ATK × HP แบบเดียวกับพลังทีม PvP) ไม่ดูสกิล -->
+          <button type="button" class="tp-auto" @click="autoTeam"><Emoji char="✨" /> จัดทีมอัตโนมัติ</button>
+        </div>
 
         <!-- ศัตรูที่จะเจอ (เปิดจากหอคอย) · ป้ายชนะทาง/แพ้ทางอยู่ในหน้าต่างเลือกตัว -->
         <div v-if="enemies.length" class="tp-foes">
@@ -124,6 +128,7 @@ import { removeAt, compact } from '../../utils/slotEdit.js'
 import { seasonOfSlot, degreeFormActive, displayName } from '../../utils/petForms.js'
 import { teamSynergy } from '../../utils/teamSynergy.js'
 import { readPresets, editPresetPatch, usePresetPatch } from '../../utils/teamPresets.js'
+import { combatStats } from '../../data/petPower.js'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -203,6 +208,19 @@ async function pickTab(i) {
   if (ok) syncRosterRow()
   else { viewIdx.value = prev; toast('เปลี่ยนทีมไม่สำเร็จ', 'error') }   // กลับแท็บเดิม — กันจอโชว์ทีมที่ไม่ได้ใช้จริง (รีวิว 28 ต.ค.)
 }
+/** ✨ 3 ตัวพลังสูงสุดในคลัง (ATK × HP ตามขั้นจริง) — ไม่ดูสกิล/สาย · ทีมว่างตอนเปิดหน้า = เติมให้เอง */
+function bestIds() {
+  const power = (p) => { const c = combatStats({ id: p.id, rarity: p.rarity || defOf(p.id).rarity, element: defOf(p.id).element, grade: p.grade || 0 }); return c.atk * c.maxHp }
+  const seen = new Map()
+  for (const p of owned.value) { const v = power(p); if (!seen.has(p.id) || v > seen.get(p.id)) seen.set(p.id, v) }
+  return [...seen.entries()].sort((a, b) => b[1] - a[1]).slice(0, BATTLE_SLOTS).map(([id]) => id)
+}
+function autoTeam() {
+  const ids = bestIds()
+  if (ids.length) setSlots(toSlots(ids, BATTLE_SLOTS))
+}
+watch(shown, (o) => { if (o && owned.value.length && !viewIds.value.length) autoTeam() })
+
 function setSlots(next) {
   const before = compact(edit.value.slots).join()
   edit.value = { slots: next }
@@ -296,6 +314,10 @@ onUnmounted(() => window.removeEventListener('keydown', onKey, true))
 .tp-cta { flex: none; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255,255,255,.85); border-top: 1px solid rgba(43,53,80,.08); }
 .tp-cta-btn { display: block; width: 100%; max-width: 488px; margin: 0 auto; border: 0; border-radius: 14px; padding: 13px; font: inherit; font-size: 1rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: var(--pop); cursor: pointer; }
 .tp-cta-btn:disabled { opacity: .5; cursor: default; }
+.tp-auto-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.tp-auto-row .tp-use { flex: 1; margin: 0; }
+.tp-auto { font: inherit; font-size: .76rem; font-weight: 800; border: var(--bw) solid var(--line); border-radius: 999px; padding: 5px 12px; background: #fff; color: #6246b8; cursor: pointer; white-space: nowrap; }
+.tp-auto:active { transform: translateY(1px); }
 .tp-inline { padding-bottom: 8px; }
 
 .tp-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }

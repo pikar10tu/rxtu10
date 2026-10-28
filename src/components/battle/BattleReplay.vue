@@ -868,6 +868,9 @@ async function applyPassive(e) {
 }
 
 // ── เสียงสกิลเปิดไฟต์ ── โชว์ทีละตัวแล้ว แต่ละตัวได้เสียงของตัวเอง (🦁 ครบ 3 สาย = คำราม)
+// 🔊 ระบบสถานะ (28 ต.ค.): ใช้ชุดเสียงเดิม จับคู่ตามชนิด · ติด = เสียงเปิด · ทำงานท้ายตา = เสียงเบา
+const STATUS_APPLY_SFX = { burn: 'p_fire', poison: 'curse', armorBreak: 'p_crack', weaken: 'curse', healBlock: 'curse', stun: 'p_crack', rally: 'p_buff', regen: 'p_heal', blessShield: 'p_guard' }
+const STATUS_TICK_SFX = { burn: 'p_fire', poison: 'virus_tick' }
 const OPEN_SFX = {
   elementTrinity: 'roar', aoeOpener: 'dragon_roar', teamCrit: 'open_crit', teamHp: 'open_hp', teamLifesteal: 'open_drain',
   teamDamageReduction: 'open_wall', enemyVuln: 'curse',
@@ -1111,9 +1114,9 @@ function landBurst(targetUid) {
 
 /** 🧾 มาตรฐานเอฟเฟกต์สถานะ (สเปก §8.10–8.11): ป้ายบนการ์ด + ป้ายเขย่า + แบนเนอร์สีประจำสถานะ
  *  applied = ตอนติด → แบนเนอร์ "ไอคอน ชื่อ" · ตอนทำงาน → ไอคอนอย่างเดียว · n = 0 → ป้ายหาย (ไม่มีแบนเนอร์ค้าง) */
-function statusFx(uid, id, n, applied) {
+function statusFx(uid, id, n, applied, inst = 1) {
   const d = STATUSES[id]; if (!d || !uid) return
-  fx?.stateMark(uid, d.icon, n)
+  fx?.stateMark(uid, d.icon, n, inst)
   if (n) fx?.markShake(uid, d.icon)
   fx?.callout(uid, 'status', applied ? `${d.icon} ${d.name}` : d.icon, d.color)
 }
@@ -1204,20 +1207,34 @@ function firePassiveFx(e) {
   // 🧾 แปะสถานะจากทะเบียน (สกิลใหม่ทุกตัวยิง effect 'statusApply' + statusId + stacks ต่อเป้า)
   // 👻 แบร่! ตัวใหญ่กลางจอ (ปิดตามสวิตช์โชว์ไทม์) แล้วค่อยติดหวาดกลัว
   if (e.boo && tuning.value.showtime !== false) fx?.boo()
-  if (e.effect === 'statusApply' && e.statusId) for (const t of on) statusFx(t, e.statusId, e.stacks?.[t] ?? 1, true)
+  // 🐉🔥 พ่นไฟ: สถานะแนบมาในใบเดียวกับพ่นไฟ
+  if (e.effect === 'aoeOpener' && e.burn) { for (const [t, b] of Object.entries(e.burn)) statusFx(t, 'burn', b.n, true, b.inst); sfx('p_fire') }
+  if (e.effect === 'statusApply' && e.statusId && !e.boo && STATUS_APPLY_SFX[e.statusId]) sfx(STATUS_APPLY_SFX[e.statusId])
+  if (e.effect === 'statusApply' && e.statusId) for (const t of on) statusFx(t, e.statusId, e.stacks?.[t] ?? 1, true, e.inst?.[t] ?? 1)
   // 🧾 สถานะทำงานท้ายตา (🔥 ☠️ 💚) / 😱 ตอนข้ามตา — ป้ายเขย่า + แบนเนอร์ไอคอน + เลขดาเมจ
   if (e.effect === 'statusTick' && e.statusId) {
-    for (const t of on) statusFx(t, e.statusId, e.left ?? 0, false)
-    if (e.fxKind === 'damage' && e.amount > 0) fx?.pop(on[0], { dmg: e.amount, weight: 0.4 })
+    for (const t of on) statusFx(t, e.statusId, e.left ?? 0, false, e.inst ?? 1)
+    if (e.fxKind === 'damage' && e.amount > 0) { fx?.pop(on[0], { dmg: e.amount, weight: 0.4 }); sfx(STATUS_TICK_SFX[e.statusId] || 'virus_tick') }
+    else if (e.fxKind === 'heal' && e.amount > 0) sfx('p_heal')
   }
   // 🛸 ลักพาตัว: การ์ดเป้าเทาโปร่ง + ป้าย 🛸 ค้าง + แบนเนอร์ "🛸 ถูกลักพาตัว" · ปล่อย = กลับมาชัด (ตกกระแทกใช้ทางดาเมจ hpPct)
   if (e.effect === 'abduct') for (const t of on) {
     highlight(t, 'away', true)
-    fx?.stateMark(t, '🛸', 1); fx?.markShake(t, '🛸')
+    fx?.stateMark(t, '🛸', e.left ?? 1); fx?.markShake(t, '🛸')
     fx?.callout(t, 'status', '🛸 โดนลักพาตัว', '#6d28d9')
   }
-  if (e.effect === 'ufoRelease') for (const t of on) { highlight(t, 'away', false); fx?.stateMark(t, '🛸', 0) }
+  if (e.effect === 'abduct') sfx('curse')
+  if (e.effect === 'ufoRelease') { for (const t of on) { highlight(t, 'away', false); fx?.stateMark(t, '🛸', 0) } sfx('p_dodge') }
   if (e.effect === 'ufoDrop' && e.amount > 0) { fx?.pop(on[0], { dmg: e.amount, weight: 0.5 }); fx?.callout(on[0], 'status', '💥 ตกกระแทก', '#6d28d9') }
+  // 🛸 ตาที่ถูกข้ามเพราะอยู่ในยาน: การ์ดเขย่า + แบนเนอร์ 🛸 + ตัวนับตาที่เหลือ (left) · ครบแล้ว ufoRelease ตามมา
+  if (e.effect === 'ufoDrain') for (const t of on) {
+    fx?.markShake(t, '🛸'); fx?.stateMark(t, '🛸', Math.max(1, e.left ?? 0))
+    fx?.callout(t, 'status', '🛸', '#6d28d9')
+    if (e.amount > 0) fx?.pop(t, { dmg: e.amount, weight: 0.4 })
+  }
+  if (e.effect === 'ufoDrain') sfx('p_aim')
+  // 🤍 กระต่ายตายจริง = มาสก์บนศัตรูหาย
+  if (e.effect === 'sparkClear') for (const t of on) fx?.stateMark(t, '🤍', 0)
   // 👽 ควบคุมจิตใจ: แบนเนอร์บนตัวที่ถูกควบคุม (หมัดที่ตามมามี mind: true ใช้ท่าตีปกติ)
   if (e.effect === 'mindControl') for (const t of on) fx?.callout(t, 'status', '👽 ถูกควบคุม', '#16a34a')
   // ☄️ พรดาวหาง: ป้ายสถานะร้ายที่ล้างหาย + ติดโล่พร 🌠 (ฟื้นเลือดใช้ทางฮีลกลางด้านล่าง)
@@ -1226,6 +1243,7 @@ function firePassiveFx(e) {
     statusFx(t, 'blessShield', 1, true)
   }
   // 🦄 ☄️ ล้างสถานะ: ป้ายบนการ์ดลดตามที่เหลือ (0 = ป้ายหาย) · คีย์ = id ในทะเบียน
+  if (e.effect === 'cleanse') sfx('p_buff')
   if (e.effect === 'cleanse') for (const t of on) {
     for (const [id, n] of Object.entries(e.left || {})) if (STATUSES[id]) fx?.stateMark(t, STATUSES[id].icon, n)
   }

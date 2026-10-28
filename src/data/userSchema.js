@@ -72,6 +72,7 @@ export const USER_DEFAULTS = {
   petFavs: [],            // ♥ ตัวโปรดในคลังเพ็ท [speciesId] — ขึ้นบนสุดในคลัง/หน้าเลือกตัว (18 ต.ค. 2026)
   towerClaims: [],        // รางวัลขั้นหอคอยที่รับแล้ว [10,20,…] · ล้างพร้อมรีเซตหอคอยตอนแจกซีซั่น
   welcomeGiftV1: false,   // one-time: ส่งจดหมายของขวัญต้อนรับแล้ว (กัน client ส่งซ้ำ)
+  starterLegendV1: false, // 🎁 one-time: เลือกตำนานของขวัญตัวแรกแล้ว (utils/starterGift.js)
   welcomeBoxSeen: false,  // เห็น Welcome box ต้อนรับแล้ว (กัน popup เด้งซ้ำ)
   passiveV2Seen: false,   // ปิดแถบ "พาสสีฟอัปเดต" ในหน้าเพ็ทแล้ว (รอบพาสสีฟ v2 — ครั้งเดียวจบ)
                           // 🔑 ฟิลด์บูลีนระดับบนสุดตามแพทเทิร์น welcomeBoxSeen — ห้ามเขียนแบบ dot-notation

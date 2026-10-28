@@ -98,8 +98,8 @@ test('👽 เอเลี่ยน: ตีโดนแล้วเป้าต�
   assert.ok(seen > 0, 'ต้องเจอหมัดควบคุม')
 })
 
-test('🛸 ยูเอฟโอ: ดูดเป้า → ตัวที่ถูกดูดไม่ได้ตา/ไม่โดนตี → ปล่อย + ตกกระแทก · ไฟต์ไม่ค้าง', () => {
-  let abducts = 0, drops = 0
+test('🛸 ยูเอฟโอ: ดูดเป้า → ตัวที่ถูกดูดครองตาแต่ข้าม/ไม่โดนตี → ปล่อยเมื่อครบตา · ไฟต์ไม่ค้าง (28 ต.ค.)', () => {
+  let abducts = 0, skips = 0, drops = 0
   for (let seed = 1; seed <= 40; seed++) {
     const a = [{ id: 'ufo', rarity: 'legendary', element: 'fist', grade: 3 }, { id: 'blank', rarity: 'rare', element: 'fist', grade: 3 }]
     const b = [{ id: 'blank', rarity: 'rare', element: 'paper', grade: 3 }, { id: 'blank', rarity: 'rare', element: 'paper', grade: 3 }, { id: 'blank', rarity: 'rare', element: 'paper', grade: 3 }]
@@ -111,13 +111,15 @@ test('🛸 ยูเอฟโอ: ดูดเป้า → ตัวที่�
       if (e.effect === 'abduct') { abducts++; away = e.targets[0] }
       else if (e.effect === 'ufoRelease') away = null
       else if (e.effect === 'ufoDrop') drops++
+      else if (e.effect === 'ufoDrain') skips++
       else if (away && e.t === 'attack' && !e.silent) {
         assert.notEqual(e.attacker, away, 'ตัวที่ถูกดูดต้องไม่ได้ตี')
         assert.notEqual(e.target, away, 'ตัวที่ถูกดูดต้องไม่โดนตี')
       }
     }
   }
-  assert.ok(abducts > 0 && drops > 0)
+  assert.ok(abducts > 0 && skips > 0, 'ตัวในยานต้องถูกข้ามตา')
+  assert.equal(drops, 0, 'ไม่มีตกกระแทกแล้ว')
 })
 
 test('🛸 บอสกันการดูด (immune away) = ตีปกติ', () => {

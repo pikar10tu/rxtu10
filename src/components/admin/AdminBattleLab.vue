@@ -29,6 +29,11 @@ const SCENES = [
   { key: 'alien', label: '👽 เอเลี่ยน', a: ['alien', 'cat'], b: ['hedgehog', 'kirin', 'luna'] },
   { key: 'ufo', label: '🛸 UFO', a: ['ufo', 'cat', 'turtle'], b: ['wolf', 'shark', 'fox'] },
   { key: 'mix', label: '🎲 รวม 6 ตัว', a: ['ufo', 'alien', 'ghost'], b: ['nemesis', 'robot', 'comet'] },
+  // 🧾 ระบบสถานะ 28 ต.ค.: ป้ายเทิร์น/หลายก้อน "+" · ป้ายนับ ×n · ล้าง
+  { key: 'burn', label: '🐉 พ่นไฟ 🔥', a: ['bahamut', 'cat', 'turtle'], b: ['unicorn', 'butterfly', 'wolf'] },
+  { key: 'mask', label: '🤍 มาสก์ ×n', a: ['rabbit', 'cat', 'turtle'], b: ['wolf', 'shark', 'fox'] },
+  { key: 'burn2', label: '🔥 ไฟหลายก้อน +', a: ['bahamut', 'cat', 'turtle'], b: ['bahamut', 'butterfly', 'wolf'] },
+  { key: 'virus', label: '🦠 เชื้อ vs ล้าง', a: ['virus', 'cat', 'turtle'], b: ['unicorn', 'butterfly', 'wolf'] },
 ]
 const replay = ref(null)
 function play(s) {

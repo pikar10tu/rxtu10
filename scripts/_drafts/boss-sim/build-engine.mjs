@@ -5,7 +5,7 @@ const root = 'file:///D:/RXTU/rxtu10-v2/src/'
 let s = fs.readFileSync('D:/RXTU/rxtu10-v2/src/utils/battleEngine.js', 'utf8')
 const rep = (a, b) => { if (!s.includes(a)) throw new Error('ไม่เจอ: ' + a.slice(0, 60)); s = s.replace(a, b) }
 s = s.replace(/from '\.\.\/([a-z]+)\//g, `from '${root}$1/`).replace(/from '\.\/([A-Za-z]+\.js)'/g, `from '${root}utils/$1'`)
-s = `import { bossImmune, STATUSES as _S } from '${root}data/statuses.js'\n_S.doom = { kind: 'debuff', color: '#000', icon: '💀', name: 'โรคร้าย', stack: 'none' }\n` + s
+s = `import { bossImmune, STATUSES as _S } from '${root}data/statuses.js'\n_S.doom = { kind: 'debuff', color: '#000', icon: '💀', name: 'โรคร้าย', single: true, turns: 99 }\n` + s
 rep('export function simulateBattle(', 'export function simulateBoss(')
 rep("slot: i, uid: `${side}${i}`, side }", "slot: i, uid: `${side}${i}`, side, passiveLv: p?.passiveLv }")
 rep('    // 🤖 โรบอท: ลดดาเมจจากสายของคนตี', '    if (bossHook) bossHook(att, tg, hitRes)\n    // 🤖 โรบอท: ลดดาเมจจากสายของคนตี')

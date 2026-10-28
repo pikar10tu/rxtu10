@@ -12,7 +12,7 @@
   let enrage = 1
   const stats = { smash: 0, doomKill: 0, cleanse: 0, breaks: 0, dmg: {} }
   const doomOf = (u) => u.ps?.doomT || 0
-  const frozenBoss = () => (boss.ps?.status?.freeze?.n || 0) > 0
+  const frozenBoss = () => ((boss.ps?.status?.freeze || []).length > 0)
 
   bossHook = (att, tg, r) => {
     if (tg !== boss) return
@@ -64,7 +64,11 @@
       } else bossHit(bst.lock, 1)
       return
     }
-    const tg = pick(targetableFoes(A))
+    // 2 แอคชั่น/รอบ = ตีไม่ซ้ำเป้า (user 28 ต.ค.) · เหลือตัวเดียว = ตัวเดิม
+    const pool = targetableFoes(A)
+    const rest = pool.filter(u => u !== bst.lastTg)
+    const tg = pick(rest.length ? rest : pool)
+    bst.lastTg = tg
     if (!tg) return
     bossHit(tg, cfg.kind === 'doom' && doomOf(tg) > 0 ? 1.5 : 1)
   }
@@ -83,7 +87,7 @@
   }
   // โรคร้าย = สถานะ 'doom' n=1 (🦄 cleanseOne / ☄️ cleanseAll ล้างได้) + ตัวจับเวลา ps.doomT
   const checkCleansed = () => {
-    for (const u of A) if (u.ps?.doomT > 0 && !(u.ps.status?.doom?.n > 0)) { u.ps.doomT = 0; if (u.hp > 0) { stats.cleanse++; bst.weakUntil = round + 1 } }
+    for (const u of A) if (u.ps?.doomT > 0 && !((u.ps.status?.doom || []).length > 0)) { u.ps.doomT = 0; if (u.hp > 0) { stats.cleanse++; bst.weakUntil = round + 1 } }
   }
   const bossRoundEnd = () => {
     for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
@@ -96,7 +100,7 @@
         let dur = cfg.doomDur ?? [0, 3, 2, 2][T]
         if (night && boss.hp < boss.maxHp / 2) dur = Math.max(1, dur - 1)
         const cand = alive(A).filter(u => !(doomOf(u) > 0)).sort((a, b) => b.atk - a.atk).slice(0, n)
-        for (const u of cand) { applyStatus(u, 'doom', { n: 1, from: boss }); u.ps.doomT = dur }
+        for (const u of cand) { applyStatus(u, 'doom', { n: 99, from: boss }); u.ps.doomT = dur }
       }
     }
     if (cfg.kind === 'shield' && cfg.regen && bst.shield === 0 && T >= 2 && round - bst.brokeAt >= (cfg.regen ?? (T === 2 ? 3 : 2))) bst.shield = cfg.shield ?? [0, 6, 10, 15][T]
@@ -129,6 +133,7 @@
       checkCleansed()
       if (cfg.kind === 'shield') for (const m of B.slice(1)) if (m.hp <= 0 && !psOf(m)._counted) { psOf(m)._counted = true; bst.shield += cfg.minionShield ?? 3 }
     }
+    bst.lastTg = null
     for (let k = 0; k < actions; k++) bossAction()
     if (boss.hp > 0) runTurnEnd(boss)
     for (const m of B.slice(1)) if (m.hp > 0 && !m.ps?.away && alive(A).length) {

@@ -364,7 +364,7 @@ test('DUO_TITLES: ทุก id ต้องมีตัวตนจริง แ
 
 test('บาลานซ์รอบ 1 (27 ก.ย. 2026): ค่าขั้น 1 ตามที่ user เคาะ', () => {
   const v = (id, eff) => passiveValueAt(partWithEffect(PET_PASSIVES[id], eff), 1)
-  assert.equal(v('bahamut', 'aoeOpener').pct, 100)
+  assert.equal(v('bahamut', 'aoeOpener').pct, 70)
   assert.deepEqual(v('earth', 'season'), { hot: 20, rain: 12, cold: 23.5 })
   assert.equal(v('mammoth', 'armorStack').pct, 25)
   assert.equal(v('mammoth', 'armorStack').count, 2)

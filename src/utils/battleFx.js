@@ -377,7 +377,8 @@ export function createBattleFx() {
     '🔥': { dx: -24, dy: -14 }, '☠️': { dx: -24, dy: 6 }, '💔': { dx: -24, dy: 26 },
     '🛸': { dx: 0, dy: -30 }, '🥀': { dx: -24, dy: 46 }, '🚫': { dx: 24, dy: 46 }, '💪': { dx: -24, dy: 46 }, '💚': { dx: 24, dy: 46 } }
   const DEFAULT_MARK_OFFSET = { dx: 0, dy: -30 }
-  function stateMark(uid, char, n) {
+  const COUNT_MARKS = new Set(['🦠', '🤍'])
+  function stateMark(uid, char, n, inst = 1) {
     const key = markKey(uid, char)
     const cur = markOn.get(key)
     if (!n) {
@@ -392,8 +393,9 @@ export function createBattleFx() {
     el.style.opacity = '1'
     const ico = el.firstChild
     if (ico && ico.dataset.char !== char) { imgSrc(ico, char); ico.dataset.char = char }
-    // ❄️ แช่แข็งมีแค่ "ติด/ไม่ติด" ไม่มีชั้นสะสม — เลข 1 ที่โผล่มาดูเหมือนบั๊ก (user เจอ 27 ก.ย.) · 🦠 ยังโชว์ชั้นตามเดิม
-    el.lastChild.textContent = (char === '❄️' && n === 1) ? '' : String(n)
+    // 🧾 กติกากลาง 28 ต.ค.: ป้ายเทิร์น = เลขเปล่า (เทิร์นที่เหลือของก้อนที่นานสุด) · หลายก้อน = ต่อท้าย "+"
+    //    ป้ายนับ (🦠 🤍) = "×จำนวน" ให้แยกออกว่าไม่ใช่เทิร์น
+    el.lastChild.textContent = COUNT_MARKS.has(char) ? '×' + n : String(n) + (inst > 1 ? '+' : '')
     markOn.set(key, el)
   }
   /** เอาป้ายสถานะ "ทุกชนิด" ของ uid นี้ออก — ใช้ตอนการ์ดตาย (🦠 + ❄️ + ไอคอนใหม่ในอนาคต ต้องหายไปพร้อมกัน)

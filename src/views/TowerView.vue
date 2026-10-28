@@ -88,13 +88,10 @@
       <!-- 🔻 แถบสู้ติดล่างจอ: sticky ใน #main-content (padding ล่าง 28px → bottom/margin -28px ให้ชิดขอบจริง) (ตัว scroll จริง ซึ่งจบเหนือ bottom-nav อยู่แล้ว)
            ⇒ ไม่ต้อง fixed/Teleport/z-index · อยู่ท้ายหน้าเสมอ เลื่อนไปไหนก็กดสู้ได้ -->
       <div class="tw-bar">
-        <button class="tw-bar-team" :aria-label="team.length ? 'จัดทีม' : 'ยังไม่ได้จัดทีม — จัดทีม'" @click="pickOpen = true">
-          <template v-if="team.length"><Emoji v-for="(p, i) in team" :key="i" :char="defOf(p.id).emoji" /></template>
-          <template v-else><Emoji char="🛡️" /></template>
-          <small>จัดทีม</small>
-        </button>
         <!-- กดสู้ = เปิดหน้าจัดทีมก่อนเสมอ (user 25 ต.ค. 2026: อย่างน้อยต้องได้ดู/เลือกทีม) · ปุ่มในหน้าจัดทีมเป็นตัวเริ่มจริง -->
-        <button class="tw-fight" :disabled="busy" @click="pickOpen = true">
+        <!-- 28 ต.ค. user: ตัดปุ่มจัดทีมเล็กออก (กดสู้ก็ไปหน้าจัดทีมอยู่แล้ว) · ยังไม่มีเพ็ท = พาไปอัญเชิญตัวแรกเลย -->
+        <RouterLink v-if="!hasPets" to="/shop" class="tw-fight"><Emoji char="🎟️" /> ไปอัญเชิญเพ็ทตัวแรกก่อนนะ</RouterLink>
+        <button v-else class="tw-fight" :disabled="busy" @click="pickOpen = true">
           <Emoji char="⚔️" /> {{ busy ? 'กำลังสู้…' : fightLabel }}
         </button>
       </div>
@@ -161,6 +158,7 @@ import TowerMilestones from '../components/tower/TowerMilestones.vue'
 import { rosterArena } from '../utils/arenas.js'
 
 const authStore = useAuthStore()
+const hasPets = computed(() => (authStore.userData?.pets || []).length > 0)
 const membersStore = useMembersStore()
 const steleOpen = ref(false)
 const { floor, best, team, botTeam, bonus, fight, TOWER_MAX, AUTO_CLIMB_MAX, claims, claimable, claimMilestones, msOpen, loadMsOpen } = useTower()
@@ -379,7 +377,7 @@ function onSheetFight() {
   border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; font-family: inherit; cursor: pointer; box-shadow: var(--pop); font-size: 1.05rem; line-height: 1; }
 .tw-bar-team small { font-size: .7rem; font-weight: 800; color: var(--primary-dark, var(--primary)); }
 .tw-bar-team:active { transform: translateY(1px); }
-.tw-fight { flex: 1; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.tw-fight { flex: 1; text-decoration: none; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; min-height: 44px; font-family: inherit; font-size: .92rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .tw-fight:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .tw-fight:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
 .tw-clear { text-align: center; padding: 0 0 14px; font-weight: 800; color: #f59e0b; }

@@ -210,14 +210,15 @@ test('aoeOpener (bahamut): ศัตรูทุกตัวโดน + มี e
   const foes = [u('cat', { uid: 'B0' }), u('mouse', { uid: 'B1' })]
   const evs = runOnStart([u('bahamut')], foes)
   assert.ok(foes[0].hp < 1000 && foes[1].hp < 1000)
-  assert.equal(evs.length, 1)
   assert.equal(evs[0].t, 'passive')
   assert.deepEqual(evs[0].targets, ['B0', 'B1'])
+  assert.equal(evs.length, 1, 'ใบเดียว — ลุกไหม้แนบในใบพ่นไฟ (แบนเนอร์ขึ้นครั้งเดียว)')
+  assert.deepEqual(Object.keys(evs[0].burn), ['B0', 'B1'], '🔥 พ่นไฟติดลุกไหม้ทุกตัว (28 ต.ค.)')
 })
 
-test('บาฮามุท: เลขเปิดไฟต์เป็น 100% ของพลังโจมตี', () => {   // ลดจาก 150 ตามเมต้าซิม 27 ก.ย. 2026
+test('บาฮามุท: พ่น 70% + ลุกไหม้ 2 ตา', () => {   // 150 → 100 (27 ก.ย.) → 70 + 🔥 (เมต้าซิม 28 ต.ค.)
   const v = partsOf(PET_PASSIVES.bahamut)[0].value
-  assert.equal(v.pct, 100)
+  assert.equal(v.pct, 70); assert.equal(v.burn, 2)
 })
 
 test('regenSelf: ฟื้นเมื่อเลือดพร่อง · เลือดเต็มแล้วไม่เด้ง event ซ้ำซาก', () => {
@@ -2166,19 +2167,17 @@ test('🦄 ยูนิคอร์น: ตีแล้วฟื้นเพื�
   assert.equal(runOnRound([uni, hurt, ok]).filter(x => x.effect === 'healLowestAlly').length, 0)
 })
 
-test('🦄 ยูนิคอร์น: ฮีลติดแล้วล้างสถานะร้ายบนเป้านั้นอย่างละ 1 (เชื้อ · มาสก์ · แช่แข็ง)', () => {
+test('🦄 ยูนิคอร์น: ฮีลติดแล้วล้างสถานะร้ายบนเป้านั้น ชนิดละ 1 ก้อน · เชื้อหายทั้งก้อน · มาสก์ล้างไม่ได้ (28 ต.ค.)', () => {
   const uni  = u('unicorn', { uid: 'A0', maxHp: 1000, hp: 1000 })
   const hurt = u('blank',   { uid: 'A1', maxHp: 1000, hp: 300 })
   const st = psOf(hurt)
-  st.infect = { n: 2, from: uni }; st.spark = 1; st.status = { freeze: { n: 1 } }
+  st.infect = { n: 2, from: uni }; st.spark = 1; st.status = { freeze: [{ n: 1 }] }
   const out = runOnDealt(uni, [uni, hurt], 100)
-  assert.equal(st.infect.n, 1)
-  assert.equal(st.spark, 0)
+  assert.equal(st.infect, undefined, 'เชื้อ = ป้ายนับ ล้างแล้วหายทั้งก้อน')
+  assert.equal(st.spark, 1, 'มาสก์ล้างไม่ได้')
   assert.equal(st.status.freeze, undefined, 'แช่แข็งหมด = ลบออกจากทะเบียน')
   const e = out.events.find(x => x.effect === 'cleanse')
-  assert.deepEqual(e.left, { infect: 1, spark: 0, freeze: 0 })
-  runOnDealt(uni, [uni, hurt], 100)
-  assert.equal(st.infect, undefined, 'ชั้นสุดท้ายหมด = ลบเชื้อทิ้ง')
+  assert.deepEqual(e.left, { infect: 0, freeze: 0 })
 })
 
 test('🦄 + 🦇 ในทีมเดียวกัน: สองผลนี้ต้องได้ event ของตัวเองครบ ไม่มีใบไหนถูกกลืน', () => {
@@ -2325,7 +2324,7 @@ test('ฤดูหนาว (ช่อง 2): rand < 30% → ศัตรูไ�
   const foes = [U('a', 'common', 0, 'B'), U('b', 'common', 1, 'B')]
   const rolls = [0.1, 0.9]
   const out = runOnRoundEnd(team, foes, () => rolls.shift())
-  assert.equal(foes[0].ps.status.freeze.n, 1)
+  assert.equal(foes[0].ps.status.freeze[0].n, 1)
   assert.ok(!foes[1].ps?.status?.freeze)
   assert.deepEqual(out[0].targets, ['B0'])
 })

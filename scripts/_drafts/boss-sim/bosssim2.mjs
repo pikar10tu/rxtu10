@@ -11,9 +11,10 @@ const KINDS = { hammer: 'fist', doom: 'scissors', shield: 'paper' }
 const TECH0 = { hammer: ['robot'], doom: ['comet', 'unicorn', 'butterfly'], shield: ['rabbit', 'cerberus', 'dragon'] }
 const TECH = { ...TECH0, ...(process.env.TECH ? { [process.argv[2]]: process.env.TECH.split(',') } : {}) }
 const DEF = {
-  hammer: { 1: { hpMul: 4, atkMul: 0.6, every: 4 }, 2: { hpMul: 6, atkMul: 0.9, every: 3 }, 3: { hpMul: 6.5, atkMul: 1.0, every: 3 }, smashHits: 5, smashPer: 0.9, allow: [] },
-  doom:   { 1: { hpMul: 4, atkMul: 0.6 }, 2: { hpMul: 7, atkMul: 0.85, doomEvery: 2 }, 3: { hpMul: 6, atkMul: 0.75 }, allow: [] },
-  shield: { 1: { hpMul: 3, atkMul: 0.6, shield: 8 }, 2: { hpMul: 4, atkMul: 0.85, shield: 25 }, 3: { hpMul: 4.5, atkMul: 0.85, shield: 40, grow: 0.03 }, allow: ['spark'] },
+  // จูน 28 ต.ค. (เอนจินจริง + กติกาสถานะ §8.17)
+  hammer: { 1: { hpMul: 4, atkMul: 0.6, every: 4 }, 2: { hpMul: 12, atkMul: 0.35, every: 3 }, 3: { hpMul: 10, atkMul: 0.45, every: 3, everyLow: 2 }, smashHits: 5, smashPer: 4, lockRage: 3, allow: [] },
+  doom:   { 1: { hpMul: 4, atkMul: 0.6 }, 2: { hpMul: 7, atkMul: 0.85, doomEvery: 1 }, 3: { hpMul: 10, atkMul: 0.9 }, allow: [] },
+  shield: { 1: { hpMul: 3, atkMul: 0.6, shield: 8 }, 2: { hpMul: 3, atkMul: 0.5, shield: 30, grow: 0, growRound: 0.5 }, 3: { hpMul: 2.5, atkMul: 0.45, shield: 40, grow: 0, growRound: 0.35 }, allow: ['spark'] },
 }
 const kind = process.argv[2]
 const over = process.argv[3] ? JSON.parse(process.argv[3]) : {}
@@ -26,7 +27,7 @@ const bossTeam = (T) => {
   if (kind === 'shield' && T === 3) out.push({ id: 'minion', rarity: 'common', element: 'paper', grade: 0 }, { id: 'minion', rarity: 'common', element: 'paper', grade: 0 })
   return out
 }
-const cfgOf = (T) => ({ kind, tier: T, smashMult: 3, smashHits: DEF[kind].smashHits, splash: false, smashPer: DEF[kind].smashPer, allow: DEF[kind].allow, ...DEF[kind][T], ...(over.all || {}), ...(over[T] || {}) })
+const cfgOf = (T) => ({ kind, tier: T, smashMult: 3, smashHits: DEF[kind].smashHits, smashPer: DEF[kind].smashPer, lockRage: DEF[kind].lockRage, splash: false, allow: DEF[kind].allow, ...DEF[kind][T], ...(over.all || {}), ...(over[T] || {}) })
 const run = (team, T, seed) => simulateBoss(team.map(x => ({ ...x, passiveLv: SK })), bossTeam(T), seed, { boss: cfgOf(T) })
 
 function pool(u, withTech) {

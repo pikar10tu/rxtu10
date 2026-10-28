@@ -304,7 +304,16 @@ export function runOnStart(team, foes) {
         if (!targets.length) continue
         const dmg = pctOf(u.atk, v.pct)
         for (const t of targets) t.hp -= dmg
-        out.push(ev(u, p, part, { targets: targets.map(t => t.uid), amount: Math.round(dmg), fxKind: 'damage' }))
+        // 🔥 พ่นไฟติดลุกไหม้ {burn} ตา (user 28 ต.ค.) — แนบในใบเดียวกับพ่นไฟ (แบนเนอร์สกิลขึ้นครั้งเดียว)
+        //    ตัวที่เลือดหมดจากพ่นไม่ต้องติด · บอสกันได้ (immune)
+        const burn = {}
+        if (v.burn > 0) for (const t of targets) {
+          if (t.hp <= 0) continue
+          const r = applyStatus(t, 'burn', { n: v.burn, from: u })
+          if (r.ok) burn[t.uid] = { n: r.n, inst: r.inst }
+        }
+        out.push(ev(u, p, part, { targets: targets.map(t => t.uid), amount: Math.round(dmg), fxKind: 'damage',
+          ...(Object.keys(burn).length ? { statusId: 'burn', burn } : {}) }))
       } else if (part.effect === 'teamHealOpener') {
         const targets = alive(team)
         for (const t of targets) if (canHeal(t)) t.hp = Math.min(t.maxHp, t.hp + pctOf(t.maxHp, v.pct))
@@ -361,7 +370,7 @@ export function runOnRound(team) {
         if (!t) continue
         const gone = cleanseAll(t)
         const h = healUnit(t, v.heal)
-        applyStatus(t, 'blessShield', { n: 1, val: v.shield })
+        applyStatus(t, 'blessShield', { val: v.shield })
         out.push(ev(u, p, part, { targets: [t.uid], ...h, cleansed: gone, left: Object.fromEntries(gone.map(id => [id, 0])),
           statusId: 'blessShield', fxKind: 'heal' }))
       } else if (part.effect === 'stackAtk') {
@@ -1106,6 +1115,11 @@ export function runOnDied(unit, foes, killer, unitTeam = []) {
     const e = ev(n, np, part, { targets: [n.uid], amount: st.revenge, fxKind: 'buff', ...(st.revengeOn ? { revengeOn: st.revengeOn } : {}) })
     e.statsAfter = statsSnapshot(unitTeam)
     out.push(e)
+    // 👤 แค้นแล้วเด้งเลือด heal% ของเลือดสูงสุด (user 28 ต.ค. · ซิมก่อนเคาะ)
+    if (v.heal > 0 && n.hp < n.maxHp && canHeal(n)) {
+      const h = healUnit(n, v.heal)
+      out.push(ev(n, np, part, { targets: [n.uid], ...h, fxKind: 'heal' }))
+    }
   }
   const p = passiveFor(unit)
   for (const part of partsAt(p, 'onDied')) {

@@ -1,5 +1,5 @@
 import { bossImmune, STATUSES as _S } from 'file:///D:/RXTU/rxtu10-v2/src/data/statuses.js'
-_S.doom = { kind: 'debuff', color: '#000', icon: '💀', name: 'โรคร้าย', stack: 'none' }
+_S.doom = { kind: 'debuff', color: '#000', icon: '💀', name: 'โรคร้าย', single: true, turns: 99 }
 // ════════════════════════════════════════════════════════════
 //  Battle engine — pure + deterministic (seeded) · พอร์ตจาก
 //  scripts/battle-sim.mjs (resolve) + บันทึก log ทุก action ให้ UI replay
@@ -144,13 +144,6 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     // ยังอยู่ใน beat เดิม และ attack event คิด dmg จาก before-after อยู่แล้ว หลอดเลือดจึงตรงเอง
     if (hitRes.pierce > 0) tg.hp -= hitRes.pierce
     if (hitRes.thorns > 0) att.hp -= hitRes.thorns
-    // 🛸 ยูเอฟโอโดนตีจริง (ไม่หลบ · รวมหมัดลูก · ไม่นับหนาม/สะท้อน/เชื้อ) ครบ {hits} = ปล่อย + ตกกระแทก
-    //    นับหลังหักดาเมจแล้ว — หมัดที่ฆ่ายูเอฟโอ = ปล่อยแบบไม่ตก (ทาง resolveSilentDeath) ไม่ใช่ตก (รีวิว 28 ต.ค.)
-    if (tg.ps?.ufo && !hitRes.dodged && !reflecting && tg.hp > 0) {
-      tg.ps.ufo.hits++
-      if (tg.ps.ufo.hits >= ufoVal(tg).hits) ufoRelease(tg, true)
-    }
-
     // เกราะสะท้อน — ใส่ศัตรูทุกตัวของผู้รับ ผ่าน strike() ปกติ (โดนสายลดของฝั่งนั้นตามสเปก)
     // 🔒 sub: true ⇒ อยู่ beat เดิม ไม่เพิ่มจังหวะ · reflecting กันไม่ให้เกราะฝั่งตรงข้ามสะท้อนกลับมาวนไม่รู้จบ
     // ⚠️ ต้อง finally: ถ้าอะไรใน strike/runOnHit/runOnDeath/runOnAnyDeath ที่ซ้อนอยู่ throw ขึ้นมา
@@ -278,6 +271,17 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     }
     for (const e of runOnAnyDeath(unit, killerTeam, unitTeam, rand)) log.push(e)
     for (const e of runOnDied(unit, killerTeam, killer, unitTeam)) log.push(e)   // 👻 แบร่ (หลังตายจริง)
+    // 🤍 กระต่ายตายจริง (ฟีนิกซ์ชุบ = ไม่มาถึงตรงนี้) ⇒ มาสก์ที่แปะไว้บนศัตรูหายหมด (user 28 ต.ค. กติกา 9)
+    if (partWithEffect(PET_PASSIVES[unit.id], 'sparkMark')) {
+      const foes = unit.side === 'A' ? B : A
+      const had = foes.filter(f => f.ps?.spark > 0)
+      if (had.length) {
+        for (const f of had) f.ps.spark = 0
+        const p = PET_PASSIVES[unit.id]
+        log.push({ t: 'passive', uid: unit.uid, side: unit.side, petId: unit.id, name: p.name, icon: p.icon,
+          effect: 'sparkClear', targets: had.map(f => f.uid), fxKind: 'debuff', sub: true })
+      }
+    }
     return true
   }
 
@@ -318,6 +322,11 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     const mod = runOnAttack(att, tg, tf, rand, attTeam)
     for (const e of mod.events) log.push(e)
     tg = mod.target || tg
+    // 🛸 เล็งดูดตัว ATK สูงสุดที่ดูดได้ (ยั่วยุยังชนะ · ซิม 28 ต.ค. ถ้า user เคาะ) — value.smart = 1
+    if (ufoPart(att) && !att.ps?.ufo && ufoVal(att).smart && !tauntTargetOf(tf)) {
+      const best = tf.filter(u => u.hp > 0 && !isImmune(u, 'away')).sort((x, y) => y.atk - x.atk)[0]
+      if (best) tg = best
+    }
     // 🛸 ยังไม่ได้ดูดใคร = หมัดนี้คือการดูดเป้า (หลบไม่ได้ · เกราะกันไม่ได้ · ไม่มีดาเมจ) · บอสกัน = ตีปกติ
     if (ufoPart(att) && !att.ps?.ufo && !isImmune(tg, 'away')) {
       if (tg.ps?.ufo) ufoRelease(tg, false)   // ดูดยูเอฟโออีกฝั่งที่กักใครอยู่ = ตัวนั้นถูกปล่อย (ไม่มีตกกระแทก)
@@ -328,7 +337,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
         effect: 'abduct', targets: [tg.uid], fxKind: 'debuff' })
       return false
     }
-    const ufoWeak = att.ps?.ufo ? ufoVal(att).pct / 100 : 1   // ระหว่างกักตัว ยูเอฟโอตีเบาลง
+    const ufoWeak = att.ps?.ufo ? (ufoVal(att).pct ?? 100) / 100 : 1   // ระหว่างกักตัว ยูเอฟโอตีเบาลง
 
     let m = elementMult(att.element, tg.element)
     const eff = m > 1 ? 'super' : (m < 1 ? 'weak' : 'neutral')  // ธาตุล้วน ก่อนคูณ crit/variance
@@ -384,13 +393,13 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
 
   // 🧾 ดาเมจจากสถานะ (🔥 ☠️ 😱) — คนแปะเป็นคนฆ่า (user 27 ต.ค.) · ไม่มีคนแปะ/คนแปะเป็นพวกเดียวกัน
   //    = ศัตรู ATK สูงสุดที่ยังอยู่ (resolveSilentDeath ต้องมี killer ฝั่งตรงข้าม)
-  const statusHurt = (u, dmg, id, from, left) => {
+  const statusHurt = (u, dmg, id, from, left, inst) => {
     if (!(dmg > 0) || u.hp <= 0) return
     const before = u.hp
     u.hp -= dmg
     const d = STATUSES[id]
     log.push({ t: 'passive', uid: u.uid, side: u.side, petId: u.id, name: d.name, icon: d.icon,
-      effect: 'statusTick', statusId: id, left, targets: [u.uid], fxKind: 'damage', amount: Math.round(before - Math.max(0, u.hp)),
+      effect: 'statusTick', statusId: id, left, inst, targets: [u.uid], fxKind: 'damage', amount: Math.round(before - Math.max(0, u.hp)),
       hpPct: Math.max(0, Math.round((Math.max(0, u.hp) / u.maxHp) * 100)) })
     if (u.hp > 0) return
     const foesOf = u.side === 'A' ? B : A
@@ -401,7 +410,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   const runTurnEnd = (u) => {
     for (const r of turnEndTicks(u)) {
       if (u.hp <= 0) break
-      if (r.dmg) statusHurt(u, r.dmg, r.id, r.from, r.left)
+      if (r.dmg) statusHurt(u, r.dmg, r.id, r.from, r.left, r.inst)
       if (r.heal && canHeal(u)) {
         const before = u.hp
         u.hp = Math.min(u.maxHp, u.hp + r.heal)
@@ -459,7 +468,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   let enrage = 1
   const stats = { smash: 0, doomKill: 0, cleanse: 0, breaks: 0, dmg: {} }
   const doomOf = (u) => u.ps?.doomT || 0
-  const frozenBoss = () => (boss.ps?.status?.freeze?.n || 0) > 0
+  const frozenBoss = () => ((boss.ps?.status?.freeze || []).length > 0)
 
   bossHook = (att, tg, r) => {
     if (tg !== boss) return
@@ -511,7 +520,11 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       } else bossHit(bst.lock, 1)
       return
     }
-    const tg = pick(targetableFoes(A))
+    // 2 แอคชั่น/รอบ = ตีไม่ซ้ำเป้า (user 28 ต.ค.) · เหลือตัวเดียว = ตัวเดิม
+    const pool = targetableFoes(A)
+    const rest = pool.filter(u => u !== bst.lastTg)
+    const tg = pick(rest.length ? rest : pool)
+    bst.lastTg = tg
     if (!tg) return
     bossHit(tg, cfg.kind === 'doom' && doomOf(tg) > 0 ? 1.5 : 1)
   }
@@ -530,7 +543,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   }
   // โรคร้าย = สถานะ 'doom' n=1 (🦄 cleanseOne / ☄️ cleanseAll ล้างได้) + ตัวจับเวลา ps.doomT
   const checkCleansed = () => {
-    for (const u of A) if (u.ps?.doomT > 0 && !(u.ps.status?.doom?.n > 0)) { u.ps.doomT = 0; if (u.hp > 0) { stats.cleanse++; bst.weakUntil = round + 1 } }
+    for (const u of A) if (u.ps?.doomT > 0 && !((u.ps.status?.doom || []).length > 0)) { u.ps.doomT = 0; if (u.hp > 0) { stats.cleanse++; bst.weakUntil = round + 1 } }
   }
   const bossRoundEnd = () => {
     for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
@@ -543,7 +556,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
         let dur = cfg.doomDur ?? [0, 3, 2, 2][T]
         if (night && boss.hp < boss.maxHp / 2) dur = Math.max(1, dur - 1)
         const cand = alive(A).filter(u => !(doomOf(u) > 0)).sort((a, b) => b.atk - a.atk).slice(0, n)
-        for (const u of cand) { applyStatus(u, 'doom', { n: 1, from: boss }); u.ps.doomT = dur }
+        for (const u of cand) { applyStatus(u, 'doom', { n: 99, from: boss }); u.ps.doomT = dur }
       }
     }
     if (cfg.kind === 'shield' && cfg.regen && bst.shield === 0 && T >= 2 && round - bst.brokeAt >= (cfg.regen ?? (T === 2 ? 3 : 2))) bst.shield = cfg.shield ?? [0, 6, 10, 15][T]
@@ -576,6 +589,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
       checkCleansed()
       if (cfg.kind === 'shield') for (const m of B.slice(1)) if (m.hp <= 0 && !psOf(m)._counted) { psOf(m)._counted = true; bst.shield += cfg.minionShield ?? 3 }
     }
+    bst.lastTg = null
     for (let k = 0; k < actions; k++) bossAction()
     if (boss.hp > 0) runTurnEnd(boss)
     for (const m of B.slice(1)) if (m.hp > 0 && !m.ps?.away && alive(A).length) {
@@ -594,7 +608,7 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   // หาตัวออกตี: ไล่จาก cursor ไปขวา วนกลับมาซ้าย เจอตัวแรกที่ยังไม่ตาย (-1 = ไม่มี)
   const nextAttacker = (team, cursor) => {
     const n = team.length
-    for (let k = 0; k < n; k++) { const i = (cursor + k) % n; if (team[i].hp > 0 && !team[i].ps?.away) return i }
+    for (let k = 0; k < n; k++) { const i = (cursor + k) % n; if (team[i].hp > 0) return i }
     return -1
   }
 
@@ -616,17 +630,13 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
   const startRound = () => {
     round++; log.push({ t: 'round', n: round })
     // 🛸 ครบ {hits} รอบนับจากตอนดูด = ปล่อย + ตกกระแทก
-    for (const u of [...A, ...B]) {
-      const h = u.ps?.ufo
-      if (h && u.hp > 0 && round - h.round >= ufoVal(u).hits) ufoRelease(u, true)
-    }
     for (const e of [...runOnRound(A), ...runOnRound(B)]) log.push(e)
-    pending = new Set([...alive(A), ...alive(B)].map(u => u.uid))
+    pending = new Set([...A, ...B].filter(u => u.hp > 0).map(u => u.uid))
   }
   const endRoundIfDone = () => {
     for (const uid of [...pending]) {
       const u = (uid[0] === 'A' ? A : B).find(x => x.uid === uid)
-      if (!u || u.hp <= 0 || u.ps?.away) pending.delete(uid)
+      if (!u || u.hp <= 0) pending.delete(uid)
     }
     if (pending.size) return
     for (const e of [...runOnRoundEnd(A, B, rand), ...runOnRoundEnd(B, A, rand)]) log.push(e)
@@ -662,6 +672,34 @@ export function simulateBoss(teamA, teamB, seed, opts = {}) {
     if (ai !== -1) {
       const att = team[ai]
       const st = psOf(att)
+      // 🛸 ถูกดูดอยู่ = ครองตาไว้แต่ข้าม (user 28 ต.ค.: ฝั่งที่โดนดูดเสียหมัดจริง) · ทุกตาที่ข้ามเสียเลือด {drain}%
+      //    ครบ {turns} ตา = ปล่อยกลับลงสนาม · ตายในยาน = คนฆ่าคือยูเอฟโอ
+      const holder = att.ps?.away ? [...A, ...B].find(x => x.ps?.ufo?.uid === att.uid) : null
+      if (att.ps?.away && holder) {
+        const hv = ufoVal(holder), h = holder.ps.ufo
+        h.turns = (h.turns || 0) + 1
+        const p = PET_PASSIVES[holder.id]
+        const before = att.hp
+        if (hv.drain) att.hp -= att.maxHp * hv.drain / 100
+        log.push({ t: 'passive', uid: holder.uid, side: holder.side, petId: holder.id, name: p.name, icon: p.icon,
+          effect: 'ufoDrain', targets: [att.uid], fxKind: 'damage', amount: Math.round(before - Math.max(0, att.hp)),
+          left: Math.max(0, hv.turns - h.turns), hpPct: Math.max(0, Math.round((Math.max(0, att.hp) / att.maxHp) * 100)) })
+        if (att.hp <= 0) { holder.ps.ufo = null; att.ps.away = false; resolveSilentDeath(att, holder) }
+        else {
+          // ⏳ สถานะของตัวที่อยู่ในยานเดินต่อ (user 28 ต.ค. กติกา 7): ข้ามตาลด · 😱 หัก · ท้ายตาทำงาน
+          const sk = consumeSkip(att)
+          if (sk?.selfDmg > 0) statusHurt(att, sk.selfDmg, 'fear', sk.dmgFrom, sk.left.fear)
+          if (att.hp > 0) runTurnEnd(att)
+          if (att.hp <= 0) { if (holder.ps.ufo) { holder.ps.ufo = null; att.ps.away = false } }
+          else if (h.turns >= hv.turns) ufoRelease(holder, false)
+        }
+        pending.delete(att.uid)
+        cursor[cur] = (ai + 1) % team.length
+        turns++
+        cur = cur === 'A' ? 'B' : 'A'
+        if (alive(A).length && alive(B).length) endRoundIfDone()
+        continue
+      }
       const sk = consumeSkip(att)
       if (sk) {
         // ⏸️ ข้ามตา (❄️ แช่แข็ง · 💫 มึน · 😱 หวาดกลัว) — ตานี้หายไปทั้งตา แต่นับว่าได้ตาในรอบนี้แล้ว
