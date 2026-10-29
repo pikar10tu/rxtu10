@@ -1132,5 +1132,15 @@ export function runOnDied(unit, foes, killer, unitTeam = []) {
     out.push(ev(unit, p, part, { effect: 'statusApply', statusId: 'fear', boo: true, targets: [tg.uid],
       stacks: { [tg.uid]: r.n }, immune: !!r.immune, fxKind: 'debuff' }))
   }
+  // 👻 ลุกเป็นวิญญาณ (หลังแบร่ · ตายจริงไปแล้ว hp ≤ 0) — เอนจินให้ตีต่อ {turns} ตา (ps.wraith) แล้วตุย
+  //    ทุกระบบอื่นยังเห็นเป็นศพ ⇒ โดนเป้า/ฟื้นเลือด/ติดสถานะไม่ได้ · แต่ยังนับว่าทีมไม่แพ้ (standing() ในเอนจิน)
+  for (const part of partsAt(p, 'onDied')) {
+    if (part.effect !== 'boo' || unit.ps?.wraithDone) continue
+    const v = valOf(part, unit)
+    if (!(v.turns > 0)) continue
+    const st = psOf(unit)
+    st.wraith = v.turns; st.wraithDone = true   // ครั้งเดียวต่อไฟต์
+    out.push(ev(unit, p, part, { effect: 'wraith', targets: [unit.uid], left: v.turns, fxKind: 'buff' }))
+  }
   return out
 }

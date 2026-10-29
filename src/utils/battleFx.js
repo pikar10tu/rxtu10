@@ -619,6 +619,42 @@ export function createBattleFx() {
     for (const x of [a, b]) { anims.add(x); x.finished.catch(() => {}).finally(() => anims.delete(x)) }
     return ms
   }
+  /** 🛸 ลำแสงดูด (user 29 ต.ค.: ไม่เอากลางจอ) — ยานเล็กโผล่เหนือการ์ดเป้า ฉายลำแสงลง การ์ดลอยขึ้นนิดแล้วค้าง
+   *  transform/opacity ล้วน · ชิ้นสร้างใหม่ทุกครั้งแล้วลบทิ้ง (เกิดได้ครั้งเดียวต่อยูเอฟโอต่อไฟต์) · คืน ms */
+  function abductBeam(uid) {
+    const c = centerOf(uid), el = getEl(uid)
+    if (!layer || !c || !el) return 0
+    const w = el.getBoundingClientRect().width
+    const ms = 1100 / rate
+    const ufo = mkImg('brfx-ufo'); imgSrc(ufo, '🛸')
+    const beam = mkEl('brfx-beam')
+    const us = Math.max(34, w * 0.55), top = c.y - w * 0.95
+    ufo.style.width = ufo.style.height = us + 'px'
+    beam.style.width = (w * 0.9) + 'px'; beam.style.height = (c.y - top) + 'px'
+    const ut = (dy, sc) => `translate(${(c.x - us / 2).toFixed(1)}px, ${(top - us / 2 + dy).toFixed(1)}px) scale(${sc})`
+    const bt = `translate(${(c.x - w * 0.45).toFixed(1)}px, ${top.toFixed(1)}px)`
+    const a = ufo.animate([
+      { transform: ut(-30, .6), opacity: 0, offset: 0 },
+      { transform: ut(0, 1), opacity: 1, offset: .2 },
+      { transform: ut(0, 1), opacity: 1, offset: .82 },
+      { transform: ut(-30, .7), opacity: 0, offset: 1 },
+    ], { duration: ms, easing: 'ease-out', fill: 'forwards' })
+    const b = beam.animate([
+      { transform: bt + ' scaleY(0)', opacity: 0, offset: 0 },
+      { transform: bt + ' scaleY(0)', opacity: 0, offset: .2 },
+      { transform: bt + ' scaleY(1)', opacity: .85, offset: .38 },
+      { transform: bt + ' scaleY(1)', opacity: .85, offset: .78 },
+      { transform: bt + ' scaleY(1)', opacity: 0, offset: .92 },
+    ], { duration: ms, easing: 'ease-out', fill: 'forwards' })
+    const list = [a, b]
+    if (F('cardLunge')) list.push(el.animate([
+      { transform: 'translateY(0)', offset: 0 }, { transform: 'translateY(0)', offset: .35 },
+      { transform: 'translateY(-10px)', offset: .7 }, { transform: 'translateY(0)', offset: 1 },
+    ], { duration: ms, easing: 'ease-in-out' }))
+    for (const x of list) { anims.add(x); x.finished.catch(() => {}).finally(() => anims.delete(x)) }
+    Promise.allSettled([a.finished, b.finished]).then(() => { ufo.remove(); beam.remove() })
+    return ms
+  }
   // ❄️ ถึงตาแต่โดนแช่ — การ์ดสั่นเหมือนพยายามขยับแต่ติดน้ำแข็ง (transform ล้วน · อนิเมชันเดียวบนการ์ด)
   function frozenShake(uid, ms = 380) {
     const el = getEl(uid); if (!el || !F('cardLunge')) return
@@ -644,6 +680,6 @@ export function createBattleFx() {
     sweep,
     pop, callout, koPuff, ring, burst, projectile, dash,
     lunge, squashTarget, targetReacts, shake, ko, dangerRing, dangerClearAll,
-    stateMark, stateMarkClear, stateMarkClearAll, markShake, boo,
+    stateMark, stateMarkClear, stateMarkClearAll, markShake, boo, abductBeam,
   }
 }

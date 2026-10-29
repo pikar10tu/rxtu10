@@ -138,3 +138,55 @@ test('👽 เครดิตดาเมจ/การฆ่าของหม�
   }
   assert.ok(seen > 0)
 })
+
+test('👻 วิญญาณ: ตายจริงแล้วตีต่อ 2 ตา · โดนเป้าไม่ได้ · ฟื้นไม่ได้ · ครบแล้วตุย', () => {
+  let found = 0
+  for (let seed = 1; seed <= 60 && !found; seed++) {
+    const a = [{ id: 'ghost', rarity: 'legendary', element: 'scissors', grade: 1 }, { id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 }]
+    const b = [{ id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 }, { id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 }]
+    const r = simulateBattle(a, b, seed)
+    const rise = r.log.findIndex(e => e.effect === 'wraith' && e.left === 2)
+    if (rise < 0) continue
+    const fade = r.log.findIndex(e => e.effect === 'wraithFade')
+    const after = r.log.slice(rise + 1, fade < 0 ? undefined : fade)
+    if (fade < 0 && r.log.at(-1).winner === 'B') continue   // ไฟต์จบก่อนครบ
+    found++
+    assert.ok(after.some(e => e.t === 'attack' && e.attacker === 'A0' && !e.silent), 'วิญญาณได้ตี')
+    assert.ok(!after.some(e => e.t === 'attack' && e.target === 'A0'), 'วิญญาณโดนเป้าไม่ได้')
+    assert.ok(!after.some(e => e.fxKind === 'heal' && e.targets?.includes('A0')), 'ฟื้นเลือดไม่ได้')
+    const turns = r.log.filter((e, i) => i > rise && e.uid === 'A0' && (e.effect === 'wraith' || e.effect === 'wraithFade')).length
+    assert.ok(turns <= 2)
+  }
+  assert.ok(found, 'ต้องเจอไฟต์ที่ผีลุกเป็นวิญญาณ')
+})
+
+test('👻 ผีเหลือตัวเดียวเป็นวิญญาณ = ทีมยังไม่แพ้ · ตีจนอีกฝั่งหมดได้ = ชนะ', async () => {
+  const { passiveValueAt, PET_PASSIVES } = await import('../data/petPassives.js')
+  const part = PET_PASSIVES.ghost.parts[0]
+  assert.equal(passiveValueAt(part, 1).turns, 2)
+  assert.equal(passiveValueAt(part, 3).turns, 4, 'อัพสกิล +1 ตา/ขั้น')
+  // 1v1 ผีแพ้ทางธาตุ — ผีตายก่อน แล้ววิญญาณ (+แบร่) ปิดไฟต์ได้
+  let won = 0
+  for (let seed = 1; seed <= 200 && !won; seed++) {
+    const a = [{ id: 'ghost', rarity: 'legendary', element: 'scissors', grade: 5 }]
+    const b = [{ id: 'blank', rarity: 'legendary', element: 'fist', grade: 5 }]
+    const r = simulateBattle(a, b, seed)
+    const rise = r.log.findIndex(e => e.effect === 'wraith')
+    if (rise < 0 || r.winner !== 'A') continue
+    if (r.log.slice(rise).some(e => e.t === 'attack' && e.attacker === 'A0' && e.dead)) won++
+  }
+  assert.ok(won, 'ต้องมีไฟต์ที่วิญญาณผีปิดไฟต์ชนะ')
+})
+
+test('🗝️ ขั้นสกิลส่งเข้าไฟต์ (passiveLv) · 🐲 บอสกันควบคุมจิตใจ', async () => {
+  const { bossImmune } = await import('../data/statuses.js')
+  const r3 = simulateBattle([{ id: 'robot', rarity: 'legendary', element: 'paper', grade: 3, passiveLv: 3 }], [{ id: 'blank', rarity: 'legendary', element: 'paper', grade: 3 }], 5)
+  const r1 = simulateBattle([{ id: 'robot', rarity: 'legendary', element: 'paper', grade: 3 }], [{ id: 'blank', rarity: 'legendary', element: 'paper', grade: 3 }], 5)
+  assert.ok(r3.base.A0.maxHp > r1.base.A0.maxHp, 'ขั้น 3 เลือดมากกว่าขั้น 1')
+  assert.ok(bossImmune().includes('control'))
+  for (let seed = 1; seed <= 20; seed++) {
+    const r = simulateBattle([{ id: 'alien', rarity: 'legendary', element: 'scissors', grade: 5 }],
+      [{ id: 'blank', rarity: 'legendary', element: 'paper', grade: 5, immune: bossImmune() }, { id: 'blank', rarity: 'common', element: 'paper', grade: 1, immune: bossImmune() }], seed)
+    assert.ok(!r.log.some(e => e.effect === 'mindControl'), 'บอสต้องไม่โดนควบคุม')
+  }
+})

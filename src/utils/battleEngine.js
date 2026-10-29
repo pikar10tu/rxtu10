@@ -27,6 +27,9 @@ function rng(seed) {
 
 // 🛸 "บนสนาม" = ยังไม่ตาย และไม่ถูกยูเอฟโอดูดอยู่ (ps.away) — ตัดสินแพ้ชนะยังดูเลือดจริงผ่าน releaseStranded()
 const alive = (t) => t.filter(f => f.hp > 0 && !f.ps?.away)
+// 👻 "ทีมยังไม่แพ้" = มีตัวบนสนาม หรือมีวิญญาณผีน้อยที่ยังเหลือตา (user 29 ต.ค.: ผีเหลือตัวเดียวตีจนชนะได้ = ชนะ)
+//    ใช้ตัดสินจบไฟต์เท่านั้น — การเลือกเป้า/ฟื้นเลือด ยังใช้ alive() (วิญญาณโดนเป้าไม่ได้)
+const standing = (t) => t.filter(f => (f.hp > 0 && !f.ps?.away) || f.ps?.wraith > 0)
 
 /** teamA/teamB = array ของ {id,rarity,element,grade} (≤4) · seed = int */
 export function simulateBattle(teamA, teamB, seed, opts = {}) {
@@ -34,7 +37,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   // 🗓️ เอฟเฟกต์ประจำสัปดาห์ (data/pvpWeekly.js) — useArena ส่ง opts.weekly มาเฉพาะ PvP · ไม่ส่ง = ไฟต์ปกติเป๊ะ
   const W = weeklyRules(opts.weekly) || {}
   const build = (p, i, side) => {
-    const u = { ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `${side}${i}`, side }
+    const u = { ...buildCombatant(p), id: p?.id, rarity: p?.rarity || 'common', slot: i, uid: `${side}${i}`, side, passiveLv: p?.passiveLv || 1 }   // 🗝️ ขั้นสกิล (ดันหิน) — ไม่มี = ขั้น 1 เหมือนเดิม
     const m = statMult(W, u, i)
     if (m.atk !== 1) u.atk *= m.atk
     if (m.hp !== 1) { u.maxHp *= m.hp; u.hp = u.maxHp }
@@ -104,6 +107,9 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   // 👽 หมัดควบคุมจิตใจกำลังบิน — คนฆ่าของหมัดนี้ = เอเลี่ยน ไม่ใช่ตัวที่ถูกควบคุม (สเปก §2.3)
   let controlBy = null
   let lastDodged = false
+  // 👻 วิญญาณผีน้อยกำลังตี (ศพ hp ≤ 0 ที่ได้ตา) — down() ยกเว้นตัวนี้ตัวเดียว ไม่งั้นลูปหมัดเบรกทันที
+  let wraithActing = null
+  const down = (u) => u.hp <= 0 && u !== wraithActing
 
   /** หักเลือด 1 ครั้ง + บันทึก log · คืน true ถ้าเป้าตายจริง (ผ่าน onDeath แล้ว)
    *  forced = หมัดนี้ลงบนเป้าที่ถูก taunt บังคับมา (ไม่ใช่เป้าที่เลือกเอง) — ส่งต่อให้ runOnHit ตัดสินใจลดดาเมจ
@@ -138,7 +144,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     // ดาเมจทะลุ (infect) — หักหลังสายลดจบแล้ว จึงไม่โดน guardian/dodge/DR/เกราะ
     // ยังอยู่ใน beat เดิม และ attack event คิด dmg จาก before-after อยู่แล้ว หลอดเลือดจึงตรงเอง
     if (hitRes.pierce > 0) tg.hp -= hitRes.pierce
-    if (hitRes.thorns > 0) att.hp -= hitRes.thorns
+    if (hitRes.thorns > 0 && att !== wraithActing) att.hp -= hitRes.thorns   // 👻 วิญญาณโดนหนามไม่ได้
     // เกราะสะท้อน — ใส่ศัตรูทุกตัวของผู้รับ ผ่าน strike() ปกติ (โดนสายลดของฝั่งนั้นตามสเปก)
     // 🔒 sub: true ⇒ อยู่ beat เดิม ไม่เพิ่มจังหวะ · reflecting กันไม่ให้เกราะฝั่งตรงข้ามสะท้อนกลับมาวนไม่รู้จบ
     // ⚠️ ต้อง finally: ถ้าอะไรใน strike/runOnHit/runOnDeath/runOnAnyDeath ที่ซ้อนอยู่ throw ขึ้นมา
@@ -351,12 +357,12 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     const perHit = mod.strikes > 1 ? base * (mod.strikePct / 100) : base
     let killed = false
     for (let i = 0; i < mod.strikes; i++) {
-      if (tg.hp <= 0 || att.hp <= 0) break
+      if (tg.hp <= 0 || down(att)) break
       if (strike(att, tg, foes, perHit, { crit, eff }, i > 0, forced)) killed = true
     }
     // 🤍 หมัดซ้ำของมาสก์ประกายแสง (กระต่าย) — เป้าเดิม beat เดิม · ไม่คริต (แบบเดียวกับ cleave)
     for (let i = 0; i < (mod.bonusHits || 0); i++) {
-      if (tg.hp <= 0 || att.hp <= 0) break
+      if (tg.hp <= 0 || down(att)) break
       if (strike(att, tg, foes, base * (mod.bonusPct / 100), { crit: false, eff, echo: true }, true, forced)) killed = true
     }
     // เป้ารองของ cleave — ดาเมจลดตาม pct · ยังอยู่ beat เดียวกัน
@@ -364,14 +370,14 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     // 🔴 สเปก §7.6 ข้อ 6: เช็ค att.hp > 0 เหมือนกัน — เข้าถึงได้จริงวันนี้ (🐕 เซอร์เบอรัสถือ cleave) หมัดหลัก
     //    ข้างบนอาจฆ่าผู้ตีไปแล้ว (โดนหนามของเป้าหลักสวนตาย) ก่อนจะมาถึงเป้ารอง ⇒ ต้องหยุดตีเป้ารองด้วย
     for (const x of mod.extra) {
-      if (att.hp <= 0) break
+      if (down(att)) break
       if (x.unit.hp <= 0) continue
       if (strike(att, x.unit, foes, base * (x.pct / 100), { crit: false, eff: 'neutral' }, true, false)) killed = true
     }
     // 👽 ควบคุมจิตใจ (สเปก §2.3): หมัดหลักโดนจริง + เป้ายังไม่ตาย ⇒ เป้าตีพวกเดียวกัน 1 ตัว (สุ่ม รวมตัวเอง)
     //    แรง = pct% ของ ATK เป้า × พลังสะสม (🌙 👹) · 1 ตา = 1 ครั้ง · อยู่ใน beat เดิม (sub)
     const mc = partWithEffect(PET_PASSIVES[att.id], 'mindControl')
-    if (mc && att.hp > 0 && tg.hp > 0 && !lastDodged && !tg.ps?.away) {
+    if (mc && !down(att) && tg.hp > 0 && !lastDodged && !tg.ps?.away && !isImmune(tg, 'control')) {   // 🐲 บอสกันควบคุม
       const tgTeam = tg.side === 'A' ? A : B
       const pool = targetableFoes(tgTeam)   // 👤 เนเมซิสที่ซ่อนอยู่ถูกหมัดควบคุมเลือกไม่ได้
       const victim = pool[Math.floor(rand() * pool.length)]
@@ -445,7 +451,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   /** ฝั่งไหนบนสนามตายหมด แต่ยังมีตัวถูกดูดค้าง = ปล่อยกลับมาสู้ต่อ (ตกกระแทก) — กันไฟต์ค้าง/ชนะผิด */
   const releaseStranded = () => {
     for (const side of [A, B]) {
-      if (alive(side).length) continue
+      if (standing(side).length) continue
       for (const u of [...A, ...B]) if (u.ps?.ufo && side.some(x => x.uid === u.ps.ufo.uid)) ufoRelease(u, true)
     }
   }
@@ -454,7 +460,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
   // หาตัวออกตี: ไล่จาก cursor ไปขวา วนกลับมาซ้าย เจอตัวแรกที่ยังไม่ตาย (-1 = ไม่มี)
   const nextAttacker = (team, cursor) => {
     const n = team.length
-    for (let k = 0; k < n; k++) { const i = (cursor + k) % n; if (team[i].hp > 0) return i }
+    for (let k = 0; k < n; k++) { const i = (cursor + k) % n; if (team[i].hp > 0 || team[i].ps?.wraith > 0) return i }   // 👻 วิญญาณได้ตาด้วย
     return -1
   }
 
@@ -510,7 +516,7 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     pending = null
   }
 
-  while (turns < BATTLE_CFG.maxTurns && (releaseStranded(), alive(A).length && alive(B).length)) {
+  while (turns < BATTLE_CFG.maxTurns && (releaseStranded(), standing(A).length && standing(B).length)) {
     if (!pending) startRound()
     const team = cur === 'A' ? A : B
     const foes = cur === 'A' ? B : A
@@ -543,7 +549,22 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
         cursor[cur] = (ai + 1) % team.length
         turns++
         cur = cur === 'A' ? 'B' : 'A'
-        if (alive(A).length && alive(B).length) endRoundIfDone()
+        if (standing(A).length && standing(B).length) endRoundIfDone()
+        continue
+      }
+      // 👻 วิญญาณผีน้อย: ตีตามปกติ (ไม่มีสถานะ/ท้ายตา เพราะตายแล้ว) · ครบ {turns} ตา = ตุย
+      if (att.hp <= 0 && st.wraith > 0) {
+        wraithActing = att
+        try { if (hit(att, foes)) for (const e of runOnKill(att, team, foes).events) log.push(e) }
+        finally { wraithActing = null }
+        st.wraith -= 1
+        const p = PET_PASSIVES[att.id]
+        log.push({ t: 'passive', uid: att.uid, side: att.side, petId: att.id, name: p.name, icon: p.icon,
+          effect: st.wraith > 0 ? 'wraith' : 'wraithFade', targets: [att.uid], left: st.wraith, fxKind: 'buff', sub: true })
+        cursor[cur] = (ai + 1) % team.length
+        turns++
+        cur = cur === 'A' ? 'B' : 'A'
+        if (standing(A).length && standing(B).length) endRoundIfDone()
         continue
       }
       const sk = consumeSkip(att)
@@ -588,12 +609,12 @@ export function simulateBattle(teamA, teamB, seed, opts = {}) {
     }
     turns++
     cur = cur === 'A' ? 'B' : 'A'   // สลับฝั่งเสมอ
-    if (alive(A).length && alive(B).length) endRoundIfDone()
+    if (standing(A).length && standing(B).length) endRoundIfDone()
   }
 
   const pct = (t) => { const max = t.reduce((s, f) => s + f.maxHp, 0); return max ? t.reduce((s, f) => s + Math.max(0, f.hp), 0) / max : 0 }
   releaseStranded()   // 🛸 หมดเวลาตอนอีกฝั่งเหลือแต่ตัวที่ถูกดูด = ปล่อยกลับก่อนตัดสิน (รีวิว 28 ต.ค.)
-  const aAlive = alive(A).length > 0, bAlive = alive(B).length > 0
+  const aAlive = standing(A).length > 0, bAlive = standing(B).length > 0
   const hpPctA = pct(A), hpPctB = pct(B)
   let winner
   if (aAlive && !bAlive) winner = 'A'

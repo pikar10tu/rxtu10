@@ -48,7 +48,7 @@ export const statusDef = (id) => STATUSES[id] || null
 
 // 🐲 บอสแบบ 7DS: ค่าเริ่มต้น = กันสถานะร้ายทุกตัว + ถูกดูด 🛸 · บอสแต่ละตัวเปิดเฉพาะตัวที่เป็นวิธีปราบ
 //    ใช้: immune: bossImmune(['burn']) = กันทุกอย่าง ยกเว้นลุกไหม้ · หน้ารายละเอียดบอสโชว์รายการนี้ "ต้านทาน: …"
-export const BOSS_EXTRA_IMMUNE = ['away']
+export const BOSS_EXTRA_IMMUNE = ['away', 'control']   // 👽 ควบคุมจิตใจ (ไม่ใช่สถานะในทะเบียน)
 export function bossImmune(allow = []) {
   const all = Object.keys(STATUSES).filter(id => STATUSES[id].kind === 'debuff')
   return [...new Set([...all, ...BOSS_EXTRA_IMMUNE])].filter(id => !allow.includes(id))

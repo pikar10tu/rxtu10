@@ -668,6 +668,7 @@ function reset() {
   clearHpTicks()                                                             // ล้างเลข HP ไล่นับ/กระพริบค้างจากไฟต์ก่อน (tuning.hpTick)
   moonNext.value = {}
   skillFired.value = {}                                                      // ล้างตัวนับสกิลติดไฟค้างจากไฟต์ก่อน (tuning.skillMark)
+  Object.keys(maxHp).forEach(u => { highlight(u, 'wraith', false); highlight(u, 'away', false) })   // 👻 🛸 ค้างจากไฟต์ก่อน
   Object.keys(maxHp).forEach(setDead)                                       // ทุกตัว hp=100 → setDead ถอด class dead ค้างจากไฟต์ก่อน
   // fx: DOM ของ .br-box/.br-fx-layer ต้องพร้อมก่อน attach — รอ nextTick (ครั้งแรกอาจยัง mount ไม่เสร็จตอน watch immediate ยิง)
   nextTick(() => { ensureFx(); fx?.reset() })                              // reset() ภายใน fx = invalidateCenters + cancelAll (ยกเลิก pop/callout/projectile ค้าง)
@@ -1219,6 +1220,7 @@ function firePassiveFx(e) {
   }
   // 🛸 ลักพาตัว: การ์ดเป้าเทาโปร่ง + ป้าย 🛸 ค้าง + แบนเนอร์ "🛸 ถูกลักพาตัว" · ปล่อย = กลับมาชัด (ตกกระแทกใช้ทางดาเมจ hpPct)
   if (e.effect === 'abduct') for (const t of on) {
+    fx?.abductBeam(t)   // 🛸 ยานเล็กฉายลำแสงที่การ์ดเป้า + การ์ดลอยขึ้น
     highlight(t, 'away', true)
     fx?.stateMark(t, '🛸', e.left ?? 1); fx?.markShake(t, '🛸')
     fx?.callout(t, 'status', '🛸 โดนลักพาตัว', '#6d28d9')
@@ -1233,6 +1235,12 @@ function firePassiveFx(e) {
     if (e.amount > 0) fx?.pop(t, { dmg: e.amount, weight: 0.4 })
   }
   if (e.effect === 'ufoDrain') sfx('p_aim')
+  // 👻 วิญญาณผีน้อย: ตายแล้วลุกเป็นผีโปร่งแสง ตีต่อ (ป้าย 👻 นับตาที่เหลือ) · ครบ = จางหาย กลับเป็นการ์ดตายปกติ
+  if (e.effect === 'wraith') for (const t of on) {
+    highlight(t, 'wraith', true); fx?.stateMark(t, '👻', e.left ?? 1)
+    if (!e.sub) { fx?.callout(t, 'status', '👻 ยังไม่ไปไหนหรอก', '#7c3aed'); sfx('curse') }
+  }
+  if (e.effect === 'wraithFade') for (const t of on) { highlight(t, 'wraith', false); fx?.stateMark(t, '👻', 0); fx?.callout(t, 'status', '👻 ตุย…', '#7c3aed') }
   // 🤍 กระต่ายตายจริง = มาสก์บนศัตรูหาย
   if (e.effect === 'sparkClear') for (const t of on) fx?.stateMark(t, '🤍', 0)
   // 👽 ควบคุมจิตใจ: แบนเนอร์บนตัวที่ถูกควบคุม (หมัดที่ตามมามี mind: true ใช้ท่าตีปกติ)
@@ -1815,6 +1823,7 @@ onUnmounted(() => {
 .br-unit.acting, .br-unit.windup { border-color: #fde68a; }
 .br-unit.flash { border-color: #f87171; }
 .br-unit.dead { opacity: .25; filter: grayscale(1); }
+.br-unit.dead.wraith { opacity: .6; filter: grayscale(.3) drop-shadow(0 0 6px #a78bfa); }   /* 👻 วิญญาณ: ตายแล้วแต่ยังสู้ */
 /* 🛸 ถูกลักพาตัว (นอกสนาม) — เทาโปร่งแต่ยังอ่านได้ ต่างจากตาย (.25 + เทาเต็ม) */
 .br-unit.away > * { opacity: .45; filter: grayscale(.7); }   /* จางเฉพาะของในการ์ด — ป้าย ::after ด้านล่างชัดเต็ม */
 /* ป้ายค้างบนการ์ดตลอดที่ถูกดูด (user 27 ต.ค.: สถานะนี้มีผลต่อไฟต์มาก ต้องเขียนชัด) · ไม่ใช่สถานะร้าย ล้างไม่ได้ · pseudo-element นิ่ง ไม่ re-raster */
@@ -2132,6 +2141,9 @@ onUnmounted(() => {
 /* ขนาดเลขมาจาก battleFx.pop() (0.86 + weight × 1.0 rem) แบบต่อเนื่อง — ไม่มีคลาสตามชั้นแล้ว */
 
 .brfx-call.survive { background: #34d399; color: #06371f; }
+.brfx-ufo { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; z-index: 6; filter: drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
+.brfx-beam { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; z-index: 5; transform-origin: top center;
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%); background: linear-gradient(to bottom, rgba(196,181,253,.95), rgba(167,139,250,.15)); }
 .brfx-boo { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; z-index: 6; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)); }
 .brfx-boo-t { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; z-index: 7; white-space: nowrap;
   font-size: 2.4rem; font-weight: 900; color: #fff; -webkit-text-stroke: 2px #7c3aed; paint-order: stroke fill; }
