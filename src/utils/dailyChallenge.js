@@ -17,6 +17,10 @@ const BKK_MS = 7 * 3_600_000
 export function dayKey(ms = Date.now()) {
   return new Date(ms + BKK_MS).toISOString().slice(0, 10)
 }
+/** เวลาเริ่มวัน (00:00 ไทย) เป็น ms — ใช้ทำ openAt ของชุด */
+export function dayStartMs(key) {
+  return Date.parse(key + 'T00:00:00Z') - BKK_MS
+}
 /** บวก/ลบวันจาก key */
 export function addDays(key, n) {
   return new Date(Date.parse(key + 'T00:00:00Z') + n * DAY_MS).toISOString().slice(0, 10)

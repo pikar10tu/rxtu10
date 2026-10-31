@@ -1,7 +1,7 @@
 // รัน: node --test src/utils/dailyChallenge.test.js
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { dayKey, addDays, questionScore, rankRows, prizeFor, pendingClaimDay, pickDaily } from './dailyChallenge.js'
+import { dayKey, dayStartMs, addDays, questionScore, rankRows, prizeFor, pendingClaimDay, pickDaily } from './dailyChallenge.js'
 
 test('dayKey ตามเวลาไทย', () => {
   assert.equal(dayKey(Date.parse('2026-10-31T16:59:59Z')), '2026-10-31')
@@ -45,4 +45,8 @@ test('pickDaily: ไม่ซ้ำ ตัดข้อไม่มีตัว�
   const q = (id, ch = ['a', 'b']) => ({ id, question: 'Q' + id, choices: ch, answer: 0 })
   const out = pickDaily([q(1), q(2, ['a'])], [q(1), q(3), q(4), q(5), q(6), q(7)], 5)
   assert.deepEqual(out.map(x => x.id), [1, 3, 4, 5, 6])
+})
+
+test('dayStartMs = 00:00 เวลาไทย', () => {
+  assert.equal(new Date(dayStartMs('2026-11-01')).toISOString(), '2026-10-31T17:00:00.000Z')
 })

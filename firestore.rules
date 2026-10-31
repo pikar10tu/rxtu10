@@ -399,12 +399,17 @@ service cloud.firestore {
 
     // ── ข้อสอบประจำวัน (spec 2026-10-31-daily-challenge-v2) ──
     // ชุดของวัน: คนแรกที่เปิดสร้าง (transaction) · ห้ามแก้ · ผล/ใบรับรางวัล create-only ต่อคน
+    // ชุดล่วงหน้า (แอดมินเคาะไว้ 10–15 วัน) ซ่อนจนถึง openAt = 00:00 ของวันนั้น · get ทีละวันเท่านั้น ห้าม list
     match /dailyChallenge/{day} {
-      allow read: if request.auth != null;
+      allow get: if request.auth != null
+        && (resource == null || !('openAt' in resource.data) || resource.data.openAt <= request.time);
+      allow list: if false;
       allow create: if request.auth != null
         && request.resource.data.date == day
         && request.resource.data.qs is list
-        && request.resource.data.qs.size() == 5;
+        && request.resource.data.qs.size() == 5
+        && request.resource.data.openAt is timestamp
+        && request.resource.data.openAt <= request.time;
       allow update, delete: if false;
 
       match /results/{uid} {

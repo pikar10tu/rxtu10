@@ -68,6 +68,16 @@
           <div v-else class="dc-sub">รอบนี้ไม่มีผลบันทึก (ออกกลางทาง) — พรุ่งนี้มาใหม่นะ</div>
           <div class="dc-sub">ประกาศผลตอนเที่ยงคืน · ท็อป 10 กดรับรางวัลได้ที่หน้านี้</div>
         </div>
+        <div v-if="review.length" class="dc-card">
+          <div class="dc-title"><Emoji char="📖" /> ทบทวน 5 ข้อของวันนี้</div>
+          <div class="dc-sub">ข้อไหนดูแปลก เฉลยน่าสงสัย กดแจ้งได้เลย ทีมวิชาการจะตรวจให้</div>
+          <div v-for="(q, i) in review" :key="q.id" class="dc-rv">
+            <div class="dc-rv-q"><b>{{ i + 1 }}.</b> {{ q.question }}</div>
+            <div class="dc-rv-a"><b>เฉลย:</b> {{ q.choices?.[q.answer] }}</div>
+            <div v-if="q.explanation" class="dc-rv-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
+            <QuestionReport :q="q" />
+          </div>
+        </div>
         <div class="dc-card">
           <div class="dc-title"><Emoji char="🏅" /> อันดับวันนี้</div>
           <div v-if="!board.length" class="dc-sub">ยังไม่มีใครเล่นเลย</div>
@@ -86,20 +96,21 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import {
   doc, getDoc, getDocs, setDoc, collection, query, where, orderBy, startAt, limit,
-  runTransaction, serverTimestamp, increment, deleteField,
+  runTransaction, serverTimestamp, increment, deleteField, Timestamp,
 } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import Emoji from '../components/shared/Emoji.vue'
+import QuestionReport from '../components/study/QuestionReport.vue'
 import { shuffleChoices } from '../utils/quizShuffle.js'
 import { applyQuizResults, buildQcardsPatch } from '../utils/srsQuestions.js'
 import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
 import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import {
-  DC_TIME_MS, DC_COIN_PER_CORRECT, dayKey, questionScore, rankRows, prizeFor, pendingClaimDay, pickDaily,
+  DC_TIME_MS, DC_COIN_PER_CORRECT, dayKey, dayStartMs, questionScore, rankRows, prizeFor, pendingClaimDay, pickDaily,
 } from '../utils/dailyChallenge.js'
 
 const auth = useAuthStore()
@@ -127,8 +138,11 @@ async function loadBoard(d) {
   return rankRows(snap.docs.map(x => x.data()))
 }
 const mine = ref(null)
+const review = ref([])          // 5 ข้อของวัน (ลำดับต้นฉบับ) — ทบทวน + แจ้งข้อผิดหลังเล่นจบ
 async function showDone() {
   try {
+    if (!qsRaw.length) { const d = await getDoc(dayRef(today)); usage.track(1); if (d.exists()) qsRaw = d.data().qs || [] }
+    review.value = qsRaw
     board.value = await loadBoard(today)
     const me = board.value.find(r => r.uid === uid.value)
     if (me) mine.value = me
@@ -194,12 +208,13 @@ async function ensureSet() {
   return runTransaction(db, async (tx) => {
     const cur = await tx.get(dayRef(today))
     if (cur.exists()) return cur.data().qs           // มีคนสร้างตัดหน้า → ใช้ของเขา
-    tx.set(dayRef(today), { date: today, qs, createdAt: serverTimestamp() })
+    tx.set(dayRef(today), { date: today, qs, openAt: Timestamp.fromMillis(dayStartMs(today)), createdAt: serverTimestamp() })
     return qs
   })
 }
 
 // ── เล่น ──
+let qsRaw = []                 // ชุดของวันตามต้นฉบับ (ก่อนสลับตัวเลือก)
 const qs = ref([])
 const idx = ref(0)
 const cur = computed(() => qs.value[idx.value] || null)
@@ -246,6 +261,7 @@ async function start() {
   starting.value = true
   try {
     const set = await ensureSet()
+    qsRaw = set
     // จองสิทธิ์ก่อนเริ่ม: dc.last = วันนี้ → ออกกลางทางก็เล่นซ้ำไม่ได้
     const ok = await auth.patchUser({ dc: { ...(auth.userData?.dc || {}), last: today } }, { 'dc.last': today })
     if (!ok) { toast('เริ่มไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error'); return }
@@ -346,6 +362,10 @@ onBeforeUnmount(() => clearInterval(timer))
 .dc-fb.no { background: #fff1f2; color: #9f1239; }
 .dc-exp { margin-top: 8px; font-size: .8rem; color: var(--ink); background: #f8fafc; border-radius: 12px; padding: 10px 12px; line-height: 1.6; }
 
+.dc-rv { border-top: 1px solid var(--line); padding: 12px 0 4px; }
+.dc-rv-q { font-size: .84rem; color: var(--ink); line-height: 1.6; white-space: pre-wrap; }
+.dc-rv-a { font-size: .8rem; color: #166534; background: #f0fdf4; border-radius: 10px; padding: 7px 10px; margin-top: 6px; }
+.dc-rv-exp { font-size: .78rem; color: var(--muted); margin-top: 6px; line-height: 1.6; }
 .dc-mine { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
 .dc-mine b { display: block; font-size: 1.25rem; color: var(--ink); }
 .dc-mine small { font-size: .72rem; color: var(--muted); }
