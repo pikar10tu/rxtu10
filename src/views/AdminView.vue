@@ -743,9 +743,12 @@ async function paySeason() {
     // ท็อป 3 อารีน่า + ทีม ณ ตอนกดแจก → roster/current.hof (ไกด์สนามหน้า PvP) · พลาดไม่ขวางการแจก
     try {
       const rs = await getDoc(doc(db, 'roster', 'current'))
-      const hof = buildHof(season, p.rows, rs.data()?.rows || {})
-      if (hof) await updateDoc(doc(db, 'roster', 'current'), { hof })
-      usage.track(1, hof ? 1 : 0)
+      const rosterRows = rs.data()?.rows || {}
+      const hof = buildHof(season, p.rows, rosterRows)
+      // ล้าง tb ในแถว roster ด้วย — ไม่งั้นอันดับหอคอยค้างเลขซีซั่นก่อนจนเจ้าตัวเปิดเว็บ (เกิดจริง 1 พ.ย. 2026)
+      const tbReset = Object.fromEntries(Object.keys(rosterRows).filter(k => rosterRows[k]?.tb).map(k => [`rows.${k}.tb`, 0]))
+      if (hof || Object.keys(tbReset).length) await updateDoc(doc(db, 'roster', 'current'), { ...tbReset, ...(hof ? { hof } : {}) })
+      usage.track(1, 1)
     } catch (e) { console.error('[season hof]', e) }
     await setDoc(payRef, { [season]: { status: 'done', mails: p.mails, at: serverTimestamp() } }, { merge: true })
     usage.track(1, ops.length + 2)
