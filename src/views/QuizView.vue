@@ -27,6 +27,13 @@
             <button class="qv-chip" :class="{ on: dom === '__all' && !examSet }" @click="pickDomain('__all')">ทั้งหมด</button>
             <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="pickDomain(d.key)">{{ d.label }}</button>
           </div>
+          <template v-if="groupChips.length">
+            <div class="qv-label qv-sub-label">เจาะกลุ่มโรค / หัวข้อ</div>
+            <div class="qv-chips">
+              <button class="qv-chip qv-chip-sm" :class="{ on: !group }" @click="group = null">ทั้งหมวด</button>
+              <button v-for="g in groupChips" :key="g.key" class="qv-chip qv-chip-sm" :class="{ on: group === g.key }" @click="group = g.key">{{ g.label }} <small>{{ g.count }}</small></button>
+            </div>
+          </template>
         </div>
 
         <div v-if="examSetChips.length" class="qv-card">
@@ -237,6 +244,7 @@ import { useQuestionFeed } from '../composables/useQuestionFeed.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import { reportDocId, buildSnapshot } from '../utils/questionReport.js'
 import { DOMAINS, DOMAIN_KEYS, domainLabel } from '../data/domains.js'
+import { groupsOfDomain, groupByKey } from '../data/plecc.js'
 import { useExamSets } from '../composables/useExamSets.js'
 import { examSetLabel } from '../utils/examSets.js'
 import { aggregateExamStats } from '../utils/examStats.js'
@@ -279,6 +287,8 @@ async function load() {
     metaApprovedTotal.value = m.approvedTotal || 0
     metaApprovedDomains.value = m.approvedDomains || {}
     metaExamSets.value = m.examSets || []
+    metaGroups.value = m.groups || {}
+    metaApprovedGroups.value = m.approvedGroups || {}
   } catch (e) {
     console.error('[quiz meta]', e)
     toast('โหลดข้อมูลข้อสอบไม่สำเร็จ', 'error')
@@ -290,6 +300,9 @@ onMounted(() => {
   if (!authStore.isLoggedIn) return
   load()
   loadExamSets()
+  // /quiz?group=cvs จากแท็บผลฝึกหน้าฉัน → เลือกหมวด+กลุ่มให้เลย
+  const qg = typeof route.query.group === 'string' ? groupByKey(route.query.group) : null
+  if (qg) { dom.value = qg.domain; group.value = qg.key }
   if (route.query.mode === 'zen') startZen()
   else if (route.query.mode === 'redo') whenUserDataReady(startRedo)
   else if (route.query.view === 'history') openHistory()
@@ -317,6 +330,7 @@ const examSetChips = computed(() => {
 // จำนวนข้อที่ทำได้ตามตัวเลือกปัจจุบัน (ชุดที่เลือก หรือ หมวด หรือ ทั้งคลัง)
 const activeCount = computed(() => {
   if (examSet.value) return examSetChips.value.find(s => s.name === examSet.value)?.count || 0
+  if (group.value) return metaGroups.value[group.value] || 0
   if (dom.value !== '__all') return metaDomains.value[dom.value] || 0
   return publishedTotal.value
 })
@@ -324,6 +338,7 @@ const activeCount = computed(() => {
 const approvedOnly = ref(false)
 const approvedCount = computed(() => {
   if (examSet.value) return examSetChips.value.find(s => s.name === examSet.value)?.approvedCount || 0
+  if (group.value) return metaApprovedGroups.value[group.value] || 0
   if (dom.value !== '__all') return metaApprovedDomains.value[dom.value] || 0
   return metaApprovedTotal.value
 })
@@ -335,12 +350,23 @@ function setTags(q) {
   const yearOf = Object.fromEntries(examSetConfig.value.map(s => [s.name, s.year]))
   return q.examSets.map(n => examSetLabel({ name: n, year: yearOf[n] }))
 }
-function pickDomain(key) { dom.value = key; examSet.value = null }
+function pickDomain(key) { dom.value = key; examSet.value = null; group.value = null }
 // เลือกชุด → toggle + ล้างหมวด
-function pickExamSet(name) { examSet.value = examSet.value === name ? null : name; if (examSet.value) dom.value = '__all' }
+function pickExamSet(name) { examSet.value = examSet.value === name ? null : name; if (examSet.value) { dom.value = '__all'; group.value = null } }
 
 // chips เฉพาะ domain ที่มีข้ออย่างน้อย 1 ข้อ
 const domainChips = computed(() => DOMAINS.filter(d => (metaDomains.value[d.key] || 0) > 0))
+
+// กลุ่มโรค (pleGroup) ของหมวดที่เลือก — นับจาก meta.groups (แอดมินกด 🔄 meta) · ไม่มีข้อ = ไม่โชว์
+const group = ref(null)
+const metaGroups = ref({})
+const metaApprovedGroups = ref({})
+const groupChips = computed(() => {
+  if (dom.value === '__all' || examSet.value) return []
+  return groupsOfDomain(dom.value)
+    .map(g => ({ key: g.key, label: g.th, count: metaGroups.value[g.key] || 0 }))
+    .filter(g => g.count > 0)
+})
 
 const len = ref(DEFAULT_LEN)
 const lenChoices = computed(() => LEN_CHOICES)
@@ -485,7 +511,7 @@ const REDO_BATCH = 20
 const missingQIds = ref([])   // id ในกองที่หาย/ถูกถอนเผยแพร่ → ลบทิ้งตอน finish()
 
 // ดึงข้อสุ่ม n ข้อ — ตรรกะการสุ่มอยู่ใน useQuestionFeed (ใช้ร่วมกับ Time Attack)
-const fetchQuestions = (n) => feedQuestions(n, { domain: dom.value, examSet: examSet.value, approvedOnly: approvedOnly.value })
+const fetchQuestions = (n) => feedQuestions(n, { domain: dom.value, group: group.value, examSet: examSet.value, approvedOnly: approvedOnly.value })
 
 async function start() {
   if (starting.value) return
@@ -508,6 +534,7 @@ async function startZen() {
   variant.value = 'zen'
   dom.value = '__all'
   examSet.value = null
+  group.value = null
   approvedOnly.value = false
   try {
     const picks = await fetchQuestions(ZEN_BATCH)
@@ -788,6 +815,9 @@ async function finish() {
 .qv-label { font-size: .7rem; font-weight: 700; color: #64748b; margin: 12px 0 6px; }
 .qv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .qv-chip { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.qv-chip-sm { padding: 5px 11px; font-size: .72rem; }
+.qv-chip small { font-size: .7rem; opacity: .7; margin-left: 2px; }
+.qv-sub-label { margin-top: 10px; }
 .qv-chip.on { background: var(--primary); border-color: var(--primary); color: #fff; }
 .qv-start { width: 100%; margin-top: 20px; border: var(--bw) solid var(--line); border-radius: 14px; padding: 15px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .qv-start:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }

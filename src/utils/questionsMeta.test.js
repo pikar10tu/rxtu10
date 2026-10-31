@@ -33,6 +33,8 @@ test('คลังว่าง → publishedTotal 0, categories [], domains ค�
     categories: [],
     domains: Object.fromEntries(DOMAIN_KEYS.map(k => [k, 0])),
     approvedDomains: Object.fromEntries(DOMAIN_KEYS.map(k => [k, 0])),
+    groups: {},
+    approvedGroups: {},
     examSets: [],
   })
 })
@@ -104,4 +106,15 @@ test('categories ของ meta รวมทุกค่าจากข้อท
     { isPublished: false, categories: ['ไม่นับ'] },
   ])
   assert.deepEqual(m.categories, ['เบาหวาน', 'ไต'].sort((a, b) => a.localeCompare(b, 'th')))
+})
+
+test('groups/approvedGroups นับต่อ pleGroup เฉพาะ published · ข้อไม่มีกลุ่มไม่นับ', () => {
+  const m = buildMeta([
+    q({ pleGroup: 'cvs', reviewStatus: 'passed' }),
+    q({ pleGroup: 'cvs' }),
+    q({ pleGroup: 'id', isPublished: false }),
+    q({}),
+  ])
+  assert.deepEqual(m.groups, { cvs: 2 })
+  assert.deepEqual(m.approvedGroups, { cvs: 1 })
 })

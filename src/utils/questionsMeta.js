@@ -17,6 +17,14 @@ export function buildMeta(questions) {
   for (const q of approved) {
     if (q.domain in approvedDomains) approvedDomains[q.domain]++
   }
+  // นับต่อกลุ่มโรค (pleGroup) — ชิปกลุ่มในหน้าควิซ
+  const groups = {}
+  const approvedGroups = {}
+  for (const q of pub) {
+    if (!q.pleGroup) continue
+    groups[q.pleGroup] = (groups[q.pleGroup] || 0) + 1
+    if (q.reviewStatus === 'passed') approvedGroups[q.pleGroup] = (approvedGroups[q.pleGroup] || 0) + 1
+  }
   // นับชุดข้อสอบย้อนหลัง (published เท่านั้น) — 1 ข้ออยู่หลายชุดนับทุกชุด
   const examCounts = {}
   const approvedExamCounts = {}
@@ -36,6 +44,8 @@ export function buildMeta(questions) {
     categories: cats,
     domains,
     approvedDomains,
+    groups,
+    approvedGroups,
     examSets,
   }
 }

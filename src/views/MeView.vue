@@ -59,7 +59,8 @@
           <Emoji :char="t.icon" /> {{ t.label }}
         </button>
       </div>
-      <PvpHistory v-if="tab === 'fight'" start-open class="me-panel" @open="openProfile" />
+      <PracticeStats v-if="tab === 'stats'" class="me-panel" />
+      <PvpHistory v-else-if="tab === 'fight'" start-open class="me-panel" @open="openProfile" />
       <NewsBoard v-else-if="tab === 'news'" start-open class="me-panel" />
       <template v-else>
         <ShowcaseEditor ref="showcaseEl" :items="achItems" />
@@ -120,6 +121,7 @@ import { useRosterSync } from '../composables/useRosterSync.js'
 import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
 import AchievementGrid from '../components/shared/AchievementGrid.vue'
+import PracticeStats from '../components/study/PracticeStats.vue'
 import PvpHistory from '../components/battle/PvpHistory.vue'
 import NewsBoard from '../components/home/NewsBoard.vue'
 import ProfileModal from '../components/members/ProfileModal.vue'
@@ -156,12 +158,13 @@ const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.u
 
 // ── แท็บ ── (ประวัติต่อสู้อ่าน roster ที่ต้องโหลดเอง — หน้านี้เข้าตรงได้โดยไม่ผ่านหน้าที่โหลดให้)
 const TABS = [
+  { k: 'stats', icon: '📊', label: 'ผลฝึก' },
   { k: 'fight', icon: '⚔️', label: 'ประวัติต่อสู้' },
   { k: 'news', icon: '📢', label: 'ข่าวรุ่น' },
   { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
 ]
 const teamOpen = ref(false)
-const tab = ref('fight')
+const tab = ref('stats')
 // แท็บความสำเร็จ: โหลดครั้งเดียวต่อเข้าหน้า แล้วส่งให้ทั้งตู้โชว์และกริด (query เดียว)
 const achItems = ref([])
 const showcaseEl = ref(null)

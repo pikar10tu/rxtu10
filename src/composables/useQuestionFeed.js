@@ -21,14 +21,16 @@ export function useQuestionFeed() {
    * @param n            จำนวนข้อที่ขอ (ได้จริงอาจน้อยกว่าถ้าคลัง/หมวดมีไม่พอ)
    * @param domain       '__all' = ทุกหมวด
    * @param examSet      ชื่อชุดย้อนหลัง (สลับกับ domain — ใส่แล้ว domain ถูกมองข้าม)
+   * @param group        pleGroup (กลุ่มโรค) — ใส่แล้วใช้แทน domain · index isPublished+(reviewStatus+)pleGroup+rand
    * @param approvedOnly true = ดึงเฉพาะข้อที่ reviewStatus==='passed'
    */
-  async function fetchQuestions(n, { domain = '__all', examSet = null, approvedOnly = false } = {}) {
+  async function fetchQuestions(n, { domain = '__all', group = null, examSet = null, approvedOnly = false } = {}) {
     const R = Math.random()
     const base = [where('isPublished', '==', true)]
     if (approvedOnly) base.push(where('reviewStatus', '==', 'passed'))
     // ชุดย้อนหลังมาก่อน (สลับกับหมวด) — ใช้ composite index isPublished+(reviewStatus+)examSets(CONTAINS)+rand
     if (examSet) base.push(where('examSets', 'array-contains', examSet))
+    else if (group) base.push(where('pleGroup', '==', group))
     else if (domain && domain !== '__all') base.push(where('domain', '==', domain))
     const col = collection(db, 'questions')
     const firstSnap = await getDocs(query(col, ...base, orderBy('rand'), startAt(R), limit(n)))
