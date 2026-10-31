@@ -244,6 +244,7 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
 import { QUIZ_COIN_PER_CORRECT, REPORT_HOLD_AT, REPORT_REWARD } from '../data/index.js'
 import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srsQuestions.js'
+import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
 import { sfx } from '../utils/sfx.js'
 import { isOwlHour } from '../utils/gags.js'
 import { grantSecret } from '../composables/useAchievements.js'
@@ -608,7 +609,7 @@ function pick(i) {
   } else streak.value = 0
   fastRun = isCorrect && fast ? fastRun + 1 : 0
   if (fastRun === 5) grantSecret('gag_demon')
-  answers.value.push({ id: current.value.id, domain: current.value.domain || null, correct: isCorrect })
+  answers.value.push({ id: current.value.id, domain: current.value.domain || null, pleGroup: current.value.pleGroup || null, correct: isCorrect })
 }
 function choiceClass(i) {
   if (picked.value === null) return ''
@@ -704,7 +705,14 @@ async function finish() {
     study: authStore.userData?.study,
     set: qcSet, remove: qcRemove, deleteSentinel: deleteField(),
   })
+  // สถิติรายกลุ่มโรค (radar หน้าฉัน) — study.gs ไปกับ patch ก้อนเดียวกัน
+  const { server: gsServer, optimisticGs } = buildGsPatch({
+    gs: authStore.userData?.study?.gs, tally: tallyGroups(answers.value), increment,
+  })
   const touchedQcards = Object.keys(qcServer).length > 0
+  const touchedGs = Object.keys(gsServer).length > 0
+  const studyLocal = touchedQcards ? optimisticStudy : { ...(authStore.userData?.study || {}) }
+  if (touchedGs) studyLocal.gs = optimisticGs
   // achievement ไร้ที่ติ: ถูกหมดทั้งชุดที่ทำจริง ≥10 ข้อ (ออกกลางคันก็นับเฉพาะที่ตอบ)
   const perfect = answered.value >= 10 && correct.value === answered.value
   if (answered.value >= 5 && isOwlHour()) grantSecret('gag_owl')   // achievement ลับ นกฮูกราตรี
@@ -715,7 +723,7 @@ async function finish() {
       quizHigh: newHigh,
       quizDoneTotal: (authStore.userData?.quizDoneTotal || 0) + answered.value,
       dailyQuest: dq,
-      ...(touchedQcards ? { study: optimisticStudy } : {}),
+      ...(touchedQcards || touchedGs ? { study: studyLocal } : {}),
       ...(perfect ? { quizPerfectTotal: (authStore.userData?.quizPerfectTotal || 0) + 1 } : {}),
       ...(evp ? evp.local : {}),
     },
@@ -726,6 +734,7 @@ async function finish() {
       dailyQuest: dq,
       ...(perfect ? { quizPerfectTotal: increment(1) } : {}),
       ...(evp ? evp.server : {}),
+      ...gsServer,
       ...qcServer,   // dot-notation เท่านั้น — ห้ามส่ง study ทั้งก้อน ไม่งั้นทับ study.cards
     },
   )

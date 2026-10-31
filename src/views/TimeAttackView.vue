@@ -131,6 +131,7 @@ import { DOMAIN_KEYS } from '../data/domains.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
 import { applyQuizResults, buildQcardsPatch } from '../utils/srsQuestions.js'
+import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
 import { QUIZ_COIN_PER_CORRECT } from '../data/index.js'
 import {
   TA_MODES, TA_BATCH, TA_REFILL_AT, TA_FLASH_MS, TA_TICK_MS, TA_EMPTY_STREAK_MAX,
@@ -248,7 +249,7 @@ function pick(i) {
   sfx(ok ? 'correct' : 'wrong')
   if (ok) correct.value++
   else missed.value.push({ q: cur.value, picked: i })
-  answers.value.push({ id: cur.value.id, domain: cur.value.domain || null, correct: ok })
+  answers.value.push({ id: cur.value.id, domain: cur.value.domain || null, pleGroup: cur.value.pleGroup || null, correct: ok })
   flashTimer = setTimeout(() => { flashTimer = null; serveNext() }, TA_FLASH_MS)
 }
 
@@ -371,7 +372,13 @@ async function finish(reason) {
   const { optimisticStudy, server: qcServer } = buildQcardsPatch({
     study: auth.userData?.study, set: qcSet, remove: qcRemove, deleteSentinel: deleteField(),
   })
+  const { server: gsServer, optimisticGs } = buildGsPatch({
+    gs: auth.userData?.study?.gs, tally: tallyGroups(snapAnswers), increment,
+  })
   const touchedQcards = Object.keys(qcServer).length > 0
+  const touchedGs = Object.keys(gsServer).length > 0
+  const studyLocal = touchedQcards ? optimisticStudy : { ...(auth.userData?.study || {}) }
+  if (touchedGs) studyLocal.gs = optimisticGs
 
   const ok = await auth.patchUser(
     {
@@ -380,7 +387,7 @@ async function finish(reason) {
       quizDoneTotal: (auth.userData?.quizDoneTotal || 0) + snapAnswered,
       ...(evp ? evp.local : {}),
       dailyQuest: dq,
-      ...(touchedQcards ? { study: optimisticStudy } : {}),
+      ...(touchedQcards || touchedGs ? { study: studyLocal } : {}),
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
@@ -389,6 +396,7 @@ async function finish(reason) {
       quizDoneTotal: increment(snapAnswered),
       ...(evp ? evp.server : {}),
       dailyQuest: dq,
+      ...gsServer,
       ...qcServer,   // dot-notation เท่านั้น — ห้ามส่ง study ทั้งก้อน ไม่งั้นทับ study.cards
     },
   )
