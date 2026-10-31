@@ -296,7 +296,7 @@ function openDoor(t) { if (t === 'drug') { router.push('/study/drugs'); return }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 const playedToday = computed(() => authStore.userData?.dc?.last === dayKey())
 const DOORS = computed(() => [
-  { key: 'daily', emoji: '🌅', title: 'ข้อสอบประจำวัน', sub: playedToday.value ? 'เล่นแล้ววันนี้ · ดูอันดับ / รับรางวัล' : '5 ข้อชุดเดียวทั้งรุ่น · ข้อละ 30 วิ · ท็อป 10 มีรางวัล', badge: playedToday.value ? 0 : 'ใหม่' },
+  { key: 'daily', emoji: '🌅', title: 'ข้อสอบประจำวัน', sub: playedToday.value ? 'เล่นแล้ว · ดูอันดับ' : '5 ข้อวันละรอบ · ลุ้นท็อป 10', badge: playedToday.value ? 0 : 'ใหม่' },
   { key: 'quiz',  emoji: '📝', title: 'ข้อสอบ',      sub: 'ทั่วไป · Zen · Time Attack · ข้อที่ผิด', badge: redoDue.value || 0 },
   { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: 'สรุปโรคจากเพื่อน RxTU10', badge: 0 },
   { key: 'flash', emoji: '🧠', title: 'แฟลชการ์ด',   sub: `ทบทวนกลุ่มยา ${DECK.length} ตัว`, badge: queueSize.value || 0 },
