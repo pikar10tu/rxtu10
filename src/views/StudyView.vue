@@ -60,8 +60,6 @@
           <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
           <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
         </div>
-        <!-- ยังไม่เปิด = แถบประบาง ไม่กินที่แถวแรกเหมือนเดิม -->
-        <div class="sv-soon"><Emoji char="🗓️" /> ข้อสอบประจำวัน ชุดเดียวกันทั้งรุ่น · เร็วๆ นี้</div>
 
         <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ -->
         <RouterLink v-if="authStore.isQuestionEditor" to="/questions" class="sv-quizlink sv-acadlink">
@@ -600,7 +598,6 @@ async function sendReport() {
 .sv-feat-go { font-size: .8rem; font-weight: 800; background: #fff; color: var(--primary-dark); border-radius: 10px; padding: 5px 10px; white-space: nowrap; }
 .sv-modes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
 /* ── แท็บ ข้อสอบ | แฟลชการ์ด ── */
-.sv-soon { margin-top: 10px; padding: 10px 14px; border-radius: 14px; border: 1px dashed rgba(43,53,80,.25); font-size: .78rem; color: var(--muted); }
 
 /* ── แท็บแฟลชการ์ด ── */
 .sv-flash { background: #fff; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop); padding: 18px 16px; text-align: center; }
