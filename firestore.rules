@@ -397,6 +397,36 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ── ข้อสอบประจำวัน (spec 2026-10-31-daily-challenge-v2) ──
+    // ชุดของวัน: คนแรกที่เปิดสร้าง (transaction) · ห้ามแก้ · ผล/ใบรับรางวัล create-only ต่อคน
+    match /dailyChallenge/{day} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.date == day
+        && request.resource.data.qs is list
+        && request.resource.data.qs.size() == 5;
+      allow update, delete: if false;
+
+      match /results/{uid} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.score is int
+          && request.resource.data.score >= 0 && request.resource.data.score <= 5000
+          && request.resource.data.correct is int
+          && request.resource.data.correct >= 0 && request.resource.data.correct <= 5;
+        allow update, delete: if false;
+      }
+      match /claims/{uid} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow create: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.coins is int
+          && request.resource.data.coins >= 0 && request.resource.data.coins <= 10000;
+        allow update, delete: if false;
+      }
+    }
+
     // ── Global fun-fact counters (public read for the pre-login page) ──
     //  doc เดียว stats/global เก็บตัวเลขรวมทั้งเว็บโชว์เล่นๆ (ไม่กระทบเหรียญ/แต้มจริงของใคร)
     //  read: เปิดสาธารณะ เฉพาะ doc นี้ doc เดียว — ไม่กระทบ stats/{id} ตัวอื่นด้านล่าง (ยังต้อง isAdmin() เหมือนเดิม)

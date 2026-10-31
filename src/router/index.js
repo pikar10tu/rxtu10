@@ -16,6 +16,7 @@ const routes = [
     { path: '/study/crcl', name: 'crcl', component: () => import('../views/CrClTrainerView.vue') },
     { path: '/study/ped-dose', name: 'ped-dose', component: () => import('../views/PedDoseView.vue') },
     { path: '/study/time-attack', name: 'timeAttack', component: () => import('../views/TimeAttackView.vue') },
+    { path: '/daily', name: 'daily', component: () => import('../views/DailyView.vue') },
     { path: '/quiz',      name: 'quiz',      component: () => import('../views/QuizView.vue')      },
     { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue') },
     { path: '/review',    name: 'review',    component: () => import('../views/ReviewView.vue')    },
