@@ -13,7 +13,7 @@
     <div class="scr-ov" role="dialog" aria-modal="true" :aria-label="`รางวัล ${mail.tier?.name || ''}`" @click="onTap">
       <canvas ref="cv" class="scr-cv" />
       <div class="scr-chest" :class="{ shake: phase === 'shake', pop: phase !== 'shake' }">
-        <Emoji :char="phase === 'shake' ? chestChar : '✨'" />
+        <Emoji eager :char="phase === 'shake' ? chestChar : '✨'" />
       </div>
       <div class="scr-name">{{ phase === 'shake' ? '' : mail.tier?.name }}</div>
       <div class="scr-items">
@@ -37,6 +37,7 @@ import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import { getArena } from '../../data/arenas.js'
 import { getAchievement } from '../../data/achievements.js'
 import { achievementTitle } from '../../utils/achievements.js'
+import { fluentFile } from '../../utils/emoji.js'
 
 const props = defineProps({ mail: { type: Object, required: true } })
 const emit = defineEmits(['close'])
@@ -114,7 +115,7 @@ function burst() {
   const r = el.getBoundingClientRect(), dpr = devicePixelRatio || 1
   el.width = r.width * dpr; el.height = r.height * dpr
   const c = el.getContext('2d'); c.scale(dpr, dpr)
-  const cx = r.width / 2, cy = r.height / 2 - 90, N = [0, 24, 45, 70, 110][lv.value]
+  const cx = r.width / 2, cy = r.height / 2 - 90, N = [0, 20, 35, 50, 60][lv.value]
   const ps = Array.from({ length: N }, () => {
     const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * (4 + lv.value * 1.5)
     return { x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4, r: 4 + Math.random() * 4, s: Math.random() * 6, c: Math.random() < 0.8 ? '#ffcf5a' : '#f472b6' }
@@ -133,6 +134,8 @@ function burst() {
 }
 
 onMounted(() => {
+  // ✨ โผล่หลังหีบสั่น — โหลดรูปไว้ก่อน ไม่งั้นสะดุดตรงจังหวะเปิด
+  const sp = fluentFile('✨'); if (sp) new Image().src = import.meta.env.BASE_URL + sp
   if (reduce) { finishNow(); return }
   const at = (ms, f) => timers.push(setTimeout(f, ms))
   const sh = SHAKE_MS[lv.value]
@@ -148,7 +151,7 @@ useEscapeKey(() => true, () => { if (finished.value) emit('close'); else onTap()
 </script>
 
 <style scoped>
-.scr-ov{position:fixed;inset:0;z-index:450;background:#070510b3;backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;color:#f3eefc}
+.scr-ov{position:fixed;inset:0;z-index:450;background:#070510e6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;color:#f3eefc}
 .scr-cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .scr-chest{font-size:88px;line-height:1}
 .scr-chest.shake{animation:scr-shake .12s linear infinite}

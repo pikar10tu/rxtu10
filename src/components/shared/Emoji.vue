@@ -12,7 +12,7 @@
     aria-hidden="true"
     class="twemoji"
     draggable="false"
-    loading="lazy"
+    :loading="eager ? 'eager' : 'lazy'"
     @error="failed = true"
   />
   <span v-else class="twemoji-fallback" aria-hidden="true">{{ emojiFallback(char) }}</span>
@@ -22,7 +22,7 @@
 import { ref, computed, watch } from 'vue'
 import { fluentFile, emojiFallback } from '../../utils/emoji.js'
 
-const props = defineProps({ char: { type: String, default: '' } })
+const props = defineProps({ char: { type: String, default: '' }, eager: { type: Boolean, default: false } })
 const failed = ref(false)
 const url = computed(() => {
   const f = fluentFile(props.char)
