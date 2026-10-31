@@ -159,7 +159,7 @@ const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.u
 // ── แท็บ ── (ประวัติต่อสู้อ่าน roster ที่ต้องโหลดเอง — หน้านี้เข้าตรงได้โดยไม่ผ่านหน้าที่โหลดให้)
 const TABS = [
   { k: 'stats', icon: '📊', label: 'ผลฝึก' },
-  { k: 'fight', icon: '⚔️', label: 'ประวัติต่อสู้' },
+  { k: 'fight', icon: '⚔️', label: 'ต่อสู้' },
   { k: 'news', icon: '📢', label: 'ข่าวรุ่น' },
   { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
 ]

@@ -27,6 +27,11 @@
         <text v-for="(r, i) in rows" :key="'t' + r.key" class="ps-lbl" :class="{ sel: sel === r.key, none: !r.t }"
           :x="pt(i, 1.2).x" :y="pt(i, 1.2).y" :text-anchor="anchor(i)" dominant-baseline="middle"
           @click="pick(r.key)">{{ r.label }}</text>
+        <g v-if="!totalAnswered" class="ps-empty">
+          <rect :x="C - 92" :y="C - 26" width="184" height="52" rx="14" />
+          <text :x="C" :y="C - 6" text-anchor="middle">ยังไม่มีข้อมูล</text>
+          <text :x="C" :y="C + 13" text-anchor="middle" class="ps-empty-sub">ทำข้อสอบสักชุดแล้วกลับมาดู</text>
+        </g>
       </svg>
 
       <div v-else class="ps-bars">
@@ -164,6 +169,9 @@ onMounted(async () => {
 .ps-lbl.none { fill: var(--muted); }
 .ps-lbl.sel { fill: var(--accent); }
 
+.ps-empty rect { fill: #fff; stroke: var(--line); }
+.ps-empty text { font-size: 13px; font-weight: 800; fill: var(--ink); }
+.ps-empty .ps-empty-sub { font-size: 11.5px; font-weight: 600; fill: var(--muted); }
 .ps-bars { display: flex; flex-direction: column; gap: 4px; }
 .ps-bar { display: grid; grid-template-columns: 76px 1fr 72px; align-items: center; gap: 8px; border: 0; background: none; padding: 4px 2px; font-family: inherit; cursor: pointer; border-radius: 8px; text-align: left; }
 .ps-bar.sel { background: var(--primary-light); }
