@@ -36,16 +36,21 @@
           </template>
         </div>
 
-        <div v-if="examSetChips.length" class="qv-card">
-          <div class="qv-label"><Emoji char="📜" /> ข้อสอบย้อนหลัง</div>
-          <div class="qv-chips">
+        <!-- ชุดย้อนหลังพับไว้ในแผ่นเลือก — เดิมเรียงเป็นกำแพง 12+ ชิปดันตัวเลือกลงใต้ปุ่มเริ่ม (รีวิว 31 ต.ค.) -->
+        <button v-if="examSetChips.length" class="qv-card qv-setbtn" :class="{ on: examSet }" @click="setSheet = true">
+          <span class="qv-setbtn-l"><Emoji char="📜" /> ข้อสอบย้อนหลัง</span>
+          <span class="qv-setbtn-r">{{ examSet ? examSetName : `เลือกชุด (${examSetChips.length})` }} ›</span>
+        </button>
+        <BottomSheet :open="setSheet" icon="📜" title="ข้อสอบย้อนหลัง" @update:open="setSheet = $event">
+          <div class="qv-setlist">
+            <button v-if="examSet" class="qv-setrow clear" @click="pickExamSet(examSet); setSheet = false">✕ ไม่เลือกชุด (กลับไปสุ่มตามหมวด)</button>
             <button
               v-for="s in examSetChips" :key="s.name"
-              class="qv-chip" :class="{ on: examSet === s.name }"
-              @click="pickExamSet(s.name)"
-            >{{ s.name }}<span v-if="s.year"> · {{ s.year }}</span> ({{ s.count }})</button>
+              class="qv-setrow" :class="{ on: examSet === s.name }"
+              @click="examSet === s.name || pickExamSet(s.name); setSheet = false"
+            ><span>{{ s.name }}<span v-if="s.year" class="qv-setyear"> · {{ s.year }}</span></span><b>{{ s.count }} ข้อ</b></button>
           </div>
-        </div>
+        </BottomSheet>
 
         <div class="qv-card">
         <div class="qv-label">แหล่งข้อ</div>
@@ -227,6 +232,7 @@ import QuickEditModal from '../components/questions/QuickEditModal.vue'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import { summarySourceText } from '../utils/summaryQuestions.js'
 import { useRouter } from 'vue-router'
+import BottomSheet from '../components/shared/BottomSheet.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -316,7 +322,9 @@ function whenUserDataReady(fn) {
 
 const dom = ref('__all')
 const examSet = ref(null)                       // ชื่อชุดที่เลือก (null = ไม่เลือก) — สลับกับ dom
-const metaExamSets = ref([])                    // [{ name, count }] จาก meta (published)
+const metaExamSets = ref([])
+const setSheet = ref(false)
+const examSetName = computed(() => { const c = examSetChips.value.find(x => x.name === examSet.value); return c ? (c.year ? `${c.name} · ${c.year}` : c.name) : '' })                    // [{ name, count }] จาก meta (published)
 const { sets: examSetConfig, loadExamSets } = useExamSets()  // ปีของแต่ละชุด (config/examSets)
 
 // ชิปชุด: เฉพาะชุดที่มีข้อ published (count>0) + ผสมปีจาก config · เรียงปีใหม่→เก่า แล้วชื่อ
@@ -815,6 +823,16 @@ async function finish() {
 .qv-label { font-size: .7rem; font-weight: 700; color: #64748b; margin: 12px 0 6px; }
 .qv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .qv-chip { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.qv-setbtn { padding: 14px; display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 8px; font-family: inherit; cursor: pointer; text-align: left; }
+.qv-setbtn.on { border-color: var(--primary); }
+.qv-setbtn-l { font-weight: 800; font-size: .82rem; color: var(--ink); }
+.qv-setbtn-r { font-size: .76rem; font-weight: 700; color: var(--primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+.qv-setlist { display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; }
+.qv-setrow { display: flex; justify-content: space-between; gap: 10px; align-items: center; border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; padding: 11px 12px; font-family: inherit; font-size: .8rem; color: var(--ink); cursor: pointer; text-align: left; }
+.qv-setrow b { white-space: nowrap; font-size: .74rem; color: var(--muted); }
+.qv-setrow.on { border-color: var(--primary); background: var(--primary-light); }
+.qv-setrow.clear { color: var(--muted); font-weight: 700; }
+.qv-setyear { color: var(--muted); }
 .qv-chip-sm { padding: 5px 11px; font-size: .72rem; }
 .qv-chip small { font-size: .7rem; opacity: .7; margin-left: 2px; }
 .qv-sub-label { margin-top: 10px; }

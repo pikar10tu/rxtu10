@@ -5,7 +5,7 @@
         <div class="sv-title"><Emoji char="📚" /> เตรียมสอบ</div>
         <HelpButton topic="study" />
       </div>
-      <div class="sv-sub">อีก {{ daysLeft }} วันถึงสอบ PLE-CC1</div>
+      <div class="sv-sub">อีก {{ daysLeft }} วันถึงสอบใบประกอบฯ · CC2 11 ธ.ค. · CC1 12–13 ธ.ค.</div>
     </div>
 
     <template v-if="!authStore.isLoggedIn">
@@ -293,13 +293,14 @@ const router = useRouter()
 const { rawConfig } = useAppConfig()
 // ฐานข้อมูลยา — ปิดด้วย flag drugDbOpen (แอดมินเห็นก่อน) · คนอื่นเห็นป้าย Coming soon
 const drugDbOpen = computed(() => isFeatureOpen(rawConfig.value, 'drugDbOpen', { isAdmin: authStore.isAdmin }))
-function openDoor(t) { if (t === 'drug') { router.push('/study/drugs'); return } tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
+function openDoor(t) { if (t === 'drug') { router.push('/study/drugs'); return } if (t === 'stats') { router.push('/me'); return } tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 const DOORS = computed(() => [
   { key: 'quiz',  emoji: '📝', title: 'ข้อสอบ',      sub: 'ทั่วไป · Zen · Time Attack · ข้อที่ผิด', badge: redoDue.value || 0 },
   { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: 'สรุปโรคจากเพื่อน RxTU10', badge: 0 },
   { key: 'flash', emoji: '🧠', title: 'แฟลชการ์ด',   sub: `ทบทวนกลุ่มยา ${DECK.length} ตัว`, badge: queueSize.value || 0 },
   { key: 'tool',  emoji: '🧮', title: 'เครื่องคำนวณ', sub: 'CrCl · ยาน้ำเด็ก', badge: 0 },
+  { key: 'stats', emoji: '📊', title: 'ผลฝึกของฉัน', sub: 'หมวดไหนแม่น หมวดไหนควรฝึก · ข้อที่ผิดบ่อย', badge: 0 },
   { key: 'drug',  emoji: '💊', title: 'ฐานข้อมูลยา', sub: 'ข้อมูลยาภาษาไทย จากฐานข้อมูล DailyMed (US FDA)', badge: 0, soon: !drugDbOpen.value },
 ])
 const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
@@ -566,6 +567,8 @@ async function sendReport() {
 .sv-door:active { transform: translateY(1px); }
 .sv-door:focus-visible, .sv-back:focus-visible, .sv-res:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .d-quiz { background: var(--primary-light); } .d-sum { background: var(--accent-light); } .d-flash { background: var(--mint-light); } .d-tool { background: #fff6e0; }
+.d-stats, .d-drug { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; }
+.d-stats { background: #f3efff; }
 .d-drug { background: #eef3f7; grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; }
 .sv-door.soon { cursor: default; opacity: .7; }
 .sv-door.soon:active { transform: none; }
