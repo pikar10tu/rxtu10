@@ -158,9 +158,12 @@ test('Endless: ไม่มีชนะ ด่าน 6+ ต่อได้เร
   assert.equal(levelConfig(100).duration, 5500)
   assert.equal(levelConfig(100).damage, 30)
   assert.match(levelConfig(7).name, /^Lv.7 /)
-  const s = newGame(roster(2), 0)
+  // หา seed ที่มีคำสั่งกดครั้งเดียว (seed 0 บังเอิญได้แต่ hold/spam)
+  const single = (st) => Object.values(st.players).find(p => { const c = st.players[p.inst.targetUid].controls.find(c => c.id === p.inst.controlId); return !['hold','spam'].includes(c.type) })
+  let s, sp
+  for (let seed = 0; !sp && seed < 50; seed++) { s = newGame(roster(2), seed); sp = single(s) }
+  assert.ok(sp, 'หา seed ที่มีคำสั่งกดครั้งเดียวไม่เจอ')
   s.level = 5; s.progress = s.maxProgress - 1; s.eventTimes = []
-  const sp = Object.values(s.players).find(p => { const c = s.players[p.inst.targetUid].controls.find(c => c.id === p.inst.controlId); return !['hold','spam'].includes(c.type) })
   applyAction(s, sp.inst.targetUid, sp.inst.controlId, sp.inst.target, 10)
   assert.equal(s.status, 'levelClear')
   tick(s, s.clearAt)

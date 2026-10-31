@@ -1,6 +1,6 @@
 // src/utils/pvpBot.test.js
 // เทสบอทสำรอง — สเกลตามพลังทีมผู้เล่น ไม่ใช่ตามเรต
-import { test } from 'node:test'
+import { test, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { botTeamOf, botTeamForPower, getFallbackBots, BOT_POWER_RATIOS } from './pvpBot.js'
 import { teamPower } from './pvpCoins.js'
@@ -70,7 +70,14 @@ test('getFallbackBots: ขอมากกว่าจำนวนอัตรา
 // ── กันเพ็ทรุ่นที่ยังไม่เปิดตัวโผล่ในทีมบอท (review round 1, Task A 4) ──────────────
 const UNRELEASED = new Set(['sol', 'earth', 'luna'])
 
-test('บอทไม่มี sol/earth/luna หลุดออกมาก่อนเปิดตู้ — ไม่มีอีเวนต์ก็ไม่มี · อีเวนต์ wave 2 ก็ยังไม่มี', () => {
+// ล็อกนาฬิกาไว้ก่อน wave 4 (พ.ย. 2026) เปิดเองตามเวลา — ไม่งั้น effectiveEvent ทับอีเวนต์ที่ส่งมา
+// แล้ว sol/earth/luna เข้าตู้ปกติไปแล้วจริง (ถูกต้องในโปรดักชัน) ทำให้เทสพังตามวันที่
+const withClock = (fn) => () => {
+  mock.timers.enable({ apis: ['Date'], now: Date.UTC(2026, 9, 15) })
+  try { fn() } finally { mock.timers.reset() }
+}
+
+test('บอทไม่มี sol/earth/luna หลุดออกมาก่อนเปิดตู้ — ไม่มีอีเวนต์ก็ไม่มี · อีเวนต์ wave 2 ก็ยังไม่มี', withClock(() => {
   for (let seed = 0; seed <= 300; seed++) {
     for (const rarity of RARITY_ORDER) {
       const noEvent = botTeamOf(rarity, 3, seed)
@@ -83,9 +90,9 @@ test('บอทไม่มี sol/earth/luna หลุดออกมาก่�
       assert.ok(bot.team.every(u => !UNRELEASED.has(u.id)), `seed ${seed} getFallbackBots ได้ ${JSON.stringify(bot.team)}`)
     }
   }
-})
+}))
 
-test('บอทได้ sol/earth/luna เมื่ออีเวนต์ wave 3 จบแล้วเท่านั้น (gate ใช้งานได้จริง ไม่ใช่ปิดตายถาวร)', () => {
+test('บอทได้ sol/earth/luna เมื่ออีเวนต์ wave 3 จบแล้วเท่านั้น (gate ใช้งานได้จริง ไม่ใช่ปิดตายถาวร)', withClock(() => {
   const stillOpen = { wave: 3, endsAt: Date.now() + 1000 }
   const ended = { wave: 3, endsAt: Date.now() - 1000 }
   let sawWhileOpen = false, sawAfterEnd = false
@@ -95,4 +102,4 @@ test('บอทได้ sol/earth/luna เมื่ออีเวนต์ wav
   }
   assert.equal(sawWhileOpen, false, 'อีเวนต์ wave 3 ยังเปิดอยู่ ตู้ปกติ (releasedPets w-1) ต้องยังไม่มี sol/earth/luna')
   assert.ok(sawAfterEnd, 'อีเวนต์ wave 3 จบแล้ว sol/earth/luna ต้องไหลเข้าตู้ปกติ — ไม่เจอเลยแปลว่า gate ปิดตายถาวรผิดที่')
-})
+}))
