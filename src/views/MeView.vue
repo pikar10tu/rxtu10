@@ -27,7 +27,7 @@
           <button class="me-btn-sm ghost" :disabled="saving" @click="cancelPhoto">ยกเลิก</button>
         </div>
         <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
-        <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="tab = 'ach'">
+        <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="goTab('ach')">
           <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
         </button>
         <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
@@ -53,8 +53,8 @@
       </section>
       <MbtiPicker v-if="mbtiTop" class="me-mbti-top" />
 
-      <!-- แท็บ: ประวัติการต่อสู้ (รวมท้าสู้กระชับมิตร) · ข่าวรุ่น · ความสำเร็จ -->
-      <div class="me-tabs" role="tablist">
+      <!-- แท็บ: ผลฝึก · ต่อสู้ (รวมท้าสู้กระชับมิตร) · ข่าวรุ่น · ความสำเร็จ — จำแท็บไว้ใน ?tab= กดย้อนกลับแล้วไม่เด้งกลับแท็บแรก -->
+      <div ref="tabsEl" class="me-tabs" role="tablist">
         <button v-for="t in TABS" :key="t.k" class="me-tab" :class="{ on: tab === t.k }" role="tab" :aria-selected="tab === t.k" @click="tab = t.k">
           <Emoji :char="t.icon" /> {{ t.label }}
         </button>
@@ -71,7 +71,7 @@
 
       <!-- เมนูรวมเป็นการ์ดเดียว (เดิมเป็นปุ่มแยกหลายก้อน) -->
       <nav class="me-menu" aria-label="เมนู">
-        <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📊" /> ประวัติการทำข้อสอบ <span class="me-go">›</span></RouterLink>
+        <RouterLink to="/quiz?view=history" class="me-link"><Emoji char="📝" /> ประวัติการทำข้อสอบ <span class="me-go">›</span></RouterLink>
         <RouterLink to="/fun-facts" class="me-link"><Emoji char="🌐" /> สถิติรวมทั้งเว็บ <span class="me-go">›</span></RouterLink>
         <!-- เปิด/ปิดเสียง — จำในเครื่องนี้ (localStorage) ไม่แตะ Firestore -->
         <button class="me-link me-sound" data-sfx="none" :aria-pressed="soundOn" @click="toggleSound">
@@ -109,7 +109,7 @@
 import MbtiPicker from '../components/members/MbtiPicker.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -164,7 +164,21 @@ const TABS = [
   { k: 'ach', icon: '🏅', label: 'ความสำเร็จ' },
 ]
 const teamOpen = ref(false)
-const tab = ref('stats')
+const route = useRoute()
+const router = useRouter()
+const tabOf = (q) => (TABS.some(t => t.k === q) ? q : 'stats')
+const tab = ref(tabOf(route.query.tab))
+watch(tab, (t) => {
+  if (tabOf(route.query.tab) === t) return
+  router.replace({ query: { ...route.query, tab: t === 'stats' ? undefined : t }, hash: route.hash })
+})
+watch(() => route.query.tab, (q) => { tab.value = tabOf(q) })
+// กดฉายาบนการ์ด → สลับแท็บแล้วเลื่อนลงไปให้เห็น (มือถือ แท็บอยู่ใต้จอ)
+const tabsEl = ref(null)
+function goTab(k) {
+  tab.value = k
+  requestAnimationFrame(() => tabsEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+}
 // แท็บความสำเร็จ: โหลดครั้งเดียวต่อเข้าหน้า แล้วส่งให้ทั้งตู้โชว์และกริด (query เดียว)
 const achItems = ref([])
 const showcaseEl = ref(null)
@@ -190,7 +204,6 @@ onMounted(() => { if (!members.rosterReady) members.loadRoster() })
 const mbtiTop = ref(null)
 watch(() => auth.userData, (u) => { if (u && mbtiTop.value === null) mbtiTop.value = !u.mbti }, { immediate: true })
 // มาจากเควส MBTI (/me#mbti) → เลื่อนลงไปที่กล่องเลือกให้เลย
-const route = useRoute()
 onMounted(() => { if (route.hash === '#mbti') setTimeout(() => document.getElementById('mbti')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300) })
 
 // กดชื่อในประวัติ → เปิดโปรไฟล์คนนั้น (มีปุ่มท้าสู้ในนั้นอยู่แล้ว = ท้ากลับ)
@@ -333,8 +346,8 @@ async function save() {
 .me-guard { display: flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 700; color: var(--muted); }
 .me-guard-cap { margin-right: 2px; }
 .me-guard-pet { width: 34px; height: 34px; display: grid; place-items: center; font-size: 1.25rem; background: rgba(255,255,255,.8); border: var(--bw) solid var(--line); border-radius: 10px; }
-.me-tabs { display: flex; gap: 6px; margin: 16px 0 0; background: var(--primary-light); padding: 4px; border-radius: 14px; }
-.me-tab { flex: 1; font: inherit; font-size: .78rem; font-weight: 700; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 8px 2px; cursor: pointer; }
+.me-tabs { display: flex; gap: 4px; scroll-margin-top: 12px; margin: 16px 0 0; background: var(--primary-light); padding: 4px; border-radius: 14px; }
+.me-tab { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: inherit; font-size: clamp(.7rem, 3.2vw, .78rem); font-weight: 700; color: var(--muted); background: transparent; border: 0; border-radius: 10px; padding: 8px 2px; cursor: pointer; }
 .me-tab.on { background: var(--surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
 .me-panel { margin-top: 10px; }
 /* ป้ายยาวพอดีข้อความ (เดิมยืดเต็มคอลัมน์เพราะแม่เป็น flex column) */

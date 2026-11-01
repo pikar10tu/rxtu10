@@ -18,21 +18,39 @@
         <template v-else>เริ่มนับตั้งแต่ 31 ต.ค. 69 — ทำข้อสอบสักชุด กราฟจะเริ่มขึ้นเลย</template>
       </p>
 
-      <svg v-if="view === 'radar'" class="ps-radar" viewBox="0 0 340 340" role="img" aria-label="กราฟผลฝึก 21 หมวด">
-        <polygon v-for="lv in [0.25, 0.5, 0.75, 1]" :key="lv" class="ps-ring" :points="ring(lv)" />
-        <line v-for="(r, i) in rows" :key="'l' + r.key" class="ps-spoke" :x1="C" :y1="C" :x2="pt(i, 1).x" :y2="pt(i, 1).y" />
-        <polygon class="ps-area" :points="rows.map((r, i) => xy(pt(i, r.pct / 100))).join(' ')" />
-        <circle v-for="(r, i) in rows" :key="'d' + r.key" class="ps-dot" :class="{ none: !r.t, sel: sel === r.key }"
-          :cx="pt(i, r.pct / 100).x" :cy="pt(i, r.pct / 100).y" r="3.5" />
-        <text v-for="(r, i) in rows" :key="'t' + r.key" class="ps-lbl" :class="{ sel: sel === r.key, none: !r.t }"
-          :x="pt(i, 1.2).x" :y="pt(i, 1.2).y" :text-anchor="anchor(i)" dominant-baseline="middle"
-          @click="pick(r.key)">{{ r.label }}</text>
+      <svg v-if="view === 'radar'" class="ps-radar" :viewBox="`0 0 ${W} ${H}`" role="img" aria-label="กราฟผลฝึก 21 หมวด">
+        <defs>
+          <radialGradient id="psFill" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--primary)" stop-opacity=".12" />
+            <stop offset="100%" stop-color="var(--primary)" stop-opacity=".38" />
+          </radialGradient>
+        </defs>
+        <!-- พื้นแบ่งโซน Care / Sci / Social·Law -->
+        <path v-for="z in zones" :key="z.k" class="ps-zone" :class="'z-' + z.k" :d="z.d" />
+        <polygon v-for="lv in [0.25, 0.5, 0.75]" :key="lv" class="ps-ring" :points="ring(lv)" />
+        <polygon class="ps-ring ps-ring-out" :points="ring(1)" />
+        <line v-for="(r, i) in rows" :key="'l' + r.key" class="ps-spoke" :x1="CX" :y1="CY" :x2="pt(i, 1).x" :y2="pt(i, 1).y" />
+        <text v-for="lv in [50, 100]" :key="'p' + lv" class="ps-tick" :x="CX + 3" :y="CY - R * lv / 100 + 9">{{ lv }}%</text>
+        <polygon v-if="practiced.length >= 3" class="ps-area" :points="rows.map((r, i) => xy(pt(i, r.pct / 100))).join(' ')" />
+        <template v-else>
+          <line v-for="r in practiced" :key="'b' + r.key" class="ps-stem" :x1="CX" :y1="CY" :x2="pt(r.i, r.pct / 100).x" :y2="pt(r.i, r.pct / 100).y" />
+        </template>
+        <circle v-for="r in practiced" :key="'d' + r.key" class="ps-dot" :class="{ sel: sel === r.key }"
+          :cx="pt(r.i, r.pct / 100).x" :cy="pt(r.i, r.pct / 100).y" :r="sel === r.key ? 5.5 : 3.5" />
+        <g v-for="(r, i) in rows" :key="'t' + r.key" class="ps-lblg" :class="{ sel: sel === r.key, none: !r.t }" @click="pick(r.key)">
+          <text class="ps-lbl" :x="lblPt(i).x" :y="lblPt(i).y" :text-anchor="anchor(i)" dominant-baseline="middle">{{ r.label }}</text>
+          <text v-if="r.t" class="ps-lbl-pct" :x="lblPt(i).x" :y="lblPt(i).y + 12" :text-anchor="anchor(i)" dominant-baseline="middle">{{ r.pct }}%</text>
+        </g>
         <g v-if="!totalAnswered" class="ps-empty">
-          <rect :x="C - 92" :y="C - 26" width="184" height="52" rx="14" />
-          <text :x="C" :y="C - 6" text-anchor="middle">ยังไม่มีข้อมูล</text>
-          <text :x="C" :y="C + 13" text-anchor="middle" class="ps-empty-sub">ทำข้อสอบสักชุดแล้วกลับมาดู</text>
+          <rect :x="CX - 92" :y="CY - 26" width="184" height="52" rx="14" />
+          <text :x="CX" :y="CY - 6" text-anchor="middle">ยังไม่มีข้อมูล</text>
+          <text :x="CX" :y="CY + 13" text-anchor="middle" class="ps-empty-sub">ทำข้อสอบสักชุดแล้วกลับมาดู</text>
         </g>
       </svg>
+      <div v-if="view === 'radar'" class="ps-legend">
+        <span><i class="z-care"></i>Care</span><span><i class="z-sci"></i>Sci</span><span><i class="z-law"></i>Social · Law</span>
+        <span class="ps-legend-note">จุดกลาง = ยังไม่ได้ฝึก</span>
+      </div>
 
       <div v-else class="ps-bars">
         <button v-for="r in weakFirst" :key="r.key" class="ps-bar" :class="{ sel: sel === r.key }" @click="pick(r.key)">
@@ -91,7 +109,7 @@ import { useUsageStore } from '../../stores/usage.js'
 import Emoji from '../shared/Emoji.vue'
 import { groupByKey } from '../../data/plecc.js'
 import {
-  MIN_ANSWERED, axisStats, sortWeakFirst, suggestAxes, topWrongIds, axisPrimaryGroup, axisFullName,
+  MIN_ANSWERED, RADAR_AXES, axisStats, sortWeakFirst, suggestAxes, topWrongIds, axisPrimaryGroup, axisFullName,
 } from '../../utils/practiceStats.js'
 
 const auth = useAuthStore()
@@ -114,19 +132,33 @@ const fullName = axisFullName
 const thName = (r) => r.groups.map(k => groupByKey(k)?.th).filter(Boolean).join(' + ')
 const practiceLink = (r) => ({ path: '/quiz', query: { group: axisPrimaryGroup(r) } })
 
-// ── เรขาคณิต radar ── (เริ่มที่ 12 นาฬิกา ตามเข็ม)
-const C = 170, R = 112
-const N = 21
+// ── เรขาคณิต radar ── (เริ่มที่ 12 นาฬิกา ตามเข็ม) · กว้างกว่าสูงเพราะป้ายซ้าย/ขวายาว
+const W = 400, H = 360, CX = 200, CY = 180, R = 112, LBL = 1.12
+const N = RADAR_AXES.length
+const ang = (i) => -Math.PI / 2 + (i * 2 * Math.PI) / N
 function pt(i, f) {
-  const a = -Math.PI / 2 + (i * 2 * Math.PI) / N
-  return { x: C + Math.cos(a) * R * f, y: C + Math.sin(a) * R * f }
+  return { x: CX + Math.cos(ang(i)) * R * f, y: CY + Math.sin(ang(i)) * R * f }
 }
 const xy = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`
 const ring = (f) => Array.from({ length: N }, (_, i) => xy(pt(i, f))).join(' ')
 function anchor(i) {
-  const x = Math.cos(-Math.PI / 2 + (i * 2 * Math.PI) / N)
-  return Math.abs(x) < 0.2 ? 'middle' : x > 0 ? 'start' : 'end'
+  const x = Math.cos(ang(i))
+  return Math.abs(x) < 0.25 ? 'middle' : x > 0 ? 'start' : 'end'
 }
+// ป้ายบน/ล่างดันออกอีกนิดกันชนเส้น · ป้ายที่มี % เลื่อนขึ้นครึ่งบรรทัดให้สองบรรทัดอยู่กลางซี่
+function lblPt(i) {
+  const p = pt(i, LBL)
+  const s = Math.sin(ang(i))
+  return { x: p.x, y: p.y + s * 6 - (rows.value[i].t ? 6 : 0) }
+}
+const practiced = computed(() => rows.value.map((r, i) => ({ ...r, i })).filter(r => r.t))
+// โซนพื้นหลัง: ลิ่มครอบช่วงซี่ของแต่ละสาย (ครึ่งช่องเผื่อสองข้าง)
+const ZONES = [['care', 0, 14], ['sci', 15, 19], ['law', 20, 20]]
+const zones = ZONES.map(([k, a, b]) => {
+  const pts = []
+  for (let t = a - 0.5; t <= b + 0.5 + 1e-9; t += 0.5) pts.push(xy(pt(t, 1)))
+  return { k, d: `M${CX},${CY} L${pts.join(' L')} Z` }
+})
 
 // ── ข้อที่ผิดบ่อย — โหลดโจทย์ตอนเปิดแท็บ (≤5 reads) ──
 const wrongIds = computed(() => topWrongIds(auth.userData?.study?.qcards, 5))
@@ -150,7 +182,7 @@ onMounted(async () => {
 
 <style scoped>
 .ps { display: flex; flex-direction: column; gap: 10px; }
-.ps-card { background: #fff; border: var(--bw) solid var(--line); border-radius: 16px; padding: 14px; box-shadow: var(--pop); }
+.ps-card { background: var(--surface, #fff); border: var(--bw) solid var(--line); border-radius: 16px; padding: 14px; box-shadow: var(--pop); }
 .ps-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .ps-title { font-weight: 800; font-size: .92rem; color: var(--ink); }
 .ps-sub { font-size: .74rem; color: var(--muted); margin: 6px 0 8px; line-height: 1.5; }
@@ -158,16 +190,28 @@ onMounted(async () => {
 .ps-seg button { border: 0; background: #fff; padding: 5px 10px; font-family: inherit; font-size: .72rem; font-weight: 700; color: var(--muted); cursor: pointer; }
 .ps-seg button.on { background: var(--primary); color: #fff; }
 
-.ps-radar { width: 100%; max-width: 380px; display: block; margin: 0 auto; overflow: visible; }
-.ps-ring { fill: none; stroke: var(--line); stroke-width: 1; }
-.ps-spoke { stroke: var(--line); stroke-width: 1; }
-.ps-area { fill: color-mix(in srgb, var(--primary) 22%, transparent); stroke: var(--primary); stroke-width: 2; stroke-linejoin: round; }
-.ps-dot { fill: var(--primary); }
-.ps-dot.none { fill: var(--line); }
-.ps-dot.sel { fill: var(--accent); r: 5.5; }
-.ps-lbl { font-size: 11.5px; font-weight: 700; fill: var(--ink); cursor: pointer; }
-.ps-lbl.none { fill: var(--muted); }
-.ps-lbl.sel { fill: var(--accent); }
+.ps-radar { width: 100%; max-width: 420px; display: block; margin: 0 auto; }
+.ps-zone { stroke: none; }
+.z-care { fill: color-mix(in srgb, var(--primary) 7%, transparent); background: color-mix(in srgb, var(--primary) 30%, transparent); }
+.z-sci { fill: color-mix(in srgb, #f59e0b 9%, transparent); background: color-mix(in srgb, #f59e0b 40%, transparent); }
+.z-law { fill: color-mix(in srgb, #10b981 10%, transparent); background: color-mix(in srgb, #10b981 40%, transparent); }
+.ps-ring { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
+.ps-ring-out { stroke-dasharray: none; stroke-width: 1.2; }
+.ps-spoke { stroke: var(--line); stroke-width: .8; }
+.ps-tick { font-size: 8.5px; fill: var(--muted); font-weight: 600; }
+.ps-area { fill: url(#psFill); stroke: var(--primary); stroke-width: 2; stroke-linejoin: round; }
+.ps-stem { stroke: var(--primary); stroke-width: 2.5; stroke-linecap: round; }
+.ps-dot { fill: #fff; stroke: var(--primary); stroke-width: 2; }
+.ps-dot.sel { fill: var(--accent); stroke: var(--accent); }
+.ps-lblg { cursor: pointer; }
+.ps-lbl { font-size: 11px; font-weight: 700; fill: var(--ink); }
+.ps-lbl-pct { font-size: 9.5px; font-weight: 800; fill: var(--primary); }
+.ps-lblg.none .ps-lbl { fill: var(--muted); font-weight: 600; }
+.ps-lblg.sel .ps-lbl, .ps-lblg.sel .ps-lbl-pct { fill: var(--accent); }
+.ps-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: .68rem; color: var(--muted); margin-top: 2px; }
+.ps-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.ps-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.ps-legend-note { opacity: .85; }
 
 .ps-empty rect { fill: #fff; stroke: var(--line); }
 .ps-empty text { font-size: 13px; font-weight: 800; fill: var(--ink); }
