@@ -18,7 +18,7 @@
         <template v-else>เริ่มนับตั้งแต่ 31 ต.ค. 69 — ทำข้อสอบสักชุด กราฟจะเริ่มขึ้นเลย</template>
       </p>
 
-      <svg v-if="view === 'radar'" class="ps-radar" :viewBox="`0 0 ${W} ${H}`" role="img" aria-label="กราฟผลฝึก 21 หมวด">
+      <svg v-if="view === 'radar'" class="ps-radar" :viewBox="`0 ${VY} ${W} ${H - 2 * VY}`" role="img" aria-label="กราฟผลฝึก 21 หมวด">
         <defs>
           <radialGradient id="psFill" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stop-color="var(--primary)" stop-opacity=".12" />
@@ -39,7 +39,7 @@
           :cx="pt(r.i, r.pct / 100).x" :cy="pt(r.i, r.pct / 100).y" :r="sel === r.key ? 5.5 : 3.5" />
         <g v-for="(r, i) in rows" :key="'t' + r.key" class="ps-lblg" :class="{ sel: sel === r.key, none: !r.t }" @click="pick(r.key)">
           <text class="ps-lbl" :x="lblPt(i).x" :y="lblPt(i).y" :text-anchor="anchor(i)" dominant-baseline="middle">{{ r.label }}</text>
-          <text v-if="r.t" class="ps-lbl-pct" :x="lblPt(i).x" :y="lblPt(i).y + 12" :text-anchor="anchor(i)" dominant-baseline="middle">{{ r.pct }}%</text>
+          <text v-if="r.t" class="ps-lbl-pct" :x="lblPt(i).x" :y="lblPt(i).y + 13" :text-anchor="anchor(i)" dominant-baseline="middle">{{ r.pct }}%</text>
         </g>
         <g v-if="!totalAnswered" class="ps-empty">
           <rect :x="CX - 92" :y="CY - 26" width="184" height="52" rx="14" />
@@ -49,7 +49,7 @@
       </svg>
       <div v-if="view === 'radar'" class="ps-legend">
         <span><i class="z-care"></i>Care</span><span><i class="z-sci"></i>Sci</span><span><i class="z-law"></i>Social · Law</span>
-        <span class="ps-legend-note">จุดกลาง = ยังไม่ได้ฝึก</span>
+        <span class="ps-legend-note">ป้ายจาง = ยังไม่ได้ฝึก</span>
       </div>
 
       <div v-else class="ps-bars">
@@ -132,8 +132,8 @@ const fullName = axisFullName
 const thName = (r) => r.groups.map(k => groupByKey(k)?.th).filter(Boolean).join(' + ')
 const practiceLink = (r) => ({ path: '/quiz', query: { group: axisPrimaryGroup(r) } })
 
-// ── เรขาคณิต radar ── (เริ่มที่ 12 นาฬิกา ตามเข็ม) · กว้างกว่าสูงเพราะป้ายซ้าย/ขวายาว
-const W = 400, H = 360, CX = 200, CY = 180, R = 112, LBL = 1.12
+// ── เรขาคณิต radar ── (เริ่มที่ 12 นาฬิกา ตามเข็ม) · กว้างกว่าสูงเพราะป้ายซ้าย/ขวายาว · VY = ตัดขอบว่างบน/ล่าง
+const W = 400, H = 360, VY = 32, CX = 200, CY = 180, R = 112, LBL = 1.12
 const N = RADAR_AXES.length
 const ang = (i) => -Math.PI / 2 + (i * 2 * Math.PI) / N
 function pt(i, f) {
@@ -149,7 +149,7 @@ function anchor(i) {
 function lblPt(i) {
   const p = pt(i, LBL)
   const s = Math.sin(ang(i))
-  return { x: p.x, y: p.y + s * 6 - (rows.value[i].t ? 6 : 0) }
+  return { x: p.x, y: p.y + s * 7 - (rows.value[i].t ? 6.5 : 0) }
 }
 const practiced = computed(() => rows.value.map((r, i) => ({ ...r, i })).filter(r => r.t))
 // โซนพื้นหลัง: ลิ่มครอบช่วงซี่ของแต่ละสาย (ครึ่งช่องเผื่อสองข้าง)
@@ -198,14 +198,14 @@ onMounted(async () => {
 .ps-ring { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
 .ps-ring-out { stroke-dasharray: none; stroke-width: 1.2; }
 .ps-spoke { stroke: var(--line); stroke-width: .8; }
-.ps-tick { font-size: 8.5px; fill: var(--muted); font-weight: 600; }
+.ps-tick { font-size: 9.5px; fill: var(--muted); font-weight: 600; }
 .ps-area { fill: url(#psFill); stroke: var(--primary); stroke-width: 2; stroke-linejoin: round; }
 .ps-stem { stroke: var(--primary); stroke-width: 2.5; stroke-linecap: round; }
 .ps-dot { fill: #fff; stroke: var(--primary); stroke-width: 2; }
 .ps-dot.sel { fill: var(--accent); stroke: var(--accent); }
 .ps-lblg { cursor: pointer; }
-.ps-lbl { font-size: 11px; font-weight: 700; fill: var(--ink); }
-.ps-lbl-pct { font-size: 9.5px; font-weight: 800; fill: var(--primary); }
+.ps-lbl { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.ps-lbl-pct { font-size: 11px; font-weight: 800; fill: var(--primary); }
 .ps-lblg.none .ps-lbl { fill: var(--muted); font-weight: 600; }
 .ps-lblg.sel .ps-lbl, .ps-lblg.sel .ps-lbl-pct { fill: var(--accent); }
 .ps-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: .68rem; color: var(--muted); margin-top: 2px; }
