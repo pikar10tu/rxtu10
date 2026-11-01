@@ -85,7 +85,7 @@
 
       <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
       <details class="me-contact-fold">
-        <summary><Emoji char="📞" /> ข้อมูลติดต่อ</summary>
+        <summary><Emoji char="📞" /> ข้อมูลติดต่อ <span class="me-fold-go">›</span></summary>
         <div class="me-contact">
           <div class="me-crow"><span><Emoji char="📞" /></span><input v-model="phone" :maxlength="LIMITS.contact" class="me-input" placeholder="เบอร์โทร" /></div>
           <div class="me-crow"><span><Emoji char="📷" /></span><input v-model="ig" :maxlength="LIMITS.contact" class="me-input" placeholder="Instagram" /></div>
@@ -371,7 +371,9 @@ async function save() {
 .me-save:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .me-save:disabled { opacity: .6; box-shadow: none; }
 .me-contact-fold { margin: 14px 0; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); background: #fff; padding: 10px 12px; }
-.me-contact-fold summary { font-weight: 800; font-size: .85rem; color: var(--ink); cursor: pointer; list-style: none; }
+.me-contact-fold summary { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: .85rem; color: var(--ink); cursor: pointer; list-style: none; }
+.me-fold-go { margin-left: auto; color: var(--muted); transition: transform .15s; }
+.me-contact-fold[open] .me-fold-go { transform: rotate(90deg); }
 .me-contact-fold summary::-webkit-details-marker { display: none; }
 .me-contact-fold[open] summary { margin-bottom: 10px; }
 .me-stats { display: flex; margin-top: 12px; background: rgba(255,255,255,.85); border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); overflow: hidden; }
@@ -385,9 +387,9 @@ async function save() {
 .me-sound-state { margin-left: auto; font-size: .75rem; color: #64748b; }
 .me-link { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border: var(--bw) solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--pop); font-weight: 700; font-size: .85rem; color: var(--ink); text-decoration: none; margin-top: 12px; }
 .me-link:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.me-feedback { width: 100%; margin-top: 22px; border: var(--bw) solid var(--line); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.me-feedback { width: 100%; margin-top: 14px; border: var(--bw) solid var(--line); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .me-feedback:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.me-logout { width: 100%; margin-top: 10px; border: var(--bw) solid var(--line); background: #fff; color: var(--accent); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
+.me-logout { width: 100%; margin-top: 10px; margin-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); border: var(--bw) solid var(--line); background: #fff; color: var(--accent); border-radius: 11px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; }
 .me-logout:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 
 
