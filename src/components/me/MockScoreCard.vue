@@ -39,7 +39,7 @@ const { exams, mine } = useMockScores()
 const C = 2 * Math.PI * 19
 const exam = computed(() => exams.value[0] || null)
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
-const seen = computed(() => isSeen(exam.value.id))
+const seen = computed(() => isSeen(exam.value.id, !!my.value))
 const hot = computed(() => !!my.value && !seen.value)
 const pct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores) : 0)
 const pass = computed(() => pct.value >= exam.value.passPct - 1e-9)

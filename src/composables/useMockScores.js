@@ -34,11 +34,18 @@ export async function loadMockScores(uid) {
 }
 
 const SEEN_KEY = id => `mockSeen:${id}`
-export function isSeen(id) {
-  try { return localStorage.getItem(SEEN_KEY(id)) === '1' } catch { return false }
+// จำแยก 2 ระดับ: 'avg' = เคยเปิดตอนยังไม่มีผลเรา · 'score' = เห็นผลตัวเองแล้ว
+// (คนที่เคยดูแค่เฉลี่ย พอผลตัวเองมาต้องเด้ง "ใหม่" อีกรอบ)
+export function isSeen(id, withScore) {
+  try {
+    const v = localStorage.getItem(SEEN_KEY(id))
+    return withScore ? v === 'score' : (v === 'avg' || v === 'score' || v === '1')
+  } catch { return false }
 }
-export function markSeen(id) {
-  try { localStorage.setItem(SEEN_KEY(id), '1') } catch { /* private mode */ }
+export function markSeen(id, withScore) {
+  try {
+    if (withScore || !isSeen(id, false)) localStorage.setItem(SEEN_KEY(id), withScore ? 'score' : 'avg')
+  } catch { /* private mode */ }
 }
 
 export function useMockScores() {

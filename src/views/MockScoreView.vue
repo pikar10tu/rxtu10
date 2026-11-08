@@ -122,7 +122,7 @@ function pick(id) { router.replace({ query: { ...route.query, exam: id } }) }
 
 onMounted(() => loadMockScores(auth.currentUser?.uid))
 watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
-watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id) }, { immediate: true })
+watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id, !!my.value) }, { immediate: true })
 </script>
 
 <style scoped>
