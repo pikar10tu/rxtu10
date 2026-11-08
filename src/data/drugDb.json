@@ -14369,5 +14369,2228 @@
    "date": "2 มี.ค. 2026",
    "set": "888dc7f9-ad9c-4c00-8d50-8ddfd9bd27c0"
   }
+ },
+ {
+  "id": "levofloxacin",
+  "name": "Levofloxacin",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Fluoroquinolone (respiratory)",
+  "chips": [
+   "วันละครั้ง",
+   "เอ็นฉีกขาด",
+   "แยก cation 2 ชม."
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ค)",
+  "nlemCond": {
+   "t": "เฉพาะ 500 และ 750 mg · ใช้ในกรณีพิเศษตามคำแนะนำของแพทย์ผู้เชี่ยวชาญโรคติดเชื้อ/ระบบทางเดินหายใจ เช่น CAP ปานกลาง–รุนแรงที่สงสัย DRSP · (บัญชี ex: MDR-TB เป็น second-line)",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "BOXED WARNING · TENDINITIS, NEUROPATHY, CNS, MYASTHENIA GRAVIS",
+  "bw": {
+   "t": "ADR รุนแรงที่อาจถาวร: เอ็นอักเสบ/ฉีกขาด, ปลายประสาทอักเสบ, CNS · ทำให้ myasthenia gravis กำเริบ · สงวนไว้สำหรับไซนัสอักเสบ หลอดลมอักเสบกำเริบ UTI ไม่ซับซ้อน เมื่อไม่มีทางเลือก",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง DNA gyrase และ topoisomerase IV · ครอบคลุม S. pneumoniae และ atypical ดีกว่า ciprofloxacin (\"respiratory quinolone\")",
+   "r": [
+    "fda:12.1",
+    "g_cap"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>วันละครั้ง</b> 250–750 mg ตามการติดเชื้อ · CAP 500 mg 7–14 วัน หรือ 750 mg 5 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "CrCl &lt;50 ต้องปรับ: เช่น 750 mg → CrCl 20–49 ให้ 750 mg q48h · 10–19 หรือฟอกไต 750 mg ครั้งแรก แล้ว 500 mg q48h",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "แยกเวลา <b>2 ชม. ก่อนหรือหลัง</b> ยาลดกรด Mg/Al, sucralfate, เหล็ก, multivitamin ที่มีสังกะสี",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "ADR กลุ่ม FQ: เอ็นฉีกขาด, neuropathy, CNS, aortic aneurysm, QT ยาว, น้ำตาลผิดปกติ, แพ้แสง",
+    "r": [
+     "fda:5.2",
+     "fda:5.3",
+     "fda:5.4",
+     "fda:5.9",
+     "fda:5.11",
+     "fda:5.13",
+     "fda:5.14"
+    ]
+   },
+   {
+    "t": "CAP ผู้ป่วยนอกมีโรคร่วม: respiratory FQ เดี่ยว เป็นทางเลือกหนึ่ง",
+    "r": [
+     "g_cap"
+    ]
+   },
+   {
+    "t": "กินพร้อมหรือไม่พร้อมอาหารก็ได้ · ดื่มน้ำพอ",
+    "r": [
+     "fda:2.5",
+     "fda:2.6"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Nosocomial pneumonia",
+    "d": "750 mg q24h 7–14 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "CAP",
+    "d": "500 mg × 7–14 วัน หรือ 750 mg × 5 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "cUTI / pyelonephritis",
+    "d": "750 mg × 5 วัน หรือ 250 mg × 10 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "UTI ไม่ซับซ้อน",
+    "d": "250 mg × 3 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "ต่อมลูกหมากอักเสบเรื้อรัง",
+    "d": "500 mg × 28 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ลืมกินยา: กินทันทีถ้าเหลือ &gt;8 ชม. ก่อนมื้อถัดไป",
+    "r": [
+     "fda:2.5"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl &lt;50 ปรับตามตาราง (ขยายช่วงเป็น q48h หรือลดขนาด)",
+   "r": [
+    "fda:2.3"
+   ]
+  },
+  "mon": [
+   {
+    "t": "อาการเอ็น ชา สับสน",
+    "r": [
+     "fda:5.2",
+     "fda:5.3",
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "น้ำตาลในผู้ป่วยเบาหวาน",
+    "r": [
+     "fda:5.13"
+    ]
+   },
+   {
+    "t": "การทำงานของไต",
+    "r": [
+     "fda:2.3"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ levofloxacin หรือ quinolone อื่น",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ADR รุนแรงถาวร",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "เอ็นอักเสบ/ฉีกขาด",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Peripheral neuropathy",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "CNS",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "MG กำเริบ",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "Aortic aneurysm",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "QT ยาว",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "น้ำตาลผิดปกติ",
+    "r": [
+     "fda:5.13"
+    ]
+   },
+   {
+    "t": "แพ้แสง",
+    "r": [
+     "fda:5.14"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ ปวดศีรษะ ท้องเสีย นอนไม่หลับ ท้องผูก เวียนศีรษะ",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาลดกรด/cation/sucralfate: แยก 2 ชม.",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Warfarin: INR อาจเพิ่ม",
+    "r": [
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "ยาเบาหวาน: น้ำตาลผิดปกติ",
+    "r": [
+     "fda:5.13"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ สังเกตท้องเสียในทารก",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เสี่ยงเอ็นฉีกขาด",
+    "r": [
+     "fda:8.5"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ ให้สารน้ำ · ฟอกเลือดไม่ช่วย",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ปวด บวมเอ็น ชา อ่อนแรง หยุดยาและพบแพทย์",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "แยกเวลาจากยาลดกรด เหล็ก",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "เลี่ยงแดด",
+    "r": [
+     "fda:5.14"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "การดูดซึม",
+    "F ~99% (กิน = ฉีด)",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตแบบไม่เปลี่ยนแปลงเป็นหลัก",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Levofloxacin — เอกสารกำกับยา US FDA (Levofloxacin tablets · Chartwell (Levaquin ไม่มีแล้ว))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=5c6c117c-9d91-48f4-9aaa-ee70b99218c2",
+    "src": "DailyMed · ฉบับ 29 มิ.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Levofloxacin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501002/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Levofloxacin tablets · Chartwell (Levaquin ไม่มีแล้ว)",
+   "date": "29 มิ.ย. 2026",
+   "set": "5c6c117c-9d91-48f4-9aaa-ee70b99218c2"
+  }
+ },
+ {
+  "id": "cotrimoxazole",
+  "name": "Co-trimoxazole (SMX/TMP)",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Sulfonamide + trimethoprim",
+  "chips": [
+   "DS = 800/160 mg",
+   "K สูง",
+   "SJS/TEN"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "ยับยั้งการสร้าง folate ของแบคทีเรีย 2 ขั้นตอน: sulfamethoxazole (dihydropteroate synthase) + trimethoprim (dihydrofolate reductase)",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "UTI ผู้ใหญ่: <b>DS 1 เม็ด (หรือเม็ดธรรมดา 2 เม็ด) q12h</b> 10–14 วัน · shigellosis 5 วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "PCP: <b>TMP 15–20 mg/kg/วัน</b> (SMX 75–100) แบ่ง q6h 14–21 วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ไต: CrCl 15–30 ให้<b>ครึ่งหนึ่ง</b> · &lt;15 ไม่แนะนำ",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: แพ้ sulfa/TMP, <b>เด็ก &lt;2 เดือน</b>, megaloblastic anemia จากขาด folate, ตับเสียหายมาก, ใช้ร่วม <b>dofetilide</b>",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ADR รุนแรง: <b>SJS/TEN</b>, DRESS, ตับวาย, agranulocytosis/aplastic anemia · <b>โพแทสเซียมสูง</b> (TMP ขนาดสูง/ไตเสื่อม) · น้ำตาลต่ำ · hemolysis ใน G6PD",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "DDI: warfarin (INR เพิ่ม), phenytoin, methotrexate (เลี่ยง) · thiazide ในผู้สูงอายุ → เกล็ดเลือดต่ำ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "UTI, otitis media เด็ก, shigellosis",
+    "d": "DS 1 เม็ด q12h · เด็ก SMX 40/TMP 8 mg/kg/วัน แบ่ง q12h",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "หลอดลมอักเสบเรื้อรังกำเริบ",
+    "d": "DS 1 เม็ด q12h 14 วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "PCP รักษา/ป้องกัน",
+    "d": "TMP 15–20 mg/kg/วัน แบ่ง q6h (รักษา) · DS วันละ 1 เม็ด (ป้องกัน)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "Traveler’s diarrhea",
+    "d": "DS 1 เม็ด q12h 5 วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl 15–30: ครึ่งหนึ่งของขนาดปกติ · &lt;15: ไม่แนะนำ",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "hepatic": {
+   "t": "ห้ามในตับเสียหายมาก",
+   "r": [
+    "fda:Contraindications"
+   ]
+  },
+  "mon": [
+   {
+    "t": "CBC (ใช้นาน) · โพแทสเซียม · การทำงานไต",
+    "r": [
+     "fda:Precautions",
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ผื่น/ไข้/เจ็บคอ",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ TMP หรือ sulfonamide",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคย immune thrombocytopenia จากยา",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Megaloblastic anemia จากขาด folate",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เด็ก &lt;2 เดือน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ตับเสียหายมาก · ไตบกพร่องรุนแรงที่ติดตามไม่ได้",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม dofetilide",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "Embryofetal toxicity",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "SCARs, ตับวาย, blood dyscrasia, ปอดอักเสบจากยา, shock เมื่อให้ซ้ำ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ขาด folate",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "Hemolysis ใน G6PD",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "น้ำตาลต่ำ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "โพแทสเซียมสูง",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ อาเจียน เบื่ออาหาร · ผื่น ลมพิษ",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Thiazide (ผู้สูงอายุ): เกล็ดเลือดต่ำ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เพิ่ม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Phenytoin: ระดับเพิ่ม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Methotrexate: เลี่ยง",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: อาจเพิ่มความพิการแต่กำเนิด",
+    "r": [
+     "fda:Warnings",
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ในทารกครบกำหนดสุขภาพดี · เลี่ยงในทารกป่วย คลอดก่อนกำหนด ตัวเหลือง หรือขาด G6PD",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "เด็ก &lt;2 เดือน: ห้าม",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "คลื่นไส้ อาเจียน เวียนศีรษะ สับสน · ภาวะกดไขกระดูกให้ leucovorin · ฟอกเลือดออกได้บางส่วน",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ดื่มน้ำมากพอ ป้องกันผลึกในปัสสาวะ",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "ผื่น ไข้ เจ็บคอ แผลในปาก ให้หยุดยาและพบแพทย์",
+    "r": [
+     "fda:Information for Patients",
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมดีทั้ง 2 ตัว",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ทางไต",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Co-trimoxazole (SMX/TMP) — เอกสารกำกับยา US FDA (Bactrim / Bactrim DS tablets · Sun Pharma)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f59d0c04-9c66-4d53-a0e1-cb55570deb62",
+    "src": "DailyMed · ฉบับ 30 ธ.ค. 2024"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Trimethoprim-Sulfamethoxazole — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501289/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Bactrim / Bactrim DS tablets · Sun Pharma",
+   "date": "30 ธ.ค. 2024",
+   "set": "f59d0c04-9c66-4d53-a0e1-cb55570deb62"
+  }
+ },
+ {
+  "id": "metronidazole",
+  "name": "Metronidazole",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Nitroimidazole",
+  "chips": [
+   "ห้ามแอลกอฮอล์",
+   "anaerobe/protozoa",
+   "warfarin INR ↑"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "bwTitle": "BOXED WARNING · CARCINOGENIC IN ANIMALS",
+  "bw": {
+   "t": "ก่อมะเร็งในหนูทดลอง · เลี่ยงการใช้โดยไม่จำเป็น ใช้เฉพาะข้อบ่งใช้ในฉลาก",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ถูกรีดิวซ์ในเชื้อไร้ออกซิเจน/โปรโตซัว ได้สารที่ทำลาย DNA · ครอบคลุม anaerobe, Trichomonas, Giardia, Entamoeba",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>ห้ามดื่มแอลกอฮอล์</b> (หรือผลิตภัณฑ์ propylene glycol) ระหว่างใช้และ <b>อย่างน้อย 3 วัน</b>หลังหยุดยา — disulfiram-like reaction",
+    "r": [
+     "fda:Contraindications",
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ห้ามใช้ถ้าได้ <b>disulfiram</b> ภายใน 2 สัปดาห์ (psychosis)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Trichomoniasis: <b>2 g ครั้งเดียว</b> หรือ 250 mg วันละ 3 ครั้ง 7 วัน · ห้ามในไตรมาสแรก",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Amebic dysentery: 750 mg วันละ 3 ครั้ง 5–10 วัน · anaerobe: 7.5 mg/kg q6h (~500 mg)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "เพิ่มฤทธิ์ <b>warfarin</b> · เพิ่มระดับ lithium, busulfan",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Encephalopathy, peripheral/optic neuropathy, ชัก · ตับบกพร่องรุนแรง (Child-Pugh C) ลดขนาด",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: Cockayne syndrome (ตับวายรุนแรง)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Trichomoniasis",
+    "d": "2 g ครั้งเดียว หรือ 250 mg tid × 7 วัน (คู่นอนรักษาด้วย)",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "Amebiasis (ลำไส้ / ฝีตับ)",
+    "d": "750 mg tid × 5–10 วัน (ฝีตับ 500–750 mg tid)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ติดเชื้อ anaerobe รุนแรง (ช่องท้อง ผิวหนัง นรีเวช ฯลฯ)",
+    "d": "7.5 mg/kg q6h · สูงสุด 4 g/วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ESRD: metabolite สะสม เฝ้าระวัง ADR",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "hepatic": {
+   "t": "Child-Pugh C: ลดขนาด · A–B ไม่ต้องปรับแต่เฝ้าระวัง",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "mon": [
+   {
+    "t": "CBC ก่อนและหลังรักษา (ใช้ซ้ำ)",
+    "r": [
+     "fda:Precautions",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "อาการทางประสาท",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "INR ถ้าใช้ warfarin",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ nitroimidazole",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Trichomoniasis ในไตรมาสแรก",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ได้ disulfiram ใน 2 สัปดาห์",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ดื่มแอลกอฮอล์ระหว่าง/3 วันหลังใช้",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Cockayne syndrome",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "SCARs (SJS/TEN, DRESS, AGEP)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Encephalopathy, neuropathy, ชัก, aseptic meningitis",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ก่อมะเร็งในสัตว์",
+    "r": [
+     "fda:Boxed"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ <b>รสโลหะในปาก</b> ปวดศีรษะ เบื่ออาหาร · ปัสสาวะสีเข้ม",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Disulfiram: psychosis",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "แอลกอฮอล์: disulfiram-like",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เพิ่ม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Lithium: ระดับเพิ่ม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Busulfan: ระดับเพิ่ม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ห้ามใช้รักษา trichomoniasis ในไตรมาสแรก",
+    "r": [
+     "fda:Contraindications",
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ความเห็นยังต่างกันสำหรับการใช้นาน · บางแหล่งแนะนำหยุดให้นม 12–24 ชม. หลังขนาด 2 g ครั้งเดียว (ขนาดต่ำกว่านั้นไม่ต้อง)",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "คลื่นไส้ อาเจียน ataxia · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "งดแอลกอฮอล์ระหว่างใช้และ 3 วันหลังหยุดยา",
+    "r": [
+     "fda:Contraindications",
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "อาจมีรสโลหะ ปัสสาวะสีเข้ม",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ชา ปลายมือปลายเท้า เดินเซ ให้พบแพทย์",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมดี",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "Metabolism",
+    "ตับ",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตเป็นหลัก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Metronidazole — เอกสารกำกับยา US FDA (Metronidazole tablets · Kanchan)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8836334e-6db4-44be-bc9e-099b26322cf4",
+    "src": "DailyMed · ฉบับ 1 ก.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Metronidazole — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501315/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Metronidazole tablets · Kanchan",
+   "date": "1 ก.ค. 2026",
+   "set": "8836334e-6db4-44be-bc9e-099b26322cf4"
+  }
+ },
+ {
+  "id": "nitrofurantoin",
+  "name": "Nitrofurantoin (Macrobid)",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Nitrofuran · urinary antiseptic",
+  "chips": [
+   "เฉพาะ cystitis",
+   "ห้าม CrCl <60",
+   "ปอดอักเสบ (ใช้นาน)"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ข)",
+  "nlemCond": {
+   "t": "1) รักษาการติดเชื้อทางเดินปัสสาวะส่วนล่าง  2) ป้องกันการติดเชื้อทางเดินปัสสาวะส่วนล่างที่กลับเป็นซ้ำในหญิงตั้งครรภ์",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "ถูกรีดิวซ์ในแบคทีเรียได้สารที่ทำลาย ribosome/DNA · ระดับในเลือดต่ำ เข้มข้นในปัสสาวะ → ใช้รักษา <b>cystitis</b> เท่านั้น ไม่ใช้ pyelonephritis",
+   "r": [
+    "fda:Mechanism of Action",
+    "fda:Indications and Usage"
+   ]
+  },
+  "exam": [
+   {
+    "t": "Macrobid <b>100 mg q12h 7 วัน</b> · กิน<b>พร้อมอาหาร</b>",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "<b>ห้ามใช้เมื่อ CrCl &lt;60</b> (ยาไม่ถึงปัสสาวะพอและเพิ่มพิษ)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ห้ามใช้ใน<b>ครรภ์ครบกำหนด (38–42 สัปดาห์)</b> ระหว่างคลอด และทารก &lt;1 เดือน (hemolytic anemia)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "<b>ปอดอักเสบ</b> เฉียบพลัน (ไข้ หอบ) และเรื้อรัง (pulmonary fibrosis เมื่อใช้ ≥6 เดือน)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ตับอักเสบเรื้อรัง · peripheral neuropathy (เสี่ยงขึ้นเมื่อไตเสื่อม เบาหวาน ขาด B) · hemolysis ใน G6PD",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ปัสสาวะอาจเป็นสีน้ำตาล/เหลืองเข้ม",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Acute uncomplicated UTI (cystitis) จาก E. coli หรือ S. saprophyticus",
+    "d": "100 mg q12h × 7 วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ห้ามใช้เมื่อ CrCl &lt;60",
+   "r": [
+    "fda:Contraindications"
+   ]
+  },
+  "hepatic": {
+   "t": "ห้ามถ้าเคย cholestatic jaundice จากยานี้",
+   "r": [
+    "fda:Contraindications"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ใช้นาน: อาการทางปอด การทำงานของตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "CrCl &lt;60, anuria, oliguria",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ครรภ์ครบกำหนด/ระหว่างคลอด · ทารก &lt;1 เดือน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคย cholestatic jaundice จาก nitrofurantoin",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "แพ้ยา",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ปอดอักเสบเฉียบพลัน/เรื้อรัง",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Peripheral neuropathy",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Hemolytic anemia (G6PD)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ ปวดศีรษะ ท้องอืด",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาลดกรด magnesium trisilicate: ลดการดูดซึม · probenecid/sulfinpyrazone: ลดการขับ เพิ่มพิษ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ห้ามในครรภ์ครบกำหนด",
+    "r": [
+     "fda:Contraindications",
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — เลี่ยงในทารก &lt;1 เดือน หรือขาด G6PD",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "อาเจียน · ฟอกเลือดออกได้",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินพร้อมอาหาร กินจนครบ",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "ปัสสาวะสีเข้มได้ ไม่อันตราย",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "ไอ หอบ ไข้ เจ็บหน้าอก ให้พบแพทย์",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "ลักษณะ",
+    "ระดับในเลือดต่ำ เข้มข้นในปัสสาวะ",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "อาหาร",
+    "เพิ่มการดูดซึม",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Nitrofurantoin (Macrobid) — เอกสารกำกับยา US FDA (Macrobid capsules · Almatica)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8f270a9f-12a1-44d4-bc7e-873613555801",
+    "src": "DailyMed · ฉบับ 14 ต.ค. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Nitrofurantoin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501053/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Macrobid capsules · Almatica",
+   "date": "14 ต.ค. 2025",
+   "set": "8f270a9f-12a1-44d4-bc7e-873613555801"
+  }
+ },
+ {
+  "id": "vancomycin",
+  "name": "Vancomycin",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Glycopeptide",
+  "chips": [
+   "MRSA",
+   "ให้ช้า ≥60 นาที",
+   "พิษต่อไต/หู"
+  ],
+  "nlem": "ex · บัญชียาเฉพาะโรค (เดิม ง)",
+  "nlemCond": {
+   "t": "ยาฉีด: ติดเชื้อแกรมบวกที่ดื้อยา หรือผู้ที่แพ้ beta-lactam รุนแรง · แคปซูล 125 mg (เพิ่มใหม่): รักษา C. difficile infection",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "จับปลาย D-Ala-D-Ala ยับยั้งการสร้างผนังเซลล์แกรมบวก · ไม่ดูดซึมทางปาก (กินได้ผลเฉพาะในลำไส้)",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่ไตปกติ: <b>2 g/วัน</b> (500 mg q6h หรือ 1 g q12h) IV",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ให้ <b>ช้า ≥60 นาที</b> (≤10 mg/min) ความเข้มข้น ≤5 mg/mL — ให้เร็วเกิด infusion reaction: ความดันต่ำ ผื่นแดง คัน (\"vancomycin infusion reaction\")",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "<b>พิษต่อไต</b> (AKI) และ<b>หู</b> — เสี่ยงขึ้นเมื่อระดับยาสูง ใช้ร่วม aminoglycoside/ยาพิษต่อไต",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ไตเสื่อม: ต้องปรับขนาด · วัดระดับยาช่วยปรับ",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "<b>กินได้ผลเฉพาะ C. difficile colitis</b> (ไม่ดูดซึม) · ยาฉีดอย่างเดียวไม่ได้ผลกับ C. diff",
+    "r": [
+     "fda:Indications and Usage"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ติดเชื้อรุนแรงจาก MRSA/staph ดื้อยา หรือผู้แพ้ penicillin: septicemia, กระดูก, ทางเดินหายใจส่วนล่าง, ผิวหนัง, endocarditis",
+    "d": "2 g/วัน IV แบ่ง q6–12h",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "C. difficile colitis (ให้ทางปาก)",
+    "d": "ตามแนวทาง (ยาฉีดผสมให้กินได้)",
+    "r": [
+     "fda:Indications and Usage"
+    ]
+   },
+   {
+    "i": "เด็ก",
+    "d": "10 mg/kg IV q6h",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ต้องปรับขนาดตามการทำงานของไต · ผู้สูงอายุ/ทารกคลอดก่อนกำหนดอาจต้องลดมากกว่าคาด",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การทำงานของไตทุกราย",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ระดับยาในเลือด (ผู้ป่วยหนัก ไตเปลี่ยนแปลง)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "การได้ยิน (ใช้นาน/ขนาดสูง)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "CBC (neutropenia เมื่อใช้นาน)",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ vancomycin",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "Infusion reaction (ความดันต่ำ, shock เมื่อ bolus)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "พิษต่อไต",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "พิษต่อหู",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง (SJS/TEN, DRESS)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "Infusion reaction: ความดันต่ำ หน้า/ลำตัวแดง คัน · หลอดเลือดดำอักเสบ · neutropenia",
+    "r": [
+     "fda:Adverse Reactions",
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาพิษต่อไต/หู (aminoglycoside, amphotericin B ฯลฯ): เสริมพิษ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ยาสลบ: infusion reaction มากขึ้น",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ ดูดซึมทางปากน้อยมาก",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ · ฟอกเลือดทั่วไปออกได้น้อย",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แจ้งถ้าได้ยินผิดปกติ หูอื้อ ปัสสาวะน้อยลง",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การให้ยา",
+    "IV (กินไม่ดูดซึม)",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตเป็นหลัก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Vancomycin — เอกสารกำกับยา US FDA (Vancomycin HCl for injection · Mylan Institutional)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2dc7b3d6-3874-40ac-b8aa-7bcfe2dc0cdf",
+    "src": "DailyMed · ฉบับ 1 มิ.ย. 2021"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Vancomycin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501263/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Vancomycin HCl for injection · Mylan Institutional",
+   "date": "1 มิ.ย. 2021",
+   "set": "2dc7b3d6-3874-40ac-b8aa-7bcfe2dc0cdf"
+  }
+ },
+ {
+  "id": "meropenem",
+  "name": "Meropenem",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Carbapenem",
+  "chips": [
+   "ลด valproate",
+   "ปรับตามไต",
+   "ESBL"
+  ],
+  "nlem": "ex · บัญชียาเฉพาะโรค (เดิม ง)",
+  "nlemCond": {
+   "t": "1) ติดเชื้อในโรงพยาบาลจากแบคทีเรียแท่งแกรมลบดื้อยาหลายชนิด (MDR) ควรมีผลความไวยืนยัน  2) ใช้ในกรณีพิเศษตามคำแนะนำของแพทย์ผู้เชี่ยวชาญโรคติดเชื้อ (เงื่อนไขเดียวกับ imipenem)",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "Carbapenem ยับยั้งการสร้างผนังเซลล์ · ทนต่อ beta-lactamase ส่วนใหญ่ (รวม ESBL) ครอบคลุมแกรมลบรวม Pseudomonas และ anaerobe",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่: cSSSI <b>500 mg q8h</b> (Pseudomonas 1 g) · intra-abdominal <b>1 g q8h</b> · เยื่อหุ้มสมองอักเสบ (เด็ก) 40 mg/kg q8h",
+    "r": [
+     "fda:2.1",
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ไต: CrCl 26–50 → ขนาดเดิม q12h · 10–25 → ครึ่งหนึ่ง q12h · &lt;10 → ครึ่งหนึ่ง q24h",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "<b>ลดระดับ valproic acid</b> จนต่ำกว่าระดับรักษา → ชัก (เพิ่มขนาด valproate ไม่ช่วย) · พิจารณายาอื่น",
+    "r": [
+     "fda:5.5",
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "ชักพบได้ (มากในผู้มีโรค CNS หรือไตบกพร่อง)",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ห้ามใช้ในผู้เคย anaphylaxis จาก beta-lactam",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "cSSSI (ผู้ใหญ่, เด็ก ≥3 เดือน)",
+    "d": "500 mg q8h (Pseudomonas 1 g)",
+    "r": [
+     "fda:1",
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "Complicated intra-abdominal infection",
+    "d": "1 g q8h",
+    "r": [
+     "fda:1",
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "Bacterial meningitis (เด็ก ≥3 เดือน)",
+    "d": "40 mg/kg q8h (สูงสุด 2 g q8h)",
+    "r": [
+     "fda:1",
+     "fda:2.3"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "IV infusion 15–30 นาที หรือ bolus 3–5 นาที (ผู้ใหญ่)",
+    "r": [
+     "fda:2.1"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl 26–50: q12h · 10–25: ครึ่งหนึ่ง q12h · &lt;10: ครึ่งหนึ่ง q24h",
+   "r": [
+    "fda:2.2"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การทำงานของไต",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "อาการชัก · ระดับ valproate",
+    "r": [
+     "fda:5.4",
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "เกล็ดเลือด (ไตบกพร่อง)",
+    "r": [
+     "fda:5.9"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ยา หรือเคย anaphylaxis จาก beta-lactam",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "แพ้ยารุนแรง",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Rhabdomyolysis",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ชัก",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ชักจาก DDI กับ valproate",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "เกล็ดเลือดต่ำ (ไตบกพร่อง)",
+    "r": [
+     "fda:5.9"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปวดศีรษะ คลื่นไส้ ท้องผูก ท้องเสีย โลหิตจาง ปวด/อักเสบที่ตำแหน่งฉีด",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Probenecid: เพิ่มระดับ (ไม่แนะนำ)",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Valproic acid: ระดับลดลงมาก",
+    "r": [
+     "fda:7.2"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ ระดับในน้ำนมต่ำ",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ · ฟอกเลือดออกได้",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แจ้งถ้าใช้ valproate",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การให้ยา",
+    "IV",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตเป็นหลัก · probenecid ลดการขับ",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Meropenem — เอกสารกำกับยา US FDA (Meropenem for injection · Hikma (Merrem ไม่มีแล้ว))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8a2a545e-b336-416a-be73-9e0a7ccf6177",
+    "src": "DailyMed · ฉบับ 26 ส.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Meropenem — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501017/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Meropenem for injection · Hikma (Merrem ไม่มีแล้ว)",
+   "date": "26 ส.ค. 2026",
+   "set": "8a2a545e-b336-416a-be73-9e0a7ccf6177"
+  }
+ },
+ {
+  "id": "fluconazole",
+  "name": "Fluconazole",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Triazole antifungal",
+  "chips": [
+   "150 mg ครั้งเดียว (VVC)",
+   "CYP2C9/3A4 inhibitor",
+   "QT ยาว"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "แคปซูล: invasive fungal infection บางชนิด และ dermatomycoses · ยาฉีด (s): แทน amphotericin B ใน cryptococcosis/candidiasis เมื่อใช้ amphotericin B ไม่ได้",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง lanosterol 14-α-demethylase (CYP51) ของเชื้อรา ลดการสร้าง ergosterol",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ช่องคลอดติดเชื้อ Candida: <b>150 mg ครั้งเดียว</b>",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "กิน = ฉีด (ดูดซึมเกือบสมบูรณ์) · ให้ <b>loading dose 2 เท่า</b>วันแรก",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ช่องปาก: 200 mg วันแรก แล้ว 100 mg/วัน ≥2 สัปดาห์ · หลอดอาหาร ≥3 สัปดาห์",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ไต: CrCl ≤50 (ไม่ฟอก) ให้ <b>50%</b> · ฟอกไต ให้ 100% หลังฟอกทุกครั้ง",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ยับยั้ง <b>CYP2C9, 3A4 (ปานกลาง), 2C19 (แรง)</b> — ฤทธิ์คงอยู่ 4–5 วันหลังหยุด · ห้ามใช้ร่วมยาที่ทำ QT ยาวผ่าน CYP3A4 (erythromycin, pimozide, quinidine)",
+    "r": [
+     "fda:Drug Interactions",
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ (พบน้อย) · QT ยาว/torsades",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Vaginal candidiasis",
+    "d": "150 mg ครั้งเดียว",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "Oropharyngeal / esophageal candidiasis",
+    "d": "200 mg D1 → 100 mg/วัน (สูงสุด 400)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "Cryptococcal meningitis",
+    "d": "400 mg D1 → 200–400 mg/วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ป้องกันเชื้อราในผู้ปลูกถ่ายไขกระดูก",
+    "d": "400 mg/วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl ≤50 (ไม่ฟอก): 50% หลัง loading · ฟอกไต: 100% หลังฟอกแต่ละครั้ง · ครั้งเดียวสำหรับ VVC ไม่ต้องปรับ",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "hepatic": {
+   "t": "ใช้อย่างระวัง หยุดยาถ้ามีอาการตับ",
+   "r": [
+    "fda:Warnings"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การทำงานของตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ECG ในผู้เสี่ยง QT",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ยาที่ใช้ร่วม (DDI)",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ fluconazole",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ร่วมยาที่ทำ QT ยาวและผ่าน CYP3A4 (erythromycin, pimozide, quinidine)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Anaphylaxis",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ผื่นลอก (ระวังใน HIV)",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปวดศีรษะ คลื่นไส้ ปวดท้อง ท้องเสีย",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Warfarin: INR เพิ่ม · phenytoin, sulfonylurea, cyclosporine, tacrolimus, statin (CYP3A4): ระดับเพิ่ม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Rifampin: ลดระดับ fluconazole",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ขนาดสูงนาน (400–800 mg/วัน) ไตรมาสแรกสัมพันธ์กับความพิการ · 150 mg ครั้งเดียวเลี่ยงในไตรมาสแรกถ้าทำได้",
+    "r": [
+     "fda:Warnings",
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ประสาทหลอน หวาดระแวง · รักษาตามอาการ ฟอกเลือด 3 ชม. ลดระดับ ~50%",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แจ้งยาที่ใช้ร่วมทุกตัว",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ใจสั่น เป็นลม ตัวเหลือง ให้พบแพทย์",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "เกือบสมบูรณ์ (กิน = IV)",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตแบบไม่เปลี่ยนแปลงเป็นหลัก · t½ ยาว",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Fluconazole — เอกสารกำกับยา US FDA (Diflucan tablets/suspension · Roerig (Pfizer))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f694c617-3383-416c-91b6-b94fda371204",
+    "src": "DailyMed · ฉบับ 2 เม.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Fluconazole — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501223/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Diflucan tablets/suspension · Roerig (Pfizer)",
+   "date": "2 เม.ย. 2026",
+   "set": "f694c617-3383-416c-91b6-b94fda371204"
+  }
+ },
+ {
+  "id": "acyclovir",
+  "name": "Acyclovir (Aciclovir)",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Nucleoside analog antiviral",
+  "chips": [
+   "งูสวัด 800 mg 5 ครั้ง",
+   "ดื่มน้ำมาก",
+   "ปรับตามไต"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "ถูก thymidine kinase ของไวรัสเปลี่ยนเป็น acyclovir triphosphate ยับยั้ง viral DNA polymerase (HSV, VZV)",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>งูสวัด: 800 mg q4h วันละ 5 ครั้ง 7–10 วัน</b>",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "เริมที่อวัยวะเพศครั้งแรก: 200 mg วันละ 5 ครั้ง 10 วัน · กดการกลับเป็นซ้ำ: 400 mg วันละ 2 ครั้ง",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "อีสุกอีใส: ผู้ใหญ่ 800 mg วันละ 4 ครั้ง 5 วัน · เด็ก ≥2 ปี 20 mg/kg วันละ 4 ครั้ง · เริ่มภายใน 24 ชม.",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ปรับตามไต: เช่น 800 mg q4h → CrCl 10–25 ให้ q8h · 0–10 ให้ q12h",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "<b>ไตวาย</b> (ผลึกในท่อไต) → ดื่มน้ำเพียงพอ · TTP/HUS ในผู้ภูมิคุ้มกันบกพร่อง",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "เริ่มยาเร็วที่สุดเมื่อมีอาการเตือน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "งูสวัด (herpes zoster)",
+    "d": "800 mg q4h วันละ 5 ครั้ง 7–10 วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "เริมอวัยวะเพศ: ครั้งแรก / เป็นซ้ำ / กดการกลับเป็นซ้ำ",
+    "d": "200 mg × 5/วัน 10 วัน · 200 mg × 5/วัน 5 วัน · 400 mg bid",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "อีสุกอีใส",
+    "d": "ผู้ใหญ่ 800 mg qid 5 วัน · เด็ก 20 mg/kg qid",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ปรับตามตาราง CrCl · ฟอกไต: ให้หลังฟอก",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การทำงานของไต (ผู้สูงอายุ ไตเสื่อม ใช้ยาพิษต่อไต)",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ acyclovir หรือ valacyclovir รุนแรง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ไตวาย",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "TTP/HUS ในผู้ภูมิคุ้มกันบกพร่อง",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง (SJS/TEN, DRESS)",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ อาเจียน ท้องเสีย ปวดศีรษะ อ่อนเพลีย",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาที่มีพิษต่อไต: เพิ่มความเสี่ยงไตเสื่อมและอาการทางประสาท",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เสี่ยงอาการทางประสาทและไต ปรับขนาด",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "กระสับกระส่าย ชัก ซึม โคม่า · ผลึกตกตะกอนในท่อไต (เกินความละลาย 2.5 mg/mL)",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ดื่มน้ำมากพอ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "เริ่มยาเร็วเมื่อมีอาการ",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ยาไม่ได้รักษาหายขาด และไม่ป้องกันการแพร่เชื้อ",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ต่ำ (~10–20%) จึงต้องกินหลายครั้ง",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตแบบไม่เปลี่ยนแปลง",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Acyclovir (Aciclovir) — เอกสารกำกับยา US FDA (Acyclovir tablets · Avet)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=0de2f5c7-9e75-4bdf-9c28-e026cc6694b4",
+    "src": "DailyMed · ฉบับ 24 ก.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Acyclovir — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501195/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Acyclovir tablets · Avet",
+   "date": "24 ก.ค. 2026",
+   "set": "0de2f5c7-9e75-4bdf-9c28-e026cc6694b4"
+  }
  }
 ]
