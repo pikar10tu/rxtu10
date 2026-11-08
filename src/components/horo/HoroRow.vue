@@ -28,7 +28,7 @@ watch(open, (o) => { if (o) loaded.value = true })
 </script>
 
 <style scoped>
-.hrow { font: inherit; width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; margin-top: 14px; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); background: #fff; padding: 10px 12px; cursor: pointer; color: var(--ink); }
+.hrow { font: inherit; width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; margin-top: 8px; border: var(--bw) solid var(--line); border-radius: 14px; box-shadow: var(--pop); background: #fff; padding: 10px 12px; cursor: pointer; color: var(--ink); }
 .hrow-ic { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-size: 1.05rem; color: #e9c46a; background: #23264f; }
 .hrow-t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .hrow-t b { font-size: .88rem; }

@@ -52,7 +52,8 @@
       </div>
       <TagChips :member="auth.userData" class="me-tags" />
       </section>
-      <MbtiPicker v-if="mbtiTop" class="me-mbti-top" />
+      <!-- MBTI + ดวงของฉัน อยู่คู่กันด้านบนเสมอ (user 9 พ.ย. 2026) -->
+      <MbtiPicker class="me-mbti-top" />
       <!-- ดวงของฉัน — ข้าง MBTI ด้านบนเสมอ (user 9 พ.ย. 2026) -->
       <HoroRow />
 
@@ -84,7 +85,6 @@
       </nav>
 
       <!-- MBTI ตั้งแล้ว = อยู่ล่างนี้ · ยังไม่ตั้ง = ขึ้นไปอยู่บนสุดใต้การ์ดโปรไฟล์ (user 25 ต.ค. 2026) -->
-      <MbtiPicker v-if="mbtiTop === false" />
 
       <!-- ข้อมูลติดต่อ (งานธุรการ → พับเก็บล่าง) -->
       <details class="me-contact-fold">
@@ -205,9 +205,6 @@ const titleLabel = computed(() => {
   return def ? achievementTitle(def, date || null) : ''
 })
 onMounted(() => { if (!members.rosterReady) members.loadRoster() })
-// ตำแหน่งกล่อง MBTI ตัดสินครั้งเดียวตอนข้อมูลมาถึง — ไม่งั้นเลือกปุ๊บกล่องกระโดดหนีลงล่าง (รายชื่อคนแบบเดียวกันจะหลุดจอ)
-const mbtiTop = ref(null)
-watch(() => auth.userData, (u) => { if (u && mbtiTop.value === null) mbtiTop.value = !u.mbti }, { immediate: true })
 // มาจากเควส MBTI (/me#mbti) → เลื่อนลงไปที่กล่องเลือกให้เลย
 onMounted(() => { if (route.hash === '#mbti') setTimeout(() => document.getElementById('mbti')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300) })
 
