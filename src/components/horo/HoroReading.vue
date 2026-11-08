@@ -139,6 +139,8 @@ const colorRows = computed(() => {
   ]
 })
 
+// ตราวันดาวน้อย — สุ่มคงที่ทั้งวัน (user เลือกคำ 9 พ.ย. 2026)
+const SOFT_STAMPS = ['ค่อยเป็นค่อยไป', 'ใจเย็นๆ', 'สู้ๆ นะ', 'พอไหว']
 // ข้อมูลสลิปแชร์ (ไพ่โชว์เฉพาะเมื่อเปิดแล้ว — ไม่สปอยล์)
 const shareData = computed(() => {
   const r = reading.value, p = profile.value, st = r.house.stars, sum = st[0] + st[1] + st[2]
@@ -148,9 +150,9 @@ const shareData = computed(() => {
     sign: SIGNS[p.sign], asc: p.asc != null ? SIGNS[p.asc] : '',
     starsArr: st, card: opened.value ? tarot.value.card.en + (tarot.value.reversed ? ' (กลับหัว)' : '') : 'ยังไม่เปิด',
     lucky: r.luckyNums.join(' · '),
-    houseLine: `จันทร์จรเรือน ${r.house.n} (${r.house.name}) · ${r.house.head}`,
+    houseLine: r.house.head,
     colors: c ? [c.work[1], c.money[1], c.charm[1]] : [],
-    slip: r.house.slip, stamp: sum >= 12 ? 'ดวงปัง!' : sum >= 9 ? 'ดวงดี' : 'ใจสู้ๆ',
+    slip: r.house.slip, stamp: sum >= 12 ? 'ดวงปัง!' : sum >= 9 ? 'ดวงดี' : SOFT_STAMPS[r.luckyNums[0] % SOFT_STAMPS.length],
   }
 })
 
