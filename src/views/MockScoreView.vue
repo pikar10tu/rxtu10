@@ -66,7 +66,8 @@
             </div>
             <div class="ms-bar">
               <span v-if="Number.isFinite(r.min)" class="ms-range" :style="{ left: r.minPct * 100 + '%', width: (r.topPct - r.minPct) * 100 + '%' }" />
-              <i :style="{ width: r.pct * 100 + '%', background: barColor(r.pct) }" />
+              <!-- ยังไม่มีผลเรา = ไม่มีแถบสี (user 8 พ.ย.) เหลือรางเทา + จุดเฉลี่ย + ช่วง -->
+              <i v-if="my" :style="{ width: r.pct * 100 + '%', background: barColor(r.pct) }" />
               <span class="ms-pm" :style="{ left: exam.passPct * 100 + '%' }" />
               <span class="ms-avg" :style="{ left: r.meanPct * 100 + '%' }" />
             </div>
