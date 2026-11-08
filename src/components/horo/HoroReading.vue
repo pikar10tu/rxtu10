@@ -92,6 +92,7 @@
       <small v-if="profile.ascApprox">โดยประมาณ (ไม่ได้ระบุเวลาเกิด)</small>
     </section>
 
+    <HoroShare v-if="profile" :data="shareData" />
     <button v-if="!profile || !colors" class="hr-setup" @click="$emit('setup')">
       {{ profile ? 'เพิ่มปีเกิด เพื่อดูสีมงคลและลัคนา ›' : 'กรอกวันเกิด เพื่อดูดวงตามราศี ›' }}
     </button>
@@ -101,6 +102,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import HoroShare from './HoroShare.vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { tarotSrc } from '../../data/tarot.js'
 import { DAY_NAMES } from '../../data/horoHouses.js'
@@ -135,6 +137,21 @@ const colorRows = computed(() => {
     { k: 'charm', label: 'เสน่ห์', name: c.charm[0], hex: c.charm[1] },
     { k: 'avoid', label: 'ควรเลี่ยง', name: c.avoid[0], hex: c.avoid[1] },
   ]
+})
+
+// ข้อมูลสลิปแชร์ (ไพ่โชว์เฉพาะเมื่อเปิดแล้ว — ไม่สปอยล์)
+const shareData = computed(() => {
+  const r = reading.value, p = profile.value, st = r.house.stars, sum = st[0] + st[1] + st[2]
+  const c = colors.value
+  return {
+    name: auth.userData?.nickname || 'เพื่อน', dateText: thaiDate, fileDay: day,
+    sign: SIGNS[p.sign], asc: p.asc != null ? SIGNS[p.asc] : '',
+    starsArr: st, card: opened.value ? tarot.value.card.en + (tarot.value.reversed ? ' (กลับหัว)' : '') : 'ยังไม่เปิด',
+    lucky: r.luckyNums.join(' · '),
+    houseLine: `จันทร์จรเรือน ${r.house.n} (${r.house.name}) · ${r.house.head}`,
+    colors: c ? [c.work[1], c.money[1], c.charm[1]] : [],
+    slip: r.house.slip, stamp: sum >= 12 ? 'ดวงปัง!' : sum >= 9 ? 'ดวงดี' : 'ใจสู้ๆ',
+  }
 })
 
 // วงจักรราศี: เมษอยู่บนสุด เวียนตามเข็ม
