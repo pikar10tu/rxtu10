@@ -1,18 +1,29 @@
 <!-- src/views/DrugDbView.vue — ฐานข้อมูลยา (17 ต.ค. 2026)
      ข้อมูลยาภาษาไทย หลายแหล่ง (FDA · NLEM · guideline · LactMed) · ข้อมูล data/drugDb.json สร้างจาก D:\RXTU\drugdb
      8 พ.ย. 2026 การ์ดแบบใหม่: บน = จุดออกสอบ · กดขยาย = ข้อมูลเต็ม · ทุกบรรทัดมีป้ายอ้างอิง (schema ดู utils/drugCard.js)
-     ปิดด้วย flag drugDbOpen — ตอนนี้แอดมินเห็นคนเดียว · ข้อความในการ์ดมี <b> ของเราเอง (v-html ปลอดภัย ไม่มี input ผู้ใช้) -->
+     ปิดด้วย flag drugDbOpen · 8 พ.ย. ปุ่มขอยาเพิ่ม/แจ้งผิด → collection drugReports เดิม (rules เดิม) · ข้อความในการ์ดมี <b> ของเราเอง (v-html ปลอดภัย ไม่มี input ผู้ใช้) -->
 <template>
   <div class="tab-content dd-wrap">
     <div class="page-title dd-head">
       <button class="dd-back" @click="back">‹ กลับ</button>
       <span><Emoji char="💊" /> ฐานข้อมูลยา</span>
+      <button v-if="open && !drug" type="button" class="dd-ask-top" @click="openForm('req')"><Emoji char="🙋" /> ขอยาเพิ่ม</button>
     </div>
 
     <div v-if="!open" class="dd-card dd-empty">ฐานข้อมูลยายังไม่เปิดให้ใช้ เร็วๆ นี้</div>
 
     <template v-else-if="!drug">
-      <div class="dd-note">ยังไม่เปิดให้ทั้งรุ่น (แอดมินเห็นคนเดียว) · {{ DRUG_DB.length }} ตัว</div>
+      <DrugForm v-if="form === 'req'" class="dd-form-top" />
+      <details class="dd-about">
+        <summary><Emoji char="📚" /> ข้อมูลมาจากไหน · ตอนนี้มี {{ DRUG_DB.length }} ตัว</summary>
+        <ul>
+          <li><b>เอกสารกำกับยา US FDA</b> (DailyMed) — ข้อบ่งใช้ ขนาดยา คำเตือน อันตรกิริยา</li>
+          <li><b>บัญชียาหลักแห่งชาติ 2569</b> (NLEM) — บัญชีและเงื่อนไขการใช้</li>
+          <li><b>แนวทางการรักษา</b> ที่เปิดอ่านฟรี (ACC/AHA, CHEST ฯลฯ) — ผ่าน PubMed</li>
+          <li><b>LactMed</b> (NIH) — การใช้ยาระหว่างให้นมบุตร</li>
+        </ul>
+        <p>ทุกบรรทัดมีเลขอ้างอิง [n] กดเปิดเอกสารต้นฉบับได้ · ใช้เพื่อการเรียน ไม่ใช่แทนการตัดสินใจทางคลินิก</p>
+      </details>
       <input v-model="q" class="dd-search" type="search" placeholder="ค้นหาชื่อยา หรือกลุ่มยา" aria-label="ค้นหายา">
       <div v-for="g in groups" :key="g.name" class="dd-group">
         <h3>{{ g.name }}</h3>
@@ -76,6 +87,10 @@
           </ol>
         </details>
       </div>
+      <div class="dd-ask">
+        <button v-if="!form" type="button" class="dd-ask-btn" @click="openForm('fix')"><Emoji char="⚠️" /> แจ้งข้อมูลผิด</button>
+        <DrugForm v-else />
+      </div>
       <footer class="dd-src">ใช้เพื่อการเรียน ไม่ใช่แทนการตัดสินใจทางคลินิก · กดเลขในวงเล็บเพื่อเปิดเอกสารต้นฉบับ</footer>
     </article>
   </div>
@@ -89,6 +104,10 @@ import DRUG_DB from '../data/drugDb.json'
 import { useAuthStore } from '../stores/auth.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { isFeatureOpen } from '../utils/featureFlags.js'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase/config.js'
+import { useToast } from '../composables/useToast.js'
+import { cleanText, LIMITS } from '../utils/text.js'
 import { LIST_SECTIONS, cardRefs, resolveLine, resolveIndRow, resolvePkRow } from '../utils/drugCard.js'
 
 // ป้ายอ้างอิง [n §หัวข้อ] กดเปิดเอกสารต้นฉบับในแท็บใหม่
@@ -123,8 +142,55 @@ const groups = computed(() => {
   }
   return [...m].map(([name, items]) => ({ name, items }))
 })
-function pick(id) { selId.value = id; document.getElementById('main-content')?.scrollTo?.(0, 0) }
-function back() { if (selId.value) selId.value = null; else router.push('/study') }
+// ขอยาเพิ่ม / แจ้งข้อมูลผิด → drugReports (แอดมินเห็นในแท็บรายงานข้อมูลยา) · แจ้งผิดต้องมีเหตุผล/อ้างอิง เหมือนหน้าสรุป
+const { toast } = useToast()
+const form = ref(null)        // null | 'req' | 'fix'
+const fText = ref('')
+const fWhy = ref('')
+const fBusy = ref(false)
+function openForm(k) { form.value = k; fText.value = ''; fWhy.value = '' }
+const canSend = computed(() => fText.value.trim() && (form.value === 'req' || fWhy.value.trim()))
+async function sendForm() {
+  if (!canSend.value || fBusy.value) return
+  const what = cleanText(fText.value, LIMITS.report)
+  const why = cleanText(fWhy.value, LIMITS.report)
+  const isReq = form.value === 'req'
+  fBusy.value = true
+  try {
+    await addDoc(collection(db, 'drugReports'), {
+      drug: isReq ? '🙋 ขอยาเพิ่ม' : `💊 ${drug.value?.name}`,
+      currentClass: isReq ? 'ฐานข้อมูลยา' : (drug.value?.cls || ''),
+      drugId: isReq ? null : drug.value?.id,
+      note: why ? `${what}
+— ${isReq ? 'อยากรู้เรื่อง' : 'เหตุผล'}: ${why}` : what,
+      what, why,
+      reporterUid: authStore.currentUser?.uid || null,
+      reporterName: authStore.userData?.nickname || authStore.userData?.name || null,
+      status: 'open',
+      ts: serverTimestamp(),
+    })
+    form.value = null
+    toast(isReq ? 'ส่งคำขอแล้ว เดี๋ยวทยอยเพิ่มให้ 🙏' : 'ส่งแล้ว ขอบคุณที่ช่วยตรวจ 🙏', 'success')
+  } catch (e) {
+    console.error('[drugDbForm]', e)
+    toast('ส่งไม่สำเร็จ', 'error')
+  } finally { fBusy.value = false }
+}
+const DrugForm = () => {
+  const isReq = form.value === 'req'
+  return h('div', { class: 'dd-form' }, [
+    h('b', isReq ? 'ขอยาเพิ่ม' : `แจ้งข้อมูลผิด · ${drug.value?.name}`),
+    h('input', { class: 'dd-search', value: fText.value, maxlength: 300, placeholder: isReq ? 'ชื่อยา เช่น Metformin' : 'ตรงไหนผิด / ควรเป็นอะไร', onInput: e => { fText.value = e.target.value } }),
+    h('textarea', { class: 'dd-search', rows: 2, value: fWhy.value, maxlength: 300, placeholder: isReq ? 'อยากรู้เรื่องไหนเป็นพิเศษ (ไม่บังคับ)' : 'เหตุผล / แหล่งอ้างอิง (บังคับ)', onInput: e => { fWhy.value = e.target.value } }),
+    h('div', { class: 'dd-form-act' }, [
+      h('button', { type: 'button', onClick: () => { form.value = null } }, 'ยกเลิก'),
+      h('button', { type: 'button', class: 'go', disabled: !canSend.value || fBusy.value, onClick: sendForm }, fBusy.value ? '...' : 'ส่ง'),
+    ]),
+  ])
+}
+
+function pick(id) { form.value = null; selId.value = id; document.getElementById('main-content')?.scrollTo?.(0, 0) }
+function back() { form.value = null; if (selId.value) selId.value = null; else router.push('/study') }
 </script>
 
 <style scoped>
@@ -173,5 +239,20 @@ function back() { if (selId.value) selId.value = null; else router.push('/study'
 .dd-reflist a { color: var(--ink); }
 .dd-reflist small { display: block; color: var(--muted); font-size: .72rem; }
 .dd-n { color: var(--primary); font-weight: 700; }
+.dd-about { background: #fff; border: var(--bw) solid var(--line); border-radius: 12px; padding: 4px 12px; margin-bottom: 10px; font-size: .8rem; line-height: 1.55; }
+.dd-about summary { cursor: pointer; padding: 6px 0; font-weight: 700; }
+.dd-about ul { margin: 0 0 6px; padding-left: 18px; }
+.dd-about p { margin: 0 0 8px; color: var(--muted); font-size: .74rem; }
+.dd-ask-top { margin-left: auto; border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 5px 12px; font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; color: var(--ink); white-space: nowrap; }
+.dd-ask-top:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.dd-form-top { margin-bottom: 10px; }
+.dd-ask { display: flex; flex-direction: column; }
+.dd-ask-btn { align-self: center; border: var(--bw) solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 16px; font: inherit; font-size: .85rem; cursor: pointer; color: var(--ink); }
+.dd-form { display: flex; flex-direction: column; gap: 6px; background: #fff; border: var(--bw) solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: .85rem; }
+.dd-form .dd-search { margin: 0; resize: vertical; }
+.dd-form-act { display: flex; justify-content: flex-end; gap: 8px; }
+.dd-form-act button { border: var(--bw) solid var(--line); background: var(--bg); border-radius: 10px; padding: 6px 16px; font: inherit; cursor: pointer; }
+.dd-form-act .go { background: var(--primary); border-color: var(--primary); color: #fff; }
+.dd-form-act .go:disabled { opacity: .5; }
 .dd-src { border-top: 1px solid var(--line); padding-top: 10px; font-size: .74rem; color: var(--muted); }
 </style>

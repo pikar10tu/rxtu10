@@ -59,7 +59,7 @@ const GATED = {
     'capsule-rush': 'arcadeOpen',
     g2048:          'arcadeOpen',
     stacker:        'arcadeOpen',
-    drugdb:         'drugDbOpen',   // ฐานข้อมูลยา 17 ต.ค. 2026 — แอดมินเห็นก่อน ยังไม่เปิดให้ทั้งรุ่น
+    drugdb:         'drugDbOpen',   // ฐานข้อมูลยา 17 ต.ค. 2026 — เปิดทั้งรุ่น 8 พ.ย. (config/app)
 }
 
 router.beforeEach((to) => {
