@@ -12099,5 +12099,2275 @@
    "date": "6 มิ.ย. 2025",
    "set": "b15200fb-1826-472b-a907-e677a272513b"
   }
+ },
+ {
+  "id": "amoxicillin",
+  "name": "Amoxicillin",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Aminopenicillin (beta-lactam)",
+  "chips": [
+   "ผื่นใน mononucleosis",
+   "ปรับตามไต",
+   "H. pylori"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "จับ penicillin-binding proteins ยับยั้งการสร้างผนังเซลล์แบคทีเรีย (bactericidal) · ถูกทำลายด้วย beta-lactamase",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่ (&gt;40 kg) ENT/ผิวหนัง/ทางเดินปัสสาวะ: <b>500 mg q12h หรือ 250 mg q8h</b> · รุนแรง/ทางเดินหายใจส่วนล่าง: <b>875 mg q12h หรือ 500 mg q8h</b>",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "เด็ก ≥3 เดือน (&lt;40 kg): 25–45 mg/kg/วัน แบ่ง q12h หรือ 20–40 mg/kg/วัน แบ่ง q8h ตามความรุนแรง",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "<b>S. pyogenes</b> ต้องรักษาอย่างน้อย <b>10 วัน</b> (ป้องกันไข้รูมาติก)",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "GFR &lt;30 <b>ห้ามใช้ 875 mg</b> · GFR 10–30: 250–500 mg q12h · &lt;10 หรือฟอกไต: q24h (ให้เพิ่มระหว่าง/หลังฟอก)",
+    "r": [
+     "fda:2.5"
+    ]
+   },
+   {
+    "t": "ผู้ป่วย <b>infectious mononucleosis</b> เกิดผื่น erythematous สูง — ไม่ควรใช้",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "H. pylori triple therapy: amoxicillin 1 g + clarithromycin 500 mg + lansoprazole 30 mg วันละ 2 ครั้ง 14 วัน",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "CAP ผู้ใหญ่ไม่มีโรคร่วม (สหรัฐฯ): amoxicillin 1 g วันละ 3 ครั้ง",
+    "r": [
+     "g_cap"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ติดเชื้อหู คอ จมูก ผิวหนัง ทางเดินปัสสาวะ ทางเดินหายใจส่วนล่าง",
+    "d": "250–500 mg q8h หรือ 500–875 mg q12h",
+    "r": [
+     "fda:1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "H. pylori (triple/dual therapy)",
+    "d": "1 g วันละ 2–3 ครั้ง ร่วม PPI ± clarithromycin 14 วัน",
+    "r": [
+     "fda:2.4"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ให้ต่ออย่างน้อย 48–72 ชม. หลังหายจากอาการ",
+    "r": [
+     "fda:2.2"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "GFR &lt;30 ห้ามใช้ 875 mg · 10–30: 250–500 mg q12h · &lt;10/ฟอกไต: q24h",
+   "r": [
+    "fda:2.5"
+   ]
+  },
+  "mon": [
+   {
+    "t": "อาการแพ้ยา ผื่นรุนแรง",
+    "r": [
+     "fda:5.1",
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ท้องเสียรุนแรง (CDAD)",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "เคยแพ้ amoxicillin หรือ beta-lactam อื่นรุนแรง (anaphylaxis, SJS)",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "Anaphylaxis",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง (SJS/TEN, DRESS, AGEP)",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Drug-induced enterocolitis syndrome (DIES) ในเด็ก",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ผื่นใน mononucleosis",
+    "r": [
+     "fda:5.6"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ อาเจียน ท้องเสีย ผื่น",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Probenecid: เพิ่มระดับ amoxicillin",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เพิ่ม",
+    "r": [
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "Allopurinol: ผื่นเพิ่มขึ้น",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "ยาคุมกำเนิด: อาจลดประสิทธิภาพ",
+    "r": [
+     "fda:7.4"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ ระดับในน้ำนมต่ำ · สังเกตท้องเสีย/ผื่นในทารก",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ไตเสื่อม: ปรับขนาด",
+    "r": [
+     "fda:8.6"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "อาการทางเดินอาหาร · ไตวายจาก crystalluria พบได้ · ฟอกเลือดออกได้",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินยาจนครบตามสั่ง แม้อาการดีขึ้น",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "ท้องเสียเป็นน้ำ/มีเลือด แม้หยุดยาแล้ว ให้พบแพทย์",
+    "r": [
+     "fda:17"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมดี อาหารไม่มีผล",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ทางไตเป็นหลัก · probenecid ชะลอการขับ",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Amoxicillin — เอกสารกำกับยา US FDA (Amoxicillin tablets/capsules/suspension · Chartwell)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b07b5ac4-253e-4c83-91c3-3fdc46e91a0f",
+    "src": "DailyMed · ฉบับ 4 ก.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Amoxicillin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK500887/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Amoxicillin tablets/capsules/suspension · Chartwell",
+   "date": "4 ก.ย. 2026",
+   "set": "b07b5ac4-253e-4c83-91c3-3fdc46e91a0f"
+  }
+ },
+ {
+  "id": "amoxicillin_clavulanate",
+  "name": "Amoxicillin/clavulanate (Co-amoxiclav)",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Aminopenicillin + beta-lactamase inhibitor",
+  "chips": [
+   "กินพร้อมอาหาร",
+   "cholestatic jaundice",
+   "เม็ด 250 ×2 ≠ 500"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ค)",
+  "nlemCond": {
+   "t": "tab เฉพาะ 500+125 และ 875+125 mg · dry syr เฉพาะ 400+57 mg",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "amoxicillin ยับยั้งการสร้างผนังเซลล์ + clavulanic acid ยับยั้ง beta-lactamase ขยายฤทธิ์ครอบคลุมเชื้อสร้าง beta-lactamase",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่: ติดเชื้อรุนแรง/ทางเดินหายใจ <b>875 mg q12h หรือ 500 mg q8h</b> · ไม่รุนแรง 500 mg q12h หรือ 250 mg q8h",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "<b>เม็ด 250 mg 2 เม็ด ≠ เม็ด 500 mg 1 เม็ด</b> (clavulanate 125 mg เท่ากันทุกเม็ด → ได้ clavulanate เกิน)",
+    "r": [
+     "fda:2.6"
+    ]
+   },
+   {
+    "t": "กิน<b>พร้อมอาหาร</b> ดูดซึม clavulanate ดีขึ้น และลดอาการทางเดินอาหาร",
+    "r": [
+     "fda:2.1",
+     "fda:12.3"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: เคยเป็น <b>cholestatic jaundice/ตับผิดปกติจากยานี้</b>",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ตับอักเสบ (มักเกิดในผู้สูงอายุ ผู้ชาย ใช้นาน) อาการอาจเริ่มหลังหยุดยา",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "GFR &lt;30 <b>ห้ามใช้ 875 mg</b>",
+    "r": [
+     "fda:2.4"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ติดเชื้อทางเดินหายใจส่วนล่าง หูชั้นกลาง ไซนัส ผิวหนัง ทางเดินปัสสาวะ ที่เกิดจากเชื้อสร้าง beta-lactamase",
+    "d": "500 mg q12h – 875 mg q12h หรือ 250–500 mg q8h",
+    "r": [
+     "fda:1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "เด็ก",
+    "d": "ตามน้ำหนัก (คิดจาก amoxicillin)",
+    "r": [
+     "fda:2.3"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ยาเม็ด 250/125 แทนเม็ดเคี้ยว 250/62.5 ไม่ได้",
+    "r": [
+     "fda:2.6"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "GFR &lt;30 ห้ามใช้ 875 mg · ปรับตามตาราง",
+   "r": [
+    "fda:2.4"
+   ]
+  },
+  "hepatic": {
+   "t": "ใช้อย่างระวัง ตรวจการทำงานตับเป็นระยะ",
+   "r": [
+    "fda:5.4"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การทำงานของตับในผู้ป่วยโรคตับ",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "อาการแพ้ยา",
+    "r": [
+     "fda:5.1"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "เคยแพ้ beta-lactam รุนแรง",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "เคย cholestatic jaundice/ตับผิดปกติจากยานี้",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "แพ้ยารุนแรง",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "DIES",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ตับผิดปกติ",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "ผื่นใน mononucleosis",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "ยาบางรูปแบบมี phenylalanine (ระวังใน PKU)",
+    "r": [
+     "fda:5.8"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ท้องเสีย (พบบ่อยสุด) คลื่นไส้ ผื่น เชื้อราในช่องคลอด",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Probenecid · warfarin · allopurinol · ยาคุมกำเนิด (เหมือน amoxicillin)",
+    "r": [
+     "fda:7.1",
+     "fda:7.2",
+     "fda:7.3",
+     "fda:7.4"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ อาจเกิดท้องเสีย/ผื่นในทารก",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "อาการทางเดินอาหาร ผื่น · ฟอกเลือดออกได้",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินพร้อมอาหาร กินจนครบ",
+    "r": [
+     "fda:2.1",
+     "fda:17"
+    ]
+   },
+   {
+    "t": "ตัวเหลือง ปัสสาวะสีเข้ม ให้พบแพทย์",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การดูดซึม",
+    "อาหารเพิ่มการดูดซึม clavulanate",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ทางไต",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Amoxicillin/clavulanate (Co-amoxiclav) — เอกสารกำกับยา US FDA (Amoxicillin and clavulanate potassium tablets · Chartwell)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f10634cb-6505-43f1-9b70-314c58673016",
+    "src": "DailyMed · ฉบับ 6 ส.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Amoxicillin and Clavulanic Acid — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK500776/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Amoxicillin and clavulanate potassium tablets · Chartwell",
+   "date": "6 ส.ค. 2026",
+   "set": "f10634cb-6505-43f1-9b70-314c58673016"
+  }
+ },
+ {
+  "id": "cephalexin",
+  "name": "Cephalexin (Cefalexin)",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Cephalosporin รุ่นที่ 1",
+  "chips": [
+   "ผิวหนัง/UTI",
+   "ปรับตามไต",
+   "เพิ่มระดับ metformin"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "ยับยั้งการสร้างผนังเซลล์ (bactericidal) · เด่นเชื้อแกรมบวก (Staph, Strep) และแกรมลบบางชนิด",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่: <b>250 mg q6h</b> หรือ 500 mg q12h · 7–14 วัน · รุนแรงได้ถึง 4 g/วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "เด็ก: 25–50 mg/kg/วัน แบ่งให้",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "ปรับตามไต: CrCl 30–59 สูงสุด 1 g/วัน · 15–29: 250 mg q8–12h · 5–14: 250 mg q24h",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: แพ้ cephalosporin · ระวังในผู้แพ้ penicillin (cross-sensitivity)",
+    "r": [
+     "fda:4",
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "<b>เพิ่มระดับ metformin</b> — ติดตามและปรับขนาด metformin",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Coombs’ test ผลบวก · ทำให้ตรวจน้ำตาลในปัสสาวะผลบวกลวง (บางวิธี)",
+    "r": [
+     "fda:5.3",
+     "fda:7.3"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ติดเชื้อทางเดินหายใจ หูชั้นกลาง ผิวหนัง กระดูก ทางเดินปัสสาวะ",
+    "d": "250 mg q6h หรือ 500 mg q12h · สูงสุด 4 g/วัน",
+    "r": [
+     "fda:1",
+     "fda:2.1"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl 30–59: สูงสุด 1 g/วัน · 15–29: 250 mg q8–12h · 5–14: 250 mg q24h · 1–4: 250 mg q48–60h",
+   "r": [
+    "fda:2.3"
+   ]
+  },
+  "mon": [
+   {
+    "t": "อาการแพ้ยา",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "PT ในผู้มีความเสี่ยง (ไต/ตับบกพร่อง ขาดอาหาร)",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ cephalexin หรือ cephalosporin อื่น",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "แพ้ยา (ระวังผู้แพ้ penicillin)",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Coombs’ test บวก",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ชัก (โดยเฉพาะไตบกพร่องที่ไม่ปรับขนาด)",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "PT ยาวขึ้น",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ท้องเสีย คลื่นไส้ อาหารไม่ย่อย ปวดท้อง",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Metformin: ระดับ metformin เพิ่ม",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Probenecid: ลดการขับ cephalexin",
+    "r": [
+     "fda:7.2"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ข้อมูลไม่พบความเสี่ยงเพิ่ม",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ใช้ได้ (LactMed)",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "คลื่นไส้ อาเจียน ปวดท้อง ท้องเสีย ปัสสาวะเป็นเลือด · รักษาตามอาการ",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินยาจนครบ",
+    "r": [
+     "fda:17"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมดี",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ทางไตเกือบทั้งหมดแบบไม่เปลี่ยนแปลง",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Cephalexin (Cefalexin) — เอกสารกำกับยา US FDA (Cephalexin capsules · Teva)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=19307ff0-71de-477b-965d-ea243e5ede3a",
+    "src": "DailyMed · ฉบับ 31 ธ.ค. 2020"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Cephalexin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501487/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Cephalexin capsules · Teva",
+   "date": "31 ธ.ค. 2020",
+   "set": "19307ff0-71de-477b-965d-ea243e5ede3a"
+  }
+ },
+ {
+  "id": "ceftriaxone",
+  "name": "Ceftriaxone",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Cephalosporin รุ่นที่ 3 (ยาฉีด)",
+  "chips": [
+   "ห้ามผสม Ca IV",
+   "ห้ามในทารกตัวเหลือง",
+   "ไม่ต้องปรับตามไต"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "1) serious community-acquired infection ยกเว้น Pseudomonas  2) gram-negative meningitis ยกเว้นเด็ก &lt;1 เดือน  3) PRSP  4) แกรมลบบางกรณีในผู้ไตบกพร่องหรือใช้ aminoglycoside ไม่ได้  5) N. gonorrhoeae  6) ซิฟิลิสที่ไม่ตั้งครรภ์ซึ่งใช้ benzathine penicillin/doxycycline ไม่ได้",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้งการสร้างผนังเซลล์ · ครอบคลุมแกรมลบและแกรมบวกกว้าง แต่<b>ไม่ครอบคลุม Pseudomonas</b> เพียงพอ",
+   "r": [
+    "fda:Clinical Pharmacology",
+    "nlem"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่: <b>1–2 g วันละครั้ง</b> (หรือแบ่ง 2 ครั้ง) · สูงสุด <b>4 g/วัน</b>",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "<b>ห้ามผสม/ให้พร้อมสารละลายที่มีแคลเซียม IV</b> (Ringer’s, Hartmann’s, TPN) — ตกตะกอน · ผู้ใหญ่ให้ต่อกันได้ถ้าล้างสายก่อน",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "<b>ห้ามใช้</b>ในทารกคลอดก่อนกำหนด (postmenstrual age ≤41 สัปดาห์) และทารก<b>ตัวเหลือง</b> (แทนที่ bilirubin → kernicterus) · ทารก ≤28 วันที่ต้องได้ Ca IV",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "<b>ไม่ต้องปรับขนาด</b>ในไตหรือตับบกพร่องอย่างเดียว (ขับทั้งทางไตและน้ำดี)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ตะกอนในถุงน้ำดี (<b>pseudolithiasis</b>) · hemolytic anemia",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "หูชั้นกลางอักเสบเด็ก: IM ครั้งเดียว 50 mg/kg (ไม่เกิน 1 g)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ติดเชื้อทางเดินหายใจส่วนล่าง ผิวหนัง ทางเดินปัสสาวะ หนองใน PID กระดูก ช่องท้อง เยื่อหุ้มสมองอักเสบ และป้องกันการติดเชื้อก่อนผ่าตัด",
+    "d": "1–2 g/วัน (สูงสุด 4 g)",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "เด็ก (ผิวหนัง/อื่นที่ไม่ใช่เยื่อหุ้มสมอง)",
+    "d": "50–75 mg/kg/วัน (สูงสุด 2 g)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "หูชั้นกลางอักเสบเฉียบพลันในเด็ก",
+    "d": "IM 50 mg/kg ครั้งเดียว (≤1 g)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ป้องกันก่อนผ่าตัด",
+    "d": "1 g ครั้งเดียวก่อนผ่าตัด",
+    "r": [
+     "fda:Indications and Usage"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ทารกแรกเกิด: ให้ IV นาน 60 นาที ลดความเสี่ยง bilirubin encephalopathy",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "S. pyogenes รักษาอย่างน้อย 10 วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไม่ต้องปรับเมื่อไตบกพร่องอย่างเดียว · ระวังเมื่อบกพร่องทั้งไตและตับรุนแรง",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "hepatic": {
+   "t": "ไม่ต้องปรับเมื่อตับบกพร่องอย่างเดียว",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "mon": [
+   {
+    "t": "อาการแพ้ยา",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "อาการถุงน้ำดี ภาวะซีดจากเม็ดเลือดแดงแตก",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "อาการทางระบบประสาท (encephalopathy, ชัก) โดยเฉพาะไตบกพร่องรุนแรง",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ cephalosporin",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ทารกคลอดก่อนกำหนด (≤41 สัปดาห์ PMA) · ทารกตัวเหลือง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ทารก ≤28 วันที่ต้องได้สารละลาย Ca IV",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "แพ้ยา (ระวังผู้แพ้ penicillin)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ตะกอน ceftriaxone-calcium",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "อาการทางระบบประสาท",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Hemolytic anemia",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Pseudolithiasis ถุงน้ำดี",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปฏิกิริยาที่ตำแหน่งฉีด · ผื่น · ท้องเสีย · eosinophilia · เอนไซม์ตับสูง",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "สารละลายที่มีแคลเซียม IV: ตกตะกอน",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ทารกแรกเกิด: ดูข้อห้าม",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ · ฟอกเลือดไม่ช่วย",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แจ้งประวัติแพ้ยา penicillin/cephalosporin",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การให้ยา",
+    "IV หรือ IM",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "t½",
+    "ยาว ให้วันละครั้งได้",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ทางไตและน้ำดี",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Ceftriaxone — เอกสารกำกับยา US FDA (Ceftriaxone for injection · Hikma)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8351aa37-552d-471d-b293-c564dcb6ec29",
+    "src": "DailyMed · ฉบับ 1 ธ.ค. 2021"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Ceftriaxone — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501453/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Ceftriaxone for injection · Hikma",
+   "date": "1 ธ.ค. 2021",
+   "set": "8351aa37-552d-471d-b293-c564dcb6ec29"
+  }
+ },
+ {
+  "id": "azithromycin",
+  "name": "Azithromycin",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Macrolide (azalide)",
+  "chips": [
+   "Z-pak 5 วัน",
+   "QT ยาว",
+   "ไม่ผ่าน CYP3A4 มาก"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ง)",
+  "moa": {
+   "t": "จับ 50S ribosome ยับยั้งการสร้างโปรตีนของแบคทีเรีย · ครอบคลุม atypical (Mycoplasma, Chlamydia, Legionella)",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "CAP/คอหอย/ผิวหนัง: <b>500 mg วันแรก แล้ว 250 mg วันละครั้ง วันที่ 2–5</b>",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ไซนัสอักเสบ: 500 mg วันละครั้ง 3 วัน · <b>Non-gonococcal urethritis/cervicitis (Chlamydia): 1 g ครั้งเดียว</b>",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "กินพร้อมหรือไม่พร้อมอาหารก็ได้ (ยาเม็ด)",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "<b>QT prolongation</b>/torsades — ระวังผู้มี QT ยาว K/Mg ต่ำ หัวใจเต้นช้า ใช้ยา class IA/III",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ทารก &lt;6 สัปดาห์: เสี่ยง <b>infantile hypertrophic pyloric stenosis</b>",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: เคย cholestatic jaundice/ตับผิดปกติจาก azithromycin",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "CAP ที่ต้องนอน รพ.: beta-lactam + macrolide",
+    "r": [
+     "g_cap"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "CAP, คอหอยอักเสบ (ทางเลือกที่ 2), ผิวหนัง",
+    "d": "500 mg D1 → 250 mg D2–5",
+    "r": [
+     "fda:1",
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "COPD กำเริบจากแบคทีเรีย",
+    "d": "500 mg × 3 วัน หรือ 500/250 × 5 วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "Chlamydia (NGU/cervicitis), chancroid",
+    "d": "1 g ครั้งเดียว",
+    "r": [
+     "fda:2.1"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "GFR &lt;10: ระดับยาเพิ่ม (AUC +35%) ใช้อย่างระวัง",
+   "r": [
+    "fda:12.3"
+   ]
+  },
+  "hepatic": {
+   "t": "ระวัง · ข้อห้ามถ้าเคยตับผิดปกติจากยานี้",
+   "r": [
+    "fda:4",
+    "fda:5.2"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ECG ในผู้เสี่ยง QT ยาว",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "อาการตับอักเสบ",
+    "r": [
+     "fda:5.2"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ azithromycin, erythromycin หรือ macrolide/ketolide",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "เคย cholestatic jaundice จาก azithromycin",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "แพ้ยารุนแรง",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "IHPS ในทารก",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "QT ยาว",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "Cardiovascular death (ข้อมูลเชิงสังเกต)",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "Myasthenia gravis กำเริบ",
+    "r": [
+     "fda:5.7"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ท้องเสีย คลื่นไส้ ปวดท้อง อาเจียน",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Nelfinavir: เพิ่มระดับ azithromycin",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เพิ่ม",
+    "r": [
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "ยาที่ทำให้ QT ยาว: เสริมกัน",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ข้อมูลไม่พบความเสี่ยงเพิ่มชัดเจน",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ผ่านน้ำนม · LactMed — ใช้ได้ สังเกตท้องเสีย/อาเจียนในทารก",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "อาการทางเดินอาหาร ได้ยินลดลงชั่วคราว · รักษาตามอาการ",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ท้องเสียเป็นน้ำ/มีเลือด ให้พบแพทย์",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "ใจสั่น เป็นลม ให้พบแพทย์",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การกระจาย",
+    "เข้าเนื้อเยื่อสูง · t½ ยาว ~68 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ขับทางปัสสาวะแบบไม่เปลี่ยนแปลงเพียง ~6%",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Azithromycin — เอกสารกำกับยา US FDA (Zithromax tablets/suspension · Pfizer)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=db52b91e-79f7-4cc1-9564-f2eee8e31c45",
+    "src": "DailyMed · ฉบับ 24 ก.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Azithromycin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501200/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Zithromax tablets/suspension · Pfizer",
+   "date": "24 ก.ค. 2026",
+   "set": "db52b91e-79f7-4cc1-9564-f2eee8e31c45"
+  }
+ },
+ {
+  "id": "clarithromycin",
+  "name": "Clarithromycin",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Macrolide",
+  "chips": [
+   "strong CYP3A4 inhibitor",
+   "H. pylori",
+   "ห้ามคู่ simvastatin"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ง)",
+  "nlemCond": {
+   "t": "1) ติดเชื้อทางเดินหายใจส่วนล่าง เมื่อใช้ยาอื่นไม่ได้/ไม่ได้ผล  2) NTM  3) กำจัด H. pylori หลังตรวจยืนยันเชื้อแล้ว",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "จับ 50S ribosome ยับยั้งการสร้างโปรตีน",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่: <b>250–500 mg q12h</b> 7–14 วัน ตามการติดเชื้อ · กินพร้อมหรือไม่พร้อมอาหารก็ได้",
+    "r": [
+     "fda:2.1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "H. pylori: <b>500 mg + amoxicillin 1 g + PPI วันละ 2 ครั้ง 10–14 วัน</b>",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "<b>Strong CYP3A4 inhibitor</b> — ห้ามใช้ร่วม simvastatin, lovastatin, lomitapide, ergot, pimozide, cisapride, lurasidone",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ห้ามใช้ร่วม <b>colchicine</b> ในผู้ไต/ตับบกพร่อง",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "CrCl &lt;30: <b>ลดขนาด 50%</b>",
+    "r": [
+     "fda:2.6"
+    ]
+   },
+   {
+    "t": "QT ยาว · ข้อมูลเพิ่ม<b>การเสียชีวิตในผู้ป่วยโรคหลอดเลือดหัวใจ</b> 1–10 ปีหลังได้ยา · ไม่แนะนำในหญิงตั้งครรภ์ (เว้นแต่ไม่มีทางเลือก)",
+    "r": [
+     "fda:5.2",
+     "fda:5.5",
+     "fda:5.7"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ติดเชื้อทางเดินหายใจ (CAP, ไซนัส, หลอดลมอักเสบกำเริบ), คอหอย, ผิวหนัง",
+    "d": "250–500 mg q12h 7–14 วัน",
+    "r": [
+     "fda:1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "H. pylori (ร่วม amoxicillin + PPI)",
+    "d": "500 mg q12h 10–14 วัน",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "i": "MAC (รักษา/ป้องกัน)",
+    "d": "500 mg q12h",
+    "r": [
+     "fda:2.5"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl &lt;30: ลด 50% · ใช้ร่วม atazanavir/ritonavir ดูตาราง",
+   "r": [
+    "fda:2.6"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับบกพร่องร่วมไตบกพร่องรุนแรง: ไม่ควรใช้",
+   "r": [
+    "fda:8.6"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ECG ในผู้เสี่ยง QT",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ตรวจรายการยาที่ใช้ร่วมทุกครั้ง (DDI)",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ macrolide",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม cisapride, pimozide, ergot, lurasidone, lomitapide, lovastatin, simvastatin",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม colchicine ในผู้ไต/ตับบกพร่อง",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "เคย cholestatic jaundice จาก clarithromycin",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ประวัติ QT ยาว/ventricular arrhythmia, K ต่ำที่ยังไม่แก้",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "แพ้ยารุนแรง",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "QT ยาว",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "อาการรุนแรงจาก DDI (เช่น colchicine, CCB, ยาเบาหวาน)",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "เพิ่มการเสียชีวิตในผู้ป่วย CAD",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "Embryo-fetal toxicity",
+    "r": [
+     "fda:5.7"
+    ]
+   },
+   {
+    "t": "MG กำเริบ",
+    "r": [
+     "fda:5.8"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ท้องเสีย คลื่นไส้ <b>รับรสผิดปกติ</b> ปวดท้อง",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยา CYP3A4 substrate: ระดับเพิ่ม (statin, colchicine, CCB, benzodiazepine บางตัว)",
+    "r": [
+     "fda:5.4",
+     "fda:7"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เพิ่ม · ยาเบาหวาน (SU/insulin): น้ำตาลต่ำ",
+    "r": [
+     "fda:7"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ไม่แนะนำเว้นแต่ไม่มีทางเลือก",
+    "r": [
+     "fda:5.7",
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้ สังเกตท้องเสียในทารก",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "อาการทางเดินอาหาร · รักษาตามอาการ ฟอกเลือดไม่ช่วย",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แจ้งยาทุกตัวที่ใช้ (DDI มาก)",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "ใจสั่น เป็นลม ให้พบแพทย์",
+    "r": [
+     "fda:5.2"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "Metabolism",
+    "CYP3A4 · metabolite 14-OH มีฤทธิ์",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตและตับ",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Clarithromycin — เอกสารกำกับยา US FDA (Clarithromycin tablets · Sandoz (Biaxin ไม่มีแล้ว))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b98b02bb-2609-49a0-b29f-e5911aa0cbc1",
+    "src": "DailyMed · ฉบับ 30 พ.ค. 2023"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Clarithromycin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501207/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Clarithromycin tablets · Sandoz (Biaxin ไม่มีแล้ว)",
+   "date": "30 พ.ค. 2023",
+   "set": "b98b02bb-2609-49a0-b29f-e5911aa0cbc1"
+  }
+ },
+ {
+  "id": "doxycycline",
+  "name": "Doxycycline",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Tetracycline",
+  "chips": [
+   "ห้ามเด็ก ≤8 ปี",
+   "แพ้แดด",
+   "แยก Ca/Fe/antacid"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "จับ 30S ribosome ยับยั้งการสร้างโปรตีน (bacteriostatic) · ครอบคลุม atypical, rickettsia, เชื้อก่อโรคเขตร้อน",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่: วันแรก <b>100 mg q12h</b> แล้ว 100 mg/วัน · รุนแรง 100 mg q12h ต่อเนื่อง",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "<b>ฟันเปลี่ยนสีถาวร</b>ในช่วงฟันกำลังสร้าง (ครึ่งหลังของการตั้งครรภ์ ทารก เด็ก ≤8 ปี) — ใช้เฉพาะโรครุนแรงที่ไม่มีทางเลือก (เช่น rickettsia)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "<b>แพ้แสงแดด</b> (photosensitivity) — หยุดยาเมื่อผิวแดง",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ดื่มน้ำตามมาก ๆ ลด<b>หลอดอาหารอักเสบ/เป็นแผล</b> · กินพร้อมอาหาร/นมได้ (ดูดซึมไม่ลดมาก)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ยาลดกรด Al/Ca/Mg, เหล็ก, bismuth <b>ลดการดูดซึม</b>",
+    "r": [
+     "fda:Drug Interactions",
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "<b>ไม่สะสมในไตบกพร่อง</b> — ใช้ได้โดยไม่ต้องปรับ (ต่างจาก tetracycline อื่น)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ความดันในกะโหลกสูง (pseudotumor cerebri)",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Rickettsia, Mycoplasma/atypical pneumonia, Chlamydia, หนองใน, ซิฟิลิส (แพ้ penicillin), สิว (ร่วม), anthrax, leptospirosis ฯลฯ",
+    "d": "200 mg วันแรก → 100 mg/วัน หรือ 100 mg q12h",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ป้องกันมาลาเรีย (ผู้เดินทางระยะสั้น)",
+    "d": "100 mg วันละครั้ง เริ่ม 1–2 วันก่อน ต่อ 4 สัปดาห์หลังออกจากพื้นที่",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "เด็ก &lt;45 kg (โรครุนแรง)",
+    "d": "2.2 mg/kg q12h",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไม่สะสมเมื่อไตบกพร่องในขนาดปกติ",
+   "r": [
+    "fda:Dosage and Administration"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ใช้นาน: CBC, การทำงานไต ตับ",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ยากลุ่ม tetracycline",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ฟันเปลี่ยนสี / enamel hypoplasia",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "แพ้แสงแดด",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ความดันในกะโหลกสูง",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ยับยั้งการเจริญของกระดูกในทารกคลอดก่อนกำหนด",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ อาเจียน หลอดอาหารอักเสบ/เป็นแผล · ผื่น แพ้แสง",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาลดกรด (Al, Ca, Mg), เหล็ก, bismuth: ลดการดูดซึม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Warfarin: อาจต้องลดขนาด",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Barbiturate, carbamazepine, phenytoin: ลด t½ ของ doxycycline",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Penicillin: เลี่ยงใช้ร่วม (ต้านฤทธิ์)",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ยาคุมกำเนิด: อาจลดประสิทธิภาพ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์ครึ่งหลัง/เด็ก ≤8 ปี: ฟันเปลี่ยนสี",
+    "r": [
+     "fda:Warnings",
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ระยะสั้นใช้ได้ เลี่ยงใช้นาน",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ · ฟอกเลือดไม่ช่วย",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ดื่มน้ำตามมาก ๆ ไม่กินก่อนนอนทันที",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "เลี่ยงแสงแดด",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "แยกเวลาจากยาลดกรด เหล็ก",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "อาหาร/นมไม่ลดการดูดซึมมาก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตและทางเดินอาหาร",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Doxycycline — เอกสารกำกับยา US FDA (Doxycycline hyclate tablets/capsules · Chartwell)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=3e7cf78f-3b48-4614-9fa4-c6d1e0c05a35",
+    "src": "DailyMed · ฉบับ 30 ก.ย. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_cap",
+    "title": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia (ATS/IDSA 2019)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31573350/",
+    "src": "Metlay JP, et al. Am J Respir Crit Care Med. 2019;200:e45–e67"
+   },
+   {
+    "id": "lact",
+    "title": "Doxycycline — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK500561/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Doxycycline hyclate tablets/capsules · Chartwell",
+   "date": "30 ก.ย. 2025",
+   "set": "3e7cf78f-3b48-4614-9fa4-c6d1e0c05a35"
+  }
+ },
+ {
+  "id": "ciprofloxacin",
+  "name": "Ciprofloxacin",
+  "group": "ยาต้านจุลชีพ",
+  "cls": "Fluoroquinolone",
+  "chips": [
+   "เอ็นฉีกขาด",
+   "แยก cation 2/6 ชม.",
+   "CYP1A2 inhibitor"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ค)",
+  "nlemCond": {
+   "t": "ใช้ในกรณีพิเศษตามคำแนะนำของแพทย์ผู้เชี่ยวชาญด้านโรคติดเชื้อ เช่น ใช้ต่อจากยาฉีด (sequential/switch therapy)",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "BOXED WARNING · TENDINITIS, NEUROPATHY, CNS, MYASTHENIA GRAVIS",
+  "bw": {
+   "t": "ADR รุนแรงที่อาจถาวร: เอ็นอักเสบ/ฉีกขาด, ปลายประสาทอักเสบ, CNS · ทำให้ myasthenia gravis กำเริบ (เลี่ยงในผู้ป่วย MG) · สงวนไว้สำหรับไซนัสอักเสบ, หลอดลมอักเสบกำเริบ, UTI ไม่ซับซ้อน เมื่อไม่มีทางเลือกอื่น",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง DNA gyrase และ topoisomerase IV (bactericidal) · เด่นแกรมลบรวม Pseudomonas",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "กิน<b>ก่อน 2 ชม. หรือหลัง 6 ชม.</b> จากยาลดกรด Mg/Al, sucralfate, เหล็ก, แคลเซียม, สังกะสี · เลี่ยงกินกับนม/โยเกิร์ตอย่างเดียว",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "<b>ห้ามใช้ร่วม tizanidine</b> · เลี่ยง theophylline (CYP1A2 inhibitor)",
+    "r": [
+     "fda:4",
+     "fda:7"
+    ]
+   },
+   {
+    "t": "ADR สำคัญ: <b>เอ็นฉีกขาด</b> (เสี่ยง: อายุ &gt;60, steroid, ปลูกถ่ายอวัยวะ), neuropathy, CNS, <b>aortic aneurysm</b>, QT ยาว, น้ำตาลสูง/ต่ำ",
+    "r": [
+     "fda:5.2",
+     "fda:5.3",
+     "fda:5.4",
+     "fda:5.9",
+     "fda:5.12",
+     "fda:5.19"
+    ]
+   },
+   {
+    "t": "เด็ก &lt;18 ปี: ใช้เฉพาะ cUTI, anthrax, plague (กระทบข้อ/กระดูกอ่อน)",
+    "r": [
+     "fda:5.13"
+    ]
+   },
+   {
+    "t": "ปรับตามไต: CrCl 30–50 → 250–500 mg q12h · 5–29 → q18h · ฟอกไต → q24h หลังฟอก",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ผู้ใหญ่ทั่วไป 250–750 mg q12h ตามการติดเชื้อ · ดื่มน้ำพอ ป้องกัน crystalluria",
+    "r": [
+     "fda:2.1",
+     "fda:5.18"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ผิวหนัง กระดูก/ข้อ ติดเชื้อในช่องท้อง (ร่วม metronidazole) ท้องเสียติดเชื้อ ไทฟอยด์ UTI ฯลฯ",
+    "d": "250–750 mg q12h ตามการติดเชื้อ",
+    "r": [
+     "fda:1",
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "เด็ก: cUTI/pyelonephritis, anthrax, plague",
+    "d": "ตามน้ำหนัก",
+    "r": [
+     "fda:2.2"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ให้ต่ออย่างน้อย 2 วันหลังหายจากอาการ",
+    "r": [
+     "fda:2.1"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl 30–50: 250–500 mg q12h · 5–29: q18h · ฟอกไต: q24h หลังฟอก",
+   "r": [
+    "fda:2.3"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับแข็งเรื้อรังไม่เปลี่ยน PK มาก · มีรายงานพิษต่อตับรุนแรง",
+   "r": [
+    "fda:8.7",
+    "fda:5.8"
+   ]
+  },
+  "mon": [
+   {
+    "t": "อาการปวดเอ็น ชา อ่อนแรง สับสน",
+    "r": [
+     "fda:5.2",
+     "fda:5.3",
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "น้ำตาลในผู้ป่วยเบาหวาน",
+    "r": [
+     "fda:5.19"
+    ]
+   },
+   {
+    "t": "ECG ในผู้เสี่ยง QT",
+    "r": [
+     "fda:5.12"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ quinolone",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม tizanidine",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ADR รุนแรงถาวร (ดู boxed)",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "เอ็นอักเสบ/ฉีกขาด",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Peripheral neuropathy",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "CNS/จิตเวช",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "MG กำเริบ",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "Aortic aneurysm/dissection",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "Theophylline: อาการรุนแรง",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "C. difficile-associated diarrhea (CDAD) เกิดได้แม้หลังหยุดยา 2 เดือน",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "QT ยาว",
+    "r": [
+     "fda:5.12"
+    ]
+   },
+   {
+    "t": "แพ้แสง",
+    "r": [
+     "fda:5.14"
+    ]
+   },
+   {
+    "t": "น้ำตาลผิดปกติ",
+    "r": [
+     "fda:5.19"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ ท้องเสีย เอนไซม์ตับสูง อาเจียน ผื่น",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Tizanidine: ห้าม · theophylline: เลี่ยง · ยา CYP1A2 อื่น (methylxanthine, clozapine, ropinirole) ระดับเพิ่ม",
+    "r": [
+     "fda:7"
+    ]
+   },
+   {
+    "t": "Cation (Mg/Al/Ca/Fe/Zn), sucralfate: ลดการดูดซึม",
+    "r": [
+     "fda:2.4",
+     "fda:7"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เพิ่ม · ยาเบาหวาน: น้ำตาลผิดปกติ",
+    "r": [
+     "fda:7"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: ฉลาก — ผ่านน้ำนม · LactMed — ใช้ได้ ระดับในน้ำนมต่ำ สังเกตท้องเสีย/เชื้อราในทารก",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เสี่ยงเอ็นฉีกขาดมากขึ้น",
+    "r": [
+     "fda:8.5"
+    ]
+   },
+   {
+    "t": "เด็ก: จำกัดข้อบ่งใช้",
+    "r": [
+     "fda:8.4"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ ให้สารน้ำ · ฟอกเลือดออกได้น้อย (&lt;10%)",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ปวด บวมเอ็น (เช่น เอ็นร้อยหวาย) ชา อ่อนแรง ให้หยุดยาและพบแพทย์",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "แยกเวลาจากยาลดกรด แคลเซียม เหล็ก",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "เลี่ยงแสงแดด",
+    "r": [
+     "fda:5.14"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "การดูดซึม",
+    "F ~70% · cation ลดการดูดซึม",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตเป็นหลัก + น้ำดี/ลำไส้",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Ciprofloxacin — เอกสารกำกับยา US FDA (Cipro tablets/suspension · Bayer)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=888dc7f9-ad9c-4c00-8d50-8ddfd9bd27c0",
+    "src": "DailyMed · ฉบับ 2 มี.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "lact",
+    "title": "Ciprofloxacin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501583/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Cipro tablets/suspension · Bayer",
+   "date": "2 มี.ค. 2026",
+   "set": "888dc7f9-ad9c-4c00-8d50-8ddfd9bd27c0"
+  }
  }
 ]
