@@ -15,7 +15,7 @@
     <template v-else-if="!drug">
       <DrugForm v-if="form === 'req'" class="dd-form-top" />
       <details class="dd-about">
-        <summary><Emoji char="📚" /> ข้อมูลมาจากไหน · ตอนนี้มี {{ DRUG_DB.length }} ตัว</summary>
+        <summary><Emoji char="📚" /> ข้อมูลมาจากไหน · ตอนนี้มี {{ DRUG_DB.length }} ตัว · ทยอยเพิ่มเรื่อยๆ</summary>
         <ul>
           <li><b>เอกสารกำกับยา US FDA</b> (DailyMed) — ข้อบ่งใช้ ขนาดยา คำเตือน อันตรกิริยา</li>
           <li><b>บัญชียาหลักแห่งชาติ 2569</b> (NLEM) — บัญชีและเงื่อนไขการใช้</li>
