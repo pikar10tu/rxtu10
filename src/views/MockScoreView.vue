@@ -41,7 +41,7 @@
       <section class="ms-card ms-cls">
         <div class="ms-cls-cap">ภาพรวมรุ่น · {{ exam.n }} คน</div>
         <div class="ms-cls-grid">
-          <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ pctText(clsPct) }}</b></div>
+          <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ pctText(clsPct) }}</b><small v-if="Number.isFinite(exam.sdPct)" class="ms-sd">SD {{ pctText(exam.sdPct) }}</small></div>
           <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ Number.isFinite(exam.minPct) ? pctText(exam.minPct) : '-' }}</b></div>
           <div class="ms-cls-box"><small>สูงสุด</small><b>{{ Number.isFinite(exam.maxPct) ? pctText(exam.maxPct) : '-' }}</b></div>
         </div>
@@ -67,6 +67,7 @@
             <div class="ms-row-cls">
               <span class="avg">เฉลี่ย <b>{{ fmt(r.mean) }}</b></span>
               <template v-if="Number.isFinite(r.min)"><span>ต่ำสุด {{ fmt(r.min) }}</span><span>สูงสุด {{ fmt(r.top) }}</span></template>
+              <span v-if="Number.isFinite(r.sd)">SD {{ fmt(r.sd) }}</span>
             </div>
           </div>
         </div>
@@ -108,7 +109,7 @@ const ringColor = computed(() => !my.value ? 'var(--primary)' : pass.value ? '#1
 const rows = computed(() => exam.value.stations.map((s, i) => {
   const score = my.value?.scores?.[i]
   const meanPct = stationPct(s.mean, s.max)
-  return { i, name: s.name, max: s.max, mean: s.mean, min: s.min, top: s.top,
+  return { i, name: s.name, max: s.max, mean: s.mean, sd: s.sd, min: s.min, top: s.top,
     minPct: stationPct(s.min, s.max), topPct: stationPct(s.top, s.max), score, meanPct, pct: my.value ? stationPct(score, s.max) : meanPct }
 }))
 const nPassSt = computed(() => rows.value.filter(r => r.pct >= exam.value.passPct - 1e-9).length)
@@ -167,10 +168,11 @@ watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id) }, { im
 .ms-cls-box { border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; }
 .ms-cls-box small { font-size: .72rem; color: var(--muted); }
 .ms-cls-box b { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--ink); }
+.ms-cls-box .ms-sd { color: var(--primary); font-weight: 600; }
 .ms-cls-box.avg { background: #eef5fb; border-color: var(--primary); }
 .ms-cls-box.avg b { color: var(--primary); }
 .ms-range { position: absolute; top: calc(100% + 3px); height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .45); }
-.ms-row-cls { display: flex; gap: 10px; font-size: .74rem; color: var(--muted); margin-top: 9px; font-variant-numeric: tabular-nums; }
+.ms-row-cls { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: .74rem; color: var(--muted); margin-top: 9px; font-variant-numeric: tabular-nums; }
 .ms-row-cls .avg { color: var(--primary); }
 .ms-row-cls .avg b { color: var(--primary); }
 .ms-lg-rng { width: 16px; height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .3); display: inline-block; }
