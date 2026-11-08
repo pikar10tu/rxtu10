@@ -93,6 +93,7 @@ export function drawSlip(canvas, d) {
     row('ความรัก', stars(d.starsArr[2])); sub(d.slip[2])
     dash()
     row('ไพ่วันนี้', d.card)
+    if (d.cardLine) { sub(d.cardLine); y += 8 }
     row('เลขนำโชค', d.lucky)
     dash()
     stampY = y
@@ -109,7 +110,7 @@ export function drawSlip(canvas, d) {
       y += 70
     }
     dash()
-    text('RxTU10', { size: 32, weight: 600, align: 'center', color: '#777', lh: 1.6 })
+    text('R10TU', { size: 32, weight: 600, align: 'center', color: '#777', lh: 1.6 })
     y += 60
     return y
   }

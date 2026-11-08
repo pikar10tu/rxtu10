@@ -149,6 +149,7 @@ const shareData = computed(() => {
     name: auth.userData?.nickname || 'เพื่อน', dateText: thaiDate, fileDay: day,
     sign: SIGNS[p.sign], asc: p.asc != null ? SIGNS[p.asc] : '',
     starsArr: st, card: opened.value ? tarot.value.card.en + (tarot.value.reversed ? ' (กลับหัว)' : '') : 'ยังไม่เปิด',
+    cardLine: opened.value ? (tarot.value.reversed ? tarot.value.card.rvTip : tarot.value.card.upTip) : 'เปิดไพ่ในเว็บก่อน แล้วค่อยแชร์อีกที',
     lucky: r.luckyNums.join(' · '),
     houseLine: r.house.head, houseDesc: r.house.desc,
     colors: c ? [c.work[1], c.money[1], c.charm[1]] : [],
