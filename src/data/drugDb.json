@@ -11484,5 +11484,620 @@
    "date": "25 ส.ค. 2026",
    "set": "b0c23a2c-b250-4c0d-9b2a-c1483faa2ca0"
   }
+ },
+ {
+  "id": "prednisolone",
+  "name": "Prednisolone",
+  "group": "เบาหวานและต่อมไร้ท่อ",
+  "cls": "Glucocorticoid (ออกฤทธิ์ปานกลาง)",
+  "chips": [
+   "5 mg ≈ dexa 0.75 mg",
+   "ห้ามหยุดยาทันที",
+   "กดภูมิ"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "glucocorticoid สังเคราะห์ ใช้ต้านการอักเสบและกดภูมิคุ้มกัน · ฤทธิ์เก็บเกลือน้อยกว่า hydrocortisone",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ขนาดเริ่ม <b>5–60 mg/วัน</b> ตามโรค · ได้ผลแล้วค่อยๆ ลดหาขนาดต่ำสุดที่คุมโรคได้",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ใช้นานแล้ว<b>ต้องค่อยๆ ลดขนาด</b> ห้ามหยุดทันที (HPA axis ถูกกด → adrenal insufficiency) · ภาวะนี้อยู่ได้หลายเดือนหลังหยุดยา",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "เทียบขนาด: <b>prednisolone 5 mg = hydrocortisone 20 mg = methylprednisolone 4 mg = dexamethasone 0.75 mg</b>",
+    "r": [
+     "dexlab"
+    ]
+   },
+   {
+    "t": "<b>Alternate-day therapy</b>: ให้ 2 เท่าของขนาดต่อวัน วันเว้นวันตอนเช้า ลดผลข้างเคียงและการกด HPA",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ข้อห้ามใช้: <b>ติดเชื้อราทั่วร่างกาย</b>",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ขนาดกดภูมิ: ไม่ควรฉีดวัคซีน · หลีกเลี่ยงคนเป็นอีสุกอีใส/หัด",
+    "r": [
+     "fda:Precautions",
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "ใช้นาน ≥3 เดือน: ป้องกันกระดูกพรุน (calcium + vitamin D ± ยารักษากระดูกพรุน)",
+    "r": [
+     "g_giop"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "โรคต่อมไร้ท่อ (adrenal insufficiency ร่วม mineralocorticoid, CAH, hypercalcemia จากมะเร็ง)",
+    "d": "5–60 mg/วัน ปรับตามโรค",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "โรครูมาติก, SLE, โรคผิวหนังรุนแรง (pemphigus, SJS), ภูมิแพ้รุนแรง (asthma, serum sickness), โรคตา, โรคเลือด, มะเร็งเม็ดเลือด, nephrotic syndrome ฯลฯ",
+    "d": "5–60 mg/วัน ปรับตามโรค",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ภาวะเครียดระหว่างใช้ยา อาจต้องเพิ่มขนาดชั่วคราว",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ใช้อย่างระวังในไตบกพร่อง",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับแข็ง: ฤทธิ์ยามากขึ้น",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ความดัน น้ำหนัก บวม · น้ำตาลในเลือด · โพแทสเซียม",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ใช้นาน: ตรวจตา (ต้อกระจก/ต้อหิน)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ใช้ ≥3 เดือน (prednisone ≥2.5 mg/วัน): ประเมินความเสี่ยงกระดูกหัก ให้ calcium + vitamin D และพิจารณายารักษากระดูกพรุน",
+    "r": [
+     "g_giop"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "ติดเชื้อราทั่วร่างกาย",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "กดภูมิคุ้มกัน เพิ่มการติดเชื้อทุกชนิด และบดบังอาการติดเชื้อ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "วัณโรคแฝงกำเริบ — ใช้นานให้ยาป้องกันวัณโรค",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "อีสุกอีใส/หัดรุนแรงถึงตายในผู้ที่ไม่มีภูมิ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ใช้ขนาดกดภูมิ: ไม่ควรฉีดวัคซีน โดยเฉพาะเชื้อเป็น",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ใช้นาน: ต้อกระจก (posterior subcapsular) ต้อหิน",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ภาวะเครียด (ผ่าตัด เจ็บป่วยหนัก) ต้องเพิ่มขนาดชั่วคราว",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "บวมน้ำ ความดันสูง โพแทสเซียมต่ำ · กระดูกพรุน กล้ามเนื้ออ่อนแรง หัวกระดูกตายจากขาดเลือด · แผลในกระเพาะ ตับอ่อนอักเสบ · แผลหายช้า ผิวบาง ฟกช้ำง่าย · Cushingoid ประจำเดือนผิดปกติ น้ำตาลสูง · อารมณ์แปรปรวน นอนไม่หลับ psychosis",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Aspirin: ระวังเมื่อมี hypoprothrombinemia",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ยาเบาหวาน: อาจต้องเพิ่มขนาด (สเตียรอยด์เพิ่มน้ำตาล)",
+    "r": [
+     "dexlab"
+    ]
+   },
+   {
+    "t": "CYP3A4 inducer (rifampin, phenytoin, carbamazepine) ลดฤทธิ์ · ketoconazole, macrolide เพิ่มระดับ",
+    "r": [
+     "dexlab"
+    ]
+   },
+   {
+    "t": "Warfarin: ตรวจ INR ถี่ขึ้น",
+    "r": [
+     "dexlab"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้เมื่อประโยชน์คุ้มความเสี่ยง · ทารกจากแม่ที่ได้ขนาดสูงให้สังเกตภาวะ hypoadrenalism",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ระดับในน้ำนมต่ำมาก ใช้ได้ ไม่จำเป็นต้องเว้นให้นม 4 ชม. · ขนาดปานกลาง–สูงอาจลดน้ำนมชั่วคราว",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "เด็ก: ใช้นานยับยั้งการเจริญเติบโต",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ฉลากไม่มีหัวข้อ overdosage · รักษาตามอาการ",
+    "r": [
+     "dexlab"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ห้ามหยุดยาเอง",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "ใช้ขนาดกดภูมิ หลีกเลี่ยงคนเป็นอีสุกอีใส/หัด ถ้าสัมผัสให้พบแพทย์ทันที",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "หลังหยุดยาหลายเดือน ถ้าเจ็บป่วยหนัก/ผ่าตัด ให้แจ้งว่าเคยใช้สเตียรอยด์",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมได้ดีทางปาก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Prednisolone — เอกสารกำกับยา US FDA (Prednisolone tablets 5 mg · Aurobindo)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=070f1937-50a5-457f-bef5-4e597014e26d",
+    "src": "DailyMed · ฉบับ 16 ก.พ. 2024"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_giop",
+    "title": "2022 American College of Rheumatology Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/37845798/",
+    "src": "Humphrey MB, et al. Arthritis Rheumatol. 2023;75:2088–2102"
+   },
+   {
+    "id": "dexlab",
+    "title": "Dexamethasone — เอกสารกำกับยา US FDA (ยากลุ่มเดียวกัน ใช้อ้างตารางเทียบขนาดและอันตรกิริยาของ corticosteroid)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b15200fb-1826-472b-a907-e677a272513b",
+    "src": "DailyMed · Hikma · ฉบับ 6 มิ.ย. 2025"
+   },
+   {
+    "id": "lact",
+    "title": "Prednisolone — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501076/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Prednisolone tablets 5 mg · Aurobindo",
+   "date": "16 ก.พ. 2024",
+   "set": "070f1937-50a5-457f-bef5-4e597014e26d"
+  }
+ },
+ {
+  "id": "dexamethasone",
+  "name": "Dexamethasone",
+  "group": "เบาหวานและต่อมไร้ท่อ",
+  "cls": "Glucocorticoid (ออกฤทธิ์นาน)",
+  "chips": [
+   "0.75 mg ≈ pred 5 mg",
+   "แทบไม่มีฤทธิ์เก็บเกลือ",
+   "DST"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "glucocorticoid ฤทธิ์แรง ใช้ต้านอักเสบ/กดภูมิ · ที่ขนาดเทียบเท่า <b>แทบไม่มีฤทธิ์เก็บโซเดียม</b>",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "เทียบขนาด: <b>dexamethasone 0.75 mg = prednisolone 5 mg = methylprednisolone 4 mg = hydrocortisone 20 mg</b>",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "แทบไม่มีฤทธิ์ mineralocorticoid → adrenal insufficiency ต้องใช้ร่วม mineralocorticoid (hydrocortisone เป็นยาที่เลือก)",
+    "r": [
+     "fda:Clinical Pharmacology",
+     "fda:Indications and Usage"
+    ]
+   },
+   {
+    "t": "<b>Dexamethasone suppression test</b>: 1 mg กิน 23:00 → เจาะ cortisol 08:00 (คัดกรอง Cushing’s) · 2 mg ทุก 6 ชม. × 48 ชม. (แยก pituitary ACTH excess)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "สมองบวมจากเนื้องอก/ผ่าตัดสมอง/บาดเจ็บศีรษะ · MS กำเริบ: 30 mg/วัน 1 สัปดาห์ แล้ว 4–12 mg วันเว้นวัน 1 เดือน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ขนาดเริ่มชนิดกิน <b>0.75–9 mg/วัน</b> · เด็ก 0.02–0.3 mg/kg/วัน แบ่ง 3–4 ครั้ง",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ห้ามหยุดยาทันทีหลังใช้นาน · ข้อห้าม: ติดเชื้อราทั่วร่างกาย",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "CYP3A4: rifampin/phenytoin ลดระดับ · ketoconazole/macrolide เพิ่มระดับ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ภูมิแพ้รุนแรง, โรคผิวหนัง, ต่อมไร้ท่อ, GI, โรคเลือด, มะเร็งเม็ดเลือด (palliative), สมองบวม, MS กำเริบ, โรคตา, ข้อ ฯลฯ",
+    "d": "0.75–9 mg/วัน ปรับตามโรค",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ตรวจวินิจฉัย Cushing’s syndrome (DST)",
+    "d": "1 mg 23:00 หรือ 0.5 mg ทุก 6 ชม. × 48 ชม.",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "Intensol (สารละลายเข้มข้น): ใช้หลอดหยดที่ให้มาเท่านั้น ผสมกับเครื่องดื่ม/อาหารนิ่มแล้วกินทันที",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ระวังใน HF ความดันสูง ไตบกพร่อง (คั่งเกลือ โพแทสเซียมต่ำ)",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับแข็ง: ฤทธิ์ยามากขึ้น",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ความดัน น้ำหนัก บวม · น้ำตาลในเลือด · โพแทสเซียม",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ใช้นาน: ตรวจตา (ต้อกระจก/ต้อหิน)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ใช้ ≥3 เดือน (prednisone ≥2.5 mg/วัน): ประเมินความเสี่ยงกระดูกหัก ให้ calcium + vitamin D และพิจารณายารักษากระดูกพรุน",
+    "r": [
+     "g_giop"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "ติดเชื้อราทั่วร่างกาย",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "แพ้ส่วนประกอบ",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "กดภูมิคุ้มกัน เพิ่มการติดเชื้อทุกชนิด และบดบังอาการติดเชื้อ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "วัณโรคแฝงกำเริบ — ใช้นานให้ยาป้องกันวัณโรค",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "อีสุกอีใส/หัดรุนแรงถึงตายในผู้ที่ไม่มีภูมิ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ใช้ขนาดกดภูมิ: ไม่ควรฉีดวัคซีน โดยเฉพาะเชื้อเป็น",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ใช้นาน: ต้อกระจก (posterior subcapsular) ต้อหิน",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ภาวะเครียด (ผ่าตัด เจ็บป่วยหนัก) ต้องเพิ่มขนาดชั่วคราว",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Anaphylactoid reaction (พบน้อย)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Kaposi’s sarcoma ในผู้ใช้นาน",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "บวมน้ำ ความดันสูง โพแทสเซียมต่ำ · กระดูกพรุน กล้ามเนื้ออ่อนแรง หัวกระดูกตายจากขาดเลือด · แผลในกระเพาะ ตับอ่อนอักเสบ · แผลหายช้า ผิวบาง ฟกช้ำง่าย · Cushingoid ประจำเดือนผิดปกติ น้ำตาลสูง · อารมณ์แปรปรวน นอนไม่หลับ psychosis",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาขับโพแทสเซียม (diuretic, amphotericin B): โพแทสเซียมต่ำ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Warfarin: มักลดการตอบสนอง ตรวจ INR ถี่",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ยาเบาหวาน: อาจต้องเพิ่มขนาด",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Isoniazid: ระดับลดลง",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Anticholinesterase ใน myasthenia gravis: อ่อนแรงรุนแรง",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้เมื่อประโยชน์คุ้มความเสี่ยง · ทารกให้สังเกต hypoadrenalism",
+    "r": [
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ฉลาก — ผ่านน้ำนม อาจกดการเจริญเติบโตของทารก · LactMed — ใช้ระยะสั้นไม่น่ามีผล ใช้นานอาจเลือกสเตียรอยด์ตัวอื่น",
+    "r": [
+     "fda:Precautions",
+     "lact"
+    ]
+   },
+   {
+    "t": "เด็ก: ใช้นานยับยั้งการเจริญเติบโต",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ห้ามหยุดยาเอง",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "หลีกเลี่ยงคนเป็นอีสุกอีใส/หัด",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมได้ดีทางปาก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "ลักษณะ",
+    "ฤทธิ์เก็บโซเดียมน้อยมาก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Dexamethasone — เอกสารกำกับยา US FDA (Dexamethasone tablets / Intensol · Hikma)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b15200fb-1826-472b-a907-e677a272513b",
+    "src": "DailyMed · ฉบับ 6 มิ.ย. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_giop",
+    "title": "2022 American College of Rheumatology Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/37845798/",
+    "src": "Humphrey MB, et al. Arthritis Rheumatol. 2023;75:2088–2102"
+   },
+   {
+    "id": "lact",
+    "title": "Dexamethasone — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501767/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Dexamethasone tablets / Intensol · Hikma",
+   "date": "6 มิ.ย. 2025",
+   "set": "b15200fb-1826-472b-a907-e677a272513b"
+  }
  }
 ]
