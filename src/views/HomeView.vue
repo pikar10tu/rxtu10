@@ -38,6 +38,10 @@
         <Emoji char="⚙️" /> แผงผู้ดูแลระบบ
       </RouterLink>
 
+      <!-- ส่งข้อเสนอแนะ — ปุ่มเดียวกับหน้า Me วางล่างสุดหน้าแรกด้วย (user 9 พ.ย. 2026) -->
+      <button class="home-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>
+      <FeedbackModal v-model="fbOpen" />
+
       <!-- กล่องจดหมาย / เควส — bottom-sheet เปิดจากปุ่ม header -->
       <BottomSheet v-model:open="showMail" icon="📬" title="กล่องจดหมาย">
         <template #actions>
@@ -55,6 +59,7 @@
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
 import MockScoreCard from '../components/me/MockScoreCard.vue'
+import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { RouterLink } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
@@ -79,6 +84,7 @@ const mailbox = useMailbox()
 
 const showMail = ref(false)
 const showQuest = ref(false)
+const fbOpen = ref(false)
 
 // จุดแดงเควส = วันนี้ยังไม่กดรับรางวัล
 const questPending = computed(() =>
@@ -108,6 +114,7 @@ function onCardSheet(name) { if (name === 'quest') showQuest.value = true }
 </script>
 
 <style scoped>
+.home-feedback { width: 100%; margin-top: 14px; border: var(--bw) solid var(--line); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); }
 /* ── header: display font + sticker badge ── */
 .home-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .home-head-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
