@@ -16,6 +16,8 @@
     <template v-if="authStore.isLoggedIn">
       <!-- จัดหน้าแบบ A (user เลือก 25 ก.ย. 2026): ของที่กดทุกวันขึ้นจอแรก
            เหรียญ + รายได้ + ปุ่มเก็บ → นาฬิกาพลิกวันสอบขนาดเต็ม (user สั่งให้ยังเด่นอยู่) → งานถัดไป → บ้าน -->
+      <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
+      <MockScoreCard only-unseen class="home" />
       <DailyCard />
       <ExamCountdown />
       <!-- อีเวนต์ประจำเดือน — ทางเข้าร้านแต้มอีเวนต์จากหน้าแรก (user 25 ต.ค. 2026) -->
@@ -50,6 +52,7 @@
 
 <script setup>
 import Emoji from '../components/shared/Emoji.vue'
+import MockScoreCard from '../components/me/MockScoreCard.vue'
 import { RouterLink } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'

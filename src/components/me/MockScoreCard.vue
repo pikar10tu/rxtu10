@@ -1,6 +1,6 @@
 <template>
   <!-- การ์ดผลสอบจำลองเหนือทีมเฝ้าบ้าน · ผลใหม่ = ฟ้าเต็ม+ป้ายใหม่ · เปิดแล้ว = ขาว+วงแหวน · ไม่มีผลเรา = ชวนดูเฉลี่ยรุ่น -->
-  <RouterLink v-if="exam" :to="{ path: '/mock-score', query: { exam: exam.id } }" class="msc" :class="{ hot }">
+  <RouterLink v-if="exam && (!onlyUnseen || !seen)" :to="{ path: '/mock-score', query: { exam: exam.id } }" class="msc" :class="{ hot }">
     <span v-if="hot" class="msc-ico"><Emoji char="✉️" /></span>
     <svg v-else-if="my" class="msc-ring" viewBox="0 0 48 48" aria-hidden="true">
       <circle cx="24" cy="24" r="19" fill="none" stroke="#edf1f7" stroke-width="5" />
@@ -32,12 +32,15 @@ import { useAuthStore } from '../../stores/auth.js'
 import { useMockScores, loadMockScores, isSeen } from '../../composables/useMockScores.js'
 import { overallPct, stationPct } from '../../utils/mockScore.js'
 
+// onlyUnseen = หน้าแรก: โชว์จนกว่าจะเคยเปิดหน้าผลรอบนี้ (ทั้งคนมีผลและยังไม่มีผล)
+const props = defineProps({ onlyUnseen: Boolean })
 const auth = useAuthStore()
 const { exams, mine } = useMockScores()
 const C = 2 * Math.PI * 19
 const exam = computed(() => exams.value[0] || null)
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
-const hot = computed(() => !!my.value && !isSeen(exam.value.id))
+const seen = computed(() => isSeen(exam.value.id))
+const hot = computed(() => !!my.value && !seen.value)
 const pct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores) : 0)
 const pass = computed(() => pct.value >= exam.value.passPct - 1e-9)
 const nPassSt = computed(() => exam.value.stations.filter((s, i) => stationPct(my.value?.scores?.[i], s.max) >= exam.value.passPct - 1e-9).length)
@@ -47,7 +50,7 @@ watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
 </script>
 
 <style scoped>
-.msc { display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-top: 10px; border-radius: 16px; background: var(--surface); border: var(--bw) solid var(--line); box-shadow: var(--pop); color: var(--ink); text-decoration: none; position: relative; transition: transform .15s; }
+.msc { display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin: 10px 0 0; border-radius: 16px; background: var(--surface); border: var(--bw) solid var(--line); box-shadow: var(--pop); color: var(--ink); text-decoration: none; position: relative; transition: transform .15s; }
 .msc:active { transform: scale(.98); }
 .msc-ring { width: 46px; height: 46px; flex: none; }
 .msc-ring-t { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 11px; fill: var(--ink); }
@@ -63,4 +66,5 @@ watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
 .msc.hot .msc-ico { animation: msc-wig 2.4s ease-in-out infinite; }
 .msc.hot::before { content: ''; position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; }
 @keyframes msc-wig { 0%, 85%, 100% { transform: rotate(0); } 88% { transform: rotate(-12deg); } 92% { transform: rotate(10deg); } 96% { transform: rotate(-6deg); } }
+.msc.home { margin: 0 0 12px; }
 </style>
