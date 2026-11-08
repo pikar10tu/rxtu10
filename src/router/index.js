@@ -22,6 +22,7 @@ const routes = [
     { path: '/review',    name: 'review',    component: () => import('../views/ReviewView.vue')    },
     { path: '/shop',      name: 'shop',      component: () => import('../views/ShopView.vue')      },
     { path: '/admin',     name: 'admin',     component: () => import('../views/AdminView.vue')     },
+    { path: '/mock-score', name: 'mockScore', component: () => import('../views/MockScoreView.vue') },
     { path: '/me',        name: 'me',        component: () => import('../views/MeView.vue')        },
     { path: '/pets',      name: 'pets',      component: () => import('../views/PetsView.vue')      },
     { path: '/team', name: 'team', component: () => import('../views/TeamView.vue') },

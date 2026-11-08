@@ -34,6 +34,7 @@
         <RouterLink to="/shop?tab=style" class="me-shoplink"><Emoji char="🎀" /> ร้านตกแต่ง ›</RouterLink>
       </div>
 
+      <MockScoreCard />
       <!-- ทีมเฝ้าบ้าน + ปุ่มจัดทีม (เปิดแผ่นจัดทีมตัวเดียวกับหน้าเพ็ท/หอคอย/อารีน่า) -->
       <div class="me-guard">
         <span class="me-guard-cap">ทีมเฝ้าบ้าน</span>
@@ -122,6 +123,7 @@ import { cleanText, LIMITS } from '../utils/text.js'
 import TagChips from '../components/shared/TagChips.vue'
 import AchievementGrid from '../components/shared/AchievementGrid.vue'
 import PracticeStats from '../components/study/PracticeStats.vue'
+import MockScoreCard from '../components/me/MockScoreCard.vue'
 import PvpHistory from '../components/battle/PvpHistory.vue'
 import NewsBoard from '../components/home/NewsBoard.vue'
 import ProfileModal from '../components/members/ProfileModal.vue'

@@ -525,6 +525,17 @@ service cloud.firestore {
 
     // (SRS cards live in the user doc at `study.cards` — no subcollection)
 
+    // ── ผลสอบจำลอง — รอบสอบ (ชื่อฐาน/ค่าเฉลี่ยรุ่น) ทุกคนอ่านได้ · คะแนนรายคนอ่านได้แค่เจ้าของ/แอดมิน ──
+    //  เขียนจากเครื่องแอดมิน (สคริปต์ REST) เท่านั้น · doc id คะแนน = uid (ไม่ใช้รหัสนศ. เพราะ user แก้ studentId เองได้)
+    match /mockExams/{examId} {
+      allow read:  if request.auth != null;
+      allow write: if isAdmin();
+      match /scores/{uid} {
+        allow read:  if request.auth != null && (request.auth.uid == uid || isAdmin());
+        allow write: if isAdmin();
+      }
+    }
+
     // ── Identity claims — กันจองรหัสนักศึกษาซ้ำ (atomic) ──
     //  doc id = รหัสนักศึกษา · create-only: มีแล้วสร้างทับไม่ได้
     //  delete: admin (ตอนแก้การผูกผิด)
