@@ -109,7 +109,7 @@ export function drawSlip(canvas, d) {
       y += 70
     }
     dash()
-    text('ขอบคุณที่ใช้บริการ · RxTU10', { size: 30, align: 'center', color: '#777', lh: 1.6 })
+    text('RxTU10', { size: 32, weight: 600, align: 'center', color: '#777', lh: 1.6 })
     y += 60
     return y
   }
