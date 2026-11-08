@@ -150,7 +150,7 @@ const shareData = computed(() => {
     sign: SIGNS[p.sign], asc: p.asc != null ? SIGNS[p.asc] : '',
     starsArr: st, card: opened.value ? tarot.value.card.en + (tarot.value.reversed ? ' (กลับหัว)' : '') : 'ยังไม่เปิด',
     lucky: r.luckyNums.join(' · '),
-    houseLine: r.house.head,
+    houseLine: r.house.head, houseDesc: r.house.desc,
     colors: c ? [c.work[1], c.money[1], c.charm[1]] : [],
     slip: r.house.slip, stamp: sum >= 12 ? 'ดวงปัง!' : sum >= 9 ? 'ดวงดี' : SOFT_STAMPS[r.luckyNums[0] % SOFT_STAMPS.length],
   }

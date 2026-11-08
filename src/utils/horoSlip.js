@@ -86,13 +86,19 @@ export function drawSlip(canvas, d) {
     text(`ใบเสร็จ · ${d.dateText}`, { size: 32, align: 'center', color: '#666', lh: 1.5 })
     text(`ลูกค้า: ${d.name} · ราศี${d.sign}${d.asc ? ` · ลัคนา${d.asc}` : ''}`, { size: 32, align: 'center', color: '#666', lh: 1.5 })
     dash()
-    row('การงาน/การเรียน', stars(d.starsArr[0]))
-    row('การเงิน', stars(d.starsArr[1]))
-    row('ความรัก', stars(d.starsArr[2]))
+    // ดาวแต่ละด้าน + คำสรุปบรรทัดใต้ (ตัด "งาน:" นำหน้าออก)
+    const sub = (t) => text(t.replace(/^[^:]+:\s*/, ''), { size: 33, color: '#555', font: BODY, lh: 1.4 })
+    row('การงาน/การเรียน', stars(d.starsArr[0])); sub(d.slip[0]); y += 8
+    row('การเงิน', stars(d.starsArr[1])); sub(d.slip[1]); y += 8
+    row('ความรัก', stars(d.starsArr[2])); sub(d.slip[2])
+    dash()
     row('ไพ่วันนี้', d.card)
     row('เลขนำโชค', d.lucky)
     dash()
-    text(d.houseLine, { size: 36, color: '#333', font: BODY, lh: 1.55 })
+    stampY = y
+    text(d.houseLine, { size: 44, weight: 700, color: '#111', lh: 1.4 })
+    text(d.houseDesc, { size: 34, color: '#444', font: BODY, lh: 1.5 })
+    y += 10
     if (d.colors?.length) {
       row('สีมงคลวันนี้', '')
       y += 14
@@ -103,10 +109,6 @@ export function drawSlip(canvas, d) {
       y += 70
     }
     dash()
-    row('รวมดวงวันนี้', '', { size: 46, weight: 700 })
-    stampY = y
-    for (const l of d.slip) text('• ' + l, { size: 37, color: '#222', font: BODY, lh: 1.55, x: 0 })
-    y += 30
     text('ขอบคุณที่ใช้บริการ · RxTU10', { size: 30, align: 'center', color: '#777', lh: 1.6 })
     y += 60
     return y
@@ -125,7 +127,7 @@ export function drawSlip(canvas, d) {
   ctx.shadowColor = 'transparent'
   layout({ y0: sy })
   // ตราประทับ
-  ctx.save(); ctx.translate(sx + sw - pad - 110, sy + stampY - 46); ctx.rotate(-8 * Math.PI / 180)
+  ctx.save(); ctx.translate(sx + sw - pad - 110, sy + stampY + 10); ctx.rotate(-8 * Math.PI / 180)
   ctx.strokeStyle = '#d6336c'; ctx.fillStyle = '#d6336c'; ctx.globalAlpha = .85; ctx.lineWidth = 7
   ctx.font = `700 46px ${FONT}`; const tw = ctx.measureText(d.stamp).width
   ctx.beginPath(); ctx.roundRect(-tw / 2 - 26, -44, tw + 52, 80, 16); ctx.stroke()
