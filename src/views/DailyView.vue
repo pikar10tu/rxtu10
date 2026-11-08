@@ -4,7 +4,7 @@
 -->
 <template>
   <div class="tab-content">
-    <div class="dc-head">
+    <div ref="headEl" class="dc-head">
       <button class="dc-back" aria-label="ย้อนกลับ" @click="$router.back()">‹</button>
       <span class="dc-head-title"><Emoji char="🌅" /> ข้อสอบประจำวัน</span>
     </div>
@@ -63,7 +63,7 @@
             <span v-if="!lastPts"> · เฉลยข้อ {{ LETTERS[cur.answer] }}</span>
           </div>
           <div v-if="cur.explanation" class="dc-exp"><Emoji char="💡" /> {{ cur.explanation }}</div>
-          <button class="dc-btn dc-btn-wide" :disabled="saving" @click="next">{{ idx + 1 < qs.length ? 'ข้อต่อไป →' : (saving ? 'กำลังบันทึก…' : 'ดูผล →') }}</button>
+          <button ref="nextBtn" class="dc-btn dc-btn-wide dc-next" :disabled="saving" @click="next">{{ idx + 1 < qs.length ? 'ข้อต่อไป →' : (saving ? 'กำลังบันทึก…' : 'ดูผล →') }}</button>
         </template>
       </div>
 
@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import {
   doc, getDoc, getDocs, setDoc, collection, query, where, orderBy, startAt, limit,
   runTransaction, serverTimestamp, increment, deleteField, Timestamp,
@@ -229,6 +229,11 @@ async function ensureSet() {
 // ── เล่น ──
 const practice = ref(false)      // รอบฝึกหลังทำรอบจริงแล้ว — ไม่บันทึกผล ไม่ให้รางวัล
 const practiceLast = ref(null)
+const headEl = ref(null)
+const nextBtn = ref(null)
+// แถบเมนูล่างลอยทับ → เลื่อนปุ่มถัดไปให้พ้นแถบ (scroll-margin-bottom ใน CSS) · กล่องเลื่อนไม่ใช่ window
+const revealNext = () => nextTick(() => nextBtn.value?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))
+const toTop = () => nextTick(() => headEl.value?.scrollIntoView({ block: 'start', behavior: 'smooth' }))
 let qsRaw = []                 // ชุดของวันตามต้นฉบับ (ก่อนสลับตัวเลือก)
 const qs = ref([])
 const idx = ref(0)
@@ -261,6 +266,7 @@ function answer(i) {
   score.value += lastPts.value
   totalMs += ms
   answers.value.push({ id: cur.value.id, domain: cur.value.domain, pleGroup: cur.value.pleGroup, correct: ok })
+  revealNext()
 }
 function optClass(i) {
   if (picked.value === null) return ''
@@ -296,6 +302,7 @@ function startPractice() {
   idx.value = 0; score.value = 0; answers.value = []; totalMs = 0
   stage.value = 'play'
   beginQuestion()
+  toTop()
 }
 
 async function finish() {
@@ -304,7 +311,7 @@ async function finish() {
     practiceLast.value = { score: score.value, correct: answers.value.filter(a => a.correct).length }
     practice.value = false
     stage.value = 'done'
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    toTop()
     return
   }
   saving.value = true
@@ -376,6 +383,7 @@ onBeforeUnmount(() => clearInterval(timer))
 .dc-btn { border: 0; background: var(--primary); color: #fff; font-family: inherit; font-weight: 800; font-size: .86rem; padding: 10px 16px; border-radius: 999px; cursor: pointer; }
 .dc-btn:disabled { opacity: .6; cursor: default; }
 .dc-btn-wide { display: block; width: 100%; margin-top: 12px; padding: 13px; }
+.dc-next { scroll-margin-bottom: 110px; }
 .dc-btn-ghost { background: #fff; color: var(--primary); border: var(--bw) solid var(--primary); }
 .dc-practice { text-align: center; font-size: .74rem; font-weight: 800; color: #7a4b00; background: #fff7d6; border-radius: 999px; padding: 4px 10px; margin-bottom: 8px; }
 .dc-plast { color: var(--primary); font-weight: 700; }
