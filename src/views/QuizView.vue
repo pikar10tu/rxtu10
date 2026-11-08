@@ -237,7 +237,7 @@ import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
-import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch, deleteField, documentId, runTransaction } from 'firebase/firestore'
+import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch, deleteField, runTransaction } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
@@ -562,16 +562,18 @@ async function loadMoreZen() {
   } catch (e) { console.error('[zen more]', e) }
 }
 // ── โหมด redo: ทบทวนข้อที่เคยตอบผิด ──
-// โหลดโจทย์ตาม id (in จำกัด 30 ต่อ query) — 20 ข้อ = 1 query
+// โหลดโจทย์ตาม id ทีละ doc (ขนานกัน) — ห้ามกลับไปใช้ query `documentId() in [...]`
+// เพราะ rules ให้นักศึกษาอ่านเฉพาะ isPublished → ถ้ามีข้อที่ถูกถอนเผยแพร่ปนอยู่แค่ข้อเดียว
+// query ทั้งก้อนโดน permission-denied = "เริ่มทบทวนไม่สำเร็จ" (เกิดจริง 8 พ.ย. 2026 · 33 คน)
+// อ่านทีละ doc แล้วข้อที่อ่านไม่ได้ = หาย → startRedo ล้างออกจากกองให้เอง
 async function fetchQuestionsByIds(ids) {
-  const col = collection(db, 'questions')
-  const out = []
-  for (let i = 0; i < ids.length; i += 30) {
-    const snap = await getDocs(query(col, where(documentId(), 'in', ids.slice(i, i + 30))))
-    usage.track(snap.size)
-    for (const d of snap.docs) out.push({ id: d.id, ...d.data() })
-  }
-  return out
+  const snaps = await Promise.all(ids.map(id =>
+    getDoc(doc(db, 'questions', id)).catch(e => {
+      if (e?.code === 'permission-denied') return null
+      throw e
+    })))
+  usage.track(snaps.length)
+  return snaps.filter(s => s?.exists()).map(s => ({ id: s.id, ...s.data() }))
 }
 
 // ล้างข้อที่หายจากคลังออกจากกอง (ใช้ตอนไม่มีรอบให้ทำ จึงไม่มี patch อื่นให้เกาะ)

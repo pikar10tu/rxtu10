@@ -102,7 +102,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { collection, getDocs, query, where, documentId } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useUsageStore } from '../../stores/usage.js'
@@ -171,10 +171,12 @@ onMounted(async () => {
   if (!ids.length) return
   loadingWrong.value = true
   try {
-    const snap = await getDocs(query(collection(db, 'questions'), where(documentId(), 'in', ids)))
-    usage.track(snap.size)
+    // อ่านทีละ doc — query `in` ทั้งก้อนโดน permission-denied ถ้ามีข้อถูกถอนเผยแพร่ปนอยู่
+    const snaps = await Promise.all(ids.map(id =>
+      getDoc(doc(db, 'questions', id)).catch(() => null)))
+    usage.track(snaps.length)
     const out = {}
-    for (const d of snap.docs) { const q = d.data(); if (q.isPublished) out[d.id] = q }
+    for (const d of snaps) { const q = d?.exists() ? d.data() : null; if (q?.isPublished) out[d.id] = q }
     wrongDocs.value = out
   } catch (e) { console.error('[practice wrong]', e) } finally { loadingWrong.value = false }
 })
