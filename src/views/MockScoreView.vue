@@ -39,11 +39,17 @@
 
       <!-- ภาพรวมรุ่น: เฉลี่ย (เลขคณิต) · ต่ำสุด · สูงสุด ของ % รวม -->
       <section class="ms-card ms-cls">
-        <div class="ms-cls-cap">ภาพรวมรุ่น · {{ exam.n }} คน</div>
+        <!-- ทุกรอบ / รอบเรา — คนตรวจแต่ละรอบไม่ใช่ชุดเดียวกัน (ทีมขอ 8 พ.ย.) · โชว์แค่รอบตัวเอง ไม่ให้ยาว -->
+        <div v-if="myRound" class="ms-scope">
+          <button :class="{ on: scope === 'all' }" @click="scope = 'all'">ทุกรอบ</button>
+          <button :class="{ on: scope === 'round' }" @click="scope = 'round'">รอบเรา · รอบ {{ my.round }}</button>
+        </div>
+        <div class="ms-cls-cap">{{ scope === 'round' && myRound ? `รอบ ${my.round}${myRound.label ? ' · ' + myRound.label : ''}` : 'ภาพรวมรุ่น' }} · {{ src.n }} คน</div>
+        <div v-if="scope === 'round' && myRound && myRound.hidden" class="ms-sub">รอบนี้มีคนสอบไม่ถึง {{ MIN_ROUND }} คน เลยไม่แสดงสถิติแยก (กันเดาคะแนนกันได้)</div>
         <div class="ms-cls-grid">
-          <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ pctText(clsPct) }}</b><small v-if="Number.isFinite(exam.sdPct)" class="ms-sd">SD {{ pctText(exam.sdPct) }}</small></div>
-          <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ Number.isFinite(exam.minPct) ? pctText(exam.minPct) : '-' }}</b></div>
-          <div class="ms-cls-box"><small>สูงสุด</small><b>{{ Number.isFinite(exam.maxPct) ? pctText(exam.maxPct) : '-' }}</b></div>
+          <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ pctText(clsPct) }}</b><small v-if="Number.isFinite(src.sdPct)" class="ms-sd">SD {{ pctText(src.sdPct) }}</small></div>
+          <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ Number.isFinite(src.minPct) ? pctText(src.minPct) : '-' }}</b></div>
+          <div class="ms-cls-box"><small>สูงสุด</small><b>{{ Number.isFinite(src.maxPct) ? pctText(src.maxPct) : '-' }}</b></div>
         </div>
       </section>
 
@@ -86,7 +92,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
 import { useAuthStore } from '../stores/auth.js'
@@ -101,12 +107,27 @@ const C = 2 * Math.PI * 40
 
 const exam = computed(() => exams.value.find(e => e.id === route.query.exam) || exams.value[0])
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
-const clsPct = computed(() => classPct(exam.value.stations))
+// สถิติที่ใช้เทียบ: ทั้งรุ่น หรือรอบที่เราสอบ (rounds[n].stations มีแค่ mean/sd/min/top ตามลำดับฐาน)
+const MIN_ROUND = 5
+const scope = ref('all')
+const myRound = computed(() => {
+  const r = my.value?.round && exam.value.rounds?.[String(my.value.round)]
+  if (!r) return null
+  return { ...r, hidden: !(r.n >= MIN_ROUND && Array.isArray(r.stations)) }
+})
+const src = computed(() => {
+  const e = exam.value
+  if (scope.value !== 'round' || !myRound.value || myRound.value.hidden) return e
+  const r = myRound.value
+  return { ...r, stations: e.stations.map((s, i) => ({ ...s, ...r.stations[i] })) }
+})
+watch(() => exam.value?.id, () => { scope.value = 'all' })
+const clsPct = computed(() => classPct(src.value.stations))
 const myPct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores) : 0)
-const headPct = computed(() => my.value ? myPct.value : clsPct.value)
+const headPct = computed(() => my.value ? myPct.value : classPct(exam.value.stations))
 const pass = computed(() => myPct.value >= exam.value.passPct - 1e-9)
 const ringColor = computed(() => !my.value ? 'var(--primary)' : pass.value ? '#10b981' : '#ef4444')
-const rows = computed(() => exam.value.stations.map((s, i) => {
+const rows = computed(() => src.value.stations.map((s, i) => {
   const score = my.value?.scores?.[i]
   const meanPct = stationPct(s.mean, s.max)
   return { i, name: s.name, max: s.max, mean: s.mean, sd: s.sd, min: s.min, top: s.top,
@@ -163,6 +184,9 @@ watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id, !!my.va
 .ms-lg-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; }
 .ms-lg-pm { width: 2px; height: 11px; background: var(--ink); display: inline-block; }
 .ms-cls { padding: 12px 14px; }
+.ms-scope { display: flex; gap: 6px; margin-bottom: 10px; }
+.ms-scope button { flex: 1; font: inherit; font-size: .8rem; font-weight: 600; border: var(--bw) solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 10px; }
+.ms-scope button.on { background: var(--primary); border-color: var(--primary); color: #fff; }
 .ms-cls-cap { font-size: .78rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
 .ms-cls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .ms-cls-box { border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; }
