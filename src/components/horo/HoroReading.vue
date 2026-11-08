@@ -36,7 +36,7 @@
     <section class="hr-tarot">
       <h3>ไพ่ประจำวัน</h3>
       <div class="hr-tarot-body">
-        <button class="hr-card" :class="{ flip: opened }" :aria-label="opened ? tarot.card.en : 'แตะเพื่อเปิดไพ่'" @click="openCard">
+        <button class="hr-card" :class="{ flip: opened }" :aria-label="opened ? `ขยายไพ่ ${tarot.card.en}` : 'แตะเพื่อเปิดไพ่'" @click="openCard">
           <span class="face back"><span class="back-mark">☾ ✦ ☽</span></span>
           <span class="face front"><img :src="tarotSrc(tarot.card.img)" :alt="tarot.card.en" :class="{ rev: tarot.reversed }" loading="lazy" /></span>
         </button>
@@ -54,6 +54,16 @@
         </div>
       </div>
     </section>
+
+    <!-- ไพ่ขยาย — แตะไพ่ที่เปิดแล้ว = ขยาย · แตะอีกที = หด (z410: เปิดจากใน BottomSheet z400) -->
+    <Teleport to="body">
+      <Transition name="hr-zoom">
+        <button v-if="zoomed" class="hr-zoom" aria-label="ย่อไพ่" @click="zoomed = false">
+          <img :src="tarotSrc(tarot.card.img)" :alt="tarot.card.en" :class="{ rev: tarot.reversed }" />
+          <span>{{ tarot.card.en }} · {{ tarot.card.th }}{{ tarot.reversed ? ' (กลับหัว)' : '' }}</span>
+        </button>
+      </Transition>
+    </Teleport>
 
     <!-- ดวงรายวัน -->
     <section v-if="profile" class="hr-daily">
@@ -140,8 +150,9 @@ const arc = computed(() => {
 // เปิดไพ่แล้ว → จำไว้ทั้งวัน (สะดวกเฉยๆ ถ้าอ่านไม่ได้ก็แค่ต้องแตะใหม่)
 const KEY = `horo-open-${day}`
 const opened = ref((() => { try { return localStorage.getItem(KEY) === '1' } catch { return false } })())
+const zoomed = ref(false)
 function openCard() {
-  if (opened.value) return
+  if (opened.value) { zoomed.value = true; return }
   opened.value = true
   try { localStorage.setItem(KEY, '1') } catch { /* ไม่เป็นไร */ }
 }
@@ -182,6 +193,16 @@ function openCard() {
 .front img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .front img.rev { transform: rotate(180deg); }
 @keyframes hr-breathe { 50% { box-shadow: 0 6px 22px rgba(233, 196, 106, .55); } }
+.hr-zoom { position: fixed; inset: 0; z-index: 410; border: 0; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(20, 22, 48, .82); cursor: zoom-out; font: inherit; }
+.hr-zoom img { width: min(78vw, 340px); max-height: 78vh; object-fit: contain; border-radius: 14px; border: 6px solid #fff; box-shadow: 0 18px 50px rgba(0, 0, 0, .45); }
+.hr-zoom img.rev { transform: rotate(180deg); }
+.hr-zoom span { color: #fdf6dc; font-weight: 800; font-size: .9rem; }
+.hr-zoom-enter-active, .hr-zoom-leave-active { transition: opacity .2s ease; }
+.hr-zoom-enter-active img, .hr-zoom-leave-active img { transition: transform .25s cubic-bezier(.2, .8, .2, 1); }
+.hr-zoom-enter-from, .hr-zoom-leave-to { opacity: 0; }
+.hr-zoom-enter-from img:not(.rev), .hr-zoom-leave-to img:not(.rev) { transform: scale(.6); }
+.hr-zoom-enter-from img.rev, .hr-zoom-leave-to img.rev { transform: rotate(180deg) scale(.6); }
+.hr-card.flip { cursor: zoom-in; }
 .hr-tarot-t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .hr-cn { font-size: 1rem; color: var(--ink); }
 .hr-tarot-t small { font-size: .78rem; color: var(--muted); }
