@@ -53,6 +53,8 @@
       <TagChips :member="auth.userData" class="me-tags" />
       </section>
       <MbtiPicker v-if="mbtiTop" class="me-mbti-top" />
+      <!-- ดวงของฉัน — ข้าง MBTI ด้านบนเสมอ (user 9 พ.ย. 2026) -->
+      <HoroRow />
 
       <!-- แท็บ: ผลฝึก · ต่อสู้ (รวมท้าสู้กระชับมิตร) · ข่าวรุ่น · ความสำเร็จ — จำแท็บไว้ใน ?tab= กดย้อนกลับแล้วไม่เด้งกลับแท็บแรก -->
       <div ref="tabsEl" class="me-tabs" role="tablist">
@@ -107,6 +109,7 @@
 </template>
 
 <script setup>
+import HoroRow from '../components/horo/HoroRow.vue'
 import MbtiPicker from '../components/members/MbtiPicker.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed, watch, onMounted } from 'vue'

@@ -46,6 +46,14 @@ service cloud.firestore {
     //  update: admins anything; otherwise only your own doc, with the `role`
     //          field unchanged and coins kept non-negative (light guards)
     //  delete: admin only
+    // ข้อมูลเกิด (ดวงประจำวัน) — ปีเกิด/เวลาตกฟาก อ่านได้เฉพาะเจ้าของ (user doc ใครล็อกอินก็อ่านได้)
+    match /users/{userId}/private/horo {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.d is int && request.resource.data.m is int
+        && request.resource.data.d >= 1 && request.resource.data.d <= 31
+        && request.resource.data.m >= 1 && request.resource.data.m <= 12;
+    }
     match /users/{userId} {
       allow read:   if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == userId;

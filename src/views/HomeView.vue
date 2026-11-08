@@ -19,6 +19,8 @@
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
       <MockScoreCard only-unseen class="home" />
       <DailyCard />
+      <!-- ดวงวันนี้ (user 9 พ.ย. 2026) — โหลด lazy เพราะไลบรารีคำนวณดาว -->
+      <HoroCard />
       <ExamCountdown />
       <!-- อีเวนต์ประจำเดือน — ทางเข้าร้านแต้มอีเวนต์จากหน้าแรก (user 25 ต.ค. 2026) -->
       <EventBanner />
@@ -54,13 +56,14 @@
 import Emoji from '../components/shared/Emoji.vue'
 import MockScoreCard from '../components/me/MockScoreCard.vue'
 import { RouterLink } from 'vue-router'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useMailbox } from '../stores/mailbox.js'
 import { questNotClaimed } from '../utils/dailyQuest.js'
 import { pendingAnnounce } from '../utils/mailbox.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import DailyCard from '../components/home/DailyCard.vue'
+const HoroCard = defineAsyncComponent(() => import('../components/horo/HoroCard.vue'))
 import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import EventBanner from '../components/shared/EventBanner.vue'
