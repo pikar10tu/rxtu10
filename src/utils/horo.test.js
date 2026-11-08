@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import * as Astro from 'astronomy-engine'
 import {
-  SIGNS, bkkDate, sunSign, ascendantLon, birthDow, birthProfile, dailyCard, dailyReading, siderealLon, signOf,
+  SIGNS, bkkDate, thaiLagnaLon, ANTONATI, sunSign, ascendantLon, birthDow, birthProfile, dailyCard, dailyReading, siderealLon, signOf,
 } from './horo.js'
 import { TAROT } from '../data/tarot.js'
 
@@ -70,4 +70,16 @@ test('เรือนจันทร์ = ระยะจากราศีเ�
 test('signOf/sidereal wrap', () => {
   assert.equal(signOf(359.9), 11); assert.equal(signOf(-0.1), 11)
   assert.ok(siderealLon(10, new Date()) > 300)
+})
+
+test('ลัคนาแบบไทย (อันโตนาที) ตรงกับ myhora 3 วันเกิด', () => {
+  assert.equal(ANTONATI.reduce((a, b) => a + b), 1440)
+  const cases = [[15, 1, 2004, '09:00', 'มีน'], [3, 11, 2004, '21:15', 'กรกฎ'], [20, 8, 2001, '14:30', 'พิจิก']]
+  for (const [d, m, y, t, want] of cases) assert.equal(SIGNS[birthProfile({ d, m, y, time: t }).asc], want, `${d}/${m}/${y} ${t}`)
+})
+
+test('ลัคนาไทย: 06:00 = ตำแหน่งอาทิตย์ · ครบ 24 ชม. วนกลับที่เดิม', () => {
+  assert.equal(thaiLagnaLon(100, '06:00'), 100)
+  assert.ok(Math.abs(thaiLagnaLon(100, '05:59') - 100) > 330 || thaiLagnaLon(100, '05:59') < 100)
+  assert.equal(signOf(thaiLagnaLon(0, '08:00')), 1)       // เมษ 0° + 120 นาที = เข้าพฤษภพอดี
 })

@@ -16,12 +16,28 @@ import BottomSheet from '../shared/BottomSheet.vue'
 import HoroReading from './HoroReading.vue'
 import HoroSetup from './HoroSetup.vue'
 import { useAuthStore } from '../../stores/auth.js'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '../../firebase/config.js'
+import { birthProfile, HORO_V } from '../../utils/horo.js'
 
 const props = defineProps({ open: Boolean, start: { type: String, default: 'read' } })
 defineEmits(['update:open'])
 const auth = useAuthStore()
 const view = ref(props.start)
-watch(() => props.open, (o) => { if (o) view.value = props.start })
+// ค่าที่คำนวณด้วยสูตรเก่า (ลัคนาดาราศาสตร์) → อ่านข้อมูลเกิดแล้วคำนวณใหม่ครั้งเดียว
+let tried = false
+async function upgrade() {
+  const h = auth.userData?.horo
+  if (tried || !h || h.v === HORO_V || !auth.currentUser) return
+  tried = true
+  try {
+    const s = await getDoc(doc(db, 'users', auth.currentUser.uid, 'private', 'horo'))
+    if (!s.exists()) return
+    const horo = birthProfile(s.data())
+    await auth.patchUser({ horo }, { horo })
+  } catch (e) { console.error('[horo upgrade]', e) }
+}
+watch(() => props.open, (o) => { if (o) { view.value = props.start; upgrade() } }, { immediate: true })
 </script>
 
 <style scoped>

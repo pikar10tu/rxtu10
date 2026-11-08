@@ -8,6 +8,7 @@ import { TAROT } from '../data/tarot.js'
 import { HOUSES, LUCKY_COLORS, SIGNS, SIGN_ICONS } from '../data/horoHouses.js'
 
 export { SIGNS, SIGN_ICONS }
+export const HORO_V = 2                       // 2 = ลัคนาแบบไทย (อันโตนาที) · ค่าเก่าใน user doc จะถูกคำนวณใหม่ตอนเปิดดวง
 export const DEFAULT_TIME = '06:00'            // ไม่รู้เวลาเกิด → ถือว่าเกิดตอนพระอาทิตย์ขึ้น (ตามที่โหรไทยนิยม)
 const BKK = { lat: 13.7563, lon: 100.5018 }    // ใช้กรุงเทพฯ เป็นที่เกิดทุกคน
 const BKK_MS = 7 * 3_600_000
@@ -44,6 +45,21 @@ export function ascendantSign(date) {
   return signOf(siderealLon(ascendantLon(date), date))
 }
 
+/**
+ * ลัคนาแบบโหราศาสตร์ไทย "อันโตนาทีสามัญ อาทิตย์อุทัย 06:00" (แบบที่ myhora/หมอดูไทยใช้)
+ * 06:00 ลัคนา = ตำแหน่งอาทิตย์ · จากนั้นเดินไปตามเวลาที่แต่ละราศีใช้ขึ้น (นาที, รวม 1440)
+ * ต่างจากลัคนาดาราศาสตร์ได้ถึง ~1 ราศี — คนไทยคุ้นกับแบบนี้ (เทียบ myhora 9 พ.ย. 2026)
+ */
+export const ANTONATI = [120, 96, 72, 120, 144, 168, 168, 144, 120, 72, 96, 120]
+export function thaiLagnaLon(sunLon, time) {
+  const [hh, mm] = String(time).split(':').map(Number)
+  let t = (((hh || 0) * 60 + (mm || 0) - 360) % 1440 + 1440) % 1440
+  let sign = signOf(sunLon), deg = norm(sunLon) % 30
+  let left = (30 - deg) / 30 * ANTONATI[sign]          // นาทีที่เหลือของราศีอาทิตย์
+  while (t >= left) { t -= left; sign = (sign + 1) % 12; deg = 0; left = ANTONATI[sign] }
+  return sign * 30 + deg + (t / ANTONATI[sign]) * 30
+}
+
 /** วันในสัปดาห์ที่เกิด 0–6 · พุธหลัง 18:00 = 7 (ราหู) — เฉพาะเมื่อกรอกเวลา */
 export function birthDow(y, m, d, time) {
   const dow = new Date(Date.UTC(y || 2000, m - 1, d)).getUTCDay()
@@ -62,8 +78,11 @@ export function birthProfile({ d, m, y, time }) {
   const sign = sunSign(date)
   const dow = y ? birthDow(y, m, d, time) : null
   let asc = null
-  if (y) asc = ascendantSign(bkkDate(y, m, d, time || DEFAULT_TIME))
-  return { sign, dow, asc, ascApprox: !!y && !time }
+  if (y) {
+    const t2 = time || DEFAULT_TIME, at = bkkDate(y, m, d, t2)
+    asc = signOf(thaiLagnaLon(siderealLon(Astro.SunPosition(at).elon, at), t2))
+  }
+  return { sign, dow, asc, ascApprox: !!y && !time, v: HORO_V }
 }
 
 // ── seed คงที่ทั้งวัน ──
