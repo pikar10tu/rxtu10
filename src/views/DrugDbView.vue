@@ -1,5 +1,6 @@
 <!-- src/views/DrugDbView.vue — ฐานข้อมูลยา (17 ต.ค. 2026)
-     ข้อมูลยาภาษาไทย จากฐานข้อมูล DailyMed (US FDA) · ข้อมูล data/drugDb.json สร้างจาก D:\RXTU\drugdb
+     ข้อมูลยาภาษาไทย หลายแหล่ง (FDA · NLEM · guideline · LactMed) · ข้อมูล data/drugDb.json สร้างจาก D:\RXTU\drugdb
+     8 พ.ย. 2026 การ์ดแบบใหม่: บน = จุดออกสอบ · กดขยาย = ข้อมูลเต็ม · ทุกบรรทัดมีป้ายอ้างอิง (schema ดู utils/drugCard.js)
      ปิดด้วย flag drugDbOpen — ตอนนี้แอดมินเห็นคนเดียว · ข้อความในการ์ดมี <b> ของเราเอง (v-html ปลอดภัย ไม่มี input ผู้ใช้) -->
 <template>
   <div class="tab-content dd-wrap">
@@ -26,47 +27,75 @@
       <header>
         <h2>{{ drug.name }}</h2>
         <div class="dd-cls">{{ drug.cls }}</div>
-        <div class="dd-chips"><span v-for="c in drug.chips" :key="c">{{ c }}</span></div>
+        <div class="dd-chips">
+          <span v-if="drug.nlem" class="dd-nlem">NLEM 2569 · {{ drug.nlem }}<a v-if="nlemRef" class="dd-ref" :href="nlemRef.url" target="_blank" rel="noopener" :title="nlemRef.title">[{{ nlemRef.n }}]</a></span>
+          <span v-for="c in drug.chips" :key="c">{{ c }}</span>
+        </div>
       </header>
-      <div v-if="drug.bw" class="dd-bw"><b>{{ drug.bwTitle || 'BOXED WARNING' }}</b><span v-html="drug.bw" /></div>
+      <p v-if="drug.nlemCond" class="dd-cond"><b>เงื่อนไขบัญชียาหลัก</b> · {{ L(drug.nlemCond).t }}<RefChips :refs="L(drug.nlemCond).refs" /></p>
+      <p v-if="L(drug.moa)" class="dd-moa"><b>กลไก</b> · <span v-html="L(drug.moa).t" /><RefChips :refs="L(drug.moa).refs" /></p>
+      <div v-if="drug.bw" class="dd-bw"><b>{{ drug.bwTitle || 'BOXED WARNING' }}</b><span v-html="L(drug.bw).t" /><RefChips :refs="L(drug.bw).refs" /></div>
 
-      <section>
-        <h4>ข้อบ่งใช้และขนาดยา</h4>
-        <div class="dd-tbl"><table>
-          <tr><th>ข้อบ่งใช้</th><th>ขนาดยา</th></tr>
-          <tr v-for="r in drug.ind" :key="r[0]"><td v-html="r[0]" /><td v-html="r[1]" /></tr>
-        </table></div>
-        <ul><li v-for="x in drug.doseNotes" :key="x" v-html="x" /></ul>
-      </section>
-      <div class="dd-organ"><b>ไต</b> · <span v-html="drug.renal" /><br><b>ตับ</b> · <span v-html="drug.hepatic" /></div>
+      <div v-if="drug.exam?.length" class="dd-exam">
+        <h4><Emoji char="🎯" /> จุดที่ออกสอบบ่อย</h4>
+        <ul><li v-for="(x, i) in drug.exam" :key="i"><span v-html="L(x).t" /><RefChips :refs="L(x).refs" /></li></ul>
+      </div>
 
-      <section>
-        <h4>กลไกการออกฤทธิ์และเภสัชจลนศาสตร์</h4>
-        <p v-html="drug.moa" />
-        <div class="dd-tbl"><table><tr v-for="r in drug.pk" :key="r[0]"><td>{{ r[0] }}</td><td v-html="r[1]" /></tr></table></div>
-      </section>
-      <section v-for="s in LIST_SECTIONS" :key="s.k">
-        <h4>{{ s.t }}</h4>
-        <ul><li v-for="x in drug[s.k]" :key="x" v-html="x" /></ul>
-      </section>
-
-      <footer class="dd-src">
-        ที่มา: {{ drug.src.lab }} · ฉลากฉบับ {{ drug.src.date }}<b v-if="drug.src.old"> · {{ drug.src.old }}</b><br>
-        <a :href="`https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${drug.src.set}`" target="_blank" rel="noopener">อ่านเอกสารกำกับยาฉบับเต็ม (DailyMed)</a>
-        · ใช้เพื่อการเรียน ไม่ใช่แทนการตัดสินใจทางคลินิก
-      </footer>
+      <div class="dd-more">
+        <details>
+          <summary>ข้อบ่งใช้และขนาดยา</summary>
+          <div class="dd-sec">
+            <div class="dd-tbl"><table>
+              <tr><th>ข้อบ่งใช้</th><th>ขนาดยา</th></tr>
+              <tr v-for="(r, i) in indRows" :key="i"><td v-html="r.i" /><td><span v-html="r.d" /><RefChips :refs="r.refs" /></td></tr>
+            </table></div>
+            <ul v-if="drug.doseNotes?.length"><li v-for="(x, i) in drug.doseNotes" :key="i"><span v-html="L(x).t" /><RefChips :refs="L(x).refs" /></li></ul>
+          </div>
+        </details>
+        <details v-if="drug.renal || drug.hepatic">
+          <summary>ผู้ป่วยไตเสื่อม / ตับเสื่อม</summary>
+          <div class="dd-sec">
+            <p v-if="drug.renal"><b>ไต</b> · <span v-html="L(drug.renal).t" /><RefChips :refs="L(drug.renal).refs" /></p>
+            <p v-if="drug.hepatic"><b>ตับ</b> · <span v-html="L(drug.hepatic).t" /><RefChips :refs="L(drug.hepatic).refs" /></p>
+          </div>
+        </details>
+        <details v-for="s in sections" :key="s.k">
+          <summary>{{ s.t }}</summary>
+          <div class="dd-sec"><ul><li v-for="(x, i) in drug[s.k]" :key="i"><span v-html="L(x).t" /><RefChips :refs="L(x).refs" /></li></ul></div>
+        </details>
+        <details v-if="pkRows.length">
+          <summary>เภสัชจลนศาสตร์</summary>
+          <div class="dd-sec"><div class="dd-tbl"><table>
+            <tr v-for="r in pkRows" :key="r.k"><td>{{ r.k }}</td><td><span v-html="r.v" /><RefChips :refs="r.refs" /></td></tr>
+          </table></div></div>
+        </details>
+        <details open>
+          <summary><Emoji char="📚" /> แหล่งอ้างอิง</summary>
+          <ol class="dd-reflist">
+            <li v-for="(r, i) in refs" :key="r.id"><span class="dd-n">[{{ i + 1 }}]</span><span><a :href="r.url" target="_blank" rel="noopener">{{ r.title }}</a><small v-if="r.src">{{ r.src }}</small></span></li>
+          </ol>
+        </details>
+      </div>
+      <footer class="dd-src">ใช้เพื่อการเรียน ไม่ใช่แทนการตัดสินใจทางคลินิก · กดเลขในวงเล็บเพื่อเปิดเอกสารต้นฉบับ</footer>
     </article>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, h } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
 import DRUG_DB from '../data/drugDb.json'
 import { useAuthStore } from '../stores/auth.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { isFeatureOpen } from '../utils/featureFlags.js'
+import { LIST_SECTIONS, cardRefs, resolveLine, resolveIndRow, resolvePkRow } from '../utils/drugCard.js'
+
+// ป้ายอ้างอิง [n §หัวข้อ] กดเปิดเอกสารต้นฉบับในแท็บใหม่
+const RefChips = (props) => props.refs?.length
+  ? props.refs.map(r => h('a', { class: 'dd-ref', href: r.url, target: '_blank', rel: 'noopener', title: r.title }, `[${r.label}]`))
+  : null
+RefChips.props = ['refs']
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -74,15 +103,16 @@ const { rawConfig } = useAppConfig()
 // กันซ้ำในหน้า — router guard ปล่อยผ่านตอน config ยังไม่โหลด (refresh ค้างหน้านี้)
 const open = computed(() => isFeatureOpen(rawConfig.value, 'drugDbOpen', { isAdmin: authStore.isAdmin }))
 
-const LIST_SECTIONS = [
-  { k: 'mon', t: 'Monitoring' }, { k: 'ci', t: 'ข้อห้ามใช้' }, { k: 'warn', t: 'คำเตือน' },
-  { k: 'ae', t: 'อาการไม่พึงประสงค์' }, { k: 'ddi', t: 'อันตรกิริยา' }, { k: 'pop', t: 'กลุ่มประชากรพิเศษ' },
-  { k: 'od', t: 'ยาเกินขนาด' }, { k: 'cou', t: 'Counseling' },
-]
 
 const q = ref('')
 const selId = ref(null)
 const drug = computed(() => DRUG_DB.find(d => d.id === selId.value) || null)
+const refs = computed(() => cardRefs(drug.value))
+const L = (line) => resolveLine(line, refs.value)
+const indRows = computed(() => (drug.value?.ind || []).map(r => resolveIndRow(r, refs.value)))
+const pkRows = computed(() => (drug.value?.pk || []).map(r => resolvePkRow(r, refs.value)))
+const sections = computed(() => LIST_SECTIONS.filter(s => drug.value?.[s.k]?.length))
+const nlemRef = computed(() => { const i = refs.value.findIndex(r => r.id === 'nlem'); return i < 0 ? null : { ...refs.value[i], n: i + 1 } })
 const groups = computed(() => {
   const term = q.value.trim().toLowerCase()
   const m = new Map()
@@ -123,7 +153,25 @@ function back() { if (selId.value) selId.value = null; else router.push('/study'
 .dd-tbl table { border-collapse: collapse; width: 100%; font-size: .82rem; }
 .dd-tbl th, .dd-tbl td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
 .dd-tbl th { font-size: .72rem; color: var(--muted); }
-.dd-organ { background: #fff6e0; border-left: 3px solid #d08a16; border-radius: 0 8px 8px 0; padding: 8px 10px; font-size: .82rem; }
+.dd-nlem { background: var(--mint) !important; font-weight: 700; }
+.dd-moa, .dd-cond { margin: 0; }
+.dd-cond { font-size: .8rem; color: var(--muted); }
+.dd-exam { background: #f1eafb; border-radius: 12px; padding: 10px 12px; }
+.dd-exam h4 { color: #6b3fb0 !important; }
+.dd-ref { font-size: .7rem; font-weight: 700; color: var(--primary); text-decoration: none; background: var(--primary-light); border-radius: 5px; padding: 0 4px; margin-left: 4px; white-space: nowrap; }
+.dd-ref:focus-visible { outline: 2px solid var(--primary); }
+.dd-more details { border-top: 1px solid var(--line); }
+.dd-more details:last-child { border-bottom: 1px solid var(--line); }
+.dd-more summary { cursor: pointer; padding: 11px 2px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.dd-more summary::-webkit-details-marker { display: none; }
+.dd-more summary::after { content: '+'; color: var(--muted); font-weight: 400; }
+.dd-more details[open] > summary::after { content: '−'; }
+.dd-sec { padding: 0 2px 12px; display: flex; flex-direction: column; gap: 6px; }
+.dd-sec p { margin: 0; }
+.dd-reflist { list-style: none; margin: 0; padding: 0 2px 12px; display: flex; flex-direction: column; gap: 8px; font-size: .8rem; }
+.dd-reflist li { display: grid; grid-template-columns: 30px 1fr; gap: 4px; }
+.dd-reflist a { color: var(--ink); }
+.dd-reflist small { display: block; color: var(--muted); font-size: .72rem; }
+.dd-n { color: var(--primary); font-weight: 700; }
 .dd-src { border-top: 1px solid var(--line); padding-top: 10px; font-size: .74rem; color: var(--muted); }
-.dd-src a { color: var(--primary); }
 </style>
