@@ -27,6 +27,7 @@
         <b v-if="profile">{{ reading.house.head }}</b>
         <b v-else>ท้องฟ้าวันนี้</b>
         <p v-if="profile">ดวงจันทร์จรราศี{{ SIGNS[moon] }} เป็นเรือนที่ {{ reading.house.n }} ({{ reading.house.name }}) นับจากราศี{{ SIGNS[profile.sign] }}ของคุณ</p>
+        <p v-if="profile" class="hr-about">{{ reading.house.about }}</p>
         <p v-else>ดวงจันทร์อยู่ราศี{{ SIGNS[moon] }} กรอกวันเกิดเพื่อดูว่าวันนี้ตรงกับเรือนไหนของคุณ</p>
       </div>
     </section>
@@ -84,7 +85,7 @@
     <button v-if="!profile || !colors" class="hr-setup" @click="$emit('setup')">
       {{ profile ? 'เพิ่มปีเกิด เพื่อดูสีมงคลและลัคนา ›' : 'กรอกวันเกิด เพื่อดูดวงตามราศี ›' }}
     </button>
-    <p class="hr-fine">คำนวณจากตำแหน่งดาวจริง (ระบบไทย) · เพื่อความบันเทิง</p>
+    <p class="hr-fine">คำนวณจากตำแหน่งดาวจริง (ระบบไทย) · อ่านไว้เป็นกำลังใจ ตัดสินใจด้วยตัวเองนะ</p>
   </div>
 </template>
 
@@ -166,6 +167,7 @@ function openCard() {
 .hr-sky-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .hr-sky-t small { font-size: .72rem; color: rgba(238, 240, 255, .7); letter-spacing: .04em; }
 .hr-sky-t b { font-size: 1.05rem; color: var(--gold); }
+.hr-about { margin-top: 4px !important; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, .14); color: #fff !important; }
 .hr-sky-t p { margin: 0; font-size: .78rem; line-height: 1.55; color: rgba(238, 240, 255, .88); }
 
 .hr-tarot-body { display: flex; gap: 14px; align-items: flex-start; }
