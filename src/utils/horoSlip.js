@@ -84,7 +84,7 @@ export function drawSlip(canvas, d) {
     text('✦ PharMoo ✦', { size: 78, weight: 700, align: 'center', color: '#1a1a1a', lh: 1.15 })
     text('ดวงประจำวัน สำหรับนักศึกษาเภสัชสายมู', { size: 34, align: 'center', color: '#666', font: BODY, lh: 1.6 })
     text(`ใบเสร็จ · ${d.dateText}`, { size: 32, align: 'center', color: '#666', lh: 1.5 })
-    text(`ลูกค้า: ${d.name} · ราศี${d.sign}${d.asc ? ` · ลัคนา${d.asc}` : ''}`, { size: 32, align: 'center', color: '#666', lh: 1.5 })
+    text(`นศภ.${d.name} · ราศี${d.sign}${d.asc ? ` · ลัคนา${d.asc}` : ''}`, { size: 32, align: 'center', color: '#666', lh: 1.5 })
     dash()
     // ดาวแต่ละด้าน + คำสรุปบรรทัดใต้ (ตัด "งาน:" นำหน้าออก)
     const sub = (t) => text(t.replace(/^[^:]+:\s*/, ''), { size: 33, color: '#555', font: BODY, lh: 1.4 })
