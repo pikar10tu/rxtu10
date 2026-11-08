@@ -29,21 +29,27 @@
               <span class="ms-chip" :class="pass ? 'ok' : 'no'">{{ pass ? 'ผ่านเกณฑ์' : 'ยังไม่ถึงเกณฑ์' }} {{ pctText(exam.passPct) }}</span>
               <span class="ms-chip">ผ่าน {{ nPassSt }}/{{ exam.stations.length }} ฐาน</span>
             </div>
-            <div class="ms-sub">เฉลี่ยรุ่น {{ pctText(clsPct) }} · {{ exam.n }} คน</div>
           </template>
           <template v-else>
             <div class="ms-sub">ยังไม่มีผลของเราในรอบนี้ — ดูภาพรวมรุ่นไปก่อนได้</div>
-            <div class="ms-chips">
-              <span class="ms-chip">เฉลี่ยรุ่น {{ pctText(clsPct) }}</span>
-              <span class="ms-chip">{{ exam.n }} คน · เกณฑ์ผ่าน {{ pctText(exam.passPct) }}</span>
-            </div>
+            <div class="ms-chips"><span class="ms-chip">เกณฑ์ผ่าน {{ pctText(exam.passPct) }}</span></div>
           </template>
+        </div>
+      </section>
+
+      <!-- ภาพรวมรุ่น: เฉลี่ย (เลขคณิต) · ต่ำสุด · สูงสุด ของ % รวม -->
+      <section class="ms-card ms-cls">
+        <div class="ms-cls-cap">ภาพรวมรุ่น · {{ exam.n }} คน</div>
+        <div class="ms-cls-grid">
+          <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ pctText(clsPct) }}</b></div>
+          <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ Number.isFinite(exam.minPct) ? pctText(exam.minPct) : '-' }}</b></div>
+          <div class="ms-cls-box"><small>สูงสุด</small><b>{{ Number.isFinite(exam.maxPct) ? pctText(exam.maxPct) : '-' }}</b></div>
         </div>
       </section>
 
       <div v-if="my" class="ms-private"><Emoji char="🔒" /> คะแนนนี้เห็นแค่เราคนเดียว</div>
 
-      <!-- แถบรายฐาน: ยาว = % ของฐานนั้น · ขีด = เกณฑ์ · จุดขาว = เฉลี่ยรุ่น -->
+      <!-- แถบรายฐาน: ยาว = % ของฐานนั้น · แถบจาง = ช่วงต่ำสุด–สูงสุดของรุ่น · ขีด = เกณฑ์ · จุดขาว = เฉลี่ยรุ่น -->
       <section class="ms-card">
         <div class="ms-rows">
           <div v-for="r in rows" :key="r.i" class="ms-row">
@@ -53,14 +59,20 @@
               <span class="ms-sc" v-else>เฉลี่ย <b>{{ fmt(r.mean) }}</b>/{{ r.max }}</span>
             </div>
             <div class="ms-bar">
+              <span v-if="Number.isFinite(r.min)" class="ms-range" :style="{ left: r.minPct * 100 + '%', width: (r.topPct - r.minPct) * 100 + '%' }" />
               <i :style="{ width: r.pct * 100 + '%', background: barColor(r.pct) }" />
               <span class="ms-pm" :style="{ left: exam.passPct * 100 + '%' }" />
-              <span v-if="my" class="ms-avg" :style="{ left: r.meanPct * 100 + '%' }" />
+              <span class="ms-avg" :style="{ left: r.meanPct * 100 + '%' }" />
+            </div>
+            <div class="ms-row-cls">
+              <span class="avg">เฉลี่ย <b>{{ fmt(r.mean) }}</b></span>
+              <template v-if="Number.isFinite(r.min)"><span>ต่ำสุด {{ fmt(r.min) }}</span><span>สูงสุด {{ fmt(r.top) }}</span></template>
             </div>
           </div>
         </div>
         <div class="ms-legend">
-          <span v-if="my"><span class="ms-lg-dot" /> เฉลี่ยรุ่น</span>
+          <span><span class="ms-lg-dot" /> เฉลี่ยรุ่น</span>
+          <span><span class="ms-lg-rng" /> ช่วงต่ำสุด–สูงสุด</span>
           <span><span class="ms-lg-pm" /> เกณฑ์ {{ pctText(exam.passPct) }}</span>
         </div>
       </section>
@@ -96,7 +108,8 @@ const ringColor = computed(() => !my.value ? 'var(--primary)' : pass.value ? '#1
 const rows = computed(() => exam.value.stations.map((s, i) => {
   const score = my.value?.scores?.[i]
   const meanPct = stationPct(s.mean, s.max)
-  return { i, name: s.name, max: s.max, mean: s.mean, score, meanPct, pct: my.value ? stationPct(score, s.max) : meanPct }
+  return { i, name: s.name, max: s.max, mean: s.mean, min: s.min, top: s.top,
+    minPct: stationPct(s.min, s.max), topPct: stationPct(s.top, s.max), score, meanPct, pct: my.value ? stationPct(score, s.max) : meanPct }
 }))
 const nPassSt = computed(() => rows.value.filter(r => r.pct >= exam.value.passPct - 1e-9).length)
 const weak = computed(() => my.value ? weakestStation(exam.value.stations, my.value.scores, exam.value.passPct) : -1)
@@ -148,6 +161,19 @@ watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id) }, { im
 .ms-legend > span { display: flex; align-items: center; gap: 5px; }
 .ms-lg-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; }
 .ms-lg-pm { width: 2px; height: 11px; background: var(--ink); display: inline-block; }
+.ms-cls { padding: 12px 14px; }
+.ms-cls-cap { font-size: .78rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+.ms-cls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ms-cls-box { border: var(--bw) solid var(--line); border-radius: 12px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; }
+.ms-cls-box small { font-size: .72rem; color: var(--muted); }
+.ms-cls-box b { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--ink); }
+.ms-cls-box.avg { background: #eef5fb; border-color: var(--primary); }
+.ms-cls-box.avg b { color: var(--primary); }
+.ms-range { position: absolute; top: calc(100% + 3px); height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .45); }
+.ms-row-cls { display: flex; gap: 10px; font-size: .74rem; color: var(--muted); margin-top: 9px; font-variant-numeric: tabular-nums; }
+.ms-row-cls .avg { color: var(--primary); }
+.ms-row-cls .avg b { color: var(--primary); }
+.ms-lg-rng { width: 16px; height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .3); display: inline-block; }
 .ms-weak { background: #eef5fb; border-radius: 14px; padding: 10px 12px; font-size: .84rem; color: var(--ink); }
 .ms-weak b { color: #b45309; }
 </style>
