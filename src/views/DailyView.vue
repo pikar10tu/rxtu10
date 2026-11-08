@@ -1,5 +1,5 @@
 <!--
-  ข้อสอบประจำวัน — 5 ข้อชุดเดียวทั้งรุ่น · ข้อละ 30 วิ · เล่นวันละครั้ง · อันดับรับรางวัลหลัง 00:00
+  ข้อสอบประจำวัน — 5 ข้อชุดเดียวทั้งรุ่น · ข้อละ 30 วิ · นับอันดับรอบแรก (ฝึกซ้ำได้ ไม่นับ) · อันดับรับรางวัลหลัง 00:00
   spec: docs/superpowers/specs/2026-10-31-daily-challenge-v2-design.md
 -->
 <template>
@@ -26,15 +26,26 @@
         <ul class="dc-rules">
           <li>5 ข้อ ข้อละ 30 วินาที</li>
           <li>ยิ่งตอบถูกไว ยิ่งได้แต้มเยอะ</li>
-          <li>วันละรอบ เริ่มแล้วลุยให้จบนะ</li>
+          <li>นับอันดับรอบแรกรอบเดียว กดเริ่มแล้วลุยให้จบนะ</li>
+          <li>จบแล้วฝึกซ้ำได้ แต่ไม่นับแต้ม</li>
           <li>ถูกข้อละ {{ DC_COIN_PER_CORRECT }} 🪙 รับเลย</li>
           <li>ติดท็อป 10 ของวัน มีรางวัลรอพรุ่งนี้ สูงสุด 10,000 🪙</li>
         </ul>
         <button class="dc-btn dc-btn-wide" :disabled="starting" @click="start">{{ starting ? 'กำลังเตรียม…' : 'เริ่มเลย →' }}</button>
       </div>
+      <div v-if="stage === 'intro'" class="dc-card">
+        <div class="dc-title"><Emoji char="🏅" /> อันดับวันนี้</div>
+        <div v-if="!board.length" class="dc-sub">ยังไม่มีใครทำวันนี้ เป็นคนแรกเลย!</div>
+        <div v-for="r in board.slice(0, 10)" :key="r.uid" class="dc-row">
+          <span class="dc-rank">{{ medal(r.rank) }}</span>
+          <span class="dc-name">{{ r.name || '?' }}</span>
+          <span class="dc-pts">{{ r.score.toLocaleString() }}</span>
+        </div>
+      </div>
 
       <!-- เล่น -->
       <div v-else-if="stage === 'play' && cur" class="dc-card">
+        <div v-if="practice" class="dc-practice">รอบฝึก · ไม่นับคะแนน</div>
         <div class="dc-prog">
           <span>ข้อ {{ idx + 1 }}/{{ qs.length }}</span>
           <span class="dc-score">{{ score.toLocaleString() }} แต้ม</span>
@@ -67,6 +78,8 @@
           </div>
           <div v-else class="dc-sub">รอบนี้ไม่มีผลบันทึก (ออกกลางทาง) — พรุ่งนี้มาใหม่นะ</div>
           <div class="dc-sub">ประกาศผลตอนเที่ยงคืน · ท็อป 10 กดรับรางวัลได้ที่หน้านี้</div>
+          <div v-if="practiceLast" class="dc-sub dc-plast">รอบฝึกล่าสุด {{ practiceLast.score.toLocaleString() }} แต้ม · ถูก {{ practiceLast.correct }}/5</div>
+          <button v-if="review.length" class="dc-btn dc-btn-wide dc-btn-ghost" @click="startPractice">ฝึกอีกรอบ (ไม่นับคะแนน) ↻</button>
         </div>
         <div v-if="review.length" class="dc-card">
           <div class="dc-title"><Emoji char="📖" /> ทบทวน 5 ข้อของวันนี้</div>
@@ -214,6 +227,8 @@ async function ensureSet() {
 }
 
 // ── เล่น ──
+const practice = ref(false)      // รอบฝึกหลังทำรอบจริงแล้ว — ไม่บันทึกผล ไม่ให้รางวัล
+const practiceLast = ref(null)
 let qsRaw = []                 // ชุดของวันตามต้นฉบับ (ก่อนสลับตัวเลือก)
 const qs = ref([])
 const idx = ref(0)
@@ -274,8 +289,24 @@ async function start() {
   } finally { starting.value = false }
 }
 
+function startPractice() {
+  if (!qsRaw.length) return
+  practice.value = true
+  qs.value = qsRaw.map(shuffleChoices)
+  idx.value = 0; score.value = 0; answers.value = []; totalMs = 0
+  stage.value = 'play'
+  beginQuestion()
+}
+
 async function finish() {
   if (saving.value) return
+  if (practice.value) {
+    practiceLast.value = { score: score.value, correct: answers.value.filter(a => a.correct).length }
+    practice.value = false
+    stage.value = 'done'
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
   saving.value = true
   const correct = answers.value.filter(a => a.correct).length
   const u = auth.userData
@@ -318,7 +349,10 @@ onMounted(async () => {
   const run = async () => {
     checkClaim()
     if (auth.userData?.dc?.last === today) await showDone()
-    else stage.value = 'intro'
+    else {
+      stage.value = 'intro'
+      try { board.value = await loadBoard(today) } catch (e) { console.error('[daily board]', e) }
+    }
   }
   if (auth.userData) run()
   else {
@@ -342,6 +376,9 @@ onBeforeUnmount(() => clearInterval(timer))
 .dc-btn { border: 0; background: var(--primary); color: #fff; font-family: inherit; font-weight: 800; font-size: .86rem; padding: 10px 16px; border-radius: 999px; cursor: pointer; }
 .dc-btn:disabled { opacity: .6; cursor: default; }
 .dc-btn-wide { display: block; width: 100%; margin-top: 12px; padding: 13px; }
+.dc-btn-ghost { background: #fff; color: var(--primary); border: var(--bw) solid var(--primary); }
+.dc-practice { text-align: center; font-size: .74rem; font-weight: 800; color: #7a4b00; background: #fff7d6; border-radius: 999px; padding: 4px 10px; margin-bottom: 8px; }
+.dc-plast { color: var(--primary); font-weight: 700; }
 .dc-claim { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: linear-gradient(135deg, #fff7d6, #ffe9c2); border: var(--bw) solid #f5d48a; border-radius: 16px; padding: 12px 14px; margin-bottom: 12px; }
 .dc-claim-t { font-weight: 800; font-size: .86rem; color: #7a4b00; }
 
