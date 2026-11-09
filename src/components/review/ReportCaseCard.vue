@@ -50,6 +50,7 @@
 
     <template v-else>
       <div class="rc-q">{{ question.question }}</div>
+      <QuestionImages :question="question" />
       <ul class="rc-choices">
         <li v-for="(c, i) in question.choices" :key="i" :class="{ correct: i === question.answer }">
           <span class="rc-c-letter">{{ LETTERS[i] }}</span><span class="rc-c-text">{{ c }}</span>
@@ -94,6 +95,7 @@
 </template>
 
 <script setup>
+import QuestionImages from '../shared/QuestionImages.vue'
 import { ref, computed } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import JudgeActions from './JudgeActions.vue'

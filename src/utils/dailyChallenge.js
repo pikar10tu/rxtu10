@@ -72,6 +72,7 @@ export function pickDaily(first, wrap, n = DC_COUNT) {
     out.push({
       id: q.id, question: q.question || '', choices: q.choices, answer: q.answer,
       explanation: q.explanation || '', pleGroup: q.pleGroup || null, domain: q.domain || null,
+      ...(Array.isArray(q.images) && q.images.length ? { images: q.images } : {}),
     })
   }
   return out

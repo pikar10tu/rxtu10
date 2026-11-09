@@ -98,6 +98,7 @@
         <span class="qv-pill qv-score">ถูก {{ correct }}/{{ answered }}</span>
       </div>
       <div class="qv-q">{{ current.question }}</div>
+      <QuestionImages :question="current" />
       <!-- ก่อนตอบ = ป้ายเฉยๆ · หลังตอบ = ลิงก์เปิดแท็บใหม่ (ความคืบหน้าควิซอยู่ในหน้านี้เท่านั้น ออกจากหน้า = หาย) -->
       <component
         :is="picked !== null ? 'a' : 'span'" v-if="current.source === 'summary'" class="qv-src"
@@ -226,6 +227,7 @@
 </template>
 
 <script setup>
+import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import QuickEditModal from '../components/questions/QuickEditModal.vue'

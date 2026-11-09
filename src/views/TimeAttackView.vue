@@ -59,6 +59,7 @@
       <div v-if="!cur" class="ta-wait">กำลังโหลดข้อถัดไป… <small>(เวลายังเดินอยู่นะ)</small></div>
       <template v-else>
         <div class="ta-q">{{ cur.question }}</div>
+        <QuestionImages :question="cur" />
         <div class="ta-choices">
           <button
             v-for="(c, i) in cur.choices" :key="i"
@@ -107,6 +108,7 @@
 </template>
 
 <script setup>
+import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'

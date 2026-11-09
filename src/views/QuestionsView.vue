@@ -328,6 +328,7 @@
           </div>
           <div v-if="expandedId === q.id" class="qz-detail">
             <div class="qz-detail-q">{{ q.question }}</div>
+            <QuestionImages :question="q" />
             <span v-for="c in getCategories(q)" :key="c" class="qz-cat qz-cat-sm">{{ c }}</span>
             <ul class="qz-choices">
               <li v-for="(c, i) in q.choices" :key="i" :class="{ correct: i === q.answer }">
@@ -374,6 +375,7 @@
 </template>
 
 <script setup>
+import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import QuestionComments from '../components/questions/QuestionComments.vue'

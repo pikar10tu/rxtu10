@@ -52,6 +52,7 @@
         </div>
         <div class="dc-timer"><span :style="{ width: (remain / DC_TIME_MS * 100) + '%' }" :class="{ low: remain < 8000 }"></span></div>
         <div class="dc-q">{{ cur.question }}</div>
+        <QuestionImages :question="cur" />
         <div class="dc-opts">
           <button v-for="(c, i) in cur.choices" :key="i" class="dc-opt" :class="optClass(i)" :disabled="picked !== null" @click="answer(i)">
             <b>{{ LETTERS[i] }}</b> {{ c }}
@@ -106,6 +107,7 @@
 </template>
 
 <script setup>
+import QuestionImages from '../components/shared/QuestionImages.vue'
 import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import {
   doc, getDoc, getDocs, setDoc, collection, query, where, orderBy, startAt, limit,

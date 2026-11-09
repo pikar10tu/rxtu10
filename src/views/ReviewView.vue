@@ -59,6 +59,7 @@
 
         <template v-if="!editing">
           <div class="rv-q">{{ current.question }}</div>
+          <QuestionImages :question="current" />
           <ul class="rv-choices">
             <li v-for="(c, i) in current.choices" :key="i" :class="{ correct: i === current.answer }">
               <span class="rv-c-letter">{{ LETTERS[i] }}</span><span class="rv-c-text">{{ c }}</span>
@@ -314,6 +315,7 @@
 </template>
 
 <script setup>
+import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
 import { ref, computed, watch, onMounted } from 'vue'
