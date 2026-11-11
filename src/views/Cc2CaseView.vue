@@ -90,7 +90,6 @@ async function load() {
     document.getElementById('main-content')?.scrollTo?.(0, 0)
   } catch (e) { error.value = 'โหลดเคสไม่ได้: ' + (e?.message || e) }
 }
-watch(() => route.params.id, load, { immediate: true })
 
 // ── นาฬิกา: นับขึ้นจากตอนเปิดเคส · มี durationMin → นับถอยหลัง เลยเวลาแค่เตือนสี ไม่ตัดจบ ──
 const startedAt = ref(Date.now()), tick = ref(Date.now())
@@ -131,6 +130,9 @@ async function finish() {
   finally { busy.value = false }
 }
 function openDrug(id) { drugId.value = id; drugOpen.value = true }
+
+// ⚠️ ต้องอยู่ท้ายสุด: immediate → load() → reset() ใช้ startedAt/tick — ถ้าอยู่ก่อนประกาศ = TDZ "Cannot access before initialization" (เคยพังบนเว็บจริง 11 พ.ย.)
+watch(() => route.params.id, load, { immediate: true })
 </script>
 
 <style scoped>
