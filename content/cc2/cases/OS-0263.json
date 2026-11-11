@@ -1,0 +1,190 @@
+{
+ "id": "OS-0263",
+ "title": "Oral Solution Preparation: Potassium Chloride Oral Solution with Syrup USP & Ethanol",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "ยาน้ำใส (Oral Solution), การคำนวณ Working Formula & Approximate Volume, Order of Mixing (การผสมสารละลายที่มี Ethanol และ Syrup), การเขียนฉลากยาและ Beyond-Use Date (BUD)",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 4",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "กำหนดสูตรตำรับ Potassium Chloride Oral Solution ดังนี้\nRx 1\nPotassium chloride: 5 g (แก้ไขจาก 10 g)\nEthanol: 3.2 mL\nSyrup USP: 50 mL\nPurified water q.s.: 100 mL\nM.ft. Oral solution 1 fl. oz. (30 mL)\n(ข้อมูลเพิ่มเติม: 1. กำหนดให้ Ethanol 2 mL = 90 หยด 2. อนุญาตให้ปัดตัวเลขทศนิยมเหลือ 1 ตำแหน่งเพื่อให้คำนวณและตวงสารได้ง่าย 3. ทำการบดและชั่งผงยา KCl เตรียมไว้ล่วงหน้าก่อนเริ่มจับเวลา)\nจงปฏิบัติตามคำสั่งต่อไปนี้ (สถานีต่อเนื่อง เวลาปฏิบัติการรวม 8 นาที แบ่งเป็นข้อ 1.1 และ 1.2 ข้อละ 4 นาที):\nข้อ 1.1 (4 นาที): แสดงวิธีคำนวณ Working Formula (W.F.), Approximate Volume (App. Vol.) และคำนวณจำนวนหยดของ Ethanol ที่ต้องใช้\nข้อ 1.2 (4 นาที): เตรียมตำรับยาน้ำใสนี้ด้วยเทคนิคทางเภสัชกรรมที่ดี เทใส่บีกเกอร์พร้อมปิดกระจกนาฬิกาส่งกรรมการผู้คุมสอบ และเขียนฉลากยาให้ถูกต้องครบถ้วน",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีเตรียมยา / Product ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>กำหนดสูตรตำรับ Potassium Chloride Oral Solution ดังนี้</p><p><span style=\"font-weight: 700;\">Rx 1</span></p><ul class=\"bullet-list\"><li>Potassium chloride: 5 g <span style=\"font-style: italic;\">(แก้ไขจาก 10 g)</span></li><li>Ethanol: 3.2 mL</li><li>Syrup USP: 50 mL</li><li>Purified water q.s.: 100 mL</li><li>M.ft. Oral solution 1 fl. oz. (30 mL)</li></ul><p><span style=\"font-style: italic;\">(ข้อมูลเพิ่มเติม: 1. กำหนดให้ Ethanol 2 mL = 90 หยด 2. อนุญาตให้ปัดตัวเลขทศนิยมเหลือ 1 ตำแหน่งเพื่อให้คำนวณและตวงสารได้ง่าย 3. ทำการบดและชั่งผงยา KCl เตรียมไว้ล่วงหน้าก่อนเริ่มจับเวลา)</span></p><p>จงปฏิบัติตามคำสั่งต่อไปนี้ (สถานีต่อเนื่อง เวลาปฏิบัติการรวม 8 นาที แบ่งเป็นข้อ 1.1 และ 1.2 ข้อละ 4 นาที):</p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ข้อ 1.1 (4 นาที):</span> แสดงวิธีคำนวณ Working Formula (W.F.), Approximate Volume (App. Vol.) และคำนวณจำนวนหยดของ Ethanol ที่ต้องใช้</li><li><span style=\"font-weight: 700;\">ข้อ 1.2 (4 นาที):</span> เตรียมตำรับยาน้ำใสนี้ด้วยเทคนิคทางเภสัชกรรมที่ดี เทใส่บีกเกอร์พร้อมปิดกระจกนาฬิกาส่งกรรมการผู้คุมสอบ และเขียนฉลากยาให้ถูกต้องครบถ้วน</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>ผ้าปูพลาสติก</li><li>เครื่องคิดเลข, กระดาษทด และปากกา</li><li>โกร่งกระเบื้อง/ลูกโกร่ง และ โกร่งแก้ว/ลูกโกร่ง</li><li>ช้อนเขาตักสาร, กระดาษชั่งสาร, ไม้พายปาดสาร (Spatula)</li><li>หลอดหยดพร้อมจุกยาง (Dropper) และ แท่งแก้วคน (Stirring rod)</li><li>กระบอกตวง (Graduated cylinder) ขนาด 10 mL, 25 mL, 50 mL, 100 mL</li><li>บีกเกอร์ (Beaker) ขนาด 50 mL, 100 mL, 150 mL, 250 mL และบีกเกอร์ Waste ขนาด 1,000 mL</li><li>กระจกนาฬิกา (Watch glass)</li><li>ฉลากยาสำหรับยารับประทาน (สีขาว/น้ำเงิน)</li><li>สารเคมี: Potassium chloride (บดและชั่งไว้แล้ว 1.5 g), Syrup USP (ในบีกเกอร์ 50 mL), Ethanol (ในบีกเกอร์ 50 mL), Purified water</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณ Working Formula (สูตร 100 mL </span><span class=\"doc-equation\">&rarr;</span><span style=\"font-weight: 700;\"> เตรียม 1 fl. oz. หรือ 30 mL, ตัวคูณ </span><span class=\"doc-equation\">&times;0.3</span><span style=\"font-weight: 700;\">):</span><ul class=\"bullet-list\"><li><span class=\"doc-equation\">Potassiumchloride=5&times;0.3=1.5g</span></li><li><span class=\"doc-equation\">Ethanol=3.2&times;0.3=0.96&asymp;1.0mL</span><ul class=\"bullet-list\"><li>จำนวนหยด Ethanol: โจทย์กำหนด <span class=\"doc-equation\">2mL=90หยด</span> ดังนั้น <span class=\"doc-equation\">1mL=45หยด</span></li></ul></li><li><span class=\"doc-equation\">SyrupUSP=50&times;0.3=15.0mL</span></li><li><span class=\"doc-equation\">Purifiedwaterq.s.ad=30.0mL</span></li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณ Approximate Volume (App. Vol.):</span><ul class=\"bullet-list\"><li>ปริมาตรรวม 30 mL</li><li>ปริมาตรแทนที่ของสารอื่น: KCl 1.5 g คิดเป็น <span class=\"doc-equation\">0.75mL</span> (ถือว่า <span class=\"doc-equation\">2g&asymp;1mL</span>), Ethanol = <span class=\"doc-equation\">1.0mL</span>, Syrup USP = <span class=\"doc-equation\">15.0mL</span> รวมเป็น <span class=\"doc-equation\">16.75mL</span></li><li><span class=\"doc-equation\">App.Vol.ของน้ำ=30-16.75=13.25&asymp;13.3mL</span></li><li>ปริมาณน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.Vol.=13.3&times;<span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>&asymp;10.0mL</span> (ใช้ละลาย KCl ในบีกเกอร์)</li><li>ปริมาณน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.Vol.&asymp;3.3mL</span> (ใช้ Rinse บีกเกอร์เทลงกระบอกตวงปรับปริมาตร)</li></ul></li><li><span style=\"font-weight: 700;\">หลักการ Order of Mixing (ข้อห้ามสำคัญ):</span><ul class=\"bullet-list\"><li>ต้องละลาย KCl ในน้ำ 10 mL ให้ใสสนิทก่อน จากนั้น <span style=\"font-weight: 700;\">ต้องเติม Syrup USP ก่อนเติม Ethanol เสมอ</span></li><li>เพราะ Ethanol มีขั้วต่ำกว่าน้ำ หากหยด Ethanol ลงในสารละลายเกลือ KCl เข้มข้นโดยตรง อาจเกิดปรากฏการณ์ Salting out ทำให้เกลือ KCl ตกผลึกกลับออกมาได้</li><li>การใส่ Syrup USP เข้าไปก่อนจะช่วยเพิ่มความหนืดและเป็นตัวกั้น (Cosolvent buffer) ช่วยป้องกันการตกผลึกของเกลือ และขณะหยด Ethanol ต้องใช้แท่งแก้วคนผสมอย่างสม่ำเสมอ</li></ul></li><li><span style=\"font-weight: 700;\">เกณฑ์วันหมดอายุ (Beyond-Use Date - BUD):</span><ul class=\"bullet-list\"><li>ตำรับนี้ไม่มีการเติมสารกันเสียเฉพาะ (Non-preserved aqueous dosage form)</li><li>กำหนด BUD <span style=\"font-weight: 700;\">ไม่เกิน 14 วัน</span> นับจากวันที่ผลิต และต้องระบุการจัดเก็บในตู้เย็น (2-8 C)</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณ Working Formula และปริมาณ Ethanol",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณสาร W.F. และจำนวนหยดของ Ethanol (1 mL = 45 หยด) ได้ถูกต้องครบถ้วน",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณ W.F. ถูกเฉพาะสารตัวอื่น แต่ผิดที่ Ethanol หรือคำนวณจำนวนหยดของ Ethanol ผิด",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดทั้งหมด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวงสารละลายที่มีความหนืด (Syrup USP)",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "ตวง Syrup USP ปริมาตร 15 mL โดยรินลงตรงกลางกระบอกตวง และรอ Draining time ให้ของเหลวไหลลงจนหมด",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่รินตรงกลางกระบอกตวง (รินเปื้อนผนังขอบกระบอกตวง)",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่รอ Draining time",
+   "s": 0.5,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการตวงผิดพลาดทั้งหมด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวง Purified water ส่วนต้น",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "ตวงน้ำประมาณ 34 ของ App. Vol. (10 mL) โดยเลือกใช้ Graduated cylinder ขนาด 10 mL ได้ถูกต้อง",
+   "html": "ตวงน้ำประมาณ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span></span> ของ App. Vol. (10 mL) โดยเลือกใช้ Graduated cylinder ขนาด 10 mL ได้ถูกต้อง",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เลือกใช้ขนาดกระบอกตวงไม่ถูกต้อง หรือไม่ใช้กระบอกตวง",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับและเทคนิคการผสมสาร (Order of Mixing)",
+   "s": 5,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "ลำดับการผสมถูกต้องสมบูรณ์ และสารละลายใสไม่พบตะกอน:\n  • ละลาย KCl (1.5 g) ในน้ำ 10 mL โดยใช้ Stirring rod คนจนได้สารละลายใส\n  • เท Syrup USP 15 mL ลงไปผสมและคนให้เข้ากันด้วย Stirring rod\n  • หยด Ethanol 1 mL (45 หยด) ลงในสารละลายข้อ 2 โดยใช้ Stirring rod ช่วยคนตลอดเวลาที่หยด",
+   "html": "ลำดับการผสมถูกต้องสมบูรณ์ และสารละลายใสไม่พบตะกอน:<ul class=\"checklist-sub-details\"><li>ละลาย KCl (1.5 g) ในน้ำ 10 mL โดยใช้ Stirring rod คนจนได้สารละลายใส</li><li>เท Syrup USP 15 mL ลงไปผสมและคนให้เข้ากันด้วย Stirring rod</li><li>หยด Ethanol 1 mL (45 หยด) ลงในสารละลายข้อ 2 โดยใช้ Stirring rod ช่วยคนตลอดเวลาที่หยด</li></ul>",
+   "s": 5,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมถูกต้องสมบูรณ์ แต่พบตะกอนหลงเหลือบางส่วน",
+   "s": 3,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "สลับใส่ Ethanol 1 mL ก่อนเติม Syrup USP 15 mL และมีตะกอนบางส่วน หรือไม่ได้ใช้ Stirring rod ช่วยคน",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ใส่ Ethanol ก่อนเติม Syrup USP, ไม่ใช้ Stirring rod ช่วยคน และยังมีตะกอนตกค้าง",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมไม่ถูกต้องทั้งหมด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การปรับปริมาตรและการ Rinse",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "ถ่ายสารละลายลงในกระบอกตวงขนาด 50 mL และใช้น้ำส่วนที่เหลือ (14 App. Vol. 3.3mL) Rinse บีกเกอร์ แล้วปรับปริมาตรจนครบ 30 mL พอดี",
+   "html": "ถ่ายสารละลายลงในกระบอกตวงขนาด 50 mL และใช้น้ำส่วนที่เหลือ (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span></span> App. Vol. <span class=\"doc-equation\">&asymp;3.3mL</span>) Rinse บีกเกอร์ แล้วปรับปริมาตรจนครบ 30 mL พอดี",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "อ่านปริมาตรผิด ปริมาตรขาด/เกิน หรือไม่ได้ทำการ Rinse บีกเกอร์",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การส่งมอบผลิตภัณฑ์",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "เทสารละลายกลับลงบีกเกอร์ คนผสมให้เข้ากันด้วย Stirring rod ก่อนส่ง และปิดปากบีกเกอร์ด้วยกระจกนาฬิกา",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ปฏิบัติหรือส่งในกระบอกตวง",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเขียนฉลากยาและกำหนด Beyond-Use Date (BUD)",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน"
+  },
+  {
+   "t": "เขียนฉลากครบถ้วนสมบูรณ์: ชื่อยาและความแรง (Potassium Chloride Oral Solution), ปริมาณบรรจุ (30 mL หรือ 1 fl. oz.), ข้อบ่งใช้, ชื่อผู้เตรียมยา, วันที่ผลิต, วันหมดอายุ (BUD = 14 วัน เก็บในตู้เย็น 2–8°C), การเก็บรักษายา",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เขียนผิดพลาดหรือไม่ครบถ้วน 1–2 ข้อ",
+   "s": 1.5,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เขียนผิด 3 ข้อ หรือระบุวันหมดอายุ/การเก็บรักษาผิด",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เขียนผิดตั้งแต่ 4 ข้อขึ้นไป หรือไม่เขียนฉลาก",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณและการเตรียมตำรับยาน้ำใส - 15 คะแนน",
+   "sub": true
+  }
+ ]
+}

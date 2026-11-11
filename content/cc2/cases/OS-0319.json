@@ -1,0 +1,55 @@
+{
+ "id": "OS-0319",
+ "title": "ointment Mipirocin ชั่ง",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "ointment",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": "OS-0320",
+ "scenario": "ให้นิสิตคำนวณและชั่ง PEG ointment เพื่อใช้ในการทำ Mupirocin ointment 15 g\nสูตรตำรับ :\nMupirocin 2 g\nPEG ointment q.s. 100 g\nคำสั่ง :\nจงคำนวณและชั่ง PEG ointment สำหรับเตรียมสูตรตำรับ 15 g",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตคำนวณและชั่ง PEG ointment เพื่อใช้ในการทำ Mupirocin ointment 15 g</p><p>สูตรตำรับ : </p><ul class=\"bullet-list\"><li>Mupirocin 2 g</li><li>PEG ointment q.s. 100 g</li></ul><p>คำสั่ง : </p><ol class=\"ordered-list\"><li>จงคำนวณและชั่ง PEG ointment สำหรับเตรียมสูตรตำรับ 15 g</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>PEG ointment</li><li>เครื่องชั่ง</li><li>กระดาษธรรมดาและกระดาษไข</li><li>ช้อนเขา</li><li>Spatula</li><li>Stiring rod</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>คำนวณโดยเทียบบัญญัติไตรยางค์</li></ul><p>สูตรตำรับ 100 g ใช้ mupirocin 2 g&nbsp;&nbsp;</p><p>ถ้า&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15 g จะใช้ mupirocin (2x15)/100 = 0.3 g</p><p>ดังนั้นจะใช้ base 15-0.3 = 14.7 g</p>",
+ "checklist": [
+  {
+   "t": "คำนวณปริมาณที่จะชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "พับกระทงชั่ง ถูกต้อง เรียบร้อย",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียน ชื่อ นํ้าหนัก บนกระทง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากครบ 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อุปกรณ์ที่ใช้ตักสาร",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ชั่งนํ้าหนักถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

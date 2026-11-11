@@ -1,0 +1,83 @@
+{
+ "id": "OS-0305",
+ "title": "Solution",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Solution",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "Potassium Chloride Solution\nRx\nKCl\t\t\t50 g\nGlycerin\t\t50 mL\nParaben conc.\t\t5.00 mL\nPurified Water qs.\t500 mL\nM.ft Solution 20 mL\nกำหนดให้ Paraben concentrate = MP 10%w/v + PP 1%w/v (Calibrate drop)\n(หมายเหตุ ใช้ Paraben conc. 0.5 mL สำหรับเตรียมสารละลายยา 50.0 mL)\nQ : 1). จงคำนวณและ ชั่งปริมาณ Potassium chloride ที่ใช้ในตำรับ\n2). จงเตรียมสูตรตำรับที่กำหนด",
+ "patientHtml": "",
+ "contentHtml": "<p>Potassium Chloride Solution</p><p><span style=\"font-weight: 700; text-decoration: underline;\">Rx</span></p><p>KCl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50 g</p><p>Glycerin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50 mL</p><p>Paraben conc.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.00 mL</p><p>Purified Water qs.&nbsp;&nbsp;&nbsp;&nbsp;500 mL</p><p>M.ft Solution 20 mL</p><p>กำหนดให้ Paraben concentrate = MP 10%w/v + PP 1%w/v (Calibrate drop)</p><p>(หมายเหตุ ใช้ Paraben conc. 0.5 mL สำหรับเตรียมสารละลายยา 50.0 mL)</p><p><span style=\"font-weight: 700;\">Q : 1). จงคำนวณและ ชั่งปริมาณ Potassium chloride ที่ใช้ในตำรับ </span></p><p><span style=\"font-weight: 700;\">2). จงเตรียมสูตรตำรับที่กำหนด</span></p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>ผงยา KCl</li><li>Glycerin</li><li>Paraben conc. ที่ calibrate drop แล้ว</li><li>Purified water</li><li>Beaker</li><li>Stirring rod</li><li>Cylinder</li><li>ขวดแก้ว(สำหรับส่ง)</li><li>ฉลากยา</li></ol>",
+ "noteHtml": "<ol class=\"ordered-list\"><li><span style=\"color: rgb(204,0,0); font-weight: 700;\">2.0 g KCl</span></li><li>Rx<span style=\"color: rgb(204,0,0); font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;W.F.</span></li></ol><p>KCl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50 g<span style=\"color: rgb(204,0,0); font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0 g</span></p><p>Glycerin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50 mL<span style=\"color: rgb(204,0,0); font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0 mL</span></p><p>Paraben conc.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.00 mL<span style=\"color: rgb(204,0,0); font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;0.2 mL</span></p><p>Purified Water qs.&nbsp;&nbsp;&nbsp;&nbsp;500 mL<span style=\"color: rgb(204,0,0); font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;20 mL </span></p><p>M.ft Solution 20 mL</p><p><span style=\"font-weight: 700;\">ขั้นตอนการเตรียม</span></p><p><span style=\"font-weight: 700;\">1.&nbsp;&nbsp;&nbsp;&nbsp;ชั่ง KCl 2 g ใส่ลงใน Beaker </span></p><p><span style=\"font-weight: 700;\">2.&nbsp;&nbsp;&nbsp;&nbsp;ตวงน้ำ ¾ x (20-2-2-0.2=~15) = ~11 mL ใช้ในการผสม</span></p><p><span style=\"font-weight: 700;\">3.&nbsp;&nbsp;&nbsp;&nbsp;ละลาย KCl ด้วยน้ำ 11 mL คนผสมให้เข้ากัน</span></p><p><span style=\"font-weight: 700;\">4.&nbsp;&nbsp;&nbsp;&nbsp;ตวง Glycerin 2 mL ด้วย cylinder และเติมลงใน Beaker คนผสมให้เข้ากัน</span></p><p><span style=\"font-weight: 700;\">5.&nbsp;&nbsp;&nbsp;&nbsp;ค่อย ๆ หยด Paraben conc. 0.2 mL คนผสมตลอดเวลา ระวังไม่ให้ขุ่น</span></p><p><span style=\"font-weight: 700;\">6.&nbsp;&nbsp;&nbsp;&nbsp;นำสารที่ได้เทลง cylinder 25 mL เพื่อปรับปริมาตร [อย่าลืม rinse 2-3 รอบ น้ำ~3.5]</span></p><p><span style=\"font-weight: 700;\">7.&nbsp;&nbsp;&nbsp;&nbsp;ปรับปริมาตรเป็น 25 mL ก่อนเทกลับ beaker เพื่อ ผสมให้เข้ากันด้วย Stirring rod</span></p><p><span style=\"font-weight: 700;\">8.&nbsp;&nbsp;&nbsp;&nbsp;เทลงขวดบรรจุ และปิดฉลาก ระบุวันหมดอายุ [35 days นับวันเตรียม]</span></p><p><span style=\"color: rgb(255,0,0); background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">Rubric Max 100 points</span></p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><span style=\"font-weight: 700;\">Component</span></th><th><span style=\"font-weight: 700;\">Mark</span></th><th><span style=\"font-weight: 700;\">Expected Content</span></th></tr><tr><td>Calculate the drug used</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 25</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – 2.0 g KCl</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – technique การชั่ง&nbsp;&nbsp;</p></td></tr><tr><td>Compounding technique</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 75</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ไม่สัมผัสผงยา</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – ใช้ Beaker ในการเตรียม<span style=\"font-weight: 700;\"> </span></p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – technique การใช้ Stirring rod</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ใช้ cylinder เหมาะสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – technique การตวง Glycerin</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – technique การเติม Paraben</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – แบ่งน้ำ ¾ ผสม กับ ¼ rinse</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points </span>– rinse 2-3 รอบ</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – คนใน Beaker/กระบอกตวง</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – ติดฉลาก [ระบุวันหมดอายุ]</p></td></tr><tr><td><span style=\"font-weight: 700;\">Total score</span></td><td><span style=\"font-weight: 700; text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style=\"font-weight: 700;\">/ 100 points</span></td><td></td></tr></table></div>",
+ "checklist": [
+  {
+   "t": "2.0 g KCl",
+   "html": "&nbsp;&nbsp;(1.5)&nbsp;&nbsp;2.0 g KCl",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การชั่ง",
+   "html": "technique การชั่ง&nbsp;&nbsp;&nbsp;",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ไม่สัมผัสผงยา",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ Beaker ในการเตรียม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การใช้ Stirring rod",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ cylinder เหมาะสม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การตวง Glycerin",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การเติม Paraben",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แบ่งน้ำ ¾ ผสม กับ ¼ rinse",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "rinse 2-3 รอบ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คนใน Beaker/กระบอกตวง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ติดฉลาก [ระบุวันหมดอายุ]",
+   "html": "ติดฉลาก [ระบุวันหมดอายุ]<span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">\n</span>",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "id": "OS-0350",
+ "title": "ชั่ง Cream base",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "ชั่ง",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงชั่ง Hydrophilic cream base จากสูตรต่อไปนี้\nRx \tUrea \t\t\t\t\t5% w/w\nHydrophilic cream base \t\tqs ad 15 g",
+ "patientHtml": "",
+ "contentHtml": "<p>จงชั่ง Hydrophilic cream base จากสูตรต่อไปนี้</p><p>Rx &nbsp;&nbsp;&nbsp;&nbsp;Urea &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5% w/w</p><p>Hydrophilic cream base &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;qs ad 15 g</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>เครื่องชั่ง</li><li>Hydrophilic cream base</li><li>กระดาษชั่งยา</li><li>Spatular</li><li>Stirring rod</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>คํานวณ Urea ก่อน 5% x 15 gได้ 0.75 g หักออกจาก 15 g = ชั่ง base 14.25 mg</li><li>เทคนิคการชั่งถูกต้อง</li></ul>",
+ "checklist": [
+  {
+   "t": "เช็คลูกน้ำเครื่องชั่ง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ดูความสะอาดของเครื่องชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การ tare เครื่อง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "พับกระทง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลาก base 3 ครั้ง (ตอนหยิบ/ก่อนตัก/ตอนเก็บ)",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกใช้อุปกรณ์ถูก",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

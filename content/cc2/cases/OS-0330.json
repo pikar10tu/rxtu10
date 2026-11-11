@@ -1,0 +1,42 @@
+{
+ "id": "OS-0330",
+ "title": "Cream Urea ผสม (ต่อจาก PDSS19)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียม Urea cream ตำรับตามสูตรที่กำหนดโดยใช้ slap และ spatula\nสูตรตำรับ:\nRx Urea 5% w/w\nHydrophilic cream base qs ad 15 g\nคำสั่ง:\nจงเตรียม Urea cream โดยใช้ Hydrophillic base ที่ชั่งมาจากสถานีก่อนหน้าและเครื่องมือ slap และ spatula",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียม Urea cream ตำรับตามสูตรที่กำหนดโดยใช้ slap และ spatula</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Rx Urea 5% w/w</li><li>Hydrophilic cream base qs ad 15 g</li></ul><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>จงเตรียม Urea cream โดยใช้ Hydrophillic base ที่ชั่งมาจากสถานีก่อนหน้าและเครื่องมือ slap และ spatula</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Levigating agent: water, propylene glycol, mineral oil</li><li>Hydrophilic cream base ที่ชั่งจากสถานีก่อน</li><li>Rx Urea 5% w/w ที่ชั่งจากสถานีก่อน</li><li>Slap</li><li>Spatula</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>การเลือก Levigating agent ควรเลือกพิจารณาจากสมบัติการละลายและความเข้ากันได้กับ Cream base คือ water หรือ PEG</li><li>การผสมหลัก Geometric dilution คือการผสมยากับ base เป็นอัตราส่วนที่เท่า ๆ กันคือ 1:1, 2:2 เป็นต้น</li></ul>",
+ "checklist": [
+  {
+   "t": "เลือก Levigating Agent ได้ถูกประเภท",
+   "html": "เลือก <span style=\"font-weight: 700;\">Levigating Agent</span> ได้ถูกประเภท",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "หยด Levigating agent บดผสมผงยา Urea ให้ได้ Smooth paste ที่เนียน ละเอียด ไม่จับตัวเป็นก้อน",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "นำ Hydrophillic cream base มาผสมด้วยเทคนิค Geometric dilution",
+   "html": "นำ Hydrophillic cream base มาผสมด้วยเทคนิค <span style=\"font-weight: 700;\">Geometric dilution</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ผสมและปาดด้วย Spatula จนได้เนื้อครีมเนียนเข้ากันดี ไร้ฟองอากาศหรือเกล็ดผงยา",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,81 @@
+{
+ "id": "OS-0078",
+ "title": "เขียนฉลากยา",
+ "cat": "Clinic",
+ "group": "การนับเม็ดยาและเขียนฉลากยา",
+ "topic": "Acute pelvic inflammatory",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2557",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงเขียนฉลากยาให้กับนางสาว แสงจันทร์ รักดี\nRx 7 มีนาคม 2557\nชื่อผู้ป่วย : นางสาว แสงจันทร์ รักดี (Luna Lovegood)\nรักษา: Acute pelvic Inflammatory\nDoxycycline (100) 1x2 pc 14 days\nMetronidazole 250 mg2x2 pc 14 days",
+ "patientHtml": "",
+ "contentHtml": "<p>จงเขียนฉลากยาให้กับนางสาว แสงจันทร์ รักดี</p><p>Rx 7 มีนาคม 2557</p><p>ชื่อผู้ป่วย : นางสาว แสงจันทร์ รักดี (Luna Lovegood)</p><p>รักษา: Acute pelvic Inflammatory</p><p>Doxycycline (100) 1x2 pc 14 days</p><p>Metronidazole 250 mg2x2 pc 14 days</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0078-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px;\">สถานีที่ 19</span></p>",
+ "checklist": [
+  {
+   "t": "ชื่อผู้ป่วย: แสงจันทร์ รักดี (Luna Lovegood)",
+   "s": 1,
+   "g": "Doxycycline"
+  },
+  {
+   "t": "วันที่: 7 มีนาคม 2557",
+   "s": 1,
+   "g": "Doxycycline"
+  },
+  {
+   "t": "ชื่อยา ความแรง: Doxycycline 100 mg",
+   "html": "ชื่อยา ความแรง: <span style=\"color: rgb(16,16,16);\">Doxycycline 100 mg </span>",
+   "s": 1,
+   "g": "Doxycycline"
+  },
+  {
+   "t": "ข้อบ่งใช้: รักษา Acute pelvic Inflammatory โรคอุ้งเชิงกรานอักเสบเฉียบพลัน",
+   "s": 1,
+   "g": "Doxycycline"
+  },
+  {
+   "t": "วิธีรับประทาน เวลาที่รับประทาน: กินครั้งละ 1 เม็ด วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น",
+   "s": 1,
+   "g": "Doxycycline"
+  },
+  {
+   "t": "ฉลากช่วย: รับประทานหลังอาหารทันที รับประทานติดต่อกันจนยาหมด",
+   "s": 1,
+   "g": "Doxycycline"
+  },
+  {
+   "t": "ชื่อผู้ป่วย: แสงจันทร์ รักดี (Luna Lovegood)",
+   "s": 1,
+   "g": "Methronidazole"
+  },
+  {
+   "t": "วันที่: 7 มีนาคม 2557",
+   "s": 1,
+   "g": "Methronidazole"
+  },
+  {
+   "t": "ชื่อยา ความแรง: Methronidazole 250 mg",
+   "s": 1,
+   "g": "Methronidazole"
+  },
+  {
+   "t": "ข้อบ่งใช้: รักษา Acute pelvic Inflammatory โรคอุ้งเชิงกรานอักเสบเฉียบพลัน",
+   "s": 1,
+   "g": "Methronidazole"
+  },
+  {
+   "t": "วิธีรับประทาน เวลาที่รับประทาน: กินครั้งละ 2 เม็ด วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น",
+   "s": 1,
+   "g": "Methronidazole"
+  },
+  {
+   "t": "ฉลากช่วย: รับประทานหลังอาหารทันที รับประทานติดต่อกันจนยาหมด",
+   "s": 1,
+   "g": "Methronidazole"
+  }
+ ]
+}

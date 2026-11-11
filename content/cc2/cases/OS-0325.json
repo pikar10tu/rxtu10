@@ -1,0 +1,50 @@
+{
+ "id": "OS-0325",
+ "title": "Gel",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Gel",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียมตำรับตามสูตรที่กำหนดให้ถูกต้อง\nสูตรตำรับ:\nCarbopol 10% w/w\nWater qs.ad 100g\nคำสั่ง:\nให้เตรียม hydrogel 30 g จาก carbopol ที่เตรียมไว้ให้",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียมตำรับตามสูตรที่กำหนดให้ถูกต้อง</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Carbopol 10% w/w</li><li>Water <a href=\"http://qs.ad\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: var(--primary); text-decoration: underline;\">qs.ad</a> 100g</li></ul><p>คำสั่ง:</p><ul class=\"bullet-list\"><li>ให้เตรียม hydrogel 30 g จาก carbopol ที่เตรียมไว้ให้</li></ul>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>ผง carbopol</li><li>Purified water</li><li>Beaker</li><li>Sterring rod</li><li>โกร่ง ลูกโกร่ง</li><li>Triethanolamine (TEA)</li><li>Glycerin</li><li>pH test paper</li></ol>",
+ "noteHtml": "<p>- เตรียม <span style=\"font-weight: 700;\">Purified water</span>&nbsp;&nbsp;30 กรัม</p><p>- เลือก TEA เพื่อเป็นสารก่อฟอร์มเจล </p><p>- ใช้ pH test paper ตรวจค่า pH โดยห้ามจุ่มกระดาษลงในเจลเลย แต่ให้ใช้ stirring rod ป้ายเอา ต้องมีค่า pH ที่เป็นด่าง</p><p> <span style=\"font-style: italic;\">- ข้อควรระวังของผู้ตรวจ:</span> ค่อย ๆ โปรย carbopol ลงไปจนได้ของเหลวใสในขั้นตอนแรก และเมื่อหยดสารก่อเจลแล้วได้ค่า pH ที่เป็นด่าง</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0325-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณนํ้า",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การชั่งหรือตวงนํ้า",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อุปกรณ์ที่ใช้เตรียม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการกระจายสารก่อเจลในน้ำ การกระจายอย่างสม่ำเสมอ ไม่มีก้อน",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การคำนวณปริมาณด่างที่ใช้ จํานวนหยด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การหยดผสมด่าง คนผสม",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

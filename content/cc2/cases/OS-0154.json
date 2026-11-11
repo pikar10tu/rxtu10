@@ -1,0 +1,66 @@
+{
+ "id": "OS-0154",
+ "title": "การสื่อสารประสานงานแพทย์ด้วยเทคนิค ISBAR (Carvedilol-induced Bradycardia)",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "ISBAR Consultation: Beta-blocker-induced Bradycardia in HFrEF",
+ "diff": 2,
+ "source": "สอบจำลองรุ่นพี่ 83 Clinic ครั้งที่ 2",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ผู้ป่วยชายไทย นายโชคดี มีชัย อายุ 75 ปี HN 123/45 มาติดตามการรักษาโรคประจำตัวที่ห้องตรวจอายุรกรรมทั่วไป โดยวันนี้มีอาการวูบ หน้ามืด เวียนศีรษะร่วมด้วย ประกอบกับผู้ป่วยแจ้งว่าเคยบ้านหมุนมาก่อน แพทย์ (นพ.เดชวิทย์ ศิลาดี) จึงสั่งจ่ายยา Betahistine 16 mg รับประทานวันละ 3 ครั้ง\n- ข้อมูลผู้ป่วย: โรคประจำตัว Heart Failure with reduced Ejection Fraction (HFrEF), Dyslipidemia, Type 2 Diabetes Mellitus\n- รายการยาเดิมที่รับประทานประจำ:\n1. Enalapril 20 mg 1x1 pc od\n2. Carvedilol 25 mg 1x2 pc bid\n3. Empagliflozin 10 mg 1x1 pc od\n4. Spironolactone 25 mg 1x2 pc bid\n5. Atorvastatin 40 mg 1x1 hs od\n6. Metformin 850 mg 1x2 pc bid\n- สัญญาณชีพวันนี้: BP 112/72 mmHg, RR 19 bpm, Heart Rate 50 bpm\nให้เภสัชกรประสานงานปรึกษาแพทย์เจ้าของไข้โดยใช้โครงสร้าง ISBAR อย่างมีประสิทธิภาพ",
+ "patientHtml": "<p>- ผู้ป่วย: นายโชคดี มีชัย, HN 123/45, อายุ 75 ปี</p><p>- แพทย์เจ้าของไข้: นพ.เดชวิทย์ ศิลาดี (คลินิกอายุรกรรมทั่วไป)</p><p>- ปัญหาสำคัญ: HR 50 bpm (Bradycardia) + Dizziness ขณะใช้ Carvedilol 25 mg bid แล้วแพทย์สั่งเพิ่ม Betahistine</p>",
+ "contentHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0154-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>ผู้ป่วยชายไทย นายโชคดี มีชัย อายุ 75 ปี HN 123/45 มาติดตามการรักษาโรคประจำตัวที่ห้องตรวจอายุรกรรมทั่วไป โดยวันนี้มีอาการวูบ หน้ามืด เวียนศีรษะร่วมด้วย ประกอบกับผู้ป่วยแจ้งว่าเคยบ้านหมุนมาก่อน แพทย์ (นพ.เดชวิทย์ ศิลาดี) จึงสั่งจ่ายยา Betahistine 16 mg รับประทานวันละ 3 ครั้ง</p><p>- ข้อมูลผู้ป่วย: โรคประจำตัว Heart Failure with reduced Ejection Fraction (HFrEF), Dyslipidemia, Type 2 Diabetes Mellitus</p><p>- รายการยาเดิมที่รับประทานประจำ:</p><p>&nbsp;&nbsp;1. Enalapril 20 mg 1x1 pc od</p><p>&nbsp;&nbsp;2. Carvedilol 25 mg 1x2 pc bid</p><p>&nbsp;&nbsp;3. Empagliflozin 10 mg 1x1 pc od</p><p>&nbsp;&nbsp;4. Spironolactone 25 mg 1x2 pc bid</p><p>&nbsp;&nbsp;5. Atorvastatin 40 mg 1x1 hs od</p><p>&nbsp;&nbsp;6. Metformin 850 mg 1x2 pc bid</p><p>- สัญญาณชีพวันนี้: BP 112/72 mmHg, RR 19 bpm, Heart Rate 50 bpm</p><p>ให้เภสัชกรประสานงานปรึกษาแพทย์เจ้าของไข้โดยใช้โครงสร้าง ISBAR อย่างมีประสิทธิภาพ</p>",
+ "equipmentHtml": "<p>เวชระเบียนผู้ป่วยนอก และโทรศัพท์จำลองสำหรับประสานงานแพทย์</p>",
+ "noteHtml": "<p>เฉลยคำตอบพร้อมคำอธิบาย:</p><p>✅ คำตอบที่ถูกต้อง:</p><p>1. การระบุปัญหา: Symptomatic sinus bradycardia (HR 50 bpm) induced by Carvedilol (25 mg bid)</p><p>2. แนวทางข้อเสนอแนะ:</p><p>- ไม่ควรจ่าย Betahistine เนื่องจากอาการเวียนศีรษะเกิดจาก Cerebral hypoperfusion จากชีพจรเต้นช้า</p><p>- ห้ามหยุด Carvedilol กะทันหันเพราะเสี่ยงต่อ Heart failure exacerbation แต่ให้ปรับลดขนาด Dose reduction</p><p>📖 Guideline อ้างอิง:</p><p>- 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure</p><p>- ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure</p><p>📌 จุดจำก่อนสอบ:</p><p>- Heart Rate &lt; 60 bpm ในผู้ป่วยที่ได้รับ Beta-blocker ร่วมกับมีอาการหน้ามืด ถือเป็นสัญญาณเตือนที่ต้องปรับลดขนาดยา</p><p>- ยา 4 Pillars ของ HFrEF: ARNI/ACEI, Beta-blocker, MRA, SGLT2i ไม่ควรหยุดยากะทันหันหากไม่มีข้อห้ามเด็ดขาด</p>",
+ "checklist": [
+  {
+   "t": "แนะนำชื่อตนเอง เภสัชกร... จากห้องจ่ายยาผู้ป่วยนอก",
+   "s": 1,
+   "g": "I - Introduction การแนะนำตัวและระบุผู้ป่วย"
+  },
+  {
+   "t": "ระบุชื่อแพทย์เจ้าของไข้ (นพ.เดชวิทย์ ศิลาดี), ระบุชื่อ-นามสกุลผู้ป่วย (นายโชคดี มีชัย), HN (123/45) และคลินิกที่ตรวจได้อย่างถูกต้อง",
+   "s": 1,
+   "g": "I - Introduction การแนะนำตัวและระบุผู้ป่วย"
+  },
+  {
+   "t": "แจ้งสถานการณ์: ผู้ป่วยมาด้วยอาการวูบ หน้ามืด เวียนศีรษะ และตรวจพบ Heart Rate 50 ครั้งต่อนาที ซึ่งมีภาวะ Bradycardia (HR < 60 bpm)",
+   "html": "แจ้งสถานการณ์: ผู้ป่วยมาด้วยอาการวูบ หน้ามืด เวียนศีรษะ และตรวจพบ Heart Rate 50 ครั้งต่อนาที ซึ่งมีภาวะ Bradycardia (HR &lt; 60 bpm)",
+   "s": 1,
+   "g": "S - Situation สถานการณ์ปัญหาปัจจุบัน"
+  },
+  {
+   "t": "แจ้งประวัติโรคเดิมของผู้ป่วยคือ HFrEF, DLP, T2DM",
+   "s": 1,
+   "g": "B - Background ข้อมูลภูมิหลังและการรักษา"
+  },
+  {
+   "t": "แจ้งรายการยาเดิมที่สำคัญคือ ผู้ป่วยได้รับ Carvedilol 25 mg วันละ 2 ครั้ง และวันนี้แพทย์ได้สั่งจ่ายยา Betahistine 16 mg เพิ่มเติม",
+   "s": 1,
+   "g": "B - Background ข้อมูลภูมิหลังและการรักษา"
+  },
+  {
+   "t": "สรุปผลการประเมิน: อาการหน้ามืด เวียนศีรษะ เกิดจากภาวะ Bradycardia (HR 50 bpm) ซึ่งเป็นผลข้างเคียงจากยา Carvedilol ในขนาดสูง ไม่ใช่อาการ Vertigo ทั่วไป ดังนั้นการให้ Betahistine จึงไม่ตรงกับสาเหตุของโรค",
+   "s": 1,
+   "g": "A - Assessment การประเมินปัญหาทางคลินิก"
+  },
+  {
+   "t": "แนะนำระงับการจ่ายยา Betahistine 16 mg",
+   "s": 1,
+   "g": "R - Recommendation ข้อเสนอแนะและการปรับยา"
+  },
+  {
+   "t": "แนะนำไม่หยุด Carvedilol ทันทีเนื่องจากเป็นยาหลักกลุ่ม 4 Pillars ในการรักษา HFrEF แต่เสนอให้ แพทย์พิจารณาปรับลดขนาดยา Carvedilol ลง (เช่น ลดเป็น 12.5 mg วันละ 2 ครั้ง หรือ 6.25 mg วันละ 2 ครั้ง) และนัดติดตามอัตราการเต้นของหัวใจและอาการหน้ามืดของผู้ป่วย",
+   "s": 1,
+   "g": "R - Recommendation ข้อเสนอแนะและการปรับยา"
+  },
+  {
+   "t": "ใช้น้ำเสียงสุภาพ ให้เกียรติแพทย์ แสดงความนอบน้อม และเปิดโอกาสให้แพทย์ได้ซักถามและร่วมตัดสินใจ",
+   "s": 1,
+   "g": "ทักษะการสื่อสารทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,55 @@
+{
+ "id": "OS-0321",
+ "title": "Ointment Sulfur ชั่ง",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Ointment",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตชั่ง base สำหรับเตรียม sulfur ointment 10 g\nสูตรตำรับ :\nSulfur 10 g\nWhite soft paraffin base to 100 g\nคำสั่ง :\nจงคำนวณและชั่ง base สำหรับเตรียมสูตรตำรับ 10 g",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตชั่ง base สำหรับเตรียม sulfur ointment 10 g</p><p>สูตรตำรับ : </p><ul class=\"bullet-list\"><li>Sulfur 10 g</li><li>White soft paraffin base to 100 g</li></ul><p>คำสั่ง :</p><ol class=\"ordered-list\"><li>จงคำนวณและชั่ง base สำหรับเตรียมสูตรตำรับ 10 g</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>White paraffin ointment base</li><li>เครื่องชั่ง</li><li>ช้อนเขา</li><li>Stiring rod</li><li>Spatula</li><li>กระดาษธรรมดาและกระดาษไข</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>คำนวนจะได้ sulfur 1 g และ base 9 g ดังนั้นต้องชั่ง base มา 9 g</li><li>ใช้ spatula กับ stiring rod ช่วยตักชั่งสารลงภาชนะ</li><li>พับกระทงปลายเปิดด้านเดียว</li><li>เช็คลูกปัดหน้าเครื่องชั่งว่าตรงไหม ดูเรื่องความสะอาดของเครื่อง เปิดเครื่อง แล้ววางกระดาษชั่ง แล้วกด tare ก่อนชั่งและหลังชั่งเสร็จ (ครั้งนี้มีให้ทำแค่กด tare)</li><li>อ่านฉลากของ base ที่ใช้ 3 ครั้ง : ครั้งที่ 1 ตอนหา, ครั้งที่ 2 ตอนจะเปิดขวดตัก, ครั้งที่ 3 ก่อนเก็บ</li></ul><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0321-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "คำนวณปริมาณที่จะชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "พับกระทงชั่ง ถูกต้อง เรียบร้อย",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียน ชื่อ นํ้าหนัก บนกระทง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากครบ 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อุปกรณ์ที่ใช้ตักสาร",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ชั่งนํ้าหนักถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

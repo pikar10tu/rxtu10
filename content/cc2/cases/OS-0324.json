@@ -1,0 +1,20 @@
+{
+ "id": "OS-0324",
+ "title": "Paste zinc ผสม (ต่อจาก PDSS13)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Paste",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียมตำรับ paste โดยใช้ slap และ spatula\nคำสั่ง:\nเลือก levigating agent ให้เหมาะสมกับสูตรตำรับ",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียมตำรับ paste โดยใช้ slap และ spatula</p><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>เลือก levigating agent ให้เหมาะสมกับสูตรตำรับ</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>ผงยา Zinc oxide</li><li>Base (white soft paraffin จากฐานก่อนหน้า)</li><li>Slap</li><li>Spatula</li><li>Levigating agent ได้แก่ PEG, PG และ Mineral oil</li></ol>",
+ "noteHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0324-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [],
+ "noScore": true
+}

@@ -1,0 +1,178 @@
+{
+ "id": "OS-0259",
+ "title": "Cream Base Preparation: W/O Cream Base (Beaker Method & HLB Calculation)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "การคำนวณ Required HLB (rHLB), Alligation Method, Beaker Method, Phase Dilution Method",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 3",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "กำหนดสูตรตำรับครีม Rx_C1 ดังนี้\nRx C1\nBeeswax (HLB = 4, M.P. = 62°C): 8.00 g\nCetostearyl alcohol (HLB = 15.5, M.P. = 50°C): 3.00 g\nOzokerite (HLB = 8.5, M.P. = 65°C): 3.00 g\nMineral oil (HLB = 6): 30.00 g\nRice bran oil (HLB = 7): 16.00 g\nSpan 60 (HLB = 4.7): x g\nTween 60 (HLB = 14.9): y g\nPhenoxyethanol: 0.40 g\nRose oil: 0.10 g\nPurified water q.s.: 100.00 g\n(กำหนดให้: Emulsifier รวมในสูตรตำรับ = 3% w/w)\nจงตอบคำถามต่อไปนี้ลงในกระดาษคำตอบ (สถานี LAB แห้ง เวลาปฏิบัติการ 8 นาที):\nหากต้องการเตรียมยาพื้นครีมปริมาณ 50 กรัม โดยไม่ต้องเตรียมเผื่อ ปริมาณ Span 60 และ Tween 60 ที่ต้องใช้ในการเตรียมยาพื้นครีมนี้ เท่ากับเท่าใด (4 คะแนน)\nจงเขียน Flow chart แสดงวิธีการเตรียมยาพื้นครีมแบบ Beaker method โดยระบุปริมาณที่ใช้, ส่วนประกอบเฟสน้ำ, เฟสน้ำมัน, สารอื่นๆ, อุณหภูมิที่ใช้ในการเตรียม และ Order of mixing ให้ครบถ้วน (5 คะแนน)\nหากนำยาครีมที่เตรียมได้ไปทดสอบด้วยวิธี Phase Dilution Method จงระบุผลการสังเกตเมื่อทดสอบด้วย Mineral oil และ Purified water (1 คะแนน)",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีเตรียมยา / Product ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>กำหนดสูตรตำรับครีม Rx_C1 ดังนี้</p><p><span style=\"font-weight: 700;\">Rx C1</span></p><ul class=\"bullet-list\"><li>Beeswax (HLB = 4, M.P. = 62°C): 8.00 g</li><li>Cetostearyl alcohol (HLB = 15.5, M.P. = 50°C): 3.00 g</li><li>Ozokerite (HLB = 8.5, M.P. = 65°C): 3.00 g</li><li>Mineral oil (HLB = 6): 30.00 g</li><li>Rice bran oil (HLB = 7): 16.00 g</li><li>Span 60 (HLB = 4.7): x g</li><li>Tween 60 (HLB = 14.9): y g</li><li>Phenoxyethanol: 0.40 g</li><li>Rose oil: 0.10 g</li><li>Purified water q.s.: 100.00 g</li></ul><p><span style=\"font-style: italic;\">(กำหนดให้: Emulsifier รวมในสูตรตำรับ = 3% w/w)</span></p><p>จงตอบคำถามต่อไปนี้ลงในกระดาษคำตอบ (สถานี LAB แห้ง เวลาปฏิบัติการ 8 นาที):</p><ul class=\"bullet-list\"><li>หากต้องการเตรียมยาพื้นครีมปริมาณ 50 กรัม โดยไม่ต้องเตรียมเผื่อ ปริมาณ Span 60 และ Tween 60 ที่ต้องใช้ในการเตรียมยาพื้นครีมนี้ เท่ากับเท่าใด (4 คะแนน)</li><li>จงเขียน Flow chart แสดงวิธีการเตรียมยาพื้นครีมแบบ Beaker method โดยระบุปริมาณที่ใช้, ส่วนประกอบเฟสน้ำ, เฟสน้ำมัน, สารอื่นๆ, อุณหภูมิที่ใช้ในการเตรียม และ Order of mixing ให้ครบถ้วน (5 คะแนน)</li><li>หากนำยาครีมที่เตรียมได้ไปทดสอบด้วยวิธี Phase Dilution Method จงระบุผลการสังเกตเมื่อทดสอบด้วย Mineral oil และ Purified water (1 คะแนน)</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>กระดาษโจทย์และกระดาษคำตอบ</li><li>เครื่องคิดเลข</li><li>ปากกา</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณ Required HLB (rHLB):</span><ul class=\"bullet-list\"><li>ปริมาณเฟสน้ำมันรวมในสูตร 100 g: <span class=\"doc-equation\">8+3+3+30+16=60g</span> (คิดเป็น 60%)</li><li><span class=\"doc-equation\">rHLB=<span class=\"equation-fraction\"><span class=\"equation-num\">8</span><span class=\"equation-denom\">60</span></span>&times;4+<span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">60</span></span>&times;15.5+<span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">60</span></span>&times;8.5+<span class=\"equation-fraction\"><span class=\"equation-num\">30</span><span class=\"equation-denom\">60</span></span>&times;6+<span class=\"equation-fraction\"><span class=\"equation-num\">16</span><span class=\"equation-denom\">60</span></span>&times;7=6.6</span></li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณปริมาณ Emulsifier สำหรับตำรับ 50 g:</span><ul class=\"bullet-list\"><li>สูตรตำรับ 50 g มี Emulsifier รวม 3% = <span class=\"doc-equation\">1.5g</span></li><li>ใช้ Alligation Method ระหว่าง Tween 60 (<span class=\"doc-equation\">HLB=14.9</span>) และ Span 60 (<span class=\"doc-equation\">HLB=4.7</span>):<ul class=\"bullet-list\"><li><span class=\"doc-equation\">Tween60=<span class=\"equation-fraction\"><span class=\"equation-num\">6.6-4.7</span><span class=\"equation-denom\">14.9-4.7</span></span>&times;1.5=<span class=\"equation-fraction\"><span class=\"equation-num\">1.9</span><span class=\"equation-denom\">10.2</span></span>&times;1.5=0.28g</span></li><li><span class=\"doc-equation\">Span60=<span class=\"equation-fraction\"><span class=\"equation-num\">14.9-6.6</span><span class=\"equation-denom\">14.9-4.7</span></span>&times;1.5=<span class=\"equation-fraction\"><span class=\"equation-num\">8.3</span><span class=\"equation-denom\">10.2</span></span>&times;1.5=1.22g</span></li></ul></li></ul></li><li><span style=\"font-weight: 700;\">หลักการเตรียม Beaker Method ของ W/O Cream:</span><ul class=\"bullet-list\"><li>สารก่ออิมัลชันที่ชอบน้ำมัน (Span 60) หลอมรวมใน Oil Phase</li><li>สารก่ออิมัลชันที่ชอบน้ำ (Tween 60) ละลายใน Water Phase</li><li>อุณหภูมิหลอมเฟสน้ำมันต้องสูงกว่าจุดหลอมเหลวของสารที่มีจุดหลอมเหลวสูงสุด (Ozokerite M.P. 65°C) ประมาณ 5–10°C จึงใช้อุณหภูมิ&nbsp;&nbsp;70-75 cอุณหภูมิเฟสน้ำต้องตั้งให้สูงกว่าเฟสน้ำมัน 3-5 c (73-80 c) เพื่อป้องกันไม่ให้ไขในเฟสน้ำมันแข็งตัวก่อนเวลาอันควรขณะเทรวม</li><li>เนื่องจากเป็น <span style=\"font-weight: 700;\">W/O Emulsion</span> จึงต้องค่อยๆ เทเฟสน้ำลงในเฟสน้ำมัน</li><li>สารระเหยง่าย (Rose oil) และสารกันเสีย (Phenoxyethanol) ต้องเติมเมื่ออุณหภูมิลดลงมาที่ 40-45 c แล้วคนจนครีมแข็งตัวคงรูป (Congeal)</li></ul></li><li><span style=\"font-weight: 700;\">Phase Dilution Method:</span><ul class=\"bullet-list\"><li>เนื่องจากตำรับนี้เป็นอิมัลชันชนิด <span style=\"font-weight: 700;\">Water-in-Oil (W/O)</span> โดยมีน้ำมันเป็น External phase จึงเข้ากันได้ดีกับตัวทำละลายไม่มีขั้ว (Mineral oil) และจะแยกชั้นเมื่อหยดน้ำ (Purified water) ลงไป</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณค่า Required HLB (rHLB) ของเฟสน้ำมันได้ถูกต้อง",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน"
+  },
+  {
+   "t": "แสดงวิธีคำนวณสัดส่วน Oil Phase (รวม 60%) และคำนวณได้ค่า rHLB=6.6",
+   "html": "แสดงวิธีคำนวณสัดส่วน Oil Phase (รวม 60%) และคำนวณได้ค่า <span class=\"doc-equation\">1.20&times;20=24หยด</span>",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณค่า rHLB ผิดพลาด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาณ Span 60 และ Tween 60 สำหรับตำรับ 50 g ได้ถูกต้อง",
+   "s": 3,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน"
+  },
+  {
+   "t": "แสดงการใช้ Alligation method และคำนวณปริมาณสำหรับตำรับ 50 g ได้ถูกต้องทั้งคู่: Tween60=0.28g และ Span60=1.22g",
+   "html": "แสดงการใช้ Alligation method และคำนวณปริมาณสำหรับตำรับ 50 g ได้ถูกต้องทั้งคู่: <span class=\"doc-equation\">Tween60=0.28g</span> และ <span class=\"doc-equation\">Span60=1.22g</span>",
+   "s": 3,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณสัดส่วนหรือปริมาณถูกเพียงตัวใดตัวหนึ่ง หรือคำนวณที่สูตรหลัก 100 g โดยไม่ได้ทอนเป็น 50 g",
+   "s": 1.5,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดทั้งหมด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ Required HLB และปริมาณ Emulsifier - 4 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเตรียม Water Phase",
+   "s": 1,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน"
+  },
+  {
+   "t": "ระบุส่วนประกอบและปริมาณถูกต้อง (Tween 60 = 0.28 g, Purified water = 18.25 g) และระบุช่วงอุณหภูมิ 73-80 c (สูงกว่าเฟสน้ำมัน 3-5 c) ครบถ้วน",
+   "s": 1,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ขาดสารบางตัว หรือระบุอุณหภูมิไม่ถูกต้อง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุส่วนประกอบเฟสน้ำ",
+   "s": 0,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเตรียม Oil Phase",
+   "s": 1,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน"
+  },
+  {
+   "t": "ระบุส่วนประกอบและปริมาณถูกต้อง (Beeswax 4 g, Cetostearyl alcohol 1.5 g, Ozokerite 1.5 g, Mineral oil 15 g, Rice bran oil 8 g, Span 60 1.22 g) และระบุช่วงอุณหภูมิ 70-75 c (สูงกว่า M.P. ของ Ozokerite 5-10 c) ครบถ้วน",
+   "s": 1,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ขาดสารบางตัว หรือระบุอุณหภูมิไม่ถูกต้อง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุส่วนประกอบเฟสน้ำมัน",
+   "s": 0,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ขั้นตอนการรวมเฟสและการเกิดอิมัลชัน",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน"
+  },
+  {
+   "t": "ระบุการค่อยๆ เทเฟสน้ำลงในเฟสน้ำมัน (Water into Oil) และคนผสมอย่างรวดเร็วจนอุณหภูมิลดลงถึง 40-45 c",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการเทสลับกัน หรือไม่ระบุอุณหภูมิที่ลดลง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุขั้นตอนการรวมเฟส",
+   "s": 0,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเติมสารแต่งกลิ่น/สารกันเสียและการทำให้แข็งตัว (Congeal)",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน"
+  },
+  {
+   "t": "ระบุการเติม Rose oil 0.05 g และ Phenoxyethanol 0.20 g ที่อุณหภูมิ 40 - 45 c พร้อมคนอย่างต่อเนื่องจนกระทั่งยาพื้นครีมแข็งตัว (Congeal) สมบูรณ์",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุอุณหภูมิขณะเติมสาร หรือไม่ระบุการคนจน Congeal",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ระบุขั้นตอนนี้",
+   "s": 0,
+   "g": "ส่วนที่ 2 แผนผังขั้นตอนการเตรียมแบบ Beaker Method - 5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ผลการทดสอบการเจือจางเฟส (Phase Dilution)",
+   "s": 1,
+   "g": "ส่วนที่ 3 การทดสอบ Phase Dilution Method - 1 คะแนน"
+  },
+  {
+   "t": "ตอบถูกต้องทั้ง 2 ข้อ: ทดสอบด้วย Mineral oil ได้ผล \"เข้าได้กับตัวทำละลาย\" (0.5 คะแนน) และทดสอบด้วย Purified water ได้ผล \"แยกชั้น\" (0.5 คะแนน)",
+   "html": "ตอบถูกต้องทั้ง 2 ข้อ: ทดสอบด้วย Mineral oil ได้ผล <span style=\"font-weight: 700;\">&quot;เข้าได้กับตัวทำละลาย&quot;</span> (0.5 คะแนน) และทดสอบด้วย Purified water ได้ผล <span style=\"font-weight: 700;\">&quot;แยกชั้น&quot;</span> (0.5 คะแนน)",
+   "s": 1,
+   "g": "ส่วนที่ 3 การทดสอบ Phase Dilution Method - 1 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตอบถูกเพียงข้อเดียว",
+   "s": 0.5,
+   "g": "ส่วนที่ 3 การทดสอบ Phase Dilution Method - 1 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตอบผิดทั้งคู่",
+   "s": 0,
+   "g": "ส่วนที่ 3 การทดสอบ Phase Dilution Method - 1 คะแนน",
+   "sub": true
+  }
+ ]
+}

@@ -87,6 +87,14 @@
           </ol>
         </details>
       </div>
+      <section v-if="cc2Cases.length" class="dd-cc2">
+        <h4><Emoji char="🩺" /> เคส CC2 ที่มียานี้</h4>
+        <RouterLink v-for="c in cc2Cases" :key="c.id" class="dd-cc2-row" :to="`/study/cc2/${c.id}`">
+          <span class="dd-cc2-cat" :class="'c-' + c.cat">{{ c.cat }}</span>
+          <span class="dd-cc2-t">{{ c.t }}</span>
+          <span class="dd-cc2-go" aria-hidden="true">›</span>
+        </RouterLink>
+      </section>
       <div class="dd-ask">
         <button v-if="!form" type="button" class="dd-ask-btn" @click="openForm('fix')"><Emoji char="⚠️" /> แจ้งข้อมูลผิด</button>
         <DrugForm v-else />
@@ -97,8 +105,9 @@
 </template>
 
 <script setup>
-import { ref, computed, h } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, h, watch } from 'vue'
+import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { loadSearchIndex } from '../composables/useGlobalSearch.js'
 import Emoji from '../components/shared/Emoji.vue'
 import DRUG_DB from '../data/drugDb.json'
 import { useAuthStore } from '../stores/auth.js'
@@ -124,10 +133,24 @@ const open = computed(() => isFeatureOpen(rawConfig.value, 'drugDbOpen', { isAdm
 
 
 const q = ref('')
+const route = useRoute()
 const selId = ref(null)
+// เปิดยาจากลิงก์ภายนอก (ค้นหารวม / ชิปยาในเคส CC2): /study/drugs?drug=<id>
+watch(() => route.query.drug, (id) => { if (typeof id === 'string' && DRUG_DB.some(d => d.id === id)) selId.value = id }, { immediate: true })
 const drug = computed(() => DRUG_DB.find(d => d.id === selId.value) || null)
 const refs = computed(() => cardRefs(drug.value))
 const L = (line) => resolveLine(line, refs.value)
+
+// เคส CC2 ที่มียานี้ — จากดัชนีค้นหา static (0 read) · โหลดครั้งเดียวตอนเปิดยาตัวแรก
+const searchIdx = ref(null)
+watch(selId, (id) => { if (id && !searchIdx.value) loadSearchIndex().then(j => { searchIdx.value = j }) }, { immediate: true })
+const cc2Cases = computed(() => {
+  const j = searchIdx.value
+  const ids = j?.drugs?.find(d => d.id === selId.value)?.cases || []
+  if (!ids.length) return []
+  const byId = new Map((j.cases || []).map(c => [c.id, c]))
+  return ids.map(id => byId.get(id)).filter(Boolean)
+})
 const indRows = computed(() => (drug.value?.ind || []).map(r => resolveIndRow(r, refs.value)))
 const pkRows = computed(() => (drug.value?.pk || []).map(r => resolvePkRow(r, refs.value)))
 const sections = computed(() => LIST_SECTIONS.filter(s => drug.value?.[s.k]?.length))
@@ -255,4 +278,12 @@ function back() { form.value = null; if (selId.value) selId.value = null; else r
 .dd-form-act .go { background: var(--primary); border-color: var(--primary); color: #fff; }
 .dd-form-act .go:disabled { opacity: .5; }
 .dd-src { border-top: 1px solid var(--line); padding-top: 10px; font-size: .74rem; color: var(--muted); }
+.dd-cc2 { display: flex; flex-direction: column; gap: 6px; }
+.dd-cc2 h4 { margin: 0 0 2px; }
+.dd-cc2-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: var(--bw) solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); background: var(--surface, #fff); }
+.dd-cc2-cat { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--primary-light); color: var(--primary); flex-shrink: 0; }
+.dd-cc2-cat.c-Product { background: #fef3c7; color: #b45309; }
+.dd-cc2-cat.c-SAP { background: #d1fae5; color: #047857; }
+.dd-cc2-t { flex: 1; font-size: .8rem; font-weight: 700; line-height: 1.4; }
+.dd-cc2-go { color: var(--muted); }
 </style>

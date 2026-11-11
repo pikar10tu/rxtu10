@@ -13,6 +13,11 @@ const routes = [
     { path: '/study',     name: 'study',     component: () => import('../views/StudyView.vue')     },
     { path: '/study/summary/:id', name: 'summary', component: () => import('../views/SummaryView.vue') },
     { path: '/study/drugs', name: 'drugdb', component: () => import('../views/DrugDbView.vue') },
+    // CC2 OSPE (11 พ.ย. 2026) — /sim และ /room ต้องมาก่อน /:id
+    { path: '/study/cc2', name: 'cc2', component: () => import('../views/Cc2LibraryView.vue') },
+    { path: '/study/cc2/sim', name: 'cc2-sim', component: () => import('../views/Cc2SimView.vue') },
+    { path: '/study/cc2/room', name: 'cc2-room', component: () => import('../views/Cc2RoomView.vue') },
+    { path: '/study/cc2/:id', name: 'cc2-case', component: () => import('../views/Cc2CaseView.vue') },
     { path: '/study/crcl', name: 'crcl', component: () => import('../views/CrClTrainerView.vue') },
     { path: '/study/ped-dose', name: 'ped-dose', component: () => import('../views/PedDoseView.vue') },
     { path: '/study/time-attack', name: 'timeAttack', component: () => import('../views/TimeAttackView.vue') },

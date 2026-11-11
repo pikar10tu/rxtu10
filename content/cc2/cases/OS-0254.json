@@ -1,0 +1,208 @@
+{
+ "id": "OS-0254",
+ "title": "Emulsion Preparation: Liquid Paraffin Oral Emulsion (Dry Gum Method)",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "การเตรียมยาน้ำอิมัลชัน (Oral Emulsion), Primary Emulsion Ratio (O:W:G), Dry Gum Method, Order of Mixing",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 2",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "กำหนดสูตรตำรับ Liquid Paraffin Emulsion ดังนี้\nRx EM1\nLiquid paraffin: 50 mL\nAcacia: ... g\nTragacanth: 0.5 g\nCherry syrup: 10 mL\nPurified water q.s.: 100 mL\nM.ft. Oral emulsion 50 mL\nจงแสดงวิธีทำและเขียนคำตอบลงในกระดาษคำตอบ (เวลาปฏิบัติการ 4 นาที):\nจงคำนวณปริมาณ Acacia และน้ำที่ต้องใช้ในการเกิด Primary Emulsion\nจงเขียนขั้นตอนวิธีการเตรียมอิมัลชันนี้ด้วยวิธี Dry Gum Method ตั้งแต่ขั้นตอนการชั่ง ตวงสาร จนถึงการบรรจุอิมัลชันและเขียนฉลาก (ระบุเทคนิคและอุปกรณ์ที่ใช้ในแต่ละขั้นตอนให้ชัดเจน)",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีเตรียมยา / Product ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>กำหนดสูตรตำรับ Liquid Paraffin Emulsion ดังนี้</p><p><span style=\"font-weight: 700;\">Rx EM1</span></p><ul class=\"bullet-list\"><li>Liquid paraffin: 50 mL</li><li>Acacia: ... g</li><li>Tragacanth: 0.5 g</li><li>Cherry syrup: 10 mL</li><li>Purified water q.s.: 100 mL</li><li>M.ft. Oral emulsion 50 mL</li></ul><p>จงแสดงวิธีทำและเขียนคำตอบลงในกระดาษคำตอบ (เวลาปฏิบัติการ 4 นาที):</p><ul class=\"bullet-list\"><li>จงคำนวณปริมาณ Acacia และน้ำที่ต้องใช้ในการเกิด Primary Emulsion</li><li>จงเขียนขั้นตอนวิธีการเตรียมอิมัลชันนี้ด้วยวิธี Dry Gum Method ตั้งแต่ขั้นตอนการชั่ง ตวงสาร จนถึงการบรรจุอิมัลชันและเขียนฉลาก (ระบุเทคนิคและอุปกรณ์ที่ใช้ในแต่ละขั้นตอนให้ชัดเจน)</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>กระดาษโจทย์และกระดาษคำตอบ</li><li>เครื่องคิดเลข</li><li>ปากกา</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณสูตร Working Formula (เตรียม 50 mL จาก 100 mL </span><span class=\"doc-equation\">&rarr;&times;0.5</span><span style=\"font-weight: 700;\">):</span><ul class=\"bullet-list\"><li>Liquid paraffin = <span class=\"doc-equation\">50&times;0.5=25mL</span></li><li>Tragacanth = <span class=\"doc-equation\">0.5&times;0.5=0.25g</span></li><li>Cherry syrup = <span class=\"doc-equation\">10&times;0.5=5mL</span></li><li>ปริมาตรรวม = 50 mL</li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณ Primary Emulsion (Mineral Oil):</span><ul class=\"bullet-list\"><li>สัดส่วนมาตรฐาน <span class=\"doc-equation\">Oil:Water:Gum=4:2:1</span></li><li>เมื่อใช้น้ำมัน 25 mL จะต้องใช้น้ำ = <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">25&times;2</span><span class=\"equation-denom\">4</span></span>=12.5mL</span> (หรือ 12.5 g)</li><li>ต้องการ Gum รวม = <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">25&times;1</span><span class=\"equation-denom\">4</span></span>=6.25g</span></li><li>เทียบสัดส่วน Gum: เนื่องจาก Tragacanth มีความหนืดเป็น 10 เท่าของ Acacia (<span class=\"doc-equation\">1gTragacanth&asymp;10gAcacia</span>)</li><li>ตำรับมี Tragacanth อยู่ 0.25 g จึงเทียบเท่า Acacia <span class=\"doc-equation\">=0.25&times;10=2.5g</span></li><li>ดังนั้น ปริมาณ Acacia ที่ต้องชั่งเพิ่ม = <span class=\"doc-equation\">6.25-2.5=3.75g</span></li></ul></li><li><span style=\"font-weight: 700;\">ปริมาณน้ำที่ใช้ทั้งหมดในตำรับ:</span><ul class=\"bullet-list\"><li>ปริมาตรรวม 50 mL ลบด้วย (น้ำมัน 25 mL + Cherry syrup 5 mL + ปริมาตร Gum ประมาณ 4 mL) = จะเหลือน้ำทั้งหมดประมาณ 16 mL</li><li>นำไปทำ Primary emulsion แล้ว 12.5 mL จึงเหลือน้ำสำหรับ Rinse โกร่งและปรับปริมาตรสุดท้าย <span class=\"doc-equation\">=16-12.5=3.5mL</span></li></ul></li><li><span style=\"font-weight: 700;\">จุดเน้นเทคนิค Dry Gum Method (Continental Method):</span><ul class=\"bullet-list\"><li>ต้องนำ <span style=\"font-weight: 700;\">Gum ผสมกับ Oil ก่อนเสมอ</span> ในโกร่งที่แห้งสนิท เพื่อให้อนุภาคน้ำมันเคลือบผงกัม ป้องกันการเกาะกันเป็นก้อน</li><li>เมื่อเติมน้ำสำหรับทำ Primary emulsion ต้อง <span style=\"font-weight: 700;\">เติมพรวดเดียวทั้งหมด (All at once)</span> แล้วรีบปั่นวนด้วยข้อมือทิศทางเดียวอย่างรวดเร็วจนได้ยินเสียง Clicking sound และสีเปลี่ยนเป็นสีขาวข้นเหมือนน้ำนม</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณปริมาณ Purified water ที่ใช้ในการเกิด Primary emulsion ได้ถูกต้อง",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับและ Primary Emulsion - 3 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณน้ำสำหรับ Primary emulsion = 12.5 mL (หรือ 12.5 g)",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับและ Primary Emulsion - 3 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาณน้ำผิดพลาด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับและ Primary Emulsion - 3 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาณ Gum Acacia ที่ต้องใช้ได้ถูกต้อง",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับและ Primary Emulsion - 3 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณ Gum Acacia ที่ต้องชั่งเพิ่ม = 3.75 g",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับและ Primary Emulsion - 3 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาณ Gum ผิดพลาด หรือไม่ได้หักลบเทียบสัดส่วนของ Tragacanth",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับและ Primary Emulsion - 3 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การชั่งสารและการเลือกภาชนะรองรับ",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "ระบุการชั่ง Acacia 3.75 g และ Tragacanth 0.25 g แยกกันบนกระดาษชั่ง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุการชั่งแยก หรือชั่งรวมกัน",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวงสารตั้งต้น",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "ระบุการตวง Liquid paraffin 25 mL และ Purified water 12.5 mL โดยใช้กระบอกตวงขนาด 25 mL แยกคนละใบ",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุขนาดกระบอกตวง หรือตวงรวมกันในใบเดียว",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การบดผสมสารก่ออิมัลชัน (Gums) ในโกร่ง",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "เท Tragacanth 0.25 g ลงกึ่งกลางโกร่งกระเบื้องที่แห้งสนิท แล้วค่อยๆ เติม Acacia ลงบดผสมทีละส่วนด้วยเทคนิค Geometric dilution จนเข้าเป็นเนื้อเดียวกัน",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุการใช้โกร่งกระเบื้องแห้ง หรือเทกัมผสมกันทีเดียวทั้งหมด",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การผสมเฟสน้ำมัน (Oil Phase)",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "ใส่ Liquid paraffin 25 mL ลงในโกร่งกระเบื้อง โดยยกลูกโกร่งขึ้นแล้วคนผสมกับผง Gum จนเข้าเป็นเนื้อเดียวกัน",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ยกลูกโกร่งขึ้น หรือขั้นตอนการผสมน้ำมันไม่ถูกต้อง",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการเกิด Primary Emulsion",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "ยกลูกโกร่งขึ้น เติมน้ำ 12.5 mL ลงไปทั้งหมดในคราวเดียว แล้วบดผสมอย่างรวดเร็วโดยใช้ข้อมือหมุนไปทางเดียวกัน ให้แรงเหวี่ยงมากกว่าแรงกดจนเกิดเสียง Clicking sound และบดต่ออีกประมาณ 5 นาทีเพื่อลดขนาดอนุภาค",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ค่อยๆ หยอดน้ำทีละน้อย หรือไม่ระบุทิศทางการบดหมุนจนเกิดเสียง Clicking sound",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การผสมสารแต่งรส (Flavoring Agent)",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "ตวง Cherry syrup 5 mL ด้วยกระบอกตวงขนาด 10 mL แล้วเทผสมทีละส่วนลงในโกร่งกระเบื้อง คนให้เข้ากันอย่างสม่ำเสมอ",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เท Cherry syrup พรวดเดียวทั้งหมด หรือไม่ระบุขนาดกระบอกตวง",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การถ่ายอิมัลชันและการ Rinse โกร่ง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "เทอิมัลชันลงในกระบอกตวงขนาด 50 mL และใช้น้ำส่วนที่เหลือ (3.5 mL) กลั้วล้างโกร่งทีละน้อยเทรวมลงในกระบอกตวง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ทำการ Rinse สารที่ติดค้างในโกร่ง",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การปรับปริมาตร",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "ปรับปริมาตรด้วย Purified water จนครบ 50 mL พอดี และใช้แท่งแก้วคนให้เข้ากันในกระบอกตวง",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ปรับปริมาตรผิดพลาดหรือไม่คนผสม",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การบรรจุและการติดฉลาก",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน"
+  },
+  {
+   "t": "เทใส่ขวดแก้วสีชา ปิดฝาให้สนิท และติดฉลากยาพร้อมฉลากช่วย \"เขย่าขวดก่อนใช้\"",
+   "html": "เทใส่ขวดแก้วสีชา ปิดฝาให้สนิท และติดฉลากยาพร้อมฉลากช่วย &quot;เขย่าขวดก่อนใช้&quot;",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุการบรรจุหรือติดฉลาก",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียมด้วยวิธี Dry Gum Method - 7 คะแนน",
+   "sub": true
+  }
+ ]
+}

@@ -1,0 +1,59 @@
+{
+ "id": "OS-0089",
+ "title": "การตรวจสอบใบสั่งยาโรค Hypertension",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Oncology",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2559",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "แพทย์มีการสั่งจ่ายยาให้กับผู้ป่วยโรคความดันสูง มีรายการยาดังนี้\nRx.     Atenolol (50)    ½ * 1                   10 tabs\nAspirin81           1 ½ * 1  ac          30 tabs\nLosartan            ½ * 1                  10 tabs\nข้อมูลของซองยาแต่ละซองมีดังนี้\nหมายเลข 1\nหมายเลข 2\nหมายเลข 3\nคำสั่ง: ระบุจุดผิดพลาดที่ผู้สอบพบเจอในซองยาของยาทั้งสามชนิดนี้",
+ "patientHtml": "<p>ผู้ป่วยเป็นโรคความดันสูง</p>",
+ "contentHtml": "<p>แพทย์มีการสั่งจ่ายยาให้กับผู้ป่วยโรคความดันสูง มีรายการยาดังนี้</p><p>Rx.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Atenolol (50)&nbsp;&nbsp;&nbsp;&nbsp;½ * 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10 tabs </p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Aspirin81&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 ½ * 1&nbsp;&nbsp;ac&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30 tabs</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Losartan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;½ * 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10 tabs</p><p>ข้อมูลของซองยาแต่ละซองมีดังนี้</p><p>หมายเลข 1</p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><td><p>ใบสั่งยาที่ 1</p><p>โรงพยาบาลเขียวนีออน</p><p>วันที่ 26 สิงหาคม 2569</p><p>ชื่อ-สกุล: นายมรกต พาสเทล</p><p>ชื่อยา: Atenolol (50)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;จำนวน 10 เม็ด</p><p>ข้อบ่งใช้: ลดความดันโลหิต</p><p>รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง</p><p><span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">ก่อนอาหาร</span>&nbsp;&nbsp;หลังอาหาร ก่อนนอน</p><p><span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">เช้า</span>&nbsp;&nbsp;กลางวัน&nbsp;&nbsp;บ่าย&nbsp;&nbsp;เย็น</p><p>หรือทุก…………………………………..ชั่วโมง</p><p>หรือเฉพาะเวลา………………………………..</p><p>ฉลากเสริม</p><p>-</p><p>Sign หยก เทอร์ควอยซ์&nbsp;&nbsp;(Pharmacy)</p></td></tr></table></div><p>หมายเลข 2</p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><td><p>ใบสั่งยาที่ 2</p><p>โรงพยาบาลเขียวนีออน</p><p>วันที่ 26 สิงหาคม 2569</p><p>ชื่อ-สกุล: นายมรกต พาสเทล&nbsp;&nbsp;</p><p>ชื่อยา: Aspirin81&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;จำนวน 30 เม็ด</p><p>ข้อบ่งใช้: สลายลิ่มเลือด</p><p>รับประทานครั้งละ 1 ½ เม็ด วันละ 1 ครั้ง</p><p>ก่อนอาหาร&nbsp;&nbsp;<span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">หลังอาหาร </span>ก่อนนอน</p><p><span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">เช้า</span>&nbsp;&nbsp;กลางวัน&nbsp;&nbsp;บ่าย&nbsp;&nbsp;เย็น</p><p>หรือทุก…………………………………..ชั่วโมง</p><p>หรือเฉพาะเวลา………………………………..</p><p>ฉลากเสริม</p><p>-</p><p>Sign หยก เทอร์ควอยซ์&nbsp;&nbsp;(Pharmacy)</p></td></tr></table></div><p>หมายเลข 3</p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><td><p>ใบสั่งยาที่ 3</p><p>โรงพยาบาลเขียวนีออน</p><p>วันที่ 26 สิงหาคม 2569</p><p>ชื่อ-สกุล: นายมรกต พาสเทล&nbsp;&nbsp;</p><p>ชื่อยา: Losartan</p><p>ข้อบ่งใช้: ลดความดันโลหิต</p><p>รับประทานครั้งละ ½ เม็ด วันละ 1 ครั้ง</p><p><span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">ก่อนอาหาร</span>&nbsp;&nbsp;หลังอาหาร ก่อนนอน</p><p><span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px;\">เช้า</span>&nbsp;&nbsp;กลางวัน&nbsp;&nbsp;บ่าย&nbsp;&nbsp;เย็น</p><p>หรือทุก…………………………………..ชั่วโมง</p><p>หรือเฉพาะเวลา………………………………..</p><p>ฉลากเสริม</p><p>-</p><p>Sign หยก เทอร์ควอยซ์&nbsp;&nbsp;(Pharmacy)</p></td></tr></table></div><p>คำสั่ง: ระบุจุดผิดพลาดที่ผู้สอบพบเจอในซองยาของยาทั้งสามชนิดนี้</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>ซองยา Atenolol&nbsp;&nbsp;&nbsp;1 ซอง&nbsp;&nbsp;(เขียนกำกับว่าหมายเลข 1)</li><li>ซองยา Aspirin81&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 ซอง&nbsp;&nbsp;(เขียนกำกับหมายเลข 2)</li><li>ซองยา Losartan&nbsp;&nbsp;&nbsp;1 ซอง&nbsp;&nbsp;(เขียนกำกับหมายเลข 3)</li></ol>",
+ "noteHtml": "<p>มีทั้งหมด 5 ข้อ บอกซองด้วยนะว่ามาจากซองไหน</p><p>ข้อมูลที่เป็นจุดผิดพลาดจากซองยาทั้งสาม มีดังนี้</p><ol class=\"ordered-list\"><li>ซองยาที่ 1 ในซองยาเป็น Atenolol 100 mg. แต่แพทย์สั่งจ่ายขนาด 50 mg.</li><li>ซองยาที่ 1 หน้าซองยาเขียนเป็น 1*1&nbsp;&nbsp;แต่แพทย์สั่งจ่ายเป็น&nbsp;&nbsp;½*1</li><li>ซองยาที่ 2 สั่งจ่ายยาจำนวน 30 เม็ด แต่ในซองมีแค่ 10 เม็ด</li><li>ซองยาที่ 2 หน้าซองยาเขียนเป็น 1 ½ *1 <span style=\"text-decoration: underline;\">pc</span> แต่แพทย์สั่งจ่าย <span style=\"text-decoration: underline;\">ac</span></li><li>ซองยาที่ 3 แพทย์สั่งยา Losartan แต่ในซองยาเป็นยา Loratardine</li></ol><p><span style=\"color: rgb(255,0,0);\">สงสัยว่าพวกข้างในซองยาที่ต้องนับยาหรือดูตัวยานี่ต้องเอารูปมาใส่เป็นพร๊อพด้วยไหม </span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">2.ปี 2559 </span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 4 </span></p>",
+ "checklist": [
+  {
+   "t": "สามารถบอกจุดผิดพลาดของแต่ละซองที่รวมแล้วมีทั้งหมด 5 จุดได้ครบถ้วน ถ้าตอบไม่ครบตัดไปจุดละ 1 คะแนน",
+   "html": "สามารถบอกจุดผิดพลาดของแต่ละซองที่รวมแล้วมีทั้งหมด 5 จุดได้ครบถ้วน <span style=\"text-decoration: underline;\">ถ้าตอบไม่ครบตัดไปจุดละ 1 คะแนน\n</span>",
+   "s": 5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ซองยาที่ 1 ในซองยาเป็น Atenolol 100 mg. แต่แพทย์สั่งจ่ายขนาด 50 mg.",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ซองยาที่ 1 หน้าซองยาเขียนเป็น 1*1  แต่แพทย์สั่งจ่ายเป็น  ½*1",
+   "html": "ซองยาที่ 1 หน้าซองยาเขียนเป็น 1*1&nbsp;&nbsp;แต่แพทย์สั่งจ่ายเป็น&nbsp;&nbsp;½*1",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ซองยาที่ 2 สั่งจ่ายยาจำนวน 30 เม็ด แต่ในซองมีแค่ 10 เม็ด",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ซองยาที่ 2 หน้าซองยาเขียนเป็น 1 ½ *1 pc แต่แพทย์สั่งจ่าย ac",
+   "html": "ซองยาที่ 2 หน้าซองยาเขียนเป็น 1 ½ *1 <span style=\"text-decoration: underline;\">pc</span> แต่แพทย์สั่งจ่าย <span style=\"text-decoration: underline;\">ac\n</span>",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ซองยาที่ 3 แพทย์สั่งยา Losartan แต่ในซองยาเป็นยา Loratardine",
+   "html": "ซองยาที่ 3 แพทย์สั่งยา Losartan แต่ในซองยาเป็นยา Loratardine<span style=\"text-decoration: underline;\">\n</span>",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

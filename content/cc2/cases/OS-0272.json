@@ -1,0 +1,231 @@
+{
+ "id": "OS-0272",
+ "title": "Solution 3A",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Ear Drops (Otic Solution)",
+ "diff": 2,
+ "source": "Mock Exam 2569 (Week 1) ชุด A",
+ "active": true,
+ "durationMin": 8,
+ "gated": [],
+ "next": null,
+ "scenario": "Rx\nSodium bicarbonate 3 g\nGlycerol 1 fl.oz.\nPurified water qs. to 100 mL\nคำสั่ง: จงคำนวณและเตรียมตำรับดังกล่าวในปริมาตร 50 mL โดยส่งในกระบอกตวง",
+ "patientHtml": "",
+ "contentHtml": "<p>Rx</p><p>Sodium bicarbonate 3 g</p><p>Glycerol 1 fl.oz.</p><p>Purified water qs. to 100 mL</p><p>คำสั่ง: จงคำนวณและเตรียมตำรับดังกล่าวในปริมาตร 50 mL โดยส่งในกระบอกตวง</p>",
+ "equipmentHtml": "<p><span style=\"font-weight: 700;\">สารเคมี</span></p><p>&nbsp;&nbsp;- Sodium bicarbonate</p><p>&nbsp;&nbsp;- Glycerol</p><p>&nbsp;&nbsp;- Purified water</p><p><span style=\"font-weight: 700;\">อุปกรณ์</span></p><p>&nbsp;&nbsp;- Cylinder ขนาด 10, 25, 50, 100 mL</p><p>&nbsp;&nbsp;- Beaker ขนาด 50, 100 mL</p><p>&nbsp;&nbsp;- โกร่งและลูกโกร่ง</p><p>&nbsp;&nbsp;- แท่งแก้วคน</p><p>&nbsp;&nbsp;- กระจกนาฬิกา</p><p><span style=\"font-weight: 700;\">ระยะเวลา</span></p><p>&nbsp;&nbsp;- 8 นาที</p>",
+ "noteHtml": "<ol class=\"ordered-list\"><li><span style=\"font-weight: 700;\">เฉลยวิธีคำนวณ:</span><ul class=\"bullet-list\"><li>ปริมาณ NaHCO<sub>3</sub> ที่ต้องใช้:&nbsp;&nbsp;&nbsp;3 g x <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">50 mL</span><span class=\"equation-denom\">100 mL</span></span></span>&nbsp;&nbsp;&nbsp;= 1.5 g</li><li>ปริมาณ Glycerol ที่ต้องใช้:&nbsp;&nbsp;&nbsp;1 fl.oz. x <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">30 mL</span><span class=\"equation-denom\">1 fl.oz.</span></span></span>&nbsp;&nbsp;x <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">50 mL</span><span class=\"equation-denom\">100 mL</span></span></span>&nbsp;&nbsp;&nbsp;= 15 mL</li><li>น้ำสำหรับละลายผงยา (¾ ของ Approximate volume):&nbsp;&nbsp;&nbsp;(50 − <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1.5</span><span class=\"equation-denom\">2</span></span></span>&nbsp;&nbsp;– 15) x ¾ = 25.6875 mL (อนุโลม 25-26 mL)</li><li>น้ำสำหรับ Rinse และปรับปริมาตร (¼ ของ Approximate volume):&nbsp;&nbsp;&nbsp;(50 − <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1.5</span><span class=\"equation-denom\">2</span></span></span> – 15) x ¼ = 8.5625 mL (อนุโลม 8-9 mL)</li></ul></li><li><span style=\"font-weight: 700;\">จุดเน้นทางเทคนิคที่ต้องตัดคะแนนหากผิดพลาด:</span><ul class=\"bullet-list\"><li>ห้ามละลายผงยาในกระบอกตวงโดยเด็ดขาด กระบอกตวงใช้วัดปริมาตรเท่านั้น การละลายต้องทำในบีกเกอร์โดยใช้แท่งแก้วคน</li><li>ลืมรอ Drainage time หลังเท Glycerol ลงบีกเกอร์</li><li>Rinse บีกเกอร์ไม่ครบอย่างน้อย 2 รอบ ด้วยน้ำ ¼ ส่วนที่เหลือ เพื่อชะตัวยาที่ตกค้างบนผนังบีกเกอร์ลงกระบอกตวงให้ครบ</li><li>สารละลายสุดท้ายต้องใส ไม่มีตะกอน</li><li>ไม่คนผสมหลังปรับปริมาตรครบ 50 mL หรือคนผสมก่อนปรับปริมาตรแล้วไม่คนซ้ำอีกครั้ง</li></ul></li><li><span style=\"font-weight: 700;\">Common Pitfalls:</span><ul class=\"bullet-list\"><li>ตวงน้ำเต็ม 50 mL มาละลายยา ทำให้ปริมาตรสุดท้ายเกิน</li><li>ไม่ Rinse บีกเกอร์</li><li>เสียบแท่งแก้วคนค้างไว้ในกระบอกตวงหลังผสมเสร็จ เสี่ยงทำให้กระบอกตวงล้มคว่ำ</li><li>ส่งมอบผลิตภัณฑ์โดยมีสารหกเลอะภายนอกกระบอกตวง</li></ul></li></ol>",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณสารและ Approximate Volume",
+   "s": 3,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แสดงวิธีคำนวณถูกต้องครบทั้ง 3 รายการ\n  • ปริมาณ NaHCO3 ที่ต้องใช้ = 1.5 g\n  • ปริมาณ Glycerol ที่ต้องใช้ = 15 mL (1 fl.oz. = 30 mL)\n  • Approximate volume ของน้ำ = 50 − 1.52 − 15 = 34.25 mL แบ่งเป็นน้ำ ¾ สำหรับละลายผงยา = 25.6875 mL (≈ 25.7 mL) และน้ำ ¼ สำหรับ Rinse และปรับปริมาตร = 8.5625 mL (≈ 8.6 mL)",
+   "html": "แสดงวิธีคำนวณถูกต้องครบทั้ง 3 รายการ<ul class=\"checklist-sub-details\"><li>ปริมาณ NaHCO<sub>3</sub> ที่ต้องใช้ = 1.5 g</li><li>ปริมาณ Glycerol ที่ต้องใช้ = 15 mL (1 fl.oz. = 30 mL)</li><li>Approximate volume ของน้ำ = 50 − <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1.5</span><span class=\"equation-denom\">2</span></span></span> − 15 = 34.25 mL แบ่งเป็นน้ำ ¾ สำหรับละลายผงยา = 25.6875 mL (≈ 25.7 mL) และน้ำ ¼ สำหรับ Rinse และปรับปริมาตร = 8.5625 mL (≈ 8.6 mL)&nbsp;&nbsp;</li></ul>",
+   "s": 3,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณถูก 2 จาก 3 รายการ",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณถูก 1 จาก 3 รายการ",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดทั้งหมด",
+   "html": "<span style=\"color: rgb(31,31,31);\">คำนวณผิดทั้งหมด</span>",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การอ่านฉลากสารเคมี (3-Checks Rule)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากกระปุก Sodium bicarbonate และ Glycerol ครบ 3 ครั้ง และวางหงายฝากระปุกสารบนโต๊ะเสมอ",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "อ่านฉลากไม่ครบ หรือคว่ำฝาลงบนโต๊ะ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเลือกกระบอกตวงสำหรับ Glycerol",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกกระบอกตวงขนาด 25 mL หรือ 50 ตวง Glycerol 15 mL (เกินความจุของขนาด 10 mL และไม่ต่ำกว่าเกณฑ์ 20% ของความจุกระบอกตวงขนาด 25 และ 50 mL)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เลือกกระบอกตวงผิดขนาด",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการตวง Glycerol (ของเหลวหนืด)",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ถือขวดโดยหันฉลากเข้าหาฝ่ามือ รินลงกระบอกตวง ยกกระบอกตวงตั้งตรง แล้วอ่านส่วนโค้งล่าง (Lower meniscus) ที่ระดับสายตาได้แม่นยำ 15 mL",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "อ่านระดับสายตาถูกต้องแต่เทคนิคการจับขวดสารไม่ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่อ่าน Meniscus ที่ระดับสายตา",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การแบ่งตวง Purified water",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แบ่งตวงน้ำแยกเป็น 2 ส่วนอย่างถูกต้อง คือ ¾ สำหรับละลายผงยา และ ¼ เก็บไว้สำหรับ Rinse และปรับปริมาตร",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ตวงถูกเพียงส่วนเดียว หรือลืมแบ่งตวงอย่างใดอย่างหนึ่ง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้แบ่งตวงน้ำเลย",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการละลายและผสมสาร",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เท NaHCO3 ลงในบีกเกอร์ เติมน้ำ ¾ ส่วนที่ตวงไว้ แล้วคนด้วยแท่งแก้วเบาๆ อย่างต่อเนื่องจนผงยาละลายหมดเป็นสารละลายใสสมบูรณ์ จากนั้นจึงเท Glycerol ที่ตวงไว้ลงไป และคนผสมจนเข้ากันดี",
+   "html": "เท NaHCO<sub>3</sub> ลงในบีกเกอร์ เติมน้ำ ¾ ส่วนที่ตวงไว้ แล้วคนด้วยแท่งแก้วเบาๆ อย่างต่อเนื่องจนผงยาละลายหมดเป็นสารละลายใสสมบูรณ์ จากนั้นจึงเท Glycerol ที่ตวงไว้ลงไป และคนผสมจนเข้ากันดี",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เท Glycerol ก่อนที่ผงยาจะละลายหมด หรือผงยาละลายไม่ใส หรือไม่ใช้น้ำ ¾ ส่วนที่ตวงไว้ก่อนหน้า",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมผิดทั้งหมด",
+   "html": "<span style=\"color: rgb(31,31,31);\">ลำดับการผสมผิดทั้งหมด</span>",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การถ่ายเท Glycerol และ Drainage time",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "หลังเท Glycerol ลงบีกเกอร์ รอให้ Glycerol ไหลออกจากกระบอกตวงจนหมด (Drainage time ประมาณ 5 วินาที) ก่อนวางกระบอกตวง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่รอ หรือยกกระบอกตวงออกทันทีหลังเท",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การปรับปริมาตรและการ Rinse กลั้วภาชนะ",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทสารละลายจากบีกเกอร์ลงกระบอกตวงขนาด 50 mL จากนั้นใช้ Purified water ¼ ส่วนที่เหลือ Rinse บีกเกอร์อย่างน้อย 2 รอบ เทลงกระบอกตวงทุกครั้ง แล้วปรับปริมาตรจนส่วนโค้งล่างแตะขีด 50 mL พอดีที่ระดับสายตา",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "Rinse บีกเกอร์เพียง 1 รอบ หรือปรับปริมาตรขาด/เกินเล็กน้อย หรือไม่ใช้น้ำ ¼ ส่วนที่เหลือ",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ Rinse บีกเกอร์เลย",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การคนผสมสาร",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้แท่งแก้วคนให้เข้ากันในกระบอกตวงหลังปรับปริมาตร แล้วนำแท่งแก้วออกไปวางบนภาชนะรองรับ (ไม่ทิ้งค้างไว้ในกระบอกตวง)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ลืมคนผสมหลังปรับปริมาตร",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ความสะอาดและการส่งมอบผลิตภัณฑ์",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ทำความสะอาดโต๊ะปฏิบัติการเรียบร้อย และส่งมอบผลิตภัณฑ์ในกระบอกตวงโดยไม่มีสารหกเลอะภายนอก",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ทำความสะอาดโต๊ะปฏิบัติการ หรือส่งมอบผลิตภัณฑ์โดยมีสารหกเลอะเปรอะเปื้อนภายนอกกระบอกตวง / โต๊ะปฏิบัติการ",
+   "html": "<span style=\"color: rgb(31,31,31);\"></span> ไม่ทำความสะอาดโต๊ะปฏิบัติการ หรือส่งมอบผลิตภัณฑ์โดยมีสารหกเลอะเปรอะเปื้อนภายนอกกระบอกตวง / โต๊ะปฏิบัติการ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

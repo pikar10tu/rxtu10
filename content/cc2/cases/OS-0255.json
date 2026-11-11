@@ -1,0 +1,207 @@
+{
+ "id": "OS-0255",
+ "title": "Mucilage Preparation: Sodium Carboxymethylcellulose (SCMC) Mucilage",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "การเตรียมตำรับ Mucilage, Dispersing Agent (Glycerin), Approximate Volume, การชั่งสารปริมาณน้อย",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 2",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงคำนวณปริมาณ Working Formula, Approximate Volume และเตรียมตำรับ Sodium CMC Mucilage ปริมาณ 20 mL ด้วยเทคนิคทางเภสัชกรรมที่ดี ใส่บีกเกอร์ส่งกรรมการผู้คุมสอบ (เวลาปฏิบัติการ 4 นาที)\nRx 2\nSodium CMC (MV): 1.0 g\nGlycerin: q.s.\nPurified water q.s.: 100 mL\nM.ft. Mucilage 20 mL\n(หมายเหตุ: 1. การชั่งสาร Sodium CMC เป็นส่วนหนึ่งของการวัดผลในเวลา 4 นาที 2. เก็บ Mucilage ที่เตรียมได้นี้ไว้ใช้ในสถานีที่ 5 ต่อไป)",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีเตรียมยา / Product ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>จงคำนวณปริมาณ Working Formula, Approximate Volume และเตรียมตำรับ Sodium CMC Mucilage ปริมาณ 20 mL ด้วยเทคนิคทางเภสัชกรรมที่ดี ใส่บีกเกอร์ส่งกรรมการผู้คุมสอบ (เวลาปฏิบัติการ 4 นาที)</p><p><span style=\"font-weight: 700;\">Rx 2</span></p><ul class=\"bullet-list\"><li>Sodium CMC (MV): 1.0 g</li><li>Glycerin: q.s.</li><li>Purified water q.s.: 100 mL</li><li>M.ft. Mucilage 20 mL</li></ul><p><span style=\"font-style: italic;\">(หมายเหตุ: 1. การชั่งสาร Sodium CMC เป็นส่วนหนึ่งของการวัดผลในเวลา 4 นาที 2. เก็บ Mucilage ที่เตรียมได้นี้ไว้ใช้ในสถานีที่ 5 ต่อไป)</span></p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>ผ้าปูพลาสติก</li><li>เครื่องคิดเลข, กระดาษทด และปากกา</li><li>เครื่องชั่งไฟฟ้า 2 ตำแหน่ง พร้อมปุ่ม Tare</li><li>กระดาษชั่งสาร (กระดาษธรรมดา) และช้อนเขาตักสาร</li><li>โกร่งแก้วและลูกโกร่งแก้ว (Glass mortar &amp; pestle)</li><li>โกร่งกระเบื้องและลูกโกร่งกระเบื้อง (Porcelain mortar &amp; pestle)</li><li>ไม้พายปาดสาร (Spatula)</li><li>หลอดหยดพร้อมจุกยาง (Dropper)</li><li>กระบอกตวง (Graduated cylinder) ขนาด 10 mL, 25 mL, 50 mL, 100 mL</li><li>บีกเกอร์ (Beaker) ขนาด 50 mL, 100 mL, 150 mL, 250 mL</li><li>สารเคมี: Sodium CMC (MV), Glycerin, Purified water</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณ Working Formula (สูตร 100 mL </span><span class=\"doc-equation\">&rarr;</span><span style=\"font-weight: 700;\"> เตรียม 20 mL, ตัวคูณ </span><span class=\"doc-equation\">&times;0.2</span><span style=\"font-weight: 700;\">):</span><ul class=\"bullet-list\"><li><span class=\"doc-equation\">SodiumCMC(MV)=1.0&times;0.2=0.2g</span></li><li><span class=\"doc-equation\">Glycerin=q.s.</span> (หยดเพียงพอเคลือบผงยา ประมาณ <span class=\"doc-equation\">3--5หยด</span>)</li><li><span class=\"doc-equation\">Purifiedwaterq.s.=20mL</span></li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณ Approximate Volume (App. Vol.):</span><ul class=\"bullet-list\"><li>ปริมาตรสุทธิ 20 mL หักปริมาตรแทนที่ของ SCMC 0.2 g (คิดเป็น <span class=\"doc-equation\">&asymp;0.2mL</span>)</li><li><span class=\"doc-equation\">App.Vol.ของน้ำ=20-0.2=19.8mL</span></li><li><span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.vol&asymp;15mL</span> (ใช้บดผสมเกิดเมือกใสในโกร่ง)</li><li><span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.vol&asymp;4.8&asymp;5mL</span> (ใช้ Rinse โกร่งแก้วเทลงกระบอกตวงปรับปริมาตร)</li></ul></li><li><span style=\"font-weight: 700;\">เทคนิคสำคัญ (Wet-Wetting / Levigating with Glycerin):</span><ul class=\"bullet-list\"><li>Sodium CMC พองตัวในน้ำได้ง่าย หากเทน้ำลงบนผง SCMC โดยตรง จะเกิดเจลหุ้มผิวนอกทำให้ข้างในเป็นก้อนแป้งแห้งไม่ละลาย (Clumping / Fish eyes)</li><li>ผู้สอบ <span style=\"font-weight: 700;\">ต้องหยด Glycerin ลงไปคลุกเคล้าผง SCMC ในโกร่งแก้วให้เปียกทั่วถึงก่อนเสมอ</span> แล้วจึงค่อยๆ รินน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span></span> ส่วนลงไปผสมทีละน้อยตามหลัก Geometric dilution</li></ul></li><li><span style=\"font-weight: 700;\">การนำไปใช้ต่อ:</span> เมือกใสที่เตรียมได้นี้ ต้องแจ้งให้ผู้สอบเก็บไว้บนโต๊ะ เพื่อนำไปใช้เป็น Suspending agent ในสถานีที่ 4 และ 5 ต่อไป</li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณสัดส่วนน้ำที่ใช้เตรียมและปรับปริมาตร",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณน้ำสำหรับผสมกับ Dispersing phase (34App.vol15mL) และปริมาณน้ำสำหรับ Rinse ปรับปริมาตร (14App.vol5mL) ได้ถูกต้อง",
+   "html": "คำนวณปริมาณน้ำสำหรับผสมกับ Dispersing phase (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.vol&asymp;15mL</span>) และปริมาณน้ำสำหรับ Rinse ปรับปริมาตร (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.vol&asymp;5mL</span>) ได้ถูกต้อง",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาณน้ำผิดพลาด",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเตรียมกระดาษชั่งสาร",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "เลือกใช้กระดาษธรรมดา พร้อมเขียนชื่อสาร \"SCMC\" และน้ำหนักที่ต้องการ \"0.2 g\" บนกระดาษ",
+   "html": "เลือกใช้กระดาษธรรมดา พร้อมเขียนชื่อสาร &quot;SCMC&quot; และน้ำหนักที่ต้องการ &quot;0.2 g&quot; บนกระดาษ",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่เขียนชื่อสาร หรือไม่เขียนน้ำหนัก",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การอ่านฉลากสารก่อนการชั่ง",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "อ่านฉลากสาร SCMC ครบ 3 ครั้ง (ก่อนหยิบ, ก่อนชั่ง, หลังชั่ง) และวางหงายฝาขวดสารเสมอ",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "อ่านฉลากไม่ครบถ้วน หรือไม่วางฝาหงาย",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การปรับสมดุลเครื่องชั่ง",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "ปรับระดับฟองน้ำและกดปุ่ม Tare ให้หน้าจอแสดง 0.00 g ก่อนตักชั่ง",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ปรับสมดุล หรือไม่กด Tare",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการใช้ช้อนเขาตักสารและการควบคุมน้ำหนัก",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "จับช้อนเขาอย่างถูกต้อง ชั่ง SCMC ได้น้ำหนัก 0.200.02g",
+   "html": "จับช้อนเขาอย่างถูกต้อง ชั่ง SCMC ได้น้ำหนัก <span class=\"doc-equation\">0.20&plusmn;0.02g</span>",
+   "s": 0.5,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "จับช้อนผิดวิธี หรือชั่งน้ำหนักเบี่ยงเบนเกินเกณฑ์",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเลือกชนิดของโกร่ง",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "เลือกเตรียม SCMC mucilage ในโกร่งแก้ว (Glass mortar)",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ใช้โกร่งกระเบื้องหรือภาชนะอื่น",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเลือก Dispersing Agent",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "เลือกใช้ Glycerin เป็นสารช่วยกระจายตัว",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ใช้น้ำเป็นสารช่วยกระจายตัว หรือไม่ใส่ Dispersing agent",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการกระจายผงยา (Dispersing phase)",
+   "s": 2,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "หยด Glycerin ในปริมาณใกล้เคียงกับผงยา บดผสมในโกร่งจนผงยากระจายตัวเคลือบสม่ำเสมอ แล้วค่อยๆ ใส่น้ำ (34App.vol=15mL) ทีละน้อยด้วยเทคนิค Geometric dilution บดผสมจนได้เมือกใสสมบูรณ์",
+   "html": "หยด Glycerin ในปริมาณใกล้เคียงกับผงยา บดผสมในโกร่งจนผงยากระจายตัวเคลือบสม่ำเสมอ แล้วค่อยๆ ใส่น้ำ (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.vol=15mL</span>) ทีละน้อยด้วยเทคนิค Geometric dilution บดผสมจนได้เมือกใสสมบูรณ์",
+   "s": 2,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ได้เมือกใส แต่ยังมีก้อนผง SCMC ที่ยังไม่กระจายตัวหลงเหลืออยู่เล็กน้อย",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ได้เมือกขุ่น มีก้อนผงจับตัวเป็นก้อนแป้ง (Fish eyes) จำนวนมาก หรือผงไม่ผสมกับน้ำ",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การล้างภาชนะและการปรับปริมาตร",
+   "s": 2,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "ใช้กระบอกตวงขนาด 25 mL และใช้น้ำส่วนที่เหลือ (14App.vol5mL) ทำการ Rinse สารที่ติดค้างในโกร่งแก้ว แล้วปรับปริมาตรจนครบ 20 mL พอดี",
+   "html": "ใช้กระบอกตวงขนาด 25 mL และใช้น้ำส่วนที่เหลือ (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.vol&asymp;5mL</span>) ทำการ Rinse สารที่ติดค้างในโกร่งแก้ว แล้วปรับปริมาตรจนครบ 20 mL พอดี",
+   "s": 2,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ปรับปริมาตรขาด/เกินเล็กน้อย หรือไม่ได้ Rinse โกร่งแก้ว",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ปรับปริมาตร หรือเลือกขนาดกระบอกตวงผิด",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การส่งมอบผลิตภัณฑ์",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน"
+  },
+  {
+   "t": "เทเมือกใสที่เตรียมได้ใส่บีกเกอร์ขนาด 50 mL ส่งให้กรรมการผู้คุมสอบ",
+   "s": 1,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ส่งในกระบอกตวง หรือใส่ภาชนะอื่นที่ไม่ถูกต้อง",
+   "s": 0,
+   "g": "การชั่งสารและการเตรียมตำรับ Mucilage - 10 คะแนน",
+   "sub": true
+  }
+ ]
+}

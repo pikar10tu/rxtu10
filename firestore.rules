@@ -74,6 +74,8 @@ service cloud.firestore {
           && request.resource.data.get('residence', {}).get('level', 1) <= 15   // = MAX_RESIDENCE_LEVEL (data/residence.js)
           && request.resource.data.get('residence', {}).get('level', 1)
              <= resource.data.get('residence', {}).get('level', 1) + 1
+          // CC2 OSPE บันทึกซ้อม (11 พ.ย. 2026 · utils/cc2Progress.js): กัน doc บวม — คลังมี ~352 เคส เผื่อ 600
+          && request.resource.data.get('study', {}).get('cc2', {}).size() <= 600
           // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร guest ปกติ) — approve/reject = admin เท่านั้น
           // ข้อยกเว้น: self-declare "อาจารย์" (instructorClaim:true) auto-approve ได้ทันที
           //   แต่แค่ครั้งแรกที่สมัครจริงๆ เท่านั้น (guestStatus เดิมต้องเป็น null) — กันคนโดน

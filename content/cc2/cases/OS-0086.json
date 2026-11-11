@@ -1,0 +1,45 @@
+{
+ "id": "OS-0086",
+ "title": "เปิดหนังสือหาข้อมูล Cefotaxime",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Cefotaxime",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2558",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "เลือกหนังสือ และตอบคำถามดังต่อไปนี้\nพยาบาลผสมยา cefotaxime sodium (1 g/vial) โดยใช้ sterile water for injection ให้ได้ความเข้มข้น 95 mg/ml อุณหภูมิที่หอผู้ป่วย 22 องศาเซลเซียส",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"font-weight: 700;\">เลือกหนังสือ และตอบคำถามดังต่อไปนี้</span></p><p>พยาบาลผสมยา cefotaxime sodium (1 g/vial) โดยใช้ sterile water for injection ให้ได้ความเข้มข้น 95 mg/ml อุณหภูมิที่หอผู้ป่วย 22 องศาเซลเซียส</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0086-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "equipmentHtml": "",
+ "noteHtml": "<div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><td><ol class=\"ordered-list\"><li>ใช้หนังสือใด</li></ol><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">Handbook on Injectable drugs 19th edition</span> หน้า 231</li><li>Pharmacotherapy หน้า ……….</li></ul><ol class=\"ordered-list\"><li>พยาบาลเตรียมยาแล้ว ทิ้งยาไว้ในหอผู้ป่วย 5 ชั่วโมง ยังสามารถใช้ยาได้อยู่หรือไม่</li></ol><p>……………………………สามารถใช้ได้…………………………………………………………………………</p><ol class=\"ordered-list\"><li>เก็บยาที่ผสมแล้วที่อุณหภูมิหอผู้ป่วย ยาจะคงตัวอยู่ได้นานเท่าใด</li></ol><p>……………………….…24 ชั่วโมง…………………………………………………………………………………</p><ol class=\"ordered-list\"><li>เก็บยาที่ผสมแล้วในตู้เย็น ยาจะคงตัวอยู่ได้นานเท่าใด</li></ol><p>…………………..……………7 วัน……………………………………………………………………………………</p></td></tr></table></div><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px;\">สถานีที่ 11</span></p>",
+ "checklist": [
+  {
+   "t": "เลือกใช้หนังสืออ้างอิง Handbook on Injectable Drugs ได้ถูกต้อง",
+   "s": 1,
+   "g": "ทักษะการสืบค้นความเสถียรของยาฉีด DIS"
+  },
+  {
+   "t": "ค้นพบและตอบได้ว่าหากเตรียมยาแล้ว ทิ้งยาไว้ในหอผู้ป่วย (22°C) 5 ชั่วโมง ยังสามารถใช้ยาได้อยู่หรือไม่ (สามารถใช้ได้)",
+   "s": 1,
+   "g": "ทักษะการสืบค้นความเสถียรของยาฉีด DIS"
+  },
+  {
+   "t": "ค้นพบและตอบได้ว่ายาที่ผสมแล้วที่อุณหภูมิหอผู้ป่วย ยาจะคงตัวอยู่ได้นานเท่าใด (คงตัว 24 ชั่วโมง)",
+   "s": 1,
+   "g": "ทักษะการสืบค้นความเสถียรของยาฉีด DIS"
+  },
+  {
+   "t": "ค้นพบและตอบได้ว่ายาที่ผสมแล้วในตู้เย็น ยาจะคงตัวอยู่ได้นานเท่าใด (คงตัว 7 วัน)",
+   "s": 1,
+   "g": "ทักษะการสืบค้นความเสถียรของยาฉีด DIS"
+  },
+  {
+   "t": "ให้คำแนะนำพยาบาลเกี่ยวกับการเก็บรักษายาฉีด Cefotaxime หลังผสมได้อย่างถูกต้อง",
+   "s": 1,
+   "g": "ทักษะการสืบค้นความเสถียรของยาฉีด DIS"
+  }
+ ]
+}

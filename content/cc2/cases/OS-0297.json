@@ -1,0 +1,45 @@
+{
+ "id": "OS-0297",
+ "title": "Dropper Calibration: Water Measurement 0.8 mL",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "การเทียบหยด (Dropper Calibration), การตวงของเหลวปริมาณน้อย, การคำนวณจำนวนหยด, การปัดเศษทศนิยม",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Product Week 1 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ต้องการตวงน้ำบริสุทธิ์ (Purified water) ปริมาตร 0.8mL ซึ่งไม่สามารถตวงได้โดยตรงจากกระบอกตวงขนาดทั่วไป จงทำการเทียบหยด (Calibrate drop) เพื่อหาจำนวนหยดของน้ำบริสุทธิ์ต่อ 1mL และคำนวณหาจำนวนหยดที่ต้องใช้สำหรับปริมาตร 0.8mL พร้อมหยดสารลงในภาชนะรองรับ แสดงวิธีคำนวณลงในกระดาษคำตอบ (เวลาปฏิบัติการ 4 นาที)",
+ "patientHtml": "",
+ "contentHtml": "<p>ต้องการตวงน้ำบริสุทธิ์ (Purified water) ปริมาตร <span class=\"doc-equation\">0.8mL</span> ซึ่งไม่สามารถตวงได้โดยตรงจากกระบอกตวงขนาดทั่วไป จงทำการเทียบหยด (Calibrate drop) เพื่อหาจำนวนหยดของน้ำบริสุทธิ์ต่อ <span class=\"doc-equation\">1mL</span> และคำนวณหาจำนวนหยดที่ต้องใช้สำหรับปริมาตร <span class=\"doc-equation\">0.8mL</span> พร้อมหยดสารลงในภาชนะรองรับ แสดงวิธีคำนวณลงในกระดาษคำตอบ (เวลาปฏิบัติการ 4 นาที)</p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>สารเคมีที่มีในสถานี: Purified water</li><li>อุปกรณ์ที่มีในสถานี:<ul class=\"bullet-list\"><li>กระบอกตวง (Graduated cylinder) ขนาด <span class=\"doc-equation\">10,25,50</span> และ <span class=\"doc-equation\">100mL</span></li><li>บีกเกอร์ (Beaker) ขนาด <span class=\"doc-equation\">50</span> และ <span class=\"doc-equation\">100mL</span></li><li>หลอดหยด (Dropper)</li><li>ปากกาเขียนแก้ว</li></ul></li></ul><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0297-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0297-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0297-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0297-4.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">หลักเกณฑ์ทางเภสัชกรรม (คู่มือทักษะสภาฯ หน้า 62):</span><ul class=\"bullet-list\"><li>การตวงของเหลวปริมาณน้อยที่ไม่สามารถใช้กระบอกตวงวัดได้โดยตรง ให้ใช้วิธีเทียบจำนวนหยดต่อมิลลิลิตร (Calibrate dropper)</li><li>ค่าเฉลี่ยทั่วไปของน้ำบริสุทธิ์: หลอดหยดมาตรฐานจะมีประมาณ <span class=\"doc-equation\">20หยด/mL</span> (ขึ้นกับขนาดรูปลายหลอดหยดและแรงตึงผิวของสาร ในทางปฏิบัติอาจพบได้ช่วง <span class=\"doc-equation\">18–24หยด/mL</span>)</li></ul></li><li><span style=\"font-weight: 700;\">ตัวอย่างการคำนวณและการตรวจให้คะแนน:</span><ul class=\"bullet-list\"><li>สมมตินิสิตนับได้ <span class=\"doc-equation\">20หยด</span> ในปริมาตร <span class=\"doc-equation\">1.0mL</span>:</li><li><span class=\"doc-equation\">หยดที่ต้องใช้=0.8&times;20=16หยด</span></li><li>สมมตินิสิตนับได้ <span class=\"doc-equation\">21หยด</span> ในปริมาตร <span class=\"doc-equation\">1.0mL</span>:<br>หยดที่ต้องใช้ = 0.8 x 21 = 16.8 หยด ปัดขึ้นเป็น 17 หยด</li><li>สมมตินิสิตนับได้ <span class=\"doc-equation\">22 หยด</span> ในปริมาตร <span class=\"doc-equation\">1.0mL</span><br> หยดที่ต้องใช้ = 0.8 x 22 = 17.6 หยด ปัดขึ้นเป็น&nbsp;&nbsp;18 หยด</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "อ่านฉลาก 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกอุปกรณ์การเตรียม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการหยดสาร",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คำนวรหยดสารที่ใช้",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาดและอื่นๆ",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

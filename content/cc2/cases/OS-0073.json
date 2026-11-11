@@ -1,0 +1,38 @@
+{
+ "id": "OS-0073",
+ "title": "คำนวณขนาดยา Dopamine",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "คำนวณขนาดยา Dopamine",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2557",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ผู้ป่วยอายุ 60 ปี สูง 170 ซม. หนัก 60 กก. ได้รับยา Dopamine 500 mg + NSS up to 250 ml IV ในอัตรา 10 ml/hr (max dose = 20 mcg/kg/min)\nจงคำนวณหา\nผู้ป่วยจะได้รับยาในอัตรากี่ mcg/ml\nผู้ป่วยจะได้รับยาในอัตรากี่ mcg/min\nผู้ป่วยจะได้รับปริมาณยาสูงสุดกี่ mg/kg/mi",
+ "patientHtml": "",
+ "contentHtml": "<p>ผู้ป่วยอายุ 60 ปี สูง 170 ซม. หนัก 60 กก. ได้รับยา Dopamine 500 mg + NSS up to 250 ml IV ในอัตรา 10 ml/hr (max dose = 20 mcg/kg/min)</p><p>จงคำนวณหา</p><ol class=\"ordered-list\"><li>ผู้ป่วยจะได้รับยาในอัตรากี่ mcg/ml</li><li>ผู้ป่วยจะได้รับยาในอัตรากี่ mcg/min</li><li>ผู้ป่วยจะได้รับปริมาณยาสูงสุดกี่ mg/kg/mi</li></ol>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px;\">สถานีที่ 12</span></p>",
+ "checklist": [
+  {
+   "t": "คำนวณความเข้มข้นของยา Dopamine ในสารน้ำ (500 mg / 250 mL = 2 mg/mL หรือ 2000 mcg/mL) ได้ถูกต้อง",
+   "s": 1,
+   "g": "การคำนวณขนาดยาและอัตราการหยดบริหารยา",
+   "img": "<div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0073-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div>"
+  },
+  {
+   "t": "คำนวณปริมาณยาที่ผู้ป่วยได้รับต่อนาที (10 mL/hr = 20,000 mcg/hr = 333.33 mcg/min) ได้ถูกต้อง",
+   "s": 1,
+   "g": "การคำนวณขนาดยาและอัตราการหยดบริหารยา",
+   "img": "<div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0073-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div>"
+  },
+  {
+   "t": "คำนวณขนาดยาตามน้ำหนักผู้ป่วย (333.33 mcg/min / 60 kg = 5.56 mcg/kg/min) และประเมินเทียบกับ Max dose (20 mcg/kg/min) ได้ถูกต้องปลอดภัย",
+   "s": 1,
+   "g": "การคำนวณขนาดยาและอัตราการหยดบริหารยา",
+   "img": "<div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0073-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div>"
+  }
+ ]
+}

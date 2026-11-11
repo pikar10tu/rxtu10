@@ -34,3 +34,9 @@ dist-ssr
 
 # git worktrees ใช้ระหว่างพัฒนาฟีเจอร์ (subagent-driven-development)
 .worktrees/
+
+# CC2 — generated จาก content/cc2 ตอน build (scripts/cc2/build-cc2.mjs)
+public/cc2/index.json
+public/cc2/cases/
+public/search-index.json
+public/cc2/drug-links.json

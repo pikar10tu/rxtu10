@@ -1,0 +1,30 @@
+{
+ "id": "OS-0359",
+ "title": "การกรอง",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "การเตรียมชุดกรอง",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตกรองสารละลาย tetracycline 2% 25 ml ให้ใส",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตกรองสารละลาย tetracycline 2% 25 ml ให้ใส</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>กรวยกรอง</li><li>บีกเกอร์</li><li>หลอดหยด</li><li>น้ำกลั่น</li><li>ที่ตั้งกรวย</li><li>สารละลาย Tetracycline 2%</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>ติดตั้งอุปกรณ์ ใช้กรวยกรองและใช้ beaker รับการ rinse กระดาษกรอง โดยใช้น้ำกลั่น rinse&nbsp;&nbsp;กระดาษากรอง</li></ul>",
+ "checklist": [
+  {
+   "t": "ได้สารละลายใส",
+   "s": 5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการกรองถูกต้อง",
+   "s": 5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

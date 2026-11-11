@@ -16,7 +16,7 @@
     <template v-else-if="mode === 'home'">
       <!-- ── หน้าแรก: ค้นหา + 4 ประตู (แบบ B — user เลือก 3 ต.ค. 2026) ── -->
       <template v-if="tab === 'home'">
-        <input v-model="search" class="sv-search" type="search" placeholder="ค้นหา โหมด เครื่องคำนวณ หรือเรื่องที่สรุป" aria-label="ค้นหาในหน้าเตรียมสอบ">
+        <input v-model="search" class="sv-search" type="search" placeholder="ค้นหายา เคส CC2 สรุป โหมด หรือเครื่องคำนวณ" aria-label="ค้นหาในหน้าเตรียมสอบ">
         <div v-if="search.trim()" class="sv-results">
           <template v-for="r in results" :key="r.key">
             <RouterLink v-if="r.to" :to="r.to" class="sv-res">
@@ -28,7 +28,8 @@
               <span class="sv-res-t"><b>{{ r.title }}</b><small>{{ r.sub }}</small></span>
             </button>
           </template>
-          <div v-if="!results.length" class="sv-res-none">ไม่เจอ "{{ search.trim() }}"</div>
+          <!-- ค้นหารวม ยา · เคส CC2 (0 read — public/search-index.json) · สรุปค้นเองข้างบนแล้ว -->
+          <GlobalSearchPanel v-model="search" hide-input :exclude="['sums']" />
         </div>
         <div v-else class="sv-doors">
           <button v-for="d in DOORS" :key="d.key" type="button" class="sv-door" :class="['d-' + d.key, { soon: d.soon }]" :disabled="d.soon" @click="openDoor(d.key)">
@@ -232,6 +233,7 @@
 </template>
 
 <script setup>
+import GlobalSearchPanel from '../components/search/GlobalSearchPanel.vue'
 import { useEscapeKey } from '../composables/useEscapeKey.js'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'
@@ -292,12 +294,13 @@ const router = useRouter()
 const { rawConfig } = useAppConfig()
 // ฐานข้อมูลยา — ปิดด้วย flag drugDbOpen (แอดมินเห็นก่อน) · คนอื่นเห็นป้าย Coming soon
 const drugDbOpen = computed(() => isFeatureOpen(rawConfig.value, 'drugDbOpen', { isAdmin: authStore.isAdmin }))
-function openDoor(t) { if (t === 'drug') { router.push('/study/drugs'); return } if (t === 'stats') { router.push('/me'); return } if (t === 'daily') { router.push('/daily'); return } tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
+function openDoor(t) { if (t === 'cc2') { router.push('/study/cc2'); return } if (t === 'drug') { router.push('/study/drugs'); return } if (t === 'stats') { router.push('/me'); return } if (t === 'daily') { router.push('/daily'); return } tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 const playedToday = computed(() => authStore.userData?.dc?.last === dayKey())
 const DOORS = computed(() => [
   { key: 'daily', emoji: '🌅', title: 'ข้อสอบประจำวัน', sub: playedToday.value ? 'เล่นแล้ว · ดูอันดับ' : '5 ข้อวันละรอบ · ลุ้นท็อป 10', badge: playedToday.value ? 0 : 'ใหม่' },
   { key: 'quiz',  emoji: '📝', title: 'ข้อสอบ',      sub: 'ทั่วไป · Zen · Time Attack · ข้อที่ผิด', badge: redoDue.value || 0 },
+  { key: 'cc2',   emoji: '🩺', title: 'CC2 OSPE', sub: 'คลังเคส · ซ้อม 16 สถานี · ซ้อมคู่กับเพื่อน', badge: 'ใหม่' },
   { key: 'sum',   emoji: '📚', title: 'สรุป',        sub: 'สรุปโรคจากเพื่อน RxTU10', badge: 0 },
   { key: 'flash', emoji: '🧠', title: 'แฟลชการ์ด',   sub: `ทบทวนกลุ่มยา ${DECK.length} ตัว`, badge: queueSize.value || 0 },
   { key: 'tool',  emoji: '🧮', title: 'เครื่องคำนวณ', sub: 'CrCl · ยาน้ำเด็ก', badge: 0 },
@@ -495,7 +498,8 @@ function endSession() {
 async function commit(newCards, reward, today, dailyTotal, reviewedInc = 0) {
   const newStudy = { ...study.value, cards: newCards, lastStudied: Date.now() }
   const optimistic = { study: newStudy }
-  const patch = { study: newStudy }
+  // dot-path เท่านั้น — ส่ง study ทั้งก้อนจะทับ study.qcards / study.cc2 ที่หน้าอื่นเพิ่งเขียน (11 พ.ย. 2026)
+  const patch = { 'study.cards': newCards, 'study.lastStudied': newStudy.lastStudied }
   if (reward) {
     optimistic.coins = (authStore.userData?.coins || 0) + reward
     optimistic.studyCoinDate = today

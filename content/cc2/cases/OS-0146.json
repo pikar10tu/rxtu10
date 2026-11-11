@@ -1,0 +1,60 @@
+{
+ "id": "OS-0146",
+ "title": "ตรวจสอบใบสั่งยาและประเมินปัญหาจากยา DRP ในเด็ก",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "Pediatric Prescription Screening & DRP (Acute Otitis Media)",
+ "diff": 2,
+ "source": "สอบจำลองรุ่นพี่ 83 Clinic ครั้งที่ 2",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "เภสัชกรได้รับใบสั่งยาสำหรับผู้ป่วยเด็กหญิง อายุ 1 ปี 6 เดือน น้ำหนัก 15 kg ได้รับการวินิจฉัยเป็น Acute otitis media (หูชั้นกลางอักเสบเฉียบพลัน) โดยมีรายการยาในใบสั่งยาดังนี้\n1. Amoxicillin dry syrup (250 mg/5 mL) รับประทานครั้งละ 1 ช้อนชา (5 mL) วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น จำนวน 2 ขวด\n2. Paracetamol syrup (250 mg/5 mL) รับประทานครั้งละ 1 ช้อนชา (5 mL) ทุก 4-6 ชั่วโมง เวลามีไข้ จำนวน 1 ขวด (ขวดยาที่หยิบมาเป็น Paracetamol 120 mg/5 mL)\n3. Cetirizine syrup (5 mg/5 mL) รับประทานครั้งละ 1/2 ช้อนชา (2.5 mL) วันละ 1 ครั้ง ก่อนนอน จำนวน 1 ขวด\n4. Mometasone furoate nasal spray 50 mcg/actuation พ่นจมูกข้างละ 1 puff วันละ 1 ครั้ง จำนวน 1 ขวด\nจงตรวจสอบความถูกต้องของใบสั่งยา ระบุ Drug Related Problems (DRPs) พร้อมทั้งระบุแนวทางการแก้ไขที่ถูกต้อง",
+ "patientHtml": "<p>- ผู้ป่วย: เด็กหญิง อายุ 1 ปี 6 เดือน, น้ำหนัก 15 kg</p><p>- การวินิจฉัย: Acute Otitis Media (AOM)</p><p>- ข้อมูลการแพ้ยา: ปฏิเสธการแพ้ยา (NKDA)</p>",
+ "contentHtml": "<p>เภสัชกรได้รับใบสั่งยาสำหรับผู้ป่วยเด็กหญิง อายุ 1 ปี 6 เดือน น้ำหนัก 15 kg ได้รับการวินิจฉัยเป็น Acute otitis media (หูชั้นกลางอักเสบเฉียบพลัน) โดยมีรายการยาในใบสั่งยาดังนี้</p><p>1. Amoxicillin dry syrup (250 mg/5 mL) รับประทานครั้งละ 1 ช้อนชา (5 mL) วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น จำนวน 2 ขวด</p><p>2. Paracetamol syrup (250 mg/5 mL) รับประทานครั้งละ 1 ช้อนชา (5 mL) ทุก 4-6 ชั่วโมง เวลามีไข้ จำนวน 1 ขวด (ขวดยาที่หยิบมาเป็น Paracetamol 120 mg/5 mL)</p><p>3. Cetirizine syrup (5 mg/5 mL) รับประทานครั้งละ 1/2 ช้อนชา (2.5 mL) วันละ 1 ครั้ง ก่อนนอน จำนวน 1 ขวด</p><p>4. Mometasone furoate nasal spray 50 mcg/actuation พ่นจมูกข้างละ 1 puff วันละ 1 ครั้ง จำนวน 1 ขวด</p><p>จงตรวจสอบความถูกต้องของใบสั่งยา ระบุ Drug Related Problems (DRPs) พร้อมทั้งระบุแนวทางการแก้ไขที่ถูกต้อง</p>",
+ "equipmentHtml": "<p>ใบสั่งยาผู้ป่วยนอก และขวดยาจำลอง 4 รายการ</p>",
+ "noteHtml": "<p>เฉลยคำตอบพร้อมคำอธิบาย:</p><p>✅ คำตอบที่ถูกต้อง:</p><p>1. Amoxicillin syrup: เกิดปัญหา Underdose และ Duration/Quantity ไม่เพียงพอ ต้องใช้ High dose 80-90 mg/kg/day นาน 10 วันในเด็ก &lt; 2 ปี เพื่อครอบคลุมเชื้อ Streptococcus pneumoniae ที่ดื้อยา</p><p>2. Paracetamol syrup: Product mismatch ระหว่างใบสั่งยากับตัวยาจริง</p><p>3. Cetirizine syrup: ถูกต้องตามขนาดมาตรฐาน</p><p>4. Mometasone nasal spray: Contraindicated in age &lt; 2 years</p><p>📖 Guideline อ้างอิง:</p><p>- AAP Clinical Practice Guideline: The Diagnosis and Management of Acute Otitis Media (American Academy of Pediatrics)</p><p>- Pediatric &amp; Neonatal Dosage Handbook (Lexicomp)</p><p>📌 จุดจำก่อนสอบ:</p><p>- เด็ก &lt; 2 ปี เป็น AOM รักษา 10 วันเสมอ ใช้ Amoxicillin high dose 80-90 mg/kg/day</p><p>- Intranasal steroids ส่วนใหญ่ห้ามใช้ในเด็กอายุน้อยกว่า 2 ปี</p><hr class=\"case-divider\">",
+ "checklist": [
+  {
+   "t": "ระบุปัญหาขนาดยา Amoxicillin ไม่เหมาะสม (Underdose สำหรับ AOM): ขนาดยามาตรฐานสำหรับ AOM ในเด็กเล็กคือ High-dose 80-90 mg/kg/day (ผู้ป่วยหนัก 15 kg ควรได้ 1,200-1,350 mg/day แบ่งวันละ 2-3 ครั้ง หรือครั้งละ 8-9 mL วันละ 3 ครั้ง)",
+   "s": 2,
+   "g": "การประเมินรายการยาที่ 1 Amoxicillin"
+  },
+  {
+   "t": "ระบุปัญหาระยะเวลาและจำนวนยาไม่เหมาะสม: การรักษา AOM ในเด็กอายุต่ำกว่า 2 ปี ต้องให้ยานาน 10 วัน (ต้องการยารวม 12,000-13,500 mg) ต้องจ่าย 5-6 ขวด",
+   "s": 1.5,
+   "g": "การประเมินรายการยาที่ 1 Amoxicillin"
+  },
+  {
+   "t": "เสนอการแก้ไข: ปรับขนาดเป็นครั้งละ 8-9 mL (หรือ 400-450 mg) วันละ 3 ครั้ง และจ่ายจำนวน 5-6 ขวด",
+   "s": 2,
+   "g": "การประเมินรายการยาที่ 1 Amoxicillin"
+  },
+  {
+   "t": "ระบุปัญหาความแรงของยาที่จัดไม่ตรงกับใบสั่งยา (ใบสั่งยาระบุ 250 mg/5 mL แต่ขวดยาเป็น 120 mg/5 mL)",
+   "s": 0.5,
+   "g": "การประเมินรายการยาที่ 2 Paracetamol"
+  },
+  {
+   "t": "เสนอการแก้ไข: เปลี่ยนขวดยาให้ตรงกับความแรง 250 mg/5 mL ตามใบสั่งยา (หรือคำนวณขนาดยา 10-15 mg/kg/dose = 150-225 mg/dose)",
+   "s": 0.5,
+   "g": "การประเมินรายการยาที่ 2 Paracetamol"
+  },
+  {
+   "t": "ระบุว่า Cetirizine syrup ถูกต้องเหมาะสมแล้ว ไม่มีข้อผิดพลาด (ขนาดยา 2.5 mg วันละครั้ง เหมาะสมสำหรับเด็ก 1-2 ปี)",
+   "s": 0.5,
+   "g": "การประเมินรายการยาที่ 3 Cetirizine syrup"
+  },
+  {
+   "t": "ระบุปัญหาข้อห้ามใช้/ความไม่เหมาะสมของยา: Intranasal corticosteroid (Mometasone nasal spray) ไม่ได้รับการรับรองและไม่เหมาะสมสำหรับเด็กอายุต่ำกว่า 2 ปี",
+   "s": 1,
+   "g": "การประเมินรายการยาที่ 4 Mometasone nasal spray"
+  },
+  {
+   "t": "เสนอการแก้ไข: ระงับการใช้ Mometasone nasal spray ในผู้ป่วยรายนี้ และประสานงานแพทย์เพื่อยกเลิกรายการยา",
+   "s": 1,
+   "g": "การประเมินรายการยาที่ 4 Mometasone nasal spray"
+  }
+ ]
+}

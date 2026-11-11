@@ -1,0 +1,70 @@
+{
+ "id": "OS-0316",
+ "title": "Cream",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตบดผสม PEG ointment และ Nitrofurantoin ด้วยวิธีที่เหมาะสม\nสูตรตำรับ :\nNitrofurantoin 5 g\nPEG ointment q.s. 10 g\nคำสั่ง :\nจงผสมยา Nitrofurantoin กับ PEG Ointment ด้วยวิธีที่เหมาะสม",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตบดผสม PEG ointment และ Nitrofurantoin ด้วยวิธีที่เหมาะสม</p><p>สูตรตำรับ : </p><ul class=\"bullet-list\"><li>Nitrofurantoin 5 g</li><li>PEG ointment q.s. 10 g</li></ul><p>คำสั่ง : </p><ol class=\"ordered-list\"><li>จงผสมยา Nitrofurantoin กับ PEG Ointment ด้วยวิธีที่เหมาะสม</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Nitrofurantoin</li><li>Slab</li><li>Spatula</li><li>Levigating agent</li></ol>",
+ "noteHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0316-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์การเตรียม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การวาง / จับ slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจับ spatula",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตำแหน่งการวางตัวยา / ยาพื้น บน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการผสมตัวยากับยาพื้น การใช้ levigating agent",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การละลายผงยา (ปริมาณน้ำที่ใช้ / อุปกรณ์ที่ใช้)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการบดผสมตัวยากับยาพื้น Geometric dilution (แบ่งอย่างน้อย 3 ครั้ง)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตรวจสอบความเป็นเนื้อเดียวกัน โดยปาดบน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้ผลิตภัณฑ์เนื้อเนียน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด และ อื่นๆ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+{
+ "id": "OS-0092",
+ "title": "เปิดหนังสือ Drug interaactions",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "อันตรกิริยาระหว่าง Warfarin และ Metronidazole",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2559",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "แพทย์สอบถามเภสัชกรว่าหากจะใช้ยา Metronidazole ร่วมกับยา Warfarin มีอันตรกิริยากันหรือไม่ เภสัชกรต้องแจ้งแพทย์ทางโทรศัพท์",
+ "patientHtml": "<p>ไม่มี</p>",
+ "contentHtml": "<p>แพทย์สอบถามเภสัชกรว่าหากจะใช้ยา Metronidazole ร่วมกับยา Warfarin มีอันตรกิริยากันหรือไม่ เภสัชกรต้องแจ้งแพทย์ทางโทรศัพท์</p>",
+ "equipmentHtml": "<p>-หนังสือ Drug Information Handbook</p><p>-หนังสือ Drug Interaction Facts</p><p>-กระดาษคำตอบพร้อมโจทย์ย่อย ดังนี้</p><ol class=\"ordered-list\"><li>ระดับ Significant เป็นแบบใด</li><li>ผลที่เกิดขึ้นเป็นอย่างไร (effect)</li><li>กลไการเกิดอันตรกิริยาระหว่างยาทั้งสองเป็นอย่างไร (mechanism)</li><li>การจัดการเมื่อเกิดอันตรกิริยาระหว่างยาทั้งสองขึ้น (management)</li><li>อ้างอิงจาก …… หน้า ……</li></ol>",
+ "noteHtml": "<p><span style=\"font-weight: 700; text-decoration: underline;\">อ้างอิงจาก </span><span style=\"text-decoration: underline;\">Drug Interation Facts 2015 หน้า 194</span></p><p><span style=\"font-weight: 700;\">Significance 1</span></p><ul class=\"bullet-list\"><li>Delayed onset</li><li>Major severity</li></ul><p><span style=\"font-weight: 700;\">Effects: </span>The anticoagulant effect of warfarin may be enhanced; hemorrhage could occur</p><p><span style=\"font-weight: 700;\">Mechanism: </span>Liver metabolism of the S(-) enantiomorph of racemic Warfarin may be decreased by Metronidazole.</p><p><span style=\"font-weight: 700;\">Management:</span> Monitor patients more frequently and deviate regarding signs and symptoms of bleeding whenever metronidazole and warfarin are coadministered. A lower dose of warfarin may be required.</p><p><span style=\"font-weight: 700; text-decoration: underline;\">อ้างอิงจาก</span><span style=\"text-decoration: underline;\"> AFHS Drug Information 2022 หน้า 1511</span></p><p><span style=\"font-weight: 700;\">Effect:</span> The levels/effects of warfarin may be increased by metronidazole. This can result in alterations in PT or INR, with an increased risk of bleeding. (ระดับและฤทธิ์ของ warfarin อาจเพิ่มขึ้นจาก metronidazole ส่งผลให้ PT หรือ INR เปลี่ยนแปลง/เพิ่มขึ้น และเพิ่มความเสี่ยงต่อการเกิดเลือดออก)</p><p><span style=\"font-weight: 700;\">Mechanism:</span> Warfarin is metabolized by cytochrome P-450 (CYP) isoenzymes. The S-enantiomer is metabolized principally by CYP2C9 and is about 2–5 times more potent than R-warfarin. Drugs that inhibit CYP2C9 can potentially increase exposure and response to warfarin. (Warfarin ถูกเปลี่ยนแปลงโดยเอนไซม์ cytochrome P-450 (CYP) หลายชนิด โดย S-enantiomer ถูกเปลี่ยนแปลงหลักโดย CYP2C9 และมีฤทธิ์แรงกว่า R-warfarin ประมาณ 2–5 เท่า ดังนั้นยาที่ ยับยั้ง CYP2C9 สามารถทำให้ ระดับที่ร่างกายได้รับและการตอบสนองต่อ warfarin เพิ่มขึ้น)</p><p><span style=\"font-weight: 700;\">Management:</span> Concurrent use probably should be avoided, if possible. If concomitant use is necessary, INR should be closely monitored, particularly when initiating, discontinuing, or changing the dosage of metronidazole. (ควรหลีกเลี่ยงการใช้ร่วมกันหากเป็นไปได้ หากจำเป็นต้องใช้ร่วมกัน ควรติดตาม INR อย่างใกล้ชิด โดยเฉพาะเมื่อเริ่มยา หยุดยา หรือเปลี่ยนขนาดยา metronidazole และเฝ้าระวังการเกิดเลือดออก)</p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 15</span></p>",
+ "checklist": [
+  {
+   "t": "ระบุได้ว่า Metronidazole และ Warfarin มีอันตรกิริยาระหว่างยาที่มีนัยสำคัญ และระบุระดับ Significance ได้ถูกต้อง",
+   "html": "<span style=\"font-weight: 700;\"></span> ระบุได้ว่า Metronidazole และ Warfarin มีอันตรกิริยาระหว่างยาที่มีนัยสำคัญ และระบุระดับ Significance ได้ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อธิบาย ผลที่เกิดขึ้น (Effect) ได้ถูกต้อง",
+   "html": "<span style=\"font-weight: 700;\"></span> อธิบาย ผลที่เกิดขึ้น (Effect) ได้ถูกต้อง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อธิบาย กลไก (Mechanism) ได้ถูกต้อง",
+   "html": "<span style=\"font-weight: 700;\"></span> อธิบาย กลไก (Mechanism) ได้ถูกต้อง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อธิบาย การจัดการ (Management) ได้เหมาะสม",
+   "html": "<span style=\"font-weight: 700;\"></span> อธิบาย การจัดการ (Management) ได้เหมาะสม",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ้างอิงแหล่งข้อมูลและเลขหน้าจาก Drug Information Handbook หรือ Drug Interaction Facts ได้ถูกต้อง",
+   "html": "<span style=\"font-weight: 700;\"></span> อ้างอิงแหล่งข้อมูลและเลขหน้าจาก Drug Information Handbook หรือ Drug Interaction Facts ได้ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ภาษาชัดเจน กระชับ เหมาะสำหรับการรายงานแพทย์ทางโทรศัพท์",
+   "html": "<span style=\"font-weight: 700;\"></span> ใช้ภาษาชัดเจน กระชับ เหมาะสำหรับการรายงานแพทย์ทางโทรศัพท์",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

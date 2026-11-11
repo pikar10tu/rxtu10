@@ -1,0 +1,160 @@
+{
+ "id": "OS-0241",
+ "title": "Mucilage Preparation: Sodium CMC Mucilage (สถานี 3)",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "ยาน้ำเมือก (Mucilage), การคำนวณ Approximate Volume, Dispersing Agent (Glycerin/Syrup/Sorbitol), การกระจายผง SCMC ไม่ให้เป็นก้อน, การ Rinse โกร่ง 3 รอบ",
+ "diff": 2,
+ "source": "สอบจำลองรุ่นพี่ 83 CC2 PRODUCT (7 NOV 2025)",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงเตรียมตำรับ Sodium CMC Mucilage ปริมาณ 20 mL ด้วยเทคนิคทางเภสัชกรรมที่ดี และปรับปริมาตรส่งในบีกเกอร์ (เวลาปฏิบัติการ 4 นาที)\nสูตรตำรับ (Rx):\nSodium CMC (MV): 0.20 g (ชั่งเตรียมไว้ให้แล้ว)\nDispersing agent (Glycerin หรือ Syrup): q.s.\nPurified water q.s. ad: 20.0 mL\n(ข้อแนะนำ: ไม่ต้องบดผง SCMC ก่อนนำไปเตรียม และต้องกระจายผงยาให้เปียกทั่วถึงก่อนเติมน้ำ)",
+ "patientHtml": "",
+ "contentHtml": "<p>จงเตรียมตำรับ Sodium CMC Mucilage ปริมาณ 20 mL ด้วยเทคนิคทางเภสัชกรรมที่ดี และปรับปริมาตรส่งในบีกเกอร์ (เวลาปฏิบัติการ 4 นาที)</p><p><span style=\"font-weight: 700;\">สูตรตำรับ (Rx):</span></p><ul class=\"bullet-list\"><li>Sodium CMC (MV): 0.20 g <span style=\"font-style: italic;\">(ชั่งเตรียมไว้ให้แล้ว)</span></li><li>Dispersing agent (Glycerin หรือ Syrup): q.s.</li><li>Purified water q.s. ad: 20.0 mL</li></ul><p><span style=\"font-style: italic;\">(ข้อแนะนำ: ไม่ต้องบดผง SCMC ก่อนนำไปเตรียม และต้องกระจายผงยาให้เปียกทั่วถึงก่อนเติมน้ำ)</span></p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>ผงยา Sodium CMC (MV) 0.20 g ในซองยา</li><li>โกร่งแก้ว หรือโกร่งกระเบื้อง พร้อมลูกโกร่ง</li><li>กระบอกตวงขนาด 10 mL, 25 mL, 50 mL</li><li>บีกเกอร์ขนาด 50 mL, แท่งแก้วคน, หลอดหยด (Dropper)</li><li>สารเคมี: Glycerin, Simple syrup, Purified water</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ห้ามบดผง SCMC ก่อนเตรียม:</span> การบดผง SCMC ที่แห้งในโกร่งจะทำให้ผงอัดแน่นเป็นแผ่นและจับตัวเป็นก้อนเมื่อสัมผัสน้ำ</li><li><span style=\"font-weight: 700;\">ปริมาณ Dispersing Agent:</span> ให้หยด Glycerin ในปริมาณพอๆ กับปริมาตรผงยา (ประมาณ 4–6 หยด) พอให้ผงยาเปียกและกระจายตัวทั่วก้นโกร่ง</li><li><span style=\"font-weight: 700;\">การล้างโกร่ง:</span> เนื่องจากเมือกมีความหนืดสูง จึงกำหนดเกณฑ์ให้ Rinse โกร่งอย่างน้อย 3 รอบ</li></ul>",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์สำหรับเตรียม Mucilage",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "เลือกเตรียมในโกร่ง (โกร่งแก้วหรือโกร่งกระเบื้อง)",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เลือกเตรียมในบีกเกอร์ (ตัดเป็น 0 คะแนน)",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การคำนวณ Approximate Volume",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณน้ำสำหรับบดผสม (34App.Vol.15mL) และน้ำสำหรับ Rinse ปรับปริมาตร (14App.Vol.5mL) ได้ถูกต้อง",
+   "html": "คำนวณปริมาณน้ำสำหรับบดผสม (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.Vol.&asymp;15mL</span>) และน้ำสำหรับ Rinse ปรับปริมาตร (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.Vol.&asymp;5mL</span>) ได้ถูกต้อง",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาณน้ำผิดพลาด",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการตวงของเหลว",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "ตวงน้ำ 34App.Vol. ด้วยกระบอกตวงขนาด 25 mL ได้แม่นยำที่ระดับสายตา",
+   "html": "ตวงน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.Vol.</span> ด้วยกระบอกตวงขนาด 25 mL ได้แม่นยำที่ระดับสายตา",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตวงน้ำผิดขนาดหรือไม่ตวงที่ระดับสายตา",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการกระจายผง (Dispersing Phase)",
+   "s": 2,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "หยด Dispersing agent (Glycerin) ในปริมาณพอเหมาะกับผงยา บดผสมเบาๆ ให้กระจายตัวเคลือบผง SCMC ทั่วถึงทั่วโกร่งก่อนเติมน้ำ",
+   "s": 2,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ใส่ Dispersing agent มากเกินไป หรือน้อยเกินไปจนผงยายังแห้ง",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เติมน้ำลงบนผง SCMC โดยตรงโดยไม่ใส่ Dispersing agent",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการผสมน้ำและการขึ้นรูปเมือก",
+   "s": 2,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "ค่อยๆ แบ่งเติมน้ำ 34App.Vol. ลงผสมทีละน้อย 2–3 รอบ บดผสมด้วยแรงพอเหมาะจนได้เมือกใส ไม่มีก้อนแป้ง (Fish eyes)",
+   "html": "ค่อยๆ แบ่งเติมน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.Vol.</span> ลงผสมทีละน้อย 2–3 รอบ บดผสมด้วยแรงพอเหมาะจนได้เมือกใส ไม่มีก้อนแป้ง (Fish eyes)",
+   "s": 2,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ได้เมือกใสแต่มีก้อนผงกระจายอยู่เล็กน้อย หรือเทน้ำหมดในคราวเดียว",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ได้เมือกขุ่น มีก้อนแป้งจับตัวเป็นก้อนใหญ่จำนวนมาก",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การ Rinse ล้างภาชนะและการปรับปริมาตร",
+   "s": 2,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "ถ่ายเมือกลงกระบอกตวง 25 mL ใช้น้ำส่วนที่เหลือ Rinse โกร่งอย่างน้อย 3 รอบ แล้วปรับปริมาตรจนครบ 20 mL พอดี",
+   "s": 2,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "Rinse โกร่งเพียง 1–2 รอบ หรือปรับปริมาตรขาด/เกินเล็กน้อย",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ทำ Rinse โกร่ง",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การคนผสมและการส่งมอบ",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน"
+  },
+  {
+   "t": "ใช้แท่งแก้วคนผสมในกระบอกตวงให้เข้าเป็นเนื้อเดียวกัน แล้วเทใส่บีกเกอร์ขนาด 50 mL ส่งมอบ",
+   "s": 1,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ส่งมอบในกระบอกตวง หรือไม่คนผสม",
+   "s": 0,
+   "g": "เทคนิคการเตรียมตำรับ Mucilage - สถานี 3: 10 คะแนน",
+   "sub": true
+  }
+ ]
+}

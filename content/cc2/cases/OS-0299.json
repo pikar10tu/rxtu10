@@ -1,0 +1,51 @@
+{
+ "id": "OS-0299",
+ "title": "Solution Preparation: Sodium Bicarbonate Solution 2% w/v 50 mL",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "ยาน้ำใส (Oral Solution), การคำนวณ % w/v, การคำนวณ Approximate Volume, การบดลดขนาดผลึกยาก่อนชั่ง, การละลายสารด้วยแท่งแก้ว, การ Rinse ภาชนะ 2 รอบ, การปรับปริมาตร",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Product Week 1 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "แพทย์มีคำสั่งการรักษาให้จ่ายยา Sodium Bicarbonate Solution 2% w/v ปริมาณ 50mL สำหรับผู้ป่วย จงคำนวณปริมาณตัวยาสำคัญและน้ำกระสายยาที่ต้องใช้ บด ชั่ง และเตรียมตำรับยาน้ำใสให้ถูกต้องตามหลักเภสัชกรรม แสดงวิธีคำนวณลงในกระดาษคำตอบ และส่งมอบผลิตภัณฑ์ในบีกเกอร์ (เวลาปฏิบัติการ 4 นาที)\nสูตรตำรับ (Rx):\nSodium Bicarbonate Solution 2% w/v\nDispense 50mL\nข้อมูลบริบท\nสารเคมีที่มีในสถานี:\nผงยา Sodium bicarbonate (NaHCO3)\nPurified water\nอุปกรณ์ที่มีในสถานี:\nเครื่องชั่งไฟฟ้า 2 ตำแหน่ง พร้อมแปรงปัด\nช้อนตักสาร (ช้อนเขา) และกระดาษชั่งสาร\nโกร่งกระเบื้องและลูกโกร่ง (Porcelain mortar & pestle)\nบีกเกอร์ (Beaker) ขนาด 50 และ 100mL\nกระบอกตวง (Graduated cylinder) ขนาด 25,50 และ 100mL\nแท่งแก้วคนสาร (Stirring rod)\nหลอดหยด (Dropper)\nกระจกนาฬิกาสำหรับปิดฝาบีกเกอร์ส่งมอบ",
+ "patientHtml": "",
+ "contentHtml": "<p>แพทย์มีคำสั่งการรักษาให้จ่ายยา Sodium Bicarbonate Solution 2% w/v ปริมาณ <span class=\"doc-equation\">50mL</span> สำหรับผู้ป่วย จงคำนวณปริมาณตัวยาสำคัญและน้ำกระสายยาที่ต้องใช้ บด ชั่ง และเตรียมตำรับยาน้ำใสให้ถูกต้องตามหลักเภสัชกรรม แสดงวิธีคำนวณลงในกระดาษคำตอบ และส่งมอบผลิตภัณฑ์ในบีกเกอร์ (เวลาปฏิบัติการ 4 นาที)</p><p><span style=\"font-weight: 700;\">สูตรตำรับ (Rx):</span></p><ul class=\"bullet-list\"><li>Sodium Bicarbonate Solution 2% w/v</li><li>Dispense <span class=\"doc-equation\">50mL</span></li></ul><p><span style=\"font-weight: 700;\">ข้อมูลบริบท</span></p><ul class=\"bullet-list\"><li>สารเคมีที่มีในสถานี:<ul class=\"bullet-list\"><li>ผงยา Sodium bicarbonate (<span class=\"doc-equation\">NaHCO<sub>3</sub></span>)</li><li>Purified water</li></ul></li><li>อุปกรณ์ที่มีในสถานี:<ul class=\"bullet-list\"><li>เครื่องชั่งไฟฟ้า 2 ตำแหน่ง พร้อมแปรงปัด</li><li>ช้อนตักสาร (ช้อนเขา) และกระดาษชั่งสาร</li><li>โกร่งกระเบื้องและลูกโกร่ง (Porcelain mortar &amp; pestle)</li><li>บีกเกอร์ (Beaker) ขนาด <span class=\"doc-equation\">50</span> และ <span class=\"doc-equation\">100mL</span></li><li>กระบอกตวง (Graduated cylinder) ขนาด <span class=\"doc-equation\">25,50</span> และ <span class=\"doc-equation\">100mL</span></li><li>แท่งแก้วคนสาร (Stirring rod)</li><li>หลอดหยด (Dropper)</li><li>กระจกนาฬิกาสำหรับปิดฝาบีกเกอร์ส่งมอบ</li></ul></li></ul><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-4.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr><tr><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-5.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-6.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-7.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0299-8.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>กระปุกสารเคมี Sodium bicarbonate</li><li>ขวดบรรจุ Purified water</li><li>เครื่องแก้วและอุปกรณ์เตรียมยาครบชุด</li><li>กระดาษคำตอบสำหรับแสดงวิธีคำนวณ</li><li>บีกเกอร์ Waste และกระดาษทิชชู</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">เฉลยวิธีคำนวณ:</span><ul class=\"bullet-list\"><li>ปริมาณ <span class=\"doc-equation\">NaHCO<sub>3</sub></span> ที่ต้องชั่ง:</li><li><span class=\"doc-equation\">Weight=<span class=\"equation-fraction\"><span class=\"equation-num\">2g</span><span class=\"equation-denom\">100mL</span></span>&times;50mL=1.00g</span></li><li>น้ำสำหรับละลาย: <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>&times;50mL=37.5mL</span> (อนุะโลมให้ตวงช่วง <span class=\"doc-equation\">35–37mL</span>)</li><li>น้ำสำหรับ Rinse และปรับปริมาตร: ประมาณ <span class=\"doc-equation\">12.5–15mL</span></li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณปริมาณสารที่ใช้ทั้งหมด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลาก 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกอุปกรณ์การเตรียม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการละลายผงยา",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการปรับปริมาตรและการกลั้วภาชนะ",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาดและอื่น ๆ",
+   "html": "ความสะอาดและอื่น ๆ<span style=\"font-weight: 700;\">\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

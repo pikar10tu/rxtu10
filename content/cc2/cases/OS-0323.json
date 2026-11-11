@@ -1,0 +1,20 @@
+{
+ "id": "OS-0323",
+ "title": "Paste Zinc ชั่ง",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Paste",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": "OS-0324",
+ "scenario": "ให้นิสิตชั่ง white soft paraffin\nสูตรตำรับ:\nZinc oxides\t0.6 g\nWhite soft paraffin\t100 g\nMft. 15 g\nคำสั่ง:\nคำนวณปริมาณผงยาเพื่อตอบในฐานถัดไป และคำนวณปริมาณ white soft paraffin ที่ต้องชั่งเพื่อนำไปใช้ต่อ",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตชั่ง white soft paraffin</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Zinc oxides&nbsp;&nbsp;&nbsp;&nbsp;0.6 g</li><li>White soft paraffin&nbsp;&nbsp;&nbsp;&nbsp;100 g</li><li>Mft. 15 g</li></ul><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>คำนวณปริมาณผงยาเพื่อตอบในฐานถัดไป และคำนวณปริมาณ white soft paraffin ที่ต้องชั่งเพื่อนำไปใช้ต่อ</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Zinc oxide</li><li>White soft paraffin</li><li>เครื่องชั่งดิจิตอล</li></ol>",
+ "noteHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0323-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [],
+ "noScore": true
+}

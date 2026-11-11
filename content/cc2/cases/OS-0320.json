@@ -1,0 +1,70 @@
+{
+ "id": "OS-0320",
+ "title": "ointment Mupirocin ผสม (ต่อจาก PDSS09)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "ointment",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียมตำรับ Mupirocin ointment 15 g\nสูตรตำรับ :\nMupirocin 2 g\nPEG ointment q.s. 100 g\nคำสั่ง :\nเลือก levigating ให้เหมาะสม ระหว่าง mineral oil กับ glycerin\nผสมยาให้เข้ากัน",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียมตำรับ Mupirocin ointment 15 g</p><p>สูตรตำรับ : </p><ul class=\"bullet-list\"><li>Mupirocin 2 g</li><li>PEG ointment q.s. 100 g</li></ul><p>คำสั่ง : </p><ol class=\"ordered-list\"><li>เลือก levigating ให้เหมาะสม ระหว่าง mineral oil กับ glycerin</li><li>ผสมยาให้เข้ากัน</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Mupirocin 0.3 g</li><li>Mineral oil</li><li>Glycerin</li><li>Slap</li><li>Spatula</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>เลือก glycerin เป็น levigating</li></ul>",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์การเตรียม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การวาง / จับ slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจับ spatula",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตำแหน่งการวางตัวยา / ยาพื้น บน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการผสมตัวยากับยาพื้น การใช้ levigating agent",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การละลายผงยา (ปริมาณน้ำที่ใช้ / อุปกรณ์ที่ใช้)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการบดผสมตัวยากับยาพื้น Geometric dilution (แบ่งอย่างน้อย 3 ครั้ง)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตรวจสอบความเป็นเนื้อเดียวกัน โดยปาดบน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้ผลิตภัณฑ์เนื้อเนียน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด และ อื่นๆ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

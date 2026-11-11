@@ -1,0 +1,61 @@
+{
+ "id": "OS-0371",
+ "title": "การจำแนกประเภทของยาตามกฎหมาย 8 รายการ",
+ "cat": "SAP",
+ "group": "ยาเสพติด วัตถุออกฤทธิ์ และยาควบคุมพิเศษ",
+ "topic": "Legal Classification of Modern Drugs & Psychotropic Substances",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2551",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงระบุประเภทของยาตามกฎหมายไทย (พ.ร.บ. ยา พ.ศ. 2510 และประมวลกฎหมายยาเสพติด พ.ศ. 2564) ของรายการยาทั้ง 8 ชนิดต่อไปนี้\n1. Phentermine\n2. Prednisolone tablet (ชนิดรับประทานเดี่ยว)\n3. Actifed tablet (Pseudoephedrine + Triprolidine)\n4. ยาเม็ดคุมกำเนิด (Oral Contraceptive Pills)\n5. Codeine (สูตรผสมแก้ไอ)\n6. ยาทาสเตียรอยด์ (Topical Steroids เช่น Triamcinolone cream)\n7. Fluoxetine\n8. ยากลุ่ม Benzodiazepines (เช่น Lorazepam, Alprazolam, Diazepam)",
+ "patientHtml": "<p>ไม่มีข้อมูลผู้ป่วยในสถานีนี้</p>",
+ "contentHtml": "<p>จงระบุประเภทของยาตามกฎหมายไทย (พ.ร.บ. ยา พ.ศ. 2510 และประมวลกฎหมายยาเสพติด พ.ศ. 2564) ของรายการยาทั้ง 8 ชนิดต่อไปนี้</p><p>1. Phentermine</p><p>2. Prednisolone tablet (ชนิดรับประทานเดี่ยว)</p><p>3. Actifed tablet (Pseudoephedrine + Triprolidine)</p><p>4. ยาเม็ดคุมกำเนิด (Oral Contraceptive Pills)</p><p>5. Codeine (สูตรผสมแก้ไอ)</p><p>6. ยาทาสเตียรอยด์ (Topical Steroids เช่น Triamcinolone cream)</p><p>7. Fluoxetine</p><p>8. ยากลุ่ม Benzodiazepines (เช่น Lorazepam, Alprazolam, Diazepam)</p>",
+ "equipmentHtml": "<p>ข้อสอบและกระดาษคำตอบ</p>",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">เฉลยคำตอบพร้อมคำอธิบา</span>ย<span style=\"font-weight: 700;\">:</span></p><p><span style=\"font-weight: 700;\">✅ คำตอบที่ถูกต้อ</span>ง:</p><p>- Phentermine = วัตถุออกฤทธิ์ประเภท 2</p><p>- Prednisolone tab = ยาควบคุมพิเศษ</p><p>- Actifed = วัตถุออกฤทธิ์ประเภท 2</p><p>- ยาคุมกำเนิด = ยาอันตราย</p><p>- Codeine ผสม = ยาเสพติดให้โทษประเภท 3</p><p>- ยาทาสเตียรอยด์ = ยาอันตราย</p><p>- Fluoxetine = ยาอันตราย</p><p>- Benzodiazepines = วัตถุออกฤทธิ์ประเภท 2 หรือ <span style=\"font-weight: 700;\">4</span></p><p><span style=\"font-weight: 700;\">📖 Guideline อ้างอ</span>ิง:</p><p>- พระราชบัญญัติยา พ.ศ. 2510 และฉบับแก้ไขเพิ่มเติม</p><p>- ประมวลกฎหมายยาเสพติด พ.ศ. 25<span style=\"font-weight: 700;\">64</span></p><p><span style=\"font-weight: 700;\">📌 จุดจำก่อน</span>สอบ:</p><p>- สเตียรอยด์กิน = ยาควบคุมพิเศษ, สเตียรอยด์ทา = ยาอันตราย</p>",
+ "checklist": [
+  {
+   "t": "1. Phentermine: ระบุเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "2. Prednisolone tablet (รับประทานเดี่ยว): ระบุเป็น ยาควบคุมพิเศษ ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "3. Actifed tablet: ระบุเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 (สูตรผสม Pseudoephedrine) ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "4. ยาเม็ดคุมกำเนิด: ระบุเป็น ยาอันตราย ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "5. Codeine สูตรผสม: ระบุเป็น ยาเสพติดให้โทษประเภท 3 ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "6. ยาทาสเตียรอยด์ (Topical steroids): ระบุเป็น ยาอันตราย ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "7. Fluoxetine: ระบุเป็น ยาอันตราย ได้ถูกต้อง",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  },
+  {
+   "t": "8. ยากลุ่ม Benzodiazepines: ระบุเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 หรือประเภท 4 ได้ถูกต้อง (Alprazolam = P2, Diazepam/Lorazepam = P4)",
+   "html": "8. ยากลุ่ม Benzodiazepines: ระบุเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 หรือประเภท 4 ได้ถูกต้อง (Alprazolam = P2, Diazepam/Lorazepam = P4)<span style=\"font-weight: 700;\">\n</span>",
+   "s": 1.25,
+   "g": "การจำแนกประเภทยาตามกฎหมาย - รวม 10 คะแนน"
+  }
+ ]
+}

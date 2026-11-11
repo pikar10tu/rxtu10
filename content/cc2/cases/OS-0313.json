@@ -1,0 +1,55 @@
+{
+ "id": "OS-0313",
+ "title": "Cream",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียมตำรับตามสูตรที่กำหนดให้ถูกต้อง\nสูตรตำรับ:\nSulfur 0.5 g\nCream base  qs 5 g\nคำสั่ง:\nให้ชั่ง vanishing cream ตามที่ระบุ",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียมตำรับตามสูตรที่กำหนดให้ถูกต้อง</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Sulfur 0.5 g</li><li>Cream base&nbsp;&nbsp;qs 5 g</li></ul><p>คำสั่ง:</p><ul class=\"bullet-list\"><li>ให้ชั่ง vanishing cream ตามที่ระบุ</li></ul>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>vanishing cream</li><li>เครื่องชั่ง digital</li><li>กระดาษชั่งแบบธรรมดาและแบบกระดาษไข</li><li>ช้อนเขา</li><li>Spatula</li><li>Stirring rod</li></ol>",
+ "noteHtml": "<p>- คํานวณปริมาณ cream ที่ใช้ ในที่นี้ คือ 4.5 กรัม</p><p>- เลือกกระดาษไข</p><p>- การใช้เครื่องชั่ง ลูกนํ้าอยู่กึ่งกลางหรือไม่ กด tare ให้เป็น 0.000 ภายหลังการวางกระดาษหรือไม่</p><p>- ใช้ spatula ในการตักสาร</p><p>- มีการอ่านสารที่จะชั่งครบ 3 ครั้ง หรือไม่</p><p>- ภายหลังการชั่งเสร็จเมื่อนํากระดาษออกมาแล้ว มีการกด tare 1 ครั้ง รอให้ตัวเลขขึ้น 0.000 แล้วค่อยกด off เพื่อปิดเครื่อง แล้วจึงใช้แปรงปัดฝุ่นที่เครื่อง</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0313-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "คํานวณปริมาณที่จะชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "พับกระทงชั่ง ถูกต้อง เรียบร้อย",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียน ชื่อ นํ้าหนัก บนกระทง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากครบ 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อุปกรณ์ที่ใช้ตักสาร",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ชั่งนํ้าหนักถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

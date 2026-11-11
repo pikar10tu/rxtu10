@@ -1,0 +1,25 @@
+{
+ "id": "OS-0337",
+ "title": "การกรอง",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "การกรอง",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตนำตํารับ tetracycline lotion ไปกรองให้ได้เป็นของเหลวใส\nสูตรตำรับ:\nTetracycline 2%\nPG 4 ml\nWater qs 25 ml\nคำสั่ง:\nกรองตํารับ tetracycline lotion ให้ได้เป็นของเหลวใส",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตนำตํารับ tetracycline lotion ไปกรองให้ได้เป็นของเหลวใส</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Tetracycline 2%</li><li>PG 4 ml</li><li>Water qs 25 ml</li></ul><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>กรองตํารับ tetracycline lotion ให้ได้เป็นของเหลวใส</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>กรวยแก้ว 1 อัน</li><li>ขาตั้งกรวย 1 อัน</li><li>บีกเกอร์ 1 อัน</li></ol>",
+ "noteHtml": "<p><span style=\"font-style: italic;\">:</span> เน้นตรวจความใสของตำรับเมื่อนิสิตนำมาส่ง</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0337-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "ได้ของเหลวใส",
+   "s": 10,
+   "g": "ทั่วไป"
+  }
+ ]
+}

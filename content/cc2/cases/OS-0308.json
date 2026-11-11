@@ -1,0 +1,86 @@
+{
+ "id": "OS-0308",
+ "title": "Syrup Ferrouse sulfate",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Ferrous Sulfate Syrup NF XIV",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "กำหนดให้\n10% w/v citric acid in water\ncalibrated dropper: 1 หยด = 0.05 mL",
+ "patientHtml": "",
+ "contentHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0308-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>กำหนดให้ </p><ol class=\"ordered-list\"><li>10% w/v citric acid in water</li><li>calibrated dropper: 1 หยด = 0.05 mL</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Ferrous Sulfate</li><li>Citric Acid stock solution &nbsp;&nbsp;&nbsp;&nbsp;</li><li>Sucrose</li><li>Paraben conc. ที่ calibrate drop แล้ว</li><li>coloring agent</li><li>Purified water</li><li>Beaker</li><li>Stirring rod</li><li>Cylinder</li><li>โกร่งกระเบื้อง</li><li>กระดาษกรอง</li><li>ขวดแก้วสีชา (สำหรับส่ง)</li><li>ฉลากยา</li></ol><p><span style=\"font-weight: 700;\">Q : </span></p><p><span style=\"font-weight: 700;\">1). จงคำนวณและชั่ง Ferrous Sulfate และ Sucrose ที่ใช้ในตำรับได้อย่างถูกต้อง</span></p><p><span style=\"font-weight: 700;\">2). จงเตรียมสูตรตำรับ Ferrous Sulfate Syrup NF XIV 50 mL</span></p>",
+ "noteHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0308-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p><span style=\"text-decoration: underline;\">Rx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;W.F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;App.vol</p><p>Ferrous Sulfate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</p><p>Citric Acid (hydrous) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.105 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.05</p><p>Peppermint Spirit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.1 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.1</p><p>Sucrose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;825 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;41.25 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20.63</p><p>Purified water q.s. ad&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27.23</p><p>¾ x28.22=20.42mL</p><p>วิธีเตรียม</p><p>1. บดผงยา ferrous sulfate และ sucrose ในโกร่งกระเบื้องจนได้เป็นผงละเอียด</p><p>2. ชั่ง ferrous sulfate 2 g และ sucrose 41.25 g ด้วยเครื่องชั่งที่ปรับสมดุลแล้ว</p><p>3. เติม purified water 27.23 mL ใน beaker ขนาด 50 mL เติม citric acid จำนวน 21 หยด จากนั้นเติม ferrous sulfate 2 g ลงในสารละลาย ใช้แท่งแก้วคนจนละลายหมด</p><p>4. เติม peppermint spirit คนผสมให้เข้ากัน</p><p>5. หากมีตะกอนเหลืองของ ferric sulfate ให้กรองด้วยกระดาษกรองจนใส</p><p>6. นำส่วนที่กรองได้ มาบดกับ sucrose ในโกร่งแก้วหรือโกรงกระเบื้อง แบ่งเติม sucrose ทีละส่วนบดจนละลายหมดแลวจึงเติมส่วนที่เหลือ</p><p>7. ปรับปริมาตรในกระบอกตวงขนาด 50 mL บรรจุขวดสีชาขนาด 2 fl.oz. (หรือป้องกันแสง) และปิดฝาให้สนิท</p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><span style=\"font-weight: 700;\">Component</span></th><th><span style=\"font-weight: 700;\">Mark</span></th><th><span style=\"font-weight: 700;\">Expected Content</span></th></tr><tr><td>Calculate the drug used</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 25</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – 2 g Ferrous Sulfate</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – technique การชั่ง&nbsp;&nbsp;</p></td></tr><tr><td>Compounding technique</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 75</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ไม่สัมผัสผงยา</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ใช้ Beaker ขนาดที่เหมาะสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points </span>– technique การเติม Citric Acid</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – technique ผสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ใช้ cylinder เหมาะสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – แบ่งน้ำ ¾ ผสม กับ ¼ rinse</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points </span>– rinse 2-3 รอบ</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – คนใน Beaker/กระบอกตวง</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – ติดฉลาก [ระบุวันหมดอายุ]</p></td></tr><tr><td><span style=\"font-weight: 700;\">Total score</span></td><td><span style=\"font-weight: 700; text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style=\"font-weight: 700;\">/ 100 points</span></td><td></td></tr></table></div>",
+ "checklist": [
+  {
+   "t": "2 g Ferrous Sulfate",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span>2 g Ferrous Sulfate",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การชั่ง",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span>technique การชั่ง&nbsp;&nbsp;",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ไม่สัมผัสผงยา",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> ไม่สัมผัสผงยา",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ Beaker ขนาดที่เหมาะสม",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> ใช้ Beaker ขนาดที่เหมาะสม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การเติม Citric Acid",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> technique การเติม Citric Acid",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique ผสม",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> technique ผสม",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ cylinder เหมาะสม",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> ใช้ cylinder เหมาะสม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แบ่งน้ำ ¾ ผสม กับ ¼ rinse",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> แบ่งน้ำ ¾ ผสม กับ ¼ rinse",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "rinse 2-3 รอบ",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> rinse 2-3 รอบ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คนใน Beaker/กระบอกตวง",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> คนใน Beaker/กระบอกตวง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ติดฉลาก [ระบุวันหมดอายุ]",
+   "html": "<span style=\"color: rgb(204,0,0); font-weight: 700;\"></span> ติดฉลาก [ระบุวันหมดอายุ]",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

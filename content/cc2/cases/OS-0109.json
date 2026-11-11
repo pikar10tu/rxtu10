@@ -1,0 +1,45 @@
+{
+ "id": "OS-0109",
+ "title": "จับผิดใบสั่งยา (Prescription Screening)",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "จับผิดใบสั่งยา",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2561",
+ "active": false,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "Diclofenac ขนาดผิด สั่ง 50 mg ใส่มา 25 mg.\nOmeprazole GPO วิธีกินผิดให้เปลี่ยนจากหลังอาหารเป็นก่อนอาหาร.\nParacetamol (Tylenal®) ฉลากไม่ครบ ต้องเขียนเพิ่ม รับประทานเมื่อมีอาการปวด\nEnalapril ยาหมดอายุปี 2013\nHCTZ ชื่อผู้ป่วยผิดจากคุณวรรณี เป็นคุณวรรณา\nเฉลยใน checklistแทนได้ไหม",
+ "patientHtml": "<p>ไม่ระบุ</p>",
+ "contentHtml": "<ul class=\"bullet-list\"><li>Diclofenac ขนาดผิด สั่ง 50 mg ใส่มา 25 mg.</li><li>Omeprazole GPO วิธีกินผิดให้เปลี่ยนจากหลังอาหารเป็นก่อนอาหาร.</li><li>Paracetamol (Tylenal®) ฉลากไม่ครบ ต้องเขียนเพิ่ม รับประทานเมื่อมีอาการปวด</li><li>Enalapril ยาหมดอายุปี 2013</li><li>HCTZ ชื่อผู้ป่วยผิดจากคุณวรรณี เป็นคุณวรรณา</li></ul><p><span style=\"color: rgb(255,0,0); font-weight: 700;\">เฉลยใน checklistแทนได้ไหม</span></p>",
+ "equipmentHtml": "",
+ "noteHtml": "",
+ "checklist": [
+  {
+   "t": "Diclofenac ขนาดผิด สั่ง 50 mg ใส่มา 25 mg.",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "Omeprazole GPO วิธีกินผิดให้เปลี่ยนจากหลังอาหารเป็นก่อนอาหาร.",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "Paracetamol (Tylenal®) ฉลากไม่ครบ ต้องเขียนเพิ่ม รับประทานเมื่อมีอาการปวด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "Enalapril ยาหมดอายุปี 2013",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "HCTZ ชื่อผู้ป่วยผิดจากคุณวรรณี เป็นคุณวรรณา",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

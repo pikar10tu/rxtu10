@@ -60,6 +60,50 @@
         }
       }
     },
+    "cc2": {
+      "rooms": {
+        ".read": "auth != null",
+        "$room": {
+          ".write": "auth != null && !newData.exists() && !data.child('players').exists()",
+          "meta": {
+            ".write": "auth != null && (!data.exists() || data.child('hostUid').val() === auth.uid || (data.parent().child('players').child(auth.uid).exists() && !data.parent().child('players').child(data.child('hostUid').val()).exists()))"
+          },
+          "players": {
+            "$uid": {
+              ".write": "auth != null && (auth.uid === $uid || data.parent().parent().child('meta/hostUid').val() === auth.uid)",
+              "name": {
+                ".validate": "newData.isString() && newData.val().length <= 40"
+              },
+              "role": {
+                ".validate": "newData.isString() && (newData.val() === 'examiner' || newData.val() === 'examinee' || newData.val() === '')"
+              }
+            }
+          },
+          "lastRound": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            ".validate": "newData.isNumber()"
+          },
+          "state": {
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || data.child('examinerUid').val() === auth.uid)"
+          },
+          "live": {
+            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            "revealed": {
+              ".write": "auth != null && data.parent().parent().child('state/examinerUid').val() === auth.uid"
+            },
+            "answers": {
+              ".write": "auth != null && data.parent().parent().child('state/examineeUid').val() === auth.uid",
+              "$i": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              }
+            }
+          },
+          "result": {
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || data.parent().child('state/examinerUid').val() === auth.uid)"
+          }
+        }
+      }
+    },
     "pharmateam": {
       "board": {
         ".read": "auth != null",

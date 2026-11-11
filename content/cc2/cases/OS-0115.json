@@ -1,0 +1,26 @@
+{
+ "id": "OS-0115",
+ "title": "วิเคราะห์ใบสั่งยา",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "Cardiovascular disease",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2562",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "วิเคราะห์ใบสั่งยาที่อยู่บนโต๊ะ โดยมียาทั้งหมด 3 ชนิดบรรจุอยู่ในแต่ละซอง ได้แก่ Aspirin 81 mg, Atenolol และ Lorazepam ให้ระบุสิ่งที่ไม่ถูกต้องในใบสั่งยานี้มา 4 ประการ",
+ "patientHtml": "<p>ไม่พบข้อมูลผู้ป่วย</p>",
+ "contentHtml": "<p>วิเคราะห์ใบสั่งยาที่อยู่บนโต๊ะ โดยมียาทั้งหมด 3 ชนิดบรรจุอยู่ในแต่ละซอง ได้แก่ Aspirin 81 mg, Atenolol และ Lorazepam ให้ระบุสิ่งที่ไม่ถูกต้องในใบสั่งยานี้มา 4 ประการ</p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p>ผู้ป่วยเป็น Recurrent MI และ Anxiety ร่วมด้วย จึงได้รับยา Aspirin 81 mg, Atenolol และ Lorazepam สั่งจ่ายยาโดยแพทย์และมีลายเซ็นกำกับ ทำนัดไว้ 1 เดือน (30วัน) แต่พบ error ในใบสั่งยา ได้แก่</p><p>1.ยา Atenolol กับ Aspirin 81 เกิด drug interaction กัน เมื่อให้ยา Atenolol ที่เป็นยากลุ่ม beta-blockers ร่วมกับ Aspirin ที่เป็นยากลุ่ม NSAIDs Aspirin จะลด Antihypertensive effect ของ Atenolol </p><p>2.Dose ของ Atenolol ผิด เนื่องจากใน recurrent MI จะให้ Atenolol 50 mg 1*2 po pc เช้า เย็น แต่ในใบสั่งยา เป็น Atenolol 50 mg po OD</p><p>3.ยา Lorazepam 1 mg 1*2 po pc เช้า เย็น ซึ่งต้องรับประทานทั้งหมด 60 เม็ด แต่แพทย์สั่งจ่ายแค่ 30 เม็ด </p><p>4.ผู้ป่วยเป็น recurrent MI จะต้องได้ Aspirin 81 mg po OD แต่แพทย์สั่งจ่ายยา Aspirin 325 mg po OD ซึ่งเป็น initial dose ไม่ใช่ maintenance dose</p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 5</span></p>",
+ "checklist": [
+  {
+   "t": "drug interaction ระหว่าง Aspirin กับ Atenolol\n  • วิธีการรับประทานยา Atenolol ผิด\n  • จำนวนยา Lorazepam ไม่ครบ\n  • Dose Aspirin ผิด",
+   "html": "drug interaction ระหว่าง Aspirin กับ Atenolol<ul class=\"checklist-sub-details\"><li>วิธีการรับประทานยา Atenolol ผิด</li><li>จำนวนยา Lorazepam ไม่ครบ</li><li>Dose Aspirin ผิด</li></ul>",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

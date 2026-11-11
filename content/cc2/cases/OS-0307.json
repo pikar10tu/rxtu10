@@ -1,0 +1,77 @@
+{
+ "id": "OS-0307",
+ "title": "Syrup Paracetamol",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Paracetamol syrup",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "Paracetamol syrup\nQ :\n1). จงคำนวณ paracetamol ที่ใช้ในตำรับได้อย่างถูกต้อง\n2). จงเตรียมสูตรตำรับ Paracetamol syrup (125 mg/5 mL) 50 mL",
+ "patientHtml": "",
+ "contentHtml": "<p>Paracetamol syrup</p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><span style=\"color: rgb(31,31,31);\">Rx</span></th><th></th><th><span style=\"color: rgb(31,31,31);\">W.F</span></th><th><span style=\"color: rgb(31,31,31);\">App.vol</span></th></tr><tr><td><span style=\"color: rgb(31,31,31);\">Paracetamol</span></td><td><span style=\"color: rgb(31,31,31);\">5 g</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"color: rgb(31,31,31);\">Propylene Glycol</span></td><td><span style=\"color: rgb(31,31,31);\">0.5 mL</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"color: rgb(31,31,31);\">Syrup (85% w/v)</span></td><td><span style=\"color: rgb(31,31,31);\">2.5 mL</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"color: rgb(31,31,31);\">Methyl paraben</span></td><td><span style=\"color: rgb(31,31,31);\">0.1 g</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"color: rgb(31,31,31);\">Propyl paraben</span></td><td><span style=\"color: rgb(31,31,31);\">0.01 g</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"color: rgb(31,31,31);\">Coloring agent</span></td><td><span style=\"color: rgb(31,31,31);\">0.005 mL</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"color: rgb(31,31,31);\">Purified water q.s. ad</span></td><td><span style=\"color: rgb(31,31,31);\">5 mL</span></td><td><span style=\"color: rgb(31,31,31);\">50 mL</span></td><td><span style=\"color: rgb(31,31,31);\">.........</span></td></tr><tr><td><span style=\"font-weight: 700;\">¾ x.........=.........mL </span></td><td></td><td></td><td></td></tr></table></div><p><span style=\"font-weight: 700;\">Q : </span></p><p><span style=\"font-weight: 700;\">1). จงคำนวณ paracetamol ที่ใช้ในตำรับได้อย่างถูกต้อง</span></p><p><span style=\"font-weight: 700;\">2). จงเตรียมสูตรตำรับ Paracetamol syrup (125 mg/5 mL) 50 mL</span></p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>ผงยา paracetamol</li><li>Propylene Glycol</li><li>Syrup (85% w/v)</li><li>Paraben conc. ที่ calibrate drop แล้ว</li><li>coloring agent</li><li>Purified water</li><li>Beaker</li><li>Stirring rod</li><li>Cylinder</li><li>ขวดแก้ว(สำหรับส่ง)</li><li>ฉลากยา</li></ul>",
+ "noteHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0307-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p><span style=\"text-decoration: underline;\">Rx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;W.F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;App.vol</p><p>Paracetamol &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;125 mg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">1.25 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.625 mL</span></p><p>Propylene Glycol &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.5 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">5 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 mL</span></p><p>Syrup (85% w/v)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.5 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">25 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25 mL</span></p><p>Methyl paraben&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.1 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">1 g</span><span style=\"color: rgb(255,0,0); font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style=\"color: rgb(255,0,0);\">&nbsp;&nbsp;&nbsp;&nbsp;</span></p><p>Propyl paraben &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.01 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">0.1 g &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 mL</span></p><p>Coloring agent &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.005 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">0.05 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.05 mL</span></p><p>Purified water q.s. ad&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: rgb(204,0,0); font-weight: 700;\">18.32 mL</span></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¾ x app.vol = <span style=\"color: rgb(204,0,0); font-weight: 700;\">13.74&nbsp;&nbsp;</span>mL</p><p>กำหนดให้ </p><ol class=\"ordered-list\"><li>10% w/v methyl paraben and 1% w/v propyl paraben in propylene glycol (calibrated dropper) : 1 หยด = 0.5 mL</li><li>1% w/v coloring agent in water</li></ol><p><span style=\"font-weight: 700;\">ขั้นตอนการเตรียม</span></p><ol class=\"ordered-list\"><li><span style=\"font-weight: 700;\">ชั่งผง paracetamol 1.25 g ลงใน beaker ขนาด 100 mL&nbsp;&nbsp;</span></li><li><span style=\"font-weight: 700;\">ละลาย paracetamol ใน solvent โดยเริ่มต้นจากการละลายในตัวทำละลาย propylene glycol และตามด้วย purified water ¾ app.vol</span></li><li><span style=\"font-weight: 700;\">เติม syrup 25 mL ลงใน beaker พร้อมคนผสม</span></li><li><span style=\"font-weight: 700;\">หยด paraben ทีละหยดลงใน beaker พร้อมคนผสมให้เข้ากันทุกครั้งที่หยด (เพื่อลดการเกิด salting out)</span></li><li><span style=\"font-weight: 700;\">หยด Colouring agent ลงใน beaker พร้อมคนผสม</span></li><li><span style=\"font-weight: 700;\">นำสารที่ได้เทลง cylinder 50 mL เพื่อปรับปริมาตร [อย่าลืม rinse 2-3 รอบ น้ำ~3]</span></li><li><span style=\"font-weight: 700;\">ปรับปริมาตรเป็น 50 mL ก่อนเทกลับ beaker เพื่อ ผสมให้เข้ากันด้วย Stirring rod</span></li><li><span style=\"font-weight: 700;\">เทลงขวดบรรจุ และปิดฉลาก </span></li></ol><p><span style=\"color: rgb(255,0,0); background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">Rubric Max 100 points</span></p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><span style=\"font-weight: 700;\">Component</span></th><th><span style=\"font-weight: 700;\">Mark</span></th><th><span style=\"font-weight: 700;\">Expected Content</span></th></tr><tr><td>Calculate the drug used</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 25</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – 1.25 g paracetamol</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – technique การชั่ง&nbsp;&nbsp;</p></td></tr><tr><td>Compounding technique</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 75</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ไม่สัมผัสผงยา</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – ใช้ Beaker ในการเตรียม<span style=\"font-weight: 700;\"> </span></p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – technique ผสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ใช้ cylinder เหมาะสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – technique การเติม Paraben</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – แบ่งน้ำ ¾ ผสม กับ ¼ rinse</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points </span>– rinse 2-3 รอบ</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – คนใน Beaker/กระบอกตวง</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – ติดฉลาก [ระบุวันหมดอายุ]</p></td></tr><tr><td><span style=\"font-weight: 700;\">Total score</span></td><td><span style=\"font-weight: 700; text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style=\"font-weight: 700;\">/ 100 points</span></td><td></td></tr></table></div>",
+ "checklist": [
+  {
+   "t": "1.25 g paracetamol",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ไม่สัมผัสผงยา",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ Beaker ในการเตรียม",
+   "html": "ใช้ Beaker ในการเตรียม<span style=\"font-weight: 700;\"> \n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique ผสม",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ cylinder เหมาะสม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การเติม Paraben",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แบ่งน้ำ ¾ ผสม กับ ¼ rinse",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "rinse 2-3 รอบ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คนใน Beaker/กระบอกตวง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ติดฉลาก [ระบุวันหมดอายุ]",
+   "html": "ติดฉลาก [ระบุวันหมดอายุ]<span style=\"font-weight: 700;\">\n</span>",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

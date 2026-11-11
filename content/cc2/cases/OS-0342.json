@@ -1,0 +1,26 @@
+{
+ "id": "OS-0342",
+ "title": "Calibration",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "Calibration",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้ Mineral oil มาบอกว่าตวง 0.4ml ใส่ beaker",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้ Mineral oil มาบอกว่าตวง 0.4ml ใส่ beaker</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Dropper</li><li>Cylinder 10 ml</li><li>Mineral oil</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>เทคนิคการ Calibration ถูกต้อง</li></ul><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0342-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0342-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "เลือก cylinder 10 ml แล้ว นับ drop ให้ครบ 2  ml (20%)\n  • คำนวณกลับจำนวน drop ที่จะใช้",
+   "html": "เลือก cylinder 10 ml แล้ว นับ drop ให้ครบ 2&nbsp;&nbsp;ml (20%)<ul class=\"checklist-sub-details\"><li>คำนวณกลับจำนวน drop ที่จะใช้</li></ul>",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+{
+ "id": "OS-0301",
+ "title": "Cream Preparation Part 1: Calamine Cream Calculation & Paper Folding",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "การคำนวณสูตรตำรับครีม, Master Formula vs Working Formula, การพับกระทงชั่งสารกึ่งแข็ง (กระดาษไขซ้อนกระดาษขาว)",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Prodct Week 2 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": "OS-0302",
+ "scenario": "แพทย์มีคำสั่งการรักษาให้เตรียมตำรับ Calamine Cream ปริมาณ 15g สำหรับทาผิวหนังลดอาการคัน จงแสดงวิธีคำนวณหาน้ำหนักของ Calamine powder และ Cream base ที่ต้องใช้ลงในกระดาษคำตอบ พร้อมทั้งพับกระทงสำหรับชั่งสารกึ่งแข็งจำนวน 1 ชิ้น ให้ถูกต้องตามหลักเภสัชกรรม (เวลาปฏิบัติการ 4 นาที)\nOfficial Master Formula (100g)\nCalamine powder: 8.0g\nCream base: 92.0g\nTotal: 100.0g\nRx (ใบสั่งยา):\nCalamine cream\nDispense 15g\nSig: Apply to affected area tid",
+ "patientHtml": "",
+ "contentHtml": "<p>แพทย์มีคำสั่งการรักษาให้เตรียมตำรับ Calamine Cream ปริมาณ <span class=\"doc-equation\">15g</span> สำหรับทาผิวหนังลดอาการคัน จงแสดงวิธีคำนวณหาน้ำหนักของ Calamine powder และ Cream base ที่ต้องใช้ลงในกระดาษคำตอบ พร้อมทั้งพับกระทงสำหรับชั่งสารกึ่งแข็งจำนวน 1 ชิ้น ให้ถูกต้องตามหลักเภสัชกรรม (เวลาปฏิบัติการ 4 นาที)</p><p><span style=\"font-weight: 700;\">Official Master Formula (</span><span class=\"doc-equation\">100g</span><span style=\"font-weight: 700;\">)</span></p><ul class=\"bullet-list\"><li>Calamine powder: <span class=\"doc-equation\">8.0g</span></li><li>Cream base: <span class=\"doc-equation\">92.0g</span></li><li>Total: <span class=\"doc-equation\">100.0g</span></li></ul><p><span style=\"font-weight: 700;\">Rx (ใบสั่งยา):</span></p><ul class=\"bullet-list\"><li>Calamine cream</li><li>Dispense <span class=\"doc-equation\">15g</span></li><li>Sig: Apply to affected area tid</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>กระดาษชั่งสาร (กระดาษขาวสะอาด)</li><li>กระดาษไข (Glassine / Wax paper)</li><li>ปากกาเขียนกระทงชั่งสาร (ปากกาเคมี/ปากกาลูกลื่น)</li><li>กรรไกร (ถ้ามี)</li><li>กระดาษคำตอบสำหรับแสดงวิธีคำนวณ</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">เฉลยการคำนวณ Working Formula (</span><span class=\"doc-equation\">15g</span><span style=\"font-weight: 700;\">):</span><ul class=\"bullet-list\"><li>Calamine powder: <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">8.0</span><span class=\"equation-denom\">100</span></span>&times;15=1.20g</span></li><li>Cream base: <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">92.0</span><span class=\"equation-denom\">100</span></span>&times;15=13.80g</span></li><li>น้ำหนักรวม: <span class=\"doc-equation\">1.20+13.80=15.00g</span></li></ul></li><li><span style=\"font-weight: 700;\">หลักการพับกระทงชั่งสารกึ่งแข็ง (คู่มือทักษะสภาฯ หน้า 57, 59):</span><ul class=\"bullet-list\"><li>สารกึ่งแข็ง (Semisolid) มีส่วนประกอบของน้ำและไขมัน หากใช้กระดาษขาวธรรมดา เนื้อครีมจะซึมเข้าเนื้อกระดาษทันทีทำให้สูญเสียน้ำหนักยา</li><li>หากใช้กระดาษไขเพียงชั้นเดียว จะมีความบางและอ่อนยวบ เมื่อปาดเนื้อครีมที่มีน้ำหนัก <span class=\"doc-equation\">13.8g</span> จะยกออกจากจานชั่งได้ยากและเสี่ยงต่อการหลุดมือ</li><li><span style=\"font-weight: 700;\">มาตรฐานทองคำ:</span> นำกระดาษไขวางทับบนกระดาษขาวธรรมดา แล้วพับพร้อมกันเป็นกระทง 2 ชั้น</li></ul></li><li><span style=\"font-weight: 700;\">Common Pitfalls:</span> คำนวณ Cream base ผิดโดยลืมหักลบน้ำหนักผงยา, ใช้กระดาษขาวชั้นเดียวพับกระทง, หรือลืมเขียนน้ำหนัก <span class=\"doc-equation\">13.80g</span> กำกับไว้บนกระทง</li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณน้ำหนัก Calamine Powder",
+   "s": 2.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การคำนวณน้ำหนัก Cream Base",
+   "s": 2.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การเลือกชนิดกระดาษสำหรับชั่งสารกึ่งแข็ง (Critical Material Step)",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความเรียบร้อยของรูปแบบการพับกระทงชั่ง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การเขียนระบุข้อความบนกระทงชั่งสาร",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

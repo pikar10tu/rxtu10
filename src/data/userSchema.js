@@ -62,7 +62,9 @@ export const USER_DEFAULTS = {
   tags: [],                                   // admin-assigned badges
   residence: { level: 1, upgradedAt: null },  // ที่อยู่อาศัย (prestige/coin sink)
   farm: { plots: [], plotCount: 4, inventory: {}, lastTick: null, plotsUnlocked: 1, orders: [], harvests: {}, gold: {}, goldFound: {} },  // harvests/gold/goldFound = ดาว+พืชทอง (data/farmMastery.js)
-  study: { cards: {}, qcards: {} },           // SRS: cards = แฟลชการ์ดตัวยา · qcards = ข้อสอบที่เคยตอบผิด
+  study: { cards: {}, qcards: {}, cc2: {} },  // SRS: cards = แฟลชการ์ดตัวยา · qcards = ข้อสอบที่เคยตอบผิด
+                                              // cc2 = {[caseId]:{g,t,d,n}} บันทึกซ้อม CC2 ล่าสุดต่อเคส (self-learning: ไม่มีเหรียญ/radar — utils/cc2Progress.js)
+                                              // ⚠️ เขียนด้วย dot-path `study.cc2.<id>` เท่านั้น
   dailyQuest: { date: null, quiz: 0, farm: 0, gacha: 0, pvp: 0, claimed: false },
   freeGachaTickets: 0,
   antiLoss: 0,            // 💊 ยาแก้แพ้ (utils/antiLoss.js)

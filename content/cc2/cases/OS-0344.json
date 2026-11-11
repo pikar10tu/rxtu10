@@ -1,0 +1,26 @@
+{
+ "id": "OS-0344",
+ "title": "ชั่ง",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "ชั่ง",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ชั่ง base เปล่า คำนวณและชั่ง washing cream",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"font-weight: 700;\">ชั่ง base เปล่า คำนวณและชั่ง washing cream</span></p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>เครื่องชั่ง</li><li>washing cream</li><li>Spatular</li></ol>",
+ "noteHtml": "",
+ "checklist": [
+  {
+   "t": "เช็คลูกน้ำเครื่องชั่ง (2)\n  • ดูความสะอาดของเครื่องชั่ง (1)\n  • การ tare เครื่อง (2)\n  • พับกระทง (2)\n  • อ่านฉลาก base 3 ครั้ง (ตอนหยิบ/ก่อนตัก/ตอนเก็บ) (2)\n  • เลือกใช้อุปกรณ์ถูก (1)",
+   "html": "เช็คลูกน้ำเครื่องชั่ง (2)<ul class=\"checklist-sub-details\"><li>ดูความสะอาดของเครื่องชั่ง (1)</li><li>การ tare เครื่อง (2)</li><li>พับกระทง (2)</li><li>อ่านฉลาก base 3 ครั้ง (ตอนหยิบ/ก่อนตัก/ตอนเก็บ) (2)</li><li>เลือกใช้อุปกรณ์ถูก (1)</li></ul>",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

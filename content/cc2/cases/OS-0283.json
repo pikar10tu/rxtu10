@@ -1,0 +1,153 @@
+{
+ "id": "OS-0283",
+ "title": "Ointment 5B",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Ointment & Spatulation",
+ "diff": 2,
+ "source": "Mock Exam 2569 (Week 2) ชุด B",
+ "active": true,
+ "durationMin": 4,
+ "gated": [],
+ "next": null,
+ "scenario": "โจทย์:\nRx\nCalamine   10% w/w\nOintment base   qs. to 15 g\nM. ft. Ointment (Disp. 15 g)\n\nคำสั่ง: จงเตรียมตำรับ Calamine ointment โดยส่งตำรับบน Slab",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"color: rgb(31,31,31); font-weight: 700;\">โจทย์:<br>Rx<br></span><span style=\"color: rgb(31,31,31);\">Calamine &nbsp;&nbsp;&nbsp;&nbsp; 10% w/w<br>Ointment base &nbsp;&nbsp;&nbsp;&nbsp; qs. to 15 g<br>M. ft. Ointment (Disp. 15 g)</span></p><p><span style=\"color: rgb(31,31,31); font-weight: 700;\"> </span></p><p><span style=\"color: rgb(31,31,31); font-weight: 700;\">คำสั่ง:</span><span style=\"color: rgb(31,31,31);\"> จงเตรียมตำรับ Calamine ointment โดยส่งตำรับบน Slab</span></p><p><span style=\"color: rgb(31,31,31); font-weight: 700;\"> </span></p>",
+ "equipmentHtml": "<p><span style=\"color: rgb(31,31,31); font-weight: 700;\">สารเคมีที่มีในสถานี:</span></p><p><span style=\"color: rgb(31,31,31);\">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Calamine powder (ชั่งไว้ให้แล้ว)</span></p><p><span style=\"color: rgb(31,31,31);\">2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Glycerin</span></p><p><span style=\"color: rgb(31,31,31);\">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mineral oil</span></p><p><span style=\"color: rgb(31,31,31);\">4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ointment base&nbsp;&nbsp;(นำมาจากข้อ 3.1B)</span></p><p><span style=\"color: rgb(31,31,31); font-weight: 700;\"> </span></p><p><span style=\"color: rgb(31,31,31); font-weight: 700;\">อุปกรณ์ที่มีในสถานี:</span></p><p><span style=\"color: rgb(31,31,31);\">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Slab</span></p><p><span style=\"color: rgb(31,31,31);\">2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spatula 2 เล่ม</span></p><p><span style=\"color: rgb(31,31,31);\">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dropper</span></p><p><span style=\"color: rgb(31,31,31);\"> </span></p><p><span style=\"color: rgb(31,31,31); font-weight: 700;\">ระยะเวลา:</span><span style=\"color: rgb(31,31,31);\"> 4 นาที</span></p>",
+ "noteHtml": "<ol class=\"ordered-list\"><li><span style=\"font-weight: 700;\">หลักการเลือก Levigating Agent (คู่มือทักษะสภาฯ หน้า 45, 63):</span><ul class=\"bullet-list\"><li>Oleaginous base / Absorption base / W/O cream: ใช้ Mineral oil เป็น Levigating agent</li><li>O/W cream (Vanishing cream) / Water-soluble base: ใช้ Glycerol (Glycerin) หรือ Propylene glycol เป็น Levigating agent</li></ul></li><li><span style=\"font-weight: 700;\">Geometric Dilution บน Slab:</span><ul class=\"bullet-list\"><li>เนื้อขี้ผึ้ง 13.5 g ต้องค่อยๆ ดึงมาผสมกับ Calamine paste (0.6 g) ทีละน้อยตามลำดับ</li><li>การเทผสมรอบเดียวจะทำให้ผงยาจับเป็นก้อนเล็กๆ (Lumps) กระจายตัวไม่สม่ำเสมอ</li></ul></li><li><span style=\"font-weight: 700;\">Common Pitfalls:</span> เลือก Glycerin แทน Mineral oil, ไม่ทำ Smooth paste (เอาครีมมาคลุกผงยาแห้งๆ ทันทีทำให้เนื้อครีมสาก), ผสมรวดเดียวไม่ทำ Geometric dilution</li></ol>",
+ "checklist": [
+  {
+   "t": "การจับและวางตำแหน่งอุปกรณ์บน Slab",
+   "html": "<span style=\"font-weight: 700;\">การจับและวางตำแหน่งอุปกรณ์บน Slab\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "วางแผ่น Slab ราบกับโต๊ะ ใช้มือข้างไม่ถนัดจับประคองด้ามจับ Slab ไว้ตลอดการผสม มือข้างถนัดจับ Spatula คว่ำมือใช้นิ้วชี้ทอดบนใบ Spatula เพื่อควบคุมน้ำหนักกดบี้ และวาง Spatula เล่มที่สองพักเกยไว้บน Slab หรือกระจกนาฬิกา (ไม่วางบนโต๊ะ)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "วางท่าทางผิดวิธี หรือวาง Spatula เลอะบนโต๊ะ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ตำแหน่งการจัดวางสารตั้งต้นบน Slab",
+   "html": "<span style=\"font-weight: 700;\">ตำแหน่งการจัดวางสารตั้งต้นบน Slab\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทผงยา Calamine powder ไว้บริเวณกึ่งกลางของ Slab และใช้ Spatula ปาดก้อน Ointment base พักไว้ที่มุมด้านข้างของ Slab",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เทผงยาและปาดครีมปนกันตั้งแต่แรก",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเลือกชนิดสารช่วยบี้บด",
+   "html": "<span style=\"font-weight: 700;\">การเลือกชนิดสารช่วยบี้บด\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกใช้ Mineral oil เป็น Levigating agent ถูกต้องตามทฤษฎีเภสัชกรรม (เนื่องจาก Simple ointment มีคุณสมบัติเป็นยาพื้นที่ไม่ชอบน้ำ หรือ Hydrophobic จึงต้องเลือกสารช่วยกระจายตัวยาที่เข้ากับวัฏภาคน้ำมันได้ดี)",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เลือกใช้ Glycerin (จะทำให้เกิดการแยกชั้นและเข้ากันไม่ได้กับ Simple ointment base)",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการทำ Smooth Paste",
+   "html": "<span style=\"font-weight: 700;\">เทคนิคการทำ Smooth Paste\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "หยด Mineral oil ลงบนผง Calamine เพียงเล็กน้อยพอประมาณ (3–5หยด) พอให้ผงยาเปียกทั่วถึง ใช้ Spatula บดบี้วนเป็นเลขแปดหรือวงกลมจนกระทั่งได้ Smooth Paste สีชมพูเนื้อเนียนละเอียด",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ทำ Smooth paste (นำ Ointment base มาผสมกับผง Calamine แห้งๆ โดยตรง) หรือหยด Mineral oil มากเกินไปจนเหลวเละ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การผสมยาพื้นด้วยวิธีเจือจางเชิงเรขาคณิต (Geometric Dilution)",
+   "html": "<span style=\"font-weight: 700;\">การผสมยาพื้นด้วยวิธีเจือจางเชิงเรขาคณิต (Geometric Dilution)\n</span>",
+   "s": 3,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ Spatula ปาดแบ่ง Ointment base จากมุมด้านข้างมาผสมกับ Calamine paste ทีละส่วนในอัตราส่วนประมาณเท่าๆ กัน (1:1) โดยแบ่งผสมอย่างน้อย 3 รอบ และใช้ Spatula บดบี้เกลี่ยให้เข้าเป็นเนื้อเดียวกันอย่างสมบูรณ์ทุกครั้งก่อนดึง Base ส่วนถัดไปมาผสม",
+   "s": 3,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ดึง Base มาผสมเพียง 1–2 ครั้ง หรือไม่ได้บดบี้ให้เข้ากันในแต่ละรอบ",
+   "s": 1.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เท Base ทั้งหมดลงไปคลุกผสมกับผงยาในคราวเดียว",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การทดสอบความเป็นเนื้อเดียวกัน (Homogeneity Test)",
+   "html": "<span style=\"font-weight: 700;\">การทดสอบความเป็นเนื้อเดียวกัน (Homogeneity Test)\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ Spatula ปาดเกลี่ยเนื้อ Calamine Ointment เป็นแผ่นฟิล์มบางๆ รูดไปบนผิว Slab เพื่อแสดงให้ผู้ตรวจเห็นว่า “เนื้อครีมเนียนเรียบสม่ำเสมอ เป็นสีชมพูเนื้อเดียว ปราศจากเม็ดสาก และไม่มีของเหลวแยกชั้น\"",
+   "html": "ใช้ Spatula ปาดเกลี่ยเนื้อ Calamine Ointment เป็นแผ่นฟิล์มบางๆ รูดไปบนผิว Slab เพื่อแสดงให้ผู้ตรวจเห็นว่า <span style=\"font-weight: 700;\">“เนื้อครีมเนียนเรียบสม่ำเสมอ เป็นสีชมพูเนื้อเดียว ปราศจากเม็ดสาก และไม่มีของเหลวแยกชั้น&quot;\n</span>",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ทำการปาดทดสอบ หรือเนื้อครีมยังเป็นเม็ดสากหยาบ/แยกชั้น",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การรักษาความสะอาด",
+   "html": "<span style=\"font-weight: 700;\">การรักษาความสะอาด\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "รักษาความสะอาดรอบบริเวณผสม โดยควบคุมเนื้อยาให้อยู่รวมเป็นกองเดียวบริเวณกึ่งกลาง Slab ไม่กระจายตัวจนเลอะทั่วแผ่นหรือล้นออกนอก Slab",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่มีการรวบเนื้อยา เนื้อยากระจายตัวเปรอะเปื้อนทั่วทั้งแผ่น Slab หรือเลอะออกนอกพื้นที่แผ่นรองผสม",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

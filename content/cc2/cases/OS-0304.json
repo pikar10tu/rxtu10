@@ -1,0 +1,82 @@
+{
+ "id": "OS-0304",
+ "title": "Lotion",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Lotion",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "Tetracycline Lotion\nRx\nTetracycline\t\t2%\nPG\t\t\t4 mL\nWater qs.\t\t25 mL\n[มี tetracycline 250 mg/cap]\n1). หากต้องเตรียม 50 mL ต้องใช้ tetracycline กี่เม็ด (จงแสดงวิธีคำนวน)\n2). จงเตรียมยา Lotion นี้",
+ "patientHtml": "",
+ "contentHtml": "<p>Tetracycline Lotion</p><p><span style=\"font-weight: 700; text-decoration: underline;\">Rx</span></p><p>Tetracycline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2%</p><p>PG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 mL</p><p>Water qs.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25 mL</p><p>[มี tetracycline 250 mg/cap]</p><p><span style=\"font-weight: 700;\">1). หากต้องเตรียม 50 mL ต้องใช้ tetracycline กี่เม็ด (จงแสดงวิธีคำนวน)</span> </p><p><span style=\"font-weight: 700;\">2). จงเตรียมยา Lotion นี้</span> </p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>เม็ดยา Tetracycline Capsule 250 mg</li><li>Propylene glycol</li><li>Purified water</li><li>โกร่งแก้ว</li><li>Beaker</li><li>Stirring rod</li><li>Cylinder</li><li>ขวดแก้ว(สำหรับส่ง)</li><li>ฉลากยา</li></ol>",
+ "noteHtml": "<ol class=\"ordered-list\"><li><span style=\"color: rgb(204,0,0); font-weight: 700;\">4 Capsules</span></li></ol><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0304-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><ol class=\"ordered-list\"><li><span style=\"color: rgb(204,0,0); font-weight: 700;\">Tetracycline เป็นผงที่ไม่ละลายน้ำและเปียกน้ำยาก (hydrophobic)</span> จึงต้องใช้ PG เป็น levigating agent เพื่อเคลือบผิวอนุภาคผงยาก่อน แล้วค่อยเติมน้ำแบบ geometric dilution เพื่อให้กระจายตัวสม่ำเสมอในตำรับ ไม่จับตัวเป็นก้อน</li></ol><p><span style=\"font-weight: 700;\">ขั้นตอนการเตรียม</span></p><p><span style=\"font-weight: 700;\">1.&nbsp;&nbsp;&nbsp;&nbsp;แกะ Tetracycline 4 แคปซูล และเทผงยาลงในโกร่งแก้ว</span></p><p><span style=\"font-weight: 700;\">2.&nbsp;&nbsp;&nbsp;&nbsp;ตวง PG 8 mL ด้วย cylinder แล้วค่อยๆ เติมลงในโกร่งแก้วทีละน้อย </span></p><p><span style=\"font-weight: 700;\">3.&nbsp;&nbsp;&nbsp;&nbsp;บดผสมผงยากับ PG จนได้เป็น Smooth paste</span></p><p><span style=\"font-weight: 700;\">4.&nbsp;&nbsp;&nbsp;&nbsp;ตวงน้ำ ¾ x (50-8-1=~40) = 30 mL ใช้ในการผสม</span></p><p><span style=\"font-weight: 700;\">5.&nbsp;&nbsp;&nbsp;&nbsp;ค่อย ๆ เติมน้ำทีละน้อยแบบ Geometric dilution และบดผสมจนกว่าน้ำจะหมด</span></p><p><span style=\"font-weight: 700;\">6.&nbsp;&nbsp;&nbsp;&nbsp;นำสารที่ได้เทลง cylinder 50 mL เพื่อปรับปริมาตร [อย่าลืม rinse 2-3 รอบ]</span></p><p><span style=\"font-weight: 700;\">7.&nbsp;&nbsp;&nbsp;&nbsp;ปรับปริมาตรเป็น 50 mL ก่อนเทลง beaker เพื่อ ผสมให้เข้ากันด้วย Stirring rod</span></p><p><span style=\"font-weight: 700;\">8.&nbsp;&nbsp;&nbsp;&nbsp;เทลงขวดบรรจุ และปิดฉลาก [เขย่าขวดก่อนใช้]</span></p><p><span style=\"color: rgb(255,0,0); background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">Rubric Max 100 points</span></p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><span style=\"font-weight: 700;\">Component</span></th><th><span style=\"font-weight: 700;\">Mark</span></th><th><span style=\"font-weight: 700;\">Expected Content</span></th></tr><tr><td>Calculate the drug used</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 25</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – 4 capsules </p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 15 points</span> – right calculation&nbsp;&nbsp;</p></td></tr><tr><td>Compounding technique</td><td><span style=\"text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/ 75</td><td><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ไม่สัมผัสผงยา</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – using PG to levigate<span style=\"font-weight: 700;\"> </span></p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – ใช้โกร่งแก้วในการเตรียม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – technique การใช้โกร่ง</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – ใช้ cylinder เหมาะสม</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – Geometric dilution technique</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – ได้เป็น Smooth paste</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – แบ่งน้ำ ¾ ผสม กับ ¼ rinse</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points </span>– rinse 2-3 รอบ</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 5 points</span> – คนใน Beaker/กระบอกตวง</p><p><span style=\"color: rgb(204,0,0); font-weight: 700;\">▢ 10 points</span> – ติดฉลาก [เขย่าขวดก่อนใช้]</p></td></tr><tr><td><span style=\"font-weight: 700;\">Total score</span></td><td><span style=\"font-weight: 700; text-decoration: underline;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style=\"font-weight: 700;\">/ 100 points</span></td><td></td></tr></table></div>",
+ "checklist": [
+  {
+   "t": "4 capsules",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "right calculation",
+   "html": "right calculation&nbsp;&nbsp;",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "using PG to levigate",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้โกร่งแก้วในการเตรียม",
+   "html": "&nbsp;&nbsp;(1) ใช้โกร่งแก้วในการเตรียม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "technique การใช้โกร่ง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ cylinder เหมาะสม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "Geometric dilution technique",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้เป็น Smooth paste",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แบ่งน้ำ ¾ ผสม กับ ¼ rinse",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "rinse 2-3 รอบ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คนใน Beaker/กระบอกตวง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ติดฉลาก [เขย่าขวดก่อนใช้]",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "id": "OS-0355",
+ "title": "การกรอง",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "การกรอง",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตทำการกรองตำรับ Peppermint water โดยมีชุดอุปกรณ์สำหรับการกรองจัดเตรียมไว้ให้\nเตรียม Peppermint Water N.F. XV จำนวน 60 ml\nRx \tPeppermint Oil \t\t2 ml\nPurified Talc \t\t\t15 g\nPurified water q.s. ad \t\t1000 ml",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตทำการกรองตำรับ Peppermint water โดยมีชุดอุปกรณ์สำหรับการกรองจัดเตรียมไว้ให้</p><p>เตรียม Peppermint Water N.F. XV จำนวน 60 ml </p><p>Rx &nbsp;&nbsp;&nbsp;&nbsp;Peppermint Oil &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 ml</p><p>&nbsp;&nbsp;&nbsp;&nbsp;Purified Talc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15 g</p><p>&nbsp;&nbsp;&nbsp;&nbsp;Purified water q.s. ad &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000 ml</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>กรวยแก้ว 1 อัน</li><li>ขาตั้งกรวย 1 อัน</li><li>บีกเกอร์ 1 อัน</li><li>Erlenmeyer flask 1 อัน</li><li>กระดาษกรอง</li><li>กระจกนาฬิกา 1 อัน</li><li>น้ำ H₂O สำหรับ rinse</li></ol>",
+ "noteHtml": "<p>- <span style=\"font-style: italic;\">ข้อควรระวังของผู้ตรวจ:</span> เน้นตรวจความถูกต้องของการติดตั้งชุดกรอง ขั้นตอนการล้างกระดาษกรอง และความใสของสารกรอง</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0355-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "ได้ของเหลวใส",
+   "s": 10,
+   "g": "ทั่วไป"
+  }
+ ]
+}

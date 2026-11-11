@@ -1,0 +1,266 @@
+{
+ "id": "OS-0138",
+ "title": "การตรวจสอบใบสั่งยาและการจัดการปัญหาจากการใช้ยา (Prescription Screening & DRPs)",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "Drug-Related Problems, Medication Errors, Drug Interaction (DTG + Metformin), Cross-allergy (Sulfa + Sulfonylurea), Dispensing Errors",
+ "diff": 2,
+ "source": "สอบจำลองรุ่นพี่ 83 Clinic ครั้งที่ 1",
+ "active": true,
+ "durationMin": 4,
+ "gated": [],
+ "next": null,
+ "scenario": "ท่านเป็นเภสัชกรประจำห้องจ่ายยาผู้ป่วยนอก ได้รับใบสั่งยาและตะกร้าจัดยาของผู้ป่วยรายหนึ่งจงตรวจสอบความถูกต้องของคำสั่งใช้ยา ตัวยา ฉลากยา และบรรจุภัณฑ์ แล้วบันทึกข้อมูลลงในกระดาษคำตอบ:\nระบุข้อผิดพลาด ของยาแต่ละรายการ (หากไม่มีข้อผิดพลาด ให้เขียนว่า \"ไม่มี\")\nเสนอแนวทางแก้ไข สำหรับข้อผิดพลาดที่พบให้ถูกต้องตามหลักวิชาชีพ (หากจำเป็นต้องปรึกษาแพทย์ ให้ระบุคำว่า \"ปรึกษา/ติดต่อแพทย์\" ด้วย)",
+ "patientHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ชื่อ-นามสกุล:</span> นาย สมศักดิ์ มีชัย อายุ 48 ปี HN: 654321</li><li><span style=\"font-weight: 700;\">สิทธิการรักษา:</span> บัตรทอง (UC)</li><li><span style=\"font-weight: 700;\">การวินิจฉัย:</span> T2DM, Essential Hypertension, HIV infection</li><li><span style=\"font-weight: 700;\">ประวัติการแพ้ยา:</span> <span style=\"font-weight: 700;\">แพ้ยากลุ่ม Sulfa (มีประวัติเกิดผื่น Maculopapular rash จาก Co-trimoxazole)</span></li><li><span style=\"font-weight: 700;\">ผลตรวจทางห้องปฏิบัติการ:</span> <span class=\"doc-equation\">eGFR=78mL/min/1.73m<sup>2</sup></span>, <span class=\"doc-equation\">CD4=420cells/mm<sup>3</sup></span>, <span class=\"doc-equation\">VL&lt;50copies/mL</span></li></ul><p>Doctor&#039;s Prescription</p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">Metformin (850 mg):</span> 1 tab po bid pc (จำนวน 60 เม็ด)</li><li><span style=\"font-weight: 700;\">Glipizide (5 mg):</span> 1 tab po bid pc (จำนวน 60 เม็ด)</li><li><span style=\"font-weight: 700;\">Enalapril (5 mg):</span> 1 tab po bid pc (จำนวน 60 เม็ด)</li><li><span style=\"font-weight: 700;\">Tenofovir disoproxil fumarate (TDF 300 mg):</span> 1 tab po qd pc (จำนวน 30 เม็ด)</li><li><span style=\"font-weight: 700;\">Lamivudine (3TC 300 mg):</span> 1 tab po qd pc (จำนวน 30 เม็ด)</li><li><span style=\"font-weight: 700;\">Dolutegravir (DTG 50 mg):</span> 1 tab po qd pc (จำนวน 30 เม็ด)</li></ul><p><span style=\"font-weight: 700;\">รายการยาที่จัดในตะกร้าส่งมอบ</span></p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ซองที่ 1:</span> ฉลากพิมพ์ว่า <span style=\"font-style: italic;\">&quot;นาย สมศักดิ์ มีชัย / Metformin 500 mg รับประทานครั้งละ 1 เม็ด วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น (60 เม็ด)&quot;</span> — บรรจุเม็ดยา Metformin 850 mg จำนวน 60 เม็ด</li><li><span style=\"font-weight: 700;\">ซองที่ 2:</span> ฉลากพิมพ์ว่า <span style=\"font-style: italic;\">&quot;นาย สมศรี มีชัย / Glipizide 5 mg รับประทานครั้งละ 1 เม็ด วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น (60 เม็ด)&quot;</span> — บรรจุในซองซิปใส เม็ดยาสีขาวมีรอยบาก</li><li><span style=\"font-weight: 700;\">ซองที่ 3:</span> ฉลากพิมพ์ว่า <span style=\"font-style: italic;\">&quot;นาย สมศักดิ์ มีชัย / Enalapril 5 mg รับประทานครั้งละ 1 เม็ด วันละ 2 ครั้ง หลังอาหาร เช้า-เย็น (60 เม็ด)&quot;</span> — มีเม็ดยาบรรจุในซองจริงจำนวน 90 เม็ด</li><li><span style=\"font-weight: 700;\">ซองที่ 4:</span> ฉลากพิมพ์ว่า <span style=\"font-style: italic;\">&quot;นาย สมศักดิ์ มีชัย / Tenofovir (TDF) 300 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง หลังอาหารเช้า (30 เม็ด)&quot;</span> — แต่เม็ดยาภายในซองเป็นเม็ดยาสีขาวรีของยา Efavirenz (EFV 600 mg)</li><li><span style=\"font-weight: 700;\">ซองที่ 5:</span> ฉลากพิมพ์ว่า <span style=\"font-style: italic;\">&quot;นาย สมศักดิ์ มีชัย / Lamivudine (3TC) 300 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง หลังอาหารเช้า (30 เม็ด)&quot;</span> — บรรจุเม็ดยาถูกต้องครบถ้วน</li><li><span style=\"font-weight: 700;\">ซองที่ 6:</span> ฉลากพิมพ์ว่า <span style=\"font-style: italic;\">&quot;นาย สมศักดิ์ มีชัย / Dolutegravir (DTG) 50 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง หลังอาหารเช้า (30 เม็ด)&quot;</span> — บรรจุเม็ดยาถูกต้องครบถ้วน</li></ul>",
+ "contentHtml": "<p>ท่านเป็นเภสัชกรประจำห้องจ่ายยาผู้ป่วยนอก ได้รับใบสั่งยาและตะกร้าจัดยาของผู้ป่วยรายหนึ่งจงตรวจสอบความถูกต้องของคำสั่งใช้ยา ตัวยา ฉลากยา และบรรจุภัณฑ์ แล้วบันทึกข้อมูลลงในกระดาษคำตอบ:</p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ระบุข้อผิดพลาด</span> ของยาแต่ละรายการ (หากไม่มีข้อผิดพลาด ให้เขียนว่า <span style=\"font-weight: 700;\">&quot;ไม่มี&quot;</span>)</li><li><span style=\"font-weight: 700;\">เสนอแนวทางแก้ไข</span> สำหรับข้อผิดพลาดที่พบให้ถูกต้องตามหลักวิชาชีพ (หากจำเป็นต้องปรึกษาแพทย์ ให้ระบุคำว่า <span style=\"font-weight: 700;\">&quot;ปรึกษา/ติดต่อแพทย์&quot;</span> ด้วย)</li></ul>",
+ "equipmentHtml": "",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">เกณฑ์การให้คะแนนและการเขียนตอบของผู้สอบ:</span><ul class=\"bullet-list\"><li>คะแนนเต็ม 10 คะแนน แบ่งเป็น Identification 5.0 คะแนน และ Resolution/Intervention 5.0 คะแนน</li><li>ในข้อ Metformin, Glipizide และ Dolutegravir หากผู้สอบไม่เขียนคำว่า <span style=\"font-weight: 700;\">&quot;ติดต่อแพทย์&quot;</span>, <span style=\"font-weight: 700;\">&quot;ปรึกษาแพทย์&quot;</span> หรือ <span style=\"font-weight: 700;\">&quot;Consult แพทย์&quot;</span> ให้หักคะแนนส่วน Resolution ในข้อย่อยนั้น 0.5 คะแนน</li></ul></li><li><span style=\"font-weight: 700;\">ประเด็นทางคลินิก (Clinical Pearls):</span><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">DTG + Metformin:</span> Dolutegravir ยับยั้ง OCT2/MATE1 ทำให้ Metformin AUC เพิ่มขึ้น 79% Guideline สากล (DHHS/WHO) แนะนำขนาดยา Metformin สูงสุดไม่เกิน <span class=\"doc-equation\">1,000mg/day</span> เมื่อใช้ร่วมกัน</li><li><span style=\"font-weight: 700;\">Sulfa Allergy vs Glipizide:</span> แม้ Sulfonylurea จะเป็น Non-arylamine sulfonamide แต่ในข้อสอบสภาเภสัชกรรมกำหนดให้ตระหนักถึงความเสี่ยงของการแพ้ข้ามกลุ่ม (Cross-reactivity) และต้องทักท้วงปรึกษาแพทย์เพื่อเปลี่ยนเป็นยาอื่น</li><li><span style=\"font-weight: 700;\">Storage Protection:</span> Glipizide สลายตัวได้ง่ายเมื่อถูกแสงแดด จึงเป็น Mandatory Rule ที่ต้องบรรจุในซองสีชาป้องกันแสง</li></ul></li><li><span style=\"font-weight: 700;\">Common Pitfalls:</span><ul class=\"bullet-list\"><li>ลืมดู DDI ระหว่าง DTG กับ Metformin แล้วตอบ Metformin ผิดแค่เรื่องฉลาก 500 mg vs 850 mg</li><li>ลืมตรวจเช็กเม็ดยาในซอง Tenofovir (มองข้ามว่าเป็น Efavirenz เม็ดสีขาวรี)</li><li>นับเม็ด Enalapril ไม่ครบ (ในซองใส่มา 90 เม็ด ขณะที่แพทย์สั่ง 60 เม็ด)</li><li>ตอบว่า Lamivudine มีข้อผิดพลาด ทั้งที่เป็น Distractor ที่ถูกต้องสมบูรณ์</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "การตรวจพบข้อผิดพลาดของยา Metformin",
+   "s": 1,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน"
+  },
+  {
+   "t": "ระบุข้อผิดพลาดครบทั้ง 2 ประเด็น:\n  • เกิด Drug-Drug Interaction กับ Dolutegravir (DTG ยับยั้ง OCT2/MATE1 ทำให้ระดับยา Metformin สูงขึ้น ขนาดยาที่แพทย์สั่ง 1,700mg/day เกินเกณฑ์ปลอดภัยที่จำกัดไว้ไม่เกิน 1,000mg/day เสี่ยงต่อการเกิด Lactic acidosis)\n  • ขนาดยาบนฉลาก (พิมพ์ 500 mg) ไม่ตรงกับใบสั่งยา (แพทย์สั่ง 850 mg) หรือไม่ตรงกับเม็ดยาในซอง",
+   "html": "ระบุข้อผิดพลาดครบทั้ง 2 ประเด็น:<ul class=\"checklist-sub-details\"><li>เกิด Drug-Drug Interaction กับ Dolutegravir (DTG ยับยั้ง OCT2/MATE1 ทำให้ระดับยา Metformin สูงขึ้น ขนาดยาที่แพทย์สั่ง <span class=\"doc-equation\">1,700mg/day</span> เกินเกณฑ์ปลอดภัยที่จำกัดไว้ไม่เกิน <span class=\"doc-equation\">1,000mg/day</span> เสี่ยงต่อการเกิด Lactic acidosis)</li><li>ขนาดยาบนฉลาก (พิมพ์ 500 mg) ไม่ตรงกับใบสั่งยา (แพทย์สั่ง 850 mg) หรือไม่ตรงกับเม็ดยาในซอง</li></ul>",
+   "s": 1,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ระบุข้อผิดพลาดได้เพียงประเด็นใดประเด็นหนึ่ง",
+   "s": 0.5,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุข้อผิดพลาด หรือระบุไม่ถูกต้อง",
+   "s": 0,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "แนวทางแก้ไขของยา Metformin",
+   "s": 1,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน"
+  },
+  {
+   "t": "ระบุแนวทางแก้ไขครบถ้วน:\n  • ติดต่อ/ปรึกษาแพทย์ เพื่อปรับลดขนาดยา Metformin ลงเหลือไม่เกิน 1,000mg/day (เช่น ปรับเป็น 500 mg รับประทานครั้งละ 1 เม็ด วันละ 2 ครั้ง หรือ 850 mg วันละ 1 ครั้ง)\n  • แก้ไขฉลากยาให้แสดงความแรงและวิธีใช้ตรงตามคำสั่งยาที่แพทย์ปรับใหม่",
+   "html": "ระบุแนวทางแก้ไขครบถ้วน:<ul class=\"checklist-sub-details\"><li><span style=\"font-weight: 700;\">ติดต่อ/ปรึกษาแพทย์</span> เพื่อปรับลดขนาดยา Metformin ลงเหลือไม่เกิน <span class=\"doc-equation\">1,000mg/day</span> (เช่น ปรับเป็น 500 mg รับประทานครั้งละ 1 เม็ด วันละ 2 ครั้ง หรือ 850 mg วันละ 1 ครั้ง)</li><li>แก้ไขฉลากยาให้แสดงความแรงและวิธีใช้ตรงตามคำสั่งยาที่แพทย์ปรับใหม่</li></ul>",
+   "s": 1,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "แนะนำปรับลดขนาดยาแต่ไม่ระบุคำว่าติดต่อ/ปรึกษาแพทย์ หรือลืมระบุเรื่องแก้ไขฉลากยา",
+   "s": 0.5,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ระบุแนวทางแก้ไขไม่ถูกต้อง",
+   "s": 0,
+   "g": "รายการที่ 1 Metformin - 2.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตรวจพบข้อผิดพลาดของยา Glipizide",
+   "s": 1.5,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน"
+  },
+  {
+   "t": "ตรวจพบข้อผิดพลาดครบทั้ง 3 มิติ:\n  • Allergy/Contraindication: ผู้ป่วยมีประวัติแพ้ยากลุ่ม Sulfa แต่ได้รับยา Glipizide ซึ่งเป็นยากลุ่ม Sulfonylurea (เสี่ยงต่อ Cross-reactivity / การแพ้ข้ามกลุ่ม)\n  • Wrong Administration Time: ฉลากระบุเวลารับประทานหลังอาหาร ซึ่งผิด (Glipizide ต้องรับประทานก่อนอาหาร 15–30 นาที)\n  • Label & Packaging Error: ชื่อผู้ป่วยบนฉลากผิดคน (พิมพ์ \"สมศรี\" แทน \"สมศักดิ์\") และ/หรือ บรรจุในซองใส (Glipizide ต้องป้องกันแสง บรรจุในซองสีชา)",
+   "html": "ตรวจพบข้อผิดพลาดครบทั้ง 3 มิติ:<ul class=\"checklist-sub-details\"><li><span style=\"font-weight: 700;\">Allergy/Contraindication:</span> ผู้ป่วยมีประวัติแพ้ยากลุ่ม Sulfa แต่ได้รับยา Glipizide ซึ่งเป็นยากลุ่ม Sulfonylurea (เสี่ยงต่อ Cross-reactivity / การแพ้ข้ามกลุ่ม)</li><li><span style=\"font-weight: 700;\">Wrong Administration Time:</span> ฉลากระบุเวลารับประทานหลังอาหาร ซึ่งผิด (Glipizide ต้องรับประทานก่อนอาหาร 15–30 นาที)</li><li><span style=\"font-weight: 700;\">Label &amp; Packaging Error:</span> ชื่อผู้ป่วยบนฉลากผิดคน (พิมพ์ &quot;สมศรี&quot; แทน &quot;สมศักดิ์&quot;) และ/หรือ บรรจุในซองใส (Glipizide ต้องป้องกันแสง บรรจุในซองสีชา)</li></ul>",
+   "s": 1.5,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตรวจพบข้อผิดพลาด 2 ประเด็น",
+   "s": 1,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตรวจพบข้อผิดพลาด 1 ประเด็น",
+   "s": 0.5,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ตรวจพบข้อผิดพลาด",
+   "s": 0,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "แนวทางแก้ไขของยา Glipizide",
+   "s": 1,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน"
+  },
+  {
+   "t": "ระบุแนวทางแก้ไขถูกต้องครบถ้วน:\n  • ติดต่อ/ปรึกษาแพทย์ทันที เพื่อแจ้งประวัติแพ้ Sulfa และขอเปลี่ยนเป็นยาลดระดับน้ำตาลกลุ่มอื่นที่ไม่มีโครงสร้าง Sulfa (เช่น DPP-4 inhibitor, SGLT-2 inhibitor หรือ Insulin)\n  • หากจำเป็นต้องใช้ ให้แก้ไขฉลากเป็นรับประทานก่อนอาหาร 15–30 นาที, แก้ไขชื่อผู้ป่วยเป็น \"นาย สมศักดิ์ มีชัย\" และเปลี่ยนบรรจุในซองสีชาป้องกันแสง",
+   "html": "ระบุแนวทางแก้ไขถูกต้องครบถ้วน:<ul class=\"checklist-sub-details\"><li><span style=\"font-weight: 700;\">ติดต่อ/ปรึกษาแพทย์ทันที</span> เพื่อแจ้งประวัติแพ้ Sulfa และขอเปลี่ยนเป็นยาลดระดับน้ำตาลกลุ่มอื่นที่ไม่มีโครงสร้าง Sulfa (เช่น DPP-4 inhibitor, SGLT-2 inhibitor หรือ Insulin)</li><li>หากจำเป็นต้องใช้ ให้แก้ไขฉลากเป็นรับประทานก่อนอาหาร 15–30 นาที, แก้ไขชื่อผู้ป่วยเป็น &quot;นาย สมศักดิ์ มีชัย&quot; และเปลี่ยนบรรจุในซองสีชาป้องกันแสง</li></ul>",
+   "s": 1,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "แนะนำเปลี่ยนยาแต่ไม่ระบุคำว่าติดต่อ/ปรึกษาแพทย์ หรือแก้ไขประเด็นฉลากไม่ครบ",
+   "s": 0.5,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ระบุแนวทางแก้ไขไม่ถูกต้อง",
+   "s": 0,
+   "g": "รายการที่ 2 Glipizide - 2.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตรวจพบข้อผิดพลาดของยา Enalapril",
+   "s": 0.5,
+   "g": "รายการที่ 3 Enalapril - 1.0 คะแนน"
+  },
+  {
+   "t": "ตรวจพบความคลาดเคลื่อนในการจัดยา: จำนวนเม็ดยาในซอง (90 เม็ด) เกินกว่าคำสั่งแพทย์ (แพทย์สั่ง 60 เม็ด สำหรับ 30 วัน)",
+   "s": 0.5,
+   "g": "รายการที่ 3 Enalapril - 1.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ตรวจพบข้อผิดพลาด",
+   "s": 0,
+   "g": "รายการที่ 3 Enalapril - 1.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "แนวทางแก้ไขของยา Enalapril",
+   "s": 0.5,
+   "g": "รายการที่ 3 Enalapril - 1.0 คะแนน"
+  },
+  {
+   "t": "นับเม็ดยาออกจากซอง ปรับจำนวนเม็ดยาให้ถูกต้องตรงตามคำสั่งแพทย์ (จ่าย 60 เม็ด)",
+   "s": 0.5,
+   "g": "รายการที่ 3 Enalapril - 1.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ระบุแนวทางแก้ไขไม่ถูกต้อง",
+   "s": 0,
+   "g": "รายการที่ 3 Enalapril - 1.0 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตรวจพบข้อผิดพลาดของยา Tenofovir",
+   "s": 1,
+   "g": "รายการที่ 4 Tenofovir (TDF"
+  },
+  {
+   "t": "ตรวจพบความคลาดเคลื่อนรุนแรงชนิดยาไม่ตรง (Wrong Drug): เม็ดยาที่บรรจุภายในซองไม่ตรงกับฉลากและคำสั่งแพทย์ (ยาในซองเป็น Efavirenz 600 mg เม็ดสีขาวรี ไม่ใช่ Tenofovir เม็ดสีฟ้า)",
+   "s": 1,
+   "g": "รายการที่ 4 Tenofovir (TDF",
+   "sub": true
+  },
+  {
+   "t": "ไม่ตรวจพบข้อผิดพลาด",
+   "s": 0,
+   "g": "รายการที่ 4 Tenofovir (TDF",
+   "sub": true
+  },
+  {
+   "t": "แนวทางแก้ไขของยา Tenofovir",
+   "s": 0.5,
+   "g": "รายการที่ 4 Tenofovir (TDF"
+  },
+  {
+   "t": "นำยาที่จัดผิดออกจากซอง และจัดเม็ดยา Tenofovir (TDF 300 mg) เม็ดสีฟ้าลงในซองให้ถูกต้องตรงตามฉลากและคำสั่งแพทย์",
+   "s": 0.5,
+   "g": "รายการที่ 4 Tenofovir (TDF",
+   "sub": true
+  },
+  {
+   "t": "ไม่แก้ไข หรือแนะนำไม่ถูกต้อง",
+   "s": 0,
+   "g": "รายการที่ 4 Tenofovir (TDF",
+   "sub": true
+  },
+  {
+   "t": "การตรวจพบข้อผิดพลาดของยา Dolutegravir",
+   "s": 1,
+   "g": "รายการที่ 5 Dolutegravir (DTG"
+  },
+  {
+   "t": "ตรวจพบปัญหา Drug-Drug Interaction: ยา DTG ยับยั้งตัวขนส่งยา OCT2 และ MATE1 ที่ไต ทำให้การขับออกของ Metformin ลดลง ส่งผลให้ระดับยา Metformin ในเลือดสูงขึ้น เสี่ยงต่อการเกิด Lactic acidosis",
+   "s": 1,
+   "g": "รายการที่ 5 Dolutegravir (DTG",
+   "sub": true
+  },
+  {
+   "t": "ไม่ตรวจพบข้อผิดพลาด",
+   "s": 0,
+   "g": "รายการที่ 5 Dolutegravir (DTG",
+   "sub": true
+  },
+  {
+   "t": "แนวทางแก้ไขของยา Dolutegravir",
+   "s": 1,
+   "g": "รายการที่ 5 Dolutegravir (DTG"
+  },
+  {
+   "t": "ติดต่อ/ปรึกษาแพทย์ เพื่อพิจารณาปรับลดขนาดยา Metformin ลงเหลือไม่เกิน 1,000mg/day พร้อมทั้งแนะนำให้ติดตามอาการแสดงของ Lactic acidosis",
+   "html": "<span style=\"font-weight: 700;\">ติดต่อ/ปรึกษาแพทย์</span> เพื่อพิจารณาปรับลดขนาดยา Metformin ลงเหลือไม่เกิน <span class=\"doc-equation\">1,000mg/day</span> พร้อมทั้งแนะนำให้ติดตามอาการแสดงของ Lactic acidosis",
+   "s": 1,
+   "g": "รายการที่ 5 Dolutegravir (DTG",
+   "sub": true
+  },
+  {
+   "t": "แนะนำปรับขนาดยา Metformin แต่ไม่ระบุคำว่าติดต่อ/ปรึกษาแพทย์",
+   "s": 0.5,
+   "g": "รายการที่ 5 Dolutegravir (DTG",
+   "sub": true
+  },
+  {
+   "t": "ระบุแนวทางแก้ไขไม่ถูกต้อง",
+   "s": 0,
+   "g": "รายการที่ 5 Dolutegravir (DTG",
+   "sub": true
+  },
+  {
+   "t": "การตรวจสอบยา Lamivudine",
+   "s": 0.5,
+   "g": "รายการที่ 6 Lamivudine (3TC"
+  },
+  {
+   "t": "ระบุว่า \"ไม่มี\" (ไม่มีข้อผิดพลาด ตัวยา ขนาดยา ฉลาก และการจัดยาถูกต้องตามคำสั่งแพทย์)",
+   "html": "ระบุว่า <span style=\"font-weight: 700;\">&quot;ไม่มี&quot;</span> (ไม่มีข้อผิดพลาด ตัวยา ขนาดยา ฉลาก และการจัดยาถูกต้องตามคำสั่งแพทย์)",
+   "s": 0.5,
+   "g": "รายการที่ 6 Lamivudine (3TC",
+   "sub": true
+  },
+  {
+   "t": "ตอบว่ามีข้อผิดพลาด หรือระบุข้อมูลเท็จ",
+   "s": 0,
+   "g": "รายการที่ 6 Lamivudine (3TC",
+   "sub": true
+  },
+  {
+   "t": "แนวทางการจัดการยา Lamivudine",
+   "s": 0.5,
+   "g": "รายการที่ 6 Lamivudine (3TC"
+  },
+  {
+   "t": "ส่งมอบยาและจ่ายยาตามคำสั่งแพทย์และฉลากยาเดิมตามปกติ",
+   "s": 0.5,
+   "g": "รายการที่ 6 Lamivudine (3TC",
+   "sub": true
+  },
+  {
+   "t": "แนะนำแก้ไขคำสั่งใช้ยาโดยไม่มีเหตุผล",
+   "s": 0,
+   "g": "รายการที่ 6 Lamivudine (3TC",
+   "sub": true
+  }
+ ]
+}

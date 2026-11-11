@@ -1,0 +1,46 @@
+{
+ "id": "OS-0064",
+ "title": "เปิดหนังสือหาข้อมูลยา Steroids",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Steroids",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2556",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "โจทย์ หากท่านเป็นเภสัชกรโรงพยาบาล มีใบสั่งยา Momethasone fuorate แต่ในโรงพยาบาลไม่มียานี้ ถามว่า ยาใดที่สามารถใช้แทน Momethasone fuorate ได้",
+ "patientHtml": "<p>ผู้ป่วยได้รับใบสั่งยา Mometasone furoate cream แต่ยาในคลังหมด ให้เลือกยาสเตียรอยด์ทาภายนอกที่มีความแรงใกล้เคียงกันทดแทน</p>",
+ "contentHtml": "<p>โจทย์ หากท่านเป็นเภสัชกรโรงพยาบาล มีใบสั่งยา Momethasone fuorate แต่ในโรงพยาบาลไม่มียานี้ ถามว่า ยาใดที่สามารถใช้แทน Momethasone fuorate ได้</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0064-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p>จากหนังสือ Drug Facts and Comparisons 2017 edition page 3610-3611</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0064-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0064-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>Momethasone furoate cream 0.1% จัดอยู่ในกลุ่ม Medium potency</p><p>ยาที่สามารถใช้แทนคือยาที่อยู่ในกลุ่มความแรงเดียวกัน ดังรูปที่แสดง Row III.&nbsp;&nbsp;</p><p>เมื่อพิจารณาจากตัวเลือกในข้อสอบ</p><ul class=\"bullet-list\"><li>Betamethasone dipropionate cream 0.05% จัดอยู่ในกลุ่ม High potency</li><li>Triamcinolone acetonide ointment 0.5% จัดอยู่ในกลุ่ม High potency</li><li>Fluticasone propionate cream 0.05% จัดอยู่ในกลุ่ม Medium potency ✅</li><li>Hydrocortisone cream 1% จัดอยู่ในกลุ่ม Low potency</li><li>Clobetasol propionate ointment 0.05% จัดอยู่ในกลุ่ม Very high potency</li></ul><p><span style=\"font-weight: 700;\">สถานีที่ 14</span></p>",
+ "checklist": [
+  {
+   "t": "ประเมินปัญหายาหมดคลัง (Mometasone furoate cream) และเลือกยาสเตียรอยด์ทาภายนอกทดแทนที่มีความแรงระดับใกล้เคียงกัน (Medium to High potency) ได้ถูกต้อง",
+   "s": 1,
+   "g": "การประเมินและการเลือกยาทดแทน"
+  },
+  {
+   "t": "เลือกระดับความแรงและรูปแบบขวดยา/เนื้อครีม (Potency & Dosage Form) ที่เหมาะสมกับรอยโรคของผู้ป่วย",
+   "html": "เลือกระดับความแรงและรูปแบบขวดยา/เนื้อครีม (Potency &amp; Dosage Form) ที่เหมาะสมกับรอยโรคของผู้ป่วย",
+   "s": 1,
+   "g": "การประเมินและการเลือกยาทดแทน"
+  },
+  {
+   "t": "เลือกหนังสืออ้างอิงทางเภสัชกรรม (เช่น Drug Facts and Comparisons หรือ AHFS) ได้ถูกต้อง",
+   "s": 1,
+   "g": "การสืบค้นและอ้างอิงแหล่งข้อมูล DIS"
+  },
+  {
+   "t": "ระบุข้อมูลฉบับพิมพ์ (Edition) และเลขหน้า (Page number) ที่สืบค้นอ้างอิงได้อย่างถูกต้อง",
+   "s": 1,
+   "g": "การสืบค้นและอ้างอิงแหล่งข้อมูล DIS"
+  },
+  {
+   "t": "อธิบายเหตุผลการเปลี่ยนยาและวิธีใช้แก่ผู้ป่วยได้อย่างชัดเจนและเป็นมืออาชีพ",
+   "s": 1,
+   "g": "การสืบค้นและอ้างอิงแหล่งข้อมูล DIS"
+  }
+ ]
+}

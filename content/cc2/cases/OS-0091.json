@@ -1,0 +1,155 @@
+{
+ "id": "OS-0091",
+ "title": "การนับเม็ดยา Bisacodyl",
+ "cat": "Clinic",
+ "group": "การนับเม็ดยาและเขียนฉลากยา",
+ "topic": "Constipation",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2559",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "มีใบสั่งยาจากแพทย์ส่งมา โดยในใบสั่งยาแพทย์มีการวินิจฉัยและจ่ายยาให้กับผู้ป่วย ดังรูป\n\nคำสั่ง: จงนับเม็ดยาตามจำนวนที่แพทย์ได้สั่งจ่าย และเขียนฉลากยากำกับให้ผู้ป่วย\nสิ่งที่มีให้ในสถานี\nถาดนับเม็ดยา 1 ชุด\nSpatula 3 อัน มีของยาทั่วไป ยากลุ่มซัลฟา และยากลุ่มเพนนิซิลลิน\nกระปุกยา Bisacodyl 1 กระปุก\nกระปุกยา Bromhexine 1 กระปุก\nAlcohol และสำลีสำหรับการทำความสะอาดถาดนับเม็ดยาและ spatula\nซองใส่ยาแบบสีใสล้วน\nกระดาษฉลากยาเพื่อเขียนคำตอบส่ง",
+ "patientHtml": "<p>ผู้ป่วยเป็น constipation</p>",
+ "contentHtml": "<p>มีใบสั่งยาจากแพทย์ส่งมา โดยในใบสั่งยาแพทย์มีการวินิจฉัยและจ่ายยาให้กับผู้ป่วย ดังรูป</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0091-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>คำสั่ง: จงนับเม็ดยาตามจำนวนที่แพทย์ได้สั่งจ่าย และเขียนฉลากยากำกับให้ผู้ป่วย</p><p><span style=\"text-decoration: underline;\">สิ่งที่มีให้ในสถานี</span></p><ol class=\"ordered-list\"><li>ถาดนับเม็ดยา 1 ชุด</li><li>Spatula 3 อัน มีของยาทั่วไป ยากลุ่มซัลฟา และยากลุ่มเพนนิซิลลิน</li><li>กระปุกยา Bisacodyl 1 กระปุก</li><li>กระปุกยา Bromhexine 1 กระปุก</li><li>Alcohol และสำลีสำหรับการทำความสะอาดถาดนับเม็ดยาและ spatula</li><li>ซองใส่ยาแบบสีใสล้วน</li><li>กระดาษฉลากยาเพื่อเขียนคำตอบส่ง</li></ol>",
+ "equipmentHtml": "",
+ "noteHtml": "<div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><p><span style=\"font-weight: 700;\">Rx.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ใบสั่งยา&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;18 ก.ค. 69</span></p><p><span style=\"font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โรงพยาบาลรักษาดี</span></p></th></tr><tr><td><p><span style=\"font-weight: 700;\">ชื่อผู้ป่วย: สมศรี เรืองแสง&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HN:123/45</span></p><p><span style=\"font-weight: 700;\">เพศ: หญิง&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;อายุ: 35&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;น้ำหนัก: 55&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ส่วนสูง: 169</span></p><p><span style=\"font-weight: 700;\">All: Sulfamethoxazole </span></p><p><span style=\"font-weight: 700;\">Dx: Constipation</span></p></td></tr><tr><td><p><span style=\"font-weight: 700;\">Sig.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Medication&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Regimen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Amount</span></p><p><span style=\"font-weight: 700;\">&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bisacodyl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 PO prn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28 tabs</span></p></td></tr><tr><td><span style=\"font-weight: 700;\">Sign สมหมาย (67890) MD</span></td></tr></table></div><p>ฉลากช่วยที่ถูกต้องสำหรับสถานีนี้คือ ห้ามรับประทานพร้อมกับผลิตภัณฑ์จากนม รวมถึงยาลดกรด ควรเว้นระยะห่างไว้อย่างน้อย 1 ชั่วโมง</p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">1.ปี 2559 *(มีเติมเนื้อเรื่องสถานการณ์และลักษณะใบสั่งยา)</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 11</span></p>",
+ "checklist": [
+  {
+   "t": "เลือกถาดนับเม็ดยาและ spatula ตามประเภทกลุ่มยาได้ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เช็ดถาดและที่นับเม็ดยาและ spatula ด้วยสำลีและแอลกอฮอลล์",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เช็ดไปในทิศทางเดียวกัน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "รอให้แห้ง (แอลกอฮอล์มากเกินไป หักคะแนน)",
+   "html": "รอให้แห้ง <span style=\"text-decoration: underline;\">(แอลกอฮอล์มากเกินไป หักคะแนน) \n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากขวดยาที่ต้องจ่ายยาครบ 3 ครั้ง (หยิบขวด ก่อนนับ เก็บยา)",
+   "html": "อ่านฉลากขวดยาที่ต้องจ่ายยาครบ 3 ครั้ง <span style=\"text-decoration: underline;\">(หยิบขวด ก่อนนับ เก็บยา)\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ปิดฝาถาดยา เวลาเทยาจากขวดลงถาด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "จับที่นับเม็ดยา โดยจับด้านที่แคบกว่า",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ที่นับเม็ดยาเกลี่ยยาให้กระจายตัวเพื่อให้ง่ายแก่การนับ",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เปิดฝาถาดยาโดยสัมผัสเฉพาะส่วนนอกของฝาถาดยา",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "นับยาให้ครบตามจำนวนโดยนิยมนับครั้งละ 5 เม็ด",
+   "html": "นับยาให้ครบตามจำนวนโดยนิยมนับ<span style=\"text-decoration: underline;\">ครั้งละ 5 เม็ด\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ปิดฝาถาดยา",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทยาที่เกินคืนขวดยาเดิม",
+   "html": "เทยาที่เกินคืนขวดยาเดิม&nbsp;&nbsp;",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทยาใส่ซอง ครบตามจำนวน ไม่ทำยาตกหล่น",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตรวจสอบว่าเทยาทั้งหมดโดยการเปิดฝาถาดยา",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เช็ดทำความสะอาดถาดยาและที่นับเม็ดยาอีกครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียนฉลากยาให้ถูกต้อง เขียนไม่ครบหักจุดละ 0.5 คะแนน",
+   "html": "เขียนฉลากยาให้ถูกต้อง <span style=\"text-decoration: underline;\">เขียนไม่ครบหักจุดละ 0.5 คะแนน</span>",
+   "s": 4,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ชื่อ-สกุลผู้ป่วย",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ชื่อยา",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ขนาดยา",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "จำนวนยาที่จ่ายให้",
+   "html": "จำนวนยาที่จ่ายให้&nbsp;&nbsp;",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ข้อบ่งใช้",
+   "html": "ข้อบ่งใช้&nbsp;&nbsp;",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "วิธีกินยา",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ฉลากช่วยอื่นๆ",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ชื่อเภสัชผู้จ่ายยา",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

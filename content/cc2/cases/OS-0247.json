@@ -1,0 +1,140 @@
+{
+ "id": "OS-0247",
+ "title": "Solid Dosage Forms: Pulverization by Intervention & Blending (สถานี 8B)",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "ยาผง (Powders), Pulverization by Intervention (Camphor), การเลือกใช้โกร่งแก้ว, การระเหยของ Intervening Agent, การผสมผงยาด้วย Geometric Dilution",
+ "diff": 2,
+ "source": "สอบจำลองรุ่นพี่ 83 CC2 PRODUCT (7 NOV 2025)",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงบดลดขนาดผงยา Camphor ด้วยวิธี Pulverization by Intervention ในโกร่งแก้ว และทำการผสมเข้ากับผงยาช่วย (Diluent เช่น Starch หรือ Kaolin) ด้วยเทคนิค Geometric Dilution จนเข้าเป็นเนื้อเดียวกันอย่างสมบูรณ์ (เวลาปฏิบัติการ 4 นาที)",
+ "patientHtml": "",
+ "contentHtml": "<p>จงบดลดขนาดผงยา Camphor ด้วยวิธี Pulverization by Intervention ในโกร่งแก้ว และทำการผสมเข้ากับผงยาช่วย (Diluent เช่น Starch หรือ Kaolin) ด้วยเทคนิค Geometric Dilution จนเข้าเป็นเนื้อเดียวกันอย่างสมบูรณ์ (เวลาปฏิบัติการ 4 นาที)</p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>โกร่งแก้วและลูกโกร่งแก้ว</li><li>ผงยา Camphor (ชั่งไว้แล้ว 0.5 g)</li><li>ผงยาช่วย (Starch หรือ Kaolin ชั่งไว้แล้ว 2.0 g)</li><li>ขวดหยดบรรจุ Alcohol 95% (Intervening agent)</li><li>ไม้พายปาดสาร (Spatula)</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">เหตุผลที่ใช้โกร่งแก้ว:</span> Camphor มีกลิ่นเฉพาะและระเหิดได้ง่าย ผิวเรียบของโกร่งแก้วช่วยลดการเกาะติดและการดูดซับสารเข้าไปในเนื้อกระเบื้อง</li><li><span style=\"font-weight: 700;\">แรงบดในขั้นตอน Intervention:</span> ไม่ต้องออกแรงบดกระแทกมาก การใช้แรงเบาๆ ร่วมกับการละลายของ Alcohol จะช่วยลดขนาดผลึก Camphor ได้อย่างมีประสิทธิภาพ และป้องกันไม่ให้ผงยาอัดแน่นติดก้นโกร่ง</li><li><span style=\"font-weight: 700;\">การระเหย:</span> ต้องมั่นใจว่า Alcohol ระเหยไปจนผง Camphor แห้งสนิทแล้ว จึงค่อยเริ่มเติมผงยาช่วยตัวที่สองลงไปผสมแบบ Geometric dilution มิฉะนั้นความชื้นจะทำให้ผงยาช่วยจับตัวเป็นก้อนสาก</li></ul>",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์โกร่ง",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน"
+  },
+  {
+   "t": "เลือกใช้โกร่งแก้วและลูกโกร่งแก้วในการบด Camphor (ป้องกันการดูดซับสารและกลิ่น)",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เลือกใช้โกร่งกระเบื้อง",
+   "s": 0,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเติม Intervening Agent",
+   "s": 2,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน"
+  },
+  {
+   "t": "ใช้หลอดหยดเติม Alcohol 95% ลงบนผลึก Camphor ในปริมาณพอเหมาะ (พอเปียกชื้น ไม่แฉะโชก)",
+   "s": 2,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เติม Alcohol มากเกินไปจนเป็นของเหลวแฉะ",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้เติม Alcohol (บดแห้งโดยตรง)",
+   "s": 0,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการบดลดขนาดด้วย Pulverization by Intervention",
+   "s": 2,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน"
+  },
+  {
+   "t": "ออกแรงบดเบาๆ หมุนวนลูกโกร่งไปในทิศทางเดียวกันจนกระทั่ง Alcohol ระเหยหมด ได้ผง Camphor ที่แห้ง ละเอียด และไม่ติดแน่นที่ก้นโกร่ง",
+   "s": 2,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ออกแรงกดบดรุนแรงเกินไป หรือผงยายังมีความชื้นของแอลกอฮอล์หลงเหลืออยู่",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "บดผิดวิธี",
+   "s": 0,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การปาดผงยาที่ติดข้างโกร่ง",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน"
+  },
+  {
+   "t": "ใช้ Spatula ช่วยปาดผงยาที่ติดบริเวณข้างโกร่งและหัวลูกโกร่งลงมารวมกันที่ก้นโกร่ง",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ปาดผงยา ปล่อยให้เกาะหนาข้างโกร่ง",
+   "s": 0,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการผสมผงยา 2 ชนิด (Geometric Dilution)",
+   "s": 3,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน"
+  },
+  {
+   "t": "ค่อยๆ แบ่งเติมผงยาช่วย (Starch/Kaolin) ลงผสมกับผง Camphor ในอัตราส่วนประมาณ 1:1 ของผงในโกร่งทีละส่วน แบ่งผสมอย่างน้อย 3 ครั้ง บดผสมเบาๆ ให้เข้ากันทุกครั้ง",
+   "s": 3,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทผงยาช่วยลงผสมเพียง 1–2 ครั้ง หรือไม่ได้บดผสมให้เข้ากันในแต่ละรอบ",
+   "s": 1.5,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทผงยาช่วยทั้งหมดลงไปผสมในคราวเดียว",
+   "s": 0,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลักษณะทางกายภาพของผงยาผสม",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน"
+  },
+  {
+   "t": "ได้ผงยาผสมที่แห้ง ละเอียด สม่ำเสมอเป็นเนื้อเดียวกัน ไม่จับตัวเป็นก้อน",
+   "s": 1,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ผงยายังชื้น เกาะเป็นก้อน หรือสีกระจายตัวไม่สม่ำเสมอ",
+   "s": 0,
+   "g": "Pulverization by Intervention และการผสมผงยา - สถานี 8B: 10 คะแนน",
+   "sub": true
+  }
+ ]
+}

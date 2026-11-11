@@ -1,0 +1,47 @@
+{
+ "id": "OS-0111",
+ "title": "เปิดหนังสือ DIS / Allergic Rhinitis (Singulair)",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Allergic rhinitis",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2561",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "เปิดหนังสือ หายา Singulair® โดยใช้สำหรับเด็กอายุ 14 ปี ถามหา dose ปกติ สำหรับโรค Allergic rhinitis มี หนังสือ 2 เล่มวางไว้ให้ Drug information Handbook 24ed และ Mine Thailand 2016\nชื่อหนังสือ............................................หน้า............\nขนาดยาที่ใช้...................................\nขนาดที่ใช้ในการออกกำลังกาย..............................\nต้องติดตาม Parameter ใด........................................................................................",
+ "patientHtml": "",
+ "contentHtml": "<p>เปิดหนังสือ หายา Singulair® โดยใช้สำหรับเด็กอายุ 14 ปี ถามหา dose ปกติ สำหรับโรค Allergic rhinitis มี หนังสือ 2 เล่มวางไว้ให้ Drug information Handbook 24ed และ Mine Thailand 2016</p><ul class=\"bullet-list\"><li>ชื่อหนังสือ............................................หน้า............</li><li>ขนาดยาที่ใช้...................................</li><li>ขนาดที่ใช้ในการออกกำลังกาย..............................</li><li>ต้องติดตาม Parameter ใด........................................................................................</li></ul>",
+ "equipmentHtml": "",
+ "noteHtml": "<p>เฉลย</p><ul class=\"bullet-list\"><li>ชื่อหนังสือ Drug information Handbook 24ed</li><li>หน้า 1392-4</li></ul><p>- Case status: Active</p><ul class=\"bullet-list\"><li>ขนาดยาที่ใช้ 5 mg Chewable tablets OD</li><li>ขนาดที่ใช้ในการออกกำลังกาย 2 ชั่วโมง ก่อนออกกำลังกาย</li><li>ต้องติดตาม Parameter ใด Mood and Behavior</li></ul>",
+ "checklist": [
+  {
+   "t": "ชื่อหนังสือ Drug information Handbook 24ed",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "หน้า 1392-4",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ขนาดยาที่ใช้  5 mg Chewable tablets OD",
+   "html": "ขนาดยาที่ใช้&nbsp;&nbsp;5 mg Chewable tablets OD",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ขนาดที่ใช้ในการออกกำลังกาย 2 ชั่วโมง ก่อนออกกำลังกาย",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ต้องติดตาม Parameter ใด Mood and Behavior",
+   "html": "ต้องติดตาม Parameter ใด Mood and Behavior<span style=\"font-weight: 700;\">\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

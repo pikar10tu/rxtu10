@@ -1,0 +1,45 @@
+{
+ "id": "OS-0339",
+ "title": "นับเม็ดยา",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "นับเม็ดยา",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "นับเม็ดยา พร้อมเขียนฉลาก มีใบสั่งแพทย์มาให้\nผู้ป่วย นายจรัส สดใส HN:12345\nDx: Osteoarthritis of knee\nRx: Piroxicam 10 mg 1*1 pc prn #30’s\nคำสั่ง:\nนับเม็ดยา\nเขียนฉลากยา Piroxicam Capsule",
+ "patientHtml": "",
+ "contentHtml": "<p>นับเม็ดยา พร้อมเขียนฉลาก มีใบสั่งแพทย์มาให้</p><p>ผู้ป่วย นายจรัส สดใส HN:12345</p><p>Dx: Osteoarthritis of knee</p><p>Rx: Piroxicam 10 mg 1*1 pc prn #30’s</p><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>นับเม็ดยา</li><li>เขียนฉลากยา Piroxicam Capsule</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Piroxicam Capsule 10 mg</li><li>Piroxicam Capsule 20 mg</li><li>ถาดนับเม็ดยาพร้อมที่นับ 1 ชุด</li><li>แอลกอฮอล์ 1 ขวดเล็ก</li><li>สำลี 1 ก้อน</li><li>กระดาษฉลากยา</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>อ่านชื่อยาอย่างน้อย 3 ครั้ง</li><li>ซองสีชา</li><li>เช็ดถูกทาง</li><li>(Tips) เขียนฉลากตอนเช็ดถาด รอแอลกอฮอล์แห้ง</li></ul><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0339-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "การอ่านฉลาก/การหยิบยาที่จจ่ายได้ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การนับเม็ดยาด้วยถาดนับเม็ดยาอย่างถูกเทคนิค",
+   "s": 4,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกบรรจุภัณฑ์ที่เหมาะสม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจัดทำฉลาก ถูกต้อง ครบถ้วน",
+   "s": 3,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียนฉลากช่วยครบถ้วน",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -454,12 +454,12 @@
       <!-- ───── รายงานข้อมูลยา (drug reports) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span><Emoji char="📋" /> รายงานข้อมูลยา</span>
+          <span><Emoji char="📋" /> รายงานข้อมูลยา / เคส CC2</span>
           <button class="btn-mini" :disabled="loadingReports" @click="loadDrugReports">
             {{ loadingReports ? '...' : '↻ โหลด' }}
           </button>
         </div>
-        <div class="admin-hint">ผู้ใช้แจ้งว่าข้อมูลยาผิด/ไม่ตรง — ตรวจแก้แล้วกด ✓ เพื่อปิด</div>
+        <div class="admin-hint">ผู้ใช้แจ้งว่าข้อมูลยาหรือเคส CC2 ผิด (🩺 = เคส CC2 แก้ที่ content/cc2/cases) — ตรวจแก้แล้วกด ✓ เพื่อปิด</div>
         <div v-if="!drugReports.length" class="admin-empty">ยังไม่มีรายงาน <Emoji char="🎉" /></div>
         <ul v-else class="log-list">
           <li v-for="r in drugReports" :key="r.id" class="rep-row">

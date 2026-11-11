@@ -210,7 +210,7 @@ onMounted(async () => {
 .ps-lbl-pct { font-size: 11px; font-weight: 800; fill: var(--primary); }
 .ps-lblg.none .ps-lbl { fill: var(--muted); font-weight: 600; }
 .ps-lblg.sel .ps-lbl, .ps-lblg.sel .ps-lbl-pct { fill: var(--accent); }
-.ps-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: .68rem; color: var(--muted); margin-top: 2px; }
+.ps-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: .7rem; color: var(--muted); margin-top: 2px; }
 .ps-legend span { display: inline-flex; align-items: center; gap: 4px; }
 .ps-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 .ps-legend-note { opacity: .85; }

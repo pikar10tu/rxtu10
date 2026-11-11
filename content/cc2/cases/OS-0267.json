@@ -1,0 +1,126 @@
+{
+ "id": "OS-0267",
+ "title": "Solution Preparation: Iodine Tincture USP (Dry Lab)",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Iodine Tincture, Polyiodide Complex Formation (I2+I-I3-), การอ่านขอบบนของของเหลวสีเข้ม (Upper Meniscus), Approximate Volume",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 4",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "กำหนดสูตรตำรับ Iodine Tincture ดังนี้\nRx 5\nIodine: 20 g\nSodium iodide: 24 g\nAlcohol: 500 mL\nPurified water q.s. ad: 1,000 mL\nSig. M.ft. Solution 50 mL\n(กำหนดให้: Sodium iodide ได้ทำการชั่งมาตาม Working Formula เรียบร้อยแล้ว)\nจงตอบคำถามต่อไปนี้ลงในกระดาษคำตอบ (สถานี LAB แห้ง เวลาปฏิบัติการ 4 นาที):\nคำนวณ Working Formula (W.F.) และ Approximate Volume (App. Vol.) ของสารในสูตรตำรับนี้\nเขียนขั้นตอนวิธีการเตรียมตำรับ Iodine Tincture ตามหัวข้อย่อย: การบดและชั่ง Iodine, การตวง Alcohol และน้ำ, การเตรียม Tincture Iodine, และการตวงปรับปริมาตร โดยระบุปริมาณสารและอุปกรณ์เครื่องแก้วที่เหมาะสมในแต่ละขั้นตอน และผลิตภัณฑ์สุดท้ายส่งในบีกเกอร์\nในขั้นตอนการตวง Iodine Tincture ที่มีสีเข้ม ต้องอ่านระดับปริมาตรสารละลายที่บริเวณใด",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีเตรียมยา / Product ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>กำหนดสูตรตำรับ Iodine Tincture ดังนี้</p><p><span style=\"font-weight: 700;\">Rx 5</span></p><ul class=\"bullet-list\"><li>Iodine: 20 g</li><li>Sodium iodide: 24 g</li><li>Alcohol: 500 mL</li><li>Purified water q.s. ad: 1,000 mL</li><li>Sig. M.ft. Solution 50 mL</li></ul><p><span style=\"font-style: italic;\">(กำหนดให้: Sodium iodide ได้ทำการชั่งมาตาม Working Formula เรียบร้อยแล้ว)</span></p><p>จงตอบคำถามต่อไปนี้ลงในกระดาษคำตอบ (สถานี LAB แห้ง เวลาปฏิบัติการ 4 นาที):</p><ul class=\"bullet-list\"><li>คำนวณ Working Formula (W.F.) และ Approximate Volume (App. Vol.) ของสารในสูตรตำรับนี้</li><li>เขียนขั้นตอนวิธีการเตรียมตำรับ Iodine Tincture ตามหัวข้อย่อย: การบดและชั่ง Iodine, การตวง Alcohol และน้ำ, การเตรียม Tincture Iodine, และการตวงปรับปริมาตร โดยระบุปริมาณสารและอุปกรณ์เครื่องแก้วที่เหมาะสมในแต่ละขั้นตอน และผลิตภัณฑ์สุดท้ายส่งในบีกเกอร์</li><li>ในขั้นตอนการตวง Iodine Tincture ที่มีสีเข้ม ต้องอ่านระดับปริมาตรสารละลายที่บริเวณใด</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>กระดาษโจทย์และกระดาษคำตอบ</li><li>เครื่องคิดเลข</li><li>ปากกา</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณ Working Formula (สูตร 1,000 mL </span><span class=\"doc-equation\">&rarr;</span><span style=\"font-weight: 700;\"> เตรียม 50 mL, ตัวคูณ </span><span class=\"doc-equation\">&times;0.05</span><span style=\"font-weight: 700;\">):</span><ul class=\"bullet-list\"><li><span class=\"doc-equation\">Iodine=20&times;0.05=1.0g</span></li><li><span class=\"doc-equation\">Sodiumiodide=24&times;0.05=1.2g</span></li><li><span class=\"doc-equation\">Alcohol=500&times;0.05=25.0mL</span></li><li>ปริมาตรแทนที่ของสาร: Iodine 1 g <span class=\"doc-equation\">&asymp;0.5mL</span>, NaI 1.2 g <span class=\"doc-equation\">&asymp;0.6mL</span>, Alcohol = 25 mL (รวมเป็น <span class=\"doc-equation\">26.1mL</span>)</li><li><span class=\"doc-equation\">App.Vol.ของน้ำ=50-26.1=23.9mL</span></li><li><span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.Vol.=23.9&times;<span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>&asymp;17.9--18.0mL</span> (ใช้ละลาย NaI และ <span class=\"doc-equation\">I<sub>2</sub></span>)</li><li><span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.Vol.&asymp;5.9--6.0mL</span> (ใช้ Rinse บีกเกอร์ปรับปริมาตรสุดท้าย)</li></ul></li><li><span style=\"font-weight: 700;\">หลักการและทฤษฎีทางเคมี (Complexation):</span><ul class=\"bullet-list\"><li>Iodine (<span class=\"doc-equation\">I<sub>2</sub></span>) ละลายน้ำได้น้อยมาก (<span class=\"doc-equation\">1g/3,000mL</span>) จึงต้องอาศัย Sodium iodide (<span class=\"doc-equation\">NaI&rarr;Na<sup>+</sup>+I<sup>-</sup></span>) ในน้ำเข้มข้น เพื่อเกิดปฏิกิริยา Polyiodide complex:<br>I_2 + I^ -&gt; I_3</li><li>สารประกอบเชิงซ้อน Triiodide ion (<span class=\"doc-equation\">I 3 -</span>) ละลายน้ำได้ดีเยี่ยมและมีฤทธิ์ฆ่าเชื้อ (Antimicrobial activity) สูง</li><li><span style=\"font-weight: 700;\">ข้อควรระวังสำคัญ:</span> ต้องละลาย NaI ในน้ำก่อนแล้วจึงใส่ <span class=\"doc-equation\">I<sub>2</sub></span> คนจนละลายหมด ก่อนที่จะเติม Alcohol ลงไป หากเติม Alcohol ลงไปทำปฏิกิริยากับ <span class=\"doc-equation\">I<sub>2</sub></span> โดยตรงในสภาวะที่เหมาะสม อาจเกิด Ethyl iodide (<span class=\"doc-equation\">C<sub>2</sub>H<sub>5</sub>I</span>) ซึ่งทำให้สูญเสียฤทธิ์ฆ่าเชื้อ</li></ul></li><li><span style=\"font-weight: 700;\">การชั่งและการอ่านปริมาตร:</span><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">Iodine:</span> เป็นสารระเหิดได้และกัดกร่อน ห้ามชั่งบนกระดาษธรรมดาหรือกระดาษไข ต้องชั่งบน <span style=\"font-weight: 700;\">กระจกนาฬิกา (Watch glass)</span> เท่านั้น</li><li><span style=\"font-weight: 700;\">Meniscus Reading:</span> สารละลาย Iodine Tincture มีสีน้ำตาลแดงเข้มจนทึบแสง ไม่สามารถมองเห็นส่วนล่างสุดของส่วนโค้งเว้าได้ จึงต้องอ่านระดับของเหลวที่ <span style=\"font-weight: 700;\">ขอบบน (Upper Meniscus)</span> เสมอ</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณ Working Formula ของ Iodine, Sodium iodide, Alcohol และ App. Vol. รวมของน้ำ ได้ถูกต้อง (Iodine 1 g, Sodium iodide 1.2 g, Alcohol 25 mL, App. Vol. น้ำ 23.9 mL)",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับ - 1.5 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณน้ำ 34 App. Vol. (17.9–18 mL) และ 14 App. Vol. (5.9–6 mL) ได้ถูกต้อง",
+   "html": "คำนวณปริมาณน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span></span> App. Vol. (17.9–18 mL) และ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span></span> App. Vol. (5.9–6 mL) ได้ถูกต้อง",
+   "s": 0.5,
+   "g": "ส่วนที่ 1 การคำนวณสูตรตำรับ - 1.5 คะแนน"
+  },
+  {
+   "t": "การบดและชั่ง Iodine",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน"
+  },
+  {
+   "t": "ระบุการบด Iodine ในโกร่งแก้วด้วยวิธี Pulverization by intervention และชั่ง Iodine 1.0 g บนกระจกนาฬิกา",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ระบุโกร่งแก้ว หรือชั่งบนกระดาษธรรมดา",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวง Alcohol และ Purified Water",
+   "s": 2,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน"
+  },
+  {
+   "t": "ระบุการตวง Alcohol 25 mL โดยใช้กระบอกตวงขนาด 25 mL",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ระบุการตวง Purified water ปริมาณ 34 App. Vol. (17.9–18 mL) โดยใช้กระบอกตวงขนาด 25 mL",
+   "html": "ระบุการตวง Purified water ปริมาณ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span></span> App. Vol. (17.9–18 mL) โดยใช้กระบอกตวงขนาด 25 mL",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการเตรียมสารละลาย (Order of Mixing)",
+   "s": 2,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน"
+  },
+  {
+   "t": "ระบุขั้นตอนถูกต้องตามลำดับ:\n  • เทน้ำส่วน 34 ลงในบีกเกอร์ขนาด 50 mL แล้วใส่ Sodium iodide 1.2 g คนด้วย Stirring rod จนละลายใส\n  • ใส่ Iodine 1.0 g ลงในสารละลาย Sodium iodide คนจน Iodine ละลายหมดเป็นสารละลายใสสีเข้ม (I3- complex)\n  • ค่อยๆ ริน Alcohol 25 mL ลงไปผสม คนด้วย Stirring rod จนเข้าเป็นเนื้อเดียวกัน",
+   "html": "ระบุขั้นตอนถูกต้องตามลำดับ:<ul class=\"checklist-sub-details\"><li>เทน้ำส่วน <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span></span> ลงในบีกเกอร์ขนาด 50 mL แล้วใส่ Sodium iodide 1.2 g คนด้วย Stirring rod จนละลายใส</li><li>ใส่ Iodine 1.0 g ลงในสารละลาย Sodium iodide คนจน Iodine ละลายหมดเป็นสารละลายใสสีเข้ม (<span class=\"doc-equation\">I 3 -</span> complex)</li><li>ค่อยๆ ริน Alcohol 25 mL ลงไปผสม คนด้วย Stirring rod จนเข้าเป็นเนื้อเดียวกัน</li></ul>",
+   "s": 2,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมผิดขั้นตอน (เช่น ใส่ Alcohol ก่อน หรือละลาย Iodine ใน Alcohol ก่อนโดยไม่เกิด complex กับ iodide)",
+   "s": 0,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวงปรับปริมาตรและการส่งมอบ",
+   "s": 3,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน"
+  },
+  {
+   "t": "ถ่ายสารละลายลงในกระบอกตวงขนาด 50 mL",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ใช้น้ำส่วนที่เหลือ (14 App. Vol. = 5.9–6.0 mL) Rinse ล้างบีกเกอร์ แล้วเทปรับปริมาตรในกระบอกตวง 50 mL จนครบ 50 mL พอดี",
+   "html": "ใช้น้ำส่วนที่เหลือ (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span></span> App. Vol. = 5.9–6.0 mL) Rinse ล้างบีกเกอร์ แล้วเทปรับปริมาตรในกระบอกตวง 50 mL จนครบ 50 mL พอดี",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทสารละลายที่ปรับปริมาตรแล้วกลับลงบีกเกอร์เดิม คนผสมด้วย Stirring rod ให้เข้ากัน และปิดปากบีกเกอร์ด้วยกระจกนาฬิกาก่อนส่ง",
+   "s": 1,
+   "g": "ส่วนที่ 2 ขั้นตอนและเทคนิคการเตรียม - 8 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตำแหน่งการอ่านระดับผิวของเหลว",
+   "s": 0.5,
+   "g": "ส่วนที่ 3 การอ่านระดับปริมาตรของเหลวสีเข้ม - 0.5 คะแนน"
+  },
+  {
+   "t": "ระบุว่าอ่านปริมาตรที่ ระดับขอบบนของของเหลว (Upper meniscus)",
+   "html": "ระบุว่าอ่านปริมาตรที่ <span style=\"font-weight: 700;\">ระดับขอบบนของของเหลว (Upper meniscus)<br>\n</span>",
+   "s": 0.5,
+   "g": "ส่วนที่ 3 การอ่านระดับปริมาตรของเหลวสีเข้ม - 0.5 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ตอบท้องกระทะ (Lower meniscus) หรือตอบตำแหน่งอื่น",
+   "s": 0,
+   "g": "ส่วนที่ 3 การอ่านระดับปริมาตรของเหลวสีเข้ม - 0.5 คะแนน",
+   "sub": true
+  }
+ ]
+}

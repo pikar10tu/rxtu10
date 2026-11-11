@@ -1,0 +1,72 @@
+{
+ "id": "OS-0088",
+ "title": "การซักประวัติจ่ายยาผู้ป่วยในร้านยา GERD and muscle pain",
+ "cat": "Clinic",
+ "group": "การซักประวัติและจ่ายยา",
+ "topic": "GERD and muscle pain",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2559",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "มีผู้ป่วยเข้ามาที่ร้านยาเพื่อขอซื้อยาที่สามารถลดอาการปวดท้องเวลามื้ออาหารได้",
+ "patientHtml": "<p>ผู้ป่วยเป็นโรคหัวใจ มีอาการปวดเข่า และชอบมีอาการปวดท้องเวลามื้ออาหาร</p><p>มียาประจำคือ Aspirin81 ส่วน Naproxen เป็นยาแก้ปวดเข่า ณ ช่วงนี้</p>",
+ "contentHtml": "<p>มีผู้ป่วยเข้ามาที่ร้านยาเพื่อขอซื้อยาที่สามารถลดอาการปวดท้องเวลามื้ออาหารได้ </p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">ได้หลายตัวมาก หนูมีตัวเลือกประมาณนี้นะ รู้สึกว่าถ้าตอบให้อยู่ในวง COX2 inhibitor paracetamol กับพวกยาลดกรดได้ ก็เกือบจะถูกหมดเลย </span></p><ol class=\"ordered-list\"><li><span style=\"font-weight: 700;\">Celecoxib 200 mg. 1*2 pc </span></li><li><span style=\"font-weight: 700;\">Celecoxib 400 mg. 1*1 pc </span></li><li><span style=\"font-weight: 700;\">Celecoxib 200 mg. 1*2 pc + Omeprazole 20 mg. OD </span></li><li><span style=\"font-weight: 700;\">Celecoxib 400 mg. 1*1 pc + Omeprazole 20 mg. OD </span></li><li><span style=\"font-weight: 700;\">Celecoxib 200 mg. 1*2 pc + Aluminium hydroxide + Magnesium hydroxide (Belcid) 20 mL. QID</span></li><li><span style=\"font-weight: 700;\">Celecoxib 400 mg. 1*1 pc + Aluminium hydroxide + Magnesium hydroxide (Belcid) 20 mL. QID</span></li><li><span style=\"font-weight: 700;\">Omeprazole 20 mg. OD </span></li><li><span style=\"font-weight: 700;\">Aluminium hydroxide + Magnesium hydroxide (Belcid) 20 mL. QID</span></li><li><span style=\"font-weight: 700;\">Paracetamol 500 mg.</span></li></ol><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">5.ปี 2559</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 2</span></p><p><span style=\"background-color: rgba(255,255,0, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">ปี 2559 ส่วนที่ไอพยายามเก็บตกให้ครบ (อาจจะ)</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 10</span></p>",
+ "checklist": [
+  {
+   "t": "สอบถามลักษณะอาการโรคที่ผู้ป่วยกำลังเป็น และระดับความรุนแรง",
+   "s": 1,
+   "g": "ให้คำปรึกษาปัญหาการใช้ยาของผู้ป่วย"
+  },
+  {
+   "t": "สอบถามโรคอื่นๆ เช่น โรคประจำตัวที่ผู้ป่วยเป็น ณ ปัจจุบัน",
+   "s": 1,
+   "g": "ให้คำปรึกษาปัญหาการใช้ยาของผู้ป่วย"
+  },
+  {
+   "t": "สอบถามยาที่ผู้ป่วยกำลังใช้รักษาตัวเอง ณ ปัจจุบัน (ถ้าถามทั้งสองตัวซึ่งเป็น ยาโรคประจำตัว กับที่ใช้แก้ปวดเข่า ให้คะแนนเต็มไปเลย ถ้าไม่ครบตัดจุดละคะแนน)",
+   "s": 2,
+   "g": "ให้คำปรึกษาปัญหาการใช้ยาของผู้ป่วย"
+  },
+  {
+   "t": "สามารถอธิบายผู้ป่วยได้ว่า อาการปวดท้องเวลามื้ออาหารเป็นผลข้างเคียงจากการใช้ยาอะไร",
+   "s": 3,
+   "g": "ให้คำปรึกษาปัญหาการใช้ยาของผู้ป่วย"
+  },
+  {
+   "t": "สามารถแนะนำยาแก้ปวดตัวใหม่ให้ผู้ป่วย ที่ลดผลข้างเคียงปวดท้องเวลามื้ออาหารได้",
+   "s": 3,
+   "g": "ให้คำปรึกษาปัญหาการใช้ยาของผู้ป่วย"
+  },
+  {
+   "t": "สอบถามประวัติแพ้ยา/สารเคมี และประวัติการใช้อาหารเสริมของผู้ป่วย",
+   "s": 2,
+   "g": "ให้คำปรึกษาปัญหาการใช้ยาของผู้ป่วย"
+  },
+  {
+   "t": "อธิบายชื่อยา ตัวยาสำคัญ ขนาดของยา และจำนวนเม็ดหรือลักษณะ dosage form ของยาที่จ่าย",
+   "html": "อธิบายชื่อยา ตัวยาสำคัญ ขนาดของยา และจำนวนเม็ด<span style=\"font-weight: 700;\">หรือ</span>ลักษณะ dosage form ของยาที่จ่าย",
+   "s": 1,
+   "g": "แนะนำตัวยาและจ่ายยาให้ผู้ป่วย"
+  },
+  {
+   "t": "อธิบายข้อบ่งใช้ยาตัวใหม่ที่จ่ายได้ถูกต้อง (ถ้าเป็น NSAID ตัวใหม่: ใช้แก้ปวดเข่า ถ้าจ่ายยาโรคกระเพาะ เช่น PPI หรือ aluminium hydroxide: ใช้ลดอาการปวดท้องเวลามื้ออาหาร)",
+   "s": 2,
+   "g": "แนะนำตัวยาและจ่ายยาให้ผู้ป่วย"
+  },
+  {
+   "t": "อธิบายวิธีการทานยา จำนวนเม็ดที่ต้องทาน ปริมาณยาที่ต้องทาน  จำนวนครั้ง จำนวนวัน ได้ถูกต้อง",
+   "html": "อธิบายวิธีการทานยา จำนวนเม็ดที่ต้องทาน ปริมาณยาที่ต้องทาน&nbsp;&nbsp;จำนวนครั้ง จำนวนวัน ได้ถูกต้อง",
+   "s": 3,
+   "g": "แนะนำตัวยาและจ่ายยาให้ผู้ป่วย"
+  },
+  {
+   "t": "อธิบายผลข้างเคียงของยาได้ถูกต้อง",
+   "s": 2,
+   "g": "แนะนำตัวยาและจ่ายยาให้ผู้ป่วย"
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "id": "OS-0102",
+ "title": "จับผิดใบสั่งยา (Prescription Screening)",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "จับผิดใบสั่งยา",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2561",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ซองที่ 1\nซองที่ 2\nซองที่ 3\nซองที่ 4\nซองที่ 5",
+ "patientHtml": "<p>ไม่มีข้อมูลผู้ป่วย</p>",
+ "contentHtml": "<p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>ซองที่ 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div><p>ซองที่ 2 </p><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-4.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-5.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div><p>ซองที่ 3 </p><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-6.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-7.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div><p>ซองที่ 4 </p><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-8.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-9.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div><p>ซองที่ 5 </p><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-10.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:50.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0102-11.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div>",
+ "equipmentHtml": "",
+ "noteHtml": "",
+ "checklist": [
+  {
+   "t": "ซองที่ 1 Betahistine 6 mg             ยาที่จัดผิดเป็นความแรงในซองผิด เป็น 12 mg",
+   "html": "ซองที่ 1 Betahistine 6 mg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ยาที่จัดผิดเป็นความแรงในซองผิด เป็น 12 mg",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ซองที่ 2 Diphenhydramine              ยาที่จัดผิดเป็น Dimenhydinate",
+   "html": "ซองที่ 2 Diphenhydramine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ยาที่จัดผิดเป็น Dimenhydinate",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ซองที่ 3 Amlodipine 10 mg            ยาที่จัดผิดเป็นความแรงในซองผิด เป็น 5 mg",
+   "html": "ซองที่ 3 Amlodipine 10 mg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ยาที่จัดผิดเป็นความแรงในซองผิด เป็น 5 mg",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ซองที่ 4 Hydroclorothiazide          วิธีรับประทานผิด เปลี่ยนจากก่อนนอนให้เป็น เช้า",
+   "html": "ซองที่ 4 Hydroclorothiazide&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;วิธีรับประทานผิด เปลี่ยนจากก่อนนอนให้เป็น เช้า",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ซองที่ 5 ชื่อของผู้ป่วยผิด                แก้ไขฉลากยาหรือเกิดการจ่ายยาผิดคน",
+   "html": "ซองที่ 5 ชื่อของผู้ป่วยผิด&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;แก้ไขฉลากยาหรือเกิดการจ่ายยาผิดคน",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

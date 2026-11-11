@@ -1,0 +1,81 @@
+{
+ "id": "OS-0097",
+ "title": "การส่งมอบยาเทคนิคพิเศษ Suppository",
+ "cat": "Clinic",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "Constipation",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2560",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "แพทย์มีการสั่งจ่ายยาให้ผู้ป่วย ดังรูป\n\nคำสั่ง: จงส่งมอบยาและอธิบายวิธีการใช้ยาดังกล่าว",
+ "patientHtml": "<p>ผู้ป่วยเป็น constipation </p>",
+ "contentHtml": "<p>แพทย์มีการสั่งจ่ายยาให้ผู้ป่วย ดังรูป</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0097-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>คำสั่ง: จงส่งมอบยาและอธิบายวิธีการใช้ยาดังกล่าว</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>ซองยาที่ภายในประกอบไปด้วย Bisacodyl suppositories 7 เม็ด</li></ol>",
+ "noteHtml": "<div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><p><span style=\"font-weight: 700;\">Rx.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ใบสั่งยา&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;18 ก.ค. 69</span></p><p><span style=\"font-weight: 700;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โรงพยาบาลรักษาดี</span></p></th></tr><tr><td><p><span style=\"font-weight: 700;\">ชื่อผู้ป่วย: สมหมาย นัดหมาย&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HN:678/90</span></p><p><span style=\"font-weight: 700;\">เพศ: ชาย&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;อายุ: 45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;น้ำหนัก: 65&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ส่วนสูง: 178</span></p><p><span style=\"font-weight: 700;\">All: NKDA</span></p><p><span style=\"font-weight: 700;\">Dx: Constipation</span></p></td></tr><tr><td><p><span style=\"font-weight: 700;\">Sig.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Medication&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Regimen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Amount</span></p><p><span style=\"font-weight: 700;\">&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bisacodyl Suppositories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 tab OD prn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7 tabs</span></p></td></tr><tr><td><span style=\"font-weight: 700;\">Sign สมปอง (281677) MD</span></td></tr></table></div><p>- การนอนตะแคงชันเข่าช่วยผ่อนคลายกล้ามเนื้อหูรูดทวารหนัก ทำให้สอดยาได้สะดวก</p><p>- ยาระบาย Bisacodyl ออกฤทธิ์กระตุ้นการบีบตัวของลำไส้ใหญ่ภายใน 15-60 นาทีหลังจากสอด จึงต้องค้างยาไว้ให้ได้เวลาก่อนถ่าย</p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">4.ปี 2560 (มีการเปลี่ยนลักษณะเนื้อหาข้อสอบ)</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 14 </span><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700; text-decoration: underline;\">(เปลี่ยนจากเหน็บช่องคลอดเป็นเหน็บทวาร มันคล้ายๆกันแค่เปลี่ยนที่เหน็บ)</span></p>",
+ "checklist": [
+  {
+   "t": "ตรวจสอบความถูกต้องของฉลากและใบสั่งยา",
+   "s": 1,
+   "g": "ตรวจสอบความถูกต้องก่อนส่งมอบยา"
+  },
+  {
+   "t": "ตรวจสอบความถูกต้องของข้อมูลผู้ป่วย (เช่น ชื่อ นามสกุล HN)",
+   "s": 1,
+   "g": "ตรวจสอบความถูกต้องก่อนส่งมอบยา"
+  },
+  {
+   "t": "สอบถามผู้ป่วยเกี่ยวกับการแพ้ยา การใช้ยา อาหารเสริมหรือสมุนไพร",
+   "s": 3,
+   "g": "ตรวจสอบความถูกต้องก่อนส่งมอบยา"
+  },
+  {
+   "t": "บอกข้อมูลยา ตั้งแต่ชื่อการค้า ตัวยาสำคัญ ขนาดยาที่จ่ายและจำนวนเม็ดยาที่จ่ายให้",
+   "s": 2,
+   "g": "การจ่าย/แนะนำตัวยาให้ผู้ป่วย"
+  },
+  {
+   "t": "บอกข้อบ่งใช้ตัวยา ตามที่ระบุในใบสั่งแพทย์",
+   "s": 1,
+   "g": "การจ่าย/แนะนำตัวยาให้ผู้ป่วย"
+  },
+  {
+   "t": "หากรู้สึกอยากถ่ายอุจจาระ ให้อุจจาระให้เรียบร้อยก่อนใช้ยา แล้วล้างมือให้สะอาด",
+   "s": 1,
+   "g": "ขั้นตอนการใช้ยาเหน็บทวาร"
+  },
+  {
+   "t": "ถ้ายาเหน็บนิ่ม ให้แช่ยาในตู้เย็นหรือน้ำเย็นก่อนแกะยาออกจากห่อเพื่อให้ยาแข็งตัวสอดง่ายขึ้น แกะยาออกจากห่อ",
+   "s": 1,
+   "g": "ขั้นตอนการใช้ยาเหน็บทวาร"
+  },
+  {
+   "t": "นอนตะแคง โดยให้ขาล่างเหยียดตรง และงอขาข้างที่อยู่ด้านบนให้หัวเข่าอยู่ใกล้หน้าอก (หรือท่ายืนยกขาขึ้นพาดเก้าอี้ หรือนั่งยอง ๆ)",
+   "s": 2,
+   "g": "ขั้นตอนการใช้ยาเหน็บทวาร"
+  },
+  {
+   "t": "เอามืออ้อมขาไปด้านหลังแล้วสอดยาเหน็บเข้าไปในทวารหนัก โดยให้ด้านที่เรียวกว่าเข้าไปก่อน ใช้นิ้วค่อย ๆ ดันยาเข้ารูทวารหนักจนยาทั้งแท่งอยู่เหนือหูรูดทวารหนัก เพื่อไม่ให้แท่งยาหลุดออกมา",
+   "s": 2,
+   "g": "ขั้นตอนการใช้ยาเหน็บทวาร"
+  },
+  {
+   "t": "นอนในท่าเดิมต่อประมาณ 15 นาที เพื่อให้ยาละลายหมด และล้างมือให้สะอาดหลังเหน็บยาเสร็จ",
+   "s": 1,
+   "g": "ขั้นตอนการใช้ยาเหน็บทวาร"
+  },
+  {
+   "t": "เน้นย้ำ: ในกรณีที่เป็นยาระบายชนิดออกฤทธิ์เร็ว ผู้ป่วยควรนอนในท่าเดิมไม่ต่ำกว่า 15-20 นาที หรือจนกว่าจะทนไม่ได้จึงลุกไปถ่ายอุจจาระ ป้องกันยาหลุดออกมาก่อนออกฤทธิ์",
+   "html": "</span>เน้นย้ำ: ในกรณีที่เป็นยาระบายชนิดออกฤทธิ์เร็ว ผู้ป่วยควรนอนในท่าเดิมไม่ต่ำกว่า 15-20 นาที หรือจนกว่าจะทนไม่ได้จึงลุกไปถ่ายอุจจาระ ป้องกันยาหลุดออกมาก่อนออกฤทธิ์",
+   "s": 2,
+   "g": "ข้อแนะนำเพิ่มเติมสำหรับยาระบายเหน็บทวาร"
+  },
+  {
+   "t": "ห้ามกลืนกินยาเหน็บทวารเด็ดขาด และควรเก็บรักษาในที่เย็นเพื่อป้องกันยาละลายเสื่อมสภาพ",
+   "s": 2,
+   "g": "ข้อแนะนำเพิ่มเติมสำหรับยาระบายเหน็บทวาร"
+  }
+ ]
+}

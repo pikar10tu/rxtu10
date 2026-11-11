@@ -1,0 +1,85 @@
+{
+ "id": "OS-0090",
+ "title": "ซักประวัติและจ่ายยา Drug allergy",
+ "cat": "Clinic",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "Asthma & COPD",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2559",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "มีการมอบหมายให้หาข้อมูลเกี่ยวกับยา etoposide ที่มีข้อบ่งใช้ในการรักษามะเร็ง สิ่งที่ต้องการให้หา มีดังนี้\nการตรวจค่าแลปที่เกี่ยวข้องกับ etoposide\nการผสมยาต้องใช้สารน้ำใด\nความคงตัวของยาเป็นอย่างไร\nคำสั่ง: จงใช้ข้อมูลจากหนังสือที่กำหนดให้ เพื่อหาข้อมูลที่ถูกต้องและใส่คำตอบลงในกระดาษคำตอบ",
+ "patientHtml": "<p>ไม่มี </p>",
+ "contentHtml": "<p>มีการมอบหมายให้หาข้อมูลเกี่ยวกับยา etoposide ที่มีข้อบ่งใช้ในการรักษามะเร็ง สิ่งที่ต้องการให้หา มีดังนี้</p><ol class=\"ordered-list\"><li>การตรวจค่าแลปที่เกี่ยวข้องกับ etoposide</li><li>การผสมยาต้องใช้สารน้ำใด</li><li>ความคงตัวของยาเป็นอย่างไร</li></ol><p>คำสั่ง: จงใช้ข้อมูลจากหนังสือที่กำหนดให้ เพื่อหาข้อมูลที่ถูกต้องและใส่คำตอบลงในกระดาษคำตอบ</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>หนังสือ Drug info</li><li>หนังสือ Remington</li><li>กระดาษคำตอบ</li></ol>",
+ "noteHtml": "<p>ต้องเปิดทั้งตัว Drug info กับ Remington เลย</p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">3.ปี 2559</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 10</span></p>",
+ "checklist": [
+  {
+   "t": "สามารถเขียนข้อมูลที่มอบหมายให้ค้นคว้าจากหนังสือได้ถูกต้อง ถ้าตอบไม่ครบตัดไปจุดละ 1 คะแนน โดยคำตอบที่ถูกต้องของโจทย์แต่ละข้อ มีดังนี้",
+   "html": "สามารถเขียนข้อมูลที่มอบหมายให้ค้นคว้าจากหนังสือได้ถูกต้อง <span style=\"text-decoration: underline;\">ถ้าตอบไม่ครบตัดไปจุดละ 1 คะแนน </span>โดยคำตอบที่ถูกต้องของโจทย์แต่ละข้อ มีดังนี้",
+   "s": 3,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "(ref: Lexicomp Drug Information Handbook with International Trade Names Index 2018-2019 edition) *หา Remington ไม่ได้",
+   "html": "<span style=\"text-decoration: underline;\">(ref: Lexicomp Drug Information Handbook with International Trade Names Index 2018-2019 edition) </span><span style=\"color: rgb(255,0,0); text-decoration: underline;\">*หา Remington ไม่ได้</span><span style=\"text-decoration: underline;\">\n</span>",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ของข้อที่ 1 ค่าแลปที่ต้องตรวจมีดังนี้",
+   "s": 2.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ค่าการทำงานของตับ (bilirubin, ALT, AST)",
+   "html": "<span style=\"font-weight: 700;\">ค่าการทำงานของตับ (bilirubin, ALT, AST)\n</span>",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ค่า albumin",
+   "html": "<span style=\"font-weight: 700;\">&nbsp;&nbsp;ค่า albumin\n</span>",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ค่า CrCl ของไต",
+   "html": "<span style=\"font-weight: 700;\">&nbsp;&nbsp;ค่า CrCl ของไต\n</span>",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ค่าความดันเลือด",
+   "html": "<span style=\"font-weight: 700;\">&nbsp;&nbsp;ค่าความดันเลือด\n</span>",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ค่า CBC",
+   "html": "<span style=\"font-weight: 700;\">ค่า CBC\n</span>",
+   "s": 0.5,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ของข้อที่ 2 สำหรับการผสมตัวยา สารน้ำที่ใช้คือ normal saline หรือ D5W",
+   "html": "ของข้อที่ 2 สำหรับการผสมตัวยา สารน้ำที่ใช้คือ <span style=\"font-weight: 700;\">normal saline หรือ D5W\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ของข้อที่ 3 ความคงตัวของยามีดังนี้ เก็บ vial ในอุณหภูมิ 20-25 องศาเซลเซียส และการเก็บยา ควรใช้ภาชนะแบบแก้วหรือ polyolefin เพื่อลดการเกิด DEHP จาก polysorbate 80 ภายในสารละลายยา Etoposide",
+   "html": "ของข้อที่ 3 ความคงตัวของยามีดังนี้ <span style=\"font-weight: 700;\">เก็บ vial ในอุณหภูมิ 20-25 องศาเซลเซียส และการเก็บยา ควรใช้ภาชนะแบบแก้วหรือ polyolefin เพื่อลดการเกิด DEHP จาก polysorbate 80 ภายในสารละลายยา Etoposide\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

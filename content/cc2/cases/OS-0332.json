@@ -1,0 +1,47 @@
+{
+ "id": "OS-0332",
+ "title": "ointment ผสม (ต่อจาก PDSS21)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "ointment",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียม TA + Salicylic acid ointment ได้อย่างถูกต้อง\nสูตรตำรับ:\nRx Salicylic acid 0.75 g\nTriamcinolone acetonide 0.02 g\nSimple ointment qs 15 g\nคำสั่ง:\nจงเตรียม TA + Salicylic acid ointment จากสูตรที่กำหนดให้",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียม TA + Salicylic acid ointment ได้อย่างถูกต้อง</p><p><span style=\"font-weight: 700;\">สูตรตำรับ:</span></p><ul class=\"bullet-list\"><li>Rx Salicylic acid 0.75 g</li><li>Triamcinolone acetonide 0.02 g</li><li>Simple ointment qs 15 g</li></ul><p><span style=\"font-weight: 700;\">คำสั่ง:</span></p><ol class=\"ordered-list\"><li>จงเตรียม TA + Salicylic acid ointment จากสูตรที่กำหนดให้</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>สารที่ชั่งจากสถานีก่อนหน้า</li><li>Levigating agent: Alcohol, Mineral oil, Purified water, PG</li><li>Slap</li><li>Spatula</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>Levigating agent ที่เหมาะสมควรเลือกเป็น Mineral oil</li></ul>",
+ "checklist": [
+  {
+   "t": "เทผงยาปริมาณน้อย (Triamcinolone acetonide 0.02 g) ลงบน Slab แล้วตามด้วยผงยาปริมาณมาก (Salicylic acid 0.75 g) เพื่อทำ Geometric dilution",
+   "html": "เทผงยาปริมาณน้อย (Triamcinolone acetonide 0.02 g) ลงบน Slab แล้วตามด้วยผงยาปริมาณมาก (Salicylic acid 0.75 g) เพื่อทำ <span style=\"font-weight: 700;\">Geometric dilution</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือก Levigating agent ได้อย่างเหมาะสม",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "หยด Levigating agent ปริมาณพอเหมาะ แล้วใช้ Spatula บดบี้ผงยาจนได้ Smooth paste เนียนละเอียด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "วาง Simple ointment กองไว้ที่มุม Slab แล้วค่อยๆ ดึงมาผสมกับผงยาแบบ Geometric dilution จนเบสหมด",
+   "html": "วาง Simple ointment กองไว้ที่มุม Slab แล้วค่อยๆ ดึงมาผสมกับผงยาแบบ <span style=\"font-weight: 700;\">Geometric dilution</span> จนเบสหมด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "] ผสมปาดเนื้อขี้ผึ้งจนได้เนื้อเนียน สม่ำเสมอ ไม่แยกชั้น ปาดรวบรวมงานบน Slab ให้และสะอาดเรียบร้อยก่อนส่งมอบ",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "id": "OS-0349",
+ "title": "บดและลดขนาด",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "บดและลดขนาด",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงบดและลดขนาด camphor ด้วยวิธี pulverization\nคำสั่ง:\nจงบดและลดขนาด camphor ด้วยวิธี pulverization",
+ "patientHtml": "",
+ "contentHtml": "<p>จงบดและลดขนาด camphor ด้วยวิธี pulverization</p><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>จงบดและลดขนาด camphor ด้วยวิธี pulverization</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>camphor บนกระทงชั่งสารที่เตรียมไว้แล้ว</li><li>โกร่งแก้ว</li><li>โกร่งกระเบื้อง</li><li>Spatula</li><li>ขวดพร้อม dropper 2 ชนิด คือ 95%EtOH และ PEG</li></ol>",
+ "noteHtml": "<p>เทคนิคการเตรียมถูกต้อง</p>",
+ "checklist": [
+  {
+   "t": "เลือกโกร่งถูกต้อง",
+   "s": 3,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือก Et(OH)",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ปั่นอย่างเร็วและกระจายที่สุด",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้ยาเป็นผงแห้งละเอียด",
+   "s": 3,
+   "g": "ทั่วไป"
+  }
+ ]
+}

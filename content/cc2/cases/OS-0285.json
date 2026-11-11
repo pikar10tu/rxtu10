@@ -1,0 +1,204 @@
+{
+ "id": "OS-0285",
+ "title": "Gel Base 1B",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Gel Base",
+ "diff": 2,
+ "source": "Mock Exam 2569 (Week 3) ชุด B",
+ "active": true,
+ "durationMin": 4,
+ "gated": [],
+ "next": null,
+ "scenario": "โจทย์: จงเตรียม Carbopol base ปริมาณ 32 g ในบีกเกอร์ เพื่อนำไปใช้เป็น Suspending agent ในข้อถัดไป\nRx\nCarbopol 940                      \t160 mg\nTriethanolamine (TEA)         \t0.15 g\nPurified water                      \tq.s. to 32.0 g\n(กำหนดให้: Triethanolamine 1 g เท่ากับ 30 หยด)\n\nคำสั่ง:\n1. \tแสดงการคำนวณปริมาณ Carbopol 940 และคำนวณจำนวนหยดของ TEA ลงในกระดาษคำตอบ (ไม่ต้องคิดปริมาณเผื่อสูญเสีย)\n2. \tเตรียม Carbopol base โดยใช้เทคนิคทางเภสัชที่ถูกต้อง และส่งผลิตภัณฑ์ในบีกเกอร์",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"font-weight: 700;\">โจทย์:</span> จงเตรียม Carbopol base ปริมาณ 32 g ในบีกเกอร์ เพื่อนำไปใช้เป็น Suspending agent ในข้อถัดไป</p><p><span style=\"font-weight: 700;\">Rx</span></p><p>Carbopol 940&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;160 mg</p><p>Triethanolamine (TEA)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.15 g</p><p>Purified water&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q.s. to 32.0 g</p><p><span style=\"font-style: italic;\">(กำหนดให้: Triethanolamine 1 g เท่ากับ 30 หยด)</span></p><p><span style=\"font-weight: 700;\"> </span></p><p><span style=\"font-weight: 700;\">คำสั่ง:</span></p><p>1. &nbsp;&nbsp;&nbsp;&nbsp;แสดงการคำนวณปริมาณ Carbopol 940 และคำนวณจำนวนหยดของ TEA ลงในกระดาษคำตอบ (ไม่ต้องคิดปริมาณเผื่อสูญเสีย)</p><p>2. &nbsp;&nbsp;&nbsp;&nbsp;เตรียม Carbopol base โดยใช้เทคนิคทางเภสัชที่ถูกต้อง และส่งผลิตภัณฑ์ในบีกเกอร์</p>",
+ "equipmentHtml": "<p><span style=\"font-weight: 700;\">สารเคมีที่มีในสถานี</span></p><p>1. &nbsp;&nbsp;&nbsp;&nbsp;ผง Carbopol 940 (จัดเตรียมไว้ให้)</p><p>2. &nbsp;&nbsp;&nbsp;&nbsp;Triethanolamine</p><p>3. &nbsp;&nbsp;&nbsp;&nbsp;Purified water</p><p><span style=\"font-weight: 700;\">อุปกรณ์ที่มีในสถานี</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Beaker ขนาด 50 และ 100 mL</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cylinder ขนาด 25 และ 50 mL</p><p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;แท่งแก้วคนสาร</p><p>4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ช้อนตักสาร</p><p>5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dropper</p><p>6.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;กระดาษชั่งสาร (เตรียมมาเอง)</p><p>7.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เครื่องชั่ง 2 ตำแหน่ง</p><p><span style=\"font-weight: 700;\">ระยะเวลา:</span> 4 นาที</p>",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">1.</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">เฉลยการคำนวณ (32 g)</span></p><ul class=\"bullet-list\"><li>Carbopol 940: 160 mg x <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1 g</span><span class=\"equation-denom\">1,000 mg</span></span></span>&nbsp;&nbsp;= 0.16 g</li><li>TEA: 0.15 g × 30 หยด/g = 4.5 หยด (≈ 5 หยด)</li><li>Purified water: 32 – 0.16 – 0.15 = 31.69 g</li><li>รวม: 0.16 + 0.15 + 31.69 = 32.00 g</li></ul><p><span style=\"font-weight: 700;\">2.</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">เกณฑ์การตรวจน้ำหนัก</span></p><ul class=\"bullet-list\"><li>น้ำ: 31.69 g (±5% = 30.11–33.28 g)</li></ul><p><span style=\"font-weight: 700;\">3.</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">Technical Points</span></p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ลำดับสำคัญ:</span> กระจาย Carbopol ในน้ำให้ทั่วก่อน แล้วจึงหยด TEA เมื่อผงกระจายตัวดีแล้วเท่านั้น (TEA ทำหน้าที่ neutralize ให้สายพอลิเมอร์คลายตัวและเกิดโครงสร้างเจล ถ้าเติมก่อนผงกระจายตัว ผงจะจับเป็นก้อนและกระจายไม่ได้)</li><li><span style=\"font-weight: 700;\">การคน:</span> ใช้แท่งแก้วคนช้า ๆ ไม่ตีแรง เพราะจะเกิดฟองอากาศติดอยู่ในเจลและเอาออกยาก</li><li><span style=\"font-weight: 700;\">การหยด TEA:</span> หยดทีละหยดพร้อมคน เมื่อเจลเริ่มก่อตัวจะใสและข้นขึ้นทันที</li><li><span style=\"font-weight: 700;\">การชั่งน้ำ:</span> ใช้บีกเกอร์ 50 mL ชั่งโดยตรง ห้ามตวงด้วย Cylinder เพราะค่าที่ต้องการอยู่ในรูปน้ำหนัก (g)</li><li><span style=\"font-weight: 700;\">ค่า Drop:</span> TEA 1 g = 30 หยด ตามที่โจทย์กำหนด ต้องแสดงลำดับการคำนวณ (% → g → หยด) ในกระดาษคำตอบ</li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณ Carbopol 940",
+   "html": "<span style=\"font-weight: 700;\">การคำนวณปริมาณ Carbopol 940\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คำนวณปริมาณ Carbopol ได้ถูกต้อง คือ 160 mg x 1 g1,000 mg = 0.16 g",
+   "html": "คำนวณปริมาณ Carbopol ได้ถูกต้อง คือ 160 mg x <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1 g</span><span class=\"equation-denom\">1,000 mg</span></span></span> = 0.16 g",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดพลาด หรือไม่แสดงวิธีทำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การคำนวณจำนวนหยดของ TEA",
+   "html": "<span style=\"font-weight: 700;\">การคำนวณจำนวนหยดของ TEA\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คำนวณจำนวนหยด TEA ได้ถูกต้อง คือ 0.15 g x 30 หยด/g = 4.5 หยด (≈ 5 หยด)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดพลาด หรือไม่แสดงวิธีทำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การคำนวณปริมาณน้ำ",
+   "html": "<span style=\"font-weight: 700;\">การคำนวณปริมาณน้ำ\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คำนวณปริมาณน้ำถูกต้อง คือ 32 – 0.16 – 0.15 = 31.69 g",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดพลาด หรือไม่แสดงวิธีทำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การอ่านฉลากสารเคมี (3-Checks Rule)",
+   "html": "<span style=\"font-weight: 700;\">การอ่านฉลากสารเคมี (3-Checks Rule)\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากกระปุก/ขวดของ Carbopol และ TEA ครบ 3 ครั้ง (ก่อนหยิบ, ก่อนตัก/ริน, หลังใช้เสร็จก่อนปิดฝา) และวางฝาหงายบนพื้นสะอาดเสมอ",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "อ่านฉลากไม่ครบ หรือวางฝาคว่ำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเตรียมและปรับสมดุลเครื่องชั่ง",
+   "html": "<span style=\"font-weight: 700;\">การเตรียมและปรับสมดุลเครื่องชั่ง\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เช็คลูกน้ำ วางบีกเกอร์บนแท่นเครื่องชั่ง ปิดตู้ลม (ถ้ามี) แล้วกด Tare เซ็ตค่าเป็น\u000b 0.00 g ก่อนเทน้ำลง",
+   "html": "เช็คลูกน้ำ วางบีกเกอร์บนแท่นเครื่องชั่ง ปิดตู้ลม (ถ้ามี) แล้วกด Tare เซ็ตค่าเป็น<br> 0.00 g ก่อนเทน้ำลง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่กด Tare หรืออ่านค่าน้ำหนักโดยไม่หักน้ำหนักภาชนะ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การชั่งน้ำ",
+   "html": "<span style=\"font-weight: 700;\">การชั่งน้ำ\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้บีกเกอร์ 50 mL Tare แล้วชั่งน้ำให้ได้ 31.69 g (ยอมรับ ±5% คือ 30.11–33.28 g)",
+   "html": "ใช้บีกเกอร์ <span style=\"font-weight: 700;\">50 mL</span> Tare แล้วชั่งน้ำให้ได้ <span style=\"font-weight: 700;\">31.69 g </span>(ยอมรับ ±5% คือ 30.11–33.28 g)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ใช้ Cylinder ตวงแทนการชั่ง หรือน้ำหนักเกินช่วง",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการกระจาย Carbopol 940",
+   "html": "<span style=\"font-weight: 700;\">เทคนิคการกระจาย Carbopol 940\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ทำอย่างใดอย่างหนึ่ง\n  • กระจายผง Carbopol 940 ด้วยน้ำปริมาณเล็กน้อยก่อน จากนั้นค่อย ๆ เติมน้ำที่เหลือทีละส่วน\n  • ค่อย ๆ โปรยผงลงบนผิวน้ำทั้งหมด พร้อมคนเบา ๆ ให้ผงกระจายตัว ไม่เป็นก้อน",
+   "html": "ทำอย่างใดอย่างหนึ่ง<ul class=\"checklist-sub-details\"><li>กระจายผง Carbopol 940 ด้วยน้ำปริมาณเล็กน้อยก่อน จากนั้นค่อย ๆ เติมน้ำที่เหลือทีละส่วน</li><li>ค่อย ๆ โปรยผงลงบนผิวน้ำทั้งหมด พร้อมคนเบา ๆ ให้ผงกระจายตัว ไม่เป็นก้อน</li></ul>",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เทผงรวดเดียวจนเป็นก้อน หรือเติม TEA ก่อนที่ Carbopol จะกระจายตัวในน้ำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การหยด TEA",
+   "html": "<span style=\"font-weight: 700;\">การหยด TEA\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้ Dropper ค่อย ๆ หยดตามจำนวนที่คำนวณ (≈ 5 หยด) พร้อมคนผสมช้า ๆ ตลอดเวลา เพื่อไม่ให้เกิดฟอง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "หยดรวดเดียวหรือเร็วเกินไป หรือหยุดคนระหว่างหยด",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การส่งผลิตภัณฑ์",
+   "html": "<span style=\"font-weight: 700;\">การส่งผลิตภัณฑ์\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้เจลใส เนียน ไม่มีก้อนผงค้าง ฟองน้อย และส่งในบีกเกอร์",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เจลขุ่น มีก้อนผง หรือมีฟองมาก",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ความสะอาด",
+   "html": "<span style=\"font-weight: 700;\">ความสะอาด\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เช็ดทำความสะอาดรอบเครื่องชั่ง ปิดฝาขวดสารเคมีเรียบร้อย โต๊ะปฏิบัติการสะอาด",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "บริเวณโต๊ะเปื้อนสารเคมี หรือเปิดฝาสารทิ้งไว้",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+{
+ "id": "OS-0125",
+ "title": "จับผิดใบสั่งยา",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "จับผิดใบสั่งยา",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2566",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จับผิดใบสั่งยา\nSimvastatin 10 mg  1x1 hs\nGemfibrozil 600 mg 1x2 po pc\nMetformin 500 mg 1x2 pc",
+ "patientHtml": "<p>ตามสถานการณ์</p>",
+ "contentHtml": "<p>จับผิดใบสั่งยา</p><ol class=\"ordered-list\"><li>Simvastatin 10 mg&nbsp;&nbsp;1x1 hs</li><li>Gemfibrozil 600 mg 1x2 po pc</li><li>Metformin 500 mg 1x2 pc</li></ol>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">ปี 2566</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานีที่ 15</span></p>",
+ "checklist": [
+  {
+   "t": "ดูชื่อคนป่วยกับใบสั่งยาว่าตรงกันหรือไม่",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ดูจำนวนเม็ดยากับวันนัดพบแพทย์ครั้งหน้า",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ดูจำนวนยาในซองกับใบสั่งยา",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ดูวิธีการกินของยา เช่น simvastatin 1x1 hs ถูกต้องหรือไม่",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อธิบาย drug interaction Gemfibrozil กับ Simvastatin เนื่องจาก Gemfibrozil อาจเพิ่มความเสี่ยงต่อการเกิดพิษต่อกล้ามเนื้อจาก Simvastatin เช่น ภาวะกล้ามเนื้อสลายอย่างรุนแรง (rhabdomyolysis) นอกจากนี้ Gemfibrozil อาจทำให้ความเข้มข้นของ Simvastatin ในเลือดเพิ่มสูงขึ้น รวมถึง ความเข้มข้นของสารเมแทบอไลต์ที่ออกฤทธิ์ของ Simvastatin (simvastatin acid) ก็อาจเพิ่มขึ้นเช่นกัน",
+   "s": 3,
+   "g": "ทั่วไป"
+  }
+ ]
+}

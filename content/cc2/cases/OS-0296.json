@@ -1,0 +1,50 @@
+{
+ "id": "OS-0296",
+ "title": "Alcohol Dilution: 70% v/v Alcohol from 95% v/v Alcohol",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "การเจือจางแอลกอฮอล์ (Alcohol Dilution), การคำนวณ C1V1=C2V2, การเลือกกระบอกตวง, การอ่าน Meniscus ที่ระดับสายตา, การอ่านฉลาก 3 ครั้ง",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Product Week 1 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงคำนวณและเตรียมสารละลาย 70  v/v Alcohol ปริมาณ 50mL จาก 95 v/v Alcohol ด้วยเทคนิคทางเภสัชกรรมที่เหมาะสม แสดงวิธีคำนวณลงในกระดาษคำตอบ และส่งมอบผลิตภัณฑ์ในภาชนะที่กำหนด (เวลาปฏิบัติการ 4 นาที)",
+ "patientHtml": "",
+ "contentHtml": "<p>จงคำนวณและเตรียมสารละลาย 70&nbsp;&nbsp;v/v Alcohol ปริมาณ <span class=\"doc-equation\">50mL</span> จาก 95 v/v Alcohol ด้วยเทคนิคทางเภสัชกรรมที่เหมาะสม แสดงวิธีคำนวณลงในกระดาษคำตอบ และส่งมอบผลิตภัณฑ์ในภาชนะที่กำหนด (เวลาปฏิบัติการ 4 นาที)</p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">สารเคมีที่มีในสถานี:</span><ul class=\"bullet-list\"><li>95%v/v Alcohol</li><li>Purified water</li></ul></li><li><span style=\"font-weight: 700;\">อุปกรณ์ที่มีในสถานี:</span><ul class=\"bullet-list\"><li>กระบอกตวง (Graduated cylinder) ขนาด <span class=\"doc-equation\">10,25,50</span> และ <span class=\"doc-equation\">100mL</span></li><li>บีกเกอร์ (Beaker) ขนาด <span class=\"doc-equation\">50</span> และ <span class=\"doc-equation\">100mL</span></li><li>แท่งแก้วคน (Stirring rod)</li><li>ปากกาเขียนแก้ว / Label sticker</li></ul></li></ul><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0296-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0296-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0296-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:25.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0296-4.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">เฉลยการคำนวณ:</span><ul class=\"bullet-list\"><li>สูตรคำนวณ: <span class=\"doc-equation\">C<sub>1</sub>V<sub>1</sub>=C<sub>2</sub>V<sub>2</sub></span></li><li>แทนค่า: (95%)(V1) = (70%)(50 mL)</li><li><span class=\"doc-equation\">V<sub>1</sub>=<span class=\"equation-fraction\"><span class=\"equation-num\">3500</span><span class=\"equation-denom\">95</span></span>=36.842mL&asymp;36.8mL</span></li><li>ดังนั้น ต้องตวง 95% v/v Alcohol ปริมาตร <span class=\"doc-equation\">36.8mL</span> แล้วปรับปริมาตรด้วย Purified water ให้ครบ <span class=\"doc-equation\">50mL</span></li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณประมาณสารที่ใช้ทั้งหมด",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลาก 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกอุปกรณ์การเตรียม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการตรวงของเหลว",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการปรับปริมาตร",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาดและอื่น ๆ",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "id": "OS-0095",
+ "title": "แปลผล lab Thyroid function test",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Thyroid function test",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2560",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "มีผล lab มาให้เป็นผล Thyroid function test ประกอบด้วย TSH ต่ำ, Free T3 สูง, Free T4 สูง พร้อมช่วงของค่าปกติ ให้เขียนอธิบายในกระดาษคำตอบเพื่อให้ผู้ป่วยเข้าใจ",
+ "patientHtml": "<p>ผล Thyroid function test ประกอบด้วย TSH ต่ำ, Free T3 สูง, Free T4 สูง และช่วงค่าปกติ&nbsp;&nbsp;&nbsp;</p>",
+ "contentHtml": "<p>มีผล lab มาให้เป็นผล Thyroid function test ประกอบด้วย TSH ต่ำ, Free T3 สูง, Free T4 สูง พร้อมช่วงของค่าปกติ ให้เขียนอธิบายในกระดาษคำตอบเพื่อให้ผู้ป่วยเข้าใจ</p>",
+ "equipmentHtml": "<p>กระดาษคำตอบพร้อมโจทย์ย่อย 4 ข้อ ดังนี้</p><ol class=\"ordered-list\"><li>TSH ย่อมาจาก …… มีหน้าที่อะไร ……</li><li>เพราะเหตุใด T3 และ T4 จึงสูง แล้ว TSH ต่ำ จงอธิบาย</li><li>ผู้ป่่วยรายนี้มีภาวะอะไร</li><li>กรณี T4, T3 และ TSH สูงทั้งหมด น่าจะมีสาเหตุจากอะไร</li></ol>",
+ "noteHtml": "<p>คำตอบ</p><ol class=\"ordered-list\"><li>TSH ย่อมาจาก <span style=\"color: rgb(56,118,29);\">Thyroid-Stimulating Hormone เป็นฮอร์โมนที่สร้างจากและหลั่งจากต่อมใต้สมองส่วนหน้า (anterior pituitary gland)</span> มีหน้าที่<span style=\"color: rgb(56,118,29);\">กระตุ้นต่อมไทรอยด์ให้สร้างและหลั่งฮอร์โมนไทรอยด์ ได้แก่ Thyroxine (T4) และ Triiodothyronine (T3)&nbsp;&nbsp;ซึ่งมีความสำคัญต่อการควบคุมการเผาผลาญและการใช้พลังงานของร่างกาย</span></li><li>เพราะเหตุใด T3 และ T4 จึงสูง แล้ว TSH ต่ำ จงอธิบาย:&nbsp;&nbsp;<span style=\"color: rgb(56,118,29);\">เมื่อระดับฮอร์โมนไทรอยด์ T3 และ T4 ในเลือดสูงขึ้น ร่างกายจะมีกลไกควบคุมแบบย้อนกลับ (negative feedback) โดยส่งสัญาณไปยังต่อมใต้สมองส่วนหน้าให้ลดการสร้างและการหลั่ง TSH ลง เพื่อลดการกระตุ้นต่อมไทรอยด์ </span></li><li>ผู้ป่วยรายนี้มีภาวะอะไร: <span style=\"color: rgb(56,118,29);\">ภาวะไทรอยด์เป็นพิษ หรือภาวะต่อมไทรอยด์ทำงานมากเกิน (Hyperthyroidism)</span></li><li>กรณี T4, T3 และ TSH สูงทั้งหมด น่าจะมีสาเหตุจากอะไร: <span style=\"color: rgb(56,118,29);\">อาจเกิดความผิดปกติของต่อมใต้สมองที่ทำให้มีการสร้างและหลั่ง TSH มากเกินไป ส่งผลให้ TSH ไปกระตุ้นต่อมไทรอยด์ให้สร้างและหลั่ง T3 และ T4 เพิ่มขึ้น จึงทำให้ระดับ TSH, T3 และ T4 สูงพร้อมกัน </span></li></ol><p>อ้างอิง : <a href=\"https://my.clevelandclinic.org/health/articles/23524-thyroid-stimulating-hormone-tsh-levels?_x_tr_hist=true\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: var(--primary); text-decoration: underline;\"><span style=\"color: rgb(17,85,204); text-decoration: underline;\">https://my.clevelandclinic.org/health/articles/23524-thyroid-stimulating-hormone-tsh-levels?_x_tr_hist=true</span></a></p><p><a href=\"https://ada.com/thyroid/thyroid-stimulating-hormone-tsh/?_x_tr_sl=en&amp;_x_tr_tl=th&amp;_x_tr_hl=th&amp;_x_tr_pto=sge\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: var(--primary); text-decoration: underline;\"><span style=\"color: rgb(17,85,204); text-decoration: underline;\">https://ada.com/thyroid/thyroid-stimulating-hormone-tsh/?_x_tr_sl=en&amp;_x_tr_tl=th&amp;_x_tr_hl=th&amp;_x_tr_pto=sge</span></a></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px; font-weight: 700;\">สถานี 11</span></p>",
+ "checklist": [
+  {
+   "t": "บอกชื่อเต็ม TSH ถูกต้อง (Thyroid Stimulating Hormones)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อธิบายหน้าที่หลักในการควบคุมการสร้าง/หลั่งฮอร์โมนไทรอยด์ (T3, T4) ได้ครบถ้วน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อธิบายเชื่อมโยงได้ชัดเจนว่า Free T3, Free T4 ที่สูงในกระแสเลือดเกี่ยวข้องกับ TSH ต่ำอย่างไร",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "สามารถะบุได้ว่าผู้ป่วยมีภาวะไทรอยด์เป็นพิษ หรือภาวะต่อมไทรอยด์ทำงานมากเกิน (Hyperthyroidism) และอาจจะมีการขยายความอาการทางคลินิกเชื่อมโยงกับผล lab ของผู้ป่วย",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "สามารถระบุสาเหตุในกรณีที่ T4, T3 และ TSH สูงทั้งหมดได้",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้คำที่เข้าใจง่าย เห็นภาพชัดเจน ไม่ใช้คำศัพท์ทางการแพทย์โดๆ โดยไม่มีคำอธิบาย",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

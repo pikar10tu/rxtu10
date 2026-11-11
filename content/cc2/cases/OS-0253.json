@@ -1,0 +1,310 @@
+{
+ "id": "OS-0253",
+ "title": "Oral Solution Preparation: Potassium Chloride Oral Solution & Dropper Calibration",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "การเตรียมยาน้ำใส (Oral Solution), Working Formula & Approximate Volume, เทคนิค Dropper Calibration, การเขียนฉลากยาและ Beyond-Use Date (BUD)",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 2",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "กำหนดสูตรตำรับ Potassium Chloride Oral Solution ดังนี้\nRx 1\nPotassium chloride 5 g\n70% Sorbitol 30 mL\nMethylparaben 0.1 g\nPropylparaben 0.01 g\nPurified water q.s. 100 mL\nM.ft. Oral solution 50 mL\n(ข้อมูลเพิ่มเติม: Paraben concentration = Methylparaben 10% w/v + Propylparaben 1% w/v in propylene glycol, KCl ต้องบดให้ละเอียดก่อนชั่ง)\nจงปฏิบัติตามคำสั่งต่อไปนี้ (เวลาปฏิบัติการรวม 8 นาที แบ่งเป็นข้อ 1.1 และ 1.2 ข้อละ 4 นาที):\nข้อ 1.1 (4 นาที): คำนวณปริมาณ Working Formula (W.F.), Approximate Volume (App. Vol.) ของสารในสูตรตำรับ และชั่งผงยา KCl ด้วยเทคนิคทางเภสัชกรรมที่ดี พร้อมทั้งทำการสอบเทียบหลอดหยด (Dropper Calibration) เพื่อคำนวณจำนวนหยดของ Paraben concentration ที่ต้องใช้\nข้อ 1.2 (4 นาที): เตรียมตำรับยาน้ำใสนี้ด้วยเทคนิคทางเภสัชกรรมที่ดี ใส่บีกเกอร์ส่งกรรมการผู้คุมสอบ และเขียนฉลากยาให้ถูกต้องสมบูรณ์",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีเตรียมยา / Product ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>กำหนดสูตรตำรับ Potassium Chloride Oral Solution ดังนี้</p><p><span style=\"font-weight: 700;\">Rx 1</span></p><ul class=\"bullet-list\"><li>Potassium chloride 5 g</li><li>70% Sorbitol 30 mL</li><li>Methylparaben 0.1 g</li><li>Propylparaben 0.01 g</li><li>Purified water q.s. 100 mL</li><li>M.ft. Oral solution 50 mL</li></ul><p><span style=\"font-style: italic;\">(ข้อมูลเพิ่มเติม: Paraben concentration = Methylparaben 10% w/v + Propylparaben 1% w/v in propylene glycol, KCl ต้องบดให้ละเอียดก่อนชั่ง)</span></p><p>จงปฏิบัติตามคำสั่งต่อไปนี้ (เวลาปฏิบัติการรวม 8 นาที แบ่งเป็นข้อ 1.1 และ 1.2 ข้อละ 4 นาที):</p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ข้อ 1.1 (4 นาที):</span> คำนวณปริมาณ Working Formula (W.F.), Approximate Volume (App. Vol.) ของสารในสูตรตำรับ และชั่งผงยา KCl ด้วยเทคนิคทางเภสัชกรรมที่ดี พร้อมทั้งทำการสอบเทียบหลอดหยด (Dropper Calibration) เพื่อคำนวณจำนวนหยดของ Paraben concentration ที่ต้องใช้</li><li><span style=\"font-weight: 700;\">ข้อ 1.2 (4 นาที):</span> เตรียมตำรับยาน้ำใสนี้ด้วยเทคนิคทางเภสัชกรรมที่ดี ใส่บีกเกอร์ส่งกรรมการผู้คุมสอบ และเขียนฉลากยาให้ถูกต้องสมบูรณ์</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>ผ้าปูพลาสติก</li><li>เครื่องคิดเลข, กระดาษทด และปากกา</li><li>เครื่องชั่งไฟฟ้า 2 ตำแหน่ง พร้อมปุ่ม Tare</li><li>กระดาษชั่งสาร (กระดาษธรรมดา) และช้อนเขาตักสาร</li><li>โกร่งกระเบื้อง/ลูกโกร่ง และ โกร่งแก้ว/ลูกโกร่ง</li><li>กระบอกตวง (Graduated cylinder) ขนาด 10 mL, 25 mL, 50 mL, 100 mL</li><li>บีกเกอร์ (Beaker) ขนาด 50 mL, 100 mL, 150 mL, 250 mL และบีกเกอร์ Waste ขนาด 1,000 mL</li><li>แท่งแก้วคน (Stirring rod) และ หลอดหยดพร้อมจุกยาง (Dropper)</li><li>กระดาษฉลากยาสีขาว/น้ำเงิน (สำหรับยารับประทาน)</li><li>สารเคมี: Potassium chloride (บดก่อนชั่ง), 70% Sorbitol solution, Paraben concentration, Purified water</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณ Working Formula (เตรียม 50 mL จากสูตรหลัก 100 mL </span><span class=\"doc-equation\">&rarr;</span><span style=\"font-weight: 700;\"> ตัวคูณคือ 0.5):</span><ul class=\"bullet-list\"><li><span class=\"doc-equation\">Potassiumchloride=5&times;0.5=2.5g</span></li><li>70 % Sorbitol = 30 x 0.5 = 15 mL</li><li><span class=\"doc-equation\">Parabenconcentration:</span> ตำรับต้องการ Methylparaben 0.05 g และ Propylparaben 0.005 g<ul class=\"bullet-list\"><li>เนื่องจาก Paraben conc. มี Methylparaben 10% w/v (<span class=\"doc-equation\">10g/100mL=0.1g/mL</span>)</li><li>ปริมาตรที่ต้องใช้ = <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">0.05g</span><span class=\"equation-denom\">0.1g/mL</span></span>=0.5mL</span></li></ul></li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณ Approximate Volume (App. Vol.):</span><ul class=\"bullet-list\"><li>ปริมาตรรวม = 50 mL</li><li>ปริมาตรของสารอื่นๆ: KCl 2.5 g คิดเป็น <span class=\"doc-equation\">1.25mL</span> (ถือว่า <span class=\"doc-equation\">2g&asymp;1mL</span>), 70% Sorbitol = <span class=\"doc-equation\">15mL</span>, Paraben conc. = <span class=\"doc-equation\">0.5mL</span></li><li>ปริมาตรน้ำที่เป็นตัวทำละลาย (App. Vol.) = <span class=\"doc-equation\">50-(1.25+15+0.5)=33.25mL</span></li><li>ปริมาณน้ำ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span>App.Vol.&asymp;25mL</span> (ใช้ละลายตัวยาขั้นแรก), ส่วนที่เหลือ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span>App.Vol.&asymp;8.25mL</span> (ใช้ Rinse ปรับปริมาตร)</li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณ Dropper Calibration:</span><ul class=\"bullet-list\"><li>นำหลอดหยดมาหยดน้ำลงกระบอกตวง 10 mL จนครบปริมาตร 2 mL แล้วนับจำนวนหยด (<span class=\"doc-equation\">N</span> หยด)</li><li>ปริมาตร Paraben conc. ที่ต้องการคือ 0.5 mL</li><li>จำนวนหยดที่ต้องใช้ = <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">Nหยด</span><span class=\"equation-denom\">2mL</span></span>&times;0.5mL=<span class=\"equation-fraction\"><span class=\"equation-num\">N</span><span class=\"equation-denom\">4</span></span>หยด</span> (หากอิงตามโจทย์ระบุ <span class=\"doc-equation\">2mL=20หยด</span> จะคำนวณได้เท่ากับ <span class=\"doc-equation\">5หยด</span>)</li></ul></li><li><span style=\"font-weight: 700;\">เกณฑ์วันหมดอายุ (Beyond-Use Date - BUD):</span><ul class=\"bullet-list\"><li>ตำรับนี้มี Paraben concentration เป็นสารกันเสีย จัดเป็น <span style=\"font-weight: 700;\">Preserved aqueous dosage form</span></li><li>กำหนด BUD <span style=\"font-weight: 700;\">ไม่เกิน 35 วัน</span> นับจากวันที่เตรียม และเก็บที่อุณหภูมิห้องควบคุม (25 C)หรือในตู้เย็น (2-8 c)</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณ Working Formula และ Approximate Volume",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาณ Working Formula ของสารทุกตัว และ App. Vol. ของตัวทำละลายถูกต้องครบถ้วน",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณค่า Working Formula หรือ App. Vol. ผิดพลาด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเตรียมกระทงชั่งสาร",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "เลือกใช้กระดาษธรรมดา พร้อมเขียนชื่อสาร \"KCl\" และน้ำหนักที่ต้องการ \"2.5 g\" บนกระดาษ",
+   "html": "เลือกใช้กระดาษธรรมดา พร้อมเขียนชื่อสาร &quot;KCl&quot; และน้ำหนักที่ต้องการ &quot;2.5 g&quot; บนกระดาษ",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่เขียนชื่อสาร หรือไม่เขียนน้ำหนัก หรือเลือกใช้ภาชนะไม่ถูกต้อง",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การอ่านฉลากสารและการเปิดฝาขวด",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "อ่านฉลากสาร KCl ครบ 3 ครั้ง (ก่อนหยิบ, ก่อนชั่ง, หลังชั่ง) และวางหงายฝาขวดสารเสมอ",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "อ่านฉลากไม่ครบถ้วน หรือไม่วางฝาหงาย",
+   "s": 0.5,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่อ่านฉลากเลย",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การปรับสมดุลเครื่องชั่ง",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "ปรับระดับฟองน้ำและกดปุ่ม Tare ปรับน้ำหนักเครื่องชั่งให้เป็น 0.00 g ก่อนทำการชั่ง",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ปรับสมดุล หรือไม่กด Tare ก่อนชั่ง",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเลือกอุปกรณ์ตวงสำหรับทำ Dropper Calibration",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "เลือกใช้กระบอกตวง (Graduated cylinder) ขนาด 10 mL",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ใช้ภาชนะขนาดอื่น",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ท่าทางและเทคนิคการจับกระบอกตวงขณะสอบเทียบหลอดหยด",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "ถือกระบอกตวงด้วยมือข้างที่ไม่ถนัด ใช้นิ้วก้อยและนิ้วนางรองรับที่ฐาน ประคองด้วยนิ้วชี้และนิ้วกลาง ใช้นิ้วโป้งชี้ที่ขีด 2 mL และอ่านปริมาตรที่ระดับสายตา",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ท่าทางการจับหรือการอ่านระดับสายตาไม่ถูกต้องบางส่วน",
+   "s": 0.5,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "วางกระบอกตวงบนโต๊ะขณะตวง หรือไม่อ่านที่ระดับสายตา",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการหยดสารด้วย Dropper",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "ถือหลอดหยดในแนวตั้งตรง (Vertical) ตลอดเวลา ปลายหลอดไม่ชนขอบกระบอกตวง ไม่เกิดฟองอากาศ และนับจำนวนหยดจนได้ปริมาตร 2 mL ครบถ้วน",
+   "s": 1,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "หลอดหยดเอียง หรือปลายแตะโดนขอบ หรือมีฟองอากาศ",
+   "s": 0.5,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้หยดจนครบ 2 mL",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การคำนวณจำนวนหยด Paraben concentration ที่ต้องใช้",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน"
+  },
+  {
+   "t": "คำนวณจำนวนหยดจากผล Calibration เทียบกับปริมาตร 0.5 mL ได้ถูกต้อง",
+   "s": 2,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณจำนวนหยดผิดพลาด",
+   "s": 0,
+   "g": "ส่วนที่ 1 การคำนวณ การชั่งสาร และ Dropper Calibration - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวงของเหลวหนืด (70% Sorbitol Solution)",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน"
+  },
+  {
+   "t": "ตวงสารละลาย 70% Sorbitol ปริมาตร 15 mL โดยรินลงตรงกลางกระบอกตวง และรอ Draining time ให้ของเหลวไหลลงจนหมด",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "รินโดนขอบกระบอกตวง",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่รอ Draining time",
+   "s": 0.5,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เทคนิคการตวงผิดพลาดทั้งหมด",
+   "s": 0,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การตวง Purified water ส่วนเริ่มต้น",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน"
+  },
+  {
+   "t": "ตวงน้ำประมาณ 34 ของ App. Vol. (25 mL) โดยเลือกใช้ Graduated cylinder ขนาด 25 mL ได้ถูกต้อง",
+   "html": "ตวงน้ำประมาณ <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">3</span><span class=\"equation-denom\">4</span></span></span> ของ App. Vol. (25 mL) โดยเลือกใช้ Graduated cylinder ขนาด 25 mL ได้ถูกต้อง",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เลือกใช้ขนาดกระบอกตวงไม่ถูกต้อง หรือไม่ใช้กระบอกตวง",
+   "s": 0,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมสาร (Order of Mixing)",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน"
+  },
+  {
+   "t": "ลำดับถูกต้องสมบูรณ์และสารละลายใสไม่มีตะกอน:\n  • ละลาย KCl 2.5 g ในน้ำ 25 mL โดยใช้แท่งแก้วคนจนละลายหมด\n  • เติม 70% Sorbitol solution 15 mL ลงไปผสมและคนให้เข้ากัน\n  • ค่อยๆ เติม Paraben conc. ตามจำนวนหยดที่คำนวณได้ พร้อมคนให้เข้ากันตลอด",
+   "html": "ลำดับถูกต้องสมบูรณ์และสารละลายใสไม่มีตะกอน:<ul class=\"checklist-sub-details\"><li>ละลาย KCl 2.5 g ในน้ำ 25 mL โดยใช้แท่งแก้วคนจนละลายหมด</li><li>เติม 70% Sorbitol solution 15 mL ลงไปผสมและคนให้เข้ากัน</li><li>ค่อยๆ เติม Paraben conc. ตามจำนวนหยดที่คำนวณได้ พร้อมคนให้เข้ากันตลอด</li></ul>",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับถูกแต่ไม่ใช้ Stirring rod ช่วยคน หรือยังมีผงยาละลายไม่หมด",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมผิดขั้นตอน",
+   "s": 0,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การปรับปริมาตรและการ Rinse",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน"
+  },
+  {
+   "t": "เทสารละลายลงในกระบอกตวงขนาด 50 mL แล้วใช้น้ำส่วนที่เหลือ (14 App. Vol.) Rinse บีกเกอร์ แล้วเทปรับปริมาตรจนครบ 50 mL พอดี",
+   "html": "เทสารละลายลงในกระบอกตวงขนาด 50 mL แล้วใช้น้ำส่วนที่เหลือ (<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">4</span></span></span> App. Vol.) Rinse บีกเกอร์ แล้วเทปรับปริมาตรจนครบ 50 mL พอดี",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "อ่านปริมาตรผิด ปริมาตรขาด/เกิน หรือไม่ทำ Rinse บีกเกอร์",
+   "s": 0,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การส่งมอบผลิตภัณฑ์",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน"
+  },
+  {
+   "t": "เทสารละลายจากกระบอกตวงกลับลงบีกเกอร์ คนผสมให้เข้ากันด้วย Stirring rod ก่อนส่งให้กรรมการ",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ปฏิบัติหรือส่งในกระบอกตวง",
+   "s": 0,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "การเขียนฉลากยาและกำหนดวันหมดอายุ (BUD)",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน"
+  },
+  {
+   "t": "เขียนฉลากครบถ้วนสมบูรณ์: ชื่อยาและความแรง, ปริมาณบรรจุ, ข้อบ่งใช้, วิธีใช้, ชื่อผู้เตรียมยา, วันที่ผลิต, วันหมดอายุ (BUD = 35 วัน เก็บที่อุณหภูมิห้องควบคุม หรือ 2–8°C)",
+   "s": 2,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เขียนผิดพลาดหรือไม่ครบถ้วน 1–2 หัวข้อ",
+   "s": 1.5,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "เขียนผิด 3 หัวข้อ หรือระบุวันหมดอายุ/การเก็บรักษาผิด",
+   "s": 1,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "ผิดตั้งแต่ 4 หัวข้อขึ้นไป หรือไม่เขียนฉลาก",
+   "s": 0,
+   "g": "ส่วนที่ 2 การเตรียมตำรับยาน้ำใสและการเขียนฉลาก - 10 คะแนน",
+   "sub": true
+  }
+ ]
+}

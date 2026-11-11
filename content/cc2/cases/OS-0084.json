@@ -1,0 +1,50 @@
+{
+ "id": "OS-0084",
+ "title": "การตรวจสอบใบสั่งยา DM",
+ "cat": "Clinic",
+ "group": "การตรวจสอบใบสั่งยา",
+ "topic": "Diabete/Hypertension",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2558",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จากการตรวจสอบใบสั่งยา ฉลากยาและซองยาของผู้ป่วยดังต่อไปนี้\nจงระบุจุดผิดพลาดที่พบเจอมา 5 ข้อ\n\nฉลากและยาในซองมีดังนี้\nMetformin 500 mg                  1x1 po pc          60 tabs\nGlipizide 5 mg                          0.5x2 po pc     30 tabs\nHydroxyzine 50 mg                 0.5x1 po pc      30 tabs",
+ "patientHtml": "<p>ชื่อ-สกุล: นายซี ดี</p><p>โรคประจำตัว: DM , HTN</p>",
+ "contentHtml": "<p>จากการตรวจสอบใบสั่งยา ฉลากยาและซองยาของผู้ป่วยดังต่อไปนี้</p><p>จงระบุจุดผิดพลาดที่พบเจอมา 5 ข้อ</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0084-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p><p>ฉลากและยาในซองมีดังนี้</p><ol class=\"ordered-list\"><li>Metformin 500 mg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1x1 po pc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;60 tabs</li><li>Glipizide 5 mg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.5x2 po pc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30 tabs</li><li>Hydroxyzine 50 mg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.5x1 po pc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30 tabs</li></ol>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"color: rgb(16,16,16);\"> สามารถระบุและสรุปจุดผิดพลาดระหว่างใบสั่งยากับซองยาทั้ง 3 ซอง ได้ถูกต้องครบถ้วนรวม 5 จุด (หากระบุไม่ครบ ตัดจุดละ 1 คะแนน)</span></p><p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px;\">สถานีที่ 5</span></p>",
+ "checklist": [
+  {
+   "t": "ตรวจพบจุดผิดพลาดซองยาที่ 1 (ความแรงยาผิด): ใบสั่งแพทย์สั่งจ่าย Metformin 850 mg แต่ในซองยาจัดเป็น Metformin 500 mg",
+   "html": "<span style=\"color: rgb(16,16,16);\">ตรวจพบจุดผิดพลาดซองยาที่ 1 (ความแรงยาผิด): ใบสั่งแพทย์สั่งจ่าย Metformin 850 mg แต่ในซองยาจัดเป็น Metformin 500 mg\n</span>",
+   "s": 1,
+   "g": "การตรวจสอบความถูกต้องและจุดผิดพลาดบนซองยา - 5 จุดผิดพลาด"
+  },
+  {
+   "t": "ตรวจพบจุดผิดพลาดซองยาที่ 1 (ความถี่ผิด): ใบสั่งแพทย์สั่งจ่าย 1x2 (วันละ 2 ครั้ง) แต่หน้าซองยาเขียนเป็น 1x1 (วันละ 1 ครั้ง)",
+   "html": "<span style=\"color: rgb(16,16,16);\">ตรวจพบจุดผิดพลาดซองยาที่ 1 (ความถี่ผิด): ใบสั่งแพทย์สั่งจ่าย 1x2 (วันละ 2 ครั้ง) แต่หน้าซองยาเขียนเป็น 1x1 (วันละ 1 ครั้ง)\n</span>",
+   "s": 1,
+   "g": "การตรวจสอบความถูกต้องและจุดผิดพลาดบนซองยา - 5 จุดผิดพลาด"
+  },
+  {
+   "t": "ตรวจพบจุดผิดพลาดซองยาที่ 2 (เวลารับประทานผิด): ใบสั่งแพทย์สั่งจ่าย ac (ก่อนอาหาร) แต่หน้าซองยาเขียนเป็น pc (หลังอาหาร)",
+   "html": "<span style=\"color: rgb(16,16,16);\">ตรวจพบจุดผิดพลาดซองยาที่ 2 (เวลารับประทานผิด): ใบสั่งแพทย์สั่งจ่าย ac (ก่อนอาหาร) แต่หน้าซองยาเขียนเป็น pc (หลังอาหาร)\n</span>",
+   "s": 1,
+   "g": "การตรวจสอบความถูกต้องและจุดผิดพลาดบนซองยา - 5 จุดผิดพลาด"
+  },
+  {
+   "t": "ตรวจพบจุดผิดพลาดซองยาที่ 3 (จำนวนยาผิด): ใบสั่งแพทย์สั่งจ่ายจำนวน 15 เม็ด แต่ในซองยาบรรจุยา 30 เม็ด",
+   "html": "<span style=\"color: rgb(16,16,16);\">ตรวจพบจุดผิดพลาดซองยาที่ 3 (จำนวนยาผิด): ใบสั่งแพทย์สั่งจ่ายจำนวน 15 เม็ด แต่ในซองยาบรรจุยา 30 เม็ด\n</span>",
+   "s": 1,
+   "g": "การตรวจสอบความถูกต้องและจุดผิดพลาดบนซองยา - 5 จุดผิดพลาด"
+  },
+  {
+   "t": "ตรวจพบจุดผิดพลาดซองยาที่ 3 (ชนิดยาผิด): ใบสั่งแพทย์สั่งยา Hydrochlorothiazide (HCTZ) แต่ในซองยาจัดยา Hydroxyzine มาให้ผิดตัว",
+   "html": "<span style=\"color: rgb(16,16,16);\">ตรวจพบจุดผิดพลาดซองยาที่ 3 (ชนิดยาผิด): ใบสั่งแพทย์สั่งยา Hydrochlorothiazide (HCTZ) แต่ในซองยาจัดยา Hydroxyzine มาให้ผิดตัว</span>",
+   "s": 1,
+   "g": "การตรวจสอบความถูกต้องและจุดผิดพลาดบนซองยา - 5 จุดผิดพลาด"
+  }
+ ]
+}

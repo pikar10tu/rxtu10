@@ -1,0 +1,31 @@
+{
+ "id": "OS-0377",
+ "title": "กฎหมายควบคุม Pseudoephedrine เดี่ยวและสูตรผสม",
+ "cat": "SAP",
+ "group": "ยาเสพติด วัตถุออกฤทธิ์ และยาควบคุมพิเศษ",
+ "topic": "Pseudoephedrine Control Regulations",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2553",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงตอบคำถามเกี่ยวกับข้อกำหนดทางกฎหมายในการจำหน่ายยา Pseudoephedrine 60 mg เดี่ยว และยา Actifed tablet (Pseudoephedrine + Triprolidine) ในร้านขายยาแผนปัจจุบัน",
+ "patientHtml": "<p>ไม่มีข้อมูลผู้ป่วยในสถานีน<span style=\"font-weight: 700;\">ี้</span></p>",
+ "contentHtml": "<p>จงตอบคำถามเกี่ยวกับข้อกำหนดทางกฎหมายในการจำหน่ายยา Pseudoephedrine 60 mg เดี่ยว และยา Actifed tablet (Pseudoephedrine + Triprolidine) ในร้านขายยาแผนปัจจุบ<span style=\"font-weight: 700;\">ัน</span></p>",
+ "equipmentHtml": "<p>ประมวลกฎหมายยาเสพติด พ.ศ. 25<span style=\"font-weight: 700;\">64</span></p>",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">เฉลยคำตอบพร้อมคำอธิ</span>บ<span style=\"font-weight: 700;\">าย:</span></p><p><span style=\"font-weight: 700;\">✅ คำตอบที่ถูกต</span>้อง:</p><p>- Pseudoephedrine ทั้งชนิดเดี่ยวและสูตรผสมทุกรูปแบบ จัดเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 ห้ามมีไว้ในครอบครองหรือจำหน่ายในร้านขายยาทั่วไปโดยเด็ด<span style=\"font-weight: 700;\">ขาด</span></p><p><span style=\"font-weight: 700;\">📖 Guideline อ้า</span>งอิง:</p><p>- ประมวลกฎหมายยาเสพติด พ.ศ. 2564</p><p>- ประกาศกระทรวงสาธารณสุข เรื่อง ระบุชื่อวัตถุออกฤทธิ์ในประเภท 2 (Pseudoephedr<span style=\"font-weight: 700;\">ine)</span></p><p><span style=\"font-weight: 700;\">📌 จุดจำก่</span>อนสอบ:</p><p>- Pseudoephedrine ทุกสูตร (เดี่ยวและผสม) = วัตถุออกฤทธิ์ประเภท 2 (ร้านยาห้ามขาย 100%)</p><hr class=\"case-divider\">",
+ "checklist": [
+  {
+   "t": "Pseudoephedrine ชนิดเดี่ยว: จัดเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 ห้ามร้านยาจำหน่ายเด็ดขาด อนุญาตให้ใช้ได้เฉพาะในโรงพยาบาลและคลินิกเท่านั้น",
+   "s": 5,
+   "g": "การประเมินกฎหมายควบคุม Pseudoephedrine - รวม 10 คะแนน"
+  },
+  {
+   "t": "Actifed tablet (Pseudoephedrine สูตรผสม): จัดเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 (ยกระดับจากยาอันตรายตั้งแต่ปี พ.ศ. 2555) ห้ามร้านยาจำหน่ายเด็ดขาด",
+   "html": "Actifed tablet (Pseudoephedrine สูตรผสม): จัดเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 2 (ยกระดับจากยาอันตรายตั้งแต่ปี พ.ศ. 2555) ห้ามร้านยาจำหน่ายเด็ดข<span style=\"font-weight: 700;\">าด\n</span>",
+   "s": 5,
+   "g": "การประเมินกฎหมายควบคุม Pseudoephedrine - รวม 10 คะแนน"
+  }
+ ]
+}

@@ -8,6 +8,7 @@
       </div>
       <!-- ปุ่มจดหมาย + เควส มุมขวา (จุดแดงเมื่อมีของค้าง) -->
       <div v-if="authStore.isLoggedIn" class="home-head-actions">
+        <HeaderIconButton icon="🔍" label="ค้นหายา เคส CC2 หรือสรุป" @click="searchOpen = true" />
         <HeaderIconButton icon="📬" :dot="mailbox.attention > 0" label="กล่องจดหมาย" @click="showMail = true" />
         <HeaderIconButton icon="🎯" :dot="questPending" label="เควสต์ประจำวัน" @click="showQuest = true" />
       </div>
@@ -18,15 +19,14 @@
            เหรียญ + รายได้ + ปุ่มเก็บ → นาฬิกาพลิกวันสอบขนาดเต็ม (user สั่งให้ยังเด่นอยู่) → งานถัดไป → บ้าน -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
       <MockScoreCard only-unseen class="home" />
-      <DailyCard />
+      <!-- ฝึกต่อ (dropdown) = รายได้ประจำวัน + งานถัดไป + เคส CC2 แนะนำ รวมใบเดียว (user 11 พ.ย. 2026) -->
+      <ContinueCard @sheet="onCardSheet" />
       <!-- ดวงวันนี้ (user 9 พ.ย. 2026) — โหลด lazy เพราะไลบรารีคำนวณดาว -->
       <HoroCard />
       <ExamCountdown />
       <!-- อีเวนต์ประจำเดือน — ทางเข้าร้านแต้มอีเวนต์จากหน้าแรก (user 25 ต.ค. 2026) -->
       <EventBanner />
       <MbtiPromo />
-      <!-- งานถัดไปที่ควรทำ — โชว์ทีละอย่าง ซ่อนตัวเองเมื่อไม่มีอะไรค้าง -->
-      <NextActionCard @sheet="onCardSheet" />
       <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
       <ResidenceCard />
       <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
@@ -41,6 +41,8 @@
       <!-- ส่งข้อเสนอแนะ — ปุ่มเดียวกับหน้า Me วางล่างสุดหน้าแรกด้วย (user 9 พ.ย. 2026) -->
       <button class="home-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>
       <FeedbackModal v-model="fbOpen" />
+      <!-- ค้นหารวม (overlay Teleport ในตัว) -->
+      <GlobalSearchPanel v-if="searchOpen" v-model="searchQuery" overlay autofocus @close="searchOpen = false" />
 
       <!-- กล่องจดหมาย / เควส — bottom-sheet เปิดจากปุ่ม header -->
       <BottomSheet v-model:open="showMail" icon="📬" title="กล่องจดหมาย">
@@ -67,14 +69,14 @@ import { useMailbox } from '../stores/mailbox.js'
 import { questNotClaimed } from '../utils/dailyQuest.js'
 import { pendingAnnounce } from '../utils/mailbox.js'
 import ResidenceCard from '../components/residence/ResidenceCard.vue'
-import DailyCard from '../components/home/DailyCard.vue'
+import ContinueCard from '../components/home/ContinueCard.vue'
+import GlobalSearchPanel from '../components/search/GlobalSearchPanel.vue'
 const HoroCard = defineAsyncComponent(() => import('../components/horo/HoroCard.vue'))
 import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import EventBanner from '../components/shared/EventBanner.vue'
 import MbtiPromo from '../components/home/MbtiPromo.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
-import NextActionCard from '../components/home/NextActionCard.vue'
 import ExamCountdown from '../components/study/ExamCountdown.vue'
 import BottomSheet from '../components/shared/BottomSheet.vue'
 import HeaderIconButton from '../components/home/HeaderIconButton.vue'
@@ -84,6 +86,8 @@ const mailbox = useMailbox()
 
 const showMail = ref(false)
 const showQuest = ref(false)
+const searchOpen = ref(false)
+const searchQuery = ref('')
 const fbOpen = ref(false)
 
 // จุดแดงเควส = วันนี้ยังไม่กดรับรางวัล

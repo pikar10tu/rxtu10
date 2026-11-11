@@ -1,0 +1,218 @@
+{
+ "id": "OS-0294",
+ "title": "Emulsion 3A",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Emulsion",
+ "diff": 2,
+ "source": "Mock Exam 2569 (Week 4) ชุด A",
+ "active": true,
+ "durationMin": 6,
+ "gated": [],
+ "next": null,
+ "scenario": "โจทย์:\nRx\n Mineral oil       \t24 mL\n Acacia powder          \t5.0 g\n Tragacanth powder  \t1.0 g\n Purified water           \tq.s. to 60 mL\nคำสั่ง\n1.     คำนวณปริมาณน้ำสำหรับทำ Primary Emulsion แสดงในกระดาษคำตอบ\n2.     เตรียม Primary Emulsion ด้วยวิธี Wet gum โดยส่งผลิตภัณฑ์ในกระบอกตวง",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"font-weight: 700;\">โจทย์:</span></p><p><span style=\"font-weight: 700;\">Rx<br></span> Mineral oil&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;24 mL<br> Acacia powder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0 g<br> Tragacanth powder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.0 g<br> Purified water&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q.s. to 60 mL</p><p><span style=\"font-weight: 700;\">คำสั่ง</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;คำนวณปริมาณน้ำสำหรับทำ Primary Emulsion แสดงในกระดาษคำตอบ</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เตรียม Primary Emulsion ด้วยวิธี Wet gum โดยส่งผลิตภัณฑ์ในกระบอกตวง</p>",
+ "equipmentHtml": "<p><span style=\"font-weight: 700;\">สารเคมีที่มีในสถานี:</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mineral oil</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผง Acacia (ชั่งไว้ให้แล้ว)</p><p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผง Tragacanth (ชั่งไว้ให้แล้ว)</p><p>4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Purified water</p><p><span style=\"font-weight: 700;\"> </span></p><p><span style=\"font-weight: 700;\">อุปกรณ์ที่มีในสถานี:</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โกร่งกระเบื้องและลูกโกร่ง</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โกร่งแก้วและลูกโกร่ง</p><p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cylinder ขนาด 10, 25, 50 และ 100 mL</p><p>4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Beaker ขนาด 50 และ 100 mL</p><p>5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;แท่งแก้วคนสาร</p><p><span style=\"font-weight: 700;\">ระยะเวลา:</span> 6 นาที</p>",
+ "noteHtml": "",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณน้ำสำหรับ primary emulsion",
+   "html": "<span style=\"font-weight: 700;\">การคำนวณปริมาณน้ำสำหรับ primary emulsion\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คำนวณถูกต้อง: oil 24 mL → gum = 24 ÷ 4 = 6 g (acacia 5 g + tragacanth 1 g) → น้ำ = 6 × 2 = 12 mL และแสดงวิธีทำ",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดพลาด หรือไม่แสดงวิธีทำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การอ่านฉลาก 3 ครั้ง",
+   "html": "<span style=\"font-weight: 700;\">การอ่านฉลาก 3 ครั้ง</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านครบ 3 ครั้ง คือ ตอนหยิบ, ตอนตวง, ตอนเก็บคืน",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "อ่านไม่ครบ หรือไม่อ่านเลย",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การตวงน้ำมันและน้ำ",
+   "html": "<span style=\"font-weight: 700;\">การตวงน้ำมันและน้ำ\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตวงน้ำมัน 24 mL และน้ำ 12 mL ด้วย cylinder ขนาดที่เหมาะสม (เช่น 25 mL) อ่านที่ meniscus และแยกใส่บีกเกอร์ไว้",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ตวงผิดปริมาตร หรือเลือก cylinder ไม่เหมาะสม",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเลือกโกร่ง",
+   "html": "<span style=\"font-weight: 700;\">การเลือกโกร่ง\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกโกร่งกระเบื้องและลูกโกร่ง (ผิวหยาบ ช่วยให้เกิดแรงเฉือนในการ emulsify ได้ดีกว่าโกร่งแก้วผิวเรียบ)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เลือกโกร่งแก้ว",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การผสมผงกัมให้เข้ากัน",
+   "html": "<span style=\"font-weight: 700;\">การผสมผงกัมให้เข้ากัน\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คลุกผง acacia และ tragacanth ให้เข้ากันในโกร่งก่อนเติมน้ำ โดยเทคนิค Geometric dilution",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เติมน้ำก่อนคลุกผง หรือผงจับเป็นก้อน",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การทำ Mucilage",
+   "html": "<span style=\"font-weight: 700;\">การทำ Mucilage\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เติมน้ำ 12 mL ลงในผงกัมทั้งหมด แล้วบดผสมในทิศทางเดียวจนได้ mucilage ข้นเนียน ไม่มีก้อนผง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ได้ mucilage ไม่เนียน มีก้อนผง หรือเติมน้ำผิดปริมาณ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเติมน้ำมัน",
+   "html": "<span style=\"font-weight: 700;\">การเติมน้ำมัน\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เติมน้ำมันทีละน้อย (ประมาณ 1-2 mL) บดเร็วและแรงในทิศทางเดียว รอให้น้ำมันส่วนแรกเข้ากันก่อนเติมส่วนต่อไป",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "เทน้ำมันปริมาณมากในครั้งเดียว หรือบดสลับทิศทาง",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเกิด Primary emulsion",
+   "html": "<span style=\"font-weight: 700;\">การเกิด Primary emulsion\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้ emulsion สีขาวขุ่นข้น เนียน (มีเสียงแตกๆ ขณะบด) และไม่เห็นหยดน้ำมันแยกชั้น",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "emulsion แยกชั้น เห็นหยดน้ำมันลอย หรือไม่ข้นเป็น primary emulsion",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การถ่ายเท, Rinse และปรับปริมาตร",
+   "html": "<span style=\"font-weight: 700;\">การถ่ายเท, Rinse และปรับปริมาตร\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทลง Cylinder 100 mL, rinse โกร่งและลูกโกร่งด้วยน้ำส่วน ≈ 18 mL อย่างน้อย 2 รอบ เทรวม และปรับให้ครบ 60 mL (อ่านที่ meniscus)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "rinse น้อยกว่า 2 รอบ เลือก cylinder ไม่เหมาะสม หรือปริมาตรไม่ถูกต้อง",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การคนผสมให้เข้ากัน",
+   "html": "<span style=\"font-weight: 700;\">การคนผสมให้เข้ากัน\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้แท่งแก้วคนผสมให้สม่ำเสมอหลังปรับปริมาตร",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่คนผสม",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ความสะอาดและการส่งมอบผลิตภัณฑ์",
+   "html": "<span style=\"font-weight: 700;\">ความสะอาดและการส่งมอบผลิตภัณฑ์ \n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ทำความสะอาดโต๊ะปฏิบัติการเรียบร้อย และส่งมอบผลิตภัณฑ์ในกระบอกตวงโดยไม่มีสารหกเลอะภายนอก",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ทำความสะอาดโต๊ะปฏิบัติการ หรือส่งมอบผลิตภัณฑ์โดยมีสารหกเลอะเปรอะเปื้อนภายนอกกระบอกตวง / โต๊ะปฏิบัติการ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

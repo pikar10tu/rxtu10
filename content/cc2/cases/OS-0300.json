@@ -1,0 +1,55 @@
+{
+ "id": "OS-0300",
+ "title": "Pulverization by Intervention: Camphor Particle Size Reduction",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "การบดลดขนาดโดยการบดแทรก (Pulverization by Intervention), Camphor, การเลือกใช้โกร่งแก้ว, การระเหยของ Intervening Agent",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Prodct Week 2 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ต้องการลดขนาดอนุภาคของ Camphor (การบูร) ปริมาณ 1.0g ให้เป็นผงละเอียดสม่ำเสมอ โดยใช้เทคนิคทางเภสัชกรรมที่เหมาะสม แสดงทักษะการเลือกอุปกรณ์ การชั่ง การบดลดขนาด และส่งมอบผงยาในโกร่ง (เวลาปฏิบัติการ 4 นาที)",
+ "patientHtml": "",
+ "contentHtml": "<p>ต้องการลดขนาดอนุภาคของ Camphor (การบูร) ปริมาณ <span class=\"doc-equation\">1.0g</span> ให้เป็นผงละเอียดสม่ำเสมอ โดยใช้เทคนิคทางเภสัชกรรมที่เหมาะสม แสดงทักษะการเลือกอุปกรณ์ การชั่ง การบดลดขนาด และส่งมอบผงยาในโกร่ง (เวลาปฏิบัติการ 4 นาที)</p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>สารเคมีที่มีในสถานี:<ul class=\"bullet-list\"><li>Camphor (ผลึกหยาบ)</li><li>95% v/v Alcohol (บรรจุในขวดหยด Dropper bottle)</li></ul></li><li>อุปกรณ์ที่มีในสถานี:<ul class=\"bullet-list\"><li>โกร่งแก้วและลูกโกร่งแก้ว (Glass mortar &amp; pestle)</li><li>โกร่งกระเบื้องและลูกโกร่งกระเบื้อง (Porcelain mortar &amp; pestle)</li><li>Spatula สเตนเลส</li><li>ช้อนตักสาร (ช้อนเขา)</li><li>กระดาษชั่งสาร</li><li>เครื่องชั่งไฟฟ้า 2 ตำแหน่ง พร้อมแปรงปัด</li></ul></li></ul>",
+ "noteHtml": "<p>VDO Link: <a href=\"https://drive.google.com/file/d/1YxZ_32llEapMCF8rOEfY7BUMJtpcnuwp/view?t=4.568\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: var(--primary); text-decoration: underline;\"><span style=\"color: rgb(17,85,204); text-decoration: underline;\">https://drive.google.com/file/d/1YxZ_32llEapMCF8rOEfY7BUMJtpcnuwp/view?t=4.568</span></a> </p><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">หลักเกณฑ์ทางเภสัชกรรม (คู่มือทักษะสภาฯ หน้า 63):</span><ul class=\"bullet-list\"><li>ของแข็งบางชนิดที่มีโครงสร้างผลึกเหนียวหรือยืดหยุ่น เช่น Camphor, Menthol, Thymol เมื่อบดแห้งโดยตรงจะเกิดแรงเสียดทานจนเกาะติดเป็นก้อนเหนียว บดย่อยได้ยาก</li><li>ต้องใช้เทคนิค <span style=\"font-weight: 700;\">&quot;บดให้ละเอียดโดยการบดแทรก (Pulverization by Intervention)&quot;</span> โดยเติมสารระเหยง่าย (Volatile solvent) เช่น 95% Alcohol ในปริมาณเล็กน้อยพอเปียก ตัวทำละลายจะแทรกซึมละลายผลึกบางส่วน เมื่อบดวนเบาๆ จนแอลกอฮอล์ระเหยหมด จะได้ผงยาที่ละเอียดเนียนสม่ำเสมอ</li></ul></li><li><span style=\"font-weight: 700;\">Technical Points:</span><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">ห้ามเลือกโกร่งกระเบื้องเด็ดขาด:</span> ผิวสัมผัสที่มีรูพรุนของโกร่งกระเบื้องจะดูดซับกลิ่นและน้ำมันหอมระเหยของ Camphor ไว้ถาวร ล้างออกยากมาก ต้องใช้โกร่งแก้วเท่านั้น</li><li>ระวังอย่าหยด Alcohol เกิน <span class=\"doc-equation\">5หยด</span> เพราะจะต้องเสียเวลารอนานกว่าแอลกอฮอล์จะระเหยหมดภายในเวลา 4 นาที</li></ul></li><li><span style=\"font-weight: 700;\">Common Pitfalls:</span> เลือกโกร่งกระเบื้อง, บด Camphor แบบแห้งโดยไม่หยดแอลกอฮอล์, หยดแอลกอฮอล์มากเกินไปจนเป็นสารละลายแฉะและระเหยไม่ทันเวลา, หรือไม่ใช้ Spatula ปาดผงยาที่ติดขอบโกร่ง</li></ul>",
+ "checklist": [
+  {
+   "t": "การเลือกชนิดของโกร่งสำหรับบด Camphor (Critical Equipment Step)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การอ่านฉลากสารเคมี (3-Checks Rule)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ทักษะการชั่งน้ำหนักบนเครื่องชั่งไฟฟ้า",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การเติม Intervening Agent (95% Alcohol)",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการบดและการระเหยของตัวทำละลาย",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การปาดรวบรวมผงยา (Scraping Step)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาดและการจัดเก็บ",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

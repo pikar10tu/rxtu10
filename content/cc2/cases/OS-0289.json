@@ -1,0 +1,172 @@
+{
+ "id": "OS-0289",
+ "title": "Mucilage 3B",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Mucilage",
+ "diff": 2,
+ "source": "Mock Exam 2569 (Week 3) ชุด B",
+ "active": true,
+ "durationMin": 4,
+ "gated": [],
+ "next": null,
+ "scenario": "โจทย์: จงเตรียม SCMC Mucilage ปริมาณ 50 mL\nRx\nSodium Carboxymethylcellulose    \t2.0 %w/v\nGlycerin                                           \tq.s.\nPurified water                                  \tq.s. to 100 mL\n\nคำสั่ง:\n1.     แสดงการคำนวณปริมาณสารแต่ละตัวในตำรับสำหรับเตรียม 50 mL ลงในกระดาษคำตอบ\n2.     เตรียม SCMC Mucilage ตามเทคนิคทางเภสัชที่ถูกต้อง โดยส่งผลิตภัณฑ์ในกระบอกตวง",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"font-weight: 700;\">โจทย์:</span> จงเตรียม SCMC Mucilage ปริมาณ 50 mL</p><p><span style=\"font-weight: 700;\">Rx</span></p><p>Sodium Carboxymethylcellulose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0 %w/v</p><p>Glycerin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q.s.</p><p>Purified water&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q.s. to 100 mL</p><p><span style=\"font-weight: 700;\"> </span></p><p><span style=\"font-weight: 700;\">คำสั่ง:</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;แสดงการคำนวณปริมาณสารแต่ละตัวในตำรับสำหรับเตรียม 50 mL ลงในกระดาษคำตอบ</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เตรียม SCMC Mucilage ตามเทคนิคทางเภสัชที่ถูกต้อง โดยส่งผลิตภัณฑ์ในกระบอกตวง</p>",
+ "equipmentHtml": "<p><span style=\"font-weight: 700;\">สารเคมีที่มีในสถานี:</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ผง Sodium Carboxymethylcellulose (จัดเตรียมไว้ให้)</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Glycerin</p><p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Purified water</p><p><span style=\"font-weight: 700;\"> </span></p><p><span style=\"font-weight: 700;\">อุปกรณ์ที่มีในสถานี:</span></p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โกร่งแก้วและลูกโกร่ง</p><p>2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Beaker ขนาด 50 และ 100 mL</p><p>3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cylinder ขนาด 10, 25, 50 และ 100 mL</p><p>4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;แท่งแก้วคนสาร</p><p>5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dropper</p><p>6.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;กระจกนาฬิกา</p><p><span style=\"font-weight: 700;\">ระยะเวลา:</span> 4 นาที</p>",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">1.</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">เฉลยการคำนวณ (50 mL)</span></p><ul class=\"bullet-list\"><li>SCMC: 2% × 50 mL = 1.0 g (สถานีเตรียมไว้ให้แล้ว)</li><li>Purified water (Approximate volume): 50 − 1 = 49.0 mL<ul class=\"bullet-list\"><li>¾ สำหรับเตรียมตำรับ = 36.8 mL (36.75)</li><li>¼ สำหรับ Rinse และปรับปริมาตร = 12.3 mL (12.25)</li></ul></li></ul><p><span style=\"font-weight: 700;\">2.</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">Technical Points</span></p><ul class=\"bullet-list\"><li>ผง SCMC สัมผัสน้ำโดยตรงจะพองตัวที่ผิวนอกเป็นก้อนเหนียว น้ำซึมเข้าด้านในไม่ได้ จึงต้องใช้ Glycerin ทำให้ผงเปียกและแยกอนุภาคออกจากกันก่อน แล้วจึงเติมน้ำ</li><li>ใช้ Dropper หยด Glycerin ทีละน้อยจนผงเปียกทั่ว ไม่ต้องให้เป็นของเหลว</li><li>แบ่งน้ำเป็น ¾ และ ¼ เพราะ Mucilage หนืดและติดโกร่งมาก ต้องเก็บน้ำไว้ Rinse โดยไม่ให้ปริมาตรเกินขีด</li><li>บดผสมช้า ๆ ในทิศทางเดียว ไม่ตีแรง เพื่อไม่ให้เกิดฟองอากาศ</li><li>Rinse โกร่งอย่างน้อย 2 รอบ เทลงกระบอกตวงทุกครั้ง แล้วจึงปรับปริมาตรที่ขีด 50 mL ที่ระดับสายตา</li><li>สถานีนี้มีเฉพาะโกร่งแก้ว จึงกำหนดให้ใช้โกร่งแก้วเท่านั้น</li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณสารและ Approximate Volume",
+   "html": "<span style=\"font-weight: 700;\">การคำนวณปริมาณสารและ Approximate Volume\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แสดงวิธีคำนวณถูกต้องครบทั้ง 2 รายการ (สำหรับ 50 mL)\n  • SCMC = 2% x 50 mL = 1.0 g\n  • Purified Water (Approximate volume) = 50 – 1.0  = 49.0 mL แบ่งเป็นน้ำ ¾ สำหรับเตรียมตำรับ = 36.75 mL (≈ 36.8 mL)  และน้ำ ¼ สำหรับ Rinse และปรับปริมาตร = 12.25 mL (≈ 12.3 mL)",
+   "html": "แสดงวิธีคำนวณถูกต้องครบทั้ง 2 รายการ (สำหรับ 50 mL)<ul class=\"checklist-sub-details\"><li>SCMC = 2% x 50 mL = 1.0 g</li><li>Purified Water (Approximate volume) = 50 – 1.0&nbsp;&nbsp;= 49.0 mL แบ่งเป็นน้ำ ¾ สำหรับเตรียมตำรับ = 36.75 mL (≈ 36.8 mL)&nbsp;&nbsp;และน้ำ ¼ สำหรับ Rinse และปรับปริมาตร = 12.25 mL (≈ 12.3 mL)</li></ul>",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณถูก 1 จาก 2 รายการ",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "คำนวณผิดทั้งหมด หรือไม่แสดงวิธีทำ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การแบ่งตวง Purified water",
+   "html": "<span style=\"font-weight: 700;\">การแบ่งตวง Purified water\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "แบ่งตวงน้ำแยกเป็น 2 ส่วนอย่างถูกต้อง คือ ¾ สำหรับเตรียมตำรับ และ ¼ เก็บไว้สำหรับ Rinse และปรับปริมาตร",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ตวงถูกเพียงส่วนเดียว หรือลืมแบ่งตวงอย่างใดอย่างหนึ่ง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้แบ่งตวงน้ำเลย",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การเลือกภาชนะสำหรับการเตรียมตำรับ",
+   "html": "<span style=\"font-weight: 700;\">การเลือกภาชนะสำหรับการเตรียมตำรับ\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกใช้โกร่งแก้วและลูกโกร่งสำหรับบดผสม (ตามหลักการสามารถใช้โกร่งกระเบื้องได้ แต่เนื่องจากสถานีสอบจัดเตรียมไว้เฉพาะโกร่งแก้ว จึงกำหนดให้ใช้โกร่งแก้วเท่านั้น)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่เลือกใช้โกร่งแก้ว",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ลำดับการผสมสาร",
+   "html": "<span style=\"font-weight: 700;\">ลำดับการผสมสาร\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ทำครบทั้ง 2 ขั้นตอน\n  • ใช้ Dropper หยด Glycerin (Dispersing agent) ลงบนผง SCMC ในโกร่งให้เปียกทั่ว\n  • เติม Purified water  ¾ แล้วบดผสมจนได้ Mucilage เนียนใส ไม่เป็นก้อน",
+   "html": "ทำครบทั้ง 2 ขั้นตอน<ul class=\"checklist-sub-details\"><li>ใช้ Dropper หยด Glycerin (Dispersing agent) ลงบนผง SCMC ในโกร่งให้เปียกทั่ว</li><li>เติม Purified water&nbsp;&nbsp;¾ แล้วบดผสมจนได้ Mucilage เนียนใส ไม่เป็นก้อน</li></ul>",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ทำถูกเพียงขั้นเดียว หรือผสมแล้วยังมีก้อนผง",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ใช้ Glycerin กระจายผง เทน้ำลงบนผง SCMC โดยตรง",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การปรับปริมาตรและการ Rinse กลั้วโกร่ง",
+   "html": "<span style=\"font-weight: 700;\">การปรับปริมาตรและการ Rinse กลั้วโกร่ง\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทส่วนผสมจากโกร่งแก้วลงกระบอกตวงขนาด 50 mL จากนั้น rinse โกร่งแก้วด้วย Purified water ส่วน ¼ อย่างน้อย 2 รอบ เทลงกระบอกตวงทุกครั้ง แล้วปรับปริมาตรจนส่วนโค้งล่างแตะขีด 50 mL พอดีที่ระดับสายตา",
+   "s": 2,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "Rinse โกร่งแก้วเพียง 1 รอบ หรือปรับปริมาตรขาด/เกินเล็กน้อย",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ได้ Rinse โกร่ง หรือปริมาตรสุดท้ายคลาดเคลื่อน",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "การคนผสมสาร",
+   "html": "<span style=\"font-weight: 700;\">การคนผสมสาร \n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ใช้แท่งแก้วคนให้เข้ากันในกระบอกตวงหลังปรับปริมาตร แล้วนำแท่งแก้วออกไปวางบนภาชนะรองรับ (ไม่ทิ้งค้างไว้ในกระบอกตวง)",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ลืมคนผสมหลังปรับปริมาตร",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ความสะอาดและการส่งมอบผลิตภัณฑ์",
+   "html": "<span style=\"font-weight: 700;\">ความสะอาดและการส่งมอบผลิตภัณฑ์ \n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ทำความสะอาดโต๊ะปฏิบัติการเรียบร้อย และส่งมอบผลิตภัณฑ์ในกระบอกตวงโดยไม่มีสารหกเลอะภายนอก",
+   "s": 1,
+   "g": "ทั่วไป",
+   "sub": true
+  },
+  {
+   "t": "ไม่ทำความสะอาดโต๊ะปฏิบัติการ หรือส่งมอบผลิตภัณฑ์โดยมีสารหกเลอะเปรอะเปื้อนภายนอกกระบอกตวง / โต๊ะปฏิบัติการ",
+   "s": 0,
+   "g": "ทั่วไป",
+   "sub": true
+  }
+ ]
+}

@@ -1,0 +1,70 @@
+{
+ "id": "OS-0314",
+ "title": "Cream",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียมตำรับตามสูตรที่กำหนดให้ถูกต้อง\nสูตรตำรับ:\nSulfur 0.5 g\nCream base  qs 5 g\nคำสั่ง:\nเลือก Levigating agent ที่เหมาะสมเพื่อทำการ Levigating ตำรับ\nผสมตำรับให้เข้ากันเป็นเนื้อเดียว แล้วส่งอาจารย์ผู้ตรวจ",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียมตำรับตามสูตรที่กำหนดให้ถูกต้อง</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Sulfur 0.5 g</li><li>Cream base&nbsp;&nbsp;qs 5 g</li></ul><p>คำสั่ง:</p><ul class=\"bullet-list\"><li>เลือก Levigating agent ที่เหมาะสมเพื่อทำการ Levigating ตำรับ</li><li>ผสมตำรับให้เข้ากันเป็นเนื้อเดียว แล้วส่งอาจารย์ผู้ตรวจ</li></ul>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>ผงยา&nbsp;&nbsp;Sulfur 1 ถุง</li><li>mineral oil</li><li>glycerin</li><li>Slab</li><li>Spatula</li></ol>",
+ "noteHtml": "<p>- Set อุปกรณ์ โดยจับ slab &amp; spatula ที่ถูกต้อง</p><p>- ใช้ Spatula บดสารก่อน โดยจะหมุนเป็นวงกลมจากตรงกลางออกไปด้านนอกหรือ เป็นเลขแปด</p><p>- ต้องเลือก <span style=\"font-weight: 700;\">Glycerin</span> เพราะเบสที่ใช้เป็น Hydrophilic base (o/w)</p><p>- บดผสมแบบ geometric dilution</p><p><span style=\"font-style: italic;\">- ข้อควรระวังของผู้ตรวจ:</span> เน้นตรวจความเนียนเป็นเนื้อเดียวกันของตำรับเมื่อนิสิตนำมาส่ง</p><p><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0314-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></p>",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์การเตรียม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การวาง / จับ slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจับ spatula",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตำแหน่งการวางตัวยา / ยาพื้น บน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการผสมตัวยากับยาพื้น การใช้ levigating agent",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การละลายผงยา (ปริมาณน้ำที่ใช้ / อุปกรณ์ที่ใช้)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการบดผสมตัวยากับยาพื้น Geometric dilution (แบ่งอย่างน้อย 3 ครั้ง)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตรวจสอบความเป็นเนื้อเดียวกัน โดยปาดบน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้ผลิตภัณฑ์เนื้อเนียน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด และ อื่นๆ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

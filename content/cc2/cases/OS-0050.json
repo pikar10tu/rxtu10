@@ -1,0 +1,40 @@
+{
+ "id": "OS-0050",
+ "title": "เปิดหนังสือ",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "-",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2555",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ฐานเปิดหนังสือ หาความเข้มข้น, Route of administration, Dosage Regimen ของ Hepatitis B vaccine ในเด็กแรกเกิด",
+ "patientHtml": "<p>ตามสถานการณ์</p>",
+ "contentHtml": "<p>&nbsp;&nbsp;ฐานเปิดหนังสือ หาความเข้มข้น, Route of administration, Dosage Regimen ของ Hepatitis B vaccine ในเด็กแรกเกิด </p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">สถานีที่ 14</span></p>",
+ "checklist": [
+  {
+   "t": "เปิดหนังสือ Drug Information Handbook with International Trade name 20th Ed. หน้า 841-842",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความเข้มข้น",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "Route of administration : IM",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "Dosage Regimen",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

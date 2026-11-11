@@ -1,0 +1,40 @@
+{
+ "id": "OS-0327",
+ "title": "Cream Oxytetrazoline ชั่ง",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": "OS-0328",
+ "scenario": "ให้นิสิตชั่ง base สำหรับเตรียม Oxytetrazoline 2%\nสูตรตำรับ:\nRx Oxytetrazoline 2%\nHydrophilic base qs 15 g\nคำสั่ง:\nจงชั่ง Base เพื่อเตรียมยาจากสูตรตำรับที่กำหนดให้",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตชั่ง base สำหรับเตรียม Oxytetrazoline 2%</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Rx Oxytetrazoline 2%</li><li>Hydrophilic base qs 15 g</li></ul><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>จงชั่ง Base เพื่อเตรียมยาจากสูตรตำรับที่กำหนดให้</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>กระดาษทดเลข (ไม่มีเครื่องคิดเลข)</li><li>กระดาษชั่ง (กระดาษไขและกระดาษทั่วไป)</li><li>เครื่องชั่ง digital</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>คำนวณปริมาณ Oxytetrazoline ได้ 0.3 g และ Hydrophilic base 14.7 g</li><li>เลือกกระดาษไขในการชั่ง</li><li>การเซ็ตเครื่องชั่งควรวางกระดาษชั่งก่อนจึงกด zero หรือ tare แล้วจึงตักสารลงกระดาษชั่ง</li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณ Oxytetrazoline (2% * 15 g = 0.3 g) และคำนวณ Base ที่ต้องชั่งได้ถูกต้อง (15 g - 0.3 g = 14.7 g)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกใช้กระดาษไข/อุปกรณ์ชั่งเบสครีมได้อย่างเหมาะสม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เซ็ตเครื่องชั่ง Digital และตักชั่ง Hydrophillic base ได้น้ำหนักแม่นยำตามคำนวณ",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "บันทึกค่าคำนวณและน้ำหนักที่ชั่งได้ลงกระดาษคำตอบอย่างครบถ้วน",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

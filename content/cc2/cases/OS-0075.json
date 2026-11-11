@@ -1,0 +1,55 @@
+{
+ "id": "OS-0075",
+ "title": "เปิดหนังสือหาข้อมูล Drug Interactions",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Drug interaction",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2557",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ผู้ป่วยกินยา colchicine อยู่แล้วได้รับยาตามใบสั่ง ดังนี้\nomeprazole\nclarithromycin\nให้หา drug interaction ที่ severity สูงสุดเพียง 1 คู่ และบอกสาเหตุและการจัดการ",
+ "patientHtml": "",
+ "contentHtml": "<p>ผู้ป่วยกินยา colchicine อยู่แล้วได้รับยาตามใบสั่ง ดังนี้</p><ul class=\"bullet-list\"><li>omeprazole</li><li>clarithromycin</li></ul><p>ให้หา drug interaction ที่ severity สูงสุดเพียง 1 คู่ และบอกสาเหตุและการจัดการ</p>",
+ "equipmentHtml": "<p><span style=\"text-decoration: underline;\">กระดาษคำตอบ</span></p><p>คู่ที่เกิด คือ ……………………………………………………………….</p><p>ความรุนแรงระดับ ……………………………………………………………….</p><p>สาเหตุ ……………………………………………………………….</p><p>การจัดการ ………………………………………………………………</p><p>reference</p><p>o Drug interaction fact หน้า…………………</p><p>o หนังสืออื่น หน้า…………….</p>",
+ "noteHtml": "<p><span style=\"background-color: rgba(0,255,255, 0.25); padding: 0 2px; border-radius: 3px;\">สถานีที่ 15</span></p>",
+ "checklist": [
+  {
+   "t": "เลือกหนังสือถูกต้องเหมาะสม ระบุเลขหน้า",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "คู่ที่เกิด คือ (Colchicineกับ clarithromycin)",
+   "html": "คู่ที่เกิด คือ <span style=\"font-weight: 700;\">(Colchicineกับ clarithromycin)\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความรุนแรงระดับ (ระดับ major)",
+   "html": "ความรุนแรงระดับ <span style=\"font-weight: 700;\">(ระดับ major)\n</span>",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "สาเหตุ (clarithromycin เป็น CYP3A4 inhibitor จึงลดการ metabolism ของ colchicine)",
+   "html": "สาเหตุ <span style=\"font-weight: 700;\">(clarithromycin เป็น CYP3A4 inhibitor จึงลดการ metabolism ของ colchicine)\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจัดการ (ห้ามใช้ยานี้คู่กันหากผู้ป่วยมีการทำงานของตับ/ไตผิดปกติ แต่หากการทำงานของตับ/ไตปกติสามารถใช้คู่กันได้หากจำเป็น โดยให้ colchicine ไม่เกิน 0.3 mg BID และคอยติดตามอาการไม่พึงประสงค์ที่อาจเกิดซึ่งแสดงถึงภาวะความเป็นพิษจาก colchicine ได้แก่ มีไข้ ปวดท้อง ท้องเสีย)",
+   "html": "การจัดการ<span style=\"font-weight: 700;\"> (ห้ามใช้ยานี้คู่กันหากผู้ป่วยมีการทำงานของตับ/ไตผิดปกติ แต่หากการทำงานของตับ/ไตปกติสามารถใช้คู่กันได้หากจำเป็น โดยให้ colchicine ไม่เกิน 0.3 mg BID และคอยติดตามอาการไม่พึงประสงค์ที่อาจเกิดซึ่งแสดงถึงภาวะความเป็นพิษจาก colchicine ได้แก่ มีไข้ ปวดท้อง ท้องเสีย)\n</span>",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "reference Drug interaction fact (หน้า 531 จากเล่มปี 2014)",
+   "html": "reference Drug interaction fact <span style=\"font-weight: 700;\">(หน้า 531 จากเล่มปี 2014)\n</span>",
+   "s": 4,
+   "g": "ทั่วไป"
+  }
+ ]
+}

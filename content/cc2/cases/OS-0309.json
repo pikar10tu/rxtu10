@@ -1,0 +1,116 @@
+{
+ "id": "OS-0309",
+ "title": "Suspension Ibuprofen",
+ "cat": "Product",
+ "group": "Liquid Dosage Form",
+ "topic": "Suspension",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "เตรียมยา Ibuprofen suspension 100 mg/1 tsp. 40 mL กําหนดให้ยา Ibuprofen tablet มีขนาด 400 mg/tablet\nกำหนดให้ การประมาณ App. vol.\n- สารที่ละลายน้ำ = ½ ของน้ำหนัก\n- สารที่ไม่ละลายน้ำ = น้ำหนัก\n- สารที่พองตัว = น้ำหนัก\n- ของเหลว = ปริมาตร",
+ "patientHtml": "",
+ "contentHtml": "<p>เตรียมยา Ibuprofen suspension 100 mg/1 tsp. 40 mL กําหนดให้ยา Ibuprofen tablet มีขนาด 400 mg/tablet</p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><td><p><span style=\"font-weight: 700;\">Rx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">Official Formula</span>&nbsp;&nbsp;<span style=\"font-weight: 700;\">W.F</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">App.vol</span></p><p>Ibuprofen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........</p><p>Sodium CMC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.0 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........</p><p>Syrup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.0 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........</p><p>Purified water to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.........</p><p>¾ x......... = .........mL</p><p>M.ft. Suspension 40 mL</p></td></tr></table></div><p><span style=\"font-weight: 700;\">กำหนดให้ การประมาณ App. vol.</span></p><p>- สารที่ละลายน้ำ = ½ ของน้ำหนัก</p><p>- สารที่ไม่ละลายน้ำ = น้ำหนัก</p><p>- สารที่พองตัว = น้ำหนัก</p><p>- ของเหลว = ปริมาตร</p>",
+ "equipmentHtml": "<p>1. ผงยา Ibuprofen</p><p>2. Sodium CMC</p><p>3. Sorbitol solution</p><p>4. Syrup</p><p>5. Purified water</p><p>6. โกร่งกระเบื้อง</p><p>7. โกร่งแก้ว</p><p>8. Beaker</p><p>9. Stirring rod</p><p>10. Cylinder</p><p>11. ขวดแก้ว (สำหรับส่ง)</p><p>12. ฉลากยา</p><p>13. เครื่องคิดเลข</p><p>14.ช้อนเขา</p><p>15. กระดาษสำหรับชั่งสาร</p><p>16. เครื่องชั่ง</p><p><span style=\"font-weight: 700;\">Q :</span></p><p>1. จากใบสังยา จงคํานวณจํานวนยา Ibuprofen 400 mg tablet ทีต้องใช้ในตํารับนี</p><p>2. จงเตรียมยาจากใบสังยานีด้วยเทคนิคทางเภสัชกรรมทีดีและใส่บีกเกอร์ส่งกรรมการ</p><p>ผู้คุมสอบ</p><p>3. เขียนฉลากยานี พร้อมระบุวันหมดอายุ และฉลากช่วย</p>",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">Rx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">Official Formula</span>&nbsp;&nbsp;<span style=\"font-weight: 700;\">W.F</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"font-weight: 700;\">App.vol</span></p><p>Ibuprofen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.8 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.8 mL</p><p>Sodium CMC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.0 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.4 g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.4 mL</p><p>Syrup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.0 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.8 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.8 mL</p><p>Purified water to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40 mL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;40 - 6 = 34 mL</p><p>¾ x 34 = 25.5 ~ 26 mL&nbsp;&nbsp;(ส่วนที่เหลือ ¼ = 8 mL ใช้ rinse และปรับปริมาตร)</p><p>หมายเหตุ : Ibuprofen 2 g / 100 mL = 20 mg/mL = 100 mg/5 mL</p><p>Ibuprofen เป็นhydrophobic จึงต้องใช้ syrup ที่แบ่งไว้เป็น levigating agent บดให้ได้ smooth paste ก่อน เพื่อลดขนาดอนุภาค ทำให้ผงเปียกทั่วถึง ไม่จับตัวเป็นก้อน และได้ suspension ที่กระจายตัวสม่ำเสมอ Sodium CMC เป็น suspending agent ถ้าเทน้ำลงบนผงโดยตรงจะเกิด gel เคลือบผิวด้านนอกแล้วจับตัวเป็นก้อน จึงต้องทำให้เปียกด้วย syrup ก่อนแล้วค่อย ๆ เติมน้ำ</p><p>ขั้นตอนการเตรียม Ibuprofen Suspension</p><ul class=\"bullet-list\"><li>บดเม็ด Ibuprofen 400 mg (2 เม็ด) ในโกร่งกระเบื้องจนได้ผงละเอียดสม่ำเสมอ</li><li>ชั่ง Sodium CMC 0.4 g ตวง Syrup 4.8 mL และตวง Purified water สำหรับใช้ในกระบวนการ</li><li>ใส่ Sodium CMC ลงในโกร่งแก้ว นำ Syrup ส่วนที่ 1 ค่อย ๆ เติมลงไปพร้อมบดผสมเบา ๆ เพื่อให้ผงกระจายตัวอย่างทั่วถึง</li><li>ค่อย ๆ เติม Purified water (ตามสัดส่วนที่คำนวณไว้) ลงในโกร่งแก้ว คนเบา ๆ จน Sodium CMC พองตัวเป็น Mucilage เนียนและปราศจากฟองอากาศ</li><li>นำ Syrup ส่วนที่ 2 เติมลงในโกร่งกระเบื้องที่มีผง Ibuprofen บดผสม (Levigate) จนได้ลักษณะเป็นครีมเนื้อเนียน (Smooth paste)</li><li>ถ่าย Sodium CMC mucilage ลงในโกร่งกระเบื้องทีละส่วน (Geometric dilution) บดผสมให้เข้าเป็นเนื้อเดียวกันทุกครั้งจนหมด</li><li>ถ่ายส่วนผสมลงกระบอกตวง ใช้ Purified water ที่เหลือชะล้างคราบยาในโกร่งทั้งสองใบลงกระบอกตวง แล้วปรับปริมาตรให้ครบตามสูตรตำรับ ผสมให้เข้ากันดีก่อนบรรจุลงขวด</li></ul><p><span style=\"font-weight: 700;\">ubric Max 100 points</span></p><div class=\"table-responsive\"><table class=\"table-patient-info\"><tr><th><span style=\"font-weight: 700;\">Component</span></th><th><span style=\"font-weight: 700;\">Mark</span></th><th><span style=\"font-weight: 700;\">Expected Content</span></th></tr><tr><td>Calculate the drug used</td><td>/ 25</td><td><p><span style=\"color: rgb(255,0,0); font-weight: 700;\">▢ 10 points</span> – W.F. ถูกต้อง : Ibuprofen 0.8 g, Na CMC 0.4 g, Syrup 4.8 mL, Purified water 30 mL</p><p><span style=\"font-weight: 700;\">▢ 5 points</span> – ใช้จำนวน Ibuprofen 400 mg ถูกต้อง ( 2 เม็ด )</p><p><span style=\"font-weight: 700;\">▢ 5 points </span>– ¾ x 30 = 25.5 ~ 26.5 mL</p><p><span style=\"font-weight: 700;\">▢ 5 points</span> – technique การชั่ง</p></td></tr><tr><td>Compounding technique</td><td>/ 75</td><td><p><span style=\"font-weight: 700;\">▢ 5 points</span> – ไม่สัมผัสผงยา</p><p><span style=\"font-weight: 700;\">▢ 5 points</span> – เลือกโกร่งถูกต้อง (โกร่งกระเบื้องบดยา / โกร่งแก้วเตรียม mucilage)</p><p><span style=\"font-weight: 700;\">▢ 10 points </span>– เตรียม mucilage โดยทำให้ Na CMC เปียกด้วย syrup ก่อน แล้วจึงค่อย ๆ เติมน้ำ (ไม่เทน้ำลงผง CMC โดยตรง)</p><p><span style=\"font-weight: 700;\">▢ 10 points</span> – ใช้ syrup ที่แบ่งไว้เป็น levigating agent บด ibuprofen จนได้ Smooth paste</p><p><span style=\"font-weight: 700;\">▢ 10 points</span> – Geometric dilution technique (แบ่งเติม mucilage ทีละส่วน)</p><p>▢ 5 points – technique การตวง</p><p>▢ 5 points – แบ่งน้ำ ¾ ผสม กับ ¼ rinse</p><p>▢ 5 points – rinse 2-3 รอบ</p><p>▢ 5 points – คนผสมในกระบอกตวง/Beaker (ไม่เทกลับไปกลับมา)</p><p>▢ 5 points – ได้ suspension เนื้อเนียน ไม่จับตัวเป็นก้อน กระจายตัวสม่ำเสมอ</p><p>▢ 10 points – เขียนฉลากถูกต้อง</p></td></tr><tr><td>Total score</td><td>/ 100 points</td><td></td></tr></table></div>",
+ "checklist": [
+  {
+   "t": "– W.F. ถูกต้อง : Ibuprofen 0.8 g, Na CMC 0.4 g, Syrup 4.8 mL, Purified water 30 mL",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– ใช้จำนวน Ibuprofen 400 mg ถูกต้อง ( 2 เม็ด )",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– ¾ x 30 = 25.5 ~ 26.5 mL",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– technique การชั่ง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– ไม่สัมผัสผงยา",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– เลือกโกร่งถูกต้อง (โกร่งกระเบื้องบดยา / โกร่งแก้วเตรียม mucilage)",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– เตรียม mucilage โดยทำให้ Na CMC เปียกด้วย syrup ก่อน แล้วจึงค่อย ๆ เติมน้ำ (ไม่เทน้ำลงผง CMC โดยตรง)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– ใช้ syrup ที่แบ่งไว้เป็น levigating agent บด ibuprofen จนได้ Smooth paste",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– Geometric dilution technique (แบ่งเติม mucilage ทีละส่วน)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– technique การตวง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– แบ่งน้ำ ¾ ผสม กับ ¼ rinse",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– rinse 2-3 รอบ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– คนผสมในกระบอกตวง/Beaker (ไม่เทกลับไปกลับมา)",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– ได้ suspension เนื้อเนียน ไม่จับตัวเป็นก้อน กระจายตัวสม่ำเสมอ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "– เขียนฉลากถูกต้อง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "2.0 g KCl- (1) ทำการ Levigating",
+   "html": "&nbsp;&nbsp;(1.5)&nbsp;&nbsp;2.0 g KCl- (1) ทำการ Levigating",
+   "s": 1.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ผสมตำรับด้วยเทคนิค Geometric Dilution",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ผสมตำรับเนียนเป็นเนื้อเดียวกัน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ส่งมอบผลงาน/ตำรับที่เตรียมเสร็จสมบูรณ์ให้อาจารย์ผู้ตรวจ",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "id": "OS-0298",
+ "title": "Filtration & Funnel Assembly: Compound Sodium Bicarbonate Solution",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "การกรอง (Filtration), การพับกระดาษกรองแบบจีบ (Plaited Filter Paper), การเลือกวัสดุช่วยกรอง, การติดตั้งชุดกรองสารให้ได้สารละลายใส",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Product Week 1 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "มีสารละลาย Compound Sodium Bicarbonate Solution ที่เพิ่งเตรียมเสร็จ แต่พบว่ามีอนุภาคฝุ่นผงและสิ่งแปลกปลอมขนาดเล็กปนเปื้อนเล็กน้อย ต้องการกรองสารละลายนี้เพื่อให้ได้ \"สารละลายใส (Clear Filtrate)\" เพื่อนำไปบรรจุขวดจ่ายให้ผู้ป่วย จงเลือกกระดาษกรองที่เหมาะสม พับกระดาษกรอง และติดตั้งชุดกรองสารให้ถูกต้องตามหลักการทางเภสัชกรรม (ไม่ต้องกรองจริง) (เวลาปฏิบัติการ 4 นาที)",
+ "patientHtml": "",
+ "contentHtml": "<p>มีสารละลาย Compound Sodium Bicarbonate Solution ที่เพิ่งเตรียมเสร็จ แต่พบว่ามีอนุภาคฝุ่นผงและสิ่งแปลกปลอมขนาดเล็กปนเปื้อนเล็กน้อย ต้องการกรองสารละลายนี้เพื่อให้ได้ <span style=\"font-weight: 700;\">&quot;สารละลายใส (Clear Filtrate)&quot;</span> เพื่อนำไปบรรจุขวดจ่ายให้ผู้ป่วย จงเลือกกระดาษกรองที่เหมาะสม พับกระดาษกรอง และติดตั้งชุดกรองสารให้ถูกต้องตามหลักการทางเภสัชกรรม (ไม่ต้องกรองจริง) (เวลาปฏิบัติการ 4 นาที)</p>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>อุปกรณ์ที่มีในสถานี<ul class=\"bullet-list\"><li>กระดาษกรองแผ่นกลม (เส้นผ่านศูนย์กลาง <span class=\"doc-equation\">11cm</span>)</li><li>กรวยกรองแก้ว (Glass funnel)</li><li>ขาตั้งพร้อม Ring clamp (Retort stand &amp; ring clamp)</li><li>บีกเกอร์รองรับ (Receiving beaker) ขนาด <span class=\"doc-equation\">100mL</span></li><li>แท่งแก้วคน (Stirring rod)</li><li>ขวดน้ำ Purified water</li></ul></li></ul><div class=\"table-responsive\"><table class=\"table-image-grid\"><tr><td style=\"width:20.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0298-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:20.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0298-2.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:20.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0298-3.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:20.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0298-4.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td><td style=\"width:20.0%;\"><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0298-5.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></td></tr></table></div>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">หลักเกณฑ์ทางเภสัชกรรม (คู่มือทักษะสภาฯ หน้า 65–66):</span><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">Plain Filter (พับแบบเรียบ 60 องศา):</span> ใช้สำหรับการกรองเพื่อ <span style=\"font-weight: 700;\">&quot;เก็บตะกอน (Precipitate)&quot;</span></li><li><span style=\"font-weight: 700;\">Plaited Filter (พับแบบจีบ 32 จีบ):</span> ใช้สำหรับการกรองเพื่อ <span style=\"font-weight: 700;\">&quot;เก็บน้ำยาใส (Clear Filtrate)&quot;</span> เนื่องจากจีบกระดาษกรองช่วยระบายอากาศและเปิดพื้นที่ผิวสัมผัสในการไหลผ่านของเหลวได้มากกว่า</li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์ วัสดุช่วยกรอง ขนาดกรวย",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การพับกระดาษกรอง ความถูกต้อง ความเรียบร้อยสวยงาม",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การตั้งชุดกรองเหมาะสมกับวัตถุประสงค์และผลิตภัณฑ์",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการกรอง การจับอุปกรณ์",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

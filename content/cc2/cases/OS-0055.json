@@ -1,0 +1,45 @@
+{
+ "id": "OS-0055",
+ "title": "Drug interaction",
+ "cat": "Clinic",
+ "group": "การค้นข้อมูลและประสานงาน",
+ "topic": "Drug interaction",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2555",
+ "active": false,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ฐานเปิดหนังสือ ถามถึง Drug Interaction ระหว่าง Colchicine และ Erythromycin ถามว่าเกิด Sig ไหน onset เป็นอย่างไร ผลที่เกิดขึ้นเป็นอย่างไร และควรจัดการเช่นใด",
+ "patientHtml": "<p>ผู้ป่วยมาขอรับยาตามใบสั่งแพทย์ พบว่ามียารับประทานร่วมกันที่มีปฏิกิริยาระหว่างยา (Drug Interaction)</p>",
+ "contentHtml": "<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ฐานเปิดหนังสือ ถามถึง Drug Interaction ระหว่าง Colchicine และ Erythromycin ถามว่าเกิด Sig ไหน onset เป็นอย่างไร ผลที่เกิดขึ้นเป็นอย่างไร และควรจัดการเช่นใด </p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">สถานีที่ 25</span></p>",
+ "checklist": [
+  {
+   "t": "เปิดหนังสือ Drug Interaction Facts",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "บอก ระดับความสำคัญ (Significance level)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การเริ่มเกิดอาการ (Onset)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ผลที่เกิดขึ้น (บอกอาการ colchicine toxicity)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจัดการทางคลินิก",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

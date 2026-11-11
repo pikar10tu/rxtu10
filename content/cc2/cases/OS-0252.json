@@ -1,0 +1,88 @@
+{
+ "id": "OS-0252",
+ "title": "Sterile Compounding Calculation: KCl in D5W Injection",
+ "cat": "Product",
+ "group": "Calculation",
+ "topic": "Parenteral Calculation, Electrolyte Infusion, Drip Rate Calculation",
+ "diff": 2,
+ "source": "รุ่นพี่ 83 Practice Week 1",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ในการเตรียม KCl in D5W injection ความเข้มข้น 0.4 mEq/mL ปริมาตร 50 mL จาก KCl injection 10 mEq/5 mL (โดย 1 vial = 5 mL) ให้แสดงวิธีทำและตอบคำถามต่อไปนี้ลงในกระดาษคำตอบ (เวลาปฏิบัติการ 4 นาที)\nต้องใช้ KCl injection 10 mEq/5 mL กี่ Vial\nต้องใช้ D5W ปริมาตรเท่าใดสำหรับการเตรียม KCl in D5W ครั้งนี้\nสารละลายสุดท้ายที่เตรียมได้ คิดเป็นความเข้มข้นกี่ mEq/L\nหากแพทย์สั่งหยดยาเข้าทางหลอดเลือดดำด้วยอัตราเร็ว 1.5 microdrop/min จะคิดเป็นอัตราการให้ยากี่ mEq/hr (กำหนดให้ 1 mL = 60 microdrop ตามมาตรฐาน microdrip set ทั่วไป หรือใช้ 90 microdrop ตามที่ระบุในโจทย์เฉพาะข้อนี้)",
+ "patientHtml": "<ul class=\"bullet-list\"><li>(สถานีคำนวณเตรียมยา / Dry Lab ไม่มีข้อมูลผู้ป่วยเฉพาะเจาะจง)</li></ul>",
+ "contentHtml": "<p>ในการเตรียม KCl in D5W injection ความเข้มข้น 0.4 mEq/mL ปริมาตร 50 mL จาก KCl injection 10 mEq/5 mL (โดย 1 vial = 5 mL) ให้แสดงวิธีทำและตอบคำถามต่อไปนี้ลงในกระดาษคำตอบ (เวลาปฏิบัติการ 4 นาที)</p><ul class=\"bullet-list\"><li>ต้องใช้ KCl injection 10 mEq/5 mL กี่ Vial</li><li>ต้องใช้ D5W ปริมาตรเท่าใดสำหรับการเตรียม KCl in D5W ครั้งนี้</li><li>สารละลายสุดท้ายที่เตรียมได้ คิดเป็นความเข้มข้นกี่ mEq/L</li><li>หากแพทย์สั่งหยดยาเข้าทางหลอดเลือดดำด้วยอัตราเร็ว 1.5 microdrop/min จะคิดเป็นอัตราการให้ยากี่ mEq/hr (กำหนดให้ 1 mL = 60 microdrop ตามมาตรฐาน microdrip set ทั่วไป หรือใช้ 90 microdrop ตามที่ระบุในโจทย์เฉพาะข้อนี้)</li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>กระดาษโจทย์และกระดาษคำตอบ</li><li>เครื่องคิดเลข</li><li>ปากกา</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">การคำนวณข้อที่ 1 (จำนวน Vial):</span><ul class=\"bullet-list\"><li>ปริมาณ KCl ทั้งหมดที่ต้องการ = <span class=\"doc-equation\">0.4mEq/mL&times;50mL=20mEq</span></li><li>KCl injection มีขนาด 10 mEq ต่อ 5 mL (1 vial)</li><li>จำนวนที่ต้องใช้ = <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">20mEq</span><span class=\"equation-denom\">10mEq/vial</span></span>=2vials</span> (คิดเป็นปริมาตร 10 mL)</li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณข้อที่ 2 (ปริมาตร D5W):</span><ul class=\"bullet-list\"><li>ปริมาตรรวมที่ต้องการคือ 50 mL</li><li>มีปริมาตรจากตัวยา KCl injection อยู่แล้ว 10 mL</li><li>ดังนั้น ปริมาตร D5W ที่ต้องใช้ = <span class=\"doc-equation\">50-10=40mL</span></li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณข้อที่ 3 (ความเข้มข้นในหน่วย mEq/L):</span><ul class=\"bullet-list\"><li>ความเข้มข้น <span class=\"doc-equation\">0.4mEq/mL=0.4&times;1,000=400mEq/L</span></li><li>หรือคิดจาก <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">20mEq</span><span class=\"equation-denom\">0.05L</span></span>=400mEq/L</span></li></ul></li><li><span style=\"font-weight: 700;\">การคำนวณข้อที่ 4 (อัตราเร็ว mEq/hr):</span><ul class=\"bullet-list\"><li>จากที่โจทย์ระบุ <span class=\"doc-equation\">1mL=90microdrop</span></li><li>อัตราการหยด <span class=\"doc-equation\">1.5microdrop/min=1.5&times;60=90microdrop/hr</span></li><li>คิดเป็นปริมาตร = <span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">90microdrop/hr</span><span class=\"equation-denom\">90microdrop/mL</span></span>=1mL/hr</span></li><li>ความเข้มข้นของสารละลายคือ <span class=\"doc-equation\">0.4mEq/mL</span></li><li>ดังนั้น อัตราการได้รับยา = <span class=\"doc-equation\">1mL/hr&times;0.4mEq/mL=0.4mEq/hr</span><br><span style=\"font-style: italic;\">(หมายเหตุ: กรณีตรวจคำตอบ หากผู้สอบใช้ตัวแปลงมาตรฐานทั่วไป </span><span class=\"doc-equation\">1mL=60microdrop</span><span style=\"font-style: italic;\"> จะได้ </span><span class=\"doc-equation\">1.5mL/hr</span><span style=\"font-style: italic;\"> คิดเป็น </span><span class=\"doc-equation\">0.6mEq/hr</span><span style=\"font-style: italic;\"> ให้พิจารณาขั้นตอนวิธีทำประกอบตามเกณฑ์ของผู้คุมสอบ)</span></li></ul></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณจำนวน Vial ของ KCl injection ที่ต้องใช้ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน"
+  },
+  {
+   "t": "คำนวณได้ว่าต้องการ KCl ทั้งหมด 20 mEq คิดเป็น 2 Vials (10 mL)",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณจำนวน Vial ผิด",
+   "s": 0,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาตรของ D5W ที่ต้องใช้ปรับปริมาตรได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน"
+  },
+  {
+   "t": "คำนวณปริมาตร D5W ที่ต้องใช้ = 40 mL (50 mL - 10 mL)",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณปริมาตรผิด หรือตอบ 50 mL โดยไม่หักปริมาตรยา",
+   "s": 0,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณความเข้มข้นของสารละลายสุดท้ายในหน่วย mEq/L ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน"
+  },
+  {
+   "t": "แปลงหน่วยความเข้มข้น 0.4 mEq/mL ได้เท่ากับ 400 mEq/L",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณความเข้มข้นหรือแปลงหน่วยผิด",
+   "s": 0,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณอัตราการให้ยาในหน่วย mEq/hr ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน"
+  },
+  {
+   "t": "คำนวณได้ 0.4 mEq/hr (เมื่อคิดตาม 1 mL = 90 microdrop ในโจทย์) หรือแสดงวิธีทำและได้ผลลัพธ์สอดคล้องกับค่า Drop factor ที่กำหนด",
+   "s": 2.5,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  },
+  {
+   "t": "คำนวณอัตราการให้ยาผิดพลาด",
+   "s": 0,
+   "g": "การคำนวณสารน้ำและอิเล็กโทรไลต์ - 10 คะแนน",
+   "sub": true
+  }
+ ]
+}

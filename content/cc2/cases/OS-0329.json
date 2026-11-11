@@ -1,0 +1,35 @@
+{
+ "id": "OS-0329",
+ "title": "Cream Urea ชั่ง",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": "OS-0330",
+ "scenario": "ให้นิสิตชั่ง base สำหรับเตรียม Urea 5% w/w\nสูตรตำรับ:\nRx Urea 5% w/w\nHydrophilic cream base qs ad 15 g\nคำสั่ง:\nจงชั่ง Rx Urea และ Hydrophilic cream base จากสูตรที่กำหนดให้",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตชั่ง base สำหรับเตรียม Urea 5% w/w</p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Rx Urea 5% w/w</li><li>Hydrophilic cream base qs ad 15 g</li></ul><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>จงชั่ง Rx Urea และ Hydrophilic cream base จากสูตรที่กำหนดให้</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>กระดาษทดเลข (ไม่มีเครื่องคิดเลข)</li><li>กระดาษชั่ง (กระดาษไขและกระดาษทั่วไป)</li><li>เครื่องชั่ง digital</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>คำนวณปริมาณ Urea ได้ 0.75 g และ Hydrophilic cream base 14.25 g</li><li>การเซ็ตเครื่องชั่งควรวางกระดาษชั่งก่อนจึงกด zero หรือ tare แล้วจึงตักสารลงกระดาษชั่ง</li></ul>",
+ "checklist": [
+  {
+   "t": "การคำนวณปริมาณ Urea (5% * 15 g = 0.75 g) และคำนวณ Base ที่ต้องชั่งได้ถูกต้อง (15 g - 0.75 g = 14.25 g)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เซ็ตเครื่องชั่ง Digital และตักชั่ง Hydrophillic cream base ได้น้ำหนักแม่นยำตามคำนวณ",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "บันทึกค่าคำนวณและน้ำหนักที่ชั่งได้ลงกระดาษคำตอบอย่างครบถ้วน",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "id": "OS-0372",
+ "title": "การจำแนกประเภทยาตามกฎหมายและผลข้างเคียงง่วงซึม",
+ "cat": "SAP",
+ "group": "ประเภทยาและสิทธิ์การจำหน่าย",
+ "topic": "Drug Classification & CNS Depressant Side Effects",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2552",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "เภสัชกรได้รับรายการยา 4 ชนิด จงระบุประเภทของยาตามกฎหมาย และระบุว่ายาชนิดใดมีผลข้างเคียงทำให้เกิดอาการง่วงซึม (Sedation / Drowsiness)\n1. Dipotassium clorazepate\n2. Fluoxetine\n3. Carbamazepine\n4. Chlorpheniramine maleate (CPM) 4 mg",
+ "patientHtml": "<p>ไม่มีข้อมูลผู้ป่วยในสถานีนี้</p>",
+ "contentHtml": "<p>เภสัชกรได้รับรายการยา 4 ชนิด จงระบุประเภทของยาตามกฎหมาย และระบุว่ายาชนิดใดมีผลข้างเคียงทำให้เกิดอาการง่วงซึม (Sedation / Drowsiness)</p><p>1. Dipotassium clorazepate</p><p>2. Fluoxetine</p><p>3. Carbamazepine</p><p>4. Chlorpheniramine maleate (CPM) 4 mg</p>",
+ "equipmentHtml": "<p>ตัวอย่างรายการยา 4 ชนิด และกระดาษคำตอบ</p>",
+ "noteHtml": "<p><span style=\"font-weight: 700;\">เฉลยคำตอบพร้อมคำอธิบาย:</span></p><p><span style=\"font-weight: 700;\">✅ คำตอบที่ถูกต้อง:</span></p><p>1. ประเภทยา: Clorazepate = วัตถุออกฤทธิ์ประเภท 4, Fluoxetine = ยาอันตราย, Carbamazepine = ยาอันตราย, CPM = ยาอันตราย</p><p>2. ยาที่ทำให้ง่วงซึม: มี 3 รายการ ได้แก่ Dipotassium clorazepate, Carbamazepine, และ Chlorpheniramine (CPM)</p><p><span style=\"font-weight: 700;\">📖 Guideline อ้างอิง</span>:</p><p>- พระราชบัญญัติยา พ.ศ. 2510 และประมวลกฎหมายยาเสพติด พ.ศ. 2564</p><p><span style=\"font-weight: 700;\">📌 จุดจำก่อนสอ</span>บ:</p><p>- Fluoxetine เป็น SSRI ที่ทำให้ตื่นตัว/นอนไม่หลับ (ไม่ทำให้ง่วง)</p><hr class=\"case-divider\">",
+ "checklist": [
+  {
+   "t": "รายการที่ 1 (Dipotassium clorazepate): ระบุเป็น วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 4 และระบุว่า ทำให้ง่วงซึม ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การจำแนกประเภทและผลข้างเคียง - รวม 10 คะแนน"
+  },
+  {
+   "t": "รายการที่ 2 (Fluoxetine): ระบุเป็น ยาอันตราย และระบุว่า ไม่ง่วงซึม (มีฤทธิ์กระตุ้นประสาท/Activating effect) ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การจำแนกประเภทและผลข้างเคียง - รวม 10 คะแนน"
+  },
+  {
+   "t": "รายการที่ 3 (Carbamazepine): ระบุเป็น ยาอันตราย และระบุว่า ทำให้ง่วงซึม ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การจำแนกประเภทและผลข้างเคียง - รวม 10 คะแนน"
+  },
+  {
+   "t": "รายการที่ 4 (CPM 4 mg): ระบุเป็น ยาอันตราย และระบุว่า ทำให้ง่วงซึม ได้ถูกต้อง",
+   "s": 2.5,
+   "g": "การจำแนกประเภทและผลข้างเคียง - รวม 10 คะแนน"
+  }
+ ]
+}

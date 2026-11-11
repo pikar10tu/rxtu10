@@ -1,0 +1,40 @@
+{
+ "id": "OS-0331",
+ "title": "ointment SA ชั่ง",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "ointment",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": "OS-0332",
+ "scenario": "ให้นิสิตชั่ง simple ointment สำหรับเตรียม TA + Salicylic acid ointment\nสูตรตำรับ:\nRx Salicylic acid 0.75 g\nTriamcinolone acetonide 0.02 g\nSimple ointment qs 15 g\nคำสั่ง:\nจงชั่ง simple ointment จากสูตรที่กำหนดให้",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตชั่ง simple ointment สำหรับเตรียม TA + Salicylic acid ointment </p><p>สูตรตำรับ:</p><ul class=\"bullet-list\"><li>Rx Salicylic acid 0.75 g</li><li>Triamcinolone acetonide 0.02 g</li><li>Simple ointment qs 15 g</li></ul><p>คำสั่ง:</p><ol class=\"ordered-list\"><li>จงชั่ง simple ointment จากสูตรที่กำหนดให้</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>กระดาษทดเลข (ไม่มีเครื่องคิดเลข)</li><li>กระดาษชั่ง (กระดาษไขและกระดาษทั่วไป)</li><li>เครื่องชั่ง digital</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>คำนวณปริมาณผงยารวมได้ (0.75 g + 0.02 g = 0.77 g) และคำนวณ Base ที่ต้องชั่งได้ถุกต้องคือ (15 g - 0.77 g = 14.23 g)</li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณน้ำหนักผงยารวม และคำนวณ Base ที่ต้องชั่งได้ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "รองกระดาษชั่งและเซ็ต Zero บนเครื่องชั่งอย่างถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ชั่ง simple ointment ได้น้ำหนักที่ถูกต้องคือ 14.23 g",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียนคำตอบตัวเลขลงกระดาษได้ถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

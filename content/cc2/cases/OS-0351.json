@@ -1,0 +1,50 @@
+{
+ "id": "OS-0351",
+ "title": "Untitled Case",
+ "cat": "Product",
+ "group": "การใช้ยาเทคนิคพิเศษ",
+ "topic": "ชั่ง",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงชั่ง Simple ointment จากสูตรตำรับต่อไปนี้โดยเครื่องชั่งปรับสมดุลเรียบร้อยแล้ว\nRx\tSalicylic acid \t\t\t\t0.75 g\nTriamcinolone acetonide \t\t0.02 g\nSimple ointment \t\t\tqs. 15 g",
+ "patientHtml": "",
+ "contentHtml": "<p>จงชั่ง Simple ointment จากสูตรตำรับต่อไปนี้โดยเครื่องชั่งปรับสมดุลเรียบร้อยแล้ว</p><p>Rx&nbsp;&nbsp;&nbsp;&nbsp;Salicylic acid &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.75 g</p><p>Triamcinolone acetonide &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.02 g</p><p>Simple ointment &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;qs. 15 g</p>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>เครื่องชั่ง</li><li>เครื่องคิดเลขแม่ค้า</li><li>Simple ointment</li><li>กระดาษชั่งยา</li><li>Spatular</li><li>Stirring rod</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li>ชั่ง Simple ointment 14.23 g</li><li>เทคนิคการชั่งถูกต้อง</li></ul>",
+ "checklist": [
+  {
+   "t": "เช็คลูกน้ำเครื่องชั่ง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ดูความสะอาดของเครื่องชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การ tare เครื่อง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "พับกระทง",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลาก base 3 ครั้ง (ตอนหยิบ/ก่อนตัก/ตอนเก็บ)",
+   "s": 2,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เลือกใช้อุปกรณ์ถูก",
+   "s": 1,
+   "g": "ทั่วไป"
+  }
+ ]
+}

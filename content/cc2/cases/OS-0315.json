@@ -1,0 +1,55 @@
+{
+ "id": "OS-0315",
+ "title": "Cream",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Cream",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตชั่ง PEG ointment เพื่อใช้ในการทำ Nitrofurantoin cream\nสูตรตำรับ :\nNitrofurantoin 5 g\nPEG ointment q.s. 10 g\nคำสั่ง :\nจงชั่ง PEG Ointment ตามสูตรตำรับ",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตชั่ง PEG ointment เพื่อใช้ในการทำ Nitrofurantoin cream</p><p>สูตรตำรับ : </p><ul class=\"bullet-list\"><li>Nitrofurantoin 5 g</li><li>PEG ointment q.s. 10 g</li></ul><p>คำสั่ง : </p><ol class=\"ordered-list\"><li>จงชั่ง PEG Ointment ตามสูตรตำรับ</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Nitrofurantoin</li><li>PEG ointment</li><li>เครื่องชั่ง</li><li>กระดาษชั่งแบบธรรมดาและแบบกระดาษไข</li><li>ช้อนเขา</li><li>Spatula</li><li>Stiring rod</li></ol>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><div style=\"text-align: center; margin: 12px 0;\"><img src=\"/cc2/img/OS-0315-1.webp\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\" alt=\"รูปภาพประกอบเคส\" /></div></li></ul>",
+ "checklist": [
+  {
+   "t": "คำนวณปริมาณที่จะชั่ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "พับกระทงชั่ง ถูกต้อง เรียบร้อย",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เขียน ชื่อ นํ้าหนัก บนกระทง",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อ่านฉลากครบ 3 ครั้ง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "อุปกรณ์ที่ใช้ตักสาร",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ชั่งนํ้าหนักถูกต้อง",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}

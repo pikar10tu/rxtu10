@@ -1,0 +1,55 @@
+{
+ "id": "OS-0303",
+ "title": "Cream Preparation Part 3: Incorporation on Slab & Levigation (ต่อจาก PD84W203)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "การผสมยาบน Ointment Slab, การเลือก Levigating Agent (Glycerol vs Mineral Oil), การทำ Smooth Paste, Geometric Dilution, Homogeneity Test",
+ "diff": 2,
+ "source": "โจทย์ซ้อม Prodct Week 2 รุ่นพี่ 84",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "จงเตรียมตำรับ Calamine Cream ปริมาณ 15g บนแผ่นกระเบื้องผสมยา (Ointment Slab) ด้วยเทคนิคทางเภสัชกรรมที่เหมาะสมตามหลักการผสมยาเข้ากับยาพื้นกึ่งแข็ง โดยเลือกสารช่วยบี้บด (Levigating agent) ให้ถูกต้องกับชนิดของยาพื้น ผสมจนเข้าเป็นเนื้อเดียวกันอย่างสมบูรณ์ และแสดงการทดสอบความเนียนสม่ำเสมอ (เวลาปฏิบัติการ 4 นาที)\nข้อมูลบริบท\nสูตรตำรับที่ต้องเตรียม: Calamine Cream 15g\nสารเคมีที่มีในสถานี:\nCalamine powder 1.20g (จัดชั่งไว้ให้แล้วในซองยา)\nGlycerol (บรรจุในขวดหยด Dropper bottle)\nMineral oil (บรรจุในขวดหยด Dropper bottle)\nCream base 13.80g (นำมาจากสถานีข้อ 3.2)\nอุปกรณ์ที่มีในสถานี:\nแผ่นกระเบื้องผสมยา (Ointment Slab) ที่สะอาดและแห้ง\nไม้พายผสมยา (Spatula สเตนเลส) 2 เล่ม\nกระดาษทิชชูทำความสะอาด",
+ "patientHtml": "",
+ "contentHtml": "<p>จงเตรียมตำรับ Calamine Cream ปริมาณ <span class=\"doc-equation\">15g</span> บนแผ่นกระเบื้องผสมยา (Ointment Slab) ด้วยเทคนิคทางเภสัชกรรมที่เหมาะสมตามหลักการผสมยาเข้ากับยาพื้นกึ่งแข็ง โดยเลือกสารช่วยบี้บด (Levigating agent) ให้ถูกต้องกับชนิดของยาพื้น ผสมจนเข้าเป็นเนื้อเดียวกันอย่างสมบูรณ์ และแสดงการทดสอบความเนียนสม่ำเสมอ (เวลาปฏิบัติการ 4 นาที)</p><p><span style=\"font-weight: 700;\">ข้อมูลบริบท</span></p><ul class=\"bullet-list\"><li>สูตรตำรับที่ต้องเตรียม: Calamine Cream <span class=\"doc-equation\">15g</span></li><li>สารเคมีที่มีในสถานี:<ul class=\"bullet-list\"><li>Calamine powder <span class=\"doc-equation\">1.20g</span> (จัดชั่งไว้ให้แล้วในซองยา)</li><li>Glycerol (บรรจุในขวดหยด Dropper bottle)</li><li>Mineral oil (บรรจุในขวดหยด Dropper bottle)</li><li>Cream base <span class=\"doc-equation\">13.80g</span> (นำมาจากสถานีข้อ 3.2)</li></ul></li><li>อุปกรณ์ที่มีในสถานี:<ul class=\"bullet-list\"><li>แผ่นกระเบื้องผสมยา (Ointment Slab) ที่สะอาดและแห้ง</li><li>ไม้พายผสมยา (Spatula สเตนเลส) 2 เล่ม</li><li>กระดาษทิชชูทำความสะอาด</li></ul></li></ul>",
+ "equipmentHtml": "<ul class=\"bullet-list\"><li>แผ่น Ointment Slab ประจำสถานี</li><li>Spatula สเตนเลส 2 เล่ม</li><li>ซอง Calamine powder <span class=\"doc-equation\">1.20g</span></li><li>ขวดหยด Glycerol และขวดหยด Mineral oil</li><li>กระดาษทิชชูทำความสะอาด</li></ul>",
+ "noteHtml": "<ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">หลักการเลือก Levigating Agent (คู่มือทักษะสภาฯ หน้า 45, 63):</span><ul class=\"bullet-list\"><li><span style=\"font-weight: 700;\">Oleaginous base / Absorption base / W/O cream:</span> ใช้ <span style=\"font-weight: 700;\">Mineral oil</span> เป็น Levigating agent</li><li><span style=\"font-weight: 700;\">O/W cream (Vanishing cream) / Water-soluble base:</span> ใช้ <span style=\"font-weight: 700;\">Glycerol (Glycerin) หรือ Propylene glycol</span> เป็น Levigating agent</li><li><span style=\"font-style: italic;\">จุดตัดคะแนนวิกฤต:</span> หากผู้สอบหยิบขวด Mineral oil มาหยดลงบนผง Calamine เพื่อเตรียม Vanishing cream ให้ตัดคะแนนส่วนการเลือกสารเป็น 0 ทันที</li></ul></li><li><span style=\"font-weight: 700;\">Geometric Dilution บน Slab:</span><ul class=\"bullet-list\"><li>เนื้อครีม <span class=\"doc-equation\">13.80g</span> ต้องค่อยๆ ดึงมาผสมกับ Calamine paste (<span class=\"doc-equation\">1.20g</span>) ทีละน้อยตามลำดับ <span class=\"doc-equation\">1.2g&rarr;2.4g&rarr;4.8g&rarr;</span> ส่วนที่เหลือ</li><li>การเทผสมรอบเดียวจะทำให้ผงยาจับเป็นก้อนเล็กๆ (Lumps) กระจายตัวไม่สม่ำเสมอ</li></ul></li><li><span style=\"font-weight: 700;\">Common Pitfalls:</span> เลือก Mineral oil แทน Glycerol, ไม่ทำ Smooth paste (เอาครีมมาคลุกผงยาแห้งๆ ทันทีทำให้เนื้อครีมสาก), ผสมรวดเดียวไม่ทำ Geometric dilution, หรือยก Slab ไปล้างน้ำที่อ่างล้างมือจนเสี่ยงต่อการตกแตก</li></ul>",
+ "checklist": [
+  {
+   "t": "การจับและวางตำแหน่งอุปกรณ์บน Slab",
+   "s": 1,
+   "g": "การจัดวางอุปกรณ์และสารบน Slab - 2 คะแนน"
+  },
+  {
+   "t": "ตำแหน่งการจัดวางสารตั้งต้นบน Slab",
+   "s": 1,
+   "g": "การจัดวางอุปกรณ์และสารบน Slab - 2 คะแนน"
+  },
+  {
+   "t": "การเลือกชนิดสารช่วยบี้บด",
+   "s": 2,
+   "g": "เทคนิคการเลือก Levigating Agent และการทำ Smooth Paste - 3 คะแนน"
+  },
+  {
+   "t": "เทคนิคการทำ Smooth Paste (Levigation Step)",
+   "s": 1,
+   "g": "เทคนิคการเลือก Levigating Agent และการทำ Smooth Paste - 3 คะแนน"
+  },
+  {
+   "t": "การผสมยาพื้นด้วยวิธีเจือจางเชิงเรขาคณิต (Geometric Dilution - Critical Step)",
+   "s": 3,
+   "g": "เทคนิคการผสม Geometric Dilution และการทดสอบ - 4 คะแนน"
+  },
+  {
+   "t": "การทดสอบความเป็นเนื้อเดียวกัน (Homogeneity Test)",
+   "s": 1,
+   "g": "เทคนิคการผสม Geometric Dilution และการทดสอบ - 4 คะแนน"
+  },
+  {
+   "t": "การทำความสะอาดแผ่น Slab",
+   "s": 1,
+   "g": "ความสะอาดและการจัดการหลังเสร็จสิ้น - 1 คะแนน"
+  }
+ ]
+}

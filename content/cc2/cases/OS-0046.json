@@ -1,0 +1,40 @@
+{
+ "id": "OS-0046",
+ "title": "หา DRPs",
+ "cat": "Clinic",
+ "group": "การซักประวัติและจ่ายยา",
+ "topic": "หา DRPs",
+ "diff": 2,
+ "source": "ข้อสอบจริง ปี 2555",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้หา Drug Related Problems (DRPs) จากใบสั่งยา มีข้อมูลว่าเป็นผู้หญิงตั้งครรภ์ได้ 3 เดือน แพ้ยา NSAIDs (Angioedema) และให้ระบุแนวทางแก้ไข",
+ "patientHtml": "<p>หญิงตั้งครรภ์ได้ 3 เดือน แพ้ยา NSAIDs (Angioedema) ยาที่ผู้ป่วยได้รับคือ ยา MTX, Chloroquine, Folic acid, Diclofenac</p>",
+ "contentHtml": "<p>ให้หา Drug Related Problems (DRPs) จากใบสั่งยา มีข้อมูลว่าเป็นผู้หญิงตั้งครรภ์ได้ 3 เดือน แพ้ยา NSAIDs (Angioedema) และให้ระบุแนวทางแก้ไข </p>",
+ "equipmentHtml": "",
+ "noteHtml": "<p><span style=\"font-weight: 700;\"> </span></p><p><span style=\"font-weight: 700;\">สถานีที่ 10</span></p>",
+ "checklist": [
+  {
+   "t": "ท้องแต่จ่าย MTX",
+   "s": 1,
+   "g": "การทักทาย แนะนำตัว และการซักประวัติ"
+  },
+  {
+   "t": "แพ้ NSAID แต่จ่าย Diclofenac",
+   "s": 1,
+   "g": "การทักทาย แนะนำตัว และการซักประวัติ"
+  },
+  {
+   "t": "คํานวณเลขแล้วจํานวนยาที่สั่งเกิน",
+   "s": 1,
+   "g": "การประเมินปัญหา การให้คำแนะนำ และการติดตามผล"
+  },
+  {
+   "t": "คํานวณเลขแล้วยาที่สั่งไม่พอ",
+   "s": 1,
+   "g": "การประเมินปัญหา การให้คำแนะนำ และการติดตามผล"
+  }
+ ]
+}

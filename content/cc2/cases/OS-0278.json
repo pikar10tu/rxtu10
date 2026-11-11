@@ -1,0 +1,20 @@
+{
+ "id": "OS-0278",
+ "title": "พัก 3A",
+ "cat": "Product",
+ "group": "",
+ "topic": "",
+ "diff": 2,
+ "source": "Mock Exam 2569 (Week 2) ชุด A",
+ "active": true,
+ "durationMin": 8,
+ "gated": [],
+ "next": null,
+ "scenario": "คำสั่ง: จงล้างทำความสะอาด เช็ดอุปกรณ์ทุกชิ้นให้แห้งสนิท และจัดวางคืนตำแหน่งเดิม เพื่อเตรียมความพร้อมสำหรับสถานีถัดไป",
+ "patientHtml": "",
+ "contentHtml": "<p><span style=\"font-weight: 700;\">คำสั่ง:</span> จงล้างทำความสะอาด เช็ดอุปกรณ์ทุกชิ้นให้แห้งสนิท และจัดวางคืนตำแหน่งเดิม เพื่อเตรียมความพร้อมสำหรับสถานีถัดไป</p>",
+ "equipmentHtml": "<p><span style=\"color: rgb(31,31,31); font-weight: 700;\">ระยะเวลา:</span><span style=\"color: rgb(31,31,31);\"> 8 นาที</span></p>",
+ "noteHtml": "",
+ "checklist": [],
+ "rest": true
+}

@@ -1,0 +1,70 @@
+{
+ "id": "OS-0322",
+ "title": "Ointment Sulfur ผสม (ต่อจาก-PDSS11)",
+ "cat": "Product",
+ "group": "Semisolid Dosage Form",
+ "topic": "Ointment",
+ "diff": 2,
+ "source": "ไม่ระบุ",
+ "active": true,
+ "durationMin": null,
+ "gated": [],
+ "next": null,
+ "scenario": "ให้นิสิตเตรียม sulfur ointment 10 g\nสูตรตำรับ :\nSulfur 10 g\nWhite soft paraffin base to 100 g\nคำสั่ง :\nเลือก levigating agent ให้เหมาะสมและผสมสารให้เข้ากัน",
+ "patientHtml": "",
+ "contentHtml": "<p>ให้นิสิตเตรียม sulfur ointment 10 g</p><p>สูตรตำรับ : </p><ul class=\"bullet-list\"><li>Sulfur 10 g</li><li>White soft paraffin base to 100 g</li></ul><p>คำสั่ง :</p><ol class=\"ordered-list\"><li>เลือก levigating agent ให้เหมาะสมและผสมสารให้เข้ากัน</li></ol>",
+ "equipmentHtml": "<ol class=\"ordered-list\"><li>Sulfur 1 g</li><li>Levigating agent</li><li>Slap</li><li>Spatula</li></ol>",
+ "noteHtml": "",
+ "checklist": [
+  {
+   "t": "การเลือกอุปกรณ์การเตรียม",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การวาง / จับ slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การจับ spatula",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตำแหน่งการวางตัวยา / ยาพื้น บน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการผสมตัวยากับยาพื้น การใช้ levigating agent",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "การละลายผงยา (ปริมาณน้ำที่ใช้ / อุปกรณ์ที่ใช้)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "เทคนิคการบดผสมตัวยากับยาพื้น Geometric dilution (แบ่งอย่างน้อย 3 ครั้ง)",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ตรวจสอบความเป็นเนื้อเดียวกัน โดยปาดบน slab",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ได้ผลิตภัณฑ์เนื้อเนียน",
+   "s": 1,
+   "g": "ทั่วไป"
+  },
+  {
+   "t": "ความสะอาด และ อื่นๆ",
+   "s": 0.5,
+   "g": "ทั่วไป"
+  }
+ ]
+}
