@@ -24,15 +24,15 @@
       <!-- วันนี้ของคุณ = ข้อสอบประจำวัน · ข้อที่เคยผิด · รายได้ + รายละเอียดเดิมพับไว้ -->
       <ContinueCard @sheet="onCardSheet" />
 
-      <!-- ประจำวันสนุกๆ: ดวง → อีเวนต์ → MBTI → เกร็ดฯ · ข้ามตัวที่ไม่มี · ครบ 4 = เกร็ดฯ ลงการ์ดเต็มกว้าง -->
+      <!-- ประจำวันสนุกๆ: ดวง → อีเวนต์ → MBTI → เกร็ดความรู้เภสัช (13 พ.ย. แทนสถิติเว็บ — ยังอยู่ที่ /fun-facts) · ข้ามตัวที่ไม่มี · ครบ 4 = เกร็ดฯ ลงการ์ดเต็มกว้าง -->
       <div class="home-sec">ประจำวันสนุกๆ</div>
       <div class="home-fun" :style="{ gridTemplateColumns: `repeat(${funCols}, minmax(0, 1fr))` }">
         <HoroCard tile />
         <EventBanner v-if="hasEvent" tile />
         <MbtiPromo v-if="hasMbtiPromo" tile />
-        <FunFactsWidget v-if="!factsWide" tile />
+        <PharmFactCard v-if="!factsWide" tile />
       </div>
-      <FunFactsWidget v-if="factsWide" />
+      <PharmFactCard v-if="factsWide" />
 
       <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
       <ResidenceCard />
@@ -73,7 +73,7 @@ import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import ContinueCard from '../components/home/ContinueCard.vue'
 import GlobalSearchPanel from '../components/search/GlobalSearchPanel.vue'
 const HoroCard = defineAsyncComponent(() => import('../components/horo/HoroCard.vue'))
-import FunFactsWidget from '../components/shared/FunFactsWidget.vue'
+import PharmFactCard from '../components/home/PharmFactCard.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import EventBanner from '../components/shared/EventBanner.vue'
 import MbtiPromo from '../components/home/MbtiPromo.vue'

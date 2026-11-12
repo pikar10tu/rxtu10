@@ -8,7 +8,7 @@ import { cleanText } from '../utils/text.js'
 export const NEWS_MSG_MAX = 140
 
 /** ชนิดที่ rules ยอมให้ผู้เล่นโพสต์ — เพิ่มที่นี่แล้วต้องเพิ่มใน firestore.rules ด้วย (แล้ว deploy) */
-export const NEWS_TYPES = ['achievement', 'legendary', 'tower100', 'record1', 'instructor']
+export const NEWS_TYPES = ['achievement', 'legendary', 'tower100', 'record1', 'instructor', 'fact']   // fact = แชร์เกร็ดความรู้ (จำกัดวันละครั้งฝั่ง client)
 
 /**
  * เลน "ข่าวอยู่ยาว" ของกระดานข่าว — ครั้งแรก/ที่หนึ่งของรุ่นเท่านั้น
