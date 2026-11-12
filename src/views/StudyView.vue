@@ -5,7 +5,7 @@
         <div class="sv-title"><Emoji char="📚" /> เตรียมสอบ</div>
         <HelpButton topic="study" />
       </div>
-      <div class="sv-sub">อีก {{ daysLeft }} วันถึงสอบใบประกอบฯ · CC2 11 ธ.ค. · CC1 12–13 ธ.ค.</div>
+      <div class="sv-sub">CC2 11 ธ.ค. · CC1 12–13 ธ.ค.</div>
     </div>
 
     <template v-if="!authStore.isLoggedIn">
@@ -31,14 +31,51 @@
           <!-- ค้นหารวม ยา · เคส CC2 (0 read — public/search-index.json) · สรุปค้นเองข้างบนแล้ว -->
           <GlobalSearchPanel v-model="search" hide-input :exclude="['sums']" />
         </div>
-        <div v-else class="sv-doors">
-          <button v-for="d in DOORS" :key="d.key" type="button" class="sv-door" :class="['d-' + d.key, { soon: d.soon }]" :disabled="d.soon" @click="openDoor(d.key)">
-            <span v-if="d.soon" class="sv-door-soon">Coming soon</span>
-            <span v-else-if="d.badge" class="sv-door-badge">{{ d.badge }}</span>
-            <span class="sv-door-em"><Emoji :char="d.emoji" /></span>
-            <span class="sv-door-t"><b>{{ d.title }}</b><small>{{ d.sub }}</small></span>
+        <!-- ── หน้าแรกแบบจัดกลุ่ม (user เคาะ 11 พ.ย. 2026): ทำวันนี้ → ฝึกทำ → อ่าน+ค้น → ผลฝึก ── -->
+        <template v-else>
+          <section class="sv-today" aria-label="ทำวันนี้">
+            <div class="sv-sec-h"><Emoji char="✅" /> ทำวันนี้ <span class="sv-days">อีก {{ daysLeft }} วันสอบ</span></div>
+            <div v-if="todayItems.length" class="sv-today-list">
+              <button v-for="t in todayItems" :key="t.key" type="button" class="sv-today-row" @click="openDoor(t.door)">
+                <span class="sv-today-em"><Emoji :char="t.emoji" /></span>
+                <span class="sv-today-t"><b>{{ t.title }}</b><small>{{ t.sub }}</small></span>
+                <span class="sv-today-go">›</span>
+              </button>
+            </div>
+            <div v-else class="sv-today-clear">
+              <span><Emoji char="🎉" /> วันนี้ครบแล้ว เก่งมาก</span>
+              <button type="button" class="sv-today-free" @click="openDoor('flash')">แฟลชการ์ดอิสระ <Emoji char="🎲" /></button>
+            </div>
+          </section>
+
+          <div class="sv-sec-h"><Emoji char="✍️" /> ฝึกทำ</div>
+          <div class="sv-doors big">
+            <button v-for="d in PRACTICE" :key="d.key" type="button" class="sv-door" :class="'d-' + d.key" @click="openDoor(d.key)">
+              <span v-if="d.badge" class="sv-door-badge">{{ d.badge }}</span>
+              <span class="sv-door-em"><Emoji :char="d.emoji" /></span>
+              <span class="sv-door-t"><b>{{ d.title }}</b><small>{{ d.sub }}</small></span>
+            </button>
+          </div>
+
+          <div class="sv-sec-h"><Emoji char="📖" /> อ่าน + ค้น</div>
+          <div class="sv-doors small">
+            <button v-for="d in READ" :key="d.key" type="button" class="sv-door" :class="['d-' + d.key, { soon: d.soon }]" :disabled="d.soon" @click="openDoor(d.key)">
+              <span v-if="d.soon" class="sv-door-soon">เร็วๆ นี้</span>
+              <span class="sv-door-em"><Emoji :char="d.emoji" /></span>
+              <span class="sv-door-t"><b>{{ d.short || d.title }}</b><small>{{ d.tile }}</small></span>
+            </button>
+          </div>
+
+          <button type="button" class="sv-stats" @click="openDoor('stats')">
+            <span class="sv-stats-em"><Emoji char="📊" /></span>
+            <span class="sv-stats-t">
+              <b>ผลฝึกของฉัน</b>
+              <small v-if="statLine">{{ statLine }}</small>
+              <small v-else>ทำข้อสอบสักหน่อย แล้วจะเห็นว่าหมวดไหนแม่น หมวดไหนควรฝึก</small>
+            </span>
+            <span class="sv-today-go">›</span>
           </button>
-        </div>
+        </template>
       </template>
       <div v-else class="sv-doorhead">
         <button type="button" class="sv-back" aria-label="กลับหน้าเตรียมสอบ" @click="openDoor('home')">‹</button>
@@ -254,6 +291,7 @@ import { DRUGS } from '../data/index.js'
 import { sm2Update, newSrsCard } from '../utils/sm2.js'
 import { dueCount as qcardsDueCount } from '../utils/srsQuestions.js'   // ชนกับ dueCount ของแฟลชการ์ดตัวยาด้านล่าง
 import { cleanText, LIMITS } from '../utils/text.js'
+import { axisStats, suggestAxes, MIN_ANSWERED } from '../utils/practiceStats.js'
 
 const authStore = useAuthStore()
 const { toast } = useToast()
@@ -308,6 +346,30 @@ const DOORS = computed(() => [
   { key: 'drug',  emoji: '💊', title: 'ฐานข้อมูลยา', sub: 'ข้อมูลยาภาษาไทย จากฐานข้อมูล DailyMed (US FDA)', badge: 0, soon: !drugDbOpen.value },
 ])
 const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
+const pick = (...keys) => keys.map(k => doorOf(k))
+const PRACTICE = computed(() => pick('quiz', 'cc2').map(d => (d.key === 'quiz' ? { ...d, badge: 0 } : d)))   // เลขข้อผิดอยู่ในแถบทำวันนี้แล้ว
+const READ = computed(() => pick('sum', 'drug', 'tool').map(d => ({ ...d, ...READ_TILE[d.key] })))
+const READ_TILE = {
+  sum: { tile: `${SUMMARIES.filter(x => x.ready).length} เรื่อง` },
+  drug: { short: 'ฐานยา', tile: 'DailyMed' },
+  tool: { short: 'คำนวณ', tile: 'CrCl · เด็ก' },
+}
+// แถบ "ทำวันนี้" — โชว์เฉพาะที่ยังค้าง · ว่างหมด = วันนี้ครบแล้ว
+const todayItems = computed(() => [
+  !playedToday.value && { key: 'daily', door: 'daily', emoji: '🌅', title: 'ข้อสอบประจำวัน', sub: '5 ข้อวันละรอบ · ลุ้นท็อป 10' },
+  redoDue.value && { key: 'redo', door: 'quiz', emoji: '🔁', title: `ข้อที่เคยผิด ${redoDue.value} ข้อ`, sub: 'ตอบใหม่จนถูก 3 ครั้งติดแล้วหลุดกอง' },
+  queueSize.value && { key: 'flash', door: 'flash', emoji: '🧠', title: `แฟลชการ์ด ${queueSize.value} ใบ`, sub: `ประมาณ ${estMin(queueSize.value)} นาที` },
+].filter(Boolean))
+// สรุปผลฝึกบรรทัดเดียว: หมวดแม่นสุด · หมวดควรฝึก (0 reads — study.gs)
+const statLine = computed(() => {
+  const rows = axisStats(authStore.userData?.study?.gs).filter(r => r.t >= MIN_ANSWERED)
+  if (!rows.length) return ''
+  const best = rows.reduce((a, b) => (b.pct > a.pct ? b : a))
+  const weak = suggestAxes(rows, 1)[0]
+  const parts = [`แม่น ${best.label} ${best.pct}%`]
+  if (weak && weak.key !== best.key) parts.push(`ควรฝึก ${weak.label} ${weak.pct}%`)
+  return parts.join(' · ')
+})
 const TOOLS = [
   { emoji: '🧮', title: 'คำนวณ CrCl', sub: 'Cockcroft-Gault · ใส่ส่วนสูงได้ IBW/AdjBW', to: '/study/crcl' },
   { emoji: '👶', title: 'ขนาดยาน้ำเด็ก', sub: 'ใส่น้ำหนัก ได้ขนาดเป็น mL ต่อครั้ง · 19 ยา', to: '/study/ped-dose' },
@@ -572,10 +634,10 @@ async function sendReport() {
 .sv-door:active { transform: translateY(1px); }
 .sv-door:focus-visible, .sv-back:focus-visible, .sv-res:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .d-quiz { background: var(--primary-light); } .d-sum { background: var(--accent-light); } .d-flash { background: var(--mint-light); } .d-tool { background: #fff6e0; }
-.d-daily, .d-stats, .d-drug { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; }
+.d-daily, .d-stats { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; }
 .d-stats { background: #f3efff; }
 .d-daily { background: linear-gradient(135deg, #fff4d6, #ffe3ec); }
-.d-drug { background: #eef3f7; grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; }
+.d-drug { background: #eef3f7; }
 .sv-door.soon { cursor: default; opacity: .7; }
 .sv-door.soon:active { transform: none; }
 .sv-door-soon { position: absolute; top: 10px; right: 10px; padding: 1px 8px; border-radius: 999px; background: var(--ink); color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: .02em; }
@@ -583,6 +645,28 @@ async function sendReport() {
 .sv-door-t { display: flex; flex-direction: column; gap: 2px; }
 .sv-door-t b { font-size: 1.05rem; }
 .sv-door-t small { font-size: .74rem; color: var(--muted); line-height: 1.35; }
+/* ── จัดกลุ่ม 11 พ.ย. 2026 ── */
+.sv-sec-h { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 16px 2px 8px; }
+.sv-today .sv-sec-h { margin-top: 0; }
+.sv-today { background: linear-gradient(135deg, var(--primary-light), var(--accent-light)); border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); padding: 12px; }
+.sv-today-list { display: flex; flex-direction: column; gap: 6px; }
+.sv-days { font-weight: 600; margin-left: 4px; }
+.sv-today-row, .sv-stats { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: none; border-radius: 12px; background: #fff; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+.sv-today-row:focus-visible, .sv-stats:focus-visible, .sv-today-free:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.sv-today-em, .sv-stats-em { font-size: 1.5rem; line-height: 1; }
+.sv-today-t, .sv-stats-t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.sv-today-t b, .sv-stats-t b { font-size: .9rem; }
+.sv-today-t small, .sv-stats-t small { font-size: .72rem; color: var(--muted); line-height: 1.35; }
+.sv-today-go { font-size: 1.3rem; color: var(--primary-dark); }
+.sv-today-clear { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .86rem; font-weight: 700; }
+.sv-today-free { border: var(--bw) solid var(--line); background: var(--mint-light); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; color: var(--ink); }
+.sv-doors.small { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.sv-doors.small .sv-door { min-height: 0; padding: 14px 8px 12px; gap: 8px; align-items: center; text-align: center; border-radius: 16px; }
+.sv-doors.small .sv-door-em { font-size: 1.7rem; }
+.sv-doors.small .sv-door-t b { font-size: .86rem; }
+.sv-doors.small .sv-door-soon { top: -8px; right: 50%; transform: translateX(50%); white-space: nowrap; }
+.d-cc2 { background: #ffeef3; }
+.sv-stats { margin-top: 14px; background: #f3efff; border: var(--bw) solid var(--line); border-radius: 16px; box-shadow: var(--pop); padding: 12px 14px; }
 .sv-door-badge { position: absolute; top: 10px; right: 10px; min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #ef4444; color: #fff; font-size: .72rem; font-weight: 800; text-align: center; }
 .sv-results { display: flex; flex-direction: column; gap: 6px; }
 .sv-res { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border: var(--bw) solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }

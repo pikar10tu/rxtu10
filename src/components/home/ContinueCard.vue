@@ -1,19 +1,37 @@
 <!--
   src/components/home/ContinueCard.vue — การ์ด "ฝึกต่อ" บน Home: dropdown เดียวรวมหน้าที่ของ
   DailyCard.vue (รายได้ประจำวัน) + NextActionCard.vue (งานถัดไป) เดิม — 2 ไฟล์นั้นลบแล้ว 11 พ.ย. 2026 (ดูใน git ได้)
+  13 พ.ย. 2026: เปลี่ยนเป็น "วันนี้ของคุณ" เปิดค้าง (รายการวันนี้ + ปุ่มฝึกต่อ) · ของเดิมพับไว้ใต้ "รายละเอียด"
   พับเป็นค่าเริ่ม (บรรทัดสรุป 1 บรรทัด) กดกางเห็นเนื้อหาเต็ม + เพิ่มเคส CC2 แนะนำ (weakCases จาก useCc2Progress
   หรือเคสเริ่มต้นถ้ายังไม่มีผลฝึก) — CC2 เป็น self-learning ล้วน ไม่มีเหรียญ/รางวัลผูกอยู่ตรงนี้ (user เคาะ 11 พ.ย. 2026)
 -->
 <template>
   <div class="cc-wrap">
-    <button class="cc-toggle" type="button" :aria-expanded="expanded" @click="expanded = !expanded">
-      <span class="cc-toggle-ico"><Emoji char="🎯" /></span>
-      <span class="cc-toggle-text">
-        <b>ฝึกต่อ</b>
-        <small v-if="!expanded">{{ summaryLine }}</small>
-      </span>
-      <span class="cc-chevron" :class="{ open: expanded }">⌄</span>
-    </button>
+    <!-- "วันนี้ของคุณ" เปิดค้าง (user เคาะ 11 พ.ย. 2026) — รายการสิ่งที่ควรทำวันนี้ + ปุ่มฝึกต่อ · รายละเอียดเดิมพับไว้ข้างล่าง -->
+    <div class="cc-hero">
+      <div class="cc-hero-h"><Emoji char="☀️" /> วันนี้ของคุณ</div>
+      <div class="cc-tasks">
+        <RouterLink to="/daily" class="cc-task">
+          <span><Emoji char="🌅" /> ข้อสอบประจำวัน</span>
+          <em :class="{ done: playedToday }">{{ playedToday ? 'ทำแล้ว ✓' : 'ยังไม่ทำ ›' }}</em>
+        </RouterLink>
+        <RouterLink v-if="redoDue" to="/quiz?mode=redo" class="cc-task">
+          <span><Emoji char="🔁" /> ข้อที่เคยผิด</span>
+          <em>{{ redoDue }} ข้อ ›</em>
+        </RouterLink>
+        <button type="button" class="cc-task" :disabled="accrued < 1" @click="claim">
+          <span><Emoji char="🪙" /> รายได้ประจำวัน</span>
+          <em v-if="accrued >= 1">เก็บ +{{ accrued.toLocaleString() }}</em>
+          <em v-else class="done">{{ isFull ? 'เต็มแล้ว' : `เต็มใน ${fmtRemain}` }}</em>
+        </button>
+      </div>
+      <div class="cc-hero-foot">
+        <RouterLink to="/study" class="cc-go">ฝึกต่อ ›</RouterLink>
+        <button class="cc-more" type="button" :aria-expanded="expanded" @click="expanded = !expanded">
+          {{ expanded ? 'ซ่อนรายละเอียด' : 'รายละเอียด' }} <span class="cc-chevron" :class="{ open: expanded }">⌄</span>
+        </button>
+      </div>
+    </div>
 
     <div v-if="expanded" class="cc-body">
       <!-- รายได้ประจำวัน (เดิม DailyCard) -->
@@ -86,6 +104,8 @@ import { nextAction } from '../../utils/nextAction.js'
 import { useAppConfig } from '../../composables/useAppConfig.js'
 import { useCc2Progress } from '../../composables/useCc2Progress.js'
 import { loadCc2Index } from '../../composables/useCc2Data.js'
+import { dayKey } from '../../utils/dailyChallenge.js'
+import { dueCount as qcardsDueCount } from '../../utils/srsQuestions.js'
 
 const emit = defineEmits(['sheet'])
 const auth = useAuthStore()
@@ -145,24 +165,27 @@ const cc2Items = computed(() => {
 })
 const cc2Label = computed(() => (weakCases.value.length ? 'เคส CC2 ที่ควรฝึกเพิ่ม' : 'ลองเริ่มฝึก CC2 จากเคสเหล่านี้'))
 
-// ── พับ/กาง ──
-const expanded = ref(false)
-const summaryLine = computed(() => {
-  if (accrued.value >= 1) return `เก็บรายได้ได้ +${accrued.value.toLocaleString()}🪙`
-  if (action.value) return action.value.title
-  if (cc2Items.value.length) return `มีเคส CC2 แนะนำให้ฝึก ${cc2Items.value.length} เคส`
-  return isFull.value ? 'รายได้เต็มแล้ว' : `รายได้เต็มใน ${fmtRemain.value}`
-})
-</script>
+// ── รายการวันนี้ (0 reads — user doc) ──
+const playedToday = computed(() => auth.userData?.dc?.last === dayKey())
+const redoDue = computed(() => qcardsDueCount(auth.userData?.study?.qcards, Date.now()))
 
+// ── พับ/กาง รายละเอียด ──
+const expanded = ref(false)
+</script>
 <style scoped>
-.cc-wrap { background: linear-gradient(150deg, #fff 0%, #f3faff 60%, #fff4f9 100%); border: var(--bw) solid var(--line); border-radius: 20px; margin-bottom: 14px; box-shadow: var(--pop); overflow: hidden; }
-.cc-toggle { all: unset; display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 14px 16px; cursor: pointer; font-family: inherit; }
-.cc-toggle-ico { font-size: 1.5rem; flex-shrink: 0; }
-.cc-toggle-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.cc-toggle-text b { font-size: .95rem; color: var(--ink); }
-.cc-toggle-text small { font-size: .72rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cc-chevron { flex-shrink: 0; font-size: 1rem; color: var(--muted); transition: transform .2s; }
+.cc-wrap { background: linear-gradient(135deg, var(--primary-light), var(--accent-light)); border: var(--bw) solid var(--line); border-radius: 20px; margin-bottom: 14px; box-shadow: var(--pop); overflow: hidden; }
+.cc-hero { padding: 14px 16px; }
+.cc-hero-h { font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+.cc-tasks { display: flex; flex-direction: column; gap: 6px; }
+.cc-task { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; background: #fff; border: var(--bw) solid var(--line); border-radius: 12px; font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; }
+.cc-task:disabled { cursor: default; }
+.cc-task:focus-visible, .cc-go:focus-visible, .cc-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.cc-task em { font-style: normal; font-weight: 800; color: var(--primary); white-space: nowrap; font-size: .8rem; }
+.cc-task em.done { color: var(--muted); font-weight: 600; }
+.cc-hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.cc-go { background: var(--primary); color: #fff; border-radius: 11px; padding: 8px 16px; font-size: .86rem; font-weight: 800; text-decoration: none; box-shadow: var(--pop); }
+.cc-more { all: unset; cursor: pointer; font-family: inherit; font-size: .76rem; color: var(--muted); padding: 6px 4px; }
+.cc-chevron { display: inline-block; font-size: .9rem; color: var(--muted); transition: transform .2s; }
 .cc-chevron.open { transform: rotate(180deg); }
 .cc-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
 

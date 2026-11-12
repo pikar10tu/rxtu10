@@ -4,7 +4,10 @@
       <div class="home-head-badge"><Emoji char="🧪" /></div>
       <div class="home-head-txt">
         <h1 class="home-head-title">RxTU10</h1>
-        <p class="home-head-sub">เภสัช มธ. รุ่น 10 · หน้าหลัก</p>
+        <!-- วันสอบย่อเหลือบรรทัดเดียว (13 พ.ย. 2026 แทนการ์ด ExamCountdown) · จิ้มรัวยังได้ความสำเร็จลับเหมือนเดิม -->
+        <p v-if="examLine" class="home-head-sub home-cd" :class="{ 'cd-jig': jig === 1, 'cd-panic': jig === 2 }" role="button" tabindex="0" data-sfx="none"
+           @click="poke" @keydown.enter="poke" @animationend="jig = 0"><Emoji char="🎯" /> {{ examLine }}</p>
+        <p v-else class="home-head-sub">เภสัช มธ. รุ่น 10 · หน้าหลัก</p>
       </div>
       <!-- ปุ่มจดหมาย + เควส มุมขวา (จุดแดงเมื่อมีของค้าง) -->
       <div v-if="authStore.isLoggedIn" class="home-head-actions">
@@ -15,31 +18,29 @@
     </header>
 
     <template v-if="authStore.isLoggedIn">
-      <!-- จัดหน้าแบบ A (user เลือก 25 ก.ย. 2026): ของที่กดทุกวันขึ้นจอแรก
-           เหรียญ + รายได้ + ปุ่มเก็บ → นาฬิกาพลิกวันสอบขนาดเต็ม (user สั่งให้ยังเด่นอยู่) → งานถัดไป → บ้าน -->
+      <!-- จัดหน้าใหม่ (user เคาะ 11 พ.ย. 2026): ผลสอบจำลอง → วันนี้ของคุณ → ประจำวันสนุกๆ → บ้าน → ลิงก์ท้ายหน้า -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
       <MockScoreCard only-unseen class="home" />
-      <!-- ฝึกต่อ (dropdown) = รายได้ประจำวัน + งานถัดไป + เคส CC2 แนะนำ รวมใบเดียว (user 11 พ.ย. 2026) -->
+      <!-- วันนี้ของคุณ = ข้อสอบประจำวัน · ข้อที่เคยผิด · รายได้ + รายละเอียดเดิมพับไว้ -->
       <ContinueCard @sheet="onCardSheet" />
-      <!-- ดวงวันนี้ (user 9 พ.ย. 2026) — โหลด lazy เพราะไลบรารีคำนวณดาว -->
-      <HoroCard />
-      <ExamCountdown />
-      <!-- อีเวนต์ประจำเดือน — ทางเข้าร้านแต้มอีเวนต์จากหน้าแรก (user 25 ต.ค. 2026) -->
-      <EventBanner />
-      <MbtiPromo />
+
+      <!-- ประจำวันสนุกๆ: ดวง → อีเวนต์ → MBTI → เกร็ดฯ · ข้ามตัวที่ไม่มี · ครบ 4 = เกร็ดฯ ลงการ์ดเต็มกว้าง -->
+      <div class="home-sec">ประจำวันสนุกๆ</div>
+      <div class="home-fun" :style="{ gridTemplateColumns: `repeat(${funCols}, minmax(0, 1fr))` }">
+        <HoroCard tile />
+        <EventBanner v-if="hasEvent" tile />
+        <MbtiPromo v-if="hasMbtiPromo" tile />
+        <FunFactsWidget v-if="!factsWide" tile />
+      </div>
+      <FunFactsWidget v-if="factsWide" />
+
       <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
       <ResidenceCard />
-      <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 (user เห็นด้วย: ไม่มีคนใช้ ซ้อนกับรายได้รายวัน · ไอเดียไปต่อใน world boss #11) — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
+      <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
 
-      <FunFactsWidget />
-
-      <!-- เครื่องมือผู้ดูแล — เฉพาะแอดมิน (Shop ไป nav, Pets ไป Play แล้ว) -->
-      <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-admin-btn">
-        <Emoji char="⚙️" /> แผงผู้ดูแลระบบ
-      </RouterLink>
-
-      <!-- ส่งข้อเสนอแนะ — ปุ่มเดียวกับหน้า Me วางล่างสุดหน้าแรกด้วย (user 9 พ.ย. 2026) -->
-      <button class="home-feedback" @click="fbOpen = true"><Emoji char="💡" /> ส่งข้อเสนอแนะ / รายงานปัญหา</button>
+      <!-- ลิงก์บรรทัดเดียวท้ายหน้า -->
+      <button type="button" class="home-link" @click="fbOpen = true"><span><Emoji char="💬" /> ส่งข้อเสนอแนะ / รายงานปัญหา</span><span>›</span></button>
+      <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-link"><span><Emoji char="⚙️" /> แผงผู้ดูแลระบบ</span><span>›</span></RouterLink>
       <FeedbackModal v-model="fbOpen" />
       <!-- ค้นหารวม (overlay Teleport ในตัว) -->
       <GlobalSearchPanel v-if="searchOpen" v-model="searchQuery" overlay autofocus @close="searchOpen = false" />
@@ -77,7 +78,12 @@ import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import EventBanner from '../components/shared/EventBanner.vue'
 import MbtiPromo from '../components/home/MbtiPromo.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
-import ExamCountdown from '../components/study/ExamCountdown.vue'
+import { EXAMS } from '../data/exams.js'
+import { upcomingExams } from '../utils/countdown.js'
+import { activeEvent } from '../utils/event.js'
+import { makeStreak } from '../utils/gags.js'
+import { grantSecret } from '../composables/useAchievements.js'
+import { sfx } from '../utils/sfx.js'
 import BottomSheet from '../components/shared/BottomSheet.vue'
 import HeaderIconButton from '../components/home/HeaderIconButton.vue'
 
@@ -89,6 +95,28 @@ const showQuest = ref(false)
 const searchOpen = ref(false)
 const searchQuery = ref('')
 const fbOpen = ref(false)
+
+// ── บรรทัดวันสอบใต้ชื่อแอป ──
+const examLine = computed(() => upcomingExams(EXAMS)
+  .map(e => `${e.id === 'ple-cc2' ? 'CC2' : e.id === 'ple-cc1' ? 'CC1' : e.label} ${e.days > 0 ? `อีก ${e.days} วัน` : 'วันนี้ สู้ๆ!'}`)
+  .join(' · '))
+// จิ้มรัว (ความสำเร็จลับ ตื่นเต้นล่ะสิ / PANIC ATTACK — ย้ายมาจาก ExamCountdown)
+const taps = makeStreak(700)
+const jig = ref(0)
+function poke() {
+  const n = taps.hit()
+  sfx('tap')
+  jig.value = 0
+  requestAnimationFrame(() => { jig.value = n >= 10 ? 2 : 1 })
+  if (n === 3) grantSecret('gag_excited')
+  if (n === 10) { grantSecret('gag_panic'); sfx('wrong') }
+}
+
+// ── แถวประจำวันสนุกๆ ──
+const hasEvent = !!activeEvent()
+const hasMbtiPromo = computed(() => !!authStore.userData && !authStore.userData.mbti)
+const factsWide = computed(() => 1 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0) >= 3)
+const funCols = computed(() => 1 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0) + (factsWide.value ? 0 : 1))
 
 // จุดแดงเควส = วันนี้ยังไม่กดรับรางวัล
 const questPending = computed(() =>
@@ -118,7 +146,17 @@ function onCardSheet(name) { if (name === 'quest') showQuest.value = true }
 </script>
 
 <style scoped>
-.home-feedback { width: 100%; margin-top: 14px; border: var(--bw) solid var(--line); background: var(--primary-light); color: var(--primary); border-radius: 11px; padding: 11px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; box-shadow: var(--pop); }
+/* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
+.home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
+.home-fun { display: grid; gap: 8px; margin-bottom: 12px; }
+.home-link { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px 4px; border-top: 1px solid var(--line); font-family: inherit; font-size: .85rem; color: var(--muted); text-decoration: none; cursor: pointer; }
+.home-link:first-of-type { margin-top: 6px; }
+.home-link:focus-visible, .home-cd:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.home-cd { cursor: pointer; display: inline-block; color: var(--primary-dark); font-weight: 700; }
+.cd-jig { animation: cd-jig .25s ease-out; }
+.cd-panic { animation: cd-panic .6s ease-in-out; }
+@keyframes cd-jig { 40% { transform: scale(.96) rotate(-1deg); } 70% { transform: scale(1.02) rotate(.6deg); } }
+@keyframes cd-panic { 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) rotate(-2deg); } 20%, 40%, 60%, 80% { transform: translateX(5px) rotate(2deg); } }
 /* ── header: display font + sticker badge ── */
 .home-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .home-head-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
@@ -139,22 +177,4 @@ function onCardSheet(name) { if (name === 'quest') showQuest.value = true }
 }
 .home-head-sub { font-size: .7rem; color: var(--muted); margin: 4px 0 0; font-weight: 600; }
 
-/* ── ปุ่มเครื่องมือผู้ดูแล (แอดมินเท่านั้น) — โทนเทา ไม่แย่งความสนใจ ── */
-.home-admin-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 4px;
-  padding: 11px;
-  border-radius: 14px;
-  background: #f3f4f6;
-  border: 1.5px solid #d1d5db;
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 0.82rem;
-  text-decoration: none;
-  transition: background .12s;
-}
-.home-admin-btn:active { background: #e5e7eb; }
 </style>

@@ -1,7 +1,12 @@
 <!-- แบนเนอร์อีเวนต์ประจำเดือน (หน้า Play + Home) — โผล่เฉพาะช่วงอีเวนต์ (data/events.js)
      2 วันสุดท้ายเปลี่ยนเป็นข้อความเตือน "ใกล้หมดอายุ รีบแลก" (user 25 ต.ค. 2026: แต้มที่เหลือหายเงียบๆ ไม่ดี) -->
 <template>
-  <RouterLink v-if="ev" to="/event" class="evb" :class="{ urgent: daysLeft <= WARN_DAYS }">
+  <RouterLink v-if="ev && tile" to="/event" class="ft evb-tile" :class="{ urgent: daysLeft <= WARN_DAYS }">
+    <span class="ft-em"><Emoji :char="ev.pt" /></span>
+    <b>อีเวนต์</b>
+    <small>{{ daysLeft <= WARN_DAYS ? (daysLeft <= 1 ? 'วันสุดท้าย!' : `อีก ${daysLeft} วัน`) : ev.name }} · มี {{ pts }}</small>
+  </RouterLink>
+  <RouterLink v-else-if="ev" to="/event" class="evb" :class="{ urgent: daysLeft <= WARN_DAYS }">
     <span class="evb-ic"><Emoji :char="ev.pt" /></span>
     <span class="evb-txt">
       <b>{{ ev.name }} <span class="evb-cd"><Emoji char="⏳" /> {{ cdText }}</span></b>
@@ -19,6 +24,7 @@ import { activeEvent, evtOf, EVT_HUNTER_GOAL } from '../../utils/event.js'
 import { grantSecret } from '../../composables/useAchievements.js'
 import { useAuthStore } from '../../stores/auth.js'
 
+defineProps({ tile: { type: Boolean, default: false } })
 const WARN_DAYS = 2
 const auth = useAuthStore()
 const ev = activeEvent()
@@ -53,4 +59,13 @@ const cdText = computed(() => {
 .evb.urgent .evb-txt small { color: #2b1f3d; font-weight: 700; }
 .evb-cd { font-size: .74rem; font-weight: 800; color: #7c2d12; background: rgba(255,255,255,.65); border-radius: 999px; padding: 1px 8px; margin-left: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .evb-have { background: #fff; border-radius: 12px; padding: 6px 10px; font-weight: 800; font-size: .84rem; color: #9a3412; white-space: nowrap; }
+
+/* ช่องเล็กในแถว "ประจำวันสนุกๆ" หน้า Home (13 พ.ย. 2026) */
+.ft { font: inherit; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; height: 100%; box-sizing: border-box; padding: 10px; border-radius: 14px; border: var(--bw) solid var(--line); box-shadow: var(--pop); text-align: left; text-decoration: none; cursor: pointer; color: var(--ink); background: #fff; }
+.ft-em { font-size: 1.35rem; line-height: 1; }
+.ft b { font-size: .84rem; }
+.ft small { font-size: .7rem; color: var(--muted); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.evb-tile { background: linear-gradient(140deg, #fdba74, #c4b5fd); color: #2b1f3d; }
+.evb-tile.urgent { background: linear-gradient(140deg, #fb923c, #f472b6); }
+.evb-tile small { color: #3b2a52; }
 </style>
