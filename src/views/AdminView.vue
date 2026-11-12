@@ -8,6 +8,14 @@
     </div>
 
     <template v-else>
+      <!-- 5 แท็บ (13 พ.ย. 2026) — ไม่ลบการ์ดใบไหน แค่จัดกลุ่ม · จำแท็บล่าสุดในเครื่อง · จุดแดง = มีงานค้าง -->
+      <nav class="adm-tabs" role="tablist" aria-label="หมวดแผงผู้ดูแล">
+        <button v-for="t in ADMIN_TABS" :key="t.key" type="button" role="tab" class="adm-tab" :class="{ on: tab === t.key }" :aria-selected="tab === t.key" @click="setTab(t.key)">
+          <Emoji :char="t.emoji" /> {{ t.label }}<span v-if="tabDot[t.key]" class="adm-dot" aria-label="มีงานค้าง"></span>
+        </button>
+      </nav>
+
+      <template v-if="tab === 'daily'">
       <!-- ───── โหมดซ่อมบำรุง (config/app.maintenance) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🚧" /> โหมดซ่อมบำรุง</span></div>
@@ -34,122 +42,6 @@
             <button class="maint-preview-x" @click="maintPreview = false">✕ ปิดพรีวิว</button>
           </div>
         </Teleport>
-      </section>
-
-      <AdminBattleLab />
-
-      <!-- ───── ตู้อัญเชิญพิเศษ (config/app.gachaEvent) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="✨" /> ตู้อัญเชิญพิเศษ</span></div>
-        <div class="admin-hint">
-          ตู้ถัดไป: <b>{{ nextTheme.name }}</b> ({{ nextTheme.featured.length }} ตัวเด่น) ·
-          <b>หมดเวลาแล้วตู้หายเอง และตัวเด่นไหลเข้าตู้ปกติทันที</b>
-        </div>
-        <div class="maint-toggle">
-          <span class="maint-state" :class="gachaEv.active ? 'on' : 'off'">
-            <template v-if="gachaEv.active"><Emoji char="🟢" /> เปิดอยู่ · เหลือ {{ gachaEvLeft }}</template>
-            <template v-else><Emoji char="⚪" /> ยังไม่มีอีเวนต์</template>
-          </span>
-          <div v-if="nextTheme.auto" class="admin-hint">⏰ ตู้ {{ nextTheme.name }} เปิดเองตามเวลา ({{ nextTheme.month }} 00:00 น. → สิ้นเดือน) ไม่ต้องกด</div>
-          <div v-else class="ev-btns">
-            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(7)">เริ่ม 7 วัน</button>
-            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(14)">เริ่ม 14 วัน</button>
-            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(30)">เริ่ม 30 วัน</button>
-            <button v-if="gachaEv.active" class="btn-mini btn-gray" :disabled="savingEvent" @click="endGachaEvent">จบตอนนี้</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ───── เอฟเฟกต์ประจำสัปดาห์ PvP (config/app.pvpWeekly = {id, startsAt, endsAt}) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="✨" /> เอฟเฟกต์ประจำสัปดาห์ (สนามประลอง)</span></div>
-        <div class="admin-hint">
-          กดแล้วมีผลทันที {{ WEEKLY_DAYS }} วัน ครบแล้วปลดเอง · มีผลกับไฟต์จริงทั้งฝั่งบุกและตั้งรับ (หอคอยไม่โดน) · กดอันใหม่ = แทนอันเดิมและเริ่มนับใหม่
-        </div>
-        <div class="maint-toggle">
-          <span class="maint-state" :class="weeklyNow ? 'on' : 'off'">
-            <template v-if="weeklyNow"><Emoji :char="weeklyNow.icon" /> {{ weeklyNow.title }} · เหลือ {{ weeklyLeftText }}</template>
-            <template v-else><Emoji char="⚪" /> ไม่มีเอฟเฟกต์</template>
-          </span>
-          <button v-if="weeklyNow" class="btn-mini btn-gray" :disabled="savingWeekly" @click="endWeekly">จบตอนนี้</button>
-        </div>
-        <div class="weekly-grid">
-          <button v-for="w in WEEKLY_EFFECTS" :key="w.id" class="weekly-btn" :class="{ on: weeklyNow?.id === w.id }"
-                  :disabled="savingWeekly" @click="startWeekly(w)">
-            <b><Emoji :char="w.icon" /> {{ w.title }}</b>
-            <span>{{ w.desc }}</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- ───── รูเล็ตหาคู่ PvP (config/app.pvpRoulette) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🎰" /> ชื่อบนรูเล็ตหาคู่</span></div>
-        <div class="admin-hint">
-          บรรทัดละ 1 ชื่อ (สูงสุด {{ ROULETTE_MAX }} ชื่อ · ชื่อละไม่เกิน {{ ROULETTE_NAME_MAX }} ตัวอักษร) —
-          ของตกแต่งล้วน รูเล็ตจบที่ "{{ ROULETTE_WINNER }}" เสมอ · ปล่อยว่าง = ใช้ชุดตั้งต้น
-        </div>
-        <textarea v-model="rouletteText" class="admin-search roulette-ta" rows="8" :placeholder="ROULETTE_DEFAULT.join('\n')" />
-        <div class="ev-btns">
-          <button class="btn-mini btn-gold" :disabled="savingRoulette" @click="saveRoulette">บันทึก</button>
-          <button class="btn-mini btn-gray" :disabled="savingRoulette" @click="rouletteText = ROULETTE_DEFAULT.join('\n')">ใส่ชุดตั้งต้น</button>
-        </div>
-      </section>
-
-      <!-- ───── ตรวจข้อสอบ (วิชาการ) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🔍" /> ตรวจข้อสอบ (วิชาการ)</span></div>
-        <div class="admin-hint">
-          สุ่มป้อนข้อให้ทีมวิชาการ+อาจารย์ช่วยตรวจความถูกต้อง — ดูได้ว่าใครตรวจไปกี่ข้อ
-        </div>
-        <RouterLink to="/review" class="btn-mini btn-gold" style="display:inline-block;text-decoration:none;margin-top:4px">
-          ไปหน้าตรวจข้อสอบ <Emoji char="🔍" />
-        </RouterLink>
-        <div class="admin-hint" style="margin-top:10px">
-          ซิงก์ = เติมสถานะตรวจให้ข้อเก่า (ครั้งแรกต้องกด ไม่งั้นหน้า /review มองไม่เห็นข้อพวกนั้น)
-          + คำนวณตัวนับ "ใครตรวจกี่ข้อ" ใหม่ · กดซ้ำได้ ปลอดภัย
-        </div>
-        <button class="btn-mini" :disabled="reviewSyncBusy" @click="syncReviewSystem">
-          <template v-if="reviewSyncBusy">กำลังซิงก์…</template>
-          <template v-else><Emoji char="🔄" /> ซิงก์ระบบตรวจ</template>
-        </button>
-
-      </section>
-
-      <!-- ───── Roster (doc สรุปรวมทั้งรุ่น) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🗂️" /> Roster ทั้งรุ่น</span></div>
-        <div class="admin-hint">
-          doc รวมที่ทุกจอของนักศึกษาอ่าน <b>1 read</b> แทนการอ่าน user ทุกคน
-          (เดิมเสีย N reads ต่อคน — 170 คนจะทะลุโควตาฟรี) ·
-          <b>ต้องกดครั้งแรกหนึ่งครั้ง</b> ไม่งั้นหน้าเพื่อน/บอร์ดจะว่าง ·
-          หลังจากนั้นแต่ละคนอัปเดตแถวตัวเองอัตโนมัติ · กดซ้ำได้ ปลอดภัย (สร้างใหม่จากของจริง) ·
-          ประวัติการบุกและข่าวกระดานของทุกคนถูกพ่วงต่อให้ ไม่หาย
-        </div>
-        <button class="btn-mini" :disabled="rebuildingRoster" @click="regenMinis">
-          <template v-if="rebuildingRoster">กำลังทำ…</template>
-          <template v-else><Emoji char="🖼️" /> สร้างรูปย่อใหม่ทั้งรุ่น + roster</template>
-        </button>
-        <div class="admin-hint">รูปที่อัปเองในหน้าสมาชิกคมขึ้น (ย่อใหม่เป็น {{ MINI_SIZE }}px) · เฉพาะคนที่ยังเป็นรุ่นเก่า · กดซ้ำได้</div>
-        <button class="btn-mini" :disabled="rebuildingRoster" @click="rebuildRoster">
-          <template v-if="rebuildingRoster">กำลังสร้าง…</template>
-          <template v-else><Emoji char="🔄" /> สร้าง roster ใหม่</template>
-        </button>
-      </section>
-
-      <!-- ───── Fun facts รวมทั้งเว็บ (stats/global) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="📊" /> สถิติรวมทั้งเว็บ (fun facts)</span></div>
-        <div class="admin-hint">
-          รวม 4 ตัวเลขสะสมของทุกคน (ข้อสอบ/ยอดขายฟาร์ม/เหรียญที่ใช้/ความสำเร็จ) เข้า doc เดียว
-          ให้หน้า fun facts อ่าน <b>1 read</b> แทนอ่าน user ทุกคน · <b>ต้องกดครั้งแรกหนึ่งครั้ง</b>
-          ก่อนหน้า fun facts จะมีเลข · กดซ้ำได้ ปลอดภัย (คำนวณใหม่จากของจริงเสมอ ไม่บวกซ้ำ) ·
-          ไม่แตะตัวนับ PvP/พลิกการ์ด (สองตัวนั้นนับสดจากการเล่นเท่านั้น)
-        </div>
-        <button class="btn-mini" :disabled="computingGlobalStats" @click="computeGlobalStats">
-          <template v-if="computingGlobalStats">กำลังคำนวณ…</template>
-          <template v-else><Emoji char="📊" /> คำนวณสถิติรวมครั้งแรก</template>
-        </button>
       </section>
 
       <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
@@ -180,70 +72,6 @@
           <div class="usage-bar"><i :style="{ width: pct(usage.today.writes, WRITE_LIMIT), background: barColor(usage.today.writes, WRITE_LIMIT) }"></i></div>
         </div>
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูค่า</div>
-      </section>
-
-      <!-- ───── สถิติการสู้ (หอคอย) ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head">
-          <span><Emoji char="⚔️" /> สถิติการสู้ (หอคอย)</span>
-          <button class="btn-mini" :disabled="loadingBattle" @click="loadBattleStats">
-            {{ loadingBattle ? 'กำลังโหลด…' : '↻ โหลด' }}
-          </button>
-        </div>
-        <div class="admin-hint">win% ราย species จากการเล่นจริง — ไว้จูนตัวเลขสมดุล (เขียว ≥60 / แดง ≤40)</div>
-        <table v-if="battleStats.length" class="bstat">
-          <thead><tr><th>ตัว</th><th>สู้</th><th>ชนะ%</th><th>ดาเมจ/ไฟต์</th><th>K/D</th></tr></thead>
-          <tbody>
-            <tr v-for="s in battleStats" :key="s.id">
-              <td><Emoji :char="s.emoji" /> {{ s.name }}</td>
-              <td>{{ s.battles }}</td>
-              <td :class="{ hi: s.winPct >= 60, lo: s.winPct <= 40 }">{{ s.winPct }}%</td>
-              <td>{{ s.avgDmg }}</td>
-              <td>{{ s.kills }}/{{ s.deaths }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูสถิติ</div>
-      </section>
-
-      <!-- ───── แจกรางวัลซีซั่น (หอคอย + อารีน่า) + รีเซตหอคอย ───── -->
-      <section class="admin-card">
-        <div class="admin-card-head"><span><Emoji char="🏆" /> แจกรางวัลซีซั่น</span></div>
-        <div class="admin-hint">
-          กดหลังขึ้นเดือนใหม่ (เวลาไทย) ยิ่งเร็วยิ่งดี — ชั้นหอคอยที่ไต่ในเดือนใหม่ก่อนกดจะถูกนับเป็นของซีซั่นเก่า ·
-          ส่งจดหมายรางวัล (กดรับเอง) + รีเซตหอคอยทุกคนเป็นชั้น 1 ในการกดเดียว · กดซ้ำซีซั่นเดิมไม่ได้
-        </div>
-        <div class="sp-row">
-          <select v-model="spSeason" class="sp-select" @change="spPreview = null">
-            <option v-for="o in spOptions" :key="o.id" :value="o.id">ซีซั่น {{ o.label }}{{ o.current ? ' (ยังไม่จบ ดูได้อย่างเดียว)' : '' }}</option>
-          </select>
-          <button class="btn-mini" :disabled="spBusy" @click="previewSeason">{{ spBusy && !spPreview ? 'กำลังโหลด…' : 'ดูว่าใครได้อะไร' }}</button>
-        </div>
-        <template v-if="spPreview">
-          <div v-if="spPreview.paid" class="admin-hint sp-paid">
-            <template v-if="spPreview.paid.status === 'done'"><Emoji char="✅" /> ซีซั่นนี้แจกไปแล้ว {{ spPreview.paid.mails }} ฉบับ</template>
-            <template v-else><Emoji char="⚠️" /> ค้างกลางทาง — เช็คจดหมายก่อนทำอะไรต่อ</template>
-          </div>
-          <div class="admin-hint">
-            หอคอย {{ spPreview.tower }} คน ({{ Object.entries(spPreview.towerTiers).map(([n, c]) => `${n} ${c}`).join(' · ') }}) ·
-            อารีน่า {{ spPreview.arena }} คน ({{ Object.entries(spPreview.arenaTiers).map(([n, c]) => `${n} ${c}`).join(' · ') }}) · จดหมาย {{ spPreview.mails }} ฉบับ
-          </div>
-          <!-- สนามแชมป์ต้องอยู่ใน data/arenas.js ก่อนกดแจก ไม่งั้นจดหมายไม่แนบสนาม (ยังแจกเหรียญ/achievement ได้) -->
-          <div class="admin-hint" :class="{ 'sp-paid': !spPreview.champArena }">
-            <template v-if="spPreview.champArena"><Emoji char="🏟️" /> สนามแชมป์ซีซั่นนี้: {{ spPreview.champArena }}</template>
-            <template v-else><Emoji char="❌" /> ยังไม่มีสนามแชมป์ ch-{{ spSeason }} ในโค้ด — กดแจกตอนนี้จะไม่ได้สนาม</template>
-          </div>
-          <ul class="sp-list">
-            <li v-for="r in spPreview.rows" :key="r.uid">
-              <b>{{ r.nickname }}</b>
-              <span v-if="r.tower"> · <Emoji char="🏯" /> ชั้น {{ r.tower.best }}<template v-if="r.tower.tier.ach"> <Emoji char="👑" /></template> → {{ r.tower.tier.name }} {{ r.tower.tier.coins.toLocaleString() }}<template v-if="r.tower.tier.tickets"> + ตั๋ว {{ r.tower.tier.tickets }}</template></span>
-              <span v-if="r.arena"> · <Emoji char="⚔️" /> #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม<template v-if="r.arena.tier.ach"> <Emoji char="👑" /></template><template v-if="r.arena.tier.champ && spPreview.champArena"> <Emoji char="🏟️" /></template> → {{ r.arena.tier.name }} {{ r.arena.tier.coins.toLocaleString() }}</span>
-            </li>
-          </ul>
-          <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
-            {{ spBusy ? 'กำลังส่ง…' : `แจก ${spPreview.mails} ฉบับ + รีเซตหอคอย` }}
-          </button>
-        </template>
       </section>
 
       <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
@@ -288,6 +116,46 @@
         </ul>
       </section>
 
+      <!-- ───── ข้อเสนอแนะพัฒนา (feedback) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span><Emoji char="💡" /> ข้อเสนอแนะพัฒนา</span>
+          <button class="btn-mini" :disabled="loadingFeedback" @click="loadFeedback">
+            {{ loadingFeedback ? '...' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">ไอเดีย/ปัญหาที่ผู้ใช้ส่งมาเพื่อพัฒนาแอป</div>
+        <div v-if="!feedback.length" class="admin-empty">ยังไม่มีข้อเสนอแนะ</div>
+        <ul v-else class="log-list">
+          <li v-for="f in feedback" :key="f.id" class="rep-row">
+            <div class="rep-top"><span class="fb-cat">{{ fbCatLabel(f.category) }}</span><button class="rep-done" @click="resolveDoc('feedback', f.id)">✓ ปิด</button></div>
+            <div class="rep-note">{{ f.message }}</div>
+            <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ fmtTs(f.ts) }}</div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ───── รายงานการโกง (cheat logs) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span><Emoji char="🚨" /> รายงานการโกง</span>
+          <button class="btn-mini" :disabled="loadingLogs" @click="loadCheatLogs">
+            {{ loadingLogs ? '...' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">ค่าผิดปกติที่ระบบตรวจพบ (กันได้แค่หยาบๆ — ดูประกอบการพิจารณา)</div>
+        <div v-if="!cheatLogs.length" class="admin-empty">ยังไม่มีรายงาน <Emoji char="🎉" /></div>
+        <ul v-else class="log-list">
+          <li v-for="g in cheatLogs" :key="g.id" class="log-row">
+            <div class="log-main"><b>{{ g.name }}</b> · <span class="log-reason">{{ g.reason }}</span></div>
+            <div class="log-detail">{{ g.detail }}</div>
+            <div class="log-ts">{{ fmtTs(g.ts) }}</div>
+          </li>
+        </ul>
+      </section>
+      </template>
+
+      <template v-if="tab === 'people'">
       <!-- ───── ทีมวิชาการ (role management) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -431,24 +299,39 @@
           </button>
         </div>
       </section>
+      </template>
 
-      <!-- ───── รายงานการโกง (cheat logs) ───── -->
+      <template v-if="tab === 'exam'">
+      <!-- ───── ตัวนับการฝึก CC2 (จาก users ที่โหลดอยู่แล้ว 0 read เพิ่ม) ───── -->
       <section class="admin-card">
-        <div class="admin-card-head">
-          <span><Emoji char="🚨" /> รายงานการโกง</span>
-          <button class="btn-mini" :disabled="loadingLogs" @click="loadCheatLogs">
-            {{ loadingLogs ? '...' : '↻ โหลด' }}
-          </button>
+        <div class="admin-card-head"><span><Emoji char="🩺" /> การฝึก CC2 OSPE</span></div>
+        <div class="admin-hint">นับจากผลฝึกที่บันทึกใน user doc (study.cc2) · กด ↻ โหลด ที่การ์ดทีมวิชาการเพื่อรีเฟรช</div>
+        <div class="cc2-stats">
+          <div><b>{{ cc2Stats.users }}</b><small>คนที่เคยฝึก</small></div>
+          <div><b>{{ cc2Stats.runs.toLocaleString() }}</b><small>ครั้งที่ฝึกรวม</small></div>
+          <div><b>{{ cc2Stats.cases }}</b><small>เคสที่ถูกฝึก</small></div>
+          <div><b>{{ cc2Stats.today }}</b><small>คนฝึกวันนี้</small></div>
         </div>
-        <div class="admin-hint">ค่าผิดปกติที่ระบบตรวจพบ (กันได้แค่หยาบๆ — ดูประกอบการพิจารณา)</div>
-        <div v-if="!cheatLogs.length" class="admin-empty">ยังไม่มีรายงาน <Emoji char="🎉" /></div>
-        <ul v-else class="log-list">
-          <li v-for="g in cheatLogs" :key="g.id" class="log-row">
-            <div class="log-main"><b>{{ g.name }}</b> · <span class="log-reason">{{ g.reason }}</span></div>
-            <div class="log-detail">{{ g.detail }}</div>
-            <div class="log-ts">{{ fmtTs(g.ts) }}</div>
-          </li>
-        </ul>
+      </section>
+
+      <!-- ───── ตรวจข้อสอบ (วิชาการ) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🔍" /> ตรวจข้อสอบ (วิชาการ)</span></div>
+        <div class="admin-hint">
+          สุ่มป้อนข้อให้ทีมวิชาการ+อาจารย์ช่วยตรวจความถูกต้อง — ดูได้ว่าใครตรวจไปกี่ข้อ
+        </div>
+        <RouterLink to="/review" class="btn-mini btn-gold" style="display:inline-block;text-decoration:none;margin-top:4px">
+          ไปหน้าตรวจข้อสอบ <Emoji char="🔍" />
+        </RouterLink>
+        <div class="admin-hint" style="margin-top:10px">
+          ซิงก์ = เติมสถานะตรวจให้ข้อเก่า (ครั้งแรกต้องกด ไม่งั้นหน้า /review มองไม่เห็นข้อพวกนั้น)
+          + คำนวณตัวนับ "ใครตรวจกี่ข้อ" ใหม่ · กดซ้ำได้ ปลอดภัย
+        </div>
+        <button class="btn-mini" :disabled="reviewSyncBusy" @click="syncReviewSystem">
+          <template v-if="reviewSyncBusy">กำลังซิงก์…</template>
+          <template v-else><Emoji char="🔄" /> ซิงก์ระบบตรวจ</template>
+        </button>
+
       </section>
 
       <!-- ───── รายงานข้อมูลยา (drug reports) ───── -->
@@ -470,25 +353,172 @@
           </li>
         </ul>
       </section>
+      </template>
 
-      <!-- ───── ข้อเสนอแนะพัฒนา (feedback) ───── -->
+      <template v-if="tab === 'game'">
+      <!-- ───── แจกรางวัลซีซั่น (หอคอย + อารีน่า) + รีเซตหอคอย ───── -->
       <section class="admin-card">
-        <div class="admin-card-head">
-          <span><Emoji char="💡" /> ข้อเสนอแนะพัฒนา</span>
-          <button class="btn-mini" :disabled="loadingFeedback" @click="loadFeedback">
-            {{ loadingFeedback ? '...' : '↻ โหลด' }}
+        <div class="admin-card-head"><span><Emoji char="🏆" /> แจกรางวัลซีซั่น</span></div>
+        <div class="admin-hint">
+          กดหลังขึ้นเดือนใหม่ (เวลาไทย) ยิ่งเร็วยิ่งดี — ชั้นหอคอยที่ไต่ในเดือนใหม่ก่อนกดจะถูกนับเป็นของซีซั่นเก่า ·
+          ส่งจดหมายรางวัล (กดรับเอง) + รีเซตหอคอยทุกคนเป็นชั้น 1 ในการกดเดียว · กดซ้ำซีซั่นเดิมไม่ได้
+        </div>
+        <div class="sp-row">
+          <select v-model="spSeason" class="sp-select" @change="spPreview = null">
+            <option v-for="o in spOptions" :key="o.id" :value="o.id">ซีซั่น {{ o.label }}{{ o.current ? ' (ยังไม่จบ ดูได้อย่างเดียว)' : '' }}</option>
+          </select>
+          <button class="btn-mini" :disabled="spBusy" @click="previewSeason">{{ spBusy && !spPreview ? 'กำลังโหลด…' : 'ดูว่าใครได้อะไร' }}</button>
+        </div>
+        <template v-if="spPreview">
+          <div v-if="spPreview.paid" class="admin-hint sp-paid">
+            <template v-if="spPreview.paid.status === 'done'"><Emoji char="✅" /> ซีซั่นนี้แจกไปแล้ว {{ spPreview.paid.mails }} ฉบับ</template>
+            <template v-else><Emoji char="⚠️" /> ค้างกลางทาง — เช็คจดหมายก่อนทำอะไรต่อ</template>
+          </div>
+          <div class="admin-hint">
+            หอคอย {{ spPreview.tower }} คน ({{ Object.entries(spPreview.towerTiers).map(([n, c]) => `${n} ${c}`).join(' · ') }}) ·
+            อารีน่า {{ spPreview.arena }} คน ({{ Object.entries(spPreview.arenaTiers).map(([n, c]) => `${n} ${c}`).join(' · ') }}) · จดหมาย {{ spPreview.mails }} ฉบับ
+          </div>
+          <!-- สนามแชมป์ต้องอยู่ใน data/arenas.js ก่อนกดแจก ไม่งั้นจดหมายไม่แนบสนาม (ยังแจกเหรียญ/achievement ได้) -->
+          <div class="admin-hint" :class="{ 'sp-paid': !spPreview.champArena }">
+            <template v-if="spPreview.champArena"><Emoji char="🏟️" /> สนามแชมป์ซีซั่นนี้: {{ spPreview.champArena }}</template>
+            <template v-else><Emoji char="❌" /> ยังไม่มีสนามแชมป์ ch-{{ spSeason }} ในโค้ด — กดแจกตอนนี้จะไม่ได้สนาม</template>
+          </div>
+          <ul class="sp-list">
+            <li v-for="r in spPreview.rows" :key="r.uid">
+              <b>{{ r.nickname }}</b>
+              <span v-if="r.tower"> · <Emoji char="🏯" /> ชั้น {{ r.tower.best }}<template v-if="r.tower.tier.ach"> <Emoji char="👑" /></template> → {{ r.tower.tier.name }} {{ r.tower.tier.coins.toLocaleString() }}<template v-if="r.tower.tier.tickets"> + ตั๋ว {{ r.tower.tier.tickets }}</template></span>
+              <span v-if="r.arena"> · <Emoji char="⚔️" /> #{{ r.arena.rank }} {{ r.arena.rating }} แต้ม<template v-if="r.arena.tier.ach"> <Emoji char="👑" /></template><template v-if="r.arena.tier.champ && spPreview.champArena"> <Emoji char="🏟️" /></template> → {{ r.arena.tier.name }} {{ r.arena.tier.coins.toLocaleString() }}</span>
+            </li>
+          </ul>
+          <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
+            {{ spBusy ? 'กำลังส่ง…' : `แจก ${spPreview.mails} ฉบับ + รีเซตหอคอย` }}
+          </button>
+        </template>
+      </section>
+
+      <!-- ───── ตู้อัญเชิญพิเศษ (config/app.gachaEvent) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="✨" /> ตู้อัญเชิญพิเศษ</span></div>
+        <div class="admin-hint">
+          ตู้ถัดไป: <b>{{ nextTheme.name }}</b> ({{ nextTheme.featured.length }} ตัวเด่น) ·
+          <b>หมดเวลาแล้วตู้หายเอง และตัวเด่นไหลเข้าตู้ปกติทันที</b>
+        </div>
+        <div class="maint-toggle">
+          <span class="maint-state" :class="gachaEv.active ? 'on' : 'off'">
+            <template v-if="gachaEv.active"><Emoji char="🟢" /> เปิดอยู่ · เหลือ {{ gachaEvLeft }}</template>
+            <template v-else><Emoji char="⚪" /> ยังไม่มีอีเวนต์</template>
+          </span>
+          <div v-if="nextTheme.auto" class="admin-hint">⏰ ตู้ {{ nextTheme.name }} เปิดเองตามเวลา ({{ nextTheme.month }} 00:00 น. → สิ้นเดือน) ไม่ต้องกด</div>
+          <div v-else class="ev-btns">
+            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(7)">เริ่ม 7 วัน</button>
+            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(14)">เริ่ม 14 วัน</button>
+            <button class="btn-mini btn-gold" :disabled="savingEvent" @click="startGachaEvent(30)">เริ่ม 30 วัน</button>
+            <button v-if="gachaEv.active" class="btn-mini btn-gray" :disabled="savingEvent" @click="endGachaEvent">จบตอนนี้</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───── เอฟเฟกต์ประจำสัปดาห์ PvP (config/app.pvpWeekly = {id, startsAt, endsAt}) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="✨" /> เอฟเฟกต์ประจำสัปดาห์ (สนามประลอง)</span></div>
+        <div class="admin-hint">
+          กดแล้วมีผลทันที {{ WEEKLY_DAYS }} วัน ครบแล้วปลดเอง · มีผลกับไฟต์จริงทั้งฝั่งบุกและตั้งรับ (หอคอยไม่โดน) · กดอันใหม่ = แทนอันเดิมและเริ่มนับใหม่
+        </div>
+        <div class="maint-toggle">
+          <span class="maint-state" :class="weeklyNow ? 'on' : 'off'">
+            <template v-if="weeklyNow"><Emoji :char="weeklyNow.icon" /> {{ weeklyNow.title }} · เหลือ {{ weeklyLeftText }}</template>
+            <template v-else><Emoji char="⚪" /> ไม่มีเอฟเฟกต์</template>
+          </span>
+          <button v-if="weeklyNow" class="btn-mini btn-gray" :disabled="savingWeekly" @click="endWeekly">จบตอนนี้</button>
+        </div>
+        <div class="weekly-grid">
+          <button v-for="w in WEEKLY_EFFECTS" :key="w.id" class="weekly-btn" :class="{ on: weeklyNow?.id === w.id }"
+                  :disabled="savingWeekly" @click="startWeekly(w)">
+            <b><Emoji :char="w.icon" /> {{ w.title }}</b>
+            <span>{{ w.desc }}</span>
           </button>
         </div>
-        <div class="admin-hint">ไอเดีย/ปัญหาที่ผู้ใช้ส่งมาเพื่อพัฒนาแอป</div>
-        <div v-if="!feedback.length" class="admin-empty">ยังไม่มีข้อเสนอแนะ</div>
-        <ul v-else class="log-list">
-          <li v-for="f in feedback" :key="f.id" class="rep-row">
-            <div class="rep-top"><span class="fb-cat">{{ fbCatLabel(f.category) }}</span><button class="rep-done" @click="resolveDoc('feedback', f.id)">✓ ปิด</button></div>
-            <div class="rep-note">{{ f.message }}</div>
-            <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ fmtTs(f.ts) }}</div>
-          </li>
-        </ul>
       </section>
+
+      <!-- ───── รูเล็ตหาคู่ PvP (config/app.pvpRoulette) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🎰" /> ชื่อบนรูเล็ตหาคู่</span></div>
+        <div class="admin-hint">
+          บรรทัดละ 1 ชื่อ (สูงสุด {{ ROULETTE_MAX }} ชื่อ · ชื่อละไม่เกิน {{ ROULETTE_NAME_MAX }} ตัวอักษร) —
+          ของตกแต่งล้วน รูเล็ตจบที่ "{{ ROULETTE_WINNER }}" เสมอ · ปล่อยว่าง = ใช้ชุดตั้งต้น
+        </div>
+        <textarea v-model="rouletteText" class="admin-search roulette-ta" rows="8" :placeholder="ROULETTE_DEFAULT.join('\n')" />
+        <div class="ev-btns">
+          <button class="btn-mini btn-gold" :disabled="savingRoulette" @click="saveRoulette">บันทึก</button>
+          <button class="btn-mini btn-gray" :disabled="savingRoulette" @click="rouletteText = ROULETTE_DEFAULT.join('\n')">ใส่ชุดตั้งต้น</button>
+        </div>
+      </section>
+
+      <!-- ───── สถิติการสู้ (หอคอย) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span><Emoji char="⚔️" /> สถิติการสู้ (หอคอย)</span>
+          <button class="btn-mini" :disabled="loadingBattle" @click="loadBattleStats">
+            {{ loadingBattle ? 'กำลังโหลด…' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">win% ราย species จากการเล่นจริง — ไว้จูนตัวเลขสมดุล (เขียว ≥60 / แดง ≤40)</div>
+        <table v-if="battleStats.length" class="bstat">
+          <thead><tr><th>ตัว</th><th>สู้</th><th>ชนะ%</th><th>ดาเมจ/ไฟต์</th><th>K/D</th></tr></thead>
+          <tbody>
+            <tr v-for="s in battleStats" :key="s.id">
+              <td><Emoji :char="s.emoji" /> {{ s.name }}</td>
+              <td>{{ s.battles }}</td>
+              <td :class="{ hi: s.winPct >= 60, lo: s.winPct <= 40 }">{{ s.winPct }}%</td>
+              <td>{{ s.avgDmg }}</td>
+              <td>{{ s.kills }}/{{ s.deaths }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูสถิติ</div>
+      </section>
+
+      <AdminBattleLab />
+      </template>
+
+      <template v-if="tab === 'tools'">
+      <!-- ───── Roster (doc สรุปรวมทั้งรุ่น) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="🗂️" /> Roster ทั้งรุ่น</span></div>
+        <div class="admin-hint">
+          doc รวมที่ทุกจอของนักศึกษาอ่าน <b>1 read</b> แทนการอ่าน user ทุกคน
+          (เดิมเสีย N reads ต่อคน — 170 คนจะทะลุโควตาฟรี) ·
+          <b>ต้องกดครั้งแรกหนึ่งครั้ง</b> ไม่งั้นหน้าเพื่อน/บอร์ดจะว่าง ·
+          หลังจากนั้นแต่ละคนอัปเดตแถวตัวเองอัตโนมัติ · กดซ้ำได้ ปลอดภัย (สร้างใหม่จากของจริง) ·
+          ประวัติการบุกและข่าวกระดานของทุกคนถูกพ่วงต่อให้ ไม่หาย
+        </div>
+        <button class="btn-mini" :disabled="rebuildingRoster" @click="regenMinis">
+          <template v-if="rebuildingRoster">กำลังทำ…</template>
+          <template v-else><Emoji char="🖼️" /> สร้างรูปย่อใหม่ทั้งรุ่น + roster</template>
+        </button>
+        <div class="admin-hint">รูปที่อัปเองในหน้าสมาชิกคมขึ้น (ย่อใหม่เป็น {{ MINI_SIZE }}px) · เฉพาะคนที่ยังเป็นรุ่นเก่า · กดซ้ำได้</div>
+        <button class="btn-mini" :disabled="rebuildingRoster" @click="rebuildRoster">
+          <template v-if="rebuildingRoster">กำลังสร้าง…</template>
+          <template v-else><Emoji char="🔄" /> สร้าง roster ใหม่</template>
+        </button>
+      </section>
+
+      <!-- ───── Fun facts รวมทั้งเว็บ (stats/global) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head"><span><Emoji char="📊" /> สถิติรวมทั้งเว็บ (fun facts)</span></div>
+        <div class="admin-hint">
+          รวม 4 ตัวเลขสะสมของทุกคน (ข้อสอบ/ยอดขายฟาร์ม/เหรียญที่ใช้/ความสำเร็จ) เข้า doc เดียว
+          ให้หน้า fun facts อ่าน <b>1 read</b> แทนอ่าน user ทุกคน · <b>ต้องกดครั้งแรกหนึ่งครั้ง</b>
+          ก่อนหน้า fun facts จะมีเลข · กดซ้ำได้ ปลอดภัย (คำนวณใหม่จากของจริงเสมอ ไม่บวกซ้ำ) ·
+          ไม่แตะตัวนับ PvP/พลิกการ์ด (สองตัวนั้นนับสดจากการเล่นเท่านั้น)
+        </div>
+        <button class="btn-mini" :disabled="computingGlobalStats" @click="computeGlobalStats">
+          <template v-if="computingGlobalStats">กำลังคำนวณ…</template>
+          <template v-else><Emoji char="📊" /> คำนวณสถิติรวมใหม่</template>
+        </button>
+      </section>
+      </template>
+
 
     </template>
 
@@ -1020,6 +1050,40 @@ async function toggleTag(m, id) {
   }
 }
 
+// ── แท็บ (จำแท็บล่าสุดในเครื่อง — ของสะดวกล้วน อ่าน/เขียนพังก็ไม่เป็นไร) ──
+const ADMIN_TABS = [
+  { key: 'daily', emoji: '📅', label: 'ประจำวัน' },
+  { key: 'people', emoji: '👥', label: 'คนในรุ่น' },
+  { key: 'exam', emoji: '📝', label: 'ข้อสอบ' },
+  { key: 'game', emoji: '🎮', label: 'เกม/ซีซั่น' },
+  { key: 'tools', emoji: '🧰', label: 'เครื่องมือ' },
+]
+const TAB_KEY = 'rxtu10.adminTab'
+const tab = ref((() => { try { const t = localStorage.getItem(TAB_KEY); return ADMIN_TABS.some(x => x.key === t) ? t : 'daily' } catch { return 'daily' } })())
+function setTab(k) { tab.value = k; try { localStorage.setItem(TAB_KEY, k) } catch { /* ไม่เป็นไร */ } }
+const tabDot = computed(() => ({
+  daily: !!(pendingGuests.value.length || pendingInstructors.value.length || feedback.value.length || cheatLogs.value.length),
+  exam: !!drugReports.value.length,
+}))
+// ตัวนับฝึก CC2 — d = YYYYMMDD (UTC) ตาม cc2Progress.js
+const cc2Stats = computed(() => {
+  const now = new Date()
+  const today = now.getUTCFullYear() * 10000 + (now.getUTCMonth() + 1) * 100 + now.getUTCDate()
+  const cases = new Set()
+  let users = 0, runs = 0, todayUsers = 0
+  for (const m of Object.values(members.fbUsers || {})) {
+    const c = m.cc2
+    if (!c || typeof c !== 'object') continue
+    const ents = Object.entries(c)
+    if (!ents.length) continue
+    users++
+    let hitToday = false
+    for (const [id, e] of ents) { cases.add(id); runs += Number(e?.n) || 1; if (e?.d === today) hitToday = true }
+    if (hitToday) todayUsers++
+  }
+  return { users, runs, cases: cases.size, today: todayUsers }
+})
+
 const cheatLogs = ref([])
 const loadingLogs = ref(false)
 
@@ -1250,6 +1314,15 @@ async function saveEcon(m) {
 .weekly-btn.on { background: #fdf2f8; border-color: #ec4899; }
 .weekly-btn:disabled { opacity: .5; cursor: default; }
 .roulette-ta { width: 100%; resize: vertical; font-family: inherit; margin: 6px 0; }
+.adm-tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px 12px; padding: 2px 2px 4px; scrollbar-width: none; }
+.adm-tab { position: relative; flex-shrink: 0; border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 7px 12px; font: inherit; font-size: .8rem; font-weight: 700; color: var(--muted); cursor: pointer; }
+.adm-tab.on { background: var(--primary); color: #fff; }
+.adm-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.adm-dot { position: absolute; top: 2px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+.cc2-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+.cc2-stats div { background: var(--primary-light); border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; }
+.cc2-stats b { font-size: 1.1rem; }
+.cc2-stats small { font-size: .7rem; color: var(--muted); }
 .admin-card {
   background: #fff;
   border: var(--bw) solid var(--line);
@@ -1389,7 +1462,7 @@ async function saveEcon(m) {
 .news-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .news-admin-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; background: rgba(0,0,0,.03); font-size: .76rem; }
 .news-admin-row span { flex: 1; word-break: break-word; }
-.news-meta { display: block; font-size: .66rem; color: rgba(0,0,0,.45); margin-top: 1px; }
+.news-meta { display: block; font-size: .7rem; color: rgba(0,0,0,.45); margin-top: 1px; }
 .news-del { border: none; background: none; cursor: pointer; font-size: .9rem; flex-shrink: 0; }
 .maint-preview { position: fixed; inset: 0; z-index: 230; }
 .maint-preview-x { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 231; border: 2px solid #2b3550; background: #fff; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }

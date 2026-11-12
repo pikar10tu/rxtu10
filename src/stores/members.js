@@ -166,6 +166,7 @@ export const useMembersStore = defineStore('members', () => {
                     contact: n.contact,
                     likes: n.likes,
                     likedBy: n.likedBy,
+                    cc2: x.study?.cc2 || null,   // ตัวนับฝึก CC2 ในแผงแอดมิน (13 พ.ย. 2026)
                 }
                 // 🔴 ห้ามกลับไปเป็น `else if (n.studentId)` — คนที่ผ่าน onboarding แต่ยังไม่ผูกรหัส
                 //    จะตกทั้งสองช่องแล้วหายเงียบ (ไม่ได้รับ broadcast + ไม่โผล่ในแผงแอดมิน)
