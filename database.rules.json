@@ -34,7 +34,7 @@
             ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid"
           },
           "lastRound": {
-            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || (!data.parent().child('state').exists() && data.parent().child('players').child(auth.uid).child('role').val() === 'examiner'))",
             ".validate": "newData.isNumber()"
           },
           "acts": {
@@ -80,14 +80,14 @@
             }
           },
           "lastRound": {
-            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || (!data.parent().child('state').exists() && data.parent().child('players').child(auth.uid).child('role').val() === 'examiner'))",
             ".validate": "newData.isNumber()"
           },
           "state": {
-            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || data.child('examinerUid').val() === auth.uid)"
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || data.child('examinerUid').val() === auth.uid || (!data.parent().child('state').exists() && data.parent().child('players').child(auth.uid).child('role').val() === 'examiner'))"
           },
           "live": {
-            ".write": "auth != null && data.parent().child('meta/hostUid').val() === auth.uid",
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || (!data.parent().child('state').exists() && data.parent().child('players').child(auth.uid).child('role').val() === 'examiner'))",
             "revealed": {
               ".write": "auth != null && data.parent().parent().child('state/examinerUid').val() === auth.uid"
             },
@@ -99,7 +99,7 @@
             }
           },
           "result": {
-            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || data.parent().child('state/examinerUid').val() === auth.uid)"
+            ".write": "auth != null && (data.parent().child('meta/hostUid').val() === auth.uid || data.parent().child('state/examinerUid').val() === auth.uid || (!data.parent().child('state').exists() && data.parent().child('players').child(auth.uid).child('role').val() === 'examiner'))"
           }
         }
       }

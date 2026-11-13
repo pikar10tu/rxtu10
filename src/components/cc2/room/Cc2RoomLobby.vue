@@ -1,4 +1,4 @@
-<!-- src/components/cc2/room/Cc2RoomLobby.vue — ล็อบบี้ห้องซ้อมคู่: รหัสห้อง · 2 คน + บทบาท · หัวห้องเลือกเคส/เวลา แล้วเริ่ม -->
+<!-- src/components/cc2/room/Cc2RoomLobby.vue — ล็อบบี้ห้องซ้อมคู่: รหัสห้อง · 2 คน + บทบาท · ผู้ประเมินเลือกเคส/เวลา แล้วเริ่ม -->
 <template>
   <div class="crl">
     <div class="crl-code-card">
@@ -28,8 +28,8 @@
       <button v-if="isHost && players.length === ROOM_SIZE" type="button" class="crl-link" @click="emit('swap')">สลับบทบาทกัน</button>
     </section>
 
-    <section v-if="isHost" class="crl-card">
-      <div class="crl-h">เลือกเคส</div>
+    <section v-if="iPick" class="crl-card">
+      <div class="crl-h">เลือกเคส <small>(ผู้ประเมินเป็นคนเลือก)</small></div>
       <div class="crl-cats">
         <button v-for="c in CATS" :key="c.v" type="button" :class="{ on: cat === c.v }" @click="cat = c.v">{{ c.t }}</button>
       </div>
@@ -62,7 +62,11 @@
         <template v-else>ผู้สอบจะเห็นแค่สถานการณ์ — ส่วนที่ต้องส่งให้ ผู้ประเมินกดส่งระหว่างสอบ</template>
       </div>
     </section>
-    <section v-else class="crl-card crl-hint">หัวห้อง ({{ hostName }}) กำลังเลือกเคส — พร้อมแล้วเริ่มได้เลย</section>
+    <section v-else class="crl-card crl-hint">
+      <template v-if="examinerCount === 1">ผู้ประเมิน ({{ players.find(p => p.role === 'examiner')?.name }}) กำลังเลือกเคส — พร้อมแล้วเริ่มได้เลย</template>
+      <template v-else-if="examinerCount > 1">มีผู้ประเมิน 2 คน — ต้องให้คนหนึ่งเปลี่ยนเป็นผู้สอบก่อน ถึงจะเลือกเคสได้</template>
+      <template v-else>ผู้ประเมินเป็นคนเลือกเคส — เลือกบทบาทก่อนนะ</template>
+    </section>
 
     <button type="button" class="crl-leave" @click="emit('leave')">ออกจากห้อง</button>
   </div>
@@ -88,7 +92,10 @@ const props = defineProps({
 const emit = defineEmits(['set-role', 'swap', 'kick', 'start', 'leave'])
 
 const CATS = [{ v: '', t: 'ทั้งหมด' }, { v: 'Clinic', t: 'Clinic' }, { v: 'Product', t: 'Product' }, { v: 'SAP', t: 'SAP' }]
-const MINUTES = [0, 5, 7, 10, 15]
+const MINUTES = [0, 4, 5, 7, 10, 15]   // 4 นาที = เกณฑ์สอบสภา
+// คนเลือกเคส/สุ่ม/เริ่ม = ผู้ประเมิน (ต้องมีผู้ประเมินคนเดียว) · user ขอ 13 พ.ย.
+const examinerCount = computed(() => props.players.filter(p => p.role === 'examiner').length)
+const iPick = computed(() => props.me?.role === 'examiner' && examinerCount.value === 1)
 const cat = ref(''), q = ref(''), mins = ref(0), picked = ref(null), copied = ref(false)
 
 const pool = computed(() => props.cases.filter(c => c.mode !== 'rest' && (!cat.value || c.cat === cat.value)))

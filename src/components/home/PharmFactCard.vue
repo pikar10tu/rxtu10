@@ -8,7 +8,7 @@
   </button>
   <button v-else type="button" class="pf-card" @click="openSheet">
     <span class="pf-em"><Emoji char="💡" /></span>
-    <span class="pf-t"><small>เกร็ดความรู้วันนี้ #{{ todayIdx + 1 }}</small><b>{{ today.t }}</b></span>
+    <span class="pf-t"><small>เกร็ดความรู้ #{{ todayIdx + 1 }}</small><b>{{ today.t }}</b></span>
     <span class="pf-go">›</span>
   </button>
 
@@ -45,12 +45,13 @@ import { useNewsPost } from '../../composables/useNewsPost.js'
 import { cleanText, LIMITS } from '../../utils/text.js'
 import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
-import { PHARM_FACTS, pharmFactIndex } from '../../data/pharmFacts.js'
+import { PHARM_FACTS } from '../../data/pharmFacts.js'
 import { dayKey } from '../../utils/dailyChallenge.js'
 
 defineProps({ tile: { type: Boolean, default: false } })
 
-const todayIdx = pharmFactIndex(dayKey())
+// สุ่มใหม่ทุกครั้งที่เข้าหน้า (user ขอ 13 พ.ย. — เดิมวันละเรื่อง เข้ากี่รอบก็เรื่องเดิม)
+const todayIdx = Math.floor(Math.random() * PHARM_FACTS.length)
 const today = PHARM_FACTS[todayIdx]
 const open = ref(false)
 const idx = ref(todayIdx)

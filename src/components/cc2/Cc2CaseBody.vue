@@ -144,7 +144,14 @@ const scenarioHtml = computed(() => {
 })
 
 // ── ส่วนผู้ป่วย / ของในสถานี + gate ──
-const sections = computed(() => caseSections(props.caseData))
+// ห้องคู่ (examiner/examinee): ข้อมูลผู้ป่วยทุกส่วนต้องให้ผู้ประเมินส่งก่อน ผู้สอบต้องซักเอง (user ขอ 13 พ.ย.) · solo ใช้ gate ตามเคส
+const sections = computed(() => {
+  const s = caseSections(props.caseData)
+  if (props.role === 'solo') return s
+  const patient = s.patient.map(p => ({ ...p, gated: true }))
+  const gateKeys = [...patient.map(p => p.key), ...(s.equipment?.gated ? ['equipment'] : [])]
+  return { ...s, patient, gateKeys }
+})
 const isRevealed = p => props.revealed.includes(p.key)
 const canSee = p => !p.gated || isStaff.value || isRevealed(p)
 const pendingCount = computed(() => sections.value.gateKeys.filter(k => !props.revealed.includes(k)).length)

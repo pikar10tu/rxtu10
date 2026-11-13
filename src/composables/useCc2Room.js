@@ -154,7 +154,7 @@ export function useCc2Room() {
     return me.value?.role || ''
   })
   const rolesOk = computed(() => players.value.length === ROOM_SIZE && new Set(players.value.map(p => p.role)).size === 2 && players.value.every(p => p.role))
-  const canStart = computed(() => isHost.value && !state.value && rolesOk.value)
+  const canStart = computed(() => me.value?.role === 'examiner' && !state.value && rolesOk.value)   // ผู้ประเมินเริ่มเคส
   // คู่หลุดกลางเคส → อีกฝั่งเห็นป้าย + หัวห้องกลับล็อบบี้ได้
   const partnerLeft = computed(() => !!state.value && !(room.value?.players?.[state.value.examinerUid] && room.value?.players?.[state.value.examineeUid]))
 
@@ -181,7 +181,7 @@ export function useCc2Room() {
     await remove(dbRef(rtdb(), roomPath(`/players/${targetUid}`))).catch(e => { error.value = 'เชิญออกไม่สำเร็จ: ' + e.message })
   }
 
-  // ── หัวห้อง: เริ่มเคส ──
+  // ── ผู้ประเมิน: เริ่มเคส ──
   async function startCase({ caseId, caseTitle = '', cat = '', durationMin = 0 }) {
     if (!canStart.value || !caseId) return
     error.value = ''
