@@ -23,7 +23,7 @@ export const DRUGS = [
   { n: 'Losartan', a: 'Angiotensin II Receptor Blocker (ARB)', ind: 'ความดันโลหิตสูง ปกป้องไตในผู้ป่วยเบาหวาน', dose: '50 mg วันละครั้ง (ช่วง 25–100 mg/วัน)' },
   { n: 'Atorvastatin', a: 'HMG-CoA Reductase Inhibitor (Statin)', ind: 'ลดไขมัน LDL ป้องกันโรคหัวใจ-หลอดเลือด', dose: '10–80 mg วันละครั้ง (เวลาใดก็ได้)' },
   { n: 'Clopidogrel', a: 'P2Y12 Antiplatelet', ind: 'ป้องกันลิ่มเลือดหลังหัวใจขาดเลือด/ใส่ขดลวด/อัมพาต', dose: '75 mg วันละครั้ง' },
-  { n: 'Gabapentin', a: 'Anticonvulsant / Neuropathic pain', ind: 'ปวดปลายประสาท โรคลมชัก (ยาเสริม)', dose: 'เริ่ม 300 mg วันละครั้ง ค่อยเพิ่มเป็น 300 mg วันละ 3 ครั้ง' },
+  { n: 'Gabapentin', a: 'Anticonvulsant / Neuropathic pain', ind: 'ปวดปลายประสาท โรคลมชัก (ยาเสริม)', dose: 'เริ่ม 100–300 mg วันละครั้ง ค่อยปรับเพิ่มถึง 300 mg วันละ 3 ครั้ง' },
   { n: 'Domperidone', a: 'Dopamine Antagonist Antiemetic', ind: 'คลื่นไส้ อาเจียน ท้องอืด อาหารไม่ย่อย', dose: '10 mg วันละ 3 ครั้ง ก่อนอาหาร' },
   { n: 'Lorazepam', a: 'Benzodiazepine (anxiolytic)', ind: 'วิตกกังวล นอนไม่หลับระยะสั้น', dose: '1–2 mg/วัน แบ่งให้; นอนไม่หลับ 1–2 mg ก่อนนอน' },
   { n: 'Tramadol', a: 'Weak Opioid Analgesic', ind: 'ปวดปานกลางถึงรุนแรง', dose: '50–100 mg ทุก 4–6 ชม. (สูงสุด 400 mg/วัน)' },
