@@ -38,5 +38,6 @@ dist-ssr
 # CC2 — generated จาก content/cc2 ตอน build (scripts/cc2/build-cc2.mjs)
 public/cc2/index.json
 public/cc2/cases/
+public/cc2/search.json
 public/search-index.json
 public/cc2/drug-links.json
