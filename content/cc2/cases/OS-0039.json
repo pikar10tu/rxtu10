@@ -1,6 +1,6 @@
 {
  "id": "OS-0039",
- "title": "Amoxicillin ผิดความแรง/จำนวน — ตรวจใบสั่งยา",
+ "title": "ใบสั่งยาเด็ก Para/Amox/CPM — ตรวจใบสั่งยา",
  "cat": "Clinic",
  "group": "การตรวจสอบใบสั่งยา",
  "topic": "การตรวจสอบใบสั่งยา",
@@ -10,9 +10,9 @@
  "durationMin": null,
  "gated": [],
  "next": null,
- "scenario": "ไม่ระบุ",
+ "scenario": "ใบสั่งยาเด็กมียา 3 รายการ (Paracetamol syrup, Amoxicillin syrup, Chlorpheniramine syrup) จัดยาใส่ซองพร้อมฉลากไว้แล้ว ให้ตรวจสอบยาและฉลากเทียบกับใบสั่งยา ระบุข้อผิดพลาดทั้งหมด และแก้ไขให้ถูกต้องก่อนส่งมอบ",
  "patientHtml": "<p>Rx Paracetamol 120 mg / 5 mL 2 ชช. Prn # 1</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Amoxicillin 250 mg / 5 mL 1 ชช. X 4 # 2</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chlorpheniramine 1 ชช. X 3 # 1</p>",
- "contentHtml": "<p>ไม่ระบุ</p>",
+ "contentHtml": "<p>ใบสั่งยาเด็กมียา 3 รายการ (Paracetamol syrup, Amoxicillin syrup, Chlorpheniramine syrup) จัดยาใส่ซองพร้อมฉลากไว้แล้ว ให้ตรวจสอบยาและฉลากเทียบกับใบสั่งยา ระบุข้อผิดพลาดทั้งหมด และแก้ไขให้ถูกต้องก่อนส่งมอบ</p>",
  "equipmentHtml": "",
  "noteHtml": "<p><span style=\"font-weight: 700;\">สถานีที่ 23</span></p>",
  "checklist": [
