@@ -60,7 +60,8 @@
       <div v-else-if="caseError" class="crv-card crv-err">{{ caseError }}</div>
       <div v-else-if="!caseData" class="crv-card crv-hint">กำลังโหลดเคส…</div>
       <template v-else>
-        <h1 class="crv-case"><span class="crv-cid">{{ caseData.id }}</span>{{ caseData.title }}</h1>
+        <!-- ผู้สอบไม่เห็นชื่อเคสจนจบ (ชื่อบอกโรค = ใบ้คำตอบ · user 14 พ.ย.) -->
+        <h1 class="crv-case"><span class="crv-cid">{{ caseData.id }}</span>{{ myRole === 'examinee' && state.status === 'play' ? 'สถานีสอบ' : caseData.title }}</h1>
         <Cc2RoomPlay v-if="state.status === 'play'"
           :case-data="caseData" :state="state" :my-role="myRole" :revealed="revealedKeys"
           :checks="checks" :answers="answers" :now="tickNow" :partner-left="partnerLeft" :busy="busy"

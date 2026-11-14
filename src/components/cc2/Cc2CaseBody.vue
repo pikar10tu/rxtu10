@@ -8,7 +8,7 @@
     <div class="ccb-meta">
       <span class="ccb-cat" :class="caseData.cat">{{ caseData.cat }}</span>
       <span v-if="caseData.group" class="ccb-grp">{{ caseData.group }}</span>
-      <span v-if="caseData.topic" class="ccb-topic">{{ caseData.topic }}</span>
+      <span v-if="caseData.topic && role !== 'examinee'" class="ccb-topic">{{ caseData.topic }}</span>
       <span v-if="caseData.durationMin" class="ccb-tag"><Emoji char="⏱️" /> {{ caseData.durationMin }} นาที</span>
       <span v-if="tot > 0" class="ccb-tag">เต็ม {{ fmt(tot) }} คะแนน</span>
       <span v-if="caseData.source" class="ccb-src">{{ caseData.source }}</span>
