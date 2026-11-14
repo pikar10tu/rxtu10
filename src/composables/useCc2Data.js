@@ -25,6 +25,13 @@ export function loadCc2Index() {
   return indexP
 }
 
+/** ข้อความเนื้อเคส {id: text} สำหรับค้นชื่อยาในเคส — โหลดตอนเริ่มพิมพ์ค้นครั้งแรก */
+let searchP = null
+export function loadCc2Search() {
+  searchP ||= fetchJson('search.json').catch(e => { searchP = null; throw e })
+  return searchP
+}
+
 /** เคสเต็มรายตัว (cache รายเคส) — id ไม่ถูกรูปแบบ → reject ทันที ไม่ยิง fetch */
 export function loadCc2Case(id) {
   if (!/^OS-\d{4}$/.test(String(id))) return Promise.reject(new Error('รหัสเคสไม่ถูกต้อง'))

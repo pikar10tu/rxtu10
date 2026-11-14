@@ -1,13 +1,15 @@
 // ════════════════════════════════════════════════════════════
 //  useCc2Room — ห้องซ้อมคู่ CC2 OSPE แบบมาตรฐาน (2 คน: ผู้ประเมิน + ผู้สอบ) บน RTDB (โครงเดียวกับ useSpyfall)
 //    cc2/rooms/{code}                      code = รหัสสั้น 4 ตัว (A–Z 2–9 ตัดตัวที่สับสน) บอกเพื่อนปากเปล่าได้
-//      meta     { hostUid, hostName, createdAt }                 ← หัวห้อง (รับช่วงได้ถ้าหัวห้องหลุด)
+//      meta     { hostUid, hostName, createdAt, private }         ← private = 🔒 ต้องใส่รหัสผ่าน 4 หลัก (14 พ.ย.)                 ← หัวห้อง (รับช่วงได้ถ้าหัวห้องหลุด)
 //      players  { [uid]: { name, joinedAt, role } }              ← ตัวเองเขียนของตัวเอง · onDisconnect ลบ · role = examiner|examinee|''
 //      state    { status: play|done, round, caseId, caseTitle, cat, examinerUid, examineeUid, startedAt, endsAt, durationMin }
 //               ← หัวห้องเขียน (ผู้ประเมินเปลี่ยน status เป็น done ได้) · ไม่มี state = อยู่ล็อบบี้
 //      live     { revealed: {key: true}, answers: {i: text} }    ← ผู้ประเมินส่งข้อมูล / ผู้สอบพิมพ์คำตอบช่องเติมคำ
 //      result   { round, got, tot, checks, answers, at }         ← ผู้ประเมินเขียนตอนจบเคส → ผู้สอบเห็นแล้วบันทึกผลตัวเอง
 //  เช็คลิสต์ที่ผู้ประเมินติ๊กอยู่ในเครื่องผู้ประเมินจนกว่าจะจบเคส — ไม่ผ่าน RTDB ระหว่างสอบ (ผู้สอบแอบดูไม่ได้)
+//  cc2/secrets/{code} { pw }  อ่านได้เฉพาะคนในห้อง · cc2/keys/{code}/{uid} = pw ที่พิมพ์ (rules เทียบกับ secrets)
+//    → rules ฝั่ง players ยอมให้เข้าห้อง private เฉพาะคนที่มี key ถูก · ไม่มีใครอ่าน pw จากลิสต์ห้องได้
 //  เนื้อเคสโหลดจากไฟล์ static ทั้งสองฝั่ง (useCc2Data) — RTDB เก็บแค่ caseId
 // ════════════════════════════════════════════════════════════
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
@@ -27,6 +29,7 @@ export const ROLES = { examiner: 'ผู้ประเมิน', examinee: '�
 
 let _db = null
 const rtdb = () => (_db ||= getDatabase(app))
+const makePw = () => String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 const makeCode = () => Array.from({ length: 4 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('')
 export const normCode = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/0/g, 'O').replace(/1/g, 'I').slice(0, 6)
 
@@ -44,6 +47,8 @@ export function useCc2Room() {
   const roomId = ref(null)
   const room = ref(null)
   const error = ref('')
+  const roomPw = ref('')        // รหัสผ่านห้อง private ที่อยู่ (โชว์ให้คนในห้องบอกต่อ)
+  const pwAsk = ref(null)       // { code } = ห้อง private ที่รอให้พิมพ์รหัสผ่าน
 
   // ── รายชื่อห้องที่รอคน ──
   const roomsRef = dbRef(rtdb(), ROOT)
@@ -67,6 +72,7 @@ export function useCc2Room() {
       count: Object.keys(r.players).length,
       names: Object.values(r.players).map(p => p.name),
       playing: !!r.state,
+      private: r.meta.private === true,
       mine: !!r.players[uid.value],
     }))
     .sort((a, b) => b.createdAt - a.createdAt))
@@ -83,9 +89,12 @@ export function useCc2Room() {
     })
     myPlayerRef = dbRef(rtdb(), `${ROOT}/${id}/players/${uid.value}`)
     onDisconnect(myPlayerRef).remove()
+    if (rooms.value[id]?.meta?.private || roomPw.value) {
+      get(dbRef(rtdb(), `cc2/secrets/${id}/pw`)).then(s => { roomPw.value = s.val() || '' }).catch(() => {})
+    }
   }
 
-  async function createRoom() {
+  async function createRoom({ isPrivate = false } = {}) {
     error.value = ''
     if (!uid.value) { error.value = 'ต้องล็อกอินก่อน'; return }
     const name = cleanText(myName(), 40)
@@ -96,15 +105,20 @@ export function useCc2Room() {
         if (!(await get(dbRef(rtdb(), `${ROOT}/${c}`))).exists()) { code = c; break }
       }
       if (!code) throw new Error('สุ่มรหัสห้องไม่ได้ ลองใหม่')
-      await update(dbRef(rtdb(), `${ROOT}/${code}`), {
-        meta: { hostUid: uid.value, hostName: name, createdAt: serverTimestamp() },
-        [`players/${uid.value}`]: { name, joinedAt: serverTimestamp(), role: 'examiner' },
+      const pw = isPrivate ? makePw() : ''
+      // อะตอมมิก: ห้อง + รหัสผ่าน + ล้าง key ค้างของรหัสห้องเดิม
+      await update(dbRef(rtdb()), {
+        [`${ROOT}/${code}/meta`]: { hostUid: uid.value, hostName: name, createdAt: serverTimestamp(), ...(isPrivate ? { private: true } : {}) },
+        [`${ROOT}/${code}/players/${uid.value}`]: { name, joinedAt: serverTimestamp(), role: 'examiner' },
+        [`cc2/secrets/${code}`]: isPrivate ? { pw } : null,
+        [`cc2/keys/${code}`]: null,
       })
+      roomPw.value = pw
       subscribeRoom(code)
     } catch (e) { error.value = 'สร้างห้องไม่สำเร็จ: ' + e.message }
   }
 
-  async function joinRoom(code) {
+  async function joinRoom(code, pw = '') {
     error.value = ''
     code = normCode(code)
     if (!code) { error.value = 'พิมพ์รหัสห้องก่อน'; return }
@@ -115,6 +129,14 @@ export function useCc2Room() {
       const n = Object.keys(r.players).length
       if (!r.players[uid.value] && n >= ROOM_SIZE) { error.value = 'ห้องนี้ครบ 2 คนแล้ว'; return }
       if (r.state && !r.players[uid.value]) { error.value = 'ห้องนี้กำลังซ้อมอยู่ รอจบรอบก่อน'; return }
+      if (r.meta.private && !r.players[uid.value]) {
+        pw = String(pw || '').replace(/D/g, '')
+        if (pw.length !== 4) { pwAsk.value = { code }; return }
+        try { await set(dbRef(rtdb(), `cc2/keys/${code}/${uid.value}`), pw) }
+        catch { error.value = 'รหัสผ่านไม่ถูก — ถามเจ้าของห้องอีกที'; pwAsk.value = { code }; return }
+        roomPw.value = pw
+      }
+      pwAsk.value = null
       // บทบาทเริ่มต้น = ตรงข้ามกับคนที่อยู่ก่อน
       const taken = Object.values(r.players).map(p => p.role)
       const role = taken.includes('examiner') ? 'examinee' : 'examiner'
@@ -127,13 +149,14 @@ export function useCc2Room() {
     if (roomRef) off(roomRef)
     if (myPlayerRef) onDisconnect(myPlayerRef).cancel().catch(() => {})
     roomRef = null; myPlayerRef = null
-    room.value = null; roomId.value = null
+    room.value = null; roomId.value = null; roomPw.value = ''
   }
   async function leaveRoom() {
     const id = roomId.value, me = myPlayerRef
     leaveLocal()
     if (!me) return
     await remove(me).catch(() => {})
+    remove(dbRef(rtdb(), `cc2/keys/${id}/${uid.value}`)).catch(() => {})
     dropRoom(id)   // คนสุดท้ายออก → ห้องหาย (ยังมีคนอยู่ rules ปฏิเสธเอง)
   }
 
@@ -243,7 +266,7 @@ export function useCc2Room() {
   })
 
   return {
-    uid, now, error, roomList, roomId, room, state, live, result, revealedKeys,
+    uid, now, error, roomList, roomPw, pwAsk, roomId, room, state, live, result, revealedKeys,
     isHost, players, me, partner, myRole, rolesOk, canStart, partnerLeft,
     listenRooms, stopRooms, createRoom, joinRoom, leaveRoom,
     setRole, swapRoles, kick, startCase, reveal, setAnswer, finishRound, backToLobby,

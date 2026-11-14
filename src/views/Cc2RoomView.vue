@@ -11,13 +11,31 @@
     </header>
     <div v-if="error" class="crv-err">{{ error }}</div>
 
+    <div v-if="roomId && roomPw" class="crv-card crv-pw"><Emoji char="🔒" /> ห้องส่วนตัว · รหัสผ่าน <b>{{ roomPw }}</b> <small>บอกเพื่อนพร้อมรหัสห้อง</small></div>
+
+    <!-- ── ใส่รหัสผ่านห้องส่วนตัว ── -->
+    <Teleport to="body">
+      <div v-if="pwAsk" class="crv-ov" @click.self="pwAsk = null">
+        <form class="crv-pwbox" @submit.prevent="joinRoom(pwAsk.code, pwIn)">
+          <b><Emoji char="🔒" /> ห้อง {{ pwAsk.code }} เป็นห้องส่วนตัว</b>
+          <input v-model="pwIn" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="รหัสผ่าน 4 หลัก" aria-label="รหัสผ่านห้อง">
+          <div v-if="error" class="crv-err">{{ error }}</div>
+          <div class="crv-pwbtns">
+            <button type="button" @click="pwAsk = null">ยกเลิก</button>
+            <button type="submit" :disabled="pwIn.replace(/D/g, '').length !== 4">เข้าห้อง</button>
+          </div>
+        </form>
+      </div>
+    </Teleport>
+
     <!-- ── หน้าแรก: สร้าง / เข้าห้อง ── -->
     <template v-if="!roomId">
       <div class="crv-card crv-intro">
         <b>ซ้อม OSPE กับเพื่อน 2 คน</b> — คนหนึ่งเป็นผู้ประเมิน (อ่านบทผู้ป่วย ติ๊กเช็คลิสต์) อีกคนเป็นผู้สอบ (เห็นแค่สถานการณ์ เหมือนสอบจริง)<br>
         <small>อยู่ด้วยกันหรือโทรคุยกัน แล้วสลับบทกันทำเคสถัดไป</small>
       </div>
-      <button type="button" class="crv-main" @click="createRoom">+ สร้างห้อง</button>
+      <button type="button" class="crv-main" @click="createRoom({ isPrivate })">+ สร้างห้อง{{ isPrivate ? 'ส่วนตัว' : '' }}</button>
+      <label class="crv-priv"><input v-model="isPrivate" type="checkbox"> <Emoji char="🔒" /> ห้องส่วนตัว <small>— ระบบสุ่มรหัสผ่านให้ เพื่อนต้องใส่ถึงเข้าได้</small></label>
       <form class="crv-join" @submit.prevent="joinRoom(code)">
         <input v-model="code" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" maxlength="6" placeholder="รหัสห้องจากเพื่อน" aria-label="รหัสห้อง">
         <button type="submit" :disabled="code.trim().length < 4">เข้าห้อง</button>
@@ -25,7 +43,7 @@
       <div class="crv-sub">ห้องที่รอคน</div>
       <div v-if="!waiting.length" class="crv-hint">ยังไม่มีห้องเปิดอยู่ — สร้างแล้วส่งรหัสให้เพื่อน</div>
       <div v-for="r in waiting" :key="r.id" class="crv-room">
-        <div class="crv-room-info"><b>ห้อง {{ r.id }}</b> · {{ r.hostName }}<small>{{ r.names.join(', ') }}</small></div>
+        <div class="crv-room-info"><b><Emoji v-if="r.private" char="🔒" /> ห้อง {{ r.id }}</b> · {{ r.hostName }}<small>{{ r.names.join(', ') }}</small></div>
         <button type="button" class="crv-join-btn" @click="joinRoom(r.id)">เข้าร่วม</button>
       </div>
     </template>
@@ -78,13 +96,16 @@ const progress = useCc2Progress()
 const router = useRouter()
 const { toast } = useToast()
 const {
-  uid, now, error, roomList, roomId, room, state, result, revealedKeys,
+  uid, now, error, roomList, roomPw, pwAsk, roomId, room, state, result, revealedKeys,
   isHost, players, me, myRole, rolesOk, canStart, partnerLeft,
   listenRooms, stopRooms, createRoom, joinRoom, leaveRoom,
   setRole, swapRoles, kick, startCase, reveal, setAnswer, finishRound, backToLobby,
 } = useCc2Room()
 
 const code = ref('')
+const isPrivate = ref(false)
+const pwIn = ref('')
+watch(pwAsk, v => { if (v) pwIn.value = '' })
 const waiting = computed(() => roomList.value.filter(r => !r.playing && r.count < 2))
 const cases = ref([])
 onMounted(() => { loadCc2Index().then(i => { cases.value = i.cases }).catch(() => {}) })
@@ -154,6 +175,18 @@ async function goBack() { if (roomId.value) { await leaveRoom(); return } router
 .crv-intro small { color: var(--muted); font-size: .8rem; }
 .crv-main { width: 100%; font: inherit; font-weight: 800; font-size: 1rem; padding: 13px; border: none; border-radius: 14px; background: var(--primary); color: #fff; cursor: pointer; box-shadow: var(--pop); }
 .crv-join { display: flex; gap: 8px; }
+.crv-priv { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-weight: 700; font-size: .86rem; margin: -2px 2px 12px; cursor: pointer; }
+.crv-priv small { font-weight: 500; color: var(--muted, #64748b); font-size: .76rem; }
+.crv-pw { font-size: .9rem; }
+.crv-pw b { font-size: 1.15rem; letter-spacing: .2em; color: var(--primary); }
+.crv-pw small { display: block; color: var(--muted, #64748b); font-size: .76rem; }
+.crv-ov { position: fixed; inset: 0; z-index: 400; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.crv-pwbox { background: #fff; border-radius: 18px; padding: 18px; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--pop); }
+.crv-pwbox input { font: inherit; font-size: 1.3rem; font-weight: 800; letter-spacing: .3em; text-align: center; padding: 10px; border-radius: 12px; border: var(--bw) solid var(--line); }
+.crv-pwbtns { display: flex; gap: 8px; }
+.crv-pwbtns button { flex: 1; font: inherit; font-weight: 800; padding: 10px; border-radius: 12px; border: 2px solid var(--primary); background: #fff; color: var(--primary); cursor: pointer; }
+.crv-pwbtns button[type=submit] { background: var(--primary); color: #fff; }
+.crv-pwbtns button:disabled { opacity: .5; }
 .crv-join input { flex: 1; min-width: 0; font: inherit; font-size: 1.1rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; text-align: center; padding: 10px 12px; border-radius: 12px; border: var(--bw) solid var(--line); background: #fff; }
 .crv-join button { font: inherit; font-weight: 800; padding: 10px 16px; border-radius: 12px; border: 2px solid var(--primary); background: #fff; color: var(--primary); cursor: pointer; }
 .crv-join button:disabled { opacity: .5; }

@@ -5,6 +5,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { validateCase, parseBlanks, sanitizeHtml } from '../../src/utils/cc2Case.js'
+import { searchText } from '../../src/utils/cc2Search.js'
 
 const SRC = 'content/cc2/cases'
 const OUT = 'public/cc2'
@@ -12,6 +13,7 @@ const OUT = 'public/cc2'
 const files = fs.readdirSync(SRC).filter(f => f.endsWith('.json')).sort()
 const index = []
 const errors = []
+const search = {}   // id → ข้อความล้วนของเนื้อเคส (ค้นชื่อยาในเคส) → public/cc2/search.json โหลดตอนเริ่มพิมพ์ค้น
 fs.rmSync(path.join(OUT, 'cases'), { recursive: true, force: true })
 fs.mkdirSync(path.join(OUT, 'cases'), { recursive: true })
 
@@ -28,8 +30,10 @@ for (const f of files) {
   c.blanks = parseBlanks(c.scenario)
   const tot = c.checklist.reduce((a, k) => a + (+k.s || 0), 0) + c.blanks.reduce((a, b) => a + b.score, 0)
   fs.writeFileSync(path.join(OUT, 'cases', c.id + '.json'), JSON.stringify(c))
+  search[c.id] = searchText([c.scenario, c.contentHtml, c.patientHtml, c.equipmentHtml, ...c.checklist.map(k => k.t || k.html)])
   index.push({ id: c.id, title: c.title, cat: c.cat, group: c.group, topic: c.topic, diff: c.diff, source: c.source, tot, mode: c.rest ? 'rest' : c.noScore ? 'free' : c.blanks.length ? 'blank' : 'check', next: c.next || undefined })
 }
 if (errors.length) { console.error('❌ CC2 content ผิดรูปแบบ:\n' + errors.join('\n')); process.exit(1) }
 fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify({ v: Date.now(), cases: index }))
+fs.writeFileSync(path.join(OUT, 'search.json'), JSON.stringify(search))
 console.log(`✅ CC2: ${index.length} เคสเปิดใช้ (จาก ${files.length} ไฟล์)`)

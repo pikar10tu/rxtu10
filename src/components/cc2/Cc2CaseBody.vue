@@ -23,7 +23,7 @@
     <!-- สถานการณ์ -->
     <section v-if="scenarioHtml" class="ccb-card">
       <h3><Emoji char="📋" /> สถานการณ์</h3>
-      <div class="ccb-html" v-html="scenarioHtml" />
+      <div class="ccb-html" v-html="scenarioShown" />
     </section>
 
     <!-- ข้อมูลผู้ป่วย (แยกเป็นชิ้นตามที่ผู้ประเมินส่ง) -->
@@ -44,7 +44,16 @@
     <!-- ของในสถานี / รายการยา -->
     <section v-if="sections.equipment && canSee(sections.equipment)" class="ccb-card" :class="{ gated: sections.equipment.gated }">
       <h3><Emoji char="🧰" /> ของในสถานี <GateBadge v-if="sections.equipment.gated" :part="sections.equipment" /></h3>
-      <div class="ccb-html" v-html="sections.equipment.html" />
+      <div class="ccb-html" v-html="paired ? stripImgs(sections.equipment.html) : sections.equipment.html" />
+    </section>
+
+    <!-- ห้องคู่: รูปในสถานการณ์/ของในสถานี แยกออกมา · ผู้สอบไม่รู้ว่ามีรูปจนผู้ประเมินส่ง (user 13 พ.ย.) -->
+    <section v-if="paired && shownImgs.length" class="ccb-card" :class="{ gated: role === 'examiner' }">
+      <h3><Emoji char="🖼️" /> {{ role === 'examiner' ? 'รูปในเคส — ส่งเมื่อผู้สอบถามถึง' : 'รูปที่ผู้ประเมินส่งมา' }}</h3>
+      <div v-for="im in shownImgs" :key="im.key" class="ccb-img">
+        <div class="ccb-html" v-html="im.html" />
+        <GateBadge v-if="role === 'examiner'" :part="im" />
+      </div>
     </section>
 
     <!-- ผู้สอบ: ส่วนที่ยังรอผู้ประเมินส่ง -->
@@ -143,6 +152,18 @@ const scenarioHtml = computed(() => {
   return blankPlaceholders(c.scenario.split(/\n+/).map(l => `<p>${esc(l)}</p>`).join(''))
 })
 
+// ── รูปในห้องคู่ ──
+const IMG_RE = /<img[^>]*>/gi
+const stripImgs = html => String(html || '').replace(IMG_RE, '')
+const paired = computed(() => props.role === 'examiner' || props.role === 'examinee')
+const scenarioShown = computed(() => (paired.value ? stripImgs(scenarioHtml.value) : scenarioHtml.value))
+const caseImgs = computed(() => {
+  const eq = caseSections(props.caseData).equipment
+  const src = scenarioHtml.value + (eq?.html || '')
+  return (src.match(IMG_RE) || []).map((html, n) => ({ key: `img_${n}`, html }))
+})
+const shownImgs = computed(() => (props.role === 'examiner' ? caseImgs.value : caseImgs.value.filter(im => props.revealed.includes(im.key))))
+
 // ── ส่วนผู้ป่วย / ของในสถานี + gate ──
 // ห้องคู่ (examiner/examinee): ข้อมูลผู้ป่วยทุกส่วนต้องให้ผู้ประเมินส่งก่อน ผู้สอบต้องซักเอง (user ขอ 13 พ.ย.) · solo ใช้ gate ตามเคส
 const sections = computed(() => {
@@ -236,6 +257,9 @@ const showDrugs = computed(() => showKey.value || props.readonly)   // ชิป
 :deep(.ccb-gate.sent) { background: var(--mint-light); color: #1f7a5a; border-color: #9fe0c6; }
 :deep(.ccb-gate.btn) { cursor: pointer; background: var(--primary); color: #fff; border-color: var(--primary); font: inherit; font-size: .78rem; font-weight: 800; padding: 6px 12px; }
 :deep(.ccb-gate.btn:disabled) { opacity: .5; cursor: default; }
+.ccb-img { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.ccb-img:last-child { border-bottom: none; }
+.ccb-img .ccb-html { align-self: stretch; }
 
 .ccb-drugs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .ccb-drugs-l { font-size: .78rem; color: var(--muted); font-weight: 700; }
