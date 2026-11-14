@@ -1,6 +1,6 @@
 {
  "id": "OS-0138",
- "title": "การตรวจสอบใบสั่งยาและการจัดการปัญหาจากการใช้ยา (Prescription Screening & DRPs)",
+ "title": "ใบสั่งยามีปัญหา — ตรวจใบสั่งยา + DRPs",
  "cat": "Clinic",
  "group": "การตรวจสอบใบสั่งยา",
  "topic": "Drug-Related Problems, Medication Errors, Drug Interaction (DTG + Metformin), Cross-allergy (Sulfa + Sulfonylurea), Dispensing Errors",

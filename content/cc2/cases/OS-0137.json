@@ -1,6 +1,6 @@
 {
  "id": "OS-0137",
- "title": "การประเมินและจัดการ ADR (ท้องเสียจากยา)",
+ "title": "ท้องเสียจาก Amoxicillin/Clavulanate — ประเมิน ADR",
  "cat": "Clinic",
  "group": "การประเมินการแพ้ยา",
  "topic": "Antibiotic-Associated Diarrhea, Amoxicillin/Clavulanate",
