@@ -23,7 +23,7 @@ export function matchCase(c, terms, body = '') {
   const caseNum = +String(c.id).replace(/\D/g, '')
   return terms.every(t => {
     const n = idNum(t)
-    if (n !== null && n === caseNum) return true
+    if (n !== null) return n === caseNum   // ตัวเลขล้วน/OS-xxxx = รหัสเท่านั้น (ไม่งั้น 48 ติด 0148 0248)
     return head.includes(t) || body.includes(t)
   })
 }

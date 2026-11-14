@@ -7,6 +7,7 @@ const c = { id: 'OS-0048', title: 'เขียนฉลากยา Warfarin', 
 test('รหัสเคสหลายแบบ', () => {
   for (const q of ['OS-0048', 'os0048', '0048', '48']) assert.ok(matchCase(c, searchTerms(q)), q)
   assert.ok(!matchCase(c, searchTerms('49')))
+  assert.ok(!matchCase({ ...c, id: 'OS-0148' }, searchTerms('48')))
 })
 test('หลายคำต้องตรงครบ', () => {
   assert.ok(matchCase(c, searchTerms('warfarin ฉลาก')))

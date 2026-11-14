@@ -52,7 +52,7 @@
       </template>
 
       <!-- หมวด > กลุ่ม > เคส พับได้ -->
-      <div v-else class="cl-tree">
+      <div v-show="!terms.length" class="cl-tree">
         <details v-for="cg in tree" :key="cg.cat" class="cl-catbox" :class="'cat-' + cg.cat">
           <summary class="cl-cat-h">
             <span class="cl-item-cat" :class="'cat-' + cg.cat">{{ cg.cat }}</span>
