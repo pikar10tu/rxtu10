@@ -50,10 +50,10 @@
         <!-- ทุกรอบ / รอบเรา — คนตรวจแต่ละรอบไม่ใช่ชุดเดียวกัน (ทีมขอ 8 พ.ย.) · โชว์แค่รอบตัวเอง ไม่ให้ยาว -->
         <div v-if="myRound" class="ms-scope">
           <button :class="{ on: scope === 'all' }" @click="scope = 'all'">ทุกรอบ</button>
-          <button :class="{ on: scope === 'round' }" @click="scope = 'round'">รอบเรา · รอบ {{ my.round }}</button>
+          <button :class="{ on: scope === 'round' }" @click="scope = 'round'">{{ myRound.isRoom ? 'ห้องเรา' : `รอบเรา · รอบ ${my.round}` }}</button>
         </div>
-        <div class="ms-cls-cap">{{ scope === 'round' && myRound ? `รอบ ${my.round}${myRound.label ? ' · ' + myRound.label : ''}` : 'ภาพรวมรุ่น' }} · {{ src.n }} คน</div>
-        <div v-if="scope === 'round' && myRound && myRound.hidden" class="ms-sub">รอบนี้มีคนสอบไม่ถึง {{ MIN_ROUND }} คน เลยไม่แสดงสถิติแยก (กันเดาคะแนนกันได้)</div>
+        <div class="ms-cls-cap">{{ scope === 'round' && myRound ? (myRound.isRoom ? `ห้องเรา · ${myRound.label}` : `รอบ ${my.round}${myRound.label ? ' · ' + myRound.label : ''}`) : 'ภาพรวมรุ่น' }} · {{ src.n }} คน</div>
+        <div v-if="scope === 'round' && myRound && myRound.hidden" class="ms-sub">{{ myRound.isRoom ? 'ห้องนี้' : 'รอบนี้' }}มีคนสอบไม่ถึง {{ MIN_ROUND }} คน เลยไม่แสดงสถิติแยก (กันเดาคะแนนกันได้)</div>
         <div class="ms-cls-grid">
           <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ pctText(clsPct) }}</b><small v-if="Number.isFinite(src.sdPct)" class="ms-sd">SD {{ pctText(src.sdPct) }}</small></div>
           <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ Number.isFinite(src.minPct) ? pctText(src.minPct) : '-' }}</b></div>
@@ -121,10 +121,12 @@ const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
 // สถิติที่ใช้เทียบ: ทั้งรุ่น หรือรอบที่เราสอบ (rounds[n].stations มีแค่ mean/sd/min/top ตามลำดับฐาน)
 const MIN_ROUND = 5
 const scope = ref('all')
+// ห้อง (room = "รอบ-วง") ก่อนรอบ: รอบเดียวแบ่ง 2 ห้อง กรรมการคนละชุด (user 15 พ.ย.)
 const myRound = computed(() => {
-  const r = my.value?.round && exam.value.rounds?.[String(my.value.round)]
+  const room = my.value?.room && exam.value.rooms?.[my.value.room]
+  const r = room || (my.value?.round && exam.value.rounds?.[String(my.value.round)])
   if (!r) return null
-  return { ...r, hidden: !(r.n >= MIN_ROUND && Array.isArray(r.stations)) }
+  return { ...r, isRoom: !!room, hidden: !(r.n >= MIN_ROUND && Array.isArray(r.stations)) }
 })
 const src = computed(() => {
   const e = exam.value
