@@ -4,7 +4,7 @@
 <template>
   <div class="pk">
     <header class="pk-head">
-      <button class="pk-back" @click="goBack">‹ กลับ</button>
+      <BackButton @click="goBack" />
       <span class="pk-title"><Emoji char="🃏" /> Poker <span class="pk-demo">ทดสอบ</span></span>
       <button class="pk-rk-btn" @click="ranksOpen = true">📖 ลำดับไพ่</button>
     </header>
@@ -205,6 +205,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'

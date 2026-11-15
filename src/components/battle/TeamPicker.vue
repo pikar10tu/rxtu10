@@ -10,7 +10,7 @@
   <Teleport to="body" :disabled="inline">
     <div v-if="inline || open" :class="inline ? 'tp-inline' : 'tp-full'">
       <div v-if="!inline" class="tp-bar">
-        <button type="button" class="tp-back" aria-label="กลับ" @click="close">‹</button>
+        <BackButton @click="close" />
         <div class="tp-bar-t">
           <b><Emoji char="⚔️" /> จัดทีม</b>
           <small v-if="context">{{ context }}</small>
@@ -111,6 +111,7 @@
 </template>
 
 <script setup>
+import BackButton from '../shared/BackButton.vue'
 import Emoji from '../shared/Emoji.vue'
 import PetDetailModal from '../pets/PetDetailModal.vue'
 import PetPickSheet from './PetPickSheet.vue'

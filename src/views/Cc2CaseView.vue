@@ -4,7 +4,7 @@
 <template>
   <div class="tab-content ccv">
     <header class="ccv-head">
-      <router-link to="/study/cc2" class="ccv-back">‹ คลังเคส</router-link>
+      <BackButton to="/study/cc2" label="คลังเคส" />
       <span v-if="caseData" class="ccv-timer" :class="{ over: overTime }">{{ clock }}</span>
     </header>
 
@@ -51,6 +51,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Cc2CaseBody from '../components/cc2/Cc2CaseBody.vue'

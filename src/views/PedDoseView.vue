@@ -3,7 +3,7 @@
 <template>
   <div class="tab-content pd-wrap">
     <div class="page-title pd-head">
-      <button class="pd-back" @click="$router.push('/study?tab=tool')">‹ กลับ</button>
+      <BackButton to="/study?tab=tool" />
       <span><Emoji char="👶" /> ขนาดยาน้ำเด็ก</span>
     </div>
 
@@ -52,6 +52,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { WEIGHT_DRUGS, AGE_DRUGS, PED_DOSE_CREDIT, calcDose, concLabel, basisLabel, freqLabel, maxLabel } from '../data/pedDose.js'

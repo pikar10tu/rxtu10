@@ -7,7 +7,7 @@
 <template>
   <div class="tab-content cl-wrap">
     <div class="page-title cl-head">
-      <button class="cl-back" type="button" @click="$router.push('/study')">‹ กลับ</button>
+      <BackButton to="/study" />
       <span><Emoji char="🩺" /> คลังเคส CC2 OSPE</span>
     </div>
 
@@ -78,6 +78,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'

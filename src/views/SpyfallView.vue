@@ -4,7 +4,7 @@
 <template>
   <div class="sfv">
     <header class="sfv-head">
-      <button class="sfv-back" @click="goBack">‹ กลับ</button>
+      <BackButton @click="goBack" />
       <span class="sfv-title"><Emoji char="🕵️" /> Pharm Spyfall <span class="sfv-demo">ทดสอบ</span></span>
       <span style="width:52px"></span>
     </header>
@@ -157,6 +157,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'

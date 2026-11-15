@@ -3,7 +3,7 @@
 <template>
   <div class="tab-content tv-wrap">
     <div class="page-title tv-head">
-      <button class="tv-back" aria-label="กลับ" @click="back">‹</button>
+      <BackButton @click="back" />
       <span><Emoji char="⚔️" /> จัดทีม</span>
       <button class="tv-coll" @click="router.push('/pets')"><Emoji char="🐾" /> คลังเพ็ท</button>
     </div>
@@ -14,6 +14,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
 import TeamPicker from '../components/battle/TeamPicker.vue'

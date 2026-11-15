@@ -26,7 +26,7 @@
         <RouterLink to="/members" class="bn-item"><span class="bn-icon"><Emoji char="👥" /></span>Members</RouterLink>
         <RouterLink to="/study"   class="bn-item bn-center"><span class="bn-icon"><Emoji char="📚" /></span>Study</RouterLink>
         <RouterLink to="/play"    class="bn-item"><span class="bn-icon"><Emoji char="🎮" /><span v-if="playDot" class="nav-dot" aria-label="มีของรอเก็บ"></span></span>Play</RouterLink>
-        <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>ฉัน</RouterLink>
+        <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>Me</RouterLink>
       </nav>
 
       <HelpModal />

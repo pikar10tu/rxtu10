@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content sv">
-    <router-link to="/study?tab=sum" class="sv-back">‹ คลังสรุป</router-link>
+    <BackButton to="/study?tab=sum" label="คลังสรุป" class="bb-solo" />
     <div v-if="!meta || !meta.ready" class="sv-card">เรื่องนี้อยู่ระหว่างดำเนินการ</div>
     <template v-else>
       <header class="sv-card">
@@ -59,6 +59,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { summaryMeta, loadSummary, SYSTEMS, reviewPill, SUMMARY_PDF_FOLDER } from '../data/summaryIndex.js'

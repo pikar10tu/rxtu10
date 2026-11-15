@@ -3,7 +3,7 @@
 <template>
   <div class="ptv">
     <header class="ptv-head">
-      <button class="ptv-back" @click="goBack">‹ กลับ</button>
+      <BackButton @click="goBack" />
       <span class="ptv-title"><Emoji char="🧪" /> PharmaTeam <span class="ptv-demo">ทดสอบ</span></span>
       <span style="width:52px"></span>
     </header>
@@ -73,6 +73,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { increment } from 'firebase/firestore'
 import { useAuthStore } from '../stores/auth.js'

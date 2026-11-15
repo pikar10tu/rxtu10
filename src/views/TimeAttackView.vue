@@ -7,7 +7,7 @@
 <template>
   <div class="tab-content">
     <div class="ta-head">
-      <button class="ta-back" aria-label="ย้อนกลับ" @click="onBack">‹</button>
+      <BackButton aria-label="ย้อนกลับ" @click="onBack" />
       <span class="ta-head-title"><Emoji char="⏱️" /> Time Attack</span>
       <HelpButton topic="timeAttack" style="margin-left:auto" />
     </div>
@@ -108,6 +108,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { activeEvent, quizPts, grantPatch } from '../utils/event.js'

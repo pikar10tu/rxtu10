@@ -1,7 +1,6 @@
 <template>
   <div class="tab-content ms">
-    <RouterLink to="/me" class="ms-back">‹ ฉัน</RouterLink>
-    <div class="page-title"><Emoji char="📋" /> ผลสอบจำลอง</div>
+    <div class="page-title bb-head"><BackButton to="/me" /><Emoji char="📋" /> ผลสอบจำลอง</div>
 
     <div v-if="!loaded" class="ms-empty">กำลังโหลด…</div>
     <div v-else-if="!exams.length" class="ms-empty">ยังไม่มีประกาศผลสอบจำลอง</div>
@@ -142,6 +141,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'

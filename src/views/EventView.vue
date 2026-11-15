@@ -4,7 +4,7 @@
 <template>
   <div class="tab-content ev">
     <div class="page-title ev-head">
-      <RouterLink to="/play" class="ev-back" aria-label="กลับ">‹</RouterLink>
+      <BackButton to="/play" />
       <span>{{ ev ? ev.name : 'อีเวนต์' }}</span>
       <span v-if="ev" class="ev-pts"><Emoji :char="ev.pt" /> {{ pts.toLocaleString() }}</span>
     </div>
@@ -87,6 +87,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted } from 'vue'
 import { increment } from 'firebase/firestore'
 import Emoji from '../components/shared/Emoji.vue'

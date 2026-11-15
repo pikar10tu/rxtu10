@@ -5,7 +5,7 @@
 <template>
   <div class="tab-content">
     <div ref="headEl" class="dc-head">
-      <button class="dc-back" aria-label="ย้อนกลับ" @click="$router.back()">‹</button>
+      <BackButton aria-label="ย้อนกลับ" @click="$router.back()" />
       <span class="dc-head-title"><Emoji char="🌅" /> ข้อสอบประจำวัน</span>
     </div>
 
@@ -107,6 +107,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
 import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import {

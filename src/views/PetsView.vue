@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="pt-head">
-      <button class="pt-back" aria-label="กลับ" @click="$router.push('/play/pets')">‹</button>
+      <BackButton to="/play/pets" />
       <span><Emoji char="🐾" /> สัตว์เลี้ยง</span>
       <HelpButton topic="pets" style="margin-left:auto" />
       <button v-if="authStore.isLoggedIn" class="pt-to-team" @click="$router.push('/team')">จัดทีม →</button>
@@ -72,6 +72,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { computed, ref } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import HelpButton from '../components/help/HelpButton.vue'

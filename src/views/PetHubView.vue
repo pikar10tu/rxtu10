@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="page-title ph-head">
-      <RouterLink to="/play" class="ph-back" aria-label="กลับ">‹</RouterLink>
+      <BackButton to="/play" />
       <span><Emoji char="🐾" /> โหมดเพ็ท</span>
       <HelpButton topic="pets" />
     </div>
@@ -80,6 +80,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Emoji from '../components/shared/Emoji.vue'
 import SoonCard from '../components/shared/SoonCard.vue'

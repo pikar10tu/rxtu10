@@ -11,7 +11,7 @@
     <!-- ── SETUP ── -->
     <template v-if="phase === 'setup'">
       <div class="page-title cs-head">
-        <button class="cs-back" type="button" @click="$router.push('/study/cc2')">‹ กลับ</button>
+        <BackButton to="/study/cc2" />
         <span><Emoji char="⏱️" /> ซ้อม 16 สถานี</span>
       </div>
 
@@ -145,6 +145,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'

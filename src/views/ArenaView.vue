@@ -5,10 +5,9 @@
 <template>
   <div class="tab-content">
     <div class="page-title ar-head">
-      <span><Emoji char="⚔️" /> สนามประลอง</span>
+      <span class="bb-head"><BackButton to="/play/pets" /><Emoji char="⚔️" /> สนามประลอง</span>
       <span class="ar-head-r">
         <HelpButton topic="arena" />
-        <RouterLink to="/play/pets" class="ar-back">‹ กลับ</RouterLink>
       </span>
     </div>
 
@@ -104,6 +103,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { ref, computed, onMounted, watch } from 'vue'

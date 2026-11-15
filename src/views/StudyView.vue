@@ -78,7 +78,7 @@
         </template>
       </template>
       <div v-else class="sv-doorhead">
-        <button type="button" class="sv-back" aria-label="กลับหน้าเตรียมสอบ" @click="openDoor('home')">‹</button>
+        <BackButton aria-label="กลับหน้าเตรียมสอบ" @click="openDoor('home')" />
         <span><Emoji :char="doorOf(tab).emoji" /> {{ doorOf(tab).title }}</span>
       </div>
 
@@ -270,6 +270,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import GlobalSearchPanel from '../components/search/GlobalSearchPanel.vue'
 import { useEscapeKey } from '../composables/useEscapeKey.js'
 import Emoji from '../components/shared/Emoji.vue'

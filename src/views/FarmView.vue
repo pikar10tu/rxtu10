@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="page-title fv-head">
-      <RouterLink to="/play" class="fv-back" aria-label="กลับ">‹</RouterLink>
+      <BackButton to="/play" />
       <span><Emoji char="🌱" /> โหมดฟาร์ม</span>
       <span class="fv-spacer"></span>
     </div>
@@ -13,6 +13,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import FarmGrid from '../components/farm/FarmGrid.vue'
 import FarmOrders from '../components/farm/FarmOrders.vue'

@@ -5,10 +5,9 @@
 <template>
   <div class="tab-content">
     <div class="page-title ex-head">
-      <span><Emoji char="🗺️" /> ส่งผจญภัย</span>
+      <span class="bb-head"><BackButton to="/play/pets" /><Emoji char="🗺️" /> ส่งผจญภัย</span>
       <span class="ex-head-r">
         <HelpButton topic="expedition" />
-        <RouterLink to="/play/pets" class="ex-back">‹ กลับ</RouterLink>
       </span>
     </div>
 
@@ -93,6 +92,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { useEscapeKey } from '../composables/useEscapeKey.js'
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink } from 'vue-router'

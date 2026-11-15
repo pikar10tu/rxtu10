@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content">
     <div class="qv-head">
-      <button class="qv-back" aria-label="ย้อนกลับ" @click="$router.back()">‹</button>
+      <BackButton aria-label="ย้อนกลับ" @click="$router.back()" />
       <span class="qv-head-title"><Emoji char="📝" /> ทำข้อสอบ</span>
       <HelpButton topic="quiz" style="margin-left:auto" />
     </div>
@@ -196,7 +196,7 @@
     <!-- ── HISTORY ── -->
     <template v-else-if="mode === 'history'">
       <div class="qv-head">
-        <button class="qv-back" aria-label="ย้อนกลับ" @click="mode = 'home'">‹</button>
+        <BackButton aria-label="ย้อนกลับ" @click="mode = 'home'" />
         <span class="qv-head-title"><Emoji char="📊" /> ประวัติของฉัน</span>
       </div>
 
@@ -227,6 +227,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'

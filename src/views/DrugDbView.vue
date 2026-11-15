@@ -5,7 +5,7 @@
 <template>
   <div class="tab-content dd-wrap">
     <div class="page-title dd-head">
-      <button class="dd-back" @click="back">‹ กลับ</button>
+      <BackButton @click="back" />
       <span><Emoji char="💊" /> ฐานข้อมูลยา</span>
       <button v-if="open && !drug" type="button" class="dd-ask-top" @click="openForm('req')"><Emoji char="🙋" /> ขอยาเพิ่ม</button>
     </div>
@@ -105,6 +105,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, h, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { loadSearchIndex } from '../composables/useGlobalSearch.js'

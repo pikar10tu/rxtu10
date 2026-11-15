@@ -5,7 +5,7 @@
 <template>
   <div class="tab-content crv">
     <header class="crv-head">
-      <button type="button" class="crv-back" @click="goBack">‹ {{ roomId ? 'ออกจากห้อง' : 'คลังเคส' }}</button>
+      <BackButton :label="roomId ? 'ออกจากห้อง' : ''" @click="goBack" />
       <span class="crv-title"><Emoji char="🤝" /> ซ้อมคู่ CC2</span>
       <span style="width:72px"></span>
     </header>
@@ -80,6 +80,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'

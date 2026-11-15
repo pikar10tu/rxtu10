@@ -1,12 +1,11 @@
 <template>
   <div class="tab-content">
     <div class="page-title tw-head">
-      <span><Emoji char="🏯" /> หอคอย</span>
+      <span class="bb-head"><BackButton to="/play/pets" /><Emoji char="🏯" /> หอคอย</span>
       <span class="tw-head-r">
         <!-- 27 ต.ค. 2026 (หน้ากระชับ): นับถอยหลังซีซั่นเป็นชิปบนหัว กดดูรางวัล -->
         <SeasonCountdown v-if="authStore.isLoggedIn" kind="tower" compact />
         <HelpButton topic="tower" />
-        <RouterLink to="/play/pets" class="tw-back">‹ กลับ</RouterLink>
       </span>
     </div>
 
@@ -126,6 +125,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'

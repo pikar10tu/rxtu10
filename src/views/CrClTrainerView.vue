@@ -4,7 +4,7 @@
 <template>
   <div class="tab-content cr-wrap">
     <div class="page-title cr-head">
-      <button class="cr-back" @click="$router.push('/study?tab=tool')">‹ กลับ</button>
+      <BackButton to="/study?tab=tool" />
       <span><Emoji char="🧮" /> คำนวณ CrCl</span>
     </div>
 
@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { ref, computed } from 'vue'
 import { cockcroftGault } from '../utils/crcl.js'

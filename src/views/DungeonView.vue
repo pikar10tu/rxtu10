@@ -4,7 +4,7 @@
 <template>
   <div class="tab-content dg">
     <div class="page-title dg-head">
-      <RouterLink to="/play/pets" class="dg-back" aria-label="กลับ">‹</RouterLink>
+      <BackButton to="/play/pets" />
       <span class="dg-title"><small>ดันเจี้ยน ›</small> <Emoji :char="D.emoji" /> {{ D.name }}</span>
       <RouterLink v-if="ev" to="/event" class="dg-pts"><Emoji :char="ev.pt" /> {{ pts.toLocaleString() }}</RouterLink>
     </div>
@@ -65,6 +65,7 @@
 </template>
 
 <script setup>
+import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onUnmounted } from 'vue'
 import { increment } from 'firebase/firestore'
 import Emoji from '../components/shared/Emoji.vue'
