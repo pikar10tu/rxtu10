@@ -87,12 +87,12 @@
           <div class="tr-msg">{{ open.t }}</div>
           <div class="tr-who">
             <template v-if="mine[open.id]">คำของเรา (เพื่อนเห็นแบบไม่ระบุชื่อ){{ thanksCount(open.id) ? ` · ได้ใจ ${thanksCount(open.id)} ครั้ง` : '' }}</template>
-            <template v-else>จากเพื่อนในรุ่นคนหนึ่ง{{ isNew(open) ? ' · ใหม่' : '' }}{{ thanksCount(open.id) ? ` · เพื่อนส่งใจ ${thanksCount(open.id)} ครั้ง` : '' }}</template>
+            <template v-else>จากเพื่อนในรุ่นคนหนึ่ง{{ isNew(open) ? ' · ใหม่' : '' }}</template>
             <template v-if="who[open.id]"> · เขียนโดย {{ who[open.id] }}</template>
           </div>
           <div class="tr-acts">
             <button v-if="!mine[open.id]" type="button" class="tr-thx" :class="{ on: thanked(open.id) }" @click="thank(open.id)">
-              <Emoji :char="thanked(open.id) ? '❤️' : '🤍'" /> {{ thanked(open.id) ? 'ส่งใจแล้ว' : 'ขอบคุณ' }}
+              <Emoji :char="thanked(open.id) ? '❤️' : '🤍'" /> {{ thanked(open.id) ? 'ส่งใจแล้ว' : 'ขอบคุณ' }}<b v-if="thanksCount(open.id)" class="tr-thx-n"> · {{ thanksCount(open.id) }}</b>
             </button>
             <button type="button" @click="open = null">ปิด</button>
             <span class="tr-acts-gap" />
@@ -344,5 +344,6 @@ onMounted(async () => {
 .tr-acts button { font: inherit; font-size: .84rem; color: var(--ink); background: #fff; border: var(--bw) solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
 .tr-acts .tr-thx.on { background: var(--accent-light); border-color: var(--accent); }
 .tr-acts-gap { flex: 1; }
+.tr-thx-n { font-weight: 700; }
 .tr-acts .tr-link { border: 0; padding: 7px 4px; color: var(--muted); font-size: .76rem; text-decoration: underline; background: none; }
 </style>
