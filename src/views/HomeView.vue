@@ -28,6 +28,7 @@
       <div class="home-sec">ประจำวันสนุกๆ</div>
       <div class="home-fun" :style="{ gridTemplateColumns: `repeat(${funCols}, minmax(0, 1fr))` }">
         <HoroCard tile />
+        <TreeTile />
         <EventBanner v-if="hasEvent" tile />
         <MbtiPromo v-if="hasMbtiPromo" tile />
         <PharmFactCard v-if="!factsWide" tile />
@@ -77,6 +78,7 @@ import PharmFactCard from '../components/home/PharmFactCard.vue'
 import DailyQuestCard from '../components/home/DailyQuestCard.vue'
 import EventBanner from '../components/shared/EventBanner.vue'
 import MbtiPromo from '../components/home/MbtiPromo.vue'
+import TreeTile from '../components/home/TreeTile.vue'
 import MailboxCard from '../components/home/MailboxCard.vue'
 import { EXAMS } from '../data/exams.js'
 import { upcomingExams } from '../utils/countdown.js'
@@ -115,8 +117,9 @@ function poke() {
 // ── แถวประจำวันสนุกๆ ──
 const hasEvent = !!activeEvent()
 const hasMbtiPromo = computed(() => !!authStore.userData && !authStore.userData.mbti)
-const factsWide = computed(() => 1 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0) >= 3)
-const funCols = computed(() => 1 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0) + (factsWide.value ? 0 : 1))
+// ต้นไม้รุ่น 10 อยู่แถวนี้ด้วย (15 พ.ย.) · แถวละไม่เกิน 4 ช่อง → ครบ 4 แล้วเกร็ดฯ ค่อยลงการ์ดเต็มกว้าง
+const factsWide = computed(() => 2 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0) >= 4)
+const funCols = computed(() => 2 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0) + (factsWide.value ? 0 : 1))
 
 // จุดแดงเควส = วันนี้ยังไม่กดรับรางวัล
 const questPending = computed(() =>
