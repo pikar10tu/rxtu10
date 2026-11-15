@@ -241,6 +241,13 @@ service cloud.firestore {
             && request.resource.data.keys().hasOnly(['msg','icon','type','uid','ts'])
             // ต้องเป็นชื่อตัวเอง — เดิมไม่บังคับ ใครก็โพสต์แอชชีฟเมนต์ในนามคนอื่นได้ผ่าน DevTools
             && request.resource.data.get('uid', '') == request.auth.uid)
+        // ข่าวต้นไม้รุ่น 10 (15 พ.ย.): ไม่ระบุชื่อ (ไม่มี uid) · ข้อความตายตัว · ต้องมากับการขยับ tree/pool.newsAt ใน batch เดียว
+        || (request.auth != null && request.resource.data.type == 'tree'
+            && request.resource.data.keys().hasOnly(['msg','icon','type','ts'])
+            && request.resource.data.msg in ['ใครบางคนให้ดอกไม้เพื่อนๆ ในต้นไม้รุ่น', 'ใครบางคนติดอาวุธให้เพื่อนๆ ในต้นไม้รุ่น']
+            && request.resource.data.icon in ['🌸', '⚔️']
+            && request.resource.data.ts == request.time
+            && getAfter(/databases/$(database)/documents/tree/pool).data.get('newsAt', null) == request.time)
         || isAdmin();
       allow update: if false;
       allow delete: if isAdmin();
@@ -588,10 +595,17 @@ service cloud.firestore {
     //  เพิ่มข้อความ: ได้ทีละ 1 คีย์ และคีย์ต้อง = treeAuthors/{uid}.last ที่เขียนคู่กันใน batch เดียว (แอดมินจึงตามคนเขียนได้)
     //  ขอบคุณ/แจ้งลบ: แตะได้แค่ thanks.{uid ตัวเอง} / flags.{uid ตัวเอง} · ลบข้อความ = แอดมิน
     match /tree/pool {
+      // newsAt = เวลาข่าวต้นไม้ล่าสุดบนกระดาน (15 พ.ย.) · ขยับได้เฉพาะตอนเขียนข้อความ และห่างครั้งก่อน ≥ 2 ชม. (กันข่าวต้นไม้ท่วมเลน news 5 ช่อง)
+      function treeNewsOk() {
+        return request.resource.data.get('newsAt', null) == resource.data.get('newsAt', null)
+          || (request.resource.data.newsAt == request.time
+              && (resource.data.get('newsAt', null) == null || resource.data.newsAt < request.time - duration.value(2, 'h')));
+      }
       function treeAdd() {
         let k = getAfter(/databases/$(database)/documents/treeAuthors/$(request.auth.uid)).data.last;
         let it = request.resource.data.items[k];
-        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['items'])
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['items', 'newsAt'])
+          && treeNewsOk()
           && request.resource.data.items.diff(resource.data.items).affectedKeys().hasOnly([k])
           && !(k in resource.data.items)
           && request.resource.data.items.size() <= 2500

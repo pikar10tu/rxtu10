@@ -22,6 +22,9 @@ export const TREE_KINDS = {
        chips: ['ลุยยย', 'สนามจริงเจอกัน', 'อีกนิดเดียว'] },
 }
 
+// ข่าวบนกระดานรุ่น (ไม่ระบุชื่อ) — ต้องตรงกับ firestore.rules (match /news) ทุกตัวอักษร
+export const TREE_NEWS = { w: 'ใครบางคนให้ดอกไม้เพื่อนๆ ในต้นไม้รุ่น', a: 'ใครบางคนติดอาวุธให้เพื่อนๆ ในต้นไม้รุ่น' }
+
 export const randomTreeIcon = (kind, rnd = Math.random) => {
   const list = kind === 'a' ? TREE_WEAPONS : TREE_LEAVES
   return list[Math.floor(rnd() * list.length)]

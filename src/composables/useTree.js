@@ -8,7 +8,7 @@ import { ref, computed } from 'vue'
 import { doc, getDoc, getDocs, setDoc, updateDoc, writeBatch, deleteField, serverTimestamp, collection, query, where } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { cleanText } from '../utils/text.js'
-import { TREE_MAX, randomTreeIcon } from '../data/tree.js'
+import { TREE_MAX, TREE_NEWS, randomTreeIcon } from '../data/tree.js'
 
 const POOL = () => doc(db, 'tree', 'pool')
 
@@ -16,6 +16,8 @@ const items = ref({})      // id → { t, k, e }
 const thanks = ref({})     // uid → { id:true }
 const flags = ref({})
 const mine = ref({})       // id:true ที่เราเขียน
+let newsAt = 0                         // ข่าวต้นไม้ล่าสุดบนกระดาน (ms) จาก tree/pool.newsAt
+const NEWS_GAP = 2 * 3600e3 + 60e3      // ตรงกับ rules (2 ชม.) + เผื่อนาฬิกาเครื่องคลาด
 const state = ref('idle')  // idle | loading | ready | missing | error
 
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(9)), b => b.toString(36).padStart(2, '0')).join('').slice(0, 14)
@@ -33,6 +35,7 @@ export async function loadTree(uid, { isAdmin = false } = {}) {
       items.value = {}; thanks.value = {}; flags.value = {}
     } else {
       const d = snap.data()
+      newsAt = d.newsAt?.toMillis?.() || 0
       items.value = d.items || {}; thanks.value = d.thanks || {}; flags.value = d.flags || {}
     }
     state.value = 'ready'
@@ -46,10 +49,21 @@ export async function plantNote(uid, kind, text) {
   const id = newId()
   const k = kind === 'a' ? 'a' : 'w'
   const e = randomTreeIcon(k)
-  const b = writeBatch(db)
-  b.set(doc(db, 'treeAuthors', uid), { last: id, ids: { [id]: true } }, { merge: true })
-  b.update(POOL(), { [`items.${id}`]: { t, k, e, at: serverTimestamp() } })
-  await b.commit()
+  const item = { [`items.${id}`]: { t, k, e, at: serverTimestamp() } }
+  const send = (withNews) => {
+    const b = writeBatch(db)
+    b.set(doc(db, 'treeAuthors', uid), { last: id, ids: { [id]: true } }, { merge: true })
+    b.update(POOL(), withNews ? { ...item, newsAt: serverTimestamp() } : item)
+    // ข่าวบนกระดาน "ใครบางคน…ในต้นไม้รุ่น" (ไม่ระบุชื่อ ไม่มี uid) — ทั้งรุ่นไม่เกิน 1 ข่าว / 2 ชม. (rules บังคับคู่กับ newsAt)
+    if (withNews) b.set(doc(collection(db, 'news')), { msg: TREE_NEWS[k], icon: k === 'a' ? '⚔️' : '🌸', type: 'tree', ts: serverTimestamp() })
+    return b.commit()
+  }
+  const news = Date.now() - newsAt > NEWS_GAP
+  if (!news) await send(false)
+  else {
+    try { await send(true); newsAt = Date.now() }
+    catch { await send(false); newsAt = Date.now() }   // คนอื่นเพิ่งได้ข่าวไปพร้อมกัน → rules ปัด ส่งแค่ข้อความ
+  }
   items.value = { ...items.value, [id]: { t, k, e } }
   mine.value = { ...mine.value, [id]: true }
   return { id, t, k, e }

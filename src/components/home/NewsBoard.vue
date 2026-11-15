@@ -22,6 +22,7 @@
             <div class="news-msg">{{ g.head.text }}</div>
             <div class="news-foot">
               <span class="news-time">{{ timeAgo(g.head.t, now) }}</span>
+              <RouterLink v-if="isTree(g.head)" to="/tree" class="news-read">ไปดู ›</RouterLink>
               <button v-if="factOf(g.head)" type="button" class="news-read" @click="readFact(g.head)">อ่านเต็ม ›</button>
               <button v-if="likeKeyOf(g.head)" type="button" class="news-like" :class="{ pop: popKey === g.head.id }"
                       :aria-label="`กดใจ (${countOf(likeKeyOf(g.head))})`" @click="tapLike(g.head)">
@@ -41,6 +42,7 @@
               <div class="news-msg">{{ n.text }}</div>
               <div class="news-foot">
                 <span class="news-time">{{ timeAgo(n.t, now) }}</span>
+                <RouterLink v-if="isTree(n)" to="/tree" class="news-read">ไปดู ›</RouterLink>
                 <button v-if="factOf(n)" type="button" class="news-read" @click="readFact(n)">อ่านเต็ม ›</button>
                 <button v-if="likeKeyOf(n)" type="button" class="news-like" :class="{ pop: popKey === n.id }"
                         :aria-label="`กดใจ (${countOf(likeKeyOf(n))})`" @click="tapLike(n)">
@@ -75,6 +77,7 @@
  */
 import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
+import { RouterLink } from 'vue-router'
 import { PHARM_FACTS } from '../../data/pharmFacts.js'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
@@ -121,6 +124,7 @@ const whoOf = (g) => g.head.uid === auth.currentUser?.uid ? 'คุณ' : (membe
 // ── เกร็ดความรู้ที่แชร์: ข้อความรูปแบบ "… แชร์เกร็ดความรู้ #N: …" (PharmFactCard) → เลข N = ลำดับในไฟล์ (ตายตัว) ──
 const factOf = (item) => { const m = /แชร์เกร็ดความรู้ #(\d+)/.exec(item?.text || ''); const f = m && PHARM_FACTS[+m[1] - 1]; return f ? { no: +m[1], ...f } : null }
 const fact = ref(null)
+const isTree = (item) => /ในต้นไม้รุ่น$/.test(item?.text || '')
 function readFact(item) { fact.value = factOf(item) }
 
 // ── กดใจ (ไม่จำกัด · รวบส่งทีเดียว ดู useNewsLikes) ──
