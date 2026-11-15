@@ -37,7 +37,7 @@ const props = defineProps({ onlyUnseen: Boolean })
 const auth = useAuthStore()
 const { exams, mine } = useMockScores()
 const C = 2 * Math.PI * 19
-const exam = computed(() => exams.value[0] || null)
+const exam = computed(() => exams.value.find(e => !e.pending) || null)  // การ์ดโชว์รอบล่าสุดที่มีคะแนนแล้ว
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
 const seen = computed(() => isSeen(exam.value.id, !!my.value))
 const hot = computed(() => !!my.value && !seen.value)

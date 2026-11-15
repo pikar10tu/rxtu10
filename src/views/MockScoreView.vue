@@ -9,10 +9,18 @@
     <template v-else>
       <div v-if="exams.length > 1" class="ms-exams">
         <button v-for="e in exams" :key="e.id" :class="{ on: e.id === exam.id }" @click="pick(e.id)">
-          {{ e.name }}<small>{{ e.date }}</small>
+          {{ e.name }}<small>{{ e.date }}{{ e.pending ? ' · รอผล' : '' }}</small>
         </button>
       </div>
 
+      <section v-if="exam.pending" class="ms-card ms-pending">
+        <Emoji char="⏳" />
+        <div class="ms-name">{{ exam.name }} · {{ exam.date }}</div>
+        <b>รอผลคะแนน</b>
+        <div class="ms-sub">ผลออกเมื่อไหร่ จะขึ้นที่หน้านี้ทันที</div>
+      </section>
+
+      <template v-else>
       <!-- หัว: วงแหวน % รวม + ผ่าน/ยังไม่ผ่าน · ไม่มีผลของเรา = โชว์ภาพรวมรุ่นแทน -->
       <section class="ms-card ms-head">
         <svg class="ms-ring" viewBox="0 0 92 92" aria-hidden="true">
@@ -88,6 +96,7 @@
       <div v-if="my && weak >= 0" class="ms-weak">
         <Emoji char="💡" /> ฐานที่ควรฝึกเพิ่ม: <b>{{ exam.stations[weak].name }}</b>
       </div>
+      </template>
     </template>
   </div>
 </template>
@@ -106,7 +115,8 @@ const router = useRouter()
 const { exams, mine, loaded } = useMockScores()
 const C = 2 * Math.PI * 40
 
-const exam = computed(() => exams.value.find(e => e.id === route.query.exam) || exams.value[0])
+// ค่าเริ่มต้น = รอบล่าสุดที่มีคะแนนแล้ว (ข้ามรอบที่ยัง "รอผล")
+const exam = computed(() => exams.value.find(e => e.id === route.query.exam) || exams.value.find(e => !e.pending) || exams.value[0])
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
 // สถิติที่ใช้เทียบ: ทั้งรุ่น หรือรอบที่เราสอบ (rounds[n].stations มีแค่ mean/sd/min/top ตามลำดับฐาน)
 const MIN_ROUND = 5
@@ -142,9 +152,9 @@ const fmt = v => Number.isFinite(v) ? String(Math.round(v * 100) / 100) : '-'
 const barColor = p => p >= exam.value.passPct ? '#10b981' : p >= exam.value.passPct - 0.1 ? '#f59e0b' : '#ef4444'
 function pick(id) { router.replace({ query: { ...route.query, exam: id } }) }
 
-onMounted(() => loadMockScores(auth.currentUser?.uid))
+onMounted(() => loadMockScores(auth.currentUser?.uid, true))
 watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
-watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id, !!my.value) }, { immediate: true })
+watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pending) markSeen(id, !!my.value) }, { immediate: true })
 </script>
 
 <style scoped>
@@ -157,6 +167,8 @@ watch(() => loaded.value && exam.value?.id, id => { if (id) markSeen(id, !!my.va
 .ms-exams button { flex: none; font: inherit; font-size: .78rem; border: var(--bw) solid var(--line); background: var(--surface); border-radius: 12px; padding: 6px 10px; color: var(--ink); display: flex; flex-direction: column; text-align: left; }
 .ms-exams button small { color: var(--muted); font-size: .7rem; }
 .ms-exams button.on { border-color: var(--primary); font-weight: 700; }
+.ms-pending { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 28px 14px; font-size: 2rem; }
+.ms-pending b { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--primary); }
 .ms-head { display: flex; align-items: center; gap: 14px; }
 .ms-ring { width: 92px; height: 92px; flex: none; }
 .ms-ring-t { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 16px; fill: var(--ink); }

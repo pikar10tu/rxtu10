@@ -11,16 +11,17 @@ const mine = ref({})           // examId → score doc | null
 const loaded = ref(false)
 let loadingFor = null
 
-export async function loadMockScores(uid) {
+// force = เปิดหน้าผล: ดึงใหม่ทุกครั้ง (แอปที่เปิดค้างไว้ก่อนอัปโหลดผลจะได้เห็น)
+export async function loadMockScores(uid, force = false) {
   if (!uid) return
-  if (loadingFor === uid) return
+  if (loadingFor === uid && !force) return
   loadingFor = uid
   try {
     const snap = await getDocs(collection(db, 'mockExams'))
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .filter(e => e.published && Array.isArray(e.stations))
+      .filter(e => e.published && (e.pending || Array.isArray(e.stations)))  // pending = ประกาศรอบไว้ก่อน ยังไม่มีคะแนน
       .sort((a, b) => (b.order || 0) - (a.order || 0))
-    const rows = await Promise.all(list.map(e =>
+    const rows = await Promise.all(list.map(e => e.pending ? null :
       getDoc(doc(db, 'mockExams', e.id, 'scores', uid)).then(s => s.exists() ? s.data() : null).catch(() => null)))
     const m = {}
     list.forEach((e, i) => { m[e.id] = rows[i] })
