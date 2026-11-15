@@ -59,6 +59,12 @@
           <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ Number.isFinite(src.minPct) ? pctText(src.minPct) : '-' }}</b></div>
           <div class="ms-cls-box"><small>สูงสุด</small><b>{{ Number.isFinite(src.maxPct) ? pctText(src.maxPct) : '-' }}</b></div>
         </div>
+        <!-- ผ่านเกณฑ์กี่คน (passN คิดตอนอัปโหลด — หน้าเว็บไม่เห็นคะแนนคนอื่น) -->
+        <div v-if="Number.isFinite(src.passN) && src.n" class="ms-passn">
+          <span>ผ่านเกณฑ์ {{ pctText(exam.passPct) }}</span>
+          <b>{{ pctText(src.passN / src.n) }}</b>
+          <small>{{ src.passN }}/{{ src.n }} คน</small>
+        </div>
       </section>
 
       <div v-if="my" class="ms-private"><Emoji char="🔒" /> คะแนนนี้เห็นแค่เราคนเดียว</div>
@@ -208,6 +214,9 @@ watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pendin
 .ms-cls-box small { font-size: .72rem; color: var(--muted); }
 .ms-cls-box b { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--ink); }
 .ms-cls-box .ms-sd { color: var(--primary); font-weight: 600; }
+.ms-passn { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; padding: 7px 12px; border-radius: 12px; background: #ecfdf5; font-size: .8rem; color: var(--muted); }
+.ms-passn b { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: #047857; margin-left: auto; }
+.ms-passn small { font-size: .74rem; }
 .ms-cls-box.avg { background: #eef5fb; border-color: var(--primary); }
 .ms-cls-box.avg b { color: var(--primary); }
 .ms-range { position: absolute; top: calc(100% + 3px); height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .45); }
