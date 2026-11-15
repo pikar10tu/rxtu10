@@ -583,6 +583,54 @@ service cloud.firestore {
       }
     }
 
+    // ── 🌳 ต้นไม้รุ่น 10 — ข้อความให้กำลังใจไม่ระบุชื่อ (15 พ.ย. 2026) · ดู composables/useTree.js ──
+    //  tree/pool ก้อนเดียวทั้งรุ่น (เปิดหน้า = 1 read) · ใน pool ไม่มีชื่อ/uid คนเขียน
+    //  เพิ่มข้อความ: ได้ทีละ 1 คีย์ และคีย์ต้อง = treeAuthors/{uid}.last ที่เขียนคู่กันใน batch เดียว (แอดมินจึงตามคนเขียนได้)
+    //  ขอบคุณ/แจ้งลบ: แตะได้แค่ thanks.{uid ตัวเอง} / flags.{uid ตัวเอง} · ลบข้อความ = แอดมิน
+    match /tree/pool {
+      function treeAdd() {
+        let k = getAfter(/databases/$(database)/documents/treeAuthors/$(request.auth.uid)).data.last;
+        let it = request.resource.data.items[k];
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['items'])
+          && request.resource.data.items.diff(resource.data.items).affectedKeys().hasOnly([k])
+          && !(k in resource.data.items)
+          && request.resource.data.items.size() <= 2500
+          && it.keys().hasOnly(['t', 'k', 'e', 'at'])
+          && it.t is string && it.t.size() >= 1 && it.t.size() <= 80
+          && it.k in ['w', 'a']
+          && it.e is string && it.e.size() <= 8
+          && it.at == request.time;
+      }
+      function treeReact() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['thanks', 'flags'])
+          && request.resource.data.thanks.diff(resource.data.thanks).affectedKeys().hasOnly([request.auth.uid])
+          && request.resource.data.flags.diff(resource.data.flags).affectedKeys().hasOnly([request.auth.uid])
+          && request.resource.data.thanks.get(request.auth.uid, {}) is map
+          && request.resource.data.thanks.get(request.auth.uid, {}).size() <= 600
+          && request.resource.data.flags.get(request.auth.uid, {}) is map
+          && request.resource.data.flags.get(request.auth.uid, {}).size() <= 60;
+      }
+      allow read: if request.auth != null && isMember();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (request.auth != null && isMember() && (treeAdd() || treeReact()));
+    }
+    //  ids โตได้อย่างเดียว (ลบร่องรอยตัวเองไม่ได้) · สูงสุด 300 ข้อความ/คน
+    match /treeAuthors/{uid} {
+      function taOk() {
+        return request.resource.data.keys().hasOnly(['last', 'ids'])
+          && request.resource.data.last is string && request.resource.data.last.size() >= 8 && request.resource.data.last.size() <= 20
+          && request.resource.data.ids is map && request.resource.data.ids.size() <= 300
+          && request.resource.data.last in request.resource.data.ids;
+      }
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == uid && isMember() && taOk()
+        && request.resource.data.ids.size() == 1;
+      allow update: if request.auth != null && request.auth.uid == uid && taOk()
+        && request.resource.data.ids.diff(resource.data.ids).removedKeys().size() == 0
+        && request.resource.data.ids.diff(resource.data.ids).addedKeys().hasOnly([request.resource.data.last]);
+      allow delete: if isAdmin();
+    }
+
     match /mockExams/{examId} {
       allow read:  if request.auth != null;
       allow write: if isAdmin();

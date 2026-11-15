@@ -44,6 +44,7 @@ const routes = [
     { path: '/dungeon', name: 'dungeon', component: () => import('../views/DungeonView.vue') },
     { path: '/event', name: 'event', component: () => import('../views/EventView.vue') },
     { path: '/play/poker', name: 'poker', component: () => import('../views/PokerView.vue') },
+    { path: '/tree', name: 'tree', component: () => import('../views/TreeView.vue') },
     { path: '/fun-facts', name: 'funFacts', component: () => import('../views/FunFactsView.vue') },
     // URL ที่ไม่รู้จัก (ลิงก์เก่า/พิมพ์ผิด) → กลับหน้าแรก แทนที่จะขึ้นจอว่างเปล่า
     { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -52,7 +53,12 @@ const routes = [
 export const router = createRouter({
     history: createWebHashHistory(),
     routes,
-    scrollBehavior: () => ({ top: 0 }),
+    // ตัวเลื่อนจริงคือ #main-content (position:fixed) ไม่ใช่ window → ต้องรีเซ็ตเอง ไม่งั้นเปลี่ยนหน้าแล้วค้างกลางหน้า
+    // (15 พ.ย. 2026) · เปลี่ยนแค่ query (แท็บใน URL หน้า Me/Study) ไม่รีเซ็ต
+    scrollBehavior(to, from) {
+        if (to.path !== from.path) document.getElementById('main-content')?.scrollTo?.(0, 0)
+        return { top: 0 }
+    },
 })
 
 // ── กันเข้าฟีเจอร์ที่ปิดอยู่ผ่านลิงก์ตรง/bookmark เก่า ──
