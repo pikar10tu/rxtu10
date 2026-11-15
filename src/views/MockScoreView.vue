@@ -115,6 +115,10 @@
               <template v-if="Number.isFinite(r.min)"><span>ต่ำสุด {{ fmt(r.min) }}</span><span>สูงสุด {{ fmt(r.top) }}</span></template>
               <span v-if="Number.isFinite(r.sd)">SD {{ fmt(r.sd) }}</span>
             </div>
+            <button class="ms-cm-btn" :class="{ on: openCm === r.name }" @click="openCm = openCm === r.name ? null : r.name">
+              💬 {{ cmCount(r.name) ? cmCount(r.name) + ' คอมเม้น' : 'ทริกจากเพื่อน' }}
+            </button>
+            <StationComments v-if="openCm === r.name" :station="r.name" />
           </div>
         </div>
         <div class="ms-legend">
@@ -141,6 +145,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import Emoji from '../components/shared/Emoji.vue'
+import StationComments from '../components/me/StationComments.vue'
+import { useMockComments, loadMockComments, stationKey } from '../composables/useMockComments.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useMockScores, loadMockScores, markSeen } from '../composables/useMockScores.js'
 import { stationPct, overallPct, classPct, weakestStation } from '../utils/mockScore.js'
@@ -186,12 +192,18 @@ const nPassSt = computed(() => rows.value.filter(r => r.pct >= exam.value.passPc
 const belowAvg = computed(() => my.value ? rows.value.filter(r => Number.isFinite(r.score) && r.score < r.mean - 1e-9).sort((a, b) => (a.score / a.max - a.meanPct) - (b.score / b.max - b.meanPct)) : [])
 const weak = computed(() => my.value ? weakestStation(exam.value.stations, my.value.scores, exam.value.passPct) : -1)
 
+// คอมเม้นรายฐาน (รวมตามชื่อฐานทุกรอบ)
+const { list: cmList } = useMockComments()
+const openCm = ref(null)
+const cmCount = name => { const k = stationKey(name); return cmList.value.filter(c => c.key === k).length }
+watch(() => exam.value?.id, () => { openCm.value = null })
+
 const pctText = p => `${Math.round(p * 1000) / 10}%`
 const fmt = v => Number.isFinite(v) ? String(Math.round(v * 100) / 100) : '-'
 const barColor = p => p >= exam.value.passPct ? '#10b981' : p >= exam.value.passPct - 0.1 ? '#f59e0b' : '#ef4444'
 function pick(id) { router.replace({ query: { ...route.query, exam: id } }) }
 
-onMounted(() => loadMockScores(auth.currentUser?.uid, true))
+onMounted(() => { loadMockScores(auth.currentUser?.uid, true); loadMockComments() })
 watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
 watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pending && !exam.value.summaryOnly) markSeen(id, !!my.value) }, { immediate: true })
 </script>
@@ -256,6 +268,8 @@ watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pendin
 .ms-row-cls .avg { color: var(--primary); }
 .ms-row-cls .avg b { color: var(--primary); }
 .ms-lg-rng { width: 16px; height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .3); display: inline-block; }
+.ms-cm-btn { font: inherit; font-size: .74rem; font-weight: 600; margin-top: 6px; border: var(--bw) solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 3px 10px; }
+.ms-cm-btn.on { border-color: var(--primary); color: var(--primary); }
 .ms-weak { background: #eef5fb; border-radius: 14px; padding: 10px 12px; font-size: .84rem; color: var(--ink); }
 .ms-weak b { color: #b45309; }
 .ms-below { margin-top: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }

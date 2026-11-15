@@ -550,6 +550,39 @@ service cloud.firestore {
 
     // ── ผลสอบจำลอง — รอบสอบ (ชื่อฐาน/ค่าเฉลี่ยรุ่น) ทุกคนอ่านได้ · คะแนนรายคนอ่านได้แค่เจ้าของ/แอดมิน ──
     //  เขียนจากเครื่องแอดมิน (สคริปต์ REST) เท่านั้น · doc id คะแนน = uid (ไม่ใช้รหัสนศ. เพราะ user แก้ studentId เองได้)
+    // ── คอมเม้นรายฐานสอบจำลอง (15 พ.ย. 2026) · ดู composables/useMockComments.js ──
+    //  author/{uid} = ใครเขียน (แอดมินอ่านคนเดียว → ไม่ระบุชื่อได้จริง) · สร้างคู่กันใน batch เดียว
+    //  name ต้องตรง nickname ตัวเอง (กันปลอมชื่อ) หรือ '' เมื่อ anon · คนอื่นแก้ได้แค่ likes.{uid ตัวเอง}
+    match /mockComments/{cid} {
+      function cmOwner() { return exists(/databases/$(database)/documents/mockComments/$(cid)/author/$(request.auth.uid)); }
+      allow read: if request.auth != null && isMember();
+      allow create: if request.auth != null && isMember()
+        && existsAfter(/databases/$(database)/documents/mockComments/$(cid)/author/$(request.auth.uid))
+        && request.resource.data.keys().hasOnly(['key', 'station', 'text', 'name', 'anon', 'likes', 'createdAt'])
+        && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 300
+        && request.resource.data.key is string && request.resource.data.key.size() <= 80
+        && request.resource.data.station is string && request.resource.data.station.size() <= 80
+        && request.resource.data.anon is bool
+        && (request.resource.data.anon
+              ? request.resource.data.name == ''
+              : request.resource.data.name == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('nickname', ''))
+        && request.resource.data.likes == {}
+        && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() || (request.auth != null && isMember()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+        && request.resource.data.likes.diff(resource.data.likes).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.likes.get(request.auth.uid, true) == true);
+      allow delete: if isAdmin() || (request.auth != null && cmOwner());
+      match /author/{uid} {
+        allow read: if isAdmin();
+        allow create: if request.auth != null && request.auth.uid == uid
+          && !exists(/databases/$(database)/documents/mockComments/$(cid))
+          && existsAfter(/databases/$(database)/documents/mockComments/$(cid))
+          && request.resource.data.keys().size() == 0;
+        allow delete: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      }
+    }
+
     match /mockExams/{examId} {
       allow read:  if request.auth != null;
       allow write: if isAdmin();
