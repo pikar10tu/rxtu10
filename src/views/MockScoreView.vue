@@ -99,8 +99,13 @@
         </div>
       </section>
 
-      <div v-if="my && weak >= 0" class="ms-weak">
-        <Emoji char="💡" /> ฐานที่ควรฝึกเพิ่ม: <b>{{ exam.stations[weak].name }}</b>
+      <div v-if="my && (weak >= 0 || belowAvg.length)" class="ms-weak">
+        <div v-if="weak >= 0"><Emoji char="💡" /> ฐานที่ควรฝึกเพิ่ม: <b>{{ exam.stations[weak].name }}</b></div>
+        <!-- ต่ำกว่าเฉลี่ย{รุ่น/รอบ/ห้อง ตามที่เลือกอยู่} (user 15 พ.ย.) -->
+        <div v-if="belowAvg.length" class="ms-below">
+          <Emoji char="📉" /> ต่ำกว่าเฉลี่ย{{ scope === 'round' && myRound && !myRound.hidden ? (myRound.isRoom ? 'ห้อง' : 'รอบ') : 'รุ่น' }} {{ belowAvg.length }} ฐาน:
+          <span v-for="r in belowAvg" :key="r.i" class="ms-below-chip">{{ r.name }} <small>{{ fmt(r.score) }} / เฉลี่ย {{ fmt(r.mean) }}</small></span>
+        </div>
       </div>
       </template>
     </template>
@@ -153,6 +158,7 @@ const rows = computed(() => src.value.stations.map((s, i) => {
     minPct: stationPct(s.min, s.max), topPct: stationPct(s.top, s.max), score, meanPct, pct: my.value ? stationPct(score, s.max) : meanPct }
 }))
 const nPassSt = computed(() => rows.value.filter(r => r.pct >= exam.value.passPct - 1e-9).length)
+const belowAvg = computed(() => my.value ? rows.value.filter(r => Number.isFinite(r.score) && r.score < r.mean - 1e-9).sort((a, b) => (a.score / a.max - a.meanPct) - (b.score / b.max - b.meanPct)) : [])
 const weak = computed(() => my.value ? weakestStation(exam.value.stations, my.value.scores, exam.value.passPct) : -1)
 
 const pctText = p => `${Math.round(p * 1000) / 10}%`
@@ -226,4 +232,7 @@ watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pendin
 .ms-lg-rng { width: 16px; height: 4px; border-radius: 999px; background: rgba(53, 147, 207, .3); display: inline-block; }
 .ms-weak { background: #eef5fb; border-radius: 14px; padding: 10px 12px; font-size: .84rem; color: var(--ink); }
 .ms-weak b { color: #b45309; }
+.ms-below { margin-top: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.ms-below-chip { background: var(--surface); border: var(--bw) solid var(--line); border-radius: 999px; padding: 2px 9px; font-size: .76rem; font-weight: 600; }
+.ms-below-chip small { color: var(--muted); font-weight: 400; }
 </style>
