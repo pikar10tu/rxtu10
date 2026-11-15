@@ -22,6 +22,7 @@
             <div class="news-msg">{{ g.head.text }}</div>
             <div class="news-foot">
               <span class="news-time">{{ timeAgo(g.head.t, now) }}</span>
+              <button v-if="factOf(g.head)" type="button" class="news-read" @click="readFact(g.head)">อ่านเต็ม ›</button>
               <button v-if="likeKeyOf(g.head)" type="button" class="news-like" :class="{ pop: popKey === g.head.id }"
                       :aria-label="`กดใจ (${countOf(likeKeyOf(g.head))})`" @click="tapLike(g.head)">
                 <span class="news-heart"><Emoji char="❤️" /></span>{{ fmt(countOf(likeKeyOf(g.head))) }}
@@ -40,6 +41,7 @@
               <div class="news-msg">{{ n.text }}</div>
               <div class="news-foot">
                 <span class="news-time">{{ timeAgo(n.t, now) }}</span>
+                <button v-if="factOf(n)" type="button" class="news-read" @click="readFact(n)">อ่านเต็ม ›</button>
                 <button v-if="likeKeyOf(n)" type="button" class="news-like" :class="{ pop: popKey === n.id }"
                         :aria-label="`กดใจ (${countOf(likeKeyOf(n))})`" @click="tapLike(n)">
                   <span class="news-heart"><Emoji char="❤️" /></span>{{ fmt(countOf(likeKeyOf(n))) }}
@@ -50,6 +52,15 @@
         </ul>
       </li>
     </ul>
+
+    <!-- เกร็ดความรู้ที่เพื่อนแชร์ → กดอ่านเต็มได้จากกระดาน (15 พ.ย. 2026) · BottomSheet Teleport ในตัว -->
+    <BottomSheet :open="!!fact" icon="💡" title="เกร็ดความรู้เภสัช" @update:open="fact = null">
+      <div v-if="fact" class="news-fact">
+        <div class="news-fact-no">เกร็ดความรู้ #{{ fact.no }}</div>
+        <div class="news-fact-h">{{ fact.t }}</div>
+        <p class="news-fact-p">{{ fact.b }}</p>
+      </div>
+    </BottomSheet>
   </div>
 </template>
 
@@ -63,6 +74,8 @@
  * ⚠️ ใช้ {{ }} เท่านั้น ห้าม v-html — ข้อความในเลน news มาจากผู้เล่น (CLAUDE.md ข้อ 8)
  */
 import Emoji from '../shared/Emoji.vue'
+import BottomSheet from '../shared/BottomSheet.vue'
+import { PHARM_FACTS } from '../../data/pharmFacts.js'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '../../firebase/config.js'
@@ -104,6 +117,11 @@ function toggle(key) {
 }
 // ชื่อในปุ่ม "อีก N ข่าวจาก X" — ข่าวไม่มีเจ้าของไม่มี rest อยู่แล้ว จึงไม่ถึงตรงนี้
 const whoOf = (g) => g.head.uid === auth.currentUser?.uid ? 'คุณ' : (members.rosterRows?.[g.head.uid]?.n || '?')
+
+// ── เกร็ดความรู้ที่แชร์: ข้อความรูปแบบ "… แชร์เกร็ดความรู้ #N: …" (PharmFactCard) → เลข N = ลำดับในไฟล์ (ตายตัว) ──
+const factOf = (item) => { const m = /แชร์เกร็ดความรู้ #(\d+)/.exec(item?.text || ''); const f = m && PHARM_FACTS[+m[1] - 1]; return f ? { no: +m[1], ...f } : null }
+const fact = ref(null)
+function readFact(item) { fact.value = factOf(item) }
 
 // ── กดใจ (ไม่จำกัด · รวบส่งทีเดียว ดู useNewsLikes) ──
 const popKey = ref(null)
@@ -180,6 +198,11 @@ watch(open, (v) => { if (v) { stop(); now.value = Date.now() } else start() })
 .news-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 .news-sub { list-style: none; margin: 6px 0 0 12px; padding: 0 0 0 10px; border-left: 2px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
 .news-body { flex: 1; min-width: 0; }
+.news-read { all: unset; cursor: pointer; font-size: .74rem; font-weight: 700; color: var(--primary); padding: 2px 4px; }
+.news-fact { display: flex; flex-direction: column; gap: 8px; }
+.news-fact-no { font-size: .74rem; color: var(--muted); font-weight: 700; }
+.news-fact-h { font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+.news-fact-p { font-size: .9rem; line-height: 1.6; color: var(--ink); white-space: pre-line; }
 .news-msg { font-size: .8rem; color: rgba(0,0,0,.75); line-height: 1.4; word-break: break-word; }
 .news-time { font-size: .7rem; color: rgba(0,0,0,.4); margin-top: 2px; }
 
