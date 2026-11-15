@@ -9102,6 +9102,341 @@
   }
  },
  {
+  "id": "gliclazide",
+  "group": "เบาหวานและต่อมไร้ท่อ",
+  "name": "Gliclazide",
+  "cls": "Sulfonylurea (รุ่นที่ 2)",
+  "chips": [
+   "MR วันละครั้งตอนเช้า",
+   "น้ำตาลต่ำ",
+   "ห้าม miconazole"
+  ],
+  "nlem": null,
+  "bw": null,
+  "moa": {
+   "t": "กระตุ้นเบต้าเซลล์ตับอ่อนให้หลั่ง<b>อินซูลิน</b> · ฟื้นการหลั่งอินซูลินระยะแรก · ยับยั้งการเกาะกลุ่มเกล็ดเลือดบางส่วน (haemovascular)",
+   "r": [
+    "smpc:5.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>MR 30–120 mg วันละครั้งพร้อมอาหารเช้า</b> เริ่ม 30 mg ปรับขึ้นทีละขั้นห่างอย่างน้อย 1 เดือน · กลืนทั้งเม็ด",
+    "r": [
+     "smpc:4.2"
+    ]
+   },
+   {
+    "t": "เม็ดธรรมดา 80 mg: 40–320 mg/วัน · ครั้งเดียวไม่เกิน 160 mg ถ้ามากกว่านั้นแบ่งวันละ 2 ครั้งพร้อมมื้อหลัก · 80 mg ≈ MR 30 mg",
+    "r": [
+     "smpc80:4.2",
+     "smpc:4.2"
+    ]
+   },
+   {
+    "t": "ADR หลัก: <b>น้ำตาลต่ำ</b> (อดอาหาร ข้ามมื้อ ออกกำลังมาก แอลกอฮอล์ ไต/ตับบกพร่อง) อาจนานและกลับซ้ำ",
+    "r": [
+     "smpc:4.4",
+     "smpc:4.8"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: แพ้ sulfonylurea/<b>sulfonamide</b>, เบาหวานชนิดที่ 1, DKA, <b>ไตหรือตับบกพร่องรุนแรง</b>, ใช้ร่วม <b>miconazole</b>, <b>ให้นมบุตร</b>",
+    "r": [
+     "smpc:4.3"
+    ]
+   },
+   {
+    "t": "ไตบกพร่องเล็กน้อย–ปานกลาง ใช้ขนาดเดิมได้แต่ติดตามใกล้ชิด (เมแทบอไลต์ไม่ออกฤทธิ์ ขับทางปัสสาวะ)",
+    "r": [
+     "smpc:4.2",
+     "smpc:5.2"
+    ]
+   },
+   {
+    "t": "DDI: miconazole (ห้าม) · phenylbutazone, แอลกอฮอล์ (ไม่แนะนำ) · fluconazole, clarithromycin, β-blocker, ACEI, NSAIDs เสริมฤทธิ์ · FQ ทำน้ำตาลแกว่ง",
+    "r": [
+     "smpc:4.5"
+    ]
+   },
+   {
+    "t": "G6PD deficiency: เสี่ยง hemolytic anemia",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "ADA: sulfonylurea ลด HbA1c ได้ดี ราคาถูก แต่เสี่ยงน้ำตาลต่ำและน้ำหนักเพิ่ม",
+    "r": [
+     "g_ada"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "เบาหวานชนิดที่ 2 ในผู้ใหญ่ (คุมอาหาร/ออกกำลังไม่พอ)",
+    "d": "MR 30–120 mg วันละครั้ง · เม็ด 80 mg: 40–320 mg/วัน",
+    "r": [
+     "smpc:4.1",
+     "smpc:4.2",
+     "smpc80:4.2"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ลืมกินยา ห้ามเพิ่มขนาดวันถัดไป",
+    "r": [
+     "smpc:4.2"
+    ]
+   },
+   {
+    "t": "ผู้เสี่ยงน้ำตาลต่ำ (ขาดอาหาร โรคต่อมไร้ท่อ หยุดสเตียรอยด์ หลอดเลือดรุนแรง) เริ่ม 30 mg",
+    "r": [
+     "smpc:4.2"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "เล็กน้อย–ปานกลาง: ขนาดเดิม ติดตามใกล้ชิด · รุนแรง: ห้าม (ใช้อินซูลิน)",
+   "r": [
+    "smpc:4.2",
+    "smpc:4.3"
+   ]
+  },
+  "hepatic": {
+   "t": "รุนแรง: ห้าม (ใช้อินซูลิน)",
+   "r": [
+    "smpc:4.3"
+   ]
+  },
+  "mon": [
+   {
+    "t": "HbA1c / FPG · SMBG",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "อาการน้ำตาลต่ำ",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "น้ำตาลเมื่อใช้ร่วม FQ",
+    "r": [
+     "smpc:4.4"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมสมบูรณ์ อาหารไม่มีผล · MR ระดับคงที่ชม. 6–12"
+   ],
+   [
+    "การกระจาย",
+    "จับโปรตีน ~95%"
+   ],
+   [
+    "Metabolism",
+    "ตับ ไม่มีเมแทบอไลต์ออกฤทธิ์"
+   ],
+   [
+    "ครึ่งชีวิต",
+    "12–20 ชม."
+   ]
+  ],
+  "ci": [
+   {
+    "t": "แพ้ gliclazide, sulfonylurea อื่น, sulfonamide",
+    "r": [
+     "smpc:4.3"
+    ]
+   },
+   {
+    "t": "เบาหวานชนิดที่ 1 · DKA, diabetic coma",
+    "r": [
+     "smpc:4.3"
+    ]
+   },
+   {
+    "t": "ไต/ตับบกพร่องรุนแรง",
+    "r": [
+     "smpc:4.3"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม miconazole",
+    "r": [
+     "smpc:4.3"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร",
+    "r": [
+     "smpc:4.3",
+     "smpc:4.6"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "น้ำตาลต่ำ ต้องกินอาหารสม่ำเสมอรวมมื้อเช้า",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "คุมน้ำตาลเสีย (ไข้ ติดเชื้อ ผ่าตัด St John’s wort) อาจต้องใช้อินซูลิน",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "Secondary failure",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "G6PD deficiency",
+    "r": [
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "Porphyria",
+    "r": [
+     "smpc:4.4"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "น้ำตาลต่ำ · ปวดท้อง คลื่นไส้ (ลดได้ถ้ากินพร้อมอาหารเช้า) · ผื่น (พบน้อย SJS/TEN, DRESS) · เลือดผิดปกติ · ตับอักเสบ ดีซ่าน · สายตามัวชั่วคราวช่วงเริ่ม",
+    "r": [
+     "smpc:4.8"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Miconazole: ห้าม (น้ำตาลต่ำถึงโคม่า)",
+    "r": [
+     "smpc:4.5"
+    ]
+   },
+   {
+    "t": "แอลกอฮอล์, phenylbutazone: ไม่แนะนำ",
+    "r": [
+     "smpc:4.5"
+    ]
+   },
+   {
+    "t": "ยาเบาหวานอื่น β-blocker fluconazole ACEI H2RA MAOI sulfonamide clarithromycin NSAIDs: เสริมน้ำตาลต่ำ",
+    "r": [
+     "smpc:4.5"
+    ]
+   },
+   {
+    "t": "Danazol, chlorpromazine ขนาดสูง, สเตียรอยด์, β2-agonist IV, St John’s wort: น้ำตาลสูงขึ้น",
+    "r": [
+     "smpc:4.5"
+    ]
+   },
+   {
+    "t": "Warfarin: อาจเสริมฤทธิ์",
+    "r": [
+     "smpc:4.5"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: เลี่ยง เปลี่ยนเป็นอินซูลิน",
+    "r": [
+     "smpc:4.6"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ห้าม (เสี่ยงน้ำตาลต่ำในทารก) · ไม่มีหน้า LactMed",
+    "r": [
+     "smpc:4.6"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: ขนาดเดียวกับผู้ใหญ่",
+    "r": [
+     "smpc:4.2"
+    ]
+   },
+   {
+    "t": "เด็ก: ไม่มีข้อมูล",
+    "r": [
+     "smpc:4.2"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "น้ำตาลต่ำ · รุนแรงให้ glucose 20–30% 50 mL IV แล้ว 10% หยดต่อเนื่อง · ฟอกไตไม่ช่วย (จับโปรตีนสูง)",
+    "r": [
+     "smpc:4.9"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินพร้อมอาหารเช้า ห้ามข้ามมื้อ",
+    "r": [
+     "smpc:4.2",
+     "smpc:4.4"
+    ]
+   },
+   {
+    "t": "รู้จักอาการน้ำตาลต่ำและพกน้ำตาล (สารให้ความหวานเทียมไม่ช่วย)",
+    "r": [
+     "smpc:4.4",
+     "smpc:4.8"
+    ]
+   },
+   {
+    "t": "งดแอลกอฮอล์",
+    "r": [
+     "smpc:4.5"
+    ]
+   },
+   {
+    "t": "ระวังขับรถช่วงเริ่มยา",
+    "r": [
+     "smpc:4.7"
+    ]
+   }
+  ],
+  "refs": [
+   {
+    "id": "smpc",
+    "title": "Diamicron 30 mg MR Tablets — Summary of Product Characteristics (UK)",
+    "url": "https://www.medicines.org.uk/emc/product/1321/smpc",
+    "src": "Servier · emc · แก้ไข 02/2020 (ไม่มีฉลาก US · อย. ไทยไม่มีเอกสารแนบ)"
+   },
+   {
+    "id": "smpc80",
+    "title": "Diamicron 80 mg Tablets — Summary of Product Characteristics (UK)",
+    "url": "https://www.medicines.org.uk/emc/product/1150/smpc",
+    "src": "Servier · emc · แก้ไข 02/2020"
+   },
+   {
+    "id": "g_ada",
+    "title": "9. Pharmacologic Approaches to Glycemic Treatment: Standards of Care in Diabetes—2026",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41358900/",
+    "src": "American Diabetes Association. Diabetes Care. 2026;49(Suppl 1):S183–S215"
+   }
+  ]
+ },
+ {
   "id": "pioglitazone",
   "name": "Pioglitazone",
   "group": "เบาหวานและต่อมไร้ท่อ",
@@ -16591,6 +16926,1948 @@
    "lab": "Acyclovir tablets · Avet",
    "date": "24 ก.ค. 2026",
    "set": "0de2f5c7-9e75-4bdf-9c28-e026cc6694b4"
+  }
+ },
+ {
+  "id": "isoniazid",
+  "name": "Isoniazid (INH, H)",
+  "group": "ยาวัณโรค",
+  "cls": "Antimycobacterial · ยับยั้งการสร้าง mycolic acid",
+  "chips": [
+   "ตับอักเสบ",
+   "ให้ B6",
+   "slow acetylator"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "bwTitle": "BOXED WARNING · HEPATITIS",
+  "bw": {
+   "t": "ตับอักเสบรุนแรงถึงตายได้ แม้ใช้มาหลายเดือน · ความเสี่ยงเพิ่มตามอายุ แอลกอฮอล์ทุกวัน โรคตับเรื้อรัง ใช้ยาฉีดเข้าเส้น หญิงหลังคลอด · ถามอาการทุกเดือน · อายุ ≥35 ปีเจาะ AST/ALT ก่อนเริ่มและเป็นระยะ",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "Prodrug ถูกกระตุ้นโดย KatG ของเชื้อ → ยับยั้งการสร้าง <b>mycolic acid</b> ของผนังเซลล์",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่ <b>5 mg/kg (สูงสุด 300 mg) วันละครั้ง</b> · หรือ 15 mg/kg (สูงสุด 900 mg) 2–3 ครั้ง/สัปดาห์ · เด็ก 10–15 mg/kg",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "สูตรมาตรฐานวัณโรคไวต่อยา: <b>2HRZE / 4HR</b> (ระยะเข้มข้น 2 เดือน 4 ตัว แล้ว INH+RIF ต่อ 4 เดือน)",
+    "r": [
+     "g_tb"
+    ]
+   },
+   {
+    "t": "ADR เด่น: <b>ตับอักเสบ</b> (มักใน 3 เดือนแรก) และ <b>peripheral neuropathy</b> จากขาดวิตามิน B6",
+    "r": [
+     "fda:Boxed",
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ให้ <b>pyridoxine (B6)</b> ร่วมในผู้ขาดอาหาร หรือเสี่ยง neuropathy (ติดสุรา เบาหวาน)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "เมแทบอลิซึมด้วย <b>acetylation</b> (กำหนดโดยพันธุกรรม) · slow acetylator ระดับยาสูง พิษมากกว่า",
+    "r": [
+     "fda:Clinical Pharmacology"
+    ]
+   },
+   {
+    "t": "DDI: เพิ่มระดับ <b>phenytoin</b>, carbamazepine, theophylline · ใช้ร่วม rifampin เพิ่มพิษต่อตับ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "เกินขนาด: ชักดื้อยา + metabolic acidosis → ให้ <b>pyridoxine IV กรัมต่อกรัม</b> เท่ากับ INH ที่กิน (ไม่ทราบขนาด: 5 g)",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "วัณโรคทุกชนิด (ร่วมกับยาอื่น)",
+    "d": "5 mg/kg/วัน สูงสุด 300 mg",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ป้องกัน/วัณโรคระยะแฝง",
+    "d": "ผู้ใหญ่ 300 mg/วัน · เด็ก 10 mg/kg/วัน (สูงสุด 300 mg)",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "กินตอนท้องว่างดูดซึมดีที่สุด",
+    "r": [
+     "fda:Clinical Pharmacology"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไตเสื่อม: ปกติไม่ต้องปรับ (slow acetylator ที่ไตเสื่อมรุนแรงอาจต้องลด)",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "hepatic": {
+   "t": "ห้ามในโรคตับเฉียบพลัน · โรคตับเรื้อรังใช้อย่างระวัง",
+   "r": [
+    "fda:Contraindications",
+    "fda:Boxed"
+   ]
+  },
+  "mon": [
+   {
+    "t": "อาการตับอักเสบทุกเดือน · AST/ALT ถ้าอายุ ≥35 หรือมีความเสี่ยง",
+    "r": [
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "อาการชาปลายมือปลายเท้า",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ตรวจตาถ้ามีอาการทางสายตา",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "เคยตับอักเสบหรือแพ้รุนแรงจาก INH (ไข้ หนาวสั่น ข้ออักเสบ)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "โรคตับเฉียบพลันทุกสาเหตุ",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ตับอักเสบรุนแรง",
+    "r": [
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "ลดการดื่มแอลกอฮอล์",
+    "r": [
+     "fda:Boxed"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ตับอักเสบ · peripheral neuropathy · ชัก optic neuritis (พบน้อย) · ผื่น DRESS · lupus-like syndrome · ขาด B6/pellagra · gynecomastia",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Phenytoin: ระดับเพิ่ม ต้องปรับขนาด",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "Carbamazepine, theophylline: ระดับเพิ่ม",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "Rifampin: เพิ่มพิษต่อตับ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ยาลดกรดอะลูมิเนียม: ลดการดูดซึม กิน INH ก่อน 1 ชม.",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "อาหารที่มี tyramine/histamine (ชีส ปลาทูน่า): ใจสั่น หน้าแดง",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้ได้เมื่อจำเป็น (ระวังตับอักเสบช่วงหลังคลอด)",
+    "r": [
+     "fda:Pregnancy",
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ระดับในน้ำนมต่ำ ใช้ได้ (สังเกตตัวเหลืองในทารก) · แม่ควรได้ B6 · ถ้าทารกได้ INH ด้วยให้ B6 1 mg/kg/วัน",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ชัก metabolic acidosis โคม่า · ให้ pyridoxine IV ขนาดเท่า INH · diazepam ถ้าไม่ตอบสนอง",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินทุกวันจนครบ ห้ามหยุดเอง",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ตัวเหลือง ตาเหลือง คลื่นไส้ เบื่ออาหาร อ่อนเพลีย ให้หยุดยาและพบแพทย์",
+    "r": [
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "งดแอลกอฮอล์",
+    "r": [
+     "fda:Boxed"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมดี อาหารลดการดูดซึม",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "Metabolism",
+    "acetylation ที่ตับ (fast/slow)",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ทางไต",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Isoniazid (INH, H) — เอกสารกำกับยา US FDA (Isoniazid tablets · Chartwell)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2e09b1a5-9786-427f-bf00-be15b06eb7e7",
+    "src": "DailyMed · ฉบับ 12 ก.พ. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_tb",
+    "title": "Treatment of Drug-Susceptible Tuberculosis (ATS/CDC/IDSA 2016)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/27516382/",
+    "src": "Nahid P, et al. Clin Infect Dis. 2016;63:e147–e195"
+   },
+   {
+    "id": "lact",
+    "title": "Isoniazid — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501336/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Isoniazid tablets · Chartwell",
+   "date": "12 ก.พ. 2025",
+   "set": "2e09b1a5-9786-427f-bf00-be15b06eb7e7"
+  }
+ },
+ {
+  "id": "rifampicin",
+  "name": "Rifampicin (Rifampin, RIF, R)",
+  "group": "ยาวัณโรค",
+  "cls": "Rifamycin · ยับยั้ง RNA polymerase",
+  "chips": [
+   "ปัสสาวะสีส้มแดง",
+   "CYP inducer แรง",
+   "กินท้องว่าง"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "ยับยั้ง <b>DNA-dependent RNA polymerase</b> ของแบคทีเรีย",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่ <b>10 mg/kg วันละครั้ง สูงสุด 600 mg</b> · กิน<b>ท้องว่าง</b> (ก่อนอาหาร 1 ชม. หรือหลัง 2 ชม.)",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "สูตรมาตรฐานวัณโรคไวต่อยา: <b>2HRZE / 4HR</b> (ระยะเข้มข้น 2 เดือน 4 ตัว แล้ว INH+RIF ต่อ 4 เดือน)",
+    "r": [
+     "g_tb"
+    ]
+   },
+   {
+    "t": "<b>CYP3A4 inducer แรง</b> ลดระดับยาหลายตัว: ยาคุมกำเนิด (ใช้วิธีอื่นร่วม), warfarin, azole, ยาต้าน HIV, สเตียรอยด์, ยากันชัก ฯลฯ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ข้อห้ามใช้ร่วม: <b>PI ต้าน HIV</b> (atazanavir, darunavir ฯลฯ), cabotegravir, lenacapavir, praziquantel, lurasidone",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ปัสสาวะ เหงื่อ น้ำตา น้ำลาย <b>สีส้มแดง</b> · คอนแทคเลนส์อาจติดสีถาวร",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ · ปฏิกิริยาแพ้ทั้งระบบ/flu-like (พบในการให้แบบเว้นช่วง) · เกล็ดเลือดต่ำ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ไตเสื่อม: <b>ไม่ต้องปรับ</b> ที่ขนาด ≤600 mg",
+    "r": [
+     "fda:Clinical Pharmacology"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "วัณโรคทุกชนิด (ร่วมกับยาอื่น)",
+    "d": "10 mg/kg/วัน สูงสุด 600 mg · เด็ก 10–20 mg/kg",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "พาหะเชื้อ meningococcus (ไม่มีอาการ)",
+    "d": "ผู้ใหญ่ 600 mg q12h × 2 วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไม่ต้องปรับที่ขนาด ≤600 mg/วัน",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "hepatic": {
+   "t": "โรคตับ: ใช้เมื่อจำเป็น ตรวจตับก่อนและทุก 2–4 สัปดาห์",
+   "r": [
+    "fda:Warnings"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การทำงานของตับ (โดยเฉพาะมีโรคตับ/ใช้ร่วมยาพิษตับ)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "CBC",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ทบทวน DDI ทุกครั้งที่เริ่มหรือหยุด RIF",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ rifamycin",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม ritonavir-boosted saquinavir (พิษตับ)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม atazanavir, darunavir, fosamprenavir, tipranavir, cabotegravir, fostemsavir, lenacapavir",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม praziquantel, lurasidone",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Porphyria กำเริบ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ปฏิกิริยาแพ้ทั้งระบบ, DRESS, SCARs",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ไม่ใช้รักษา meningococcal disease (ดื้อเร็ว)",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "คลื่นไส้ ปวดท้อง ท้องเสีย · flu-like syndrome · ผื่น · เกล็ดเลือดต่ำ · ไตวายเฉียบพลัน (แพ้ยา) · สารคัดหลั่งสีส้ม",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาคุมกำเนิดฮอร์โมน: ประสิทธิภาพลด",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "Warfarin, ยาเบาหวาน sulfonylurea, digoxin, azole, สเตียรอยด์, methadone, cyclosporine/tacrolimus: ระดับลด",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ยาต้าน HIV: หลายตัวห้ามใช้ร่วม · efavirenz/dolutegravir ต้องปรับขนาด",
+    "r": [
+     "fda:Contraindications",
+     "g_hiv"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้ได้ · ให้ vitamin K แม่/ทารกถ้าใช้ช่วงท้ายครรภ์ (เลือดออกหลังคลอด)",
+    "r": [
+     "fda:Pregnancy",
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ระดับในน้ำนมต่ำ ใช้ได้ น้ำนมอาจมีสีส้มแดง",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "คลื่นไส้ อาเจียน ผิว/ปัสสาวะสีแดงส้ม (red man) ตับโต · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินตอนท้องว่างพร้อมน้ำเต็มแก้ว",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ปัสสาวะ น้ำตา เหงื่อเป็นสีส้มแดง ไม่อันตราย · เลี่ยงคอนแทคเลนส์",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ใช้วิธีคุมกำเนิดอื่นร่วม",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "แจ้งทุกครั้งที่ได้ยาใหม่",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "อาหารลดการดูดซึม",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "Metabolism",
+    "deacetylation ที่ตับ · เหนี่ยวนำเอนไซม์ตัวเอง",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "น้ำดีเป็นหลัก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Rifampicin (Rifampin, RIF, R) — เอกสารกำกับยา US FDA (Rifampin capsules · Lupin (Rifadin ไม่มีใน openFDA))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b56004f0-f23d-47f6-80c7-39884fccbccc",
+    "src": "DailyMed · ฉบับ 11 ก.พ. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_tb",
+    "title": "Treatment of Drug-Susceptible Tuberculosis (ATS/CDC/IDSA 2016)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/27516382/",
+    "src": "Nahid P, et al. Clin Infect Dis. 2016;63:e147–e195"
+   },
+   {
+    "id": "g_hiv",
+    "title": "Guidelines for the Use of Antiretroviral Agents in Adults and Adolescents with HIV (US DHHS)",
+    "url": "https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/whats-new",
+    "src": "clinicalinfo.hiv.gov · ปรับปรุงต่อเนื่อง"
+   },
+   {
+    "id": "lact",
+    "title": "Rifampin — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501348/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Rifampin capsules · Lupin (Rifadin ไม่มีใน openFDA)",
+   "date": "11 ก.พ. 2026",
+   "set": "b56004f0-f23d-47f6-80c7-39884fccbccc"
+  }
+ },
+ {
+  "id": "pyrazinamide",
+  "name": "Pyrazinamide (PZA, Z)",
+  "group": "ยาวัณโรค",
+  "cls": "Antimycobacterial (analog ของ nicotinamide)",
+  "chips": [
+   "กรดยูริกสูง",
+   "ห้ามใน gout เฉียบพลัน",
+   "2 เดือนแรก"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "Prodrug ถูกเปลี่ยนเป็น pyrazinoic acid · ออกฤทธิ์ในสภาวะกรด (ใน macrophage) · กลไกแน่ชัดยังไม่ทราบ",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>15–30 mg/kg วันละครั้ง</b> (สูงสุด 2–3 g/วัน) · ใช้เฉพาะ <b>2 เดือนแรก</b> ของสูตร 6 เดือน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "สูตรมาตรฐานวัณโรคไวต่อยา: <b>2HRZE / 4HR</b> (ระยะเข้มข้น 2 เดือน 4 ตัว แล้ว INH+RIF ต่อ 4 เดือน)",
+    "r": [
+     "g_tb"
+    ]
+   },
+   {
+    "t": "ยับยั้งการขับ urate ทางไต → <b>กรดยูริกสูง</b> (มักไม่มีอาการ) · ถ้ามี gout กำเริบ หยุดยา",
+    "r": [
+     "fda:Precautions",
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ตรวจ <b>uric acid และการทำงานตับ</b> ก่อนเริ่ม · พิษตับ (มากสุดในยาหลัก)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: ตับเสียหายรุนแรง, <b>gout เฉียบพลัน</b>",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "วัณโรค ระยะเข้มข้น 2 เดือนแรก",
+    "d": "15–30 mg/kg/วัน · หรือ 50–70 mg/kg 2 ครั้ง/สัปดาห์",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไตเสื่อมรุนแรง: ยาและ metabolite สะสม ใช้อย่างระวัง (guideline: ฟอกไตให้ 3 ครั้ง/สัปดาห์หลังฟอก)",
+   "r": [
+    "fda:Precautions",
+    "g_tb"
+   ]
+  },
+  "hepatic": {
+   "t": "ห้ามในตับเสียหายรุนแรง",
+   "r": [
+    "fda:Contraindications"
+   ]
+  },
+  "mon": [
+   {
+    "t": "Uric acid, LFT ก่อนเริ่มและระหว่างรักษา",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "อาการปวดข้อ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "น้ำตาลในผู้ป่วยเบาหวาน",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "ตับเสียหายรุนแรง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "แพ้ยา",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Gout เฉียบพลัน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "พิษต่อตับ: หยุดถาวรถ้ามีตับเสียหาย",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "Hyperuricemia + gout",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ระวังในเบาหวาน (คุมน้ำตาลยาก) และ porphyria",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปวดข้อ (arthralgia) · คลื่นไส้ เบื่ออาหาร · ตับอักเสบ · ผื่น แพ้แสง",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Allopurinol/probenecid: อาจลดผลการลดยูริก",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ฉลากให้ใช้เมื่อจำเป็น",
+    "r": [
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนมได้ค่อนข้างมาก · ทารกที่กินนมแม่อย่างเดียวให้สังเกตตัวเหลือง ตับอักเสบ ปวดข้อ (พบน้อย)",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ข้อมูลจำกัด · ตับผิดปกติ · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ตัวเหลือง ปวดข้อมาก ให้พบแพทย์",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   },
+   {
+    "t": "กินพร้อมยาวัณโรคอื่นจนครบตามแพทย์สั่ง",
+    "r": [
+     "fda:Information for Patients"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ดูดซึมดี",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "Metabolism",
+    "ตับ → pyrazinoic acid",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไต",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Pyrazinamide (PZA, Z) — เอกสารกำกับยา US FDA (Pyrazinamide tablets · ANI)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=262d8829-728c-48db-b89b-88d13b87e684",
+    "src": "DailyMed · ฉบับ 2 มี.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_tb",
+    "title": "Treatment of Drug-Susceptible Tuberculosis (ATS/CDC/IDSA 2016)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/27516382/",
+    "src": "Nahid P, et al. Clin Infect Dis. 2016;63:e147–e195"
+   },
+   {
+    "id": "lact",
+    "title": "Pyrazinamide — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501347/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Pyrazinamide tablets · ANI",
+   "date": "2 มี.ค. 2026",
+   "set": "262d8829-728c-48db-b89b-88d13b87e684"
+  }
+ },
+ {
+  "id": "ethambutol",
+  "name": "Ethambutol (EMB, E)",
+  "group": "ยาวัณโรค",
+  "cls": "Antimycobacterial · ยับยั้ง arabinosyl transferase",
+  "chips": [
+   "ตาบอดสีแดง-เขียว",
+   "ตรวจตา",
+   "ปรับตามไต"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "moa": {
+   "t": "ยับยั้งการสร้าง arabinogalactan ของผนังเซลล์ (bacteriostatic)",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>15 mg/kg วันละครั้ง</b> · รักษาซ้ำ 25 mg/kg 60 วันแรกแล้วลดเหลือ 15",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "สูตรมาตรฐานวัณโรคไวต่อยา: <b>2HRZE / 4HR</b> (ระยะเข้มข้น 2 เดือน 4 ตัว แล้ว INH+RIF ต่อ 4 เดือน)",
+    "r": [
+     "g_tb"
+    ]
+   },
+   {
+    "t": "ADR เด่น: <b>optic neuritis</b> — สายตามัว ตาบอดสี<b>แดง-เขียว</b> (สัมพันธ์ขนาดยา หายได้ถ้าหยุดเร็ว)",
+    "r": [
+     "fda:Warnings",
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ตรวจตา (visual acuity + color discrimination) ก่อนเริ่มและระหว่างใช้ · ขนาด 25 mg/kg ตรวจทุกเดือน",
+    "r": [
+     "fda:Precautions",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ห้ามในผู้ที่<b>บอกอาการทางตาไม่ได้</b> (เด็กเล็ก หมดสติ) · ฉลากไม่แนะนำเด็ก &lt;13 ปี",
+    "r": [
+     "fda:Contraindications",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ขับทางไต → ไตเสื่อมต้องปรับ (guideline: ฟอกไต 3 ครั้ง/สัปดาห์)",
+    "r": [
+     "fda:Clinical Pharmacology",
+     "g_tb"
+    ]
+   },
+   {
+    "t": "ยาลดกรด Al(OH)₃ ลดการดูดซึม: เว้น 4 ชม.หลัง EMB",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "วัณโรคปอด (ร่วมกับยาอื่น)",
+    "d": "15 mg/kg/วัน · รักษาซ้ำ 25 mg/kg × 60 วัน แล้ว 15 mg/kg",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "กินพร้อมอาหารได้ · วันละครั้งเท่านั้น",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไตเสื่อม: ลดขนาดตามระดับยา",
+   "r": [
+    "fda:Precautions"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ตรวจตาก่อนเริ่มและเป็นระยะ",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "LFT ก่อนเริ่มและเป็นระยะ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ไต, กรดยูริก",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ยา",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "Optic neuritis เดิม (ยกเว้นแพทย์พิจารณา)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ผู้ที่บอกอาการทางตาไม่ได้",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "สายตาลดลง/optic neuritis อาจตาบอดถาวร",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "Optic neuritis ตาบอดสี · กรดยูริกสูง gout · ปลายประสาทอักเสบ · ผื่น คลื่นไส้",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาลดกรด Al(OH)₃: เว้นอย่างน้อย 4 ชม.",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้เมื่อประโยชน์คุ้มความเสี่ยง",
+    "r": [
+     "fda:Pregnancy"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ใช้ได้",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ตามัว แยกสีแดง-เขียวไม่ได้ ให้หยุดยาและพบแพทย์ทันที",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "การดูดซึม",
+    "~75–80% อาหารไม่มีผล",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตเป็นหลัก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Ethambutol (EMB, E) — เอกสารกำกับยา US FDA (Ethambutol HCl tablets · Marlex (Myambutol ไม่มีแล้ว))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1b9fbe16-edfc-44b6-b8d8-5c5a9d7558e1",
+    "src": "DailyMed · ฉบับ 22 ส.ค. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_tb",
+    "title": "Treatment of Drug-Susceptible Tuberculosis (ATS/CDC/IDSA 2016)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/27516382/",
+    "src": "Nahid P, et al. Clin Infect Dis. 2016;63:e147–e195"
+   },
+   {
+    "id": "lact",
+    "title": "Ethambutol — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501335/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Ethambutol HCl tablets · Marlex (Myambutol ไม่มีแล้ว)",
+   "date": "22 ส.ค. 2025",
+   "set": "1b9fbe16-edfc-44b6-b8d8-5c5a9d7558e1"
+  }
+ },
+ {
+  "id": "tdf",
+  "name": "Tenofovir disoproxil fumarate (TDF)",
+  "group": "ยาต้านเอชไอวี",
+  "cls": "NRTI (nucleotide) · HIV + HBV",
+  "chips": [
+   "ไต (Fanconi)",
+   "กระดูกบาง",
+   "HBV กำเริบเมื่อหยุด"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "ยาต้าน HIV ตามนโยบายเอดส์แห่งชาติ · (บัญชี ex: HBV เรื้อรังในหญิงตั้งครรภ์/decompensated cirrhosis ฯลฯ)",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "BOXED WARNING · POSTTREATMENT EXACERBATION OF HEPATITIS B",
+  "bw": {
+   "t": "หยุดยาในผู้ติด HBV อาจทำให้ตับอักเสบกำเริบรุนแรง · ติดตามตับหลายเดือนหลังหยุด",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "Nucleotide analog ยับยั้ง reverse transcriptase ของ HIV-1 และ DNA polymerase ของ HBV",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>300 mg วันละครั้ง</b> ไม่ขึ้นกับอาหาร",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "ตรวจ <b>HBV ก่อนเริ่ม</b> · หยุดยาใน HBV → ตับอักเสบกำเริบ",
+    "r": [
+     "fda:2.1",
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "พิษต่อไต: ไตวายเฉียบพลัน, <b>Fanconi syndrome</b> · ตรวจ Cr, CrCl, น้ำตาลและโปรตีนในปัสสาวะ (CKD + ฟอสเฟต)",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "CrCl 30–49: <b>q48h</b> · 10–29: <b>q72–96h</b> · ฟอกเลือด: ทุก 7 วันหลังฟอก",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "<b>มวลกระดูกลดลง</b> · lactic acidosis/ตับโตไขมันพอก",
+    "r": [
+     "fda:5.5",
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "เลี่ยงใช้ร่วม/เพิ่งใช้ยาพิษต่อไต (NSAIDs ขนาดสูงหลายตัว)",
+    "r": [
+     "fda:5.2"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "HIV-1 (ร่วมกับ ARV อื่น)",
+    "d": "300 mg วันละครั้ง (ผู้ใหญ่/เด็ก ≥35 kg)",
+    "r": [
+     "fda:1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "HBV เรื้อรัง",
+    "d": "300 mg วันละครั้ง",
+    "r": [
+     "fda:1",
+     "fda:2.2"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl &lt;50 ขยายช่วงการให้ยา (ตาราง)",
+   "r": [
+    "fda:2.4"
+   ]
+  },
+  "hepatic": {
+   "t": "ไม่ต้องปรับ (PK ใกล้เคียงคนปกติ)",
+   "r": [
+    "fda:12.3"
+   ]
+  },
+  "mon": [
+   {
+    "t": "Cr, CrCl, UA glucose/protein · ฟอสเฟตใน CKD",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "LFT/HBV ถ้าหยุดยาในผู้ติด HBV",
+    "r": [
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "BMD ในผู้เสี่ยงกระดูกหัก",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "ci": [],
+  "warn": [
+   {
+    "t": "HBV กำเริบหลังหยุดยา",
+    "r": [
+     "fda:Boxed"
+    ]
+   },
+   {
+    "t": "ไตเสื่อมใหม่/แย่ลง",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Immune reconstitution syndrome",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "กระดูกบาง",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "Lactic acidosis",
+    "r": [
+     "fda:5.6"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ผื่น ท้องเสีย ปวดศีรษะ ซึมเศร้า อ่อนเพลีย คลื่นไส้",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาที่ลดการทำงานของไต/แย่งขับทางท่อไต: ระดับยาสูงขึ้น",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Didanosine, atazanavir, lopinavir/r, ledipasvir: ดูตาราง",
+    "r": [
+     "fda:7.2"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้ได้ (APR ไม่พบความพิการเพิ่ม)",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: CDC แนะนำแม่ติด HIV ในสหรัฐฯ ไม่ให้นม · LactMed (HBV) — ยาผ่านน้ำนมน้อย",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ · ฟอกเลือดเอาออกได้ ~10%",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินทุกวันห้ามขาด · ห้ามหยุดเองโดยเฉพาะถ้ามี HBV",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "แจ้งก่อนใช้ NSAIDs",
+    "r": [
+     "fda:5.2"
+    ]
+   }
+  ],
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "prodrug · อาหารไขมันสูงเพิ่ม AUC",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไต (กรอง + หลั่งท่อไต)",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Tenofovir disoproxil fumarate (TDF) — เอกสารกำกับยา US FDA (Viread tablets · Gilead)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=33fd6418-fbdc-42ca-a50d-ce2a476a5418",
+    "src": "DailyMed · ฉบับ 18 ก.พ. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_hiv",
+    "title": "Guidelines for the Use of Antiretroviral Agents in Adults and Adolescents with HIV (US DHHS)",
+    "url": "https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/whats-new",
+    "src": "clinicalinfo.hiv.gov · ปรับปรุงต่อเนื่อง"
+   },
+   {
+    "id": "lact",
+    "title": "Tenofovir Disoproxil Fumarate — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501549/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Viread tablets · Gilead",
+   "date": "18 ก.พ. 2025",
+   "set": "33fd6418-fbdc-42ca-a50d-ce2a476a5418"
+  }
+ },
+ {
+  "id": "efavirenz",
+  "name": "Efavirenz (EFV)",
+  "group": "ยาต้านเอชไอวี",
+  "cls": "NNRTI",
+  "chips": [
+   "ก่อนนอน ท้องว่าง",
+   "ฝันร้าย/มึนงง",
+   "ปัสสาวะกัญชาผลบวกปลอม"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "ยาต้าน HIV ตามนโยบายเอดส์แห่งชาติ",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "Non-nucleoside reverse transcriptase inhibitor ของ HIV-1 (จับตำแหน่งนอก active site)",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>600 mg วันละครั้ง ท้องว่าง ก่อนนอน</b> (อาหารเพิ่มระดับยา → ADR มากขึ้น)",
+    "r": [
+     "fda:2",
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม <b>rifampin</b> (น้ำหนัก ≥50 kg): เพิ่มเป็น <b>800 mg</b>",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "อาการทางประสาท (มึนงง นอนไม่หลับ <b>ฝันผิดปกติ</b>) เริ่ม 1–2 วัน หายใน 2–4 สัปดาห์ · อาการทางจิตรุนแรง ซึมเศร้า คิดฆ่าตัวตาย",
+    "r": [
+     "fda:5.5",
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "<b>ผื่น</b> (พบบ่อย มักไม่รุนแรง) · พิษตับ · ชัก · QT ยาว · ไขมันสูง",
+    "r": [
+     "fda:5.2",
+     "fda:5.8",
+     "fda:5.9",
+     "fda:5.10",
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "เลี่ยงใน<b>ไตรมาสแรก</b> (ความพิการทารกในสัตว์/รายงาน neural tube)",
+    "r": [
+     "fda:5.7"
+    ]
+   },
+   {
+    "t": "CYP3A4 inducer (และ substrate CYP2B6) · ข้อห้าม: elbasvir/grazoprevir",
+    "r": [
+     "fda:7.1",
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ปัสสาวะ <b>cannabinoid ผลบวกปลอม</b>",
+    "r": [
+     "fda:7.6"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "HIV-1 (ร่วมกับ ARV อื่น)",
+    "d": "600 mg วันละครั้ง ก่อนนอน · เด็ก ≥3 เดือน ตามน้ำหนัก",
+    "r": [
+     "fda:1",
+     "fda:2.2",
+     "fda:2.3"
+    ]
+   }
+  ],
+  "hepatic": {
+   "t": "ไม่แนะนำใน Child-Pugh B/C · ตรวจตับในผู้มี HBV/HCV",
+   "r": [
+    "fda:8.6",
+    "fda:5.9"
+   ]
+  },
+  "mon": [
+   {
+    "t": "LFT (โดยเฉพาะมี HBV/HCV)",
+    "r": [
+     "fda:2.1",
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "ไขมัน",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "อาการทางจิต",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "ตรวจครรภ์ก่อนเริ่ม",
+    "r": [
+     "fda:8.3"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ยารุนแรง (SJS, EM, ผื่นพิษ)",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม elbasvir/grazoprevir",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "DDI",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "อาการทางจิต",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "อาการทางระบบประสาท",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "พิษต่อตัวอ่อน",
+    "r": [
+     "fda:5.7"
+    ]
+   },
+   {
+    "t": "ผื่น",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "ชัก",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "ไขมันสูง",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "IRIS",
+    "r": [
+     "fda:5.12"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ผื่น มึนงง คลื่นไส้ ปวดศีรษะ อ่อนเพลีย นอนไม่หลับ ฝันผิดปกติ",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Rifampin: ลดระดับ EFV → 800 mg",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "ยาที่ยืด QT: ระวัง",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "ลดระดับยาคุม (etonogestrel/levonorgestrel), statin, methadone, azole",
+    "r": [
+     "fda:7.4"
+    ]
+   },
+   {
+    "t": "Elbasvir/grazoprevir: ห้าม",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: เลี่ยงไตรมาสแรก",
+    "r": [
+     "fda:5.7",
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "คุมกำเนิดแบบ barrier ร่วม 12 สัปดาห์หลังหยุดยา",
+    "r": [
+     "fda:8.3"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนม พบในเลือดทารกบางรายเล็กน้อย · ไม่พบผลต่อการเจริญเติบโต",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "อาการทางประสาทมากขึ้น กล้ามเนื้อกระตุก · ถ่านกัมมันต์ · ฟอกเลือดไม่ช่วย",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินก่อนนอนตอนท้องว่าง",
+    "r": [
+     "fda:17"
+    ]
+   },
+   {
+    "t": "อาจมึนงง ฝันแปลก ช่วง 2–4 สัปดาห์แรก เลี่ยงขับรถ",
+    "r": [
+     "fda:17",
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "ซึมเศร้า คิดทำร้ายตัวเอง ให้พบแพทย์ทันที",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "การดูดซึม",
+    "อาหารไขมันสูงเพิ่มระดับยา",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "Metabolism",
+    "CYP2B6/3A4 · เหนี่ยวนำตัวเอง",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "ครึ่งชีวิต",
+    "ยาวมาก (40–55 ชม.)",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Efavirenz (EFV) — เอกสารกำกับยา US FDA (Efavirenz tablets · Macleods (Sustiva ไม่มีแล้ว))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=13ca3456-e5bf-4bb1-af95-b1378658a358",
+    "src": "DailyMed · ฉบับ 28 มิ.ย. 2024"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_hiv",
+    "title": "Guidelines for the Use of Antiretroviral Agents in Adults and Adolescents with HIV (US DHHS)",
+    "url": "https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/whats-new",
+    "src": "clinicalinfo.hiv.gov · ปรับปรุงต่อเนื่อง"
+   },
+   {
+    "id": "lact",
+    "title": "Efavirenz — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501534/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Efavirenz tablets · Macleods (Sustiva ไม่มีแล้ว)",
+   "date": "28 มิ.ย. 2024",
+   "set": "13ca3456-e5bf-4bb1-af95-b1378658a358"
+  }
+ },
+ {
+  "id": "dolutegravir",
+  "name": "Dolutegravir (DTG)",
+  "group": "ยาต้านเอชไอวี",
+  "cls": "INSTI (integrase strand transfer inhibitor)",
+  "chips": [
+   "rifampin → BID",
+   "แยก cation",
+   "Cr ขึ้นปลอม"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ค)",
+  "nlemCond": {
+   "t": "เฉพาะ 50 mg · ใช้ตามแนวทางการตรวจวินิจฉัย รักษา และป้องกันการติดเชื้อเอชไอวี ประเทศไทย ฉบับปัจจุบัน",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง integrase ของ HIV-1 ขั้น strand transfer",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "<b>50 mg วันละครั้ง</b> · ใช้ร่วม <b>rifampin, efavirenz, carbamazepine</b> หรือดื้อ INSTI → <b>50 mg วันละ 2 ครั้ง</b>",
+    "r": [
+     "fda:2.2",
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "กินก่อน <b>2 ชม. หรือหลัง 6 ชม.</b> จากยาลดกรด/ยาระบายที่มี cation, sucralfate, เหล็ก, แคลเซียม (ถ้ากินพร้อมอาหาร กินเหล็ก/แคลเซียมพร้อมกันได้)",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "ยับยั้ง OCT2/MATE1 → <b>creatinine สูงขึ้น</b>เล็กน้อยโดย GFR จริงไม่เปลี่ยน · เพิ่มระดับ <b>metformin</b> (พิจารณาปรับ)",
+    "r": [
+     "fda:7.1",
+     "fda:6"
+    ]
+   },
+   {
+    "t": "ข้อห้าม: <b>dofetilide</b> · เคยแพ้ DTG",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ปฏิกิริยาแพ้ (ผื่น ไข้ ตับ) ต้องหยุดถาวร · พิษตับ (โดยเฉพาะมี HBV/HCV)",
+    "r": [
+     "fda:5.1",
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ตั้งครรภ์: ข้อมูล &gt;14,000 ราย ไม่พบ neural tube defect เพิ่ม",
+    "r": [
+     "fda:8.1"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "HIV-1 (ร่วมกับ ARV อื่น) ไม่เคย INSTI",
+    "d": "50 mg วันละครั้ง",
+    "r": [
+     "fda:1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "ใช้ร่วม inducer / ดื้อ INSTI",
+    "d": "50 mg วันละ 2 ครั้ง",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "เด็ก ≥4 สัปดาห์ ≥3 kg",
+    "d": "ตามน้ำหนัก (Tivicay PD เม็ดละลายน้ำ ไม่เท่ากับเม็ดธรรมดา mg ต่อ mg)",
+    "r": [
+     "fda:2.3",
+     "fda:5.5"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไม่ต้องปรับ (ระวังใน CrCl &lt;30 ที่ดื้อ INSTI)",
+   "r": [
+    "fda:8.7"
+   ]
+  },
+  "hepatic": {
+   "t": "Child-Pugh C: ไม่แนะนำ",
+   "r": [
+    "fda:8.6"
+   ]
+  },
+  "mon": [
+   {
+    "t": "LFT โดยเฉพาะมี HBV/HCV",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "Creatinine (ขึ้นได้ ไม่ใช่ไตเสื่อมจริง)",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "เคยแพ้ dolutegravir",
+    "r": [
+     "fda:4"
+    ]
+   },
+   {
+    "t": "ใช้ร่วม dofetilide",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "Hypersensitivity",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "Hepatotoxicity",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "DDI → ADR/ดื้อยา",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "IRIS",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "Tivicay กับ Tivicay PD ใช้แทนกันแบบ mg ต่อ mg ไม่ได้",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "นอนไม่หลับ ปวดศีรษะ อ่อนเพลีย · น้ำหนักเพิ่ม",
+    "r": [
+     "fda:6"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Rifampin, carbamazepine, efavirenz: ลดระดับ DTG → BID",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "Cation (Al, Mg, Fe, Ca): แยกเวลา",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "Metformin: ระดับเพิ่ม",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "Dofetilide: ห้าม",
+    "r": [
+     "fda:4"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้ได้",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนมน้อย ใช้ได้อย่างปลอดภัย แนะนำเป็นยาลำดับแรกช่วงให้นม",
+    "r": [
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "รักษาตามอาการ · ฟอกเลือดไม่น่าช่วย (จับโปรตีนสูง)",
+    "r": [
+     "fda:10"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แยกเวลาจากยาลดกรด เหล็ก แคลเซียม",
+    "r": [
+     "fda:7.3"
+    ]
+   },
+   {
+    "t": "ผื่น ไข้ ตัวเหลือง ให้หยุดยาและพบแพทย์",
+    "r": [
+     "fda:5.1"
+    ]
+   }
+  ],
+  "bw": null,
+  "doseNotes": [],
+  "pk": [
+   [
+    "Metabolism",
+    "UGT1A1 เป็นหลัก + CYP3A",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "ครึ่งชีวิต",
+    "~14 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Dolutegravir (DTG) — เอกสารกำกับยา US FDA (Tivicay / Tivicay PD · ViiV Healthcare)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=63df5af3-b8ac-4e76-9830-2dbb340af922",
+    "src": "DailyMed · ฉบับ 25 ส.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_hiv",
+    "title": "Guidelines for the Use of Antiretroviral Agents in Adults and Adolescents with HIV (US DHHS)",
+    "url": "https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/whats-new",
+    "src": "clinicalinfo.hiv.gov · ปรับปรุงต่อเนื่อง"
+   },
+   {
+    "id": "lact",
+    "title": "Dolutegravir — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK500631/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Tivicay / Tivicay PD · ViiV Healthcare",
+   "date": "25 ส.ค. 2026",
+   "set": "63df5af3-b8ac-4e76-9830-2dbb340af922"
   }
  }
 ]
