@@ -168,7 +168,9 @@ function pieceStyle(p) {
 
 // ── สูตรผสม (15 พ.ย.): ใหม่ ≤3 วัน + ยอดนิยม (สุ่มจากกลุ่มใจมากสุด) + สุ่มทั้งกอง · กลุ่มไหนไม่พอเติมจากสุ่ม ──
 const atMs = n => n.at?.toMillis ? n.at.toMillis() : n.at?.seconds ? n.at.seconds * 1000 : Date.now()   // ไม่มี at = เพิ่งเขียนในเครื่อง
-const isNew = n => Date.now() - atMs(n) < TREE_MIX.freshDays * 864e5
+// "ใหม่" = 5 ข้อความล่าสุด และไม่เก่ากว่า 3 วัน (16 พ.ย.: นับแค่เวลา → ช่วงแรกขึ้นใหม่ทุกดอก)
+const newestIds = computed(() => new Set([...pool.value].sort((a, b) => atMs(b) - atMs(a)).slice(0, TREE_MIX.newest).map(n => n.id)))
+const isNew = n => newestIds.value.has(n.id) && Date.now() - atMs(n) < TREE_MIX.freshDays * 864e5
 const popularIds = computed(() => new Set(pool.value.map(n => [n.id, thanksCount(n.id)]).filter(x => x[1] > 0)
   .sort((a, b) => b[1] - a[1]).slice(0, TREE_MIX.popularPool).map(x => x[0])))
 function pickMix() {
