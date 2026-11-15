@@ -34,6 +34,7 @@
         <button v-for="p in shown" :key="p.key" type="button" class="tr-piece" :class="[p.note.k, { fresh: p.fresh, fall: falling }]"
                 :style="pieceStyle(p)" :aria-label="p.note.k === 'a' ? 'อ่านคำปลุกใจจากเพื่อน' : 'อ่านคำให้กำลังใจจากเพื่อน'" @click="open = p.note">
           <img :src="base + fluentFile(p.note.e)" alt="" draggable="false" />
+          <span v-if="isNew(p.note)" class="tr-new" aria-hidden="true">✦</span>
         </button>
       </div>
 
@@ -86,7 +87,7 @@
           <div class="tr-msg">{{ open.t }}</div>
           <div class="tr-who">
             <template v-if="mine[open.id]">คำของเรา (เพื่อนเห็นแบบไม่ระบุชื่อ){{ thanksCount(open.id) ? ` · ได้ใจ ${thanksCount(open.id)} ครั้ง` : '' }}</template>
-            <template v-else>จากเพื่อนในรุ่นคนหนึ่ง</template>
+            <template v-else>จากเพื่อนในรุ่นคนหนึ่ง{{ isNew(open) ? ' · ใหม่' : '' }}{{ thanksCount(open.id) ? ` · เพื่อนส่งใจ ${thanksCount(open.id)} ครั้ง` : '' }}</template>
             <template v-if="who[open.id]"> · เขียนโดย {{ who[open.id] }}</template>
           </div>
           <div class="tr-acts">
@@ -115,7 +116,7 @@ import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { useEscapeKey } from '../composables/useEscapeKey.js'
 import { fluentFile } from '../utils/emoji.js'
-import { TREE_KINDS, TREE_MAX, TREE_SHOW, TREE_SLOTS, TREE_VIEW, TREE_WEAPONS } from '../data/tree.js'
+import { TREE_KINDS, TREE_MAX, TREE_SHOW, TREE_SLOTS, TREE_VIEW, TREE_WEAPONS, TREE_MIX } from '../data/tree.js'
 import { useTree, loadTree, plantNote, toggleThanks, toggleFlag, removeNote, whoPlanted } from '../composables/useTree.js'
 
 const base = import.meta.env.BASE_URL
@@ -159,16 +160,32 @@ function pieceStyle(p) {
   const arm = p.note.k === 'a'
   return {
     left: x / TREE_VIEW.w * 100 + '%', top: y / TREE_VIEW.h * 100 + '%',
-    width: (arm ? TREE_VIEW.weapon : TREE_VIEW.leaf) / TREE_VIEW.w * 100 + 'cqw',
+    width: (arm ? TREE_VIEW.weapon : TREE_VIEW.leaf) * boost(p.note) / TREE_VIEW.w * 100 + 'cqw',
     '--rot': (arm ? rot * .6 : rot) + 'deg',
     animationDelay: (falling.value ? p.slot % 5 * .04 : p.fresh ? p.fresh * .09 : 0) + 's',
   }
 }
 
+// ── สูตรผสม (15 พ.ย.): ใหม่ ≤3 วัน + ยอดนิยม (สุ่มจากกลุ่มใจมากสุด) + สุ่มทั้งกอง · กลุ่มไหนไม่พอเติมจากสุ่ม ──
+const atMs = n => n.at?.toMillis ? n.at.toMillis() : n.at?.seconds ? n.at.seconds * 1000 : Date.now()   // ไม่มี at = เพิ่งเขียนในเครื่อง
+const isNew = n => Date.now() - atMs(n) < TREE_MIX.freshDays * 864e5
+const popularIds = computed(() => new Set(pool.value.map(n => [n.id, thanksCount(n.id)]).filter(x => x[1] > 0)
+  .sort((a, b) => b[1] - a[1]).slice(0, TREE_MIX.popularPool).map(x => x[0])))
+function pickMix() {
+  const out = [], taken = new Set()
+  const take = (list, n) => { for (const x of shuffle([...list])) { if (out.length >= TREE_SHOW || n <= 0) break; if (!taken.has(x.id)) { taken.add(x.id); out.push(x); n-- } } }
+  take(pool.value.filter(isNew), TREE_MIX.fresh)
+  take(pool.value.filter(n => popularIds.value.has(n.id)), TREE_MIX.popular)
+  take(pool.value, TREE_SHOW)
+  return shuffle(out)
+}
+// ใหญ่ขึ้นตามใจ (สูงสุด +18%) — ยอดนิยมเห็นได้ด้วยตา
+const boost = n => 1 + Math.min(.18, thanksCount(n.id) * .03)
+
 /** สุ่มชุดใหม่ทั้งต้น */
 function fill() {
   const slots = shuffle([...TREE_SLOTS.keys()])
-  shown.value = shuffle([...pool.value]).slice(0, TREE_SHOW).map((note, i) => ({ key: ++seq, slot: slots[i], note, fresh: i + 1 }))
+  shown.value = pickMix().map((note, i) => ({ key: ++seq, slot: slots[i], note, fresh: i + 1 }))
 }
 
 function shake() {
@@ -268,6 +285,8 @@ onMounted(async () => {
 .tr-piece img { width: 100%; height: 100%; display: block; object-fit: contain; pointer-events: none; }
 .tr-piece:hover, .tr-piece:focus-visible { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.2); z-index: 2; }
 .tr-piece:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 50%; }
+.tr-new { position: absolute; right: -28%; top: -30%; font-size: .78rem; line-height: 1; color: #ffd84a; text-shadow: 0 0 3px #fff, 0 0 6px #fff7c2; animation: tr-twinkle 1.6s ease-in-out infinite; pointer-events: none; }
+@keyframes tr-twinkle { 50% { opacity: .35; transform: scale(.7) rotate(25deg); } }
 .tr-piece.fresh { animation: tr-sprout .6s cubic-bezier(.3, 1.6, .5, 1) both; }
 .tr-piece.fall { animation: tr-fall .55s ease-in both; pointer-events: none; }
 @keyframes tr-sprout { from { transform: translate(-50%, -50%) rotate(calc(var(--rot, 0deg) - 30deg)) scale(0); } }
