@@ -9,7 +9,7 @@
     <template v-else>
       <div v-if="exams.length > 1" class="ms-exams">
         <button v-for="e in exams" :key="e.id" :class="{ on: e.id === exam.id }" @click="pick(e.id)">
-          {{ e.name }}<small>{{ e.date }}{{ e.pending ? ' · รอผล' : '' }}</small>
+          {{ e.name }}<small>{{ e.date }}{{ e.pending ? ' · รอผล' : e.summaryOnly ? ' · ผลทางอีเมล' : '' }}</small>
         </button>
       </div>
 
@@ -19,6 +19,31 @@
         <b>รอผลคะแนน</b>
         <div class="ms-sub">ผลออกเมื่อไหร่ จะขึ้นที่หน้านี้ทันที</div>
       </section>
+
+      <!-- summaryOnly = มีแค่สถิติรุ่น (คะแนนรายคนส่งทางอีเมล) · CC1 รอบอาจารย์ 15 พ.ย. -->
+      <template v-else-if="exam.summaryOnly">
+        <section class="ms-card ms-pending">
+          <Emoji char="📧" />
+          <div class="ms-name">{{ exam.name }} · {{ exam.date }}</div>
+          <b>เช็คคะแนนของตัวเองได้ทางอีเมล</b>
+          <div class="ms-sub">{{ exam.note || 'ผลรายคนส่งเข้าอีเมลมหาวิทยาลัยแล้ว — ด้านล่างเป็นภาพรวมรุ่นไว้เทียบกัน' }}</div>
+        </section>
+        <section class="ms-card ms-cls">
+          <div class="ms-cls-cap">ภาพรวมรุ่น · คะแนนเต็ม {{ exam.totalMax }}</div>
+          <div class="ms-cls-grid">
+            <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ fmt(exam.mean) }}</b><small class="ms-sd">SD {{ fmt(exam.sd) }}</small></div>
+            <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ fmt(exam.min) }}</b></div>
+            <div class="ms-cls-box"><small>สูงสุด</small><b>{{ fmt(exam.max) }}</b></div>
+          </div>
+          <div class="ms-cls-cap ms-cap2">เทียบเป็นคะแนนเต็ม 100 · เกณฑ์ผ่าน {{ exam.passScore100 }} ขึ้นไป</div>
+          <div class="ms-cls-grid">
+            <div class="ms-cls-box avg"><small>ค่าเฉลี่ย</small><b>{{ fmt(exam.mean100) }}</b><small class="ms-sd">SD {{ fmt(exam.sd100) }}</small></div>
+            <div class="ms-cls-box"><small>ต่ำสุด</small><b>{{ fmt(exam.min100) }}</b></div>
+            <div class="ms-cls-box"><small>สูงสุด</small><b>{{ fmt(exam.max100) }}</b></div>
+          </div>
+          <div class="ms-sub">ได้คะแนนเต็ม 100 ตั้งแต่ {{ exam.passScore100 }} ขึ้นไป = ผ่านเกณฑ์</div>
+        </section>
+      </template>
 
       <template v-else>
       <!-- หัว: วงแหวน % รวม + ผ่าน/ยังไม่ผ่าน · ไม่มีผลของเรา = โชว์ภาพรวมรุ่นแทน -->
@@ -127,7 +152,7 @@ const { exams, mine, loaded } = useMockScores()
 const C = 2 * Math.PI * 40
 
 // ค่าเริ่มต้น = รอบล่าสุดที่มีคะแนนแล้ว (ข้ามรอบที่ยัง "รอผล")
-const exam = computed(() => exams.value.find(e => e.id === route.query.exam) || exams.value.find(e => !e.pending) || exams.value[0])
+const exam = computed(() => exams.value.find(e => e.id === route.query.exam) || exams.value.find(e => !e.pending && !e.summaryOnly) || exams.value[0])
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
 // สถิติที่ใช้เทียบ: ทั้งรุ่น หรือรอบที่เราสอบ (rounds[n].stations มีแค่ mean/sd/min/top ตามลำดับฐาน)
 const MIN_ROUND = 5
@@ -168,7 +193,7 @@ function pick(id) { router.replace({ query: { ...route.query, exam: id } }) }
 
 onMounted(() => loadMockScores(auth.currentUser?.uid, true))
 watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
-watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pending) markSeen(id, !!my.value) }, { immediate: true })
+watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pending && !exam.value.summaryOnly) markSeen(id, !!my.value) }, { immediate: true })
 </script>
 
 <style scoped>
@@ -182,6 +207,7 @@ watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pendin
 .ms-exams button small { color: var(--muted); font-size: .7rem; }
 .ms-exams button.on { border-color: var(--primary); font-weight: 700; }
 .ms-pending { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 28px 14px; font-size: 2rem; }
+.ms-cap2 { margin-top: 12px; }
 .ms-pending b { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; color: var(--primary); }
 .ms-head { display: flex; align-items: center; gap: 14px; }
 .ms-ring { width: 92px; height: 92px; flex: none; }

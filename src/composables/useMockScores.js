@@ -19,9 +19,9 @@ export async function loadMockScores(uid, force = false) {
   try {
     const snap = await getDocs(collection(db, 'mockExams'))
     const list = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .filter(e => e.published && (e.pending || Array.isArray(e.stations)))  // pending = ประกาศรอบไว้ก่อน ยังไม่มีคะแนน
+      .filter(e => e.published && (e.pending || e.summaryOnly || Array.isArray(e.stations)))  // pending = ประกาศรอบไว้ก่อน ยังไม่มีคะแนน
       .sort((a, b) => (b.order || 0) - (a.order || 0))
-    const rows = await Promise.all(list.map(e => e.pending ? null :
+    const rows = await Promise.all(list.map(e => (e.pending || e.summaryOnly) ? null :
       getDoc(doc(db, 'mockExams', e.id, 'scores', uid)).then(s => s.exists() ? s.data() : null).catch(() => null)))
     const m = {}
     list.forEach((e, i) => { m[e.id] = rows[i] })
