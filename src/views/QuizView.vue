@@ -41,6 +41,11 @@
           <span class="qv-setbtn-l"><Emoji char="📜" /> ข้อสอบย้อนหลัง</span>
           <span class="qv-setbtn-r">{{ examSet ? examSetName : `เลือกชุด (${examSetChips.length})` }} ›</span>
         </button>
+        <!-- 🔖 ข้อที่บันทึกไว้ — โชว์เมื่อมีอย่างน้อย 1 ข้อ (หน้าแรกไม่รกสำหรับคนยังไม่ใช้) -->
+        <button v-if="savedTotal" class="qv-card qv-setbtn" :disabled="starting" @click="startSaved">
+          <span class="qv-setbtn-l"><Emoji char="🔖" /> ข้อที่บันทึกไว้</span>
+          <span class="qv-setbtn-r">{{ savedTotal }} ข้อ · ทำชุดนี้ ›</span>
+        </button>
         <BottomSheet :open="setSheet" icon="📜" title="ข้อสอบย้อนหลัง" @update:open="setSheet = $event">
           <div class="qv-setlist">
             <button v-if="examSet" class="qv-setrow clear" @click="pickExamSet(examSet); setSheet = false">✕ ไม่เลือกชุด (กลับไปสุ่มตามหมวด)</button>
@@ -92,6 +97,7 @@
       <div class="qv-meta">
         <span class="qv-tag">{{ variant === 'zen' ? `ข้อที่ ${idx + 1}` : `ข้อ ${idx + 1}/${quiz.length}` }}</span>
         <span v-if="variant === 'redo'" class="qv-tag qv-tag-redo"><Emoji char="🔁" /> ทบทวน</span>
+        <span v-if="variant === 'saved'" class="qv-tag qv-tag-saved"><Emoji char="🔖" /> ที่บันทึกไว้</span>
         <span v-if="current.domain" class="qv-tag">{{ domainLabel(current.domain) }}</span>
         <span v-for="n in setTags(current)" :key="n" class="qv-tag qv-tag-set"><Emoji char="📚" /> {{ n }}</span>
         <ReviewStatusBadge :question="current" />
@@ -130,9 +136,15 @@
           <Emoji char="✏️" /> {{ quickEdited.has(current.id) ? 'แก้แล้ว · แก้อีก' : 'แก้ข้อนี้ (วิชาการ)' }}
         </button>
         <div class="qv-report">
-          <button v-if="reportedIds.has(current.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
-          <button v-else-if="!reportOpen" class="qv-report-btn" @click="reportOpen = true"><Emoji char="🚩" /> แจ้งข้อผิด</button>
-          <div v-else class="qv-report-panel">
+          <!-- แถวปุ่มหลังตอบ: 🔖 บันทึก · 🚩 แจ้งข้อผิด (💬 ความเห็นจะแทรกกลางทีหลัง) -->
+          <div class="qv-acts">
+            <button class="qv-report-btn qv-save-btn" :class="{ on: savedNow }" :aria-pressed="savedNow" :disabled="saving" @click="toggleSave">
+              <Emoji char="🔖" /> {{ savedNow ? 'บันทึกแล้ว' : 'บันทึก' }}
+            </button>
+            <button v-if="reportedIds.has(current.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
+            <button v-else class="qv-report-btn" :aria-expanded="reportOpen" @click="reportOpen = !reportOpen"><Emoji char="🚩" /> แจ้งข้อผิด</button>
+          </div>
+          <div v-if="reportOpen && !reportedIds.has(current.id)" class="qv-report-panel">
             <div class="qv-report-chips">
               <button
                 v-for="r in REPORT_REASONS" :key="r"
@@ -262,6 +274,7 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
 import { QUIZ_COIN_PER_CORRECT, REPORT_HOLD_AT, REPORT_REWARD } from '../data/index.js'
 import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srsQuestions.js'
+import { buildSavedToggle, buildSavedRemove, savedIds, savedCount, isSaved, SAVED_MAX, SAVED_BATCH } from '../utils/savedQuestions.js'
 import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
 import { sfx } from '../utils/sfx.js'
 import { isOwlHour } from '../utils/gags.js'
@@ -400,7 +413,7 @@ const evNow = activeEvent()
 const answers = ref([])
 
 const ZEN_BATCH = 15
-const variant = ref('normal')   // 'normal' | 'zen'
+const variant = ref('normal')   // 'normal' | 'zen' | 'redo' | 'saved'
 const sessionTotal = computed(() => variant.value === 'zen' ? answered.value : quiz.value.length)
 
 // ── ประวัติของฉัน (Phase 1 — private, ไม่มี leaderboard) ──
@@ -521,6 +534,50 @@ const starting = ref(false)
 // ── SRS ข้อที่เคยผิด (study.qcards) — spec 2026-08-20-quiz-srs-wiring ──
 const REDO_BATCH = 20
 const missingQIds = ref([])   // id ในกองที่หาย/ถูกถอนเผยแพร่ → ลบทิ้งตอน finish()
+
+// ── 🔖 ข้อที่บันทึกไว้ (study.saved) — utils/savedQuestions.js ──
+const savedMap = computed(() => authStore.userData?.study?.saved || {})
+const savedTotal = computed(() => savedCount(savedMap.value))
+const savedNow = computed(() => isSaved(savedMap.value, current.value?.id))
+const saving = ref(false)
+async function toggleSave() {
+  const qid = current.value?.id
+  if (!qid || saving.value || !authStore.currentUser) return
+  const r = buildSavedToggle({ study: authStore.userData?.study, qid, deleteSentinel: deleteField() })
+  if (r.full) { toast(`บันทึกได้สูงสุด ${SAVED_MAX} ข้อ — เอาข้อเก่าออกก่อนนะ`, 'info'); return }
+  if (!r.ok) return
+  const nowSaved = r.saved   // หยิบก่อน patchUser (กับดัก #9)
+  saving.value = true
+  try {
+    const ok = await authStore.patchUser({ study: r.optimisticStudy }, r.server)
+    if (ok) toast(nowSaved ? 'บันทึกไว้ใน "ข้อที่บันทึกไว้" แล้ว' : 'เอาออกจากที่บันทึกแล้ว', 'success')
+    else toast('บันทึกไม่สำเร็จ ลองใหม่อีกที', 'error')
+  } finally { saving.value = false }
+}
+async function startSaved() {
+  if (starting.value) return
+  starting.value = true
+  variant.value = 'saved'
+  missingQIds.value = []
+  try {
+    const ids = savedIds(savedMap.value, SAVED_BATCH)
+    if (!ids.length) { toast('ยังไม่มีข้อที่บันทึกไว้ — กด 🔖 ที่หน้าเฉลยได้เลย', 'info'); return }
+    const rows = await fetchQuestionsByIds(ids)
+    const usable = rows.filter(q => q.isPublished && Array.isArray(q.choices) && q.choices.length >= 2)
+    const okIds = new Set(usable.map(q => q.id))
+    const gone = ids.filter(id => !okIds.has(id))   // หาย/ถอนเผยแพร่ → เอาออกจากที่บันทึก
+    if (gone.length) {
+      const { optimisticStudy, server } = buildSavedRemove({ study: authStore.userData?.study, ids: gone, deleteSentinel: deleteField() })
+      authStore.patchUser({ study: optimisticStudy }, server)
+    }
+    if (!usable.length) { toast('ข้อที่บันทึกไว้ถูกนำออกจากคลังแล้ว', 'info'); return }
+    quiz.value = shuffle(usable).map(shuffleChoices)
+    idx.value = 0; resetRound()
+    mode.value = 'quiz'
+  } catch (e) {
+    console.error('[saved start]', e); toast('เริ่มทำข้อที่บันทึกไว้ไม่สำเร็จ', 'error')
+  } finally { starting.value = false }
+}
 
 // ดึงข้อสุ่ม n ข้อ — ตรรกะการสุ่มอยู่ใน useQuestionFeed (ใช้ร่วมกับ Time Attack)
 const fetchQuestions = (n) => feedQuestions(n, { domain: dom.value, group: group.value, examSet: examSet.value, approvedOnly: approvedOnly.value })
@@ -867,6 +924,7 @@ async function finish() {
 .qv-tag { font-size: .7rem; font-weight: 700; border-radius: 6px; padding: 2px 8px; background: var(--primary-light); color: var(--primary-dark); }
 .qv-tag-set { background: #eef2ff; color: #4338ca; }
 .qv-tag-redo { background: #fef3c7; color: #92400e; }
+.qv-tag-saved { background: var(--primary-light); color: var(--primary-dark); }
 .qv-count { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }
 .qv-running { text-align: right; font-size: .7rem; font-weight: 700; color: #15803d; margin-bottom: 10px; }
@@ -896,6 +954,9 @@ async function finish() {
 .qv-next { width: 100%; margin-top: 14px; border: none; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .88rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,var(--primary),var(--primary-2)); cursor: pointer; }
 
 .qv-report { margin-top: 12px; }
+.qv-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.qv-acts + .qv-report-panel { margin-top: 8px; }
+.qv-save-btn.on { border-style: solid; border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
 .qv-report-btn { width: 100%; border: 1px dashed rgba(0,0,0,.2); background: none; border-radius: 10px; padding: 9px; font-family: inherit; font-size: .76rem; font-weight: 700; color: #64748b; cursor: pointer; }
 .qv-report-hint { font-size: .7rem; color: rgba(0,0,0,.5); margin: 6px 0 2px; line-height: 1.5; }
 .qv-edit-btn { margin-bottom: 6px; border-style: solid; border-color: #c7d2fe; color: #4338ca; background: #eef2ff; }
