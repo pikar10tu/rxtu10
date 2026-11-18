@@ -32,6 +32,7 @@
         </button>
         <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
         <RouterLink to="/shop?tab=style" class="me-shoplink"><Emoji char="🎀" /> ร้านตกแต่ง ›</RouterLink>
+        <RouterLink to="/doll" class="me-shoplink"><Emoji char="👗" /> ตู้เสื้อผ้า ›</RouterLink>
       </div>
 
       <MockScoreCard />

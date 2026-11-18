@@ -41,3 +41,7 @@ public/cc2/cases/
 public/cc2/search.json
 public/search-index.json
 public/cc2/drug-links.json
+
+# สกิลชุมชนติดตั้งในเครื่อง ไม่ขึ้น GitHub
+.claude/skills/pixel-art-studio/
+.claude/skills/pixel-art-sprites/

@@ -56,6 +56,7 @@ export const USER_DEFAULTS = {
   equipTitle: null,        // docId achievement ที่สวมเป็นฉายา (utils/achievements resolveTitle)
   pinnedAch: [],           // docId ที่ปักขึ้นตู้โชว์ ≤3 (resolveShowcase)
   cosmetics: { owned: [], n: null, f: null, b: null, g: null },  // ร้านตกแต่ง (data/cosmetics.js · utils/cosmetics.js)
+  doll: null,              // ตู้เสื้อผ้าตุ๊กตา { owned: [], eq: {…} } · null = ยังไม่เคยแต่ง → utils/doll.js dollOf() คืนชุดเริ่มต้นฟรี (18 พ.ย. 2026)
   arenas: { owned: [], on: null, champ: {} },   // สนามประลอง (data/arenas.js · utils/arenas.js) · champ = { 'YYYY-MM': อันดับ }
   // ── v2 fields ──
   role: 'student',                            // 'student' | 'academic' | 'instructor' | 'admin'
