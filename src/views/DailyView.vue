@@ -89,6 +89,7 @@
             <div class="dc-rv-q"><b>{{ i + 1 }}.</b> {{ q.question }}</div>
             <div class="dc-rv-a"><b>เฉลย:</b> {{ q.choices?.[q.answer] }}</div>
             <div v-if="q.explanation" class="dc-rv-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
+            <QuestionActions :q="q" />
             <QuestionReport :q="q" />
           </div>
         </div>
@@ -110,7 +111,7 @@
 import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
-import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import {
   doc, getDoc, getDocs, setDoc, collection, query, where, orderBy, startAt, limit,
   runTransaction, serverTimestamp, increment, deleteField, Timestamp,
@@ -121,6 +122,8 @@ import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import Emoji from '../components/shared/Emoji.vue'
 import QuestionReport from '../components/study/QuestionReport.vue'
+import QuestionActions from '../components/quiz/QuestionActions.vue'
+import { loadQComments } from '../composables/useQComments.js'
 import { shuffleChoices } from '../utils/quizShuffle.js'
 import { applyQuizResults, buildQcardsPatch } from '../utils/srsQuestions.js'
 import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
@@ -155,7 +158,9 @@ async function loadBoard(d) {
   return rankRows(snap.docs.map(x => x.data()))
 }
 const mine = ref(null)
+// 💬 โหลดความเห็นของ 5 ข้อ ตอนเล่นจบ (เห็นเฉลยแล้ว) — 1 query
 const review = ref([])          // 5 ข้อของวัน (ลำดับต้นฉบับ) — ทบทวน + แจ้งข้อผิดหลังเล่นจบ
+watch(() => stage.value === 'done' && review.value.map(q => q.id).join(','), ids => { if (ids) loadQComments(ids.split(',')) }, { immediate: true })
 async function showDone() {
   try {
     if (!qsRaw.length) { const d = await getDoc(dayRef(today)); usage.track(1); if (d.exists()) qsRaw = d.data().qs || [] }

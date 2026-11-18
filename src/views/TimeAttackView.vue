@@ -100,6 +100,7 @@
           <div class="ta-miss-line ok">เฉลย: {{ m.q.choices[m.q.answer] }}</div>
           <div v-if="m.q.explanation" class="ta-miss-exp"><Emoji char="💡" /> {{ m.q.explanation }}</div>
           <AiReviewNote :q="m.q" />
+          <QuestionActions :q="m.q" />
         </div>
       </template>
       <div v-else-if="answered" class="ta-miss-none"><Emoji char="🏆" /> ตอบถูกหมดทุกข้อ!</div>
@@ -113,10 +114,12 @@ import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
+import QuestionActions from '../components/quiz/QuestionActions.vue'
+import { loadQComments } from '../composables/useQComments.js'
 import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import TaBoard from '../components/study/TaBoard.vue'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import { useConfirm } from '../composables/useConfirm.js'
@@ -166,6 +169,8 @@ const correct = ref(0)
 const answered = ref(0)
 const answers = ref([])        // { id, domain, correct } — ใช้ต่อที่ examSessions/SRS
 const missed = ref([])         // { q, picked } — เฉลยที่ยกไปโชว์ตอนจบ
+// 💬 โหลดความเห็นของข้อที่ผิด ตอนจบรอบ (ระหว่างเล่นไม่โหลด — เวลาคือทรัพยากร)
+watch(() => stage.value === 'result' && missed.value.map(m => m.q.id).join(','), ids => { if (ids) loadQComments(ids.split(',')) })
 const leftMs = ref(0)
 const endReason = ref('time')  // time | quit | empty
 const coinsEarned = ref(0)

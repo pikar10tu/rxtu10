@@ -338,6 +338,7 @@
             <div v-if="q.explanation" class="qz-exp"><Emoji char="💡" /> {{ q.explanation }}</div>
             <AiReviewNote :q="q" team />
             <div v-if="q.reviewNote" class="qz-note"><Emoji char="📝" /> {{ q.reviewNote }}</div>
+            <QuestionActions :q="q" />
             <div class="qz-audit">
               <div class="qz-audit-row"><b>เพิ่มโดย:</b> {{ q.createdByName || 'ไม่ระบุ' }}<span v-if="q.source === 'import'"> · นำเข้า</span> · {{ fmtTime(q.createdAt) || '—' }}</div>
               <div v-if="q.source === 'summary'" class="qz-audit-row"><b>ที่มา:</b> {{ summarySourceText(q) }}<span v-if="q.keyBy === 'converter'"> · ต้นฉบับไม่มีเฉลย ผู้แปลงเฉลยให้</span></div>
@@ -378,6 +379,8 @@
 import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import AiReviewNote from '../components/shared/AiReviewNote.vue'
+import QuestionActions from '../components/quiz/QuestionActions.vue'
+import { loadQComments } from '../composables/useQComments.js'
 import QuestionComments from '../components/questions/QuestionComments.vue'
 import QuestionEditor from '../components/questions/QuestionEditor.vue'
 import { draftFrom, draftPayload, draftValid } from '../utils/questionDraft.js'
@@ -446,6 +449,7 @@ function reviewerListOf(q) {
 async function toggleExpand(id) {
   if (expandedId.value === id) { expandedId.value = null; return }
   expandedId.value = id
+  loadQComments([id])   // 💬 ความเห็นเพื่อนของข้อที่กาง (ไม่โหลดซ้ำ)
   detailReviews.value = []
   const q = list.value.find(x => x.id === id)
   if (!q || !(q.reviewedBy?.length)) return
