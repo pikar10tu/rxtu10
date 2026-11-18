@@ -592,6 +592,38 @@ service cloud.firestore {
       }
     }
 
+    // ── 💬 ความเห็นเพื่อนต่อข้อสอบ (18 พ.ย. 2026) · ดู composables/useQComments.js ──
+    //  ชุดเดียวกับ mockComments: author/{uid} = ใครเขียน (แอดมินอ่านคนเดียว) · name ตรง nickname หรือ '' เมื่อ anon
+    //  คนอื่นแก้ได้แค่ likes.{uid ตัวเอง} · ปักหมุด (pinned) = แอดมิน · ลบ = เจ้าของ/แอดมิน
+    match /qComments/{cid} {
+      function qcOwner() { return exists(/databases/$(database)/documents/qComments/$(cid)/author/$(request.auth.uid)); }
+      allow read: if request.auth != null && isMember();
+      allow create: if request.auth != null && isMember()
+        && existsAfter(/databases/$(database)/documents/qComments/$(cid)/author/$(request.auth.uid))
+        && request.resource.data.keys().hasOnly(['qid', 'text', 'name', 'anon', 'likes', 'createdAt'])
+        && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 300
+        && request.resource.data.qid is string && request.resource.data.qid.size() >= 1 && request.resource.data.qid.size() <= 80
+        && request.resource.data.anon is bool
+        && (request.resource.data.anon
+              ? request.resource.data.name == ''
+              : request.resource.data.name == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('nickname', ''))
+        && request.resource.data.likes == {}
+        && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() || (request.auth != null && isMember()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+        && request.resource.data.likes.diff(resource.data.likes).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.likes.get(request.auth.uid, true) == true);
+      allow delete: if isAdmin() || (request.auth != null && qcOwner());
+      match /author/{uid} {
+        allow read: if isAdmin();
+        allow create: if request.auth != null && request.auth.uid == uid
+          && !exists(/databases/$(database)/documents/qComments/$(cid))
+          && existsAfter(/databases/$(database)/documents/qComments/$(cid))
+          && request.resource.data.keys().size() == 0;
+        allow delete: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      }
+    }
+
     // ── 🌳 ต้นไม้รุ่น 10 — ข้อความให้กำลังใจไม่ระบุชื่อ (15 พ.ย. 2026) · ดู composables/useTree.js ──
     //  tree/pool ก้อนเดียวทั้งรุ่น (เปิดหน้า = 1 read) · ใน pool ไม่มีชื่อ/uid คนเขียน
     //  เพิ่มข้อความ: ได้ทีละ 1 คีย์ และคีย์ต้อง = treeAuthors/{uid}.last ที่เขียนคู่กันใน batch เดียว (แอดมินจึงตามคนเขียนได้)

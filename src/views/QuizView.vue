@@ -136,10 +136,13 @@
           <Emoji char="✏️" /> {{ quickEdited.has(current.id) ? 'แก้แล้ว · แก้อีก' : 'แก้ข้อนี้ (วิชาการ)' }}
         </button>
         <div class="qv-report">
-          <!-- แถวปุ่มหลังตอบ: 🔖 บันทึก · 🚩 แจ้งข้อผิด (💬 ความเห็นจะแทรกกลางทีหลัง) -->
+          <!-- แถวปุ่มหลังตอบ: 🔖 บันทึก · 💬 ความเห็นเพื่อน · 🚩 แจ้งข้อผิด -->
           <div class="qv-acts">
             <button class="qv-report-btn qv-save-btn" :class="{ on: savedNow }" :aria-pressed="savedNow" :disabled="saving" @click="toggleSave">
               <Emoji char="🔖" /> {{ savedNow ? 'บันทึกแล้ว' : 'บันทึก' }}
+            </button>
+            <button class="qv-report-btn qv-talk-btn" @click="commentsOpen = true">
+              <Emoji char="💬" /> ความเห็น <span class="qv-cnt" :class="{ zero: !commentN }">{{ commentN }}</span>
             </button>
             <button v-if="reportedIds.has(current.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
             <button v-else class="qv-report-btn" :aria-expanded="reportOpen" @click="reportOpen = !reportOpen"><Emoji char="🚩" /> แจ้งข้อผิด</button>
@@ -167,6 +170,7 @@
       <div v-if="picked !== null" class="qv-dock">
         <button class="qv-start" @click="next">{{ idx + 1 < quiz.length || variant === 'zen' ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
       </div>
+      <QuestionComments v-if="current" v-model:open="commentsOpen" :qid="current.id" />
     </template>
 
     <!-- ── RESULT ── -->
@@ -248,6 +252,8 @@ import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import { summarySourceText } from '../utils/summaryQuestions.js'
 import { useRouter } from 'vue-router'
 import BottomSheet from '../components/shared/BottomSheet.vue'
+import QuestionComments from '../components/quiz/QuestionComments.vue'
+import { useQComments, loadQComments, qCommentCount } from '../composables/useQComments.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -534,6 +540,13 @@ const starting = ref(false)
 // ── SRS ข้อที่เคยผิด (study.qcards) — spec 2026-08-20-quiz-srs-wiring ──
 const REDO_BATCH = 20
 const missingQIds = ref([])   // id ในกองที่หาย/ถูกถอนเผยแพร่ → ลบทิ้งตอน finish()
+
+// ── 💬 ความเห็นเพื่อน — โหลดพร้อมชุด (รวม Zen ที่เติมข้อทีหลัง) · โชว์หลังตอบเท่านั้น ──
+const { byQ } = useQComments()
+const commentsOpen = ref(false)
+const commentN = computed(() => (byQ.value, qCommentCount(current.value?.id)))
+watch(() => quiz.value.map(q => q.id).join(','), ids => { if (ids) loadQComments(ids.split(',')) })
+watch(() => current.value?.id, () => { commentsOpen.value = false })
 
 // ── 🔖 ข้อที่บันทึกไว้ (study.saved) — utils/savedQuestions.js ──
 const savedMap = computed(() => authStore.userData?.study?.saved || {})
@@ -954,7 +967,10 @@ async function finish() {
 .qv-next { width: 100%; margin-top: 14px; border: none; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .88rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,var(--primary),var(--primary-2)); cursor: pointer; }
 
 .qv-report { margin-top: 12px; }
-.qv-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.qv-acts { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 6px; }
+.qv-acts .qv-report-btn { padding: 9px 4px; }
+.qv-cnt { display: inline-block; min-width: 1.4em; margin-left: 2px; border-radius: 999px; padding: 0 6px; font-size: .7rem; background: var(--accent); color: #fff; }
+.qv-cnt.zero { background: var(--line); color: var(--muted); }
 .qv-acts + .qv-report-panel { margin-top: 8px; }
 .qv-save-btn.on { border-style: solid; border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
 .qv-report-btn { width: 100%; border: 1px dashed rgba(0,0,0,.2); background: none; border-radius: 10px; padding: 9px; font-family: inherit; font-size: .76rem; font-weight: 700; color: #64748b; cursor: pointer; }
