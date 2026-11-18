@@ -22,6 +22,7 @@ const routes = [
     { path: '/study/ped-dose', name: 'ped-dose', component: () => import('../views/PedDoseView.vue') },
     { path: '/study/time-attack', name: 'timeAttack', component: () => import('../views/TimeAttackView.vue') },
     { path: '/daily', name: 'daily', component: () => import('../views/DailyView.vue') },
+    { path: '/saved', name: 'saved', component: () => import('../views/SavedQuestionsView.vue') },
     { path: '/quiz',      name: 'quiz',      component: () => import('../views/QuizView.vue')      },
     { path: '/questions', name: 'questions', component: () => import('../views/QuestionsView.vue') },
     { path: '/review',    name: 'review',    component: () => import('../views/ReviewView.vue')    },
@@ -46,6 +47,10 @@ const routes = [
     { path: '/play/poker', name: 'poker', component: () => import('../views/PokerView.vue') },
     { path: '/tree', name: 'tree', component: () => import('../views/TreeView.vue') },
     { path: '/fun-facts', name: 'funFacts', component: () => import('../views/FunFactsView.vue') },
+    // 🧍 เดโมตุ๊กตาชั่วคราว (A1 18 พ.ย. 2026) — ไม่มีลิงก์ในเมนู · ลบเมื่อมีตู้เสื้อผ้า
+    { path: '/doll-demo', name: 'dollDemo', component: () => import('../views/DollDemoView.vue') },
+    // 🧍 ตู้เสื้อผ้าตุ๊กตา (A2 18 พ.ย. 2026) — เข้าจากหน้าฉัน
+    { path: '/doll', name: 'doll', component: () => import('../views/DollView.vue') },
     // URL ที่ไม่รู้จัก (ลิงก์เก่า/พิมพ์ผิด) → กลับหน้าแรก แทนที่จะขึ้นจอว่างเปล่า
     { path: '/:pathMatch(.*)*', redirect: '/' },
 ]

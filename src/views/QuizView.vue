@@ -42,10 +42,13 @@
           <span class="qv-setbtn-r">{{ examSet ? examSetName : `เลือกชุด (${examSetChips.length})` }} ›</span>
         </button>
         <!-- 🔖 ข้อที่บันทึกไว้ — โชว์เมื่อมีอย่างน้อย 1 ข้อ (หน้าแรกไม่รกสำหรับคนยังไม่ใช้) -->
-        <button v-if="savedTotal" class="qv-card qv-setbtn" :disabled="starting" @click="startSaved">
-          <span class="qv-setbtn-l"><Emoji char="🔖" /> ข้อที่บันทึกไว้</span>
-          <span class="qv-setbtn-r">{{ savedTotal }} ข้อ · ทำชุดนี้ ›</span>
-        </button>
+        <div v-if="savedTotal" class="qv-card qv-setbtn qv-saved">
+          <span class="qv-setbtn-l"><Emoji char="🔖" /> ข้อที่บันทึกไว้ <small class="qv-saved-n">{{ savedTotal }} ข้อ</small></span>
+          <span class="qv-saved-acts">
+            <button class="qv-saved-btn" @click="router.push('/saved')"><Emoji char="📖" /> อ่าน</button>
+            <button class="qv-saved-btn main" :disabled="starting" @click="startSaved">ทำชุดนี้ ›</button>
+          </span>
+        </div>
         <BottomSheet :open="setSheet" icon="📜" title="ข้อสอบย้อนหลัง" @update:open="setSheet = $event">
           <div class="qv-setlist">
             <button v-if="examSet" class="qv-setrow clear" @click="pickExamSet(examSet); setSheet = false">✕ ไม่เลือกชุด (กลับไปสุ่มตามหมวด)</button>
@@ -334,6 +337,7 @@ onMounted(() => {
   if (qg) { dom.value = qg.domain; group.value = qg.key }
   if (route.query.mode === 'zen') startZen()
   else if (route.query.mode === 'redo') whenUserDataReady(startRedo)
+  else if (route.query.mode === 'saved') whenUserDataReady(startSaved)
   else if (route.query.view === 'history') openHistory()
 })
 
@@ -907,6 +911,11 @@ async function finish() {
 .qv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .qv-chip { border: var(--bw) solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: .76rem; font-weight: 700; color: var(--ink); cursor: pointer; }
 .qv-setbtn { padding: 14px; display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 8px; font-family: inherit; cursor: pointer; text-align: left; }
+.qv-saved { cursor: default; }
+.qv-saved-n { font-weight: 600; color: var(--muted); font-size: .72rem; }
+.qv-saved-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.qv-saved-btn { font: inherit; font-size: .76rem; font-weight: 700; border: var(--bw) solid var(--line); background: none; border-radius: 999px; padding: 6px 12px; color: var(--primary); cursor: pointer; }
+.qv-saved-btn.main { background: var(--primary); border-color: var(--primary); color: #fff; }
 .qv-setbtn.on { border-color: var(--primary); }
 .qv-setbtn-l { font-weight: 800; font-size: .82rem; color: var(--ink); }
 .qv-setbtn-r { font-size: .76rem; font-weight: 700; color: var(--primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
