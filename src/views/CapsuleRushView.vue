@@ -39,6 +39,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import { ref, computed, onBeforeUnmount } from 'vue'
 import { increment } from 'firebase/firestore'
 import MinigameShell from '../components/minigame/MinigameShell.vue'
@@ -62,6 +63,8 @@ const { postNews, myName } = useNewsPost()
 const { syncRosterRow } = useRosterSync()
 const canvasEl = ref(null)
 const phase = ref('pick') // 'pick' | 'play' | 'over'
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+useLeaveGuard(() => phase.value === 'play', 'ออกตอนนี้รอบนี้จะหายนะ\nแน่ใจไหม?')
 const lastScore = ref(0)
 const earned = ref(0)
 const saveState = ref('idle') // idle | saving | saved | failed

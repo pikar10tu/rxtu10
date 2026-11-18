@@ -29,6 +29,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import Emoji from '../components/shared/Emoji.vue'
 import MinigameShell from '../components/minigame/MinigameShell.vue'
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
@@ -56,6 +57,9 @@ const REWARD_CAP = 3000
 const board = ref(newBoard())
 const score = ref(0)
 const over = ref(false)
+
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+useLeaveGuard(() => !over.value && score.value > 0, 'ออกตอนนี้รอบนี้จะหายนะ\nแน่ใจไหม?')
 const earned = ref(0)
 const saveState = ref('idle')   // idle | saving | saved | failed
 const overEl = ref(null)

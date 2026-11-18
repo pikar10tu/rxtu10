@@ -145,6 +145,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
@@ -211,6 +212,8 @@ const totalStations = computed(() => ratioClinic.value + ratioProduct.value + ra
 
 // ── session state ──
 const phase = ref('setup') // setup | playing | done
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+useLeaveGuard(() => phase.value === 'playing', 'ออกจากการสอบจำลองตอนนี้?\nรอบที่ทำค้างไว้จะหายนะ')
 const stations = ref([])
 const warnings = ref([])
 const idx = ref(0)

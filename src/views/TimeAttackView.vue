@@ -117,7 +117,9 @@ import ReviewStatusBadge from '../components/shared/ReviewStatusBadge.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import TaBoard from '../components/study/TaBoard.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter, onBeforeRouteLeave } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
+import { useConfirm } from '../composables/useConfirm.js'
 import { collection, addDoc, doc, getDoc, writeBatch, increment, serverTimestamp, deleteField } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -425,12 +427,12 @@ async function finish(reason) {
 
 function onBack() {
   if (stage.value === 'pick') router.back()
-  else if (stage.value === 'play') finish('quit')
+  else if (stage.value === 'play') useConfirm().confirm('จบรอบนี้เลยไหม?\nคะแนนที่ทำได้จะบันทึกไว้').then(ok => ok && finish('quit'))
   else stage.value = 'pick'
 }
 
 // เผลอกดแท็บอื่นกลางรอบ = จบรอบให้ ไม่ปล่อยให้คะแนน 15 นาทีหายเปล่า
-onBeforeRouteLeave(() => { if (stage.value === 'play') finish('quit') })
+useLeaveGuard(() => stage.value === 'play', 'จบรอบนี้แล้วออกเลยไหม?\nคะแนนที่ทำได้จะบันทึกไว้', { onLeave: () => finish('quit') })
 
 onMounted(() => {
   members.loadRoster()

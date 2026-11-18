@@ -239,6 +239,7 @@ import BottomSheet from '../components/shared/BottomSheet.vue'
 import HelpButton from '../components/help/HelpButton.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import { activeEvent, quizPts, grantPatch } from '../utils/event.js'
 import { collection, getDocs, getDoc, query, where, orderBy, limit, doc, addDoc, setDoc, increment, serverTimestamp, writeBatch, deleteField, runTransaction } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
@@ -673,6 +674,13 @@ function quit() {
   else mode.value = 'home'
 }
 function backToHome() { variant.value = 'normal'; mode.value = 'home' }
+
+// กันมือโดน toolbar/ปุ่มกลับกลางชุด — ออกแล้วบันทึกผลเท่าที่ทำให้
+useLeaveGuard(
+  () => mode.value === 'quiz' && answered.value > 0,
+  'ออกจากข้อสอบตอนนี้?\nระบบจะบันทึกผลเท่าที่ทำไว้ให้',
+  { onLeave: () => finish() },
+)
 
 async function finish() {
   mode.value = 'result'

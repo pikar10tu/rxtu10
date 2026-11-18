@@ -107,6 +107,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
 import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
@@ -307,6 +308,9 @@ function startPractice() {
   beginQuestion()
   toTop()
 }
+
+// กันมือโดน toolbar/ปุ่มกลับกลางรอบ
+useLeaveGuard(() => stage.value === 'play', 'ออกตอนนี้รอบนี้จะไม่นับนะ\nแน่ใจไหม?')
 
 async function finish() {
   if (saving.value) return

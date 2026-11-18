@@ -73,6 +73,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { increment } from 'firebase/firestore'
@@ -116,7 +117,9 @@ function askSensors() {
 }
 function onCreate() { askSensors(); createRoom() }
 function onJoin(id) { askSensors(); joinRoom(id) }
-async function goBack() { if (roomId.value) await leaveRoom(); router.push('/play') }
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+const { confirmLeave } = useLeaveGuard(() => !!roomId.value && inGame.value && room.value?.state?.status !== 'gameover', 'ออกกลางเกมตอนนี้?\nทีมจะเล่นต่อโดยไม่มีเรา', { onLeave: () => leaveRoom() })
+async function goBack() { if (!(await confirmLeave())) return; if (roomId.value) await leaveRoom(); router.push('/play') }
 
 onMounted(() => { listenRooms(); refreshBoard() })
 // อยู่ในห้อง = ไม่ต้องฟังรายชื่อห้อง (กันดาวน์โหลด state ทุกห้องซ้ำทุกครั้งที่มีคนกด)

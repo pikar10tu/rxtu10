@@ -157,6 +157,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -222,7 +223,9 @@ const reasonText = computed(() => {
   }[r.reason] || ''
 })
 
-async function goBack() { if (roomId.value) await leaveRoom(); router.push('/play') }
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+const { confirmLeave } = useLeaveGuard(() => !!roomId.value && ['play', 'vote'].includes(st.value?.status), 'ออกกลางเกมตอนนี้?\nเพื่อนในห้องจะเล่นต่อโดยไม่มีเรา', { onLeave: () => leaveRoom() })
+async function goBack() { if (!(await confirmLeave())) return; if (roomId.value) await leaveRoom(); router.push('/play') }
 onMounted(listenRooms)
 watch(roomId, id => { if (id) stopRooms(); else listenRooms() })
 </script>

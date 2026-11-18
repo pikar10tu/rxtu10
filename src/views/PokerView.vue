@@ -205,6 +205,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useRouter } from 'vue-router'
@@ -434,6 +435,8 @@ function onQuit() { if (quitArm.value) { disarm(); leaveRoom() } else arm(() => 
 
 // กดกลับ = หลุดชั่วคราว (ที่นั่ง+ชิปยังอยู่ กลับมากด "กลับเข้าโต๊ะ" ได้) · ลุกจริงใช้ปุ่มลุกจากโต๊ะ
 function goBack() { router.push('/play') }
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+useLeaveGuard(() => !!roomId.value && !!pub.value?.phase && pub.value.phase !== 'showdown', 'ออกกลางตาตอนนี้?\nเพื่อนในโต๊ะจะเล่นต่อโดยไม่มีเรา')
 onMounted(() => { listenRooms(); loadStats() })
 watch(roomId, id => { if (id) stopRooms(); else { listenRooms(); loadStats() } })
 </script>

@@ -18,7 +18,9 @@ import { computed, ref } from 'vue'
 import { questionImages } from '../../utils/questionImages.js'
 
 const props = defineProps({ question: { type: Object, default: null } })
-const list = computed(() => questionImages(props.question))
+// path ใน DB ขึ้นต้น /qimg/ แต่เว็บจริงอยู่ใต้ /rxtu10/ → ต้องเติม BASE_URL ไม่งั้นรูป 404
+const BASE = import.meta.env.BASE_URL || "./"
+const list = computed(() => questionImages(props.question).map(p => BASE + p.slice(1)))
 const zoom = ref(null)
 </script>
 

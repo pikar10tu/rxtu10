@@ -80,6 +80,7 @@
 </template>
 
 <script setup>
+import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -163,7 +164,9 @@ watch(() => state.value?.status === 'done' && result.value?.round, async r => {
 
 const drugOpen = ref(false), drugId = ref('')
 function openDrug(id) { drugId.value = id; drugOpen.value = true }
-async function goBack() { if (roomId.value) { await leaveRoom(); return } router.push('/study/cc2') }
+// กันมือโดน toolbar/ปุ่มกลับกลางเกม
+const { confirmLeave } = useLeaveGuard(() => !!roomId.value && state.value?.status === 'play', 'ออกจากห้องกลางเคสตอนนี้?\nคู่ของเราจะค้างอยู่ในเคสนี้', { onLeave: () => leaveRoom() })
+async function goBack() { if (!(await confirmLeave())) return; if (roomId.value) { await leaveRoom(); return } router.push('/study/cc2') }
 </script>
 
 <style scoped>
