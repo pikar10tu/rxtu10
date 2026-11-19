@@ -19,5 +19,17 @@ for (const f of files) {
     parts[id] = draw
   }
 }
+// ✔️ ตรวจเบื้องต้น (บอกปัญหา แต่ยังเขียนพรีวิวให้ดู) — id ต้องมีอยู่จริงและช่องตรงของเดิม · พิกัดอยู่ในกริด 40×44
+const { PART } = await import('../src/data/dollParts.js')
+const warn = []
+for (const [id, d] of Object.entries(parts)) {
+  if (!PART[id]) warn.push(`${id}: ไม่มี id นี้ในของเดิม (ของใหม่ยังพรีวิวไม่ได้ ให้ Claude เพิ่มเข้าแคตตาล็อกก่อน)`)
+  for (const L of ['m', 'o', 'back', 'ob']) for (const op of d[L] || []) {
+    const [k, x, y, a] = op
+    const w = k === 'r' ? a : String(a).length, h = k === 'r' ? op[4] : 1
+    if (x < 0 || y < 0 || x + w > 40 || y + h > 44) warn.push(`${id}.${L}: ${JSON.stringify(op)} ล้นกริด 40×44`)
+  }
+}
+if (warn.length) console.log(warn.map(w => '⚠️ ' + w).join(String.fromCharCode(10)))
 fs.writeFileSync(OUT, '// สร้างโดย scripts/art-inbox.mjs — ห้ามแก้มือ ห้าม commit\nexport default ' + JSON.stringify({ parts, base }) + '\n')
 console.log('พรีวิว', Object.keys(parts).join(' '), base ? '+ ตัวฐาน' : '')
