@@ -351,6 +351,14 @@ for (const [base, id, label, pal] of VARIANTS) {
 
 // ── ทับด้วยชิ้นที่แก้ใน editor (dollEdits.js) ──
 for (const p of PARTS) if (EDITS[p.id]) Object.assign(p, EDITS[p.id])
+// 🎨 พรีวิวงานแผนกอาร์ต (art-dept/inbox) บนห้องแต่งตัวจริง — dev เท่านั้น · สร้างด้วย `node scripts/art-inbox.mjs`
+// ไฟล์ dollInbox.local.js อยู่ใน .gitignore · ไม่มีไฟล์ = ไม่มีผล (build จริง/เทสต์ node ไม่เห็น)
+const INBOX = import.meta.env?.DEV
+  ? Object.values(import.meta.glob('./dollInbox.local.js', { eager: true }))[0]?.default : null
+if (INBOX) {
+  for (const p of PARTS) if (INBOX.parts?.[p.id]) Object.assign(p, { m: null, o: null, back: null, ob: null, st: null }, INBOX.parts[p.id])
+  if (INBOX.base) BASE.m.splice(0, BASE.m.length, ...INBOX.base)
+}
 // ── เลื่อนตำแหน่งชิ้น off = [dx, dy] (18 พ.ย. 2026 หลังแขนยาวขึ้น) — ไม่ต้องวาดใหม่ ตัวเรนเดอร์บวกให้
 // ปีก: ต้นแบบเริ่มที่ระดับคอ → ลง 5 แถวให้โคนปีกอยู่ที่ไหล่ (ผ้าคลุม w6 อยู่ถูกแล้ว)
 // ของในมือ: จุดจับต้องทับมือ (x 26–27 · y 26–27) — ชิ้นวาดหลังสุด จึงบังมือเหมือนกำอยู่
