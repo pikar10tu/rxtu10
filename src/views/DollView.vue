@@ -251,7 +251,8 @@ async function doEquip() {
 .dv-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--surface); border: var(--bw) solid var(--line); border-radius: 14px; padding: 4px; }
 .dv-group { font: inherit; font-size: .8rem; font-weight: 800; border: 0; border-radius: 10px; padding: 8px 2px; background: none; color: var(--muted); cursor: pointer; }
 .dv-group.on { background: var(--primary); color: #fff; }
-.dv-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+/* หมวดย่อยขึ้นบรรทัดใหม่แทนเลื่อนข้าง (20 พ.ย. 2026 user: กดหมวดปีกไม่ได้ — แถบเลื่อนซ่อนอยู่ คอมเลื่อนไม่ได้ มือถือไม่รู้ว่าเลื่อนได้) */
+.dv-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding-bottom: 2px; }
 .dv-tab { flex: none; font: inherit; font-size: .78rem; font-weight: 700; border: var(--bw) solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
 .dv-tab.on { background: var(--primary); border-color: var(--primary); color: #fff; }
 .dv-tab.covered:not(.on) { opacity: .55; }
