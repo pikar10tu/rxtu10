@@ -4,6 +4,7 @@
 // ⚠️ แก้ตัวฐาน BASE = กระทบทุกชิ้น → รัน node --test src/utils/dollRender.test.js ทุกครั้ง
 // 18 พ.ย.: แขนยาวขึ้น 1 แถว (มือแถว 26–27) user เลือกแบบ B · ชุด/กระโปรงทับมือได้เพราะ base วาดก่อนเสื้อผ้าเสมอ
 import EDITS from './dollEdits.js'
+import ART_PARTS from './dollPartsArt.js'
 export const W = 40, H = 44, PAD = 4;
 // 🪽 ชิ้นแบบสติกเกอร์ (19 พ.ย. 2026): วาดแยกเป็นภาพของตัวเอง แล้วติดที่ "จุดยึด" บนตัว
 // กรอบรวมกว้างขึ้นข้างละ XM ให้ปีกกางพ้นตัวได้ (ตัวยังอยู่กริด 40x44 เดิม)
@@ -349,6 +350,9 @@ for (const [base, id, label, pal] of VARIANTS) {
   PARTS.splice(PARTS.indexOf(b) + 1 + PARTS.filter(p => p.variantOf === base).length, 0, { ...b, id, label, pal: { ...b.pal, ...pal }, variantOf: base })
 }
 
+// 🎨 ชิ้นใหม่จากแผนกอาร์ต (Gemini · art-dept) ที่ user ผ่านแล้ว — scripts/art-approve.mjs เขียน dollPartsArt.js (20 พ.ย. 2026)
+PARTS.push(...ART_PARTS.map(p => ({ ...p })))
+
 // ── ทับด้วยชิ้นที่แก้ใน editor (dollEdits.js) ──
 for (const p of PARTS) if (EDITS[p.id]) Object.assign(p, EDITS[p.id])
 // 🎨 พรีวิวงานแผนกอาร์ต (art-dept/inbox) บนห้องแต่งตัวจริง — dev เท่านั้น · สร้างด้วย `node scripts/art-inbox.mjs`
@@ -433,7 +437,7 @@ export const SETS = [
 
 // 🆕 ของใหม่ (ป้าย "ใหม่" + ตัวกรองในห้องแต่งตัว) — ใส่ id ตอนเพิ่มของเข้าร้านหลังเปิดใช้ แล้วเอาออกเมื่อเก่าแล้ว
 // เปิดห้องแต่งตัวครั้งแรกทุกชิ้นใหม่หมด จึงเริ่มว่าง
-export const NEW_PARTS = new Set([])
+export const NEW_PARTS = new Set(ART_PARTS.map(p => p.id))   // ชิ้นใหม่จากแผนกอาร์ต 20 พ.ย. — ล้างเมื่อเก่าแล้ว
 
 // ชุดเริ่มต้นของคนที่ยังไม่เคยแต่ง (ทุกชิ้นฟรี)
 // 🧑 ลักษณะตัวละคร vs 👕 แต่งตัว — ตู้เสื้อผ้าแยกเป็น 2 หมวด
