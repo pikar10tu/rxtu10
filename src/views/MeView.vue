@@ -10,12 +10,19 @@
       <CosBg :id="myCos.g" />
       <!-- หัวการ์ดจัดกลางแบบการ์ดโปรไฟล์: รูป (ปุ่มกล้องที่มุม) → ชื่อ → ฉายา → บ้าน → ปุ่มร้านตกแต่ง -->
       <div class="me-hero">
+        <!-- รูป + อวาตาร์ยืนข้าง (20 พ.ย. 2026) · แตะอวาตาร์ = ห้องแต่งตัว (แทนลิงก์ตัวหนังสือเดิม) -->
+        <div class="me-id">
         <div class="me-av-box">
           <CosFrame :id="myCos.f">
             <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" @click="pokeMirror" />
           </CosFrame>
           <button class="me-cam" aria-label="เปลี่ยนรูป" @click="fileEl?.click()"><Emoji char="📷" /></button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
+        </div>
+        <RouterLink to="/doll" class="me-doll" aria-label="ห้องแต่งตัว">
+          <DollFigure :eq="myDoll" :scale="2" label="อวาตาร์ของฉัน" />
+          <span class="me-doll-cap"><Emoji char="👗" /> แต่งตัว</span>
+        </RouterLink>
         </div>
         <!-- ปุ่มบันทึกต้องอยู่ใกล้รูป ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
              เดิมเลือกรูปแล้วเห็นรูปเปลี่ยนบนจอ แต่หาปุ่มบันทึกไม่เจอ ⇒ รีเฟรชแล้วรูปเด้งกลับ -->
@@ -31,18 +38,9 @@
           <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
         </button>
         <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
-        <!-- ร้านตกแต่งรวมเข้าห้องแต่งตัวแล้ว (19 พ.ย. 2026) -->
-        <RouterLink to="/doll" class="me-shoplink"><Emoji char="👗" /> ห้องแต่งตัว ›</RouterLink>
       </div>
 
       <MockScoreCard />
-      <!-- ทีมเฝ้าบ้าน + ปุ่มจัดทีม (เปิดแผ่นจัดทีมตัวเดียวกับหน้าเพ็ท/หอคอย/อารีน่า) -->
-      <div class="me-guard">
-        <span class="me-guard-cap">ทีมเฝ้าบ้าน</span>
-        <span v-for="(g, i) in guard" :key="i" class="me-guard-pet"><Emoji :char="g" /></span>
-        <span v-if="!guard.length" class="me-guard-none">ยังไม่ได้จัด</span>
-        <button class="me-guard-edit" @click="teamOpen = true"><Emoji char="⚙️" /> จัดทีม</button>
-      </div>
       <TeamPicker v-model:open="teamOpen" context="ทีมนี้ใช้ทั้งบุกและตั้งรับ" done-label="เสร็จ" @done="teamOpen = false" />
 
       <div class="me-stats">
@@ -65,7 +63,17 @@
         </button>
       </div>
       <PracticeStats v-if="tab === 'stats'" class="me-panel" />
-      <PvpHistory v-else-if="tab === 'fight'" start-open class="me-panel" @open="openProfile" />
+      <template v-else-if="tab === 'fight'">
+        <!-- ทีมเฝ้าบ้านย้ายจากการ์ดหัวมาอยู่แท็บต่อสู้ (20 พ.ย. 2026) — การ์ดหัวเหลือแค่ตัวตน -->
+        <!-- ทีมเฝ้าบ้าน + ปุ่มจัดทีม (เปิดแผ่นจัดทีมตัวเดียวกับหน้าเพ็ท/หอคอย/อารีน่า) -->
+        <div class="me-guard">
+          <span class="me-guard-cap">ทีมเฝ้าบ้าน</span>
+          <span v-for="(g, i) in guard" :key="i" class="me-guard-pet"><Emoji :char="g" /></span>
+          <span v-if="!guard.length" class="me-guard-none">ยังไม่ได้จัด</span>
+          <button class="me-guard-edit" @click="teamOpen = true"><Emoji char="⚙️" /> จัดทีม</button>
+        </div>
+        <PvpHistory start-open class="me-panel" @open="openProfile" />
+      </template>
       <NewsBoard v-else-if="tab === 'news'" start-open class="me-panel" />
       <template v-else>
         <ShowcaseEditor ref="showcaseEl" :items="achItems" />
@@ -147,6 +155,8 @@ import CosName from '../components/cosmetics/CosName.vue'
 import CosBg from '../components/cosmetics/CosBg.vue'
 import TitlePill from '../components/shared/TitlePill.vue'
 import { cosOf } from '../utils/cosmetics.js'
+import DollFigure from '../components/doll/DollFigure.vue'
+import { dollOf } from '../utils/doll.js'
 import { getCosmetic } from '../data/cosmetics.js'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from '../utils/achievements.js'
@@ -159,6 +169,7 @@ const members = useMembersStore()
 const tier = computed(() => getTier(auth.userData?.residence?.level || 1))
 const myCos = computed(() => cosOf(auth.userData))
 const myBg = computed(() => getCosmetic(myCos.value.g))
+const myDoll = computed(() => dollOf(auth.userData).eq)
 const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
   .map(p => getPetDef(p.id)?.emoji).filter(Boolean))
 
@@ -400,6 +411,10 @@ async function save() {
 .me-card { padding: 18px 14px 14px; }
 .me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 .me-av-box { position: relative; margin-bottom: 4px; }
+.me-id { display: flex; align-items: flex-end; justify-content: center; gap: 12px; }
+.me-doll { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; transition: transform .15s; }
+.me-doll:active { transform: scale(.95); }
+.me-doll-cap { font-size: .7rem; font-weight: 800; color: var(--primary-dark); background: rgba(255,255,255,.85); border: var(--bw) solid var(--line); border-radius: 999px; padding: 1px 8px; }
 .me-avatar { width: 92px; height: 92px; }
 .me-cam { position: absolute; right: -2px; bottom: -2px; z-index: 3; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff;
   background: var(--primary); color: #fff; display: grid; place-items: center; font-size: .9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(43,53,80,.25); }
@@ -407,7 +422,7 @@ async function save() {
 .me-hero .me-title, .me-hero .me-shoplink { align-self: center; margin: 0; }
 .me-hero .me-home { margin: 0; }
 .me-photo-save { justify-content: center; }
-.me-guard { justify-content: center; margin-top: 12px; }
+.me-guard { justify-content: center; margin: 4px 0 10px; }
 .me-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; background: none; border: 0; box-shadow: none; overflow: visible; }
 .me-stat { display: flex; align-items: center; gap: 8px; text-align: left; padding: 10px 12px; border: var(--bw) solid var(--line); border-right: var(--bw) solid var(--line);
   border-radius: 14px; background: rgba(255,255,255,.88); }

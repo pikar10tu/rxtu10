@@ -29,6 +29,9 @@ export function computeProgress(userData) {
     arenaChampTotal: u.arenaChampTotal || 0,
     pharmaTeamBest: u.minigames?.pharmaTeam?.best || 0,
     cosmeticsOwned: Array.isArray(u.cosmetics?.owned) ? u.cosmetics.owned.length : 0,
+    // ── ชุด 20 พ.ย. 2026 (อวาตาร์ + CC2) · dollSetsOwned ต้องรู้แคตตาล็อก → useAchievements เติม ──
+    dollOwned: Array.isArray(u.doll?.owned) ? u.doll.owned.length : 0,
+    cc2Cases: u.study?.cc2 && typeof u.study.cc2 === 'object' ? Object.keys(u.study.cc2).length : 0,
   }
 }
 

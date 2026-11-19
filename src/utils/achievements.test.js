@@ -103,3 +103,12 @@ test('progress ชุด 25 ก.ย.: เลเจนด์นับชนิด
   assert.equal(p.cosmeticsOwned, 2)
   assert.equal(computeProgress({}).gachaPullsTotal, 0)
 })
+
+test('progress ชุด 20 พ.ย.: อวาตาร์นับชิ้นที่ซื้อ · CC2 นับเคสที่ซ้อม · ไม่มีข้อมูล = 0', () => {
+  const p = computeProgress({ doll: { owned: ['f5', 'x13', 't9'] }, study: { cc2: { a: {}, b: {} } } })
+  assert.equal(p.dollOwned, 3)
+  assert.equal(p.cc2Cases, 2)
+  const z = computeProgress({})
+  assert.equal(z.dollOwned, 0)
+  assert.equal(z.cc2Cases, 0)
+})

@@ -58,7 +58,7 @@
           <Emoji char="🥚" /><b>อัญเชิญ</b>
         </RouterLink>
         <RouterLink to="/shop?tab=farm" class="shop s-farm"><Emoji char="🌾" /><b>ร้านฟาร์ม</b></RouterLink>
-        <RouterLink to="/shop?tab=style" class="shop s-style"><Emoji char="🎀" /><b>แต่งตัว</b></RouterLink>
+        <RouterLink to="/doll" class="shop s-style"><Emoji char="🎀" /><b>แต่งตัว</b></RouterLink>
       </div>
 
       <!-- ── มินิเกม (จาก registry data/minigames.js) — ซ่อนเมื่อ arcadeOpen ปิด ──

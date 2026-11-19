@@ -66,6 +66,16 @@ export const ACHIEVEMENTS = {
   cos_5: { title: 'สายแฟ', icon: '🎀', type: 'milestone', trigger: { stat: 'cosmeticsOwned', gte: 5 }, desc: 'มีของตกแต่ง 5 ชิ้น', flavor: 'แต่งตัวก่อนออกจากบ้าน' },
   cos_20: { title: 'แฟชั่นนิสต้า', icon: '💅', type: 'milestone', trigger: { stat: 'cosmeticsOwned', gte: 20 }, desc: 'มีของตกแต่ง 20 ชิ้น', flavor: 'ตู้เสื้อผ้าไม่พอแล้ว' },
   cos_legend: { title: 'ไอคอนแห่งรุ่น', icon: '✨', type: 'milestone', trigger: { stat: 'cosmeticLegend', gte: 1 }, desc: 'มีของตกแต่งระดับตำนาน', flavor: 'เดินผ่านทีไรคนหันมอง' },
+  // 🧍 อวาตาร์ + CC2 (20 พ.ย. 2026) — นับจาก user doc ตรงๆ ไม่มี read/write เพิ่ม
+  //    dollOwned = ชิ้นที่ซื้อ (ไม่นับของฟรี) · dollSetsOwned = มีครบเซ็ตสัตว์ (SETS) · cc2Cases = เคส CC2 ที่เคยซ้อม (study.cc2)
+  doll_1:   { title: 'ชุดแรกในตู้', icon: '👕', type: 'milestone', trigger: { stat: 'dollOwned', gte: 1 },  desc: 'ซื้อของแต่งอวาตาร์ชิ้นแรก', flavor: 'ส่องกระจกนานกว่าปกตินิดนึง' },
+  doll_15:  { title: 'ตู้เริ่มแน่น', icon: '👗', type: 'milestone', trigger: { stat: 'dollOwned', gte: 15 }, desc: 'มีของแต่งอวาตาร์ 15 ชิ้น', flavor: 'วันนี้ใส่ชุดไหนดี เลือกนานกว่าทำข้อสอบ' },
+  doll_40:  { title: 'เจ้าของห้องเสื้อ', icon: '🧥', type: 'milestone', trigger: { stat: 'dollOwned', gte: 40 }, desc: 'มีของแต่งอวาตาร์ 40 ชิ้น', flavor: 'เปิดร้านเช่าชุดได้แล้ว' },
+  doll_set: { title: 'คอสเพลย์ตัวจริง', icon: '🐸', type: 'milestone', trigger: { stat: 'dollSetsOwned', gte: 1 }, desc: 'มีชุดสัตว์ครบเซ็ต 1 เซ็ต', flavor: 'ใส่แล้วมีออร่าโบนัสด้วยนะ' },
+  doll_set3: { title: 'สวนสัตว์เดินได้', icon: '🐼', type: 'milestone', trigger: { stat: 'dollSetsOwned', gte: 3 }, desc: 'มีชุดสัตว์ครบ 3 เซ็ต', flavor: 'เปลี่ยนร่างได้ทุกวัน' },
+  cc2_5:    { title: 'ซ้อมเคาน์เตอร์', icon: '🩺', type: 'milestone', trigger: { stat: 'cc2Cases', gte: 5 },  desc: 'ซ้อมเคส CC2 ครบ 5 เคส', flavor: 'สวัสดีค่ะ/ครับ มีอะไรให้ช่วยไหม' },
+  cc2_20:   { title: 'เภสัชหน้าร้านมือโปร', icon: '💬', type: 'milestone', trigger: { stat: 'cc2Cases', gte: 20 }, desc: 'ซ้อมเคส CC2 ครบ 20 เคส', flavor: 'ซักประวัติคล่องจนคนไข้ยิ้ม' },
+  cc2_50:   { title: 'พร้อมสอบ OSPE', icon: '🎖️', type: 'milestone', trigger: { stat: 'cc2Cases', gte: 50 }, desc: 'ซ้อมเคส CC2 ครบ 50 เคส', flavor: 'กริ่งดังเมื่อไหร่ก็พร้อม' },
   // ── ลับ (กิมมิคตลก) — ปลดด้วย grantSecret() · ก่อนปลดไม่โชว์ที่ไหน (กริดโชว์แค่ของที่ได้) · user ขอ 25 ก.ย. 2026 ──
   gag_excited: { title: 'ตื่นเต้นล่ะสิ', icon: '😳', type: 'secret', desc: 'จิ้มนับถอยหลังวันสอบ 3 ครั้งรัวๆ', flavor: 'จิ้มแล้ววันสอบก็ไม่เลื่อนนะ' },
   gag_panic:   { title: 'PANIC ATTACK', icon: '😱', type: 'secret', desc: 'จิ้มนับถอยหลังวันสอบ 10 ครั้งรัวๆ', flavor: 'หายใจเข้า… หายใจออก…' },

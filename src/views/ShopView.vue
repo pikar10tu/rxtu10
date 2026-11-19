@@ -18,7 +18,7 @@
     <template v-else-if="authStore.isLoggedIn">
       <!-- หน้าร้านค้ารวม 3 ร้าน (25 ก.ย. 2026) — ร้านเพ็ท = อัญเชิญ + ห้องทดลองในหน้าเดียว -->
       <div class="stores" role="tablist">
-        <button v-for="s in STORES" :key="s.k" class="store" :class="['st-' + s.k, { on: tab === s.k }]" role="tab" :aria-selected="tab === s.k" @click="tab = s.k">
+        <button v-for="s in STORES" :key="s.k" class="store" :class="['st-' + s.k, { on: tab === s.k }]" role="tab" :aria-selected="tab === s.k" @click="s.k === 'style' ? $router.push('/doll') : (tab = s.k)">
           <span v-if="s.k === 'pet' && dustDot" class="nav-dot store-dot" aria-label="มีตัวซ้ำรอแปลงเป็นประกายดาว"></span>
           <span class="store-emoji"><Emoji :char="s.icon" /></span>
           <span class="store-name">{{ s.name }}</span>
@@ -143,7 +143,7 @@ const { syncRosterRow } = useRosterSync()
 const STORES = [
   { k: 'pet', icon: '🐾', name: 'ร้านเพ็ท', sub: 'อัญเชิญ · ประกายดาว' },
   { k: 'farm', icon: '🌱', name: 'ร้านฟาร์ม', sub: 'ปลดแปลงเพิ่ม' },
-  { k: 'style', icon: '🎀', name: 'ร้านตกแต่ง', sub: 'สีชื่อ · กรอบ · ป้าย' },
+  { k: 'style', icon: '👗', name: 'ห้องแต่งตัว', sub: 'อวาตาร์ · กรอบ · สีชื่อ' },   // 20 พ.ย. 2026: แตะแล้วไป #/doll เลย
 ]
 // ?tab=style|farm|pet (เดิม gacha/lab = ร้านเพ็ท) — ลิงก์จากหน้าฉัน/หน้าเกมชี้ร้านตรงได้
 const qTab = String(useRoute().query.tab || '')

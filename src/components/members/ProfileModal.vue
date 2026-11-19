@@ -6,12 +6,18 @@
       <!-- Tier 1: hero (residence art = the flex background) -->
       <div class="pf-hero" :class="{ 'pf-lightbg': cosBg && !cosBg.dark }" :style="heroStyle">
         <CosBg :id="cos.g" />
-        <button v-if="isMe" class="pf-deco" aria-label="ไปร้านตกแต่ง" @click="goShop"><Emoji char="🎀" /></button>
+        <button v-if="isMe" class="pf-deco" aria-label="ไปห้องแต่งตัว" @click="goShop"><Emoji char="🎀" /></button>
         <button class="pf-x" @click="$emit('close')">✕</button>
         <div class="pf-hero-art"><Emoji :char="tier.art" /></div>
-        <CosFrame :id="cos.f" class="pf-av-frame">
-          <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
-        </CosFrame>
+        <!-- โปรไฟล์แบบ B (20 พ.ย. 2026): รูป+กรอบ แล้วอวาตาร์ยืนข้าง · ของตัวเองแตะอวาตาร์ = ไปห้องแต่งตัว -->
+        <div class="pf-id">
+          <CosFrame :id="cos.f" class="pf-av-frame">
+            <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
+          </CosFrame>
+          <component :is="isMe ? 'button' : 'span'" class="pf-doll" :type="isMe ? 'button' : undefined" :aria-label="isMe ? 'ไปห้องแต่งตัว' : undefined" @click="isMe && goShop()">
+            <DollFigure :eq="dollEq" :scale="2" :label="`อวาตาร์ของ ${view.nickname || ''}`" />
+          </component>
+        </div>
         <div v-if="view.realName" class="pf-real">{{ view.realName }}</div>
         <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
         <div v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.74" :fit="22" /></div>
@@ -44,9 +50,10 @@
 
       <!-- Tier 2: stat strip (max 3, no coins) — การ์ดจิ๋วขอบหมึก+เงา เข้าชุดกับ AchievementGrid -->
       <div class="pf-stats">
-        <div class="pf-stat" style="background:rgba(255,176,32,.12)"><span><Emoji char="⚔️" /></span><b>{{ view.pvp?.wins || 0 }}</b><small>ชนะ (ซีซั่นนี้)</small></div>
-        <div class="pf-stat" style="background:rgba(45,168,255,.12)"><span><Emoji char="🏯" /></span><b>{{ view.towerBest || 0 }}</b><small>หอคอย</small></div>
-        <div class="pf-stat" style="background:rgba(23,195,154,.12)"><span><Emoji char="🐾" /></span><b>{{ (view.pets || []).length }}</b><small>สัตว์เลี้ยง</small></div>
+        <!-- 20 พ.ย. 2026: เรียน 2 ช่อง + เล่น 1 ช่อง (เดิมเกมล้วน ชนะ/หอคอย/เพ็ท) -->
+        <div class="pf-stat" style="background:rgba(45,168,255,.12)"><span><Emoji char="📝" /></span><b>{{ (view.quizDoneTotal || 0).toLocaleString() }}</b><small>ข้อสอบที่ทำ</small></div>
+        <div class="pf-stat" style="background:rgba(23,195,154,.12)"><span><Emoji char="🩺" /></span><b>{{ cc2Count }}</b><small>เคส CC2</small></div>
+        <div class="pf-stat" style="background:rgba(255,176,32,.12)"><span><Emoji char="⚔️" /></span><b>{{ (view.pvp?.rating || 1000).toLocaleString() }}</b><small>แต้มประลอง</small></div>
       </div>
 
       <!-- Tier 3: active team (tap to see stats) -->
@@ -99,6 +106,9 @@ import CosFrame from '../cosmetics/CosFrame.vue'
 import CosName from '../cosmetics/CosName.vue'
 import CosBg from '../cosmetics/CosBg.vue'
 import TitlePill from '../shared/TitlePill.vue'
+import DollFigure from '../doll/DollFigure.vue'
+import { dollOf } from '../../utils/doll.js'
+import { decodeDoll } from '../../utils/dollCode.js'
 import { cosOf } from '../../utils/cosmetics.js'
 import { getCosmetic } from '../../data/cosmetics.js'
 import { resolveShowcase, resolveTitle } from '../../utils/achievements.js'
@@ -161,6 +171,10 @@ const petPopup = ref(null)
 const cos = computed(() => full.value ? cosOf(full.value) : (props.member?.cosmetics || {}))
 const cosBg = computed(() => getCosmetic(cos.value.g))
 
+// 🧍 อวาตาร์: doc เต็มมีของจริง · ระหว่างรอใช้รหัสจากแถว roster (members.doll = dl) — ไม่มีจอว่าง
+const dollEq = computed(() => (full.value?.doll ? dollOf(full.value).eq : decodeDoll(props.member?.doll)))
+const cc2Count = computed(() => Object.keys(view.value?.study?.cc2 || {}).length)
+
 const lvl  = computed(() => view.value?.residence?.level || 1)
 const tier = computed(() => getTier(lvl.value))
 
@@ -199,7 +213,7 @@ const router = useRouter()
 const isMe = computed(() => !!view.value?.uid && view.value.uid === myUid.value)
 function goShop() {
   emit('close')
-  router.push('/shop?tab=style')
+  router.push('/doll')
 }
 
 const duelReplay = ref(null)
@@ -241,6 +255,10 @@ function startDuel() {
 /* พื้นการ์ดสีอ่อนจากร้าน → ตัวอักษรเข้ม (พื้นเดิมของ hero เข้ม ตัวอักษรขาว) */
 .pf-hero.pf-lightbg { color: var(--ink); }
 /* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
+.pf-id { display: flex; align-items: flex-end; justify-content: center; gap: 10px; }
+.pf-doll { display: inline-flex; padding: 0; margin-bottom: -4px; background: none; border: 0; filter: drop-shadow(0 2px 0 rgba(0,0,0,.12)); }
+button.pf-doll { cursor: pointer; transition: transform .15s; }
+button.pf-doll:active { transform: scale(.95); }
 .pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
 .pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 /* ทางลัดร้านตกแต่ง — เฉพาะโปรไฟล์ตัวเอง วางถัดจาก ✕ ในกลุ่มปุ่มเดียวกัน (ขอบ/ขนาด/สไตล์ชุดเดียวกับ pf-x) */

@@ -1,6 +1,7 @@
 import { watch } from 'vue'
 import { collection, getDocs, getDoc, doc, setDoc, serverTimestamp, increment } from 'firebase/firestore'
 import { getCosmetic } from '../data/cosmetics.js'
+import { SETS } from '../data/dollParts.js'
 import { db } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
@@ -43,6 +44,7 @@ async function loadReviewedCount(uid) {
 const progressOf = (u) => ({
   ...computeProgress(u),
   cosmeticLegend: (u?.cosmetics?.owned || []).filter(id => getCosmetic(id)?.tier === 4).length,
+  dollSetsOwned: SETS.filter(set => set.parts.every(id => (u?.doll?.owned || []).includes(id))).length,
   reviewedCount,
   // มาจาก likes/board ที่กระดานข่าวโหลดอยู่แล้ว ⇒ read เพิ่ม 0 · ยังไม่เปิดกระดาน = 0 (ไม่ปลด ไม่ใช่ปลดผิด)
   likesReceived: useNewsLikes().board.value.recv?.[u?.uid || useAuthStore().currentUser?.uid] || 0,
