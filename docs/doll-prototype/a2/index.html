@@ -1,0 +1,541 @@
+<title>ตู้เสื้อผ้าตุ๊กตา</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Sarabun:wght@400;600;700&display=swap">
+<style>
+/* Layout: แถบบนเหรียญ (จำลอง) → เวทีตัวละคร → แท็บช่อง → ตารางชิ้น → ปุ่มล่าง · หน้าตาเลียนแบบ DollView.vue ในเว็บ */
+:root{
+  --bg:#f7f9fd; --surface:#ffffff; --ink:#2b3550; --muted:#6b7590; --line:#dde5f0;
+  --primary:#3593cf; --primary-2:#62b6e6; --primary-light:#e6f2fb; --primary-dark:#1f6fa3; --gold:#b7791f;
+  --pop:0 2px 8px rgba(43,53,80,.08);
+  --f-disp:"Mitr",system-ui,sans-serif; --f-body:"Sarabun",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171f;--surface:#20232e;--ink:#e8ecf6;--muted:#a3abc0;--line:#323747;--primary-light:#1d3346;--primary-dark:#8ccaf2;--gold:#f2c76b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15171f;--surface:#20232e;--ink:#e8ecf6;--muted:#a3abc0;--line:#323747;--primary-light:#1d3346;--primary-dark:#8ccaf2;--gold:#f2c76b;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.app{max-width:520px;margin:0 auto;padding-block:14px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px;min-height:100%}
+.banner{font-size:.78rem;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:8px 12px}
+.top{display:flex;align-items:center;gap:10px}
+.top h1{flex:1;margin:0;font-family:var(--f-disp);font-weight:600;font-size:1.2rem}
+.coins{font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.coins button{font:inherit;font-size:.72rem;margin-left:6px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:2px 8px;cursor:pointer}
+.stage{display:grid;justify-items:center;gap:4px;padding:14px 10px 10px;border-radius:22px;background:linear-gradient(160deg,#e3effb,#fff 60%,#fde2ee);border:1px solid var(--line);box-shadow:var(--pop)}
+.note{font-size:.74rem;color:#6b7590;font-weight:700}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px}
+.tab{flex:none;font:inherit;font-size:.8rem;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:6px 12px;cursor:pointer}
+.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.tab.cov:not(.on){opacity:.55}
+.hint{margin:0;font-size:.76rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;padding-bottom:8px}
+.item{font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;cursor:pointer;color:var(--ink)}
+.item.sel{border-color:var(--primary);box-shadow:0 0 0 3px rgba(53,147,207,.18);background:var(--primary-light)}
+.item canvas{background:#eef4fb;border-radius:8px}
+.none{height:104px;display:grid;place-items:center;font-size:.82rem;font-weight:700;color:var(--muted)}
+.nm{font-size:.74rem;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
+.price{font-size:.76rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.st{font-size:.72rem;font-weight:800;color:var(--muted)}
+.st.on{color:var(--primary-dark)}
+.colors{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.color{font:inherit;height:56px;border-radius:14px;border:2px solid var(--line);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding:4px}
+.color.sel{border-color:var(--primary);box-shadow:0 0 0 3px rgba(53,147,207,.22)}
+.color span{font-size:.72rem;font-weight:700;background:rgba(255,255,255,.88);color:#2b3550;border-radius:999px;padding:0 6px}
+.dock{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,var(--bg) 72%,transparent)}
+.btn{flex:1;font:inherit;font-size:.92rem;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-2));border:0;border-radius:14px;padding:13px 10px;cursor:pointer;box-shadow:var(--pop)}
+.btn.ghost{flex:0 0 auto;color:var(--primary-dark);background:var(--surface);border:1px solid var(--line)}
+.btn:disabled{background:#cbd5e1;cursor:default}
+.btn:focus-visible,.item:focus-visible,.tab:focus-visible,.color:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.sheet{position:fixed;inset:0;background:rgba(20,24,36,.45);display:grid;place-items:end center;padding:16px;z-index:20}
+.sheet[hidden]{display:none!important}
+.sheet .card{background:var(--surface);border-radius:18px;padding:16px;max-width:480px;width:100%;display:grid;gap:12px;margin-bottom:env(safe-area-inset-bottom,0px)}
+.sheet p{margin:0;white-space:pre-line}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2b3550;color:#fff;padding:8px 14px;border-radius:999px;font-size:.85rem;z-index:30}
+.toast[hidden]{display:none!important}
+</style>
+
+<div class="app">
+  <div class="banner">หน้าจำลองบน artifact · ใช้โค้ดเรนเดอร์และตรรกะตู้เสื้อผ้าชุดเดียวกับเว็บจริง · เหรียญเป็นของปลอม ซื้อแล้วไม่มีผลกับบัญชีจริง</div>
+  <div class="top"><h1>ตู้เสื้อผ้า</h1><span class="coins">🪙 <span id="coins"></span><button id="refill" type="button">เติมเหรียญปลอม</button></span></div>
+  <div class="stage"><canvas id="main"></canvas><div class="note" id="note"></div></div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <p class="hint" id="hint" hidden>ชุดเต็มตัวที่ลองอยู่บังช่องนี้ · เลือกชิ้นในนี้ = ถอดชุดเต็มตัวออก</p>
+  <div id="body"></div>
+  <div class="dock" id="dock" hidden>
+    <button class="btn ghost" id="reset" type="button">ย้อนกลับ</button>
+    <button class="btn" id="act" type="button"></button>
+  </div>
+</div>
+<div class="sheet" id="sheet" hidden><div class="card"><p id="ask"></p><div style="display:flex;gap:8px"><button class="btn ghost" id="no" type="button">ยกเลิก</button><button class="btn" id="yes" type="button">ยืนยัน</button></div></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// 🧍 RxTU10 doll — แคตตาล็อกชิ้นส่วน (ยกจาก docs/doll-prototype/doll.js 18 พ.ย. 2026)
+// กรอบ 40x44 · แกนสะท้อน x' = 39 - x · op: ['r', x, y, w, h, ch] | ['p', x, y, 'string']
+// id สั้นและห้ามเปลี่ยนหลังปล่อย (ขี่ไปกับรหัส dl ใน roster)
+// ⚠️ แก้ตัวฐาน BASE = กระทบทุกชิ้น → รัน node --test src/utils/dollRender.test.js ทุกครั้ง
+// 18 พ.ย.: แขนยาวขึ้น 1 แถว (มือแถว 26–27) user เลือกแบบ B · ชุด/กระโปรงทับมือได้เพราะ base วาดก่อนเสื้อผ้าเสมอ
+const W = 40, H = 44, PAD = 4;
+const R = (x, y, w, h, c) => ['r', x, y, w, h, c];
+const P = (x, y, s) => ['p', x, y, s];
+
+const INK = '#3A2E2A';
+const SKINS = [
+  { id: 's1', label: 'ขาวอมชมพู', S: '#FFE3CF', s: '#F5C9AE' },
+  { id: 's2', label: 'ผิวพีช', S: '#FFD9BF', s: '#F2BFA0' },
+  { id: 's3', label: 'สองสี', S: '#EDBB92', s: '#D9A077' },
+  { id: 's4', label: 'ผิวแทน', S: '#C98E64', s: '#AE754E' },
+  { id: 's5', label: 'ผิวเข้ม', S: '#8E5B3D', s: '#74472E' },
+];
+const HAIRC = [
+  { id: 'c1', label: 'ดำ', H: '#2F2A3A', h: '#1F1B28', L: '#4A4458' },
+  { id: 'c2', label: 'น้ำตาล', H: '#7A4B2A', h: '#5E3820', L: '#A8703F' },
+  { id: 'c3', label: 'บลอนด์', H: '#F2D27A', h: '#D9B25A', L: '#FFF0B8' },
+  { id: 'c4', label: 'ชมพู', H: '#F29BB5', h: '#D97C99', L: '#FBC8D7' },
+  { id: 'c5', label: 'ม่วง', H: '#8A6BC0', h: '#6B4E9B', L: '#B49BE0' },
+  { id: 'c6', label: 'ฟ้า', H: '#6BB8E8', h: '#4A93C4', L: '#A8DAF7' },
+  { id: 'c7', label: 'เงิน', H: '#C9C4D9', h: '#A39DB8', L: '#EDEAF5' },
+  { id: 'c8', label: 'แดง', H: '#D9533F', h: '#B03D2C', L: '#F08A6E' },
+];
+
+const SLOTS = [
+  { k: 'h', label: 'ทรงผม' }, { k: 'e', label: 'ตา' }, { k: 'm', label: 'ปาก' },
+  { k: 't', label: 'เสื้อ/ชุด' }, { k: 'b', label: 'ท่อนล่าง' }, { k: 'k', label: 'รองเท้า' },
+  { k: 'o', label: 'เสื้อคลุม' }, { k: 'x', label: 'หมวก' }, { k: 'a', label: 'หน้า' },
+  { k: 'i', label: 'ในมือ' }, { k: 'w', label: 'ปีก/หลัง' },
+];
+const THEMES = { basic: 'พื้นฐาน', fashion: 'แฟชั่น', uniform: 'ยูนิฟอร์ม', fantasy: 'แฟนซี', cute: 'น่ารัก', sport: 'กีฬา' };
+
+// ── shared shapes ──
+const BASE = { m: [
+  P(16, 4, 'SSSS'), P(15, 5, 'SSSSS'), R(14, 6, 6, 8, 'S'), P(15, 14, 'SSSSS'), P(16, 15, 'SSSS'),
+  R(13, 9, 1, 2, 'S'), R(18, 16, 2, 1, 's'),
+  P(15, 17, 'SSSSS'), R(14, 18, 6, 9, 'S'), R(12, 18, 2, 8, 'S'), R(12, 26, 2, 2, 's'),
+  R(16, 27, 3, 12, 'S'), R(15, 39, 4, 2, 'S'), R(15, 12, 2, 1, 'C'),
+] };
+const FRINGE = [P(16, 3, 'HHHH'), P(15, 4, 'HHHHH'), R(14, 5, 6, 2, 'H'), P(14, 7, 'HHHHH'), P(14, 8, 'HH'), R(13, 6, 1, 5, 'H')];
+const TEE = [P(15, 17, 'TTTTT'), R(14, 18, 6, 9, 'T'), R(12, 18, 2, 4, 'T'), R(14, 18, 1, 9, 't'), R(12, 21, 2, 1, 't')];
+const TEE_O = [P(18, 17, 'SSSS')];
+const LONG = [P(15, 17, 'TTTTT'), R(14, 18, 6, 9, 'T'), R(12, 18, 2, 8, 'T'), R(14, 18, 1, 9, 't'), R(12, 25, 2, 1, 't')];
+const PANTS = [R(14, 27, 6, 2, 'P'), R(16, 29, 3, 10, 'P'), R(16, 29, 1, 10, 'p')];
+const SKIRT = [R(14, 27, 6, 1, 'p'), R(13, 28, 7, 2, 'P'), R(12, 30, 8, 2, 'P'), R(12, 31, 8, 1, 'p')];
+const BOOT = [R(15, 35, 4, 5, 'B'), R(15, 40, 4, 1, 'b'), R(15, 35, 4, 1, 'b')];
+
+const I = (id, slot, theme, label, d) => ({ id, slot, theme, label, ...d });
+
+const PARTS = [
+  // ── ตา ──
+  I('e1', 'e', 'basic', 'ตาจุด', { m: [R(17, 9, 1, 2, 'K')] }),
+  I('e2', 'e', 'basic', 'ตาโตวิบวับ', { m: [R(16, 9, 2, 3, 'K'), R(17, 11, 1, 1, 'I')], o: [R(16, 9, 1, 1, 'W'), R(22, 9, 1, 1, 'W')], pal: { I: '#4FA3D9' } }),
+  I('e3', 'e', 'basic', 'ตายิ้ม', { m: [P(17, 9, 'K'), P(16, 10, 'K.K')] }),
+  I('e4', 'e', 'basic', 'ตาง่วง', { m: [R(16, 10, 3, 1, 'K')] }),
+  I('e5', 'e', 'fashion', 'ตาขนตายาว', { m: [R(17, 9, 1, 2, 'K'), P(16, 8, 'K')] }),
+  I('e6', 'e', 'cute', 'ขยิบตา', { o: [R(17, 9, 1, 2, 'K'), P(22, 9, 'K'), P(21, 10, 'K.K')] }),
+  I('e7', 'e', 'fantasy', 'ตาดาว', { m: [P(17, 9, 'Y'), P(16, 10, 'YYY'), P(17, 11, 'Y')], pal: { Y: '#F6C453' } }),
+  I('e8', 'e', 'fantasy', 'ตาแดงปีศาจ', { m: [R(16, 9, 2, 3, 'K'), R(16, 10, 2, 1, 'R')], o: [R(16, 9, 1, 1, 'W'), R(22, 9, 1, 1, 'W')], pal: { R: '#E0524A' } }),
+  // ── ปาก ──
+  I('m1', 'm', 'basic', 'ยิ้ม', { o: [P(19, 13, 'MM')] }),
+  I('m2', 'm', 'basic', 'อ้าปากหัวเราะ', { o: [P(18, 13, 'MMMM'), P(19, 14, 'MM')] }),
+  I('m3', 'm', 'cute', 'ปากแมว', { o: [P(18, 12, 'K..K'), P(19, 13, 'KK')] }),
+  I('m4', 'm', 'cute', 'แลบลิ้น', { o: [P(19, 13, 'KK'), P(20, 14, 'M')] }),
+  I('m5', 'm', 'basic', 'เฉย', { o: [P(19, 13, 'KK')] }),
+  I('m6', 'm', 'fantasy', 'เขี้ยว', { o: [P(18, 13, 'MMMM'), P(18, 14, 'W..W')] }),
+  // ── ผม ──
+  I('h1', 'h', 'basic', 'สั้น', { m: FRINGE, o: [P(16, 4, 'LL')] }),
+  I('h2', 'h', 'basic', 'ยาวตรง', { m: [...FRINGE, R(12, 6, 2, 13, 'H'), R(12, 19, 2, 1, 'h')], back: [R(14, 8, 6, 12, 'h')], o: [P(16, 4, 'LL')] }),
+  I('h3', 'h', 'fashion', 'บ๊อบ', { m: [...FRINGE, R(13, 6, 2, 8, 'H'), R(13, 14, 2, 1, 'h')], o: [P(16, 4, 'LL'), P(22, 5, 'L')] }),
+  I('h4', 'h', 'cute', 'แกละสองข้าง', { m: FRINGE, back: [R(11, 6, 2, 2, 'R'), R(8, 8, 3, 9, 'H'), R(9, 17, 2, 2, 'h')], o: [P(16, 4, 'LL')], pal: { R: '#E0524A' } }),
+  I('h5', 'h', 'fashion', 'ดังโงะ', { m: [...FRINGE, P(17, 0, 'HHH'), P(16, 1, 'HHHH'), P(17, 2, 'HHH')], o: [P(17, 1, 'L'), P(16, 4, 'LL')] }),
+  I('h6', 'h', 'basic', 'ฟูชี้', { m: [P(15, 1, 'H..'), P(15, 2, 'HH.H'), P(14, 3, 'HHHHHH'), P(15, 4, 'HHHHH'), R(14, 5, 6, 2, 'H'), P(14, 7, 'H.HH.'), R(13, 6, 1, 3, 'H')], o: [P(16, 4, 'LL')] }),
+  I('h7', 'h', 'fashion', 'หางม้า', { m: FRINGE, back: [], o: [P(16, 4, 'LL')], ob: [R(26, 6, 2, 3, 'H'), R(27, 9, 3, 9, 'H'), R(28, 18, 2, 2, 'h'), R(26, 7, 1, 1, 'R')], pal: { R: '#F29BB5' } }),
+  I('h8', 'h', 'fashion', 'ลอนฟู', { m: [P(15, 1, 'HHHHH'), P(13, 2, 'HHHHHHH'), R(12, 3, 8, 4, 'H'), R(12, 7, 3, 6, 'H'), P(15, 7, 'H.H.H'), R(12, 13, 2, 2, 'h')], o: [P(15, 2, 'LL'), P(23, 3, 'L')] }),
+  I('h9', 'h', 'basic', 'เกรียน', { m: [P(16, 4, 'hhhh'), P(15, 5, 'hhhhh'), R(14, 6, 1, 3, 'h')] }),
+  I('h10', 'h', 'fashion', 'ปัดข้าง', { o: [P(16, 3, 'HHHHHHHH'), P(15, 4, 'HHHHHHHHHH'), R(14, 5, 12, 2, 'H'), P(14, 7, 'HHHHHHH....H'), P(14, 8, 'HHHHH......H'), P(14, 9, 'HHH'), R(13, 6, 1, 6, 'H'), R(26, 6, 1, 4, 'H'), P(17, 4, 'LL')] }),
+  // ── เสื้อ ──
+  I('t1', 't', 'basic', 'ยืดขาว', { m: TEE, o: TEE_O, pal: { T: '#F4F4F4', t: '#D9DEE8' } }),
+  I('t2', 't', 'basic', 'ยืดมิ้นต์', { m: TEE, o: TEE_O, pal: { T: '#9ED9BF', t: '#7FC1A4' } }),
+  I('t3', 't', 'basic', 'ยืดชมพู', { m: TEE, o: TEE_O, pal: { T: '#F7B6C8', t: '#E89AB0' } }),
+  I('t4', 't', 'fashion', 'ลายขวาง', { m: TEE, o: [...TEE_O, R(14, 19, 12, 1, 'u'), R(14, 21, 12, 1, 'u'), R(14, 23, 12, 1, 'u'), R(14, 25, 12, 1, 'u')], pal: { T: '#F4F4F4', t: '#D9DEE8', u: '#4A6FA5' } }),
+  I('t5', 't', 'uniform', 'เชิ้ตนักศึกษา', { m: [...TEE, P(17, 17, 'W')], o: [P(18, 17, 'SSSS'), R(19, 18, 2, 1, 'N'), R(19, 19, 2, 5, 'N'), P(19, 24, 'N.')], pal: { T: '#FFFFFF', t: '#D9DEE8', W: '#EEF1F6', N: '#2F3A5F' } }),
+  I('t6', 't', 'fashion', 'ฮู้ดดี้', { m: [...LONG, P(15, 16, 'TT'), R(16, 23, 4, 3, 't')], o: [R(18, 18, 1, 3, 'W'), R(21, 18, 1, 3, 'W')], pal: { T: '#B49BE0', t: '#957AC6' } }),
+  I('t7', 't', 'cute', 'สเวตเตอร์หัวใจ', { m: LONG, o: [P(18, 17, 'SSSS'), P(17, 20, 'RR..RR'), P(17, 21, 'RRRRRR'), P(18, 22, 'RRRR'), P(19, 23, 'RR')], pal: { T: '#FCE3D2', t: '#EBC7B0', R: '#E0524A' } }),
+  I('t8', 't', 'fashion', 'กะลาสี', { m: [...TEE, P(14, 17, 'NNNNN'), P(14, 18, 'NNNN')], o: [R(19, 19, 2, 2, 'R')], pal: { T: '#FFFFFF', t: '#D9DEE8', N: '#2F3A5F', R: '#E0524A' } }),
+  I('t9', 't', 'sport', 'เสื้อกีฬาเบอร์ 10', { m: TEE, o: [...TEE_O, R(16, 20, 1, 4, 'W'), R(19, 20, 3, 1, 'W'), R(19, 23, 3, 1, 'W'), R(19, 20, 1, 4, 'W'), R(21, 20, 1, 4, 'W')], pal: { T: '#4FA3D9', t: '#3A7FB0' } }),
+  I('t10', 't', 'uniform', 'ชุดสครับ', { m: TEE, o: [P(18, 17, 'SSSS'), P(19, 18, 'SS'), R(15, 20, 3, 2, 't')], pal: { T: '#7FC8B5', t: '#5FAE9A' } }),
+  I('t11', 't', 'fashion', 'ครอปท็อป', { m: [P(15, 17, 'TTTTT'), R(14, 18, 6, 5, 'T'), R(12, 18, 2, 3, 'T'), R(14, 22, 6, 1, 't')], o: TEE_O, pal: { T: '#F6C453', t: '#E0AC3A' } }),
+  I('t12', 't', 'basic', 'เสื้อกล้าม', { m: [R(15, 17, 2, 1, 'T'), R(14, 18, 6, 9, 'T'), R(14, 18, 1, 9, 't')], pal: { T: '#E8EBF2', t: '#C3CAD8' } }),
+  // ── ชุดเต็มตัว ──
+  I('f1', 't', 'fashion', 'เดรสชมพู', { full: true, m: [P(15, 17, 'TTTTT'), R(14, 18, 6, 6, 'T'), R(12, 18, 2, 3, 'T'), R(14, 24, 6, 1, 'u'), R(14, 25, 6, 2, 'T'), R(13, 27, 7, 1, 'T'), R(12, 28, 8, 4, 'T'), R(12, 32, 8, 1, 't')], o: TEE_O, pal: { T: '#F7B6C8', t: '#E89AB0', u: '#FFFFFF' } }),
+  I('f2', 't', 'uniform', 'ครุยรับปริญญา', { full: true, m: [R(14, 17, 6, 20, 'G'), R(12, 18, 2, 8, 'G'), R(13, 26, 7, 11, 'G'), R(12, 36, 8, 1, 'g'), P(17, 17, 'Y'), P(18, 18, 'Y')], pal: { G: '#2B2B33', g: '#1E1E25', Y: '#F6C453' } }),
+  I('f3', 't', 'fantasy', 'ชุดนางฟ้า', { full: true, m: [P(15, 17, 'TTTTT'), R(14, 18, 6, 7, 'T'), R(12, 18, 2, 2, 'T'), R(14, 25, 6, 1, 'Y'), R(13, 26, 7, 4, 'T'), R(12, 30, 8, 4, 'u'), R(12, 34, 8, 1, 't')], o: [...TEE_O, P(16, 28, 'Y'), P(22, 31, 'Y'), P(14, 32, 'Y')], pal: { T: '#FFFFFF', t: '#D9DEE8', u: '#F7E3EC', Y: '#F6C453' } }),
+  I('f4', 't', 'cute', 'ชุดเมด', { full: true, m: [P(15, 17, 'TTTTT'), R(14, 18, 6, 9, 'T'), R(12, 18, 2, 4, 'W'), R(13, 27, 7, 1, 'T'), R(12, 28, 8, 4, 'T'), R(12, 32, 8, 1, 'W'), R(16, 20, 4, 1, 'W'), R(16, 21, 4, 10, 'W'), R(16, 30, 4, 1, 'G')], o: [R(19, 17, 2, 2, 'R')], pal: { T: '#2F2A3A', t: '#1F1B28', W: '#FFFFFF', G: '#D9DEE8', R: '#E0524A' } }),
+  I('f5', 't', 'cute', 'ชุดหมีกบ', { full: true, m: [...LONG, R(14, 27, 6, 2, 'T'), R(16, 29, 3, 10, 'T'), R(16, 29, 1, 10, 't'), R(16, 20, 4, 6, 'u')], o: TEE_O, pal: { T: '#7FC86B', t: '#5FAA4E', u: '#E9F5C9' } }),
+  I('f6', 't', 'fantasy', 'ชุดฮีโร่', { full: true, m: [...LONG, R(14, 27, 6, 2, 'R'), R(16, 29, 3, 10, 'T'), R(16, 29, 1, 10, 't'), R(14, 26, 6, 1, 'Y')], o: [P(18, 17, 'TTTT'), P(18, 20, 'YYYY'), P(18, 21, 'Y..Y'), P(18, 22, 'YYYY'), P(19, 23, 'YY')], pal: { T: '#4A6FC9', t: '#3A55A0', R: '#E0524A', Y: '#F6C453' } }),
+  I('f7', 't', 'fashion', 'ชุดยูกาตะ', { full: true, m: [R(14, 17, 6, 20, 'T'), R(11, 18, 3, 8, 'T'), R(11, 25, 3, 1, 't'), R(13, 27, 7, 10, 'T'), R(13, 36, 7, 1, 't'), R(14, 23, 6, 2, 'O')], o: [P(18, 17, 'S'), P(19, 18, 'S'), P(21, 17, 'S'), P(16, 29, 'F'), P(22, 33, 'F'), P(15, 19, 'F')], pal: { T: '#6BB8E8', t: '#4A93C4', O: '#F29BB5', F: '#FFFFFF' } }),
+  I('f8', 't', 'fashion', 'เอี๊ยมยีนส์', { full: true, m: [...TEE, R(16, 18, 1, 4, 'P'), R(16, 22, 4, 5, 'P'), ...PANTS], o: [...TEE_O, R(18, 23, 4, 2, 'p'), P(16, 21, 'Y')], pal: { T: '#F6C453', t: '#E0AC3A', P: '#4A6FA5', p: '#3A5683', Y: '#F4F4F4' } }),
+  // ── ท่อนล่าง ──
+  I('b1', 'b', 'basic', 'ยีนส์', { m: PANTS, pal: { P: '#4A6FA5', p: '#3A5683' } }),
+  I('b2', 'b', 'uniform', 'สแล็คดำ', { m: PANTS, pal: { P: '#2F3A5F', p: '#232C4A' } }),
+  I('b3', 'b', 'basic', 'ขาสั้น', { m: [R(14, 27, 6, 2, 'P'), R(15, 29, 4, 3, 'P'), R(15, 31, 4, 1, 'p')], pal: { P: '#D9C49A', p: '#BFA87D' } }),
+  I('b4', 'b', 'uniform', 'กระโปรงพลีท', { m: SKIRT, o: [R(15, 28, 1, 4, 'p'), R(18, 28, 1, 4, 'p'), R(21, 28, 1, 4, 'p'), R(24, 28, 1, 4, 'p')], pal: { P: '#2F3A5F', p: '#232C4A' } }),
+  I('b5', 'b', 'fashion', 'กระโปรงลายสก็อต', { m: SKIRT, o: [R(12, 29, 16, 1, 'u'), R(15, 28, 1, 4, 'u'), R(20, 28, 1, 4, 'u'), R(24, 28, 1, 4, 'u')], pal: { P: '#E0524A', p: '#B53B35', u: '#3A2E2A' } }),
+  I('b6', 'b', 'fashion', 'คาร์โก้', { m: [...PANTS, R(15, 31, 2, 3, 'p')], pal: { P: '#8A9A5B', p: '#6E7D45' } }),
+  I('b7', 'b', 'sport', 'กางเกงวอร์ม', { m: [...PANTS, R(18, 29, 1, 10, 'W'), R(16, 37, 3, 2, 'p')], pal: { P: '#8A8FA3', p: '#6E7388', W: '#FFFFFF' } }),
+  I('b8', 'b', 'fashion', 'กระโปรงยาว', { m: [R(14, 27, 6, 1, 'p'), R(13, 28, 7, 5, 'P'), R(12, 33, 8, 4, 'P'), R(12, 36, 8, 1, 'p')], pal: { P: '#B49BE0', p: '#957AC6' } }),
+  // ── รองเท้า ──
+  I('k1', 'k', 'basic', 'ผ้าใบขาว', { m: [R(15, 39, 4, 2, 'W'), R(15, 40, 4, 1, 'G'), P(16, 39, 'R')], pal: { G: '#C3CAD8', R: '#E0524A' } }),
+  I('k2', 'k', 'fashion', 'บูทหนัง', { m: BOOT, pal: { B: '#7A5C3E', b: '#5A4430' } }),
+  I('k3', 'k', 'uniform', 'คัทชูดำ', { m: [R(15, 39, 4, 2, 'B'), R(15, 40, 4, 1, 'b')], pal: { B: '#2B2B33', b: '#1E1E25' } }),
+  I('k4', 'k', 'cute', 'สลิปเปอร์ขนฟู', { m: [R(14, 39, 5, 2, 'B'), R(14, 40, 5, 1, 'b'), P(15, 39, 'W')], pal: { B: '#F7B6C8', b: '#E89AB0' } }),
+  I('k5', 'k', 'cute', 'บูทกันฝน', { m: BOOT, pal: { B: '#F6C453', b: '#E0AC3A' } }),
+  I('k6', 'k', 'fashion', 'ส้นสูงแดง', { m: [R(15, 39, 4, 1, 'B'), R(15, 40, 1, 1, 'b'), R(18, 40, 1, 1, 'B')], pal: { B: '#E0524A', b: '#B53B35' } }),
+  I('k7', 'k', 'sport', 'สตั๊ด', { m: [R(15, 39, 4, 2, 'B'), P(15, 40, 'W.W.')], pal: { B: '#2B2B33', W: '#F6C453' } }),
+  // ── เสื้อคลุม ──
+  I('o1', 'o', 'uniform', 'เสื้อกาวน์', { m: [P(14, 17, 'WWW'), R(14, 18, 4, 16, 'W'), R(12, 18, 2, 8, 'W'), R(17, 18, 1, 16, 'G'), R(14, 33, 4, 1, 'G')], o: [R(15, 25, 2, 2, 'G'), R(23, 21, 1, 2, 'B')], pal: { W: '#FFFFFF', G: '#D9DEE8', B: '#4FA3D9' } }),
+  I('o2', 'o', 'fashion', 'คาร์ดิแกน', { m: [P(14, 17, 'TT'), R(14, 18, 3, 9, 'T'), R(12, 18, 2, 8, 'T'), R(16, 18, 1, 9, 't'), R(12, 25, 2, 1, 't')], pal: { T: '#F2D27A', t: '#D9B25A' } }),
+  I('o3', 'o', 'fashion', 'แจ็กเก็ตหนัง', { m: [P(14, 17, 'TTTT'), R(14, 18, 4, 9, 'T'), R(12, 18, 2, 8, 'T'), R(17, 18, 1, 9, 't'), R(14, 26, 4, 1, 't'), P(16, 18, 'u')], pal: { T: '#4A3A34', t: '#2F2420', u: '#C3CAD8' } }),
+  I('o4', 'o', 'sport', 'แจ็กเก็ตทีม', { m: [P(14, 17, 'TTTT'), R(14, 18, 4, 9, 'T'), R(12, 18, 2, 8, 'W'), R(12, 25, 2, 1, 'G'), R(14, 26, 4, 1, 'u')], o: [P(15, 20, 'YY'), P(15, 21, 'Y.')], pal: { T: '#E0524A', t: '#B53B35', W: '#FFFFFF', G: '#D9DEE8', u: '#FFFFFF', Y: '#F6C453' } }),
+  I('o5', 'o', 'cute', 'ผ้าพันคอ', { m: [R(15, 16, 5, 2, 'R'), R(15, 17, 5, 1, 'r')], o: [R(21, 18, 2, 5, 'R'), R(21, 22, 2, 1, 'r')], pal: { R: '#E0524A', r: '#B53B35' } }),
+  // ── หมวก ──
+  I('x1', 'x', 'basic', 'แก๊ปแดง', { m: [P(15, 3, 'QQQQQ'), R(14, 4, 6, 3, 'Q')], o: [R(13, 7, 14, 1, 'q'), P(19, 4, 'WW')], pal: { Q: '#E0524A', q: '#B53B35' } }),
+  I('x2', 'x', 'cute', 'บีนนี่ปอมปอม', { m: [P(16, 2, 'BBBB'), P(15, 3, 'BBBBB'), R(14, 4, 6, 3, 'B'), R(13, 6, 7, 2, 'b')], o: [P(19, 0, 'WW'), P(18, 1, 'WWWW')], pal: { B: '#7FC8A9', b: '#5FAE8D' } }),
+  I('x3', 'x', 'fantasy', 'มงกุฎ', { m: [P(15, 0, 'Y..Y'), P(15, 1, 'YY.YY'), R(15, 2, 5, 2, 'Y'), R(15, 3, 5, 1, 'y')], o: [P(19, 2, 'RR'), P(16, 2, 'G'), P(23, 2, 'G')], pal: { Y: '#F6C453', y: '#D9A23A', R: '#E0524A', G: '#4FA3D9' } }),
+  I('x4', 'x', 'fantasy', 'หมวกแม่มด', { o: [P(22, 0, 'VV'), P(20, 1, 'VVVV'), P(19, 2, 'VVVV'), P(18, 3, 'VVVVV'), P(16, 4, 'VVVVVVVV'), P(15, 5, 'vvvvvvvvvv'), R(11, 6, 18, 2, 'V'), R(11, 7, 18, 1, 'w')], pal: { V: '#5B4585', w: '#45346A', v: '#F6C453' } }),
+  I('x5', 'x', 'cute', 'หูแมว', { m: [P(14, 1, 'H'), P(14, 2, 'HH'), P(14, 3, 'HPH')], pal: { P: '#F7B6C8' } }),
+  I('x6', 'x', 'cute', 'หูกระต่าย', { m: [R(15, 0, 2, 4, 'W'), R(16, 1, 1, 2, 'P')], pal: { W: '#FFFFFF', P: '#F7B6C8' } }),
+  I('x7', 'x', 'fantasy', 'วงแหวนนางฟ้า', { m: [P(16, 0, 'YYYY'), P(15, 1, 'Y')], pal: { Y: '#F6C453' } }),
+  I('x8', 'x', 'fantasy', 'เขาปีศาจ', { m: [P(14, 1, 'R'), P(14, 2, 'RR'), P(15, 3, 'RR')], pal: { R: '#E0524A' } }),
+  I('x9', 'x', 'uniform', 'หมวกบัณฑิต', { m: [R(11, 2, 9, 1, 'G'), P(13, 3, 'GGGGGGG'), R(14, 4, 6, 2, 'G')], o: [R(27, 2, 1, 4, 'Y'), R(26, 6, 2, 1, 'Y')], pal: { G: '#2B2B33', Y: '#F6C453' } }),
+  I('x10', 'x', 'uniform', 'หมวกพยาบาล', { m: [P(16, 2, 'WWWW'), P(15, 3, 'WWWWW')], o: [R(19, 1, 2, 3, 'R'), R(18, 2, 4, 1, 'R')], pal: { W: '#FFFFFF', R: '#E0524A' } }),
+  I('x11', 'x', 'fashion', 'มงกุฎดอกไม้', { o: [P(14, 4, 'FGYGFGYGFGYF'), P(15, 3, 'F..Y..F..Y')], pal: { F: '#F29BB5', G: '#7FC8A9', Y: '#F6C453' } }),
+  I('x12', 'x', 'basic', 'หูฟัง', { o: [P(15, 2, 'KKKKKKKKKK'), P(14, 3, 'K'), P(25, 3, 'K'), R(13, 4, 1, 4, 'K'), R(26, 4, 1, 4, 'K')], m: [R(12, 8, 2, 4, 'A')], pal: { A: '#E0524A' } }),
+  I('x13', 'x', 'cute', 'ฮู้ดกบ', { m: [P(15, 1, 'GG'), P(15, 2, 'GKG'), P(16, 3, 'GGGG'), R(14, 4, 6, 3, 'G'), R(13, 6, 2, 8, 'G'), R(13, 13, 2, 1, 'g')], pal: { G: '#7FC86B', g: '#5FAA4E' } }),
+  // ── หน้า ──
+  I('a1', 'a', 'basic', 'แว่นเหลี่ยม', { m: [P(15, 8, 'KKKK'), P(15, 9, 'K..K'), P(15, 10, 'K..K'), P(15, 11, 'KKKK')], o: [P(19, 9, 'KK')] }),
+  I('a2', 'a', 'fashion', 'แว่นกันแดด', { m: [R(15, 9, 4, 2, 'K')], o: [P(16, 9, 'W'), P(21, 9, 'W'), P(19, 9, 'KK')] }),
+  I('a3', 'a', 'uniform', 'แมสก์', { o: [R(15, 12, 10, 3, 'W'), R(15, 14, 10, 1, 'G'), P(14, 11, 'G'), P(25, 11, 'G')], pal: { W: '#FFFFFF', G: '#D9DEE8' } }),
+  I('a4', 'a', 'fantasy', 'ผ้าปิดตา', { o: [R(21, 9, 3, 3, 'K'), P(13, 7, 'KK'), P(24, 8, 'KK')] }),
+  I('a5', 'a', 'cute', 'สติกเกอร์ดาว', { o: [P(23, 11, 'Y'), P(22, 12, 'YYY'), P(23, 13, 'Y')], pal: { Y: '#F6C453' } }),
+  I('a6', 'a', 'fashion', 'หนวด', { m: [P(17, 12, 'KKK'), P(16, 13, 'K')] }),
+  // ── ในมือ ──
+  I('i1', 'i', 'uniform', 'ขวดยา', { o: [R(28, 21, 3, 1, 'W'), R(28, 22, 3, 5, 'O'), R(28, 23, 3, 2, 'W'), R(30, 22, 1, 5, 'o')], pal: { W: '#FFFFFF', O: '#F6A04D', o: '#DB8636' } }),
+  I('i2', 'i', 'cute', 'ชานมไข่มุก', { o: [P(30, 18, 'K'), P(30, 19, 'K'), R(28, 20, 3, 1, 'G'), R(28, 21, 3, 6, 'T'), R(30, 21, 1, 6, 't'), P(28, 25, 'K.K'), P(29, 26, 'K')], pal: { G: '#C3CAD8', T: '#E8C9A0', t: '#CFAE82' } }),
+  I('i3', 'i', 'basic', 'หนังสือ', { o: [R(28, 20, 4, 7, 'B'), R(28, 20, 1, 7, 'b'), R(29, 22, 2, 1, 'W'), R(29, 24, 2, 1, 'W')], pal: { B: '#4FA3D9', b: '#3A7FB0' } }),
+  I('i4', 'i', 'fantasy', 'ไม้กายสิทธิ์', { o: [P(30, 16, 'Y'), P(29, 17, 'YYY'), P(30, 18, 'Y'), R(30, 19, 1, 8, 'B')], pal: { Y: '#F6C453', B: '#7A5C3E' } }),
+  I('i5', 'i', 'fantasy', 'ดาบ', { o: [R(29, 12, 2, 12, 'G'), R(29, 12, 1, 12, 'W'), R(27, 24, 6, 1, 'Y'), R(29, 25, 2, 2, 'B')], pal: { G: '#C3CAD8', W: '#EEF1F6', Y: '#F6C453', B: '#7A5C3E' } }),
+  I('i6', 'i', 'basic', 'มือถือ', { o: [R(28, 21, 3, 6, 'K'), R(29, 22, 1, 4, 'G')], pal: { G: '#7FC8A9' } }),
+  I('i7', 'i', 'cute', 'ลูกโป่ง', { o: [P(29, 8, 'RRR'), R(28, 9, 5, 4, 'R'), P(29, 13, 'RRR'), P(29, 9, 'W'), P(30, 14, 'r'), R(29, 15, 1, 11, 'G')], pal: { R: '#F29BB5', r: '#D97C99', G: '#C3CAD8' } }),
+  I('i8', 'i', 'fashion', 'ดอกไม้', { o: [P(28, 19, 'P.P'), P(29, 20, 'Y'), P(28, 21, 'P.P'), R(29, 22, 1, 5, 'G'), P(30, 24, 'G')], pal: { P: '#F29BB5', Y: '#F6C453', G: '#7FC86B' } }),
+  I('i9', 'i', 'basic', 'กาแฟ', { o: [P(29, 19, 'G'), P(30, 20, 'G'), R(28, 22, 3, 5, 'W'), R(28, 23, 3, 2, 'B'), R(31, 23, 1, 2, 'W')], pal: { G: '#C3CAD8', B: '#7A5C3E' } }),
+  I('i10', 'i', 'uniform', 'ครกบดยา', { o: [R(31, 19, 1, 6, 'B'), R(28, 24, 5, 1, 'G'), R(28, 25, 5, 2, 'G'), R(29, 26, 3, 1, 'g')], pal: { B: '#7A5C3E', G: '#D9DEE8', g: '#A39DB8' } }),
+  // ── ปีก/หลัง ── (วาดฝั่งซ้าย สะท้อนอัตโนมัติ)
+  I('w1', 'w', 'fantasy', 'ปีกนางฟ้า', { back: [P(8, 12, 'WWW'), P(5, 13, 'WWWWWWWW'), P(4, 14, 'WWWWWWWWW'), P(3, 15, 'WWWWWWWWWW'), P(3, 16, 'WWWWWWWWWW'), P(4, 17, 'GWWWWWWWW'), P(5, 18, 'GWWWWWWW'), P(6, 19, 'GWWWWW'), P(7, 20, 'GWWW'), P(8, 21, 'GG')], pal: { W: '#FFFFFF', G: '#D9DEE8' } }),
+  I('w2', 'w', 'fantasy', 'ปีกค้างคาว', { back: [P(9, 12, 'VVV'), P(6, 13, 'VVVVVVV'), P(3, 14, 'VVVVVVVVVV'), P(2, 15, 'VvVVVVVVVVV'), P(2, 16, 'V.VvVVVVVVV'), P(5, 17, 'V.VvVVVV'), P(8, 18, 'V.VVV'), P(10, 19, 'VV')], pal: { V: '#5B4585', v: '#45346A' } }),
+  I('w3', 'w', 'fantasy', 'ปีกนางฟ้าน้อย', { back: [P(6, 10, 'FF'), P(4, 11, 'FFFFF'), P(3, 12, 'FFfFFFFFFF'), P(3, 13, 'FFFfFFFFFF'), P(5, 14, 'FFFfFFFF'), P(8, 15, 'FFFFF'), P(7, 17, 'FFFFFF'), P(5, 18, 'FFFfFFFF'), P(5, 19, 'FFFFfFF'), P(6, 20, 'FFFF')], pal: { F: '#BDE7F5', f: '#8FCDE3' } }),
+  I('w4', 'w', 'cute', 'ปีกผีเสื้อ', { back: [P(5, 10, 'OOO'), P(3, 11, 'OOYOOOO'), P(2, 12, 'OYYYOOOOOO'), P(2, 13, 'OOYOOOOOOO'), P(4, 14, 'OOOOOOOO'), P(7, 15, 'OOOOO'), P(6, 17, 'OOOOOO'), P(4, 18, 'OOYOOOOO'), P(5, 19, 'OOOOOO'), P(7, 20, 'OOO')], pal: { O: '#F6A04D', Y: '#FFF0B8' } }),
+  I('w5', 'w', 'fantasy', 'ปีกมังกร', { back: [P(7, 10, 'D'), P(6, 11, 'DD'), P(5, 12, 'DdDDDDDD'), P(3, 13, 'DDdDDDDDDD'), P(2, 14, 'DDDdDDDDDDD'), P(2, 15, 'D.DDdDDDDDD'), P(4, 16, 'D.DDdDDDD'), P(7, 17, 'D.DDDD'), P(10, 18, 'DD')], pal: { D: '#5FAA4E', d: '#3F7F36' } }),
+  I('w6', 'w', 'fantasy', 'ผ้าคลุมฮีโร่', { back: [P(12, 17, 'RRRRRRRR'), R(11, 18, 9, 19, 'R'), R(11, 37, 9, 1, 'r'), R(11, 18, 1, 19, 'r')], pal: { R: '#E0524A', r: '#B53B35' } }),
+];
+// ── เลื่อนตำแหน่งชิ้น off = [dx, dy] (18 พ.ย. 2026 หลังแขนยาวขึ้น) — ไม่ต้องวาดใหม่ ตัวเรนเดอร์บวกให้
+// ปีก: ต้นแบบเริ่มที่ระดับคอ → ลง 5 แถวให้โคนปีกอยู่ที่ไหล่ (ผ้าคลุม w6 อยู่ถูกแล้ว)
+// ของในมือ: จุดจับต้องทับมือ (x 26–27 · y 26–27) — ชิ้นวาดหลังสุด จึงบังมือเหมือนกำอยู่
+const OFF = {
+  w1: [0, 5], w2: [0, 5], w3: [0, 5], w4: [0, 5], w5: [0, 5],
+  i1: [-1, 2], i2: [-1, 2], i3: [-1, 2], i4: [-2, 2], i5: [-2, 1], i6: [-1, 2],
+  i7: [-2, 2], i8: [-2, 2], i9: [-1, 2], i10: [-2, 2],
+}
+for (const p of PARTS) if (OFF[p.id]) p.off = OFF[p.id]
+
+// ── ราคา (ตั้งต้น · user ยังไม่เคาะ 18 พ.ย. 2026 — แก้ที่นี่ที่เดียว) ──
+// ระดับเดียวกับร้านตกแต่ง: T1 5k–15k · T2 60k–120k · T3 300k–450k · T4 1.2M–3M
+// ชุดเริ่มต้นฟรี (handover §6): สีผิว/สีผมทุกสี · ผม 3 · ตา 2 · ปาก 2 · เสื้อ 2 (รวมเชิ้ตนักศึกษา) · ท่อนล่าง 2 · รองเท้า 1
+const FREE = new Set(['h1', 'h2', 'h3', 'e1', 'e2', 'm1', 'm5', 't1', 't5', 'b2', 'b4', 'k1'])
+const THEME_PRICE = { basic: 8000, uniform: 60000, sport: 60000, fashion: 80000, cute: 80000, fantasy: 300000 }
+const PRICE_OVERRIDE = {
+  // หน้า (ตา/ปาก) ถูกกว่าเสื้อผ้า
+  e3: 5000, e4: 5000, e5: 15000, e6: 15000, e7: 60000, e8: 60000,
+  m2: 5000, m3: 15000, m4: 15000, m6: 60000,
+  // ชุดเต็มตัวแฟนซี + ปีก = ของโชว์
+  f3: 400000, f6: 400000, w1: 1200000, w2: 1200000, w3: 1500000, w4: 1500000, w5: 2000000, w6: 450000,
+}
+for (const p of PARTS) p.price = FREE.has(p.id) ? 0 : (PRICE_OVERRIDE[p.id] ?? THEME_PRICE[p.theme] ?? 8000)
+
+// ชุดเริ่มต้นของคนที่ยังไม่เคยแต่ง (ทุกชิ้นฟรี)
+const DEFAULT_EQ = { s: 's2', c: 'c1', h: 'h1', e: 'e1', m: 'm1', t: 't1', b: 'b2', k: 'k1' }
+// ช่องที่ถอดไม่ได้ (ไม่ปล่อยตัวเปล่า/หน้าเปล่า)
+const REQUIRED = ['s', 'c', 'h', 'e', 'm', 't', 'b']
+
+const PART = Object.fromEntries(PARTS.map(p => [p.id, p]));
+
+const OUTFITS = [
+  { name: 'นักศึกษา', eq: { s: 's2', c: 'c1', h: 'h3', e: 'e1', m: 'm1', t: 't5', b: 'b4', k: 'k3', a: 'a1', i: 'i3' } },
+  { name: 'เภสัชกร', eq: { s: 's3', c: 'c2', h: 'h1', e: 'e2', m: 'm1', t: 't10', b: 'b2', k: 'k1', o: 'o1', i: 'i1' } },
+  { name: 'รับปริญญา', eq: { s: 's2', c: 'c1', h: 'h2', e: 'e3', m: 'm2', t: 'f2', k: 'k3', x: 'x9', i: 'i8' } },
+  { name: 'นางฟ้า', eq: { s: 's1', c: 'c3', h: 'h2', e: 'e2', m: 'm1', t: 'f3', k: 'k4', x: 'x7', w: 'w1', i: 'i4' } },
+  { name: 'ปีศาจน้อย', eq: { s: 's4', c: 'c7', h: 'h6', e: 'e8', m: 'm6', t: 't6', b: 'b2', k: 'k2', x: 'x8', w: 'w2' } },
+  { name: 'สตรีท', eq: { s: 's3', c: 'c1', h: 'h9', e: 'e4', m: 'm5', t: 't4', b: 'b6', k: 'k1', o: 'o3', x: 'x1', a: 'a2' } },
+  { name: 'แม่มด', eq: { s: 's1', c: 'c5', h: 'h2', e: 'e7', m: 'm3', t: 'f4', k: 'k2', x: 'x4', i: 'i4' } },
+  { name: 'เมด', eq: { s: 's2', c: 'c4', h: 'h4', e: 'e2', m: 'm1', t: 'f4', k: 'k3', x: 'x6', i: 'i2' } },
+  { name: 'กบน้อย', eq: { s: 's2', c: 'c2', h: 'h1', e: 'e6', m: 'm4', t: 'f5', k: 'k5', x: 'x13', i: 'i7' } },
+  { name: 'ฮีโร่', eq: { s: 's5', c: 'c8', h: 'h6', e: 'e1', m: 'm2', t: 'f6', k: 'k2', w: 'w6', a: 'a4' } },
+  { name: 'ยูกาตะ', eq: { s: 's2', c: 'c1', h: 'h5', e: 'e3', m: 'm1', t: 'f7', k: 'k6', x: 'x11', i: 'i9' } },
+  { name: 'นักบอล', eq: { s: 's4', c: 'c2', h: 'h1', e: 'e1', m: 'm2', t: 't9', b: 'b7', k: 'k7', o: 'o4', x: 'x12' } },
+  { name: 'มังกร', eq: { s: 's3', c: 'c6', h: 'h8', e: 'e8', m: 'm6', t: 't12', b: 'b6', k: 'k2', w: 'w5', i: 'i5' } },
+  { name: 'ผีเสื้อ', eq: { s: 's1', c: 'c8', h: 'h7', e: 'e5', m: 'm1', t: 'f1', k: 'k6', w: 'w4', x: 'x11' } },
+  { name: 'หน้าหนาว', eq: { s: 's5', c: 'c3', h: 'h10', e: 'e4', m: 'm5', t: 't7', b: 'b1', k: 'k5', o: 'o5', x: 'x2', i: 'i9' } },
+];
+
+
+;
+// 🧍 RxTU10 doll — ตัวเรนเดอร์ (pure, ไม่แตะ DOM) ยกจาก docs/doll-prototype/doll.js 18 พ.ย. 2026
+// compose(eq) → กริดสี 40x44 · outline(grid) → +ขอบเข้ม 1px + ขอบขาว 2px (กรอบ 48x52) · render(eq) = ทั้งสองขั้น
+// ปรับจากต้นแบบ (user เลือกแบบ B 18 พ.ย.): ไหล่มน + เส้นแยกแขน/ลำตัวเมื่อสีเดียวกัน · แขนยาวอยู่ใน BASE (data/dollParts.js)
+
+// ลำดับซ้อนจากหลังไปหน้า — ตัวฐาน (base) อยู่ก่อนเสื้อผ้าเสมอ ชุด/กระโปรงจึงทับมือที่ยาวขึ้นได้เอง
+const ORDER = ['w', 'hb', 'base', 'b', 'k', 't', 'o', 'e', 'm', 'h', 'x', 'a', 'i']
+
+const hx = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16))
+const mix = (a, b, t) =>
+  '#' + hx(a).map((v, i) => Math.round(v + (hx(b)[i] - v) * t).toString(16).padStart(2, '0')).join('').toUpperCase()
+
+function apply(g, ops, pal, mirror, onlyEmpty, off) {
+  const [ox, oy] = off || [0, 0]
+  const put = (x0, y0, ch, mir) => {
+    const x = x0 + (mir ? -ox : ox), y = y0 + oy     // ฝั่งสะท้อนเลื่อน x กลับด้าน (ปีกซ้าย-ขวาเท่ากัน)
+    if (ch === '.' || x < 0 || x >= W || y < 0 || y >= H) return
+    if (onlyEmpty && g[y][x]) return
+    g[y][x] = pal[ch] || ch
+  }
+  const one = (op, mir) => {
+    if (op[0] === 'r') {
+      const [, x, y, w, h, c] = op
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) put(mir ? W - 1 - (x + i) : x + i, y + j, c, mir)
+    } else {
+      const [, x, y, s] = op
+      for (let i = 0; i < s.length; i++) put(mir ? W - 1 - (x + i) : x + i, y, s[i], mir)
+    }
+  }
+  for (const op of ops || []) { one(op, false); if (mirror) one(op, true) }
+}
+
+// ช่องที่ถูกชิ้นอื่นกินอยู่ (ชุดเต็มตัว full → กิน b · ชิ้นใดก็ประกาศ covers ได้)
+function hiddenSlots(eq) {
+  const hidden = new Set()
+  for (const k of ORDER) {
+    const p = PART[eq[k]]
+    if (!p) continue
+    if (p.full) hidden.add('b')
+    for (const c of p.covers || []) hidden.add(c)
+  }
+  return hidden
+}
+
+// ไหล่มน: ตัดมุมบนนอกสุดของไหล่ (แถว 18) ถ้าเหนือและข้างนอกว่าง = เป็นมุมจริง ไม่ใช่ปีก/ผม/ผ้าคลุม
+function roundShoulders(g) {
+  for (const [x, out] of [[12, 11], [W - 13, W - 12]]) {
+    if (g[18][x] && !g[17][x] && !g[18][out]) g[18][x] = null
+  }
+}
+// แยกแขนกับลำตัว: แขน (x=13) กับขอบลำตัว (x=14) สีเดียวกัน → ลงเงาบางที่ขอบลำตัว (เสื้อยืดขาว กาวน์ ฮู้ด)
+function armSeam(g) {
+  for (let y = 19; y <= 27; y++) {
+    for (const [a, b] of [[13, 14], [W - 14, W - 15]]) {
+      if (g[y][a] && g[y][a] === g[y][b]) g[y][b] = mix(g[y][b], INK, 0.28)
+    }
+  }
+}
+
+function compose(eq) {
+  const g = Array.from({ length: H }, () => Array(W).fill(null))
+  const skin = SKINS.find(s => s.id === eq.s) || SKINS[1]
+  const hair = HAIRC.find(c => c.id === eq.c) || HAIRC[0]
+  const glob = { S: skin.S, s: skin.s, H: hair.H, h: hair.h, L: hair.L, K: INK, W: '#FFFFFF', C: '#FFB3A7', M: '#D9665F' }
+  const hidden = hiddenSlots(eq)
+  for (const k of ORDER) {
+    if (k === 'base') { apply(g, BASE.m, glob, true); continue }
+    if (k === 'hb') {
+      const p = PART[eq.h]
+      if (p) { const pal = { ...glob, ...p.pal }; apply(g, p.back, pal, true); apply(g, p.ob, pal, false) }
+      continue
+    }
+    if (hidden.has(k)) continue
+    const p = PART[eq[k]]
+    if (!p) continue
+    const pal = { ...glob, ...p.pal }
+    if (k === 'w') { apply(g, p.back, pal, true, false, p.off); continue }
+    apply(g, p.m, pal, true, false, p.off)
+    apply(g, p.o, pal, false, false, p.off)
+  }
+  roundShoulders(g)
+  armSeam(g)
+  return g
+}
+
+// ขอบ: ช่องว่างที่ห่างจากพิกเซลตัวละคร ≤1.5 = ขอบเข้ม · ≤3.2 = ขอบขาว (ระยะแบบ euclidean)
+function outline(g) {
+  const w = W + PAD * 2, h = H + PAD * 2
+  const src = Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_, x) => g[y - PAD]?.[x - PAD] || null))
+  const out = src.map(r => r.slice())
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (src[y][x]) continue
+    let m = 99
+    for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
+      const yy = y + dy, xx = x + dx
+      if (yy < 0 || xx < 0 || yy >= h || xx >= w || !src[yy][xx]) continue
+      const d = Math.hypot(dx, dy); if (d < m) m = d
+    }
+    if (m <= 1.5) out[y][x] = INK; else if (m <= 3.2) out[y][x] = '#FFFFFF'
+  }
+  return { w, h, px: out }
+}
+
+const render = eq => outline(compose(eq))
+
+;
+// 🧍 ตู้เสื้อผ้าตุ๊กตา — ตรรกะล้วน (ไม่แตะ Firestore/Vue) · เทส: node --test src/utils/doll.test.js
+// users/{uid}.doll = { owned: [id…], eq: { s,c,h,e,m,t,b,k,o,x,a,i,w } } (handover §6)
+// แบบเดียวกับ utils/cosmetics.js: ซื้อครั้งเดียวเก็บถาวร · ใส่ได้ช่องละ 1 · ลองใส่ก่อนซื้อ · ซื้อรวดเดียวทั้งชุดที่ลอง
+
+const SLOT_KEYS = ['s', 'c', 'h', 'e', 'm', 't', 'b', 'k', 'o', 'x', 'a', 'i', 'w']
+const isColor = (k, v) => (k === 's' ? SKINS : HAIRC).some(o => o.id === v)
+
+/** ชิ้นนี้ฟรีไหม (สีผิว/สีผมฟรีหมด) */
+const isFree = (id) => FREE.has(id)
+
+/** ของที่มี + ชุดที่ใส่ จาก user doc — กันค่าเพี้ยน/ชิ้นที่ถูกลบ/ใส่ของที่ไม่มี */
+function dollOf(u) {
+  const d = u?.doll || {}
+  const owned = Array.isArray(d.owned) ? d.owned.filter(id => PART[id] && !isFree(id)) : []
+  const has = (id) => isFree(id) || owned.includes(id)
+  const raw = d.eq && typeof d.eq === 'object' ? d.eq : DEFAULT_EQ   // ยังไม่เคยแต่ง = ชุดเริ่มต้น (รวมรองเท้า)
+  const eq = {}
+  for (const k of SLOT_KEYS) {
+    const v = raw[k]
+    if (k === 's' || k === 'c') { eq[k] = isColor(k, v) ? v : DEFAULT_EQ[k]; continue }
+    if (v && PART[v]?.slot === k && has(v)) eq[k] = v
+    else if (REQUIRED.includes(k)) eq[k] = DEFAULT_EQ[k]
+  }
+  return { owned, eq }
+}
+
+/** ลองใส่ชิ้น id ในช่อง slot (id = null ถอด) · คืน eq ใหม่ — ไม่สนว่ามีของไหม (ลองได้ทุกชิ้น)
+ *  กติกาชุดเต็มตัว (handover §4): เลือกท่อนล่างขณะใส่ชุดเต็มตัว = ถอดชุดกลับเป็นเสื้อเริ่มต้น */
+function tryOn(eq, slot, id) {
+  const next = { ...eq }
+  if (!id) {
+    if (REQUIRED.includes(slot)) return next
+    delete next[slot]; return next
+  }
+  next[slot] = id
+  if (slot === 'b' && PART[eq.t]?.full) next.t = DEFAULT_EQ.t
+  return next
+}
+
+/** ชิ้นที่ต้องซื้อถ้าจะใส่ชุดนี้ → { items: [part…], total } (ไม่นับช่องที่ถูกชุดเต็มตัวบัง) */
+function cartFor(u, eq) {
+  const { owned } = dollOf(u)
+  const covered = new Set()
+  for (const id of Object.values(eq)) { const p = PART[id]; if (p?.full) covered.add('b'); for (const c of p?.covers || []) covered.add(c) }
+  const items = []
+  for (const [k, id] of Object.entries(eq)) {
+    if (k === 's' || k === 'c' || covered.has(k)) continue
+    const p = PART[id]
+    if (p && !isFree(id) && !owned.includes(id)) items.push(p)
+  }
+  return { items, total: items.reduce((a, p) => a + p.price, 0) }
+}
+
+/** ซื้อทั้งชุดได้ไหม → { ok, reason: 'none'|'coins'|null, total } */
+function canBuyCart(u, eq) {
+  const { items, total } = cartFor(u, eq)
+  if (!items.length) return { ok: false, reason: 'none', total: 0 }
+  if ((u?.coins || 0) < total) return { ok: false, reason: 'coins', total }
+  return { ok: true, reason: null, total }
+}
+
+/** ค่า doll ใหม่หลังซื้อทั้งชุด (ใส่ให้ทันที) */
+function afterBuyCart(u, eq) {
+  const cur = dollOf(u)
+  const { items } = cartFor(u, eq)
+  const owned = [...cur.owned, ...items.map(p => p.id).filter(id => !cur.owned.includes(id))]
+  return dollOf({ doll: { owned, eq } })
+}
+
+/** ใส่ชุดที่ลอง (เฉพาะเมื่อมีครบทุกชิ้นแล้ว) — ไม่ครบ = คืนของเดิม */
+function afterEquip(u, eq) {
+  if (cartFor(u, eq).items.length) return dollOf(u)
+  return dollOf({ doll: { owned: dollOf(u).owned, eq } })
+}
+
+/** ชุดที่ลองต่างจากที่ใส่อยู่ไหม */
+function sameEq(a, b) {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)])
+  for (const k of keys) if ((a[k] || null) !== (b[k] || null)) return false
+  return true
+}
+
+
+// ── จำลอง user doc ──
+const user = { coins: 500000, doll: null }
+const TABS = [{ k: 's', label: 'สีผิว' }, { k: 'c', label: 'สีผม' }, ...SLOTS]
+let tab = 'h'
+let trying = { ...dollOf(user).eq }
+const $ = (id) => document.getElementById(id)
+
+function paint(cv, eq, s) {
+  const r = render(eq)
+  cv.width = r.w * s; cv.height = r.h * s
+  cv.style.imageRendering = 'pixelated'
+  const ctx = cv.getContext('2d')
+  for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) {
+    const v = r.px[y][x]; if (!v) continue
+    ctx.fillStyle = v; ctx.fillRect(x * s, y * s, s, s)
+  }
+}
+const fmt = (n) => n >= 1e6 ? `${(n / 1e6).toLocaleString(undefined, { maximumFractionDigits: 1 })}M` : `${n / 1000}k`
+const has = (id) => isFree(id) || dollOf(user).owned.includes(id)
+function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 1800) }
+function ask(text) { return new Promise(res => { $('ask').textContent = text; $('sheet').hidden = false; $('yes').onclick = () => { $('sheet').hidden = true; res(true) }; $('no').onclick = () => { $('sheet').hidden = true; res(false) } }) }
+
+function draw() {
+  const mine = dollOf(user)
+  $('coins').textContent = user.coins.toLocaleString()
+  paint($('main'), trying, 5)
+  const changed = !sameEq(trying, mine.eq)
+  const cart = cartFor(user, trying)
+  $('note').textContent = changed ? (cart.items.length ? `กำลังลอง · ต้องซื้อ ${cart.items.length} ชิ้น` : 'กำลังลอง · มีครบแล้ว') : 'ที่ใส่อยู่ตอนนี้'
+  const cov = (k) => k === 'b' && !!PART[trying.t]?.full
+  $('tabs').innerHTML = TABS.map(t => `<button class="tab ${tab === t.k ? 'on' : ''} ${cov(t.k) ? 'cov' : ''}" role="tab" aria-selected="${tab === t.k}" data-k="${t.k}" type="button">${t.label}</button>`).join('')
+  $('hint').hidden = !cov(tab)
+  const body = $('body')
+  if (tab === 's' || tab === 'c') {
+    const list = tab === 's' ? SKINS : HAIRC
+    body.innerHTML = `<div class="colors">${list.map(o => `<button class="color ${trying[tab] === o.id ? 'sel' : ''}" style="background:${tab === 's' ? o.S : o.H}" data-p="${o.id}" type="button"><span>${o.label}</span></button>`).join('')}</div>`
+  } else {
+    const parts = PARTS.filter(p => p.slot === tab)
+    body.innerHTML = `<div class="grid">${REQUIRED.includes(tab) ? '' : `<button class="item ${!trying[tab] ? 'sel' : ''}" data-p="" type="button"><span class="none">ไม่ใส่</span></button>`}${parts.map(p => `<button class="item ${trying[tab] === p.id ? 'sel' : ''}" data-p="${p.id}" type="button"><canvas data-c="${p.id}"></canvas><span class="nm">${p.label}</span>${mine.eq[tab] === p.id ? '<span class="st on">ใส่อยู่</span>' : has(p.id) ? '<span class="st">มีแล้ว</span>' : `<span class="price">🪙 ${fmt(p.price)}</span>`}</button>`).join('')}</div>`
+    body.querySelectorAll('canvas[data-c]').forEach(cv => paint(cv, tryOn(trying, tab, cv.dataset.c), 2))
+  }
+  $('dock').hidden = !changed
+  const buy = canBuyCart(user, trying)
+  const act = $('act')
+  if (cart.items.length) {
+    act.textContent = buy.reason === 'coins' ? `เหรียญไม่พอ (ขาด ${(cart.total - user.coins).toLocaleString()})` : `ซื้อ ${cart.items.length} ชิ้นแล้วใส่ · 🪙 ${cart.total.toLocaleString()}`
+    act.disabled = !buy.ok
+  } else { act.textContent = 'ใส่ชุดนี้'; act.disabled = false }
+}
+
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) { tab = b.dataset.k; draw() } })
+$('body').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) { trying = tryOn(trying, tab, b.dataset.p || null); draw() } })
+$('reset').onclick = () => { trying = { ...dollOf(user).eq }; draw() }
+$('refill').onclick = () => { user.coins += 1000000; draw() }
+$('act').onclick = async () => {
+  const eq = { ...trying }
+  const { items, total } = cartFor(user, eq)
+  if (items.length) {
+    if (!canBuyCart(user, eq).ok) return
+    if (!await ask(`ซื้อ ${items.length} ชิ้น (${items.map(p => p.label).join(', ')}) ราคารวม ${total.toLocaleString()} เหรียญ?\nซื้อแล้วเก็บถาวร ใส่/ถอดได้ตลอด`)) return
+    user.doll = afterBuyCart(user, eq); user.coins -= total
+    toast(`ได้ ${items.length} ชิ้นแล้ว ใส่ให้เลย`)
+  } else { user.doll = afterEquip(user, eq); toast('ใส่ชุดนี้แล้ว') }
+  trying = { ...dollOf(user).eq }; draw()
+}
+draw()
+</script>

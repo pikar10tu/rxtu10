@@ -31,6 +31,7 @@
     <div class="mv-sort">
       <label class="mv-sort-label" for="mv-sort-sel">เรียงตาม</label>
       <select id="mv-sort-sel" v-model="sortKey" class="mv-sort-sel">
+        <option value="fashion">เฉิดฉาย ✨</option>
         <option value="level">เลเวลบ้าน</option>
         <option value="studentId">รหัสนักศึกษา</option>
         <option value="nickname">ชื่อเล่น</option>
@@ -92,7 +93,8 @@ const myUid = computed(() => auth.currentUser?.uid)
 const search = ref('')
 const track = ref('all')
 const selected = ref(null)
-const sortKey = ref('level')   // ค่าเริ่มต้น = เลเวลบ้านสูงสุดก่อน (user สั่ง 24 ก.ย. 2026)
+// ค่าเริ่มต้น = เฉิดฉาย (คะแนนลับ นับของแต่งตัวทุกชิ้น+บ้าน · user 19 พ.ย. 2026) · เดิมเลเวลบ้าน (24 ก.ย.)
+const sortKey = ref('fashion')
 
 // โหลด roster แล้วซ่อมแถวตัวเองถ้ายังไม่มี/เพี้ยน — ปิดช่องว่างของคนที่เพิ่งผูกตัวตนเสร็จ
 // (syncRosterRow เขียนเฉพาะตอนค่าต่างจริง จึงไม่ใช่ write เพิ่มในกรณีปกติ)

@@ -27,11 +27,8 @@
       </div>
 
       <template v-if="tab === 'style'">
-        <div class="style-note">
-          <b><Emoji char="🎀" /> ร้านตกแต่ง</b> แตะชิ้นไหนก็ลองใส่บนการ์ดด้านล่างได้เลย ยังไม่เสียเงิน · ซื้อครั้งเดียวเก็บถาวร ใส่ได้หมวดละ 1 ชิ้น
-          <span class="style-where">โชว์ที่ไหน: <b>สีชื่อ · กรอบรูป · ป้ายหน้าชื่อ</b> ขึ้นในหน้าสมาชิก การ์ดโปรไฟล์ และหน้าฉัน · <b>พื้นการ์ด</b> ขึ้นเต็มในการ์ดโปรไฟล์และหน้าฉัน ส่วนหน้าสมาชิกขึ้นแบบจางๆ · ในหน้าสมาชิกทุกอย่างเป็นภาพนิ่ง</span>
-        </div>
-        <CosmeticShop />
+        <!-- ร้านตกแต่งย้ายไปเป็นหมวด 🪪 การ์ดโปรไฟล์ ในห้องแต่งตัว (19 พ.ย. 2026) — เหลือทางลัดไว้ให้คนที่จำทางเดิม -->
+        <RouterLink to="/doll?g=card" class="shop-moved"><Emoji char="👗" /> ร้านตกแต่งย้ายไปอยู่ <b>ห้องแต่งตัว</b> แล้ว · แตะเพื่อไป ›</RouterLink>
       </template>
       <FarmStore v-else-if="tab === 'farm'" />
       <template v-else>
@@ -131,7 +128,6 @@ import { useConfirm } from '../composables/useConfirm.js'
 import GachaBanner from '../components/shop/GachaBanner.vue'
 import CapsuleReveal from '../components/shop/CapsuleReveal.vue'
 import { useAppConfig } from '../composables/useAppConfig.js'
-import CosmeticShop from '../components/shop/CosmeticShop.vue'
 import FarmStore from '../components/shop/FarmStore.vue'
 import { useRoute } from 'vue-router'
 
@@ -362,4 +358,5 @@ async function chooseTarget(id) {
 .shop-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
 .shop-tab { flex: 1; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px; font-family: inherit; font-weight: 800; font-size: .82rem; background: #fff; color: var(--ink); cursor: pointer; }
 .shop-tab.on { background: var(--gold); }
+.shop-moved { display: block; text-align: center; padding: 18px 14px; border-radius: 16px; background: var(--primary-light); color: var(--primary-dark); font-weight: 700; font-size: .85rem; text-decoration: none; border: var(--bw) solid var(--line); }
 </style>

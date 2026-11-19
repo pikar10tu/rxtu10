@@ -1,0 +1,143 @@
+<title>ตรวจตัวฐานตุ๊กตา</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=Sarabun:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: ตัวฐาน (ขยายได้) → สีผิว 5 → ผม 8 → ร่างข้อความที่จะแก้ (สกิล / handover) แบบ ก่อน-หลัง → เช็คลิสต์ให้ตอบ */
+:root{
+  --bg:#f5f4fb; --card:#ffffff; --fg:#2d2a3e; --muted:#6c6883; --line:#e3dff0;
+  --accent:#6f63e6; --stage:#e9f0ff; --del:#fbe4e6; --add:#e1f4ea; --delfg:#8c2433; --addfg:#1f6b4a;
+  --f-disp:"Mitr",system-ui,sans-serif; --f-body:"Sarabun",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161f;--card:#211f2c;--fg:#ece9f7;--muted:#a7a2bd;--line:#34314a;--accent:#a99dff;--stage:#2a2840;--del:#3d2228;--add:#1d3529;--delfg:#f3a0aa;--addfg:#8fe0b8;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17161f;--card:#211f2c;--fg:#ece9f7;--muted:#a7a2bd;--line:#34314a;--accent:#a99dff;--stage:#2a2840;--del:#3d2228;--add:#1d3529;--delfg:#f3a0aa;--addfg:#8fe0b8;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:500;margin:0;text-wrap:balance}
+h1{font-size:1.85rem} h2{font-size:1.25rem} h3{font-size:1rem}
+p{margin:0} .lede{color:var(--muted);max-width:66ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px 20px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:10px;z-index:3;border-bottom:1px solid var(--line)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seg span{font-size:.85rem;color:var(--muted)}
+.seg button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:4px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{display:grid;gap:10px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.strip{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;background:var(--stage);padding:14px 8px}
+.strip figure{margin:0;display:grid;justify-items:center;gap:4px}
+.strip img{image-rendering:pixelated;width:calc(40px * var(--z,3));max-width:100%;height:auto}
+.strip figcaption{font-size:.78rem;color:var(--muted)}
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center;padding:16px 18px}
+.hero img{image-rendering:pixelated;width:calc(40px * 6);max-width:40vw;height:auto;background:var(--stage);border-radius:12px}
+.hero ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
+@media (max-width:560px){.hero{grid-template-columns:1fr}.hero img{max-width:100%}}
+.diff{border-top:1px solid var(--line);overflow-x:auto}
+.diff pre{margin:0;font-family:var(--f-mono);font-size:.8rem;line-height:1.55;padding:10px 16px;white-space:pre-wrap;min-width:0}
+.del{background:var(--del);color:var(--delfg)}
+.add{background:var(--add);color:var(--addfg)}
+.panel header{padding:12px 18px;display:grid;gap:2px}
+.panel header code{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.ask{background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:16px 18px;display:grid;gap:8px}
+.ask ol{margin:0;padding-left:1.3em;display:grid;gap:4px}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>ตรวจตัวฐานตุ๊กตา</h1>
+    <p class="lede">ตัวฐานใหม่สำหรับแนว MMO หน้าตรง หน้าไข่มน รวมเป็นไฟล์เดียว <code>docs/doll-prototype/mmo/base.py</code> แล้ว ด้านล่างมีร่างข้อความที่จะแก้ในสกิลและเอกสาร handover ยังไม่ได้เขียนทับไฟล์จริง รอคุณตรวจก่อน</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="ขนาด"><span>ขยาย</span>
+      <button id="z1" data-z="1" aria-pressed="false">1×</button>
+      <button id="z2" data-z="2" aria-pressed="false">2×</button>
+      <button id="z3" data-z="3" aria-pressed="true">3×</button>
+    </div>
+  </div>
+
+  <section>
+    <h2>1. ตัวฐาน</h2>
+    <div class="panel hero">
+      <img src="out/base.png" alt="ตัวฐาน ผมดำสั้น เสื้อกล้ามขาว กางเกงขาสั้นเทาฟ้า">
+      <ul>
+        <li>กรอบ 40x66 ตัวกว้าง 32 สูงราว 3 หัว</li>
+        <li>หน้าไข่มน ตา 3x5 ต่ำและชิด ปากจุดเดียว แก้มแดง</li>
+        <li>ไม่ปล่อยตัวเปล่า ใส่เสื้อกล้ามกับกางเกงขาสั้นไว้เป็นค่าเริ่มต้น</li>
+        <li>มือกลมอยู่ในแนวแขน ไม่บานออก (แก้แล้ว) มีเข่า มีรองเท้าพื้นฐาน</li>
+        <li>เงาไล่ 4 เฉด เส้นในอมสีของชิ้น</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. สีผิว 5 แบบ</h2>
+    <div class="panel"><div class="strip">
+      <figure><img src="out/skin_s1.png" alt="ผิวขาวอมชมพู"><figcaption>s1</figcaption></figure>
+      <figure><img src="out/skin_s2.png" alt="ผิวพีช"><figcaption>s2</figcaption></figure>
+      <figure><img src="out/skin_s3.png" alt="ผิวสองสี"><figcaption>s3</figcaption></figure>
+      <figure><img src="out/skin_s4.png" alt="ผิวแทน"><figcaption>s4</figcaption></figure>
+      <figure><img src="out/skin_s5.png" alt="ผิวเข้ม"><figcaption>s5</figcaption></figure>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>3. สีผม 8 สี × ผมสั้น/ยาว × สีตา</h2>
+    <div class="panel"><div class="strip">
+      <figure><img src="out/hair_c1.png" alt="ผมดำ"><figcaption>c1 ดำ</figcaption></figure>
+      <figure><img src="out/hair_c2.png" alt="ผมน้ำตาลยาว"><figcaption>c2 น้ำตาล</figcaption></figure>
+      <figure><img src="out/hair_c3.png" alt="ผมบลอนด์"><figcaption>c3 บลอนด์</figcaption></figure>
+      <figure><img src="out/hair_c4.png" alt="ผมชมพูยาว"><figcaption>c4 ชมพู</figcaption></figure>
+      <figure><img src="out/hair_c5.png" alt="ผมม่วง"><figcaption>c5 ม่วง</figcaption></figure>
+      <figure><img src="out/hair_c6.png" alt="ผมฟ้ายาว"><figcaption>c6 ฟ้า</figcaption></figure>
+      <figure><img src="out/hair_c7.png" alt="ผมเงิน"><figcaption>c7 เงิน</figcaption></figure>
+      <figure><img src="out/hair_c8.png" alt="ผมแดงยาว"><figcaption>c8 แดง</figcaption></figure>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>4. ร่างข้อความที่จะแก้ (ยังไม่เขียนทับ)</h2>
+
+    <div class="panel">
+      <header><h3>สกิล rxtu-pixel-doll · หัวข้อ "สไตล์ที่เคาะแล้ว"</h3><code>~/.claude/skills/…/rxtu-pixel-doll/SKILL.md</code></header>
+      <div class="diff">
+<pre class="del">- พิกเซลอาร์ต ตัวสูงราว 3 หัว ยืนหน้าตรงท่าเดียว ร่างเดียวไม่แยกเพศ
+- ตัวสูง 36px กว้างราว 14px บนกรอบ 40x44
+- ขอบเข้ม 1px + ขอบขาว 2px คำนวณอัตโนมัติจากรูปร่างรวม ห้ามวาดขอบในชิ้น
+- โทนพาสเทลนุ่ม เข้ากับธีมเว็บ เส้นขอบในตัวใช้ `#3A2E2A` ไม่ใช้ดำสนิท</pre>
+<pre class="add">+ แนว MMO 2D หน้าตรง (เคาะ 18 พ.ย. 2026) ตัวเพรียว ราว 3 หัว ยืนท่าเดียว ร่างเดียวไม่แยกเพศ
++ กรอบ 40x66 ตัวกว้าง 32 วางที่ x=4 · วาดครึ่งซ้าย 16 คอลัมน์แล้วสะท้อน (แกนระหว่างคอลัมน์ 15|16)
++ หน้าไข่มน · ตา 3x5 ต่ำและชิด ประกายมุมซ้ายบนทั้งสองข้าง · หน้าม้าลงถึงคิ้ว ปอยข้างแก้ม
++ เส้นนอก #3A2028 · เส้นในใช้สีเข้มของชิ้นข้างเคียง (คำนวณอัตโนมัติ) · ไม่มีขอบขาวสติกเกอร์แล้ว
++ เงาไล่ 4 เฉดต่อชิ้น แสงซ้ายบน · ผิวเงาอมชมพู ผ้าเงาอมม่วง · ลาย/ประกายใช้ x X (ไม่ไล่เงา)
++ ไม่ยึดธีมพาสเทลของเว็บ ชิ้นแต่งได้ทุกแนว ทั้งเท่และเบียว
++ ของบนหัวและของติดหลังควรสูงราวหัว ให้ดูออกที่ 1×
++ อ้างอิงการ์ด pixel-art-studio 006 และตัวต้นแบบ docs/doll-prototype/mmo/base.py</pre>
+      </div>
+    </div>
+
+    <div class="panel">
+      <header><h3>เอกสาร handover · หัวข้อ 1 "สิ่งที่ user เคาะแล้ว" ส่วน Avatar</h3><code>rxtu10-v2/docs/avatar-pharmarble-handover.md</code></header>
+      <div class="diff">
+<pre class="del">- ขอบเข้ม 1px + ขอบขาว 2px รอบตัวแบบโทเค่นบอร์ดเกม คำนวณอัตโนมัติจากรูปร่างรวม
+- ตัวละครสูง 36px กว้างราว 14px วางบนกรอบ 40x44 (เผื่อปีก หมวกสูง วงแหวน ของในมือ)</pre>
+<pre class="add">+ **18 พ.ย. 2026 เปลี่ยนแนวอาร์ต:** แนว MMO 2D หน้าตรง ตัวเพรียว หน้าไข่มน (ดู docs/doll-prototype/mmo/)
++ กรอบ 40x66 ตัวกว้าง 32 · เส้นนอกเข้ม เส้นในอมสีชิ้น · ไม่มีขอบขาวสติกเกอร์
++ ชิ้นใน doll.js (99 ชิ้น กรอบ 40x44) ใช้ไม่ได้กับแนวใหม่ ต้องวาดใหม่ · โครงช่อง/พาเลต/สะท้อนซ้ายขวาใช้ต่อได้
++ ⚠️ บนกระดาน PharMarble (ช่องราว 38px) หมากต้องย่อ หรือครอปครึ่งบน ต้องลองก่อน B3</pre>
+      </div>
+    </div>
+  </section>
+
+  <div class="ask">
+    <h3>ช่วยตรวจ 3 อย่าง</h3>
+    <ol>
+      <li>ตัวฐานโอเคไหม (ทรงตัว ขา มือ เสื้อกล้าม/กางเกงขาสั้นเริ่มต้น)</li>
+      <li>สีผิว 5 สี และสีผมกับสีตา โอเคไหม หรืออยากเพิ่ม/เปลี่ยนสีไหน</li>
+      <li>ร่างข้อความในสกิลกับเอกสาร handover ให้เขียนทับได้เลยไหม</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('[data-z]').forEach(x=>x.addEventListener('click',()=>{document.querySelectorAll('.strip img').forEach(i=>i.style.setProperty('--z',x.dataset.z));document.querySelectorAll('[data-z]').forEach(y=>y.setAttribute('aria-pressed',y===x));}));
+</script>

@@ -1,0 +1,96 @@
+<title>ลองแนว chibi เงาการ์ตูน</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=Sarabun:wght@400;600&display=swap">
+<style>
+/* Layout: ปุ่มพื้น/ขนาด → chibi 3 ชุด → MMO รอบที่เลือก 3 ชุด → เทียบ */
+:root{
+  --bg:#f5f4fb; --card:#ffffff; --fg:#2d2a3e; --muted:#6c6883; --line:#e3dff0;
+  --accent:#6f63e6; --stage:#cfe6f5;
+  --f-disp:"Mitr",system-ui,sans-serif; --f-body:"Sarabun",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161f;--card:#211f2c;--fg:#ece9f7;--muted:#a7a2bd;--line:#34314a;--accent:#a99dff;--stage:#2a2840;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17161f;--card:#211f2c;--fg:#ece9f7;--muted:#a7a2bd;--line:#34314a;--accent:#a99dff;--stage:#2a2840;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:500;margin:0;text-wrap:balance}
+h1{font-size:1.85rem} h2{font-size:1.1rem} h3{font-size:1rem}
+p{margin:0} .lede{color:var(--muted);max-width:64ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px 20px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:10px;z-index:3;border-bottom:1px solid var(--line)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seg span{font-size:.85rem;color:var(--muted)}
+.seg button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:4px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.v{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.v.new{border-color:var(--accent)}
+.v header{padding:12px 18px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;border-bottom:1px solid var(--line)}
+.v header p{color:var(--muted);font-size:.9rem}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--stage);transition:background .2s}
+body[data-stage="stone"] .row{background:#4a4458}
+body[data-stage="grass"] .row{background:#7fb06a}
+.row figure{margin:0;display:grid;justify-items:center;align-content:end;padding:14px 4px 10px}
+.row img{image-rendering:pixelated;width:calc(40px * var(--z,4));max-width:100%;height:auto}
+.table{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+th,td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-family:var(--f-disp);font-weight:500}
+tr:last-child td{border-bottom:0}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>ลองแนว chibi เงาการ์ตูน</h1>
+    <p class="lede">วาดตัวของเราเองตามลักษณะแนวจากรูปที่ส่งมา คือหัวโต พิกเซลใหญ่ เส้นน้ำตาลหนา เงาเป็นก้อนสีเรียบ ตาโตมีตาขาว ยืนกางขา กำมือ วางเทียบกับแนว MMO ที่เลือกไว้</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="พื้นหลัง"><span>พื้น</span>
+      <button id="bg-l" data-bg="light" aria-pressed="true">ฟ้า</button>
+      <button id="bg-s" data-bg="stone" aria-pressed="false">พื้นหิน</button>
+      <button id="bg-g" data-bg="grass" aria-pressed="false">สนามหญ้า</button>
+    </div>
+    <div class="seg" role="group" aria-label="ขนาด"><span>ขยาย</span>
+      <button id="z1" data-z="1" aria-pressed="false">1×</button>
+      <button id="z2" data-z="2" aria-pressed="false">2×</button>
+      <button id="z4" data-z="4" aria-pressed="true">4×</button>
+    </div>
+  </div>
+
+  <section class="v new">
+    <header><h2>แนว chibi เงาการ์ตูน</h2><p>กรอบ 40x56 · ร่างแรก</p></header>
+    <div class="row">
+      <figure><img src="out/casual.png" alt="chibi ผมน้ำตาล แจ็กเก็ตฟ้า"></figure>
+      <figure><img src="out/pharm.png" alt="chibi ผมดำ เสื้อขาวเสื้อในเขียว"></figure>
+      <figure><img src="out/dark.png" alt="chibi ผมเงิน ชุดดำแดง ตาแดง"></figure>
+    </div>
+  </section>
+
+  <section class="v">
+    <header><h2>แนว MMO ที่เลือกไว้</h2><p>รอบ 4 + หน้าไข่ · กรอบ 40x66</p></header>
+    <div class="row">
+      <figure><img src="out/egg_girl.png" alt="MMO สาวหูกระต่าย"></figure>
+      <figure><img src="out/egg_pharm.png" alt="MMO เภสัชกร"></figure>
+      <figure><img src="out/egg_knight.png" alt="MMO อัศวิน"></figure>
+    </div>
+  </section>
+
+  <div class="table">
+    <table>
+      <thead><tr><th></th><th>chibi เงาการ์ตูน</th><th>MMO หน้าตรง</th></tr></thead>
+      <tbody>
+        <tr><td>ความรู้สึก</td><td>สดใส ชัด ตัวการ์ตูนเกม</td><td>เพรียว ละเอียดกว่า โตกว่า</td></tr>
+        <tr><td>ที่ 1× (หมาก)</td><td>ชัดกว่า หัวใหญ่ ตาเห็นชัด</td><td>เล็กกว่า ต้องพึ่งของบนหัว</td></tr>
+        <tr><td>วาดชิ้นใหม่</td><td>ง่ายกว่า เงาเป็นก้อน ไม่ต้องไล่เฉด</td><td>ยากกว่า ต้องเกลาเงาทีละชิ้น</td></tr>
+        <tr><td>ชุดที่โชว์ได้</td><td>เห็นชุดน้อยกว่า เพราะตัวสั้น</td><td>ชุดยาว กระโปรง ผ้าคลุม โชว์ได้เต็มที่</td></tr>
+        <tr><td>ผมช่อไม่สมมาตร</td><td>ต้องวาดผมเต็มทุกทรง ไม่สะท้อน</td><td>วาดครึ่งแล้วสะท้อนได้เกือบทั้งหมด</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const b=document.body;
+const bind=(attr,fn)=>document.querySelectorAll('['+attr+']').forEach(x=>x.addEventListener('click',()=>{fn(x);document.querySelectorAll('['+attr+']').forEach(y=>y.setAttribute('aria-pressed',y===x));}));
+bind('data-bg',x=>b.dataset.stage=x.dataset.bg);
+bind('data-z',x=>document.querySelectorAll('.row img').forEach(i=>i.style.setProperty('--z',x.dataset.z)));
+</script>

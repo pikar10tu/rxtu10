@@ -1,0 +1,95 @@
+<title>20 โมเดล Avatar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=Sarabun:wght@400;600&display=swap">
+<style>
+/* Layout: ปุ่มพื้น/ขนาด → กริด 20 การ์ด (เลข + ชื่อ + ค่าเด่น) → วิธีเลือก */
+:root{
+  --bg:#f5f4fb; --card:#ffffff; --fg:#2d2a3e; --muted:#6c6883; --line:#e3dff0;
+  --accent:#6f63e6; --stage:#e9f0ff;
+  --f-disp:"Mitr",system-ui,sans-serif; --f-body:"Sarabun",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161f;--card:#211f2c;--fg:#ece9f7;--muted:#a7a2bd;--line:#34314a;--accent:#a99dff;--stage:#2a2840;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17161f;--card:#211f2c;--fg:#ece9f7;--muted:#a7a2bd;--line:#34314a;--accent:#a99dff;--stage:#2a2840;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.6}
+.wrap{max-width:1100px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1,h3{font-family:var(--f-disp);font-weight:500;margin:0;text-wrap:balance}
+h1{font-size:1.85rem} h3{font-size:1rem}
+p{margin:0} .lede{color:var(--muted);max-width:66ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px 20px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:10px;z-index:3;border-bottom:1px solid var(--line)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seg span{font-size:.85rem;color:var(--muted)}
+.seg button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:4px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.stage{background:var(--stage);display:grid;place-items:end center;min-height:calc(72px * var(--z,3) + 20px);padding:10px;position:relative;transition:background .2s}
+body[data-stage="grass"] .stage{background:#7fb06a}
+body[data-stage="stone"] .stage{background:#4a4458}
+.stage img{image-rendering:pixelated;width:calc(44px * var(--z,3));max-width:100%;height:auto}
+.num{position:absolute;top:8px;left:8px;font-family:var(--f-disp);font-size:.9rem;background:var(--card);color:var(--accent);border-radius:999px;padding:0 9px;font-variant-numeric:tabular-nums}
+.meta{padding:8px 12px;display:grid;gap:2px}
+.meta b{font-family:var(--f-disp);font-weight:500;font-size:.92rem}
+.meta small{color:var(--muted);font-size:.78rem}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;gap:8px}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>20 โมเดล Avatar</h1>
+    <p class="lede">ร่างเร็วเพื่อเลือก "โครง" ก่อน ต่างกันที่สัดส่วนหัวต่อตัว ความยาวขา ทรงตา แบบเส้นขอบ และแบบลงเงา ยังไม่เกลารายละเอียด เลือกเลขที่ชอบ (หลายเลขได้) แล้วผมจะเกลาโครงนั้นต่อ</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="พื้นหลัง"><span>พื้น</span>
+      <button id="bg-l" data-bg="light" aria-pressed="true">ฟ้าอ่อน</button>
+      <button id="bg-g" data-bg="grass" aria-pressed="false">สนามหญ้า</button>
+      <button id="bg-s" data-bg="stone" aria-pressed="false">พื้นหิน</button>
+    </div>
+    <div class="seg" role="group" aria-label="ขนาด"><span>ขยาย</span>
+      <button id="z1" data-z="1" aria-pressed="false">1×</button>
+      <button id="z2" data-z="2" aria-pressed="false">2×</button>
+      <button id="z3" data-z="3" aria-pressed="true">3×</button>
+      <button id="z4" data-z="4" aria-pressed="false">4×</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="box">
+    <h3>บอกตรงๆ</h3>
+    <p>รอบนี้เน้นจำนวนแบบให้เห็นโครงต่างกัน รายละเอียดเลยหยาบกว่ารอบก่อน เช่นหมวกแม่มด (8) ยังแบนเหมือนหมวกครุย หูกระต่าย (9) เล็กจนแทบไม่เห็น และเสื้อยังเรียบ เลือกโครงที่ชอบได้เลย ตอนเกลาจะแก้ส่วนพวกนี้ให้</p>
+  </div>
+</div>
+
+<script>
+const M=[
+ ["ตัวจิ๋ว 1.5 หัว","เส้นน้ำตาล · สีเรียบ · ตาจุด"],
+ ["chibi กลม 2 หัว","เส้นน้ำตาล · เงาการ์ตูน"],
+ ["สติกเกอร์ 2.5 หัว","ขอบขาวหนา · เงาการ์ตูน"],
+ ["chibi ตาโต","ตาใหญ่ 3x5 · เงานุ่ม · ผมแกละ"],
+ ["หัวโตตัวสั้น บูทใหญ่","ตาต่ำ · เงานุ่ม"],
+ ["RPG 2.5 หัว ยืนกางขา","เส้นดำ · เงาการ์ตูน · ผมชี้"],
+ ["ฮีโร่ผ้าคลุม","ตาคม · เส้นดำ"],
+ ["แม่มดหมวกแหลม","ถือคทา · เงานุ่ม"],
+ ["หูกระต่าย","เส้นอมสี · เงานุ่ม"],
+ ["MMO เพรียว 3 หัว","กาวน์ยาว · เส้นอมสี"],
+ ["ตัวสูง 4 หัว","ขายาว · เงานุ่ม"],
+ ["ฮีโร่ 5 หัว","สูงสุด · ผ้าคลุม"],
+ ["หมวกแก๊ป สตรีท","ตายิ้ม · เงาการ์ตูน"],
+ ["ไร้เส้น โทนนุ่ม","ไม่มีเส้นขอบ"],
+ ["เส้นบาง แสงขอบ","แสงขอบซ้าย เงาขวา"],
+ ["8-bit คลาสสิก","สีเรียบ · เส้นดำ · ไม่มีปาก"],
+ ["ตาปิดยิ้ม","ผมแกละ · เงาการ์ตูน"],
+ ["ปีกนางฟ้า","ปีกขาว · เงานุ่ม"],
+ ["ปีกปีศาจ ดาร์ก","ปีกค้างคาว · ตาแดง"],
+ ["หน้าตรงเพรียว ไม่มีปาก","ตาแท่ง · เส้นอมสี"],
+];
+const g=document.getElementById('grid');
+M.forEach(([n,d],i)=>{const k=String(i+1).padStart(2,'0');g.insertAdjacentHTML('beforeend',
+ `<article class="card"><div class="stage"><span class="num">${i+1}</span><img src="out/m${k}.png" alt="แบบ ${i+1} ${n}"></div><div class="meta"><b>${n}</b><small>${d}</small></div></article>`);});
+const b=document.body;
+const bind=(attr,fn)=>document.querySelectorAll('['+attr+']').forEach(x=>x.addEventListener('click',()=>{fn(x);document.querySelectorAll('['+attr+']').forEach(y=>y.setAttribute('aria-pressed',y===x));}));
+bind('data-bg',x=>b.dataset.stage=x.dataset.bg);
+bind('data-z',x=>{document.querySelectorAll('.stage').forEach(i=>i.style.setProperty('--z',x.dataset.z));});
+</script>

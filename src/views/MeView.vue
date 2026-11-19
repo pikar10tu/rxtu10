@@ -31,7 +31,8 @@
           <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
         </button>
         <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
-        <RouterLink to="/shop?tab=style" class="me-shoplink"><Emoji char="🎀" /> ร้านตกแต่ง ›</RouterLink>
+        <!-- ร้านตกแต่งรวมเข้าห้องแต่งตัวแล้ว (19 พ.ย. 2026) -->
+        <RouterLink to="/doll" class="me-shoplink"><Emoji char="👗" /> ห้องแต่งตัว ›</RouterLink>
       </div>
 
       <MockScoreCard />

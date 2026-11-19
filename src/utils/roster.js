@@ -8,6 +8,9 @@
  * ตรรกะล้วน ไม่แตะ Firestore/Vue — เทส `node --test src/utils/roster.test.js`
  * spec: docs/superpowers/specs/2026-08-20-roster-doc-design.md
  */
+import { dollOf } from './doll.js'
+import { encodeDoll } from './dollCode.js'
+import { fashionScore } from './fashionScore.js'
 import { MINIGAMES } from '../data/minigames.js'
 import { getPetDef } from '../data/index.js'
 import { stripTrailingEmoji } from './text.js'
@@ -88,6 +91,10 @@ export function buildRosterRow(u, prev) {
     tm,
     // ร้านตกแต่ง: สีชื่อ/กรอบ/ป้าย/พื้นการ์ดที่ใส่อยู่ (id สั้น) — ใส่เฉพาะเมื่อมี
     ...(cs ? { cs } : {}),
+    // 🧍 ตุ๊กตา (รหัสสั้น utils/dollCode.js) — ใส่เฉพาะคนที่เคยแต่ง · ไม่มี = ฝั่งอ่านวาดชุดเริ่มต้น
+    ...(d.doll ? { dl: encodeDoll(dollOf(d).eq) } : {}),
+    // ✨ คะแนนเฉิดฉาย (ลับ · utils/fashionScore.js) — ใช้เรียงรายชื่อเพื่อน ไม่โชว์ตัวเลข
+    fs: fashionScore(d),
     // สนามประลองที่ใส่อยู่ (id สั้น · แชมป์พ่วงอันดับ 'ch-2026-09#3') — ครึ่งบนของฉากต่อสู้ตอนมีคนมาบุก
     ...(ar ? { ar } : {}),
     // ฉายาที่สวม (docId achievement เช่น home_13 / tower_champ__2026-09) — หน้ารวมโชว์ใต้ชื่อ
@@ -186,6 +193,8 @@ export function toMember(uid, row) {
     activePetsTeam: rosterTeam(row),
     cosmetics: row.cs || null,
     equipTitle: row.ti || null,
+    doll: row.dl || null,          // รหัสตุ๊กตา (decodeDoll) · null = ชุดเริ่มต้น
+    fashion: row.fs ?? 0,          // คะแนนเฉิดฉาย (ลับ) ใช้เรียงเท่านั้น
   }
 }
 

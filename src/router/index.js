@@ -47,6 +47,12 @@ const routes = [
     { path: '/play/poker', name: 'poker', component: () => import('../views/PokerView.vue') },
     { path: '/tree', name: 'tree', component: () => import('../views/TreeView.vue') },
     { path: '/fun-facts', name: 'funFacts', component: () => import('../views/FunFactsView.vue') },
+    // 🧍 เดโมตุ๊กตาชั่วคราว (A1 18 พ.ย. 2026) — ไม่มีลิงก์ในเมนู · ลบเมื่อมีตู้เสื้อผ้า
+    { path: '/doll-demo', name: 'dollDemo', component: () => import('../views/DollDemoView.vue') },
+    // 🧍 ตู้เสื้อผ้าตุ๊กตา (A2 18 พ.ย. 2026) — เข้าจากหน้าฉัน
+    { path: '/doll', name: 'doll', component: () => import('../views/DollView.vue') },
+    // 🎨 editor ชิ้นตุ๊กตา — dev เท่านั้น (npm run dev) ไม่ขึ้นเว็บจริง
+    ...(import.meta.env.DEV ? [{ path: '/doll-editor', name: 'dollEditor', component: () => import('../views/DollEditorView.vue') }] : []),
     // URL ที่ไม่รู้จัก (ลิงก์เก่า/พิมพ์ผิด) → กลับหน้าแรก แทนที่จะขึ้นจอว่างเปล่า
     { path: '/:pathMatch(.*)*', redirect: '/' },
 ]

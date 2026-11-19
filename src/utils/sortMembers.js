@@ -3,6 +3,8 @@
 function byKey(key) {
   if (key === 'nickname') return (a, b) => String(a.nickname || '').localeCompare(String(b.nickname || ''), 'th')
   // เลเวลเท่ากัน → ตามรหัสนักศึกษา (ไม่งั้นลำดับในเลเวลเดียวกันสลับไปมาตามลำดับที่โหลดมา)
+  // ✨ เฉิดฉาย (คะแนนลับ utils/fashionScore.js) → เท่ากันดูเลเวลบ้าน → รหัส
+  if (key === 'fashion')  return (a, b) => (b.fashion || 0) - (a.fashion || 0) || byKey('level')(a, b)
   if (key === 'level')    return (a, b) => (b.residence?.level || 1) - (a.residence?.level || 1) || byKey('studentId')(a, b)
   // default studentId น้อย→มาก (numeric-aware)
   return (a, b) => String(a.studentId || '').localeCompare(String(b.studentId || ''), undefined, { numeric: true })

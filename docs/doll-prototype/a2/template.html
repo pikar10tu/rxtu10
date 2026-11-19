@@ -1,0 +1,138 @@
+<title>ตู้เสื้อผ้าตุ๊กตา</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Sarabun:wght@400;600;700&display=swap">
+<style>
+/* Layout: แถบบนเหรียญ (จำลอง) → เวทีตัวละคร → แท็บช่อง → ตารางชิ้น → ปุ่มล่าง · หน้าตาเลียนแบบ DollView.vue ในเว็บ */
+:root{
+  --bg:#f7f9fd; --surface:#ffffff; --ink:#2b3550; --muted:#6b7590; --line:#dde5f0;
+  --primary:#3593cf; --primary-2:#62b6e6; --primary-light:#e6f2fb; --primary-dark:#1f6fa3; --gold:#b7791f;
+  --pop:0 2px 8px rgba(43,53,80,.08);
+  --f-disp:"Mitr",system-ui,sans-serif; --f-body:"Sarabun",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171f;--surface:#20232e;--ink:#e8ecf6;--muted:#a3abc0;--line:#323747;--primary-light:#1d3346;--primary-dark:#8ccaf2;--gold:#f2c76b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15171f;--surface:#20232e;--ink:#e8ecf6;--muted:#a3abc0;--line:#323747;--primary-light:#1d3346;--primary-dark:#8ccaf2;--gold:#f2c76b;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.app{max-width:520px;margin:0 auto;padding-block:14px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px;min-height:100%}
+.banner{font-size:.78rem;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:8px 12px}
+.top{display:flex;align-items:center;gap:10px}
+.top h1{flex:1;margin:0;font-family:var(--f-disp);font-weight:600;font-size:1.2rem}
+.coins{font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.coins button{font:inherit;font-size:.72rem;margin-left:6px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:2px 8px;cursor:pointer}
+.stage{display:grid;justify-items:center;gap:4px;padding:14px 10px 10px;border-radius:22px;background:linear-gradient(160deg,#e3effb,#fff 60%,#fde2ee);border:1px solid var(--line);box-shadow:var(--pop)}
+.note{font-size:.74rem;color:#6b7590;font-weight:700}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px}
+.tab{flex:none;font:inherit;font-size:.8rem;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:6px 12px;cursor:pointer}
+.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.tab.cov:not(.on){opacity:.55}
+.hint{margin:0;font-size:.76rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;padding-bottom:8px}
+.item{font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;cursor:pointer;color:var(--ink)}
+.item.sel{border-color:var(--primary);box-shadow:0 0 0 3px rgba(53,147,207,.18);background:var(--primary-light)}
+.item canvas{background:#eef4fb;border-radius:8px}
+.none{height:104px;display:grid;place-items:center;font-size:.82rem;font-weight:700;color:var(--muted)}
+.nm{font-size:.74rem;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
+.price{font-size:.76rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.st{font-size:.72rem;font-weight:800;color:var(--muted)}
+.st.on{color:var(--primary-dark)}
+.colors{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.color{font:inherit;height:56px;border-radius:14px;border:2px solid var(--line);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding:4px}
+.color.sel{border-color:var(--primary);box-shadow:0 0 0 3px rgba(53,147,207,.22)}
+.color span{font-size:.72rem;font-weight:700;background:rgba(255,255,255,.88);color:#2b3550;border-radius:999px;padding:0 6px}
+.dock{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,var(--bg) 72%,transparent)}
+.btn{flex:1;font:inherit;font-size:.92rem;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-2));border:0;border-radius:14px;padding:13px 10px;cursor:pointer;box-shadow:var(--pop)}
+.btn.ghost{flex:0 0 auto;color:var(--primary-dark);background:var(--surface);border:1px solid var(--line)}
+.btn:disabled{background:#cbd5e1;cursor:default}
+.btn:focus-visible,.item:focus-visible,.tab:focus-visible,.color:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.sheet{position:fixed;inset:0;background:rgba(20,24,36,.45);display:grid;place-items:end center;padding:16px;z-index:20}
+.sheet[hidden]{display:none!important}
+.sheet .card{background:var(--surface);border-radius:18px;padding:16px;max-width:480px;width:100%;display:grid;gap:12px;margin-bottom:env(safe-area-inset-bottom,0px)}
+.sheet p{margin:0;white-space:pre-line}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2b3550;color:#fff;padding:8px 14px;border-radius:999px;font-size:.85rem;z-index:30}
+.toast[hidden]{display:none!important}
+</style>
+
+<div class="app">
+  <div class="banner">หน้าจำลองบน artifact · ใช้โค้ดเรนเดอร์และตรรกะตู้เสื้อผ้าชุดเดียวกับเว็บจริง · เหรียญเป็นของปลอม ซื้อแล้วไม่มีผลกับบัญชีจริง</div>
+  <div class="top"><h1>ตู้เสื้อผ้า</h1><span class="coins">🪙 <span id="coins"></span><button id="refill" type="button">เติมเหรียญปลอม</button></span></div>
+  <div class="stage"><canvas id="main"></canvas><div class="note" id="note"></div></div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <p class="hint" id="hint" hidden>ชุดเต็มตัวที่ลองอยู่บังช่องนี้ · เลือกชิ้นในนี้ = ถอดชุดเต็มตัวออก</p>
+  <div id="body"></div>
+  <div class="dock" id="dock" hidden>
+    <button class="btn ghost" id="reset" type="button">ย้อนกลับ</button>
+    <button class="btn" id="act" type="button"></button>
+  </div>
+</div>
+<div class="sheet" id="sheet" hidden><div class="card"><p id="ask"></p><div style="display:flex;gap:8px"><button class="btn ghost" id="no" type="button">ยกเลิก</button><button class="btn" id="yes" type="button">ยืนยัน</button></div></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/*__DOLL_CODE__*/
+
+// ── จำลอง user doc ──
+const user = { coins: 500000, doll: null }
+const TABS = [{ k: 's', label: 'สีผิว' }, { k: 'c', label: 'สีผม' }, ...SLOTS]
+let tab = 'h'
+let trying = { ...dollOf(user).eq }
+const $ = (id) => document.getElementById(id)
+
+function paint(cv, eq, s) {
+  const r = render(eq)
+  cv.width = r.w * s; cv.height = r.h * s
+  cv.style.imageRendering = 'pixelated'
+  const ctx = cv.getContext('2d')
+  for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) {
+    const v = r.px[y][x]; if (!v) continue
+    ctx.fillStyle = v; ctx.fillRect(x * s, y * s, s, s)
+  }
+}
+const fmt = (n) => n >= 1e6 ? `${(n / 1e6).toLocaleString(undefined, { maximumFractionDigits: 1 })}M` : `${n / 1000}k`
+const has = (id) => isFree(id) || dollOf(user).owned.includes(id)
+function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 1800) }
+function ask(text) { return new Promise(res => { $('ask').textContent = text; $('sheet').hidden = false; $('yes').onclick = () => { $('sheet').hidden = true; res(true) }; $('no').onclick = () => { $('sheet').hidden = true; res(false) } }) }
+
+function draw() {
+  const mine = dollOf(user)
+  $('coins').textContent = user.coins.toLocaleString()
+  paint($('main'), trying, 5)
+  const changed = !sameEq(trying, mine.eq)
+  const cart = cartFor(user, trying)
+  $('note').textContent = changed ? (cart.items.length ? `กำลังลอง · ต้องซื้อ ${cart.items.length} ชิ้น` : 'กำลังลอง · มีครบแล้ว') : 'ที่ใส่อยู่ตอนนี้'
+  const cov = (k) => k === 'b' && !!PART[trying.t]?.full
+  $('tabs').innerHTML = TABS.map(t => `<button class="tab ${tab === t.k ? 'on' : ''} ${cov(t.k) ? 'cov' : ''}" role="tab" aria-selected="${tab === t.k}" data-k="${t.k}" type="button">${t.label}</button>`).join('')
+  $('hint').hidden = !cov(tab)
+  const body = $('body')
+  if (tab === 's' || tab === 'c') {
+    const list = tab === 's' ? SKINS : HAIRC
+    body.innerHTML = `<div class="colors">${list.map(o => `<button class="color ${trying[tab] === o.id ? 'sel' : ''}" style="background:${tab === 's' ? o.S : o.H}" data-p="${o.id}" type="button"><span>${o.label}</span></button>`).join('')}</div>`
+  } else {
+    const parts = PARTS.filter(p => p.slot === tab)
+    body.innerHTML = `<div class="grid">${REQUIRED.includes(tab) ? '' : `<button class="item ${!trying[tab] ? 'sel' : ''}" data-p="" type="button"><span class="none">ไม่ใส่</span></button>`}${parts.map(p => `<button class="item ${trying[tab] === p.id ? 'sel' : ''}" data-p="${p.id}" type="button"><canvas data-c="${p.id}"></canvas><span class="nm">${p.label}</span>${mine.eq[tab] === p.id ? '<span class="st on">ใส่อยู่</span>' : has(p.id) ? '<span class="st">มีแล้ว</span>' : `<span class="price">🪙 ${fmt(p.price)}</span>`}</button>`).join('')}</div>`
+    body.querySelectorAll('canvas[data-c]').forEach(cv => paint(cv, tryOn(trying, tab, cv.dataset.c), 2))
+  }
+  $('dock').hidden = !changed
+  const buy = canBuyCart(user, trying)
+  const act = $('act')
+  if (cart.items.length) {
+    act.textContent = buy.reason === 'coins' ? `เหรียญไม่พอ (ขาด ${(cart.total - user.coins).toLocaleString()})` : `ซื้อ ${cart.items.length} ชิ้นแล้วใส่ · 🪙 ${cart.total.toLocaleString()}`
+    act.disabled = !buy.ok
+  } else { act.textContent = 'ใส่ชุดนี้'; act.disabled = false }
+}
+
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) { tab = b.dataset.k; draw() } })
+$('body').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) { trying = tryOn(trying, tab, b.dataset.p || null); draw() } })
+$('reset').onclick = () => { trying = { ...dollOf(user).eq }; draw() }
+$('refill').onclick = () => { user.coins += 1000000; draw() }
+$('act').onclick = async () => {
+  const eq = { ...trying }
+  const { items, total } = cartFor(user, eq)
+  if (items.length) {
+    if (!canBuyCart(user, eq).ok) return
+    if (!await ask(`ซื้อ ${items.length} ชิ้น (${items.map(p => p.label).join(', ')}) ราคารวม ${total.toLocaleString()} เหรียญ?\nซื้อแล้วเก็บถาวร ใส่/ถอดได้ตลอด`)) return
+    user.doll = afterBuyCart(user, eq); user.coins -= total
+    toast(`ได้ ${items.length} ชิ้นแล้ว ใส่ให้เลย`)
+  } else { user.doll = afterEquip(user, eq); toast('ใส่ชุดนี้แล้ว') }
+  trying = { ...dollOf(user).eq }; draw()
+}
+draw()
+</script>
