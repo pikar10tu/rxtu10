@@ -20,7 +20,8 @@
     <div class="farm-sub">{{ plotCount }} แปลง · ปลูกได้ {{ seedChoices.length }} ชนิด<template v-if="upcoming"> · ปลดล็อก Lv.{{ upcoming.level }} <Emoji v-for="c in upcoming.crops" :key="c.id" :char="c.emoji" /></template></div>
 
     <!-- plots -->
-    <div class="farm-grid">
+    <!-- 13 แปลงขึ้นไป = 4 คอลัมน์แบบกะทัดรัด (21 พ.ย. — 20 แปลงใน 3 คอลัมน์ยาว 7 แถว ต้องเลื่อนหาแปลง) -->
+    <div class="farm-grid" :class="{ dense }">
       <div v-for="(plot, i) in plots" :key="i" class="plot" :class="{ ready: stat(plot).ready, empty: !plot }" :ref="el => { if (el) plotEls[i] = el }">
         <!-- empty -->
         <button v-if="!plot" class="plot-empty" @click="openPicker(i)">
@@ -35,11 +36,11 @@
           <div class="plot-name">{{ stat(plot).crop.name }}</div>
 
           <template v-if="stat(plot).ready">
-            <button class="plot-btn harvest" @click="onHarvest(i, plot)"><Emoji char="✅" /> เก็บเกี่ยว</button>
+            <button class="plot-btn harvest" @click="onHarvest(i, plot)"><Emoji char="✅" /> {{ dense ? 'เก็บ' : 'เก็บเกี่ยว' }}</button>
           </template>
           <template v-else>
             <div class="plot-bar"><div class="plot-fill" :style="{ width: (stat(plot).progress * 100) + '%' }"></div></div>
-            <div class="plot-time"><Emoji char="⏱" /> {{ fmt(stat(plot).remainingMs) }} · {{ Math.round(stat(plot).progress * 100) }}%</div>
+            <div class="plot-time"><Emoji v-if="!dense" char="⏱" /> {{ fmt(stat(plot).remainingMs) }}<template v-if="!dense"> · {{ Math.round(stat(plot).progress * 100) }}%</template></div>
           </template>
         </template>
       </div>
@@ -162,6 +163,7 @@ function onPick(seedId, all) {
   else farm.plant(i, seedId)
 }
 const emptyCount = computed(() => plots.value.filter(p => !p).length)
+const dense = computed(() => plots.value.length >= 13)
 
 // 📋 จากออเดอร์ "ขาด… · ปลูกเลย" (21 พ.ย.) — เปิดแผ่นเมล็ดที่แปลงว่างแรก พร้อมยกเมล็ดที่ขาดขึ้นบนสุด
 const focusSeed = ref(null)
@@ -364,6 +366,14 @@ const invList = computed(() => [
 .plot-add { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 94px; text-decoration: none; color: #2f7d55;
   background: rgba(255,255,255,.55); border: 2px dashed #7fd9b8; }
 .plot-add .plot-hint { font-size: .72rem; font-weight: 700; }
+/* กะทัดรัด 4 คอลัมน์ (13+ แปลง) — ตัวหนังสือยังไม่ต่ำกว่า .7rem ตามกฎ */
+.farm-grid.dense { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.dense .plot { min-height: 88px; padding: 6px 4px; border-radius: 10px; }
+.dense .plot-emoji { font-size: 1.45rem; }
+.dense .plot-empty, .dense.farm-grid .plot-add { min-height: 74px; }
+.dense .plot-ready-tag { top: 3px; right: 3px; padding: 1px 5px; }
+.dense .plot-btn.harvest { padding: 4px 6px; }
+@media (min-width: 520px) { .farm-grid.dense { grid-template-columns: repeat(5, 1fr); } }
 .farm-harvest-all { width: 100%; margin: 6px 0 8px; font: inherit; font-size: .9rem; font-weight: 800; color: #fff; border: 0; border-radius: 14px; padding: 11px;
   background: linear-gradient(135deg, #4cc9a0, #7fd9b8); box-shadow: var(--pop); cursor: pointer; animation: fh-pulse 1.6s ease-in-out infinite; }
 .farm-harvest-row { display: flex; gap: 8px; margin: 6px 0 8px; }

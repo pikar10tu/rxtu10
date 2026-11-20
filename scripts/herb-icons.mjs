@@ -185,6 +185,117 @@ const DRAW = {
     const fr = (x, y, r) => `<path d="M${x} ${y - r - 4}L${x} ${y - r}" stroke="${p.stem}" stroke-width="1.2"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#F)"/><path d="M${x} ${y - r}Q${x - r * .6} ${y} ${x} ${y + r}M${x} ${y - r}Q${x + r * .6} ${y} ${x} ${y + r}" stroke="${p.frD}" stroke-width=".8" fill="none" opacity=".6"/><ellipse cx="${x - r * .4}" cy="${y - r * .4}" rx="${r * .25}" ry="${r * .35}" fill="#fff" opacity=".55"/>`
     return s + fr(20, 38, 8) + fr(36, 42, 9.5) + fr(50, 36, 7.5)
   },
+
+  // ── ขั้นบ้าน 13–20 (21 พ.ย. 2026) ──
+  // หญ้าหนวดแมว — ใบหยักคู่ + ช่อดอกขาวม่วงอ่อนที่มีเกสรยาวยื่นเหมือนหนวดแมว
+  catswhisker(p) {
+    let s = stem('M32 60L32 22', p, 2.4)
+    ;[[54, 15, -58], [54, 15, 58], [44, 14, -62], [44, 14, 62], [34, 12, -58], [34, 12, 58]].forEach(([y, l, r]) => { s += leaf(32, y, l, 5.6, r, 'L', p) })
+    ;[[24, 32], [21, 26], [18, 20], [15, 14]].forEach(([y, w], i) => {
+      ;[-1, 1].forEach(side => {
+        const x = 32 + side * (3 + i * .4)
+        s += `<ellipse cx="${x}" cy="${y}" rx="2.4" ry="1.6" fill="${p.fw}" stroke="#d2c6e6" stroke-width=".5"/>`
+        s += `<path d="M${x} ${y}Q${x + side * w * .3} ${y - 6} ${x + side * w * .42} ${y - 9}M${x} ${y}Q${x + side * w * .22} ${y - 7} ${x + side * w * .28} ${y - 11}" stroke="${p.fa}" stroke-width=".6" fill="none" stroke-linecap="round"/>`
+        s += `<circle cx="${x + side * w * .42}" cy="${y - 9}" r=".8" fill="${p.yel}"/><circle cx="${x + side * w * .28}" cy="${y - 11}" r=".8" fill="${p.yel}"/>`
+      })
+    })
+    return s
+  },
+  // พริก — ต้นใบรี + ผลพริกแดงเรียวห้อย/ชี้ขึ้น
+  capsicum(p) {
+    let s = stem('M32 60L32 30', p, 2.4) + stem('M32 46Q22 40 16 30', p, 1.8) + stem('M32 42Q42 36 48 28', p, 1.8)
+    s += leaf(18, 32, 13, 5, -40, 'L', p) + leaf(46, 30, 13, 5, 40, 'L', p) + leaf(32, 32, 14, 5.5, 0, 'L', p) + leaf(32, 52, 12, 5, -60, 'L', p) + leaf(32, 50, 12, 5, 60, 'L', p)
+    const pod = (x, y, r, l) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 -2.2L0 0" stroke="${p.stem}" stroke-width="1.6" stroke-linecap="round"/><path d="M-2.4 0C-2.6 ${l * .5} -1 ${l * .9} 0.6 ${l}C1.6 ${l * .8} 2.6 ${l * .45} 2.4 0Z" fill="url(#Rd)"/><ellipse cx="-.8" cy="${l * .3}" rx=".6" ry="${l * .18}" fill="#fff" opacity=".4"/></g>`
+    return s + pod(22, 40, 18, 14) + pod(40, 36, -14, 15) + pod(31, 26, 172, 12) + pod(46, 42, -28, 12)
+  },
+  // หญ้าดอกขาว — ต้นเล็ก ใบรี + ดอกเป็นพู่ฝอยสีม่วงอ่อนหลายดอก
+  flowergrass(p) {
+    let s = stem('M32 60L32 30', p, 2) + stem('M32 40Q24 30 20 20', p, 1.4) + stem('M32 38Q40 28 44 18', p, 1.4) + stem('M32 32L32 14', p, 1.4)
+    s += leaf(32, 56, 14, 5, -62, 'L', p) + leaf(32, 54, 14, 5, 62, 'L', p) + leaf(32, 46, 11, 4.4, -55, 'L', p) + leaf(32, 45, 11, 4.4, 55, 'L', p)
+    const puff = (x, y) => { let b = `<ellipse cx="${x}" cy="${y + 2}" rx="2.6" ry="2" fill="url(#L)"/>`; for (let a = -60; a <= 60; a += 20) b += `<path d="M${x} ${y + 1}L${x + Math.sin(a * Math.PI / 180) * 4.5} ${y + 1 - Math.cos(a * Math.PI / 180) * 4.5}" stroke="${p.fa}" stroke-width="1.3" stroke-linecap="round" opacity=".85"/>`; return b + `<circle cx="${x}" cy="${y - 2.8}" r="1.4" fill="${p.pink}"/>` }
+    return s + puff(20, 18) + puff(44, 16) + puff(32, 12) + puff(26, 24) + puff(39, 23)
+  },
+  // กานพลู — กิ่งใบมัน + ช่อดอกตูมก้านแดงหัวกลม (แบบกานพลูแห้งที่เห็นในครัว)
+  clove(p) {
+    let s = `<path d="M8 50Q24 40 34 30" stroke="${p.wood}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+    s += leaf(14, 46, 16, 5.5, -70, 'L', p) + leaf(22, 41, 15, 5.2, 115, 'L', p) + leaf(28, 35, 13, 4.6, -55, 'L', p)
+    const bud = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M-1.3 0L-1.6 12L1.6 12L1.3 0Z" fill="url(#Rd)"/><path d="M-1.6 12L-3.4 14.2M1.6 12L3.4 14.2" stroke="${p.redD}" stroke-width="1.3" stroke-linecap="round"/><circle cx="0" cy="15" r="2.6" fill="url(#O)"/></g>`
+    ;[[36, 28, 205], [40, 26, 225], [42, 30, 250], [38, 32, 185], [44, 24, 240]].forEach(([x, y, r]) => { s += `<path d="M34 30L${x} ${y}" stroke="${p.redD}" stroke-width="1"/>` + bud(x, y, r) })
+    return s
+  },
+  // เสลดพังพอน — ไม้พุ่ม ใบเรียวยาวคู่ + ดอกหลอดสีแดงส้มที่ปลายกิ่ง
+  clinacanthus(p) {
+    let s = stem('M32 60L32 16', p, 2.4) + stem('M32 44Q22 38 16 28', p, 1.6) + stem('M32 40Q42 34 48 24', p, 1.6)
+    ;[[54, 18, -62], [54, 18, 62], [44, 16, -66], [44, 16, 66], [32, 14, -56], [32, 14, 56]].forEach(([y, l, r]) => { s += leaf(32, y, l, 3.6, r, 'L', p) })
+    s += leaf(16, 30, 11, 3, -30, 'L', p) + leaf(48, 26, 11, 3, 30, 'L', p)
+    const tube = (x, y, r) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M-1.5 0L-1.8 -9C-1.8 -11 1.8 -11 1.8 -9L1.5 0Z" fill="url(#Rd)"/><path d="M0 -10.5L-2.6 -12.6M0 -10.5L2.6 -12.6" stroke="${p.redD}" stroke-width="1" stroke-linecap="round"/></g>`
+    return s + tube(32, 16, 0) + tube(28, 18, -25) + tube(36, 18, 25) + tube(16, 28, -35) + tube(48, 24, 35)
+  },
+  // กระเทียม — หัวกลมเป็นกลีบ สีขาวอมม่วง + ใบแบนเรียวด้านบน
+  garlic(p) {
+    let s = leaf(30, 30, 24, 2.6, -14, 'L', p, false) + leaf(34, 30, 26, 2.6, 10, 'L', p, false) + leaf(32, 30, 22, 2.4, -2, 'L', p, false)
+    const clove = (x, w, r) => `<path d="M${x} 58C${x - w} 54 ${x - w} 42 ${x} 34C${x + w} 42 ${x + w} 54 ${x} 58Z" fill="${p.fw}" stroke="#d6cbe4" stroke-width=".8" transform="rotate(${r} ${x} 56)"/>`
+    s += `<path d="M18 50C16 40 24 33 32 32C40 33 48 40 46 50C44 58 20 58 18 50Z" fill="${p.fw}" stroke="#d6cbe4" stroke-width="1"/>`
+    s += clove(24, 6, -14) + clove(40, 6, 14) + clove(32, 7, 0)
+    s += `<path d="M24 40L25 54M32 36L32 56M40 40L39 54" stroke="${p.fa}" stroke-width=".8" opacity=".35"/><path d="M28 58L27 61M32 58L32 62M36 58L37 61" stroke="${p.bd}" stroke-width="1" stroke-linecap="round"/>`
+    return s
+  },
+  // รางจืด — เถาใบรูปหัวใจ + ดอกปากแตรสีม่วงฟ้า
+  thunbergia(p) {
+    let s = `<path d="M10 58Q20 44 30 34Q40 24 54 14" stroke="${p.stem}" stroke-width="2" fill="none" stroke-linecap="round"/>`
+    const heart = (x, y, r, rot) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0C-${r} -${r * .2} -${r * 1.1} -${r * 1.3} 0 -${r * 1.9}C${r * 1.1} -${r * 1.3} ${r} -${r * .2} 0 0Z" fill="url(#L)"/><path d="M0 -.5L0 -${r * 1.7}" stroke="${p.vein}" stroke-width=".7" opacity=".45"/></g>`
+    s += heart(16, 50, 7.5, -60) + heart(26, 38, 7.5, 60) + heart(40, 26, 7, -55) + heart(50, 18, 6, 55)
+    const gold = p === PAL.g
+    const fl = (x, y, r) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="${-r * .55}" rx="${r * .5}" ry="${r * .55}" fill="${gold ? p.yel : '#9db4f2'}" transform="rotate(${a})"/>`).join('')}<circle r="${r * .38}" fill="${gold ? p.fw : '#fff7c2'}"/><circle r="${r * .18}" fill="${gold ? p.yelD : '#5b6fc4'}"/></g>`
+    return s + fl(34, 40, 7) + fl(46, 34, 6) + fl(20, 30, 5.5)
+  },
+  // มะแว้ง — กิ่งใบหยัก + ผลกลมเล็กเป็นพวง เขียว/ส้ม + ดอกม่วงรูปดาว
+  solanum(p) {
+    let s = stem('M32 60L32 22', p, 2.4) + stem('M32 40Q22 34 16 24', p, 1.6) + stem('M32 36Q42 30 48 20', p, 1.6)
+    s += leaf(32, 52, 14, 6, -60, 'L', p) + leaf(32, 50, 14, 6, 60, 'L', p) + leaf(16, 26, 10, 4.6, -40, 'L', p) + leaf(48, 22, 10, 4.6, 40, 'L', p)
+    const berry = (x, y, r, f) => `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#${f})"/><ellipse cx="${x - r * .35}" cy="${y - r * .35}" rx="${r * .25}" ry="${r * .3}" fill="#fff" opacity=".5"/>`
+    s += berry(26, 34, 3.6, 'O') + berry(31, 38, 3.8, 'O') + berry(38, 33, 3.6, 'D') + berry(34, 28, 3.2, 'O') + berry(42, 38, 3.2, 'D')
+    const star = (x, y, r) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map(a => `<path d="M0 0L${-r * .35} ${-r * .6}L0 ${-r}L${r * .35} ${-r * .6}Z" fill="${p.fa}" transform="rotate(${a})"/>`).join('')}<circle r="${r * .25}" fill="${p.yel}"/></g>`
+    return s + star(32, 18, 5) + star(22, 22, 4)
+  },
+  // บอระเพ็ด — เถาอวบเป็นตุ่มปุ่ม + ใบรูปหัวใจ
+  tinospora(p) {
+    const vine = 'M8 56Q20 50 26 40Q32 30 44 26Q52 23 56 14'
+    let s = `<path d="${vine}" stroke="${p.ld}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="${vine}" stroke="${p.la}" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    ;[[14, 53], [20, 48], [25, 42], [29, 35], [36, 29], [44, 26], [51, 22]].forEach(([x, y]) => { s += `<circle cx="${x}" cy="${y}" r="1.5" fill="${p.ld}"/><circle cx="${x - .4}" cy="${y - .4}" r=".6" fill="${p.spot}"/>` })
+    const heart = (x, y, r, rot) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0C-${r} -${r * .2} -${r * 1.1} -${r * 1.3} 0 -${r * 1.9}C${r * 1.1} -${r * 1.3} ${r} -${r * .2} 0 0Z" fill="url(#L)"/><path d="M0 -.5L0 -${r * 1.7}" stroke="${p.vein}" stroke-width=".7" opacity=".45"/></g>`
+    return s + heart(22, 46, 8, -40) + heart(32, 32, 8.5, 30) + heart(46, 25, 7.5, -20) + heart(14, 54, 6, 50)
+  },
+  // น้อยหน่า — ผลกลมเป็นตุ่มเกล็ด สีเขียวนวล + ใบรี
+  annona(p) {
+    let s = stem('M32 16L32 6', p, 2) + leaf(32, 12, 15, 5.5, -60, 'L', p) + leaf(32, 12, 14, 5, 62, 'L', p)
+    s += `<circle cx="32" cy="38" r="20" fill="url(#F)"/>`
+    for (const [cx, cy] of [[24, 26], [32, 23], [40, 26], [19, 34], [27, 32], [37, 32], [45, 34], [19, 43], [27, 41], [37, 41], [45, 43], [24, 50], [32, 51], [40, 50], [32, 31.5], [32, 42]]) {
+      s += `<path d="M${cx - 4} ${cy}Q${cx} ${cy - 5} ${cx + 4} ${cy}Q${cx} ${cy + 5} ${cx - 4} ${cy}Z" fill="none" stroke="${p.frD}" stroke-width=".9" opacity=".7"/>`
+    }
+    return s + `<ellipse cx="25" cy="30" rx="4" ry="6" fill="#fff" opacity=".3"/>`
+  },
+  // มะระขี้นก — ผลเล็กผิวขรุขระเป็นปุ่ม เขียว (มีลูกสุกสีส้ม) + ดอกเหลือง + มือเกาะ
+  bittergourd(p) {
+    let s = `<path d="M8 20Q24 12 40 16Q50 18 56 12" stroke="${p.stem}" stroke-width="1.6" fill="none"/>`
+    s += leaf(18, 16, 11, 6, -150, 'L', p) + leaf(44, 17, 10, 5.6, 160, 'L', p) + flower5(52, 14, 4.6, p.yel, p.yelD)
+    s += `<path d="M30 15Q27 9 31 7Q35 6 34 10" stroke="${p.stem}" stroke-width="1" fill="none"/>`
+    const gourd = (x, y, rot, f, d) => { let b = `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0C5 4 6 16 0 26C-6 16 -5 4 0 0Z" fill="url(#${f})"/>`; for (let k = 5; k < 23; k += 3.4) b += `<circle cx="-2" cy="${k}" r="1" fill="${d}" opacity=".5"/><circle cx="2" cy="${k + 1.7}" r="1" fill="${d}" opacity=".5"/>`; return b + `<path d="M0 0L0 -4" stroke="${p.stem}" stroke-width="1.2"/></g>` }
+    return s + gourd(24, 22, 14, 'F', p.frD) + gourd(36, 24, -10, 'F', p.frD) + gourd(46, 22, -24, 'O', p.ornD)
+  },
+  // เถาวัลย์เปรียง — เถาไม้เลื้อยสีน้ำตาลบิดเกลียว + ใบประกอบรี + ฝักแบนเล็ก
+  derris(p) {
+    let s = `<path d="M10 60C18 50 14 42 24 34C34 26 30 18 44 12" stroke="${p.wood}" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    s += `<path d="M10 60C18 50 14 42 24 34C34 26 30 18 44 12" stroke="${p.bd}" stroke-width="1.2" fill="none" stroke-dasharray="3 3" opacity=".6"/>`
+    ;[[18, 46, 'L'], [28, 30, 'R'], [38, 18, 'L']].forEach(([x, y, side]) => {
+      const dir = side === 'L' ? -1 : 1
+      s += `<path d="M${x} ${y}L${x + dir * 14} ${y - 4}" stroke="${p.stem}" stroke-width="1.2"/>`
+      ;[3, 7, 11].forEach(k => { s += leaf(x + dir * k, y - k * .28, 6.5, 3, dir * 60, 'L', p) + leaf(x + dir * k, y - k * .28, 6.5, 3, dir * 140, 'L', p) })
+      s += leaf(x + dir * 14, y - 4, 7, 3.2, dir * 100, 'L', p)
+    })
+    s += `<g transform="translate(40 40) rotate(20)"><path d="M0 0C4 -3 13 -3 18 1C13 5 4 4 0 0Z" fill="url(#D)" stroke="${p.podD}" stroke-width=".7"/></g>`
+    return s
+  },
 }
 
 export const HERB_IDS = Object.keys(DRAW)

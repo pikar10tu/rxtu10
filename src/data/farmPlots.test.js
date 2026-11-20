@@ -2,8 +2,11 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { MAX_PLOTS, PLOT_UNLOCK_COST, plotUnlockCost, nextPlotInfo } from './farmPlots.js'
 
-test('MAX_PLOTS = 15 เท่าเพดานเลเวลบ้านสูงสุด', () => {
-  assert.equal(MAX_PLOTS, 15)
+test('MAX_PLOTS = 20 เท่าเพดานเลเวลบ้านสูงสุด', async () => {
+  assert.equal(MAX_PLOTS, 20)
+  const { residencePlots, MAX_RESIDENCE_LEVEL } = await import('./residence.js')
+  assert.equal(residencePlots(MAX_RESIDENCE_LEVEL), MAX_PLOTS)
+  assert.equal(PLOT_UNLOCK_COST.length, MAX_PLOTS + 1, 'ทุกแปลงต้องมีราคา')
 })
 
 test('แปลงที่ 1 ฟรี, ราคาแพงขึ้นเรื่อยๆ (strictly increasing)', () => {
@@ -24,7 +27,8 @@ test('แปลงช่วงต้นราคาถูกตามดีไ�
 
 test('plotUnlockCost นอกช่วง → null', () => {
   assert.equal(plotUnlockCost(0), null)
-  assert.equal(plotUnlockCost(16), null)
+  assert.equal(plotUnlockCost(21), null)
+  assert.equal(plotUnlockCost(20), 1200000)
   assert.equal(plotUnlockCost(-1), null)
 })
 
@@ -50,8 +54,13 @@ test('nextPlotInfo: ชนเพดานเลเวลบ้าน → atCeili
   assert.equal(info.reason, 'atCeiling')
 })
 
-test('nextPlotInfo: ปลดครบ 15 → maxed (nextPlot/cost = null)', () => {
-  const info = nextPlotInfo({ plotsUnlocked: 15, ceiling: 15, coins: 999999 })
+test('nextPlotInfo: ปลดครบ 15 แต่บ้านยังไม่ถึง 16 → atCeiling (ไม่ใช่ maxed แล้ว)', () => {
+  assert.equal(nextPlotInfo({ plotsUnlocked: 15, ceiling: 15, coins: 9e9 }).reason, 'atCeiling')
+  assert.equal(nextPlotInfo({ plotsUnlocked: 15, ceiling: 16, coins: 9e9 }).cost, 900000)
+})
+
+test('nextPlotInfo: ปลดครบ 20 → maxed (nextPlot/cost = null)', () => {
+  const info = nextPlotInfo({ plotsUnlocked: 20, ceiling: 20, coins: 999999 })
   assert.equal(info.canUnlock, false)
   assert.equal(info.reason, 'maxed')
   assert.equal(info.nextPlot, null)

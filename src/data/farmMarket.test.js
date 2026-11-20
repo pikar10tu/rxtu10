@@ -53,6 +53,16 @@ test('เรื่องเดียวกันไม่ซ้ำภายใ�
   }
 })
 
+// ข่าวที่ออกไปแล้วห้ามเปลี่ยนตอนเพิ่มเรื่อง/พืช (ดู since ใน farmMarket.js) — เพิ่มบรรทัดวันใหม่ได้เรื่อยๆ
+test('ไทม์ไลน์ที่ประกาศไปแล้วไม่เปลี่ยน', () => {
+  const m21 = marketOf(20778, nameOf), m22 = marketOf(20779, nameOf)
+  assert.equal(m21.head, 'พ่อค้าส่งออกต่างชาติบินมาเหมามะขามแขกถึงหน้าสวน')
+  assert.deepEqual(m21.boosts, [{ id: 'melon', pct: 60 }])
+  assert.equal(m21.tease, 'พยากรณ์บอกฝนหลงฤดูกำลังมา แหล่งปลูกกระเจี๊ยบแดงอยู่ในเส้นทางพอดี')
+  assert.equal(m22.head, 'ฝนหลงฤดูถล่มแหล่งปลูกกระเจี๊ยบแดงและชุมเห็ดเทศ')
+  assert.deepEqual(m22.boosts, [{ id: 'mushroom', pct: 50 }, { id: 'eggplant', pct: 40 }])
+})
+
 test('ราคา/วัน/ไอดีข่าว', () => {
   assert.equal(boosted(1000, 60), 1600)
   assert.equal(boostPct('x', { boosts: [{ id: 'x', pct: 40 }] }), 40)

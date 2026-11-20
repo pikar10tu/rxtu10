@@ -56,6 +56,34 @@ export const CROPS = [
     herb: { sci: 'Zingiber montanum (Z. cassumunar)', part: 'เหง้า', uses: 'ทาบรรเทาอาการปวดเมื่อย เคล็ดขัดยอก ฟกช้ำ (ครีมไพล)', note: 'ใช้ภายนอก · ห้ามทาบนแผลเปิดหรือรอบดวงตา' } },
   { id: 'moneytree', name: 'มะขามป้อม', emoji: 'herb:moneytree', tier: 'legendary', unlockLevel: 12, seedCost: 15000, growMinutes: 4320, sellPrice: 70000, stages: ['🌱','🌲'],
     herb: { sci: 'Phyllanthus emblica', part: 'ผล', uses: 'บรรเทาอาการไอ ขับเสมหะ ทำให้ชุ่มคอ มีวิตามินซีและแทนนินสูง', note: '' } },
+
+  // ── 🌟 ขั้นบ้าน 13–20 (21 พ.ย. 2026) — บ้านอัปถึง 20 แต่พืชหยุดที่ 12 · ชั้นละ 1–2 ชนิด ──
+  // เลือกจากสมุนไพรที่ออกข้อสอบ PLE-CC จริง (ค้นคลังข้อสอบเก่า D:\ข้อสอบเก่า · user ขอ 21 พ.ย.)
+  // ตัวเลข: กำไร/ชม. สูงกว่าพืชรอบเวลาใกล้กันในชั้นก่อนราว 1.3 เท่า (สั้น ~2,000/ชม. · ยาว ~1,000–1,250/ชม.)
+  { id: 'clinacanthus', name: 'เสลดพังพอน', emoji: 'herb:clinacanthus', tier: 'mythic', unlockLevel: 13, seedCost: 1000, growMinutes: 25, sellPrice: 1830,
+    herb: { sci: 'Clinacanthus nutans', part: 'ใบ', uses: 'ครีม/ทิงเจอร์ทาบรรเทาผื่นจากเริม งูสวัด และผื่นคันจากแมลงกัดต่อย', note: 'ใช้ภายนอก' } },
+  { id: 'garlic', name: 'กระเทียม', emoji: 'herb:garlic', tier: 'mythic', unlockLevel: 13, seedCost: 3500, growMinutes: 120, sellPrice: 6600,
+    herb: { sci: 'Allium sativum', part: 'หัว (กลีบ)', uses: 'ขับลม บรรเทาอาการท้องอืด ท้องเฟ้อ · ใช้ปรุงอาหาร', note: 'อาจเพิ่มความเสี่ยงเลือดออก ระวังเมื่อใช้ร่วมกับยาต้านการแข็งตัวของเลือด' } },
+  { id: 'thunbergia', name: 'รางจืด', emoji: 'herb:thunbergia', tier: 'mythic', unlockLevel: 14, seedCost: 6000, growMinutes: 240, sellPrice: 10800,
+    herb: { sci: 'Thunbergia laurifolia', part: 'ใบ', uses: 'ตำรายาไทยใช้ถอนพิษ แก้ร้อนใน (ชาชง)', note: 'อาจลดผลของยาที่กินพร้อมกัน ควรเว้นระยะห่างจากยาอื่น' } },
+  { id: 'solanum', name: 'มะแว้ง', emoji: 'herb:solanum', tier: 'mythic', unlockLevel: 14, seedCost: 2000, growMinutes: 60, sellPrice: 4000,
+    herb: { sci: 'Solanum trilobatum / S. indicum', part: 'ผล', uses: 'บรรเทาอาการไอ ขับเสมหะ (ยาประสะมะแว้ง)', note: '' } },
+  { id: 'catswhisker', name: 'หญ้าหนวดแมว', emoji: 'herb:catswhisker', tier: 'mythic', unlockLevel: 15, seedCost: 2500, growMinutes: 40, sellPrice: 4000,
+    herb: { sci: 'Orthosiphon aristatus', part: 'ใบ', uses: 'ชงดื่มเพื่อขับปัสสาวะ', note: 'ห้ามใช้ในผู้ป่วยโรคหัวใจหรือโรคไต เพราะมีโพแทสเซียมสูง' } },
+  { id: 'tinospora', name: 'บอระเพ็ด', emoji: 'herb:tinospora', tier: 'mythic', unlockLevel: 15, seedCost: 8000, growMinutes: 360, sellPrice: 16000,
+    herb: { sci: 'Tinospora crispa', part: 'เถา', uses: 'ตำรายาไทยใช้แก้ไข้ ช่วยเจริญอาหาร (รสขมจัด)', note: 'ระวังในผู้ป่วยโรคตับ' } },
+  { id: 'capsicum', name: 'พริก', emoji: 'herb:capsicum', tier: 'mythic', unlockLevel: 16, seedCost: 10000, growMinutes: 720, sellPrice: 22000,
+    herb: { sci: 'Capsicum annuum', part: 'ผล', uses: 'ครีมพริก (สาร capsaicin) ทาบรรเทาอาการปวดกล้ามเนื้อ · ใช้ปรุงอาหาร', note: 'ใช้ภายนอก · ห้ามทาบนแผลเปิด เลี่ยงบริเวณตาและเยื่อบุ' } },
+  { id: 'annona', name: 'น้อยหน่า', emoji: 'herb:annona', tier: 'mythic', unlockLevel: 17, seedCost: 12000, growMinutes: 480, sellPrice: 22500,
+    herb: { sci: 'Annona squamosa', part: 'ใบและเมล็ด', uses: 'โลชั่น/ครีมใช้กำจัดเหา', note: 'ใช้ภายนอก · ระวังเข้าตา ทำให้ตาอักเสบได้' } },
+  { id: 'bittergourd', name: 'มะระขี้นก', emoji: 'herb:bittergourd', tier: 'mythic', unlockLevel: 17, seedCost: 3000, growMinutes: 30, sellPrice: 4000,
+    herb: { sci: 'Momordica charantia', part: 'ผล', uses: 'ตำรายาไทยใช้ช่วยเจริญอาหาร แก้ไข้ · ใช้ปรุงอาหาร', note: 'อาจลดน้ำตาลในเลือด ระวังในผู้ที่ใช้ยาเบาหวาน' } },
+  { id: 'flowergrass', name: 'หญ้าดอกขาว', emoji: 'herb:flowergrass', tier: 'mythic', unlockLevel: 18, seedCost: 20000, growMinutes: 1440, sellPrice: 47000,
+    herb: { sci: 'Cyanthillium cinereum', part: 'ทั้งต้น', uses: 'ชาชงช่วยลดความอยากบุหรี่', note: 'ระวังในผู้ป่วยโรคหัวใจหรือโรคไต เพราะมีโพแทสเซียมสูง' } },
+  { id: 'clove', name: 'กานพลู', emoji: 'herb:clove', tier: 'mythic', unlockLevel: 19, seedCost: 40000, growMinutes: 2880, sellPrice: 95000,
+    herb: { sci: 'Syzygium aromaticum', part: 'ดอกตูม', uses: 'น้ำมันกานพลูบรรเทาอาการปวดฟัน (สาร eugenol) · เป็นเครื่องเทศ', note: 'ใช้ภายนอกเฉพาะที่' } },
+  { id: 'derris', name: 'เถาวัลย์เปรียง', emoji: 'herb:derris', tier: 'mythic', unlockLevel: 20, seedCost: 60000, growMinutes: 4320, sellPrice: 150000, stages: ['🌱','🌿'],
+    herb: { sci: 'Derris scandens', part: 'เถา', uses: 'แคปซูลบรรเทาอาการปวดกล้ามเนื้อ ปวดข้อ', note: '' } },
 ]
 
 const _byId = Object.fromEntries(CROPS.map(c => [c.id, c]))

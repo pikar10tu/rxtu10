@@ -5,7 +5,8 @@
 //  ราคาทั้งหมด tunable ที่ตารางเดียวด้านล่าง
 // ════════════════════════════════════════════════════════════
 
-export const MAX_PLOTS = 15
+// 21 พ.ย. 2026: 15 → 20 (บ้านขั้น 16–20 ได้เพดาน +1 แปลงต่อขั้น · ดู data/residence.js)
+export const MAX_PLOTS = 20
 
 // index = หมายเลขแปลง (1-based). [1]=0 เริ่มต้นฟรี, [2..15]=ราคาซื้อปลด
 export const PLOT_UNLOCK_COST = [
@@ -22,9 +23,16 @@ export const PLOT_UNLOCK_COST = [
   150000,   // 10
   320000,   // 11
   700000,   // 12
-  1000000,  // 13 (28 ก.ย. 2026 — user เลือก 1M/1.5M/2M)
-  1500000,  // 14
-  2000000,  // 15
+  // 13–20 ปรับใหม่ 21 พ.ย. 2026 (user: ลดลงหน่อย ไม่ต้องแพงมาก) — เดิม 13–15 = 1M/1.5M/2M
+  // ขยับทีละ 50k–100k ต่อจากแปลง 12 (700k) ⇒ แปลง 13–20 รวม 7.35M (เท่าอัปบ้านราว 2 ขั้น)
+  750000,   // 13
+  800000,   // 14
+  850000,   // 15
+  900000,   // 16
+  950000,   // 17
+  1000000,  // 18
+  1100000,  // 19
+  1200000,  // 20
 ]
 
 /** ราคาซื้อ "แปลงลำดับที่ plotNumber" — null ถ้านอกช่วง 1..MAX_PLOTS */
@@ -39,7 +47,7 @@ export function plotUnlockCost(plotNumber) {
  *   plotsUnlocked = จำนวนแปลงที่ปลดแล้ว (≥1)
  *   ceiling       = เพดานตามเลเวลบ้าน residencePlots(level)
  *   coins         = เหรียญปัจจุบัน
- * reason: 'ok' ปลดได้ · 'notEnoughCoins' เงินไม่พอ · 'atCeiling' ชนเพดานบ้าน · 'maxed' ครบ 15
+ * reason: 'ok' ปลดได้ · 'notEnoughCoins' เงินไม่พอ · 'atCeiling' ชนเพดานบ้าน · 'maxed' ครบ MAX_PLOTS
  */
 export function nextPlotInfo({ plotsUnlocked, ceiling, coins }) {
   const owned = Math.max(1, Math.floor(Number(plotsUnlocked) || 1))

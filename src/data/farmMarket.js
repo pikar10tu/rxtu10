@@ -18,9 +18,23 @@
 //   บัวหลวง (lotus)          ดอกไหว้พระ · เกสรอยู่ในตำรับยาหอม  ไพล (sunflower)     ครีมไพล เคล็ดขัดยอก ฟกช้ำ · ลูกประคบ
 //   มะขามป้อม (moneytree)   แก้ไอ ชุ่มคอ · วิตามินซีสูง
 
-const ALL = ['lettuce', 'tomato', 'corn', 'potato', 'strawberry', 'chili', 'eggplant', 'melon', 'mushroom', 'herb', 'ginseng', 'pumpkin', 'glowflower', 'lotus', 'sunflower', 'moneytree']
-const DRINK = ['corn', 'strawberry', 'mushroom', 'glowflower']          // ทำเครื่องดื่มได้จริง
-const FOOD = ['tomato', 'corn', 'ginseng', 'lotus']                     // ใช้ทำอาหารจริง (ขมิ้น ขิง แกงขี้เหล็ก เมล็ด/รากบัว)
+import { getCrop } from './crops.js'
+
+const ALL = ['lettuce', 'tomato', 'corn', 'potato', 'strawberry', 'chili', 'eggplant', 'melon', 'mushroom', 'herb', 'ginseng', 'pumpkin', 'glowflower', 'lotus', 'sunflower', 'moneytree',
+  'clinacanthus', 'garlic', 'thunbergia', 'solanum', 'catswhisker', 'tinospora', 'capsicum', 'annona', 'bittergourd', 'flowergrass', 'clove', 'derris']
+const DRINK = ['corn', 'strawberry', 'mushroom', 'glowflower', 'thunbergia']   // ทำเครื่องดื่มได้จริง (ชารางจืด)
+const FOOD = ['tomato', 'corn', 'ginseng', 'lotus', 'garlic', 'capsicum', 'bittergourd', 'clove']   // ใช้ทำอาหาร/เครื่องเทศจริง
+const GAS = ['garlic', 'corn', 'tomato']              // ขับลม บรรเทาท้องอืดท้องเฟ้อ
+
+// ⚠️ เพิ่มเรื่อง/พืชใหม่ = สุ่มทั้งไทม์ไลน์ใหม่ → ข่าววันนี้ (ที่โพสต์ไปแล้ว) จะเปลี่ยน
+//    กันด้วย "since": ของใหม่ใช้ได้เฉพาะเรื่องที่เริ่มตั้งแต่วันนั้น · ของเดิมไม่มี since = ใช้ได้ตั้งแต่ต้น
+//    เพิ่มของรอบหน้า: ตั้ง since เป็น "มะรืน" ของวันที่ push (วันนี้โชว์คำใบ้ของพรุ่งนี้ไปแล้ว) · เทสต์ "ไทม์ไลน์เดิมไม่เปลี่ยน" คุมอยู่
+const SINCE_V2 = 20780   // marketDayNo ของ 23 พ.ย. 2026 (ไทย) — พืชขั้น 13–20 + เรื่องชุดที่ 2 · push 21 พ.ย.
+const CROP_SINCE = Object.fromEntries(['clinacanthus', 'garlic', 'thunbergia', 'solanum', 'catswhisker', 'tinospora', 'capsicum', 'annona', 'bittergourd', 'flowergrass', 'clove', 'derris'].map(id => [id, SINCE_V2]))
+const cropOk = (id, day) => (CROP_SINCE[id] || 0) <= day
+// (สรรพคุณขั้น 13–20: เสลดพังพอน ทาเริม งูสวัด แมลงกัด · กระเทียม ขับลม · รางจืด ถอนพิษ แก้ร้อนใน · มะแว้ง แก้ไอ
+//  หญ้าหนวดแมว ขับปัสสาวะ · บอระเพ็ด แก้ไข้ เจริญอาหาร · พริก ครีมปวดกล้ามเนื้อ · น้อยหน่า กำจัดเหา
+//  มะระขี้นก เจริญอาหาร · หญ้าดอกขาว ลดอยากบุหรี่ · กานพลู ปวดฟัน · เถาวัลย์เปรียง ปวดกล้ามเนื้อ ปวดข้อ)
 const LAX = ['eggplant', 'melon']                                       // ยาระบาย
 const RUB = ['sunflower']                                               // นวด/ประคบ เคล็ดขัดยอก
 const SKIN = ['potato']                                                 // ทาผิวไหม้แดด
@@ -34,7 +48,7 @@ export const ARCS = [
     { icon: '🌊', head: 'น้ำท่วมแหล่งปลูกต่อเนื่อง {a}ยังแพง {b}เริ่มขาด', body: 'สวนที่น้ำไม่ท่วมกลายเป็นที่พึ่งเดียวของตลาด', boost: [['a', 40], ['b', 30]], tease: 'น้ำเริ่มเอ่อเข้าแหล่งปลูก{b} นักวิเคราะห์เตือนราคาอาจตามมา' },
     { icon: '🌤️', head: 'ฟ้าเปิดแล้ว สวนเริ่มฟื้นตัว', body: 'ราคา{a}อ่อนลงแต่ยังสูงกว่าปกติ เก็บตกโค้งสุดท้าย', boost: [['a', 20]], tease: 'พายุเริ่มสลาย ราคา{a}น่าจะค่อยๆ ลง แต่ยังไม่ทันที' },
   ] },
-  { id: 'cold', crops: { a: ['lettuce'], b: ['moneytree'] }, steps: [
+  { id: 'cold', crops: { a: ['lettuce'], b: ['moneytree', 'solanum'] }, steps: [
     { icon: '🌬️', head: 'ลมหนาวมาเร็วกว่าทุกปี คนทั้งเมืองเริ่มไอจาม', body: 'คลินิกคึกคัก ร้านยาสั่ง{a}ตุนไว้ล่วงหน้า เพราะใช้บรรเทาอาการเจ็บคอจากหวัด', boost: [], tease: 'ลมหนาวกำลังมา ร้านยาคาดว่าจะต้องใช้{a}มากขึ้น' },
     { icon: '😷', head: 'หวัดระบาดทั่วเมือง! {a}ถูกกว้านซื้อเกลี้ยงแผง', body: 'ร้านยาทั่วประเทศโทรตามหาทุกสวน', boost: [['a', 80]], tease: 'หวัดเริ่มลามหลายจังหวัด คาดว่าพรุ่งนี้{a}จะขาดตลาด' },
     { icon: '🍯', head: 'ไอกันทั้งบ้าน ยาอม{b}ขายดีตาม', body: '{b}ใช้แก้ไอ ช่วยให้ชุ่มคอ ร้านยาสั่งเพิ่มสองเท่า ส่วน{a}ราคายังยืน', boost: [['b', 50], ['a', 30]], tease: 'ช่วงหวัดมักตามด้วยอาการไอ นักวิเคราะห์ชี้{b}จะมาแรงต่อ' },
@@ -44,7 +58,7 @@ export const ARCS = [
     { icon: '📺', head: 'รีวิวมาแล้ว! สินค้าจาก{a}ของดาราดังไวรัลทั้งประเทศ', body: 'แม่ค้าออนไลน์แห่ตุน ยอดสั่งพุ่งข้ามคืน', boost: [['a', 100]], tease: 'คลิปรีวิวจะปล่อยพรุ่งนี้ นักวิเคราะห์ฟันธง{a}ราคาพุ่งแน่' },
     { icon: '🛍️', head: 'ร้านดังแห่ออกเมนูใหม่ {a}คู่กับ{b}', body: 'กระแสยังไม่ซา ร้านค้าขอ{b}เพิ่มด่วน', boost: [['a', 40], ['b', 40]], tease: 'มีข่าวลือร้านดังจะออกเมนู{a}คู่{b} จับตาราคา{b}' },
   ] },
-  { id: 'research', crops: { a: ['lettuce', 'tomato', 'corn', 'chili', 'sunflower', 'moneytree', 'pumpkin'] }, steps: [
+  { id: 'research', crops: { a: ['lettuce', 'tomato', 'corn', 'chili', 'sunflower', 'moneytree', 'pumpkin', 'capsicum', 'catswhisker', 'flowergrass', 'clove'] }, steps: [
     { icon: '🧪', head: 'ทีมวิจัยนัดแถลงข่าวพรุ่งนี้เรื่อง{a}', body: 'วงการยาจับตา คาดว่าเป็นข่าวดีของสมุนไพรไทย', boost: [], tease: 'ทีมวิจัยนัดแถลงข่าวเรื่อง{a} นักวิเคราะห์คาดว่าราคาจะขยับ' },
     { icon: '📰', head: 'โรงงานผลิตยาสมุนไพรขยายไลน์ผลิต{a}', body: 'สั่งวัตถุดิบยกล็อตจากทุกสวน ราคากระโดดทันที', boost: [['a', 70]], tease: 'แถลงข่าวเรื่อง{a}พรุ่งนี้ ตลาดเตรียมรับแรงซื้อ' },
   ] },
@@ -85,13 +99,13 @@ export const ARCS = [
   { id: 'chef', crops: { a: FOOD.concat(['glowflower']) }, steps: [
     { icon: '🧑‍🍳', head: 'เชฟดังจอง{a}ยกล็อตทำเมนูใหม่', body: 'ร้านอาหารรายอื่นต้องเข้าคิวรอของ', boost: [['a', 70]], tease: 'เชฟดังกำลังทดลองเมนูใหม่ วัตถุดิบหลักคือ{a}' },
   ] },
-  { id: 'cream', crops: { a: ['chili', 'herb', 'sunflower'] }, steps: [
+  { id: 'cream', crops: { a: ['chili', 'herb', 'sunflower', 'capsicum', 'clinacanthus'] }, steps: [
     { icon: '🏭', head: 'โรงงานยาทาสมุนไพรเร่งผลิตล็อตใหญ่', body: 'ต้องใช้{a}เป็นวัตถุดิบหลัก ประกาศรับซื้อไม่อั้น', boost: [['a', 60]], tease: 'โรงงานยาทาสมุนไพรเตรียมเปิดไลน์ใหม่ จับตา{a}' },
   ] },
   { id: 'gym', crops: { a: RUB }, steps: [
     { icon: '🏋️', head: 'ฟิตเนสเปิดใหม่ทั่วเมือง คนออกกำลังกันคึกคัก', body: 'มือใหม่ปวดเมื่อยกันเพียบ ครีม{a}ที่ใช้บรรเทาฟกช้ำเคล็ดขัดยอกขายดี', boost: [['a', 50]], tease: 'ฟิตเนสหลายที่จะเปิดตัวพร้อมกัน คนน่าจะปวดเมื่อยกันเยอะ' },
   ] },
-  { id: 'clinic', crops: { a: ['pumpkin', 'chili', 'herb', 'tomato'] }, steps: [
+  { id: 'clinic', crops: { a: ['pumpkin', 'chili', 'herb', 'tomato', 'catswhisker', 'tinospora', 'solanum'] }, steps: [
     { icon: '🏥', head: 'โรงพยาบาลการแพทย์แผนไทยสั่ง{a}ล็อตใหญ่', body: 'ประกาศรับซื้อทุกกิโล ไม่อั้น', boost: [['a', 60]], tease: 'มีข่าวโรงพยาบาลแผนไทยเตรียมสั่ง{a}เพิ่ม' },
   ] },
   { id: 'gift', crops: { a: ['moneytree', 'glowflower', 'lotus', 'corn'], b: ['moneytree', 'glowflower', 'lotus', 'corn'] }, steps: [
@@ -107,6 +121,34 @@ export const ARCS = [
   ] },
   { id: 'app', crops: { a: DRINK }, steps: [
     { icon: '🛵', head: 'แอปเดลิเวอรี่จัดแคมเปญเครื่องดื่ม{a}', body: 'ไรเดอร์ต่อคิวรับของหน้าร้านตั้งแต่เช้า', boost: [['a', 50]], tease: 'แอปเดลิเวอรี่เตรียมแคมเปญใหม่ เมนูเด่นคือ{a}' },
+  ] },
+  { id: 'bloat', since: SINCE_V2, crops: { a: GAS }, steps: [
+    { icon: '🍽️', head: 'บุฟเฟต์เปิดใหม่ลดครึ่งราคา คนต่อคิวรอบตึก', body: 'กินกันจนท้องอืด ร้านยาเติม{a}ที่ใช้ขับลมแก้ท้องอืดท้องเฟ้อ', boost: [['a', 50]], tease: 'บุฟเฟต์ใหญ่จะเปิดโปรลดครึ่งราคา คาดว่าคนจะหาของแก้ท้องอืดอย่าง{a}' },
+  ] },
+  { id: 'quit', since: SINCE_V2, crops: { a: ['flowergrass'] }, steps: [
+    { icon: '🚭', head: 'แคมเปญเลิกบุหรี่ระดับประเทศเริ่มวันนี้', body: 'คนแห่หาชา{a} ที่ใช้ช่วยลดความอยากบุหรี่ ร้านยาเติมของไม่ทัน', boost: [['a', 70]], tease: 'แคมเปญเลิกบุหรี่ระดับประเทศใกล้เริ่ม คาดว่าชา{a}จะขายดี' },
+  ] },
+  { id: 'tooth', since: SINCE_V2, crops: { a: ['clove'] }, steps: [
+    { icon: '🦷', head: 'คลินิกทันตกรรมหยุดยาวพร้อมกันทั้งเมือง', body: 'คนปวดฟันกลางดึกหาน้ำมัน{a}ที่ใช้บรรเทาปวดฟันระหว่างรอหมอ', boost: [['a', 60]], tease: 'คลินิกฟันหลายแห่งประกาศหยุดยาว ร้านยาคาดว่าน้ำมัน{a}จะขายดี' },
+  ] },
+  { id: 'somtam', since: SINCE_V2, crops: { a: ['capsicum'], b: ['garlic'] }, steps: [
+    { icon: '🥗', head: 'ส้มตำติดอันดับอาหารดังของโลกอีกรอบ', body: 'นักท่องเที่ยวแห่ลองส้มตำ ร้านสั่ง{a}และ{b}เพิ่มสองเท่า', boost: [['a', 50], ['b', 40]], tease: 'สื่อต่างชาติกำลังจะประกาศอันดับอาหารดังของโลก ร้านส้มตำเตรียมตุน{a}' },
+  ] },
+  { id: 'lice', since: SINCE_V2, crops: { a: ['annona'] }, steps: [
+    { icon: '🎒', head: 'โรงเรียนหลายแห่งเจอเหาระบาดช่วงเปิดเทอม', body: 'ผู้ปกครองแห่หาโลชั่น{a}ที่ใช้กำจัดเหา ร้านยาหน้าโรงเรียนของหมด', boost: [['a', 60]], tease: 'ใกล้เปิดเทอมแล้ว ร้านยาเตรียมสต็อกโลชั่น{a}ไว้กำจัดเหา' },
+  ] },
+  { id: 'rainy', since: SINCE_V2, crops: { a: ['clinacanthus'] }, steps: [
+    { icon: '🦟', head: 'เข้าหน้าฝน ยุงชุมทั้งเมือง', body: 'คนแห่หาครีม{a}ที่ใช้ทาผื่นคันจากแมลงกัด', boost: [['a', 50]], tease: 'กรมอุตุฯ บอกว่าฤดูฝนจะมาเร็ว คาดว่าครีม{a}จะขายดี' },
+  ] },
+  { id: 'office', since: SINCE_V2, crops: { a: ['derris'] }, steps: [
+    { icon: '💻', head: 'มนุษย์ออฟฟิศทำงานหนักปิดงบปลายปี ปวดหลังกันทั้งตึก', body: 'ร้านยาขายแคปซูล{a}ที่ใช้บรรเทาปวดกล้ามเนื้อจนหมดชั้น', boost: [['a', 50]], tease: 'ใกล้ปิดงบปลายปี พนักงานออฟฟิศน่าจะปวดเมื่อยกันเยอะ จับตา{a}' },
+  ] },
+  { id: 'teashop', since: SINCE_V2, crops: { a: ['thunbergia'] }, steps: [
+    { icon: '🫖', head: 'ร้านชาสมุนไพรดังออกเมนูชา{a}', body: 'ตำรายาไทยใช้{a}แก้ร้อนใน คนรักสุขภาพต่อคิวลอง', boost: [['a', 50]], tease: 'มีข่าวร้านชาดังกำลังทดลองเมนูชา{a}' },
+  ] },
+  { id: 'bitter', since: SINCE_V2, crops: { a: ['bittergourd'], b: ['tinospora'] }, steps: [
+    { icon: '🍜', head: 'เทรนด์อาหารรสขมมาแรงในโซเชียล', body: 'ร้านอาหารเพื่อสุขภาพเสิร์ฟผัด{a}จนของขาด', boost: [['a', 50]], tease: 'เชฟสายสุขภาพเริ่มพูดถึงเมนูรสขม จับตา{a}' },
+    { icon: '😖', head: 'ชาเลนจ์ชิมของขมสุดในไทย {b}ชนะขาดลอย', body: 'คนแห่ซื้อ{b}ไปลองชิม ส่วน{a}ยังขายดีต่อ', boost: [['b', 60], ['a', 30]], tease: 'มีคนเปิดชาเลนจ์ชิมของขม ว่ากันว่า{b}ขมที่สุด' },
   ] },
   { id: 'market', crops: { a: ALL, b: ALL }, steps: [
     { icon: '🏪', head: 'ตลาดนัดสมุนไพรใหญ่ประจำปีเปิดสามวัน', body: 'วันแรกของขายดีสุดคือ{a}', boost: [['a', 40]], tease: 'ตลาดนัดสมุนไพรประจำปีใกล้เปิด คาดว่า{a}จะเป็นของขายดี' },
@@ -139,6 +181,13 @@ export const EPOCH_DAY = marketDayNo(Date.UTC(2026, 10, 20, 17))   // 21 พ.ย
 
 // ไทม์ไลน์: เรื่องต่อเรื่องจาก EPOCH · cache ไว้ (เดินซ้ำทุกเรนเดอร์ไม่จำเป็น)
 const plans = []   // [{ start, arc, crops }]
+// น้ำหนัก = 1/√(เลเวลปลดล็อก) — Lv1 = 1 · Lv4 = .5 · Lv16 = .25 ⇒ พืชต้นออกบ่อยกว่าแต่ตัวท้ายยังมีโอกาส
+const weighted = (list, u) => {
+  const w = list.map(id => 1 / Math.sqrt(getCrop(id)?.unlockLevel || 1))
+  let x = u * w.reduce((s, v) => s + v, 0)
+  for (let i = 0; i < list.length; i++) { x -= w[i]; if (x < 0) return list[i] }
+  return list[list.length - 1]
+}
 const RECENT = 10  // ต้องน้อยกว่าจำนวนเรื่องใน ARCS พอสมควร
 function arcAt(k) {
   if (plans[k]) return plans[k]
@@ -147,11 +196,13 @@ function arcAt(k) {
   // กันเรื่องซ้ำถี่: ไม่เอาเรื่องที่ออกไปใน RECENT เรื่องล่าสุด (ข่าวแล้งโผล่สองรอบในห้าวันดูแปลก)
   const recent = new Set()
   for (let j = Math.max(0, k - RECENT); j < k; j++) recent.add(arcAt(j).arc.id)
-  const pool = ARCS.filter(x => !recent.has(x.id))
+  const pool = ARCS.filter(x => !recent.has(x.id) && (x.since || 0) <= start)
   const arc = pool[Math.floor(r() * pool.length)]
-  const a = arc.crops.a[Math.floor(r() * arc.crops.a.length)]
-  const bPool = (arc.crops.b || []).filter(x => x !== a)
-  const b = bPool.length ? bPool[Math.floor(r() * bPool.length)] : null
+  const aPool = arc.crops.a.filter(id => cropOk(id, start))
+  const pick = (list) => (start >= SINCE_V2 ? weighted(list, r()) : list[Math.floor(r() * list.length)])
+  const a = pick(aPool)
+  const bPool = (arc.crops.b || []).filter(x => x !== a && cropOk(x, start))
+  const b = bPool.length ? pick(bPool) : null
   return (plans[k] = { start, arc, crops: { a, b } })
 }
 function planOf(day) {
@@ -181,8 +232,8 @@ export function marketOf(day, nameOf) {
   if (!boosts.length) {
     const r = rng(hash('short-' + day))
     const sh = SHORTS[Math.floor(r() * SHORTS.length)]
-    const pool = ALL.filter(id => id !== p.crops.a && id !== p.crops.b)
-    const id = pool[Math.floor(r() * pool.length)]
+    const pool = ALL.filter(id => id !== p.crops.a && id !== p.crops.b && cropOk(id, day))
+    const id = day >= SINCE_V2 ? weighted(pool, r()) : pool[Math.floor(r() * pool.length)]
     short = `${sh[0]} ${sh[1].replaceAll('{a}', nameOf(id))}`
     boosts = [{ id, pct: [30, 40, 50][Math.floor(r() * 3)] }]
   }

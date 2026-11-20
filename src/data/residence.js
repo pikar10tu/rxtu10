@@ -3,7 +3,7 @@
 // ════════════════════════════════════════════════════════════
 //  Narrative arc: สู้ชีวิต → สร้างตัว → ประสบความสำเร็จ → (อนาคต) เหนือระดับ
 //  15 tiers ปลดครบแล้ว (25 ก.ย. 2026 user สั่งขยายเพดาน 12 → 15 พร้อมชื่อใหม่ 13–15)
-//  แปลงฟาร์มขยายถึง 15 แล้ว (28 ก.ย. 2026) — ชั้น 13–15 ปลดแปลง 13/14/15
+//  แปลงฟาร์มขยายถึง 15 แล้ว (28 ก.ย. 2026) — ชั้น 13–15 ปลดแปลง 13/14/15 · 21 พ.ย. 2026 ขยายถึง 20 (ชั้น 16–20 +1 แปลง/ขั้น)
 //  `residence.level` drives daily income, farm plots, pet-income bonus %,
 //  (battle slots ไม่ผูกเลเวลแล้ว = BATTLE_SLOTS คงที่ 3 · field `battleSlots` ในตารางเป็น legacy)
 //  market unlock, seed tier, shop discount, art/frame. All numbers tunable.
@@ -30,11 +30,11 @@ export const RESIDENCE_TIERS = [
   { level: 14, tierName: 'มหานครใต้บาดาล',           art: '🔱', upgradeCost: 1900000, dailyIncome: 100000, plots: 14, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 7, frameColor: '#a21caf' },
   { level: 15, tierName: 'สวนสวรรค์เหนือน่านฟ้า',     art: '☁️', upgradeCost: 3200000, dailyIncome: 140000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#fbbf24' },
   // ── 🌌 เหนือจักรวาล (20 พ.ย. 2026 ขยาย 15 → 20) · ราคาคงที่ 3.2M/ขั้น · รายได้ +10k/ขั้น · perk อื่นเท่าขั้น 15 ──
-  { level: 16, tierName: 'วิมานบนดวงจันทร์',           art: '🌙', upgradeCost: 3200000, dailyIncome: 150000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#a78bfa' },
-  { level: 17, tierName: 'สถานีอวกาศแห่งดวงดาว',      art: '🛸', upgradeCost: 3200000, dailyIncome: 160000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#60a5fa' },
-  { level: 18, tierName: 'วังคริสตัลวงแหวนดาวเสาร์',   art: '🪐', upgradeCost: 3200000, dailyIncome: 170000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#e879f9' },
-  { level: 19, tierName: 'มหานครเนบิวลาสีรุ้ง',         art: '🌌', upgradeCost: 3200000, dailyIncome: 180000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#f472b6' },
-  { level: 20, tierName: 'อาณาจักรสุริยะนิรันดร์',      art: '☀️', upgradeCost: 3200000, dailyIncome: 190000, plots: 15, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#facc15' },
+  { level: 16, tierName: 'วิมานบนดวงจันทร์',           art: '🌙', upgradeCost: 3200000, dailyIncome: 150000, plots: 16, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#a78bfa' },
+  { level: 17, tierName: 'สถานีอวกาศแห่งดวงดาว',      art: '🛸', upgradeCost: 3200000, dailyIncome: 160000, plots: 17, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#60a5fa' },
+  { level: 18, tierName: 'วังคริสตัลวงแหวนดาวเสาร์',   art: '🪐', upgradeCost: 3200000, dailyIncome: 170000, plots: 18, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#e879f9' },
+  { level: 19, tierName: 'มหานครเนบิวลาสีรุ้ง',         art: '🌌', upgradeCost: 3200000, dailyIncome: 180000, plots: 19, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#f472b6' },
+  { level: 20, tierName: 'อาณาจักรสุริยะนิรันดร์',      art: '☀️', upgradeCost: 3200000, dailyIncome: 190000, plots: 20, battleSlots: 4, marketUnlocked: true, maxSeedTier: 'legendary', eggSlots: 8, frameColor: '#facc15' },
 ]
 
 export const MIN_RESIDENCE_LEVEL = 1
