@@ -21,8 +21,10 @@ for (const line of fs.readFileSync(path.join(ART, 'APPROVED.md'), 'utf8').split(
   const m = line.match(/inbox\/parts\/([\w.-]+\.js)`?\s*:\s*(.+)$/)
   if (!m) continue
   const parts = Object.fromEntries(load(m[1]).map(p => [p.id, p]))
-  for (const id of [...m[2].matchAll(/`([a-z]+\d+)`/g)].map(x => x[1])) {
-    const p = parts[id]
+  // ไอดีทดลอง `h53_exp` → ลงเว็บเป็น `h53` (ตัด _exp) · Set กันไอดีซ้ำจากคำอธิบายท้ายบรรทัด
+  for (const raw of new Set([...m[2].matchAll(/`([a-z]+\d+(?:_exp)?)`/g)].map(x => x[1]))) {
+    const id = raw.replace(/_exp$/, '')
+    const p = parts[raw] && { ...parts[raw], id }
     if (!p) { problems.push(`${id}: ไม่พบใน ${m[1]}`); continue }
     const { id: _, slot, theme, label, ...draw } = p
     if (PART[id] && !artById[id]) {

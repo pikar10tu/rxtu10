@@ -16,9 +16,10 @@ function apply(g, ops, pal, mirror, onlyEmpty, off) {
   const [ox, oy] = off || [0, 0]
   const put = (x0, y0, ch, mir) => {
     const x = x0 + (mir ? -ox : ox) + XM, y = y0 + oy     // ฝั่งสะท้อนเลื่อน x กลับด้าน (ปีกซ้าย-ขวาเท่ากัน) · +XM = ลงกรอบรวม
-    if (ch === '.' || x < 0 || x >= FW || y < 0 || y >= H) return
-    if (onlyEmpty && g[y][x]) return
-    g[y][x] = pal[ch] || ch
+    if (ch === '.' || x < 0 || x >= FW || y < -PAD || y >= H) return
+    const row = y < 0 ? g.top[y + PAD] : g[y]     // y -4..-1 = เหนือหัวในขอบ PAD (ผมตั้ง 21 พ.ย.)
+    if (onlyEmpty && row[x]) return
+    row[x] = pal[ch] || ch
   }
   const one = (op, mir) => {
     if (op[0] === 'r') {
@@ -67,8 +68,8 @@ function applySticker(g, st, layer, pal) {
   const [axb, ayb] = ANCH[st.at] || [0, 0]
   const put = (bx, by, ch) => {
     const x = bx + XM
-    if (ch === '.' || x < 0 || x >= FW || by < 0 || by >= H) return
-    g[by][x] = pal[ch] || ch
+    if (ch === '.' || x < 0 || x >= FW || by < -PAD || by >= H) return
+    ;(by < 0 ? g.top[by + PAD] : g[by])[x] = pal[ch] || ch
   }
   rows.forEach((row, sy) => {
     for (let sx = 0; sx < row.length; sx++) {
@@ -84,6 +85,7 @@ const HAND = [[26, 26], [27, 26], [26, 27], [27, 27]]   // มือขวา (�
 
 export function composeWide(eq, { bare = false } = {}) {
   const g = Array.from({ length: H }, () => Array(FW).fill(null))
+  g.top = Array.from({ length: PAD }, () => Array(FW).fill(null))   // แถวเหนือหัว (y<0) — render() วาดลงขอบใสด้านบน
   const skin = SKINS.find(s => s.id === eq.s) || SKINS[1]
   const hair = HAIRC.find(c => c.id === eq.c) || HAIRC[0]
   const glob = { S: skin.S, s: skin.s, H: hair.H, h: hair.h, L: hair.L, K: INK, W: '#FFFFFF', C: '#FFB3A7', M: '#D9665F' }
@@ -146,7 +148,8 @@ export function outline(g) {
 // 19 พ.ย. 2026 (user เลือกแบบ 3 จากรูปเทียบ docs/doll-prototype/outline-compare4.png): ไม่มีขอบเลย — น่ารักกว่า ผมไม่พอง
 // (ขอบสร้างความหนาเพิ่ม 1 px รอบตัว ทรงผมเลยดูพอง) · ของที่มีออร่า (เรือง/ประกาย) มีขอบแสงในตัวอยู่แล้ว
 // เว้นขอบใส (PAD) ไว้เท่าเดิม ขนาดกรอบทุกหน้าไม่เปลี่ยน · outline() เก็บไว้เผื่อใช้ทำสติกเกอร์
-export const pad = (g) => ({ w: g[0].length + PAD * 2, h: g.length + PAD * 2, px: Array.from({ length: g.length + PAD * 2 }, (_, y) => Array.from({ length: g[0].length + PAD * 2 }, (_, x) => g[y - PAD]?.[x - PAD] || null)) })
+// ขอบบนรับพิกเซล y<0 จาก g.top (ทรงผมตั้ง h53–h58 · 21 พ.ย.) — กรอบยังเท่าเดิม
+export const pad = (g) => ({ w: g[0].length + PAD * 2, h: g.length + PAD * 2, px: Array.from({ length: g.length + PAD * 2 }, (_, y) => Array.from({ length: g[0].length + PAD * 2 }, (_, x) => (y < PAD ? g.top?.[y]?.[x - PAD] : g[y - PAD]?.[x - PAD]) || null)) })
 export const render = eq => pad(composeWide(eq))
 
 // 🧺 รูปย่อในห้องแต่งตัว (19 พ.ย. 2026 · user: ในช่องเลือกของให้เห็นแค่ของ ไม่ต้องมีคนทั้งตัว)
@@ -166,8 +169,9 @@ export function renderThumb(id, eq = {}) {
   if (!p) return bare([[null]])
   if (FACE_THUMB.includes(p.slot)) {
     const g = composeWide({ s: eq.s, c: eq.c, h: eq.h || 'h1', e: eq.e || 'e1', m: eq.m || 'm1', j: eq.j, [p.slot]: id })
-    return bare(crop(g.slice(0, 17).map(r => r.slice(XM + 11, XM + 29))))
+    return bare(crop([...g.top, ...g.slice(0, 17)].map(r => r.slice(XM + 11, XM + 29))))
   }
   const one = { s: eq.s, c: eq.c, [p.slot]: id }
-  return bare(crop(composeWide(one, { bare: true })))
+  const g = composeWide(one, { bare: true })
+  return bare(crop([...g.top, ...g]))
 }
