@@ -34,6 +34,15 @@
         <!-- ── หน้าแรกแบบจัดกลุ่ม (user เคาะ 11 พ.ย. 2026): ทำวันนี้ → ฝึกทำ → อ่าน+ค้น → ผลฝึก ── -->
         <template v-else>
           <!-- เตรียมสอบแบบ A (user เคาะ 20 พ.ย. 2026): เป็นคลังล้วน · "ทำวันนี้" ย้ายไปอยู่หน้าแรกที่เดียว (เดิมซ้ำ 2 ที่) -->
+          <!-- 🌅 ข้อสอบประจำวัน — แบนเนอร์ยาวบนหัวข้อฝึกทำ (user 20 พ.ย. 2026 · เดิมอยู่ในกล่องทำวันนี้ที่ย้ายออกไป) -->
+          <button type="button" class="sv-daily" :class="{ done: playedToday }" @click="openDoor('daily')">
+            <span class="sv-daily-em"><Emoji char="🌅" /></span>
+            <span class="sv-daily-t">
+              <b>ข้อสอบประจำวัน</b>
+              <small>{{ playedToday ? 'วันนี้เล่นแล้ว · ดูอันดับในรุ่น' : '5 ข้อวันละรอบ · ลุ้นท็อป 10 ของรุ่น' }}</small>
+            </span>
+            <span class="sv-daily-go">{{ playedToday ? 'ดูอันดับ ›' : 'เล่นเลย ›' }}</span>
+          </button>
           <div class="sv-sec-h"><Emoji char="✍️" /> ฝึกทำ <span class="sv-days">อีก {{ daysLeft }} วันสอบ</span></div>
           <div class="sv-doors big">
             <button v-for="d in PRACTICE" :key="d.key" type="button" class="sv-door" :class="'d-' + d.key" @click="openDoor(d.key)">
@@ -334,7 +343,7 @@ const DOORS = computed(() => [
 ])
 const doorOf = (k) => DOORS.value.find(d => d.key === k) || DOORS.value[0]
 const pick = (...keys) => keys.map(k => doorOf(k))
-const PRACTICE = computed(() => pick('quiz', 'cc2').map(d => (d.key === 'quiz' ? { ...d, badge: 0 } : d)))   // เลขข้อผิดอยู่ในแถบทำวันนี้แล้ว
+const PRACTICE = computed(() => pick('quiz', 'cc2'))   // ป้ายเลขบนข้อสอบ = ข้อที่ผิดรอทบทวน (แถบทำวันนี้ถูกถอดแล้ว 20 พ.ย.)
 const READ = computed(() => pick('sum', 'drug', 'tool').map(d => ({ ...d, ...READ_TILE[d.key] })))
 const READ_TILE = {
   sum: { tile: `${SUMMARIES.filter(x => x.ready).length} เรื่อง` },
@@ -601,6 +610,16 @@ async function sendReport() {
 </script>
 
 <style scoped>
+.sv-daily { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0 0 14px; border: var(--bw) solid var(--line); border-radius: 18px;
+  background: linear-gradient(120deg, #ffe7c2, #ffd3e2 60%, #e3e6ff); box-shadow: var(--pop); font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+.sv-daily:active { transform: translateY(1px); }
+.sv-daily.done { background: linear-gradient(120deg, #fff4e3, #fbe9f0 60%, #eef0ff); }
+.sv-daily-em { font-size: 1.9rem; line-height: 1; flex: none; }
+.sv-daily-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.sv-daily-t b { font-size: 1rem; font-weight: 800; }
+.sv-daily-t small { font-size: .74rem; color: var(--muted); font-weight: 700; }
+.sv-daily-go { flex: none; font-size: .8rem; font-weight: 800; color: #fff; background: #f08a4b; border-radius: 999px; padding: 6px 12px; }
+.sv-daily.done .sv-daily-go { background: #fff; color: var(--primary-dark); border: var(--bw) solid var(--line); }
 .sv-head { margin-bottom: 14px; }
 .sv-head-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .sv-title { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }

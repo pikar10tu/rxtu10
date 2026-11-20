@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import { collection, getDocs, getDoc, doc, setDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { collection, getDocsFromServer, getDoc, doc, setDoc, serverTimestamp, increment } from 'firebase/firestore'
 import { getCosmetic } from '../data/cosmetics.js'
 import { SETS } from '../data/dollParts.js'
 import { db } from '../firebase/config.js'
@@ -92,7 +92,11 @@ async function grantMilestone(achId) {
     await auth.patchUser({ achievementCount: (auth.userData?.achievementCount || 0) + 1 },
       { achievementCount: increment(1) })
     return true
-  } catch (e) { console.error('[achievement grant]', e); earned.delete(achId); return false }
+  } catch (e) {
+    // create-only: ปฏิเสธ = มี doc นี้อยู่แล้ว (ได้ไปแล้วจริง) → ถือว่าได้แล้ว ไม่ต้องลองซ้ำ ไม่ต้องโวย
+    if (e?.code === 'permission-denied') return false
+    console.error('[achievement grant]', e); earned.delete(achId); return false
+  }
 }
 
 /** เช็คแล้วปลดทุกอันที่เข้าเกณฑ์ · announce=false = backfill เงียบ */
@@ -106,7 +110,10 @@ async function grantAll(u, announce) {
 async function loadEarned(uid) {
   earned.clear()
   const usage = useUsageStore()
-  const snap = await getDocs(collection(db, 'users', uid, 'achievements'))
+  // ⚠️ ต้องอ่านจากเซิร์ฟเวอร์เท่านั้น: เน็ตหลุดตอนเปิดแอป getDocs จะคืน "แคชในเครื่อง" ซึ่งอาจไม่ครบ
+  //    ⇒ ระบบคิดว่ายังไม่เคยได้ → ยิง create ซ้ำ → rules (create-only) ปฏิเสธ = error เต็ม console (เจอ 20 พ.ย. 2026)
+  //    อ่านไม่ได้ = throw ⇒ loadedFor ยังเป็น null ⇒ ไม่ปลดอะไร แล้วค่อยลองใหม่
+  const snap = await getDocsFromServer(collection(db, 'users', uid, 'achievements'))
   usage.track(snap.size)
   snap.forEach(d => earned.add(d.data().achId || d.id))
 }
@@ -150,8 +157,18 @@ export function initAchievements() {
       if (auth.currentUser?.uid !== uid) return        // สลับบัญชีระหว่างโหลด
       loadedFor = uid
       await check()                                    // userData มาแล้ว = backfill เงียบเลย · ยังไม่มา = รอ watcher ข้างล่าง
-    } catch (e) { console.error('[achievement init]', e) }
+    } catch (e) {
+      console.warn('[achievement init] โหลดไม่ได้ (เน็ต?) ลองใหม่ใน 20 วิ', e?.code || e)
+      setTimeout(() => { if (auth.currentUser?.uid === uid && loadedFor !== uid) retryInit(uid) }, 20000)
+    }
   }, { immediate: true })
+  async function retryInit(uid) {
+    try {
+      await loadEarned(uid); await loadReviewedCount(uid)
+      if (auth.currentUser?.uid !== uid) return
+      loadedFor = uid; await check()
+    } catch { setTimeout(() => { if (auth.currentUser?.uid === uid && loadedFor !== uid) retryInit(uid) }, 60000) }
+  }
 
   // userData เปลี่ยน → เช็ค (ครั้งแรกเงียบ · หลังจากนั้นประกาศ)
   watch(() => auth.userData, () => { check() }, { deep: true })
