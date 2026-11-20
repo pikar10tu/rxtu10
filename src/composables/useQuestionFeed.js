@@ -45,5 +45,17 @@ export function useQuestionFeed() {
     return quizSample(first, wrap, n).filter(q => Array.isArray(q.choices) && q.choices.length >= 2)
   }
 
-  return { fetchQuestions }
+  /**
+   * โหลดข้อ published ทั้งชุดย้อนหลัง (ชุดละ ~100–350 ข้อ) — ใช้กรองชุด × หมวด/กลุ่มโรคฝั่งเครื่อง
+   * (เพื่อนขอ 20 พ.ย.: เลือกชุดแล้วเจาะเรื่องได้) · ไม่ต้องเพิ่ม composite index
+   */
+  async function fetchSetPool(examSet) {
+    const snap = await getDocs(query(collection(db, 'questions'),
+      where('isPublished', '==', true), where('examSets', 'array-contains', examSet)))
+    usage.track(snap.size)
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(q => Array.isArray(q.choices) && q.choices.length >= 2)
+  }
+
+  return { fetchQuestions, fetchSetPool }
 }

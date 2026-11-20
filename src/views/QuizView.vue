@@ -24,7 +24,7 @@
         <div v-if="domainChips.length" class="qv-card">
           <div class="qv-label">หมวด</div>
           <div class="qv-chips">
-            <button class="qv-chip" :class="{ on: dom === '__all' && !examSet }" @click="pickDomain('__all')">ทั้งหมด</button>
+            <button class="qv-chip" :class="{ on: dom === '__all' }" @click="pickDomain('__all')">ทั้งหมด</button>
             <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="pickDomain(d.key)">{{ d.label }}</button>
           </div>
           <template v-if="groupChips.length">
@@ -51,7 +51,7 @@
         </div>
         <BottomSheet :open="setSheet" icon="📜" title="ข้อสอบย้อนหลัง" @update:open="setSheet = $event">
           <div class="qv-setlist">
-            <button v-if="examSet" class="qv-setrow clear" @click="pickExamSet(examSet); setSheet = false">✕ ไม่เลือกชุด (กลับไปสุ่มตามหมวด)</button>
+            <button v-if="examSet" class="qv-setrow clear" @click="pickExamSet(examSet); setSheet = false">✕ ไม่เลือกชุด (สุ่มจากทั้งคลัง)</button>
             <button
               v-for="s in examSetChips" :key="s.name"
               class="qv-setrow" :class="{ on: examSet === s.name }"
@@ -296,7 +296,7 @@ const { syncRosterRow } = useRosterSync()
 const usage = useUsageStore()
 const { toast } = useToast()
 const route = useRoute()
-const { fetchQuestions: feedQuestions } = useQuestionFeed()
+const { fetchQuestions: feedQuestions, fetchSetPool } = useQuestionFeed()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const LEN_CHOICES = [5, 10, 15, 20]
@@ -364,8 +364,26 @@ const examSetChips = computed(() => {
     .sort((a, b) => (b.year || 0) - (a.year || 0) || a.name.localeCompare(b.name, 'th'))
 })
 // จำนวนข้อที่ทำได้ตามตัวเลือกปัจจุบัน (ชุดที่เลือก หรือ หมวด หรือ ทั้งคลัง)
+// ชุดที่เลือก โหลดทั้งก้อนไว้ในเครื่อง → กรองหมวด/กลุ่มโรคซ้อนได้ (เพื่อนขอ 20 พ.ย.)
+const setPool = ref(null)          // null = ยังไม่โหลด/ไม่เลือกชุด
+const setPoolLoading = ref(false)
+watch(examSet, async (name) => {
+  setPool.value = null
+  if (!name) return
+  setPoolLoading.value = true
+  try {
+    const pool = await fetchSetPool(name)
+    if (examSet.value === name) setPool.value = pool
+  } catch (e) { console.error('[set pool]', e); toast('โหลดชุดข้อสอบไม่สำเร็จ', 'error') }
+  finally { setPoolLoading.value = false }
+})
+const poolFiltered = (approved) => (setPool.value || []).filter(q =>
+  (!approved || q.reviewStatus === 'passed') &&
+  (group.value ? q.pleGroup === group.value : dom.value === '__all' || q.domain === dom.value))
+const countBy = (field) => (setPool.value || []).reduce((m, q) => { if (q[field]) m[q[field]] = (m[q[field]] || 0) + 1; return m }, {})
+
 const activeCount = computed(() => {
-  if (examSet.value) return examSetChips.value.find(s => s.name === examSet.value)?.count || 0
+  if (examSet.value) return setPool.value ? poolFiltered(false).length : 0
   if (group.value) return metaGroups.value[group.value] || 0
   if (dom.value !== '__all') return metaDomains.value[dom.value] || 0
   return publishedTotal.value
@@ -373,7 +391,7 @@ const activeCount = computed(() => {
 // เหมือน activeCount แต่นับเฉพาะข้อที่ผ่านตรวจแล้ว (reviewStatus==='passed')
 const approvedOnly = ref(false)
 const approvedCount = computed(() => {
-  if (examSet.value) return examSetChips.value.find(s => s.name === examSet.value)?.approvedCount || 0
+  if (examSet.value) return setPool.value ? poolFiltered(true).length : 0
   if (group.value) return metaApprovedGroups.value[group.value] || 0
   if (dom.value !== '__all') return metaApprovedDomains.value[dom.value] || 0
   return metaApprovedTotal.value
@@ -386,21 +404,29 @@ function setTags(q) {
   const yearOf = Object.fromEntries(examSetConfig.value.map(s => [s.name, s.year]))
   return q.examSets.map(n => examSetLabel({ name: n, year: yearOf[n] }))
 }
-function pickDomain(key) { dom.value = key; examSet.value = null; group.value = null }
-// เลือกชุด → toggle + ล้างหมวด
-function pickExamSet(name) { examSet.value = examSet.value === name ? null : name; if (examSet.value) { dom.value = '__all'; group.value = null } }
+// หมวด × ชุด กรองซ้อนกันได้แล้ว (20 พ.ย.) — เปลี่ยนชุดล้างแค่หมวดที่ชุดใหม่ไม่มี (เช็คใน watch ข้างล่าง)
+function pickDomain(key) { dom.value = key; group.value = null }
+function pickExamSet(name) { examSet.value = examSet.value === name ? null : name }
+// โหลดชุดเสร็จแล้วหมวด/กลุ่มที่เลือกอยู่ไม่มีในชุด → ปล่อยเป็นทั้งหมด
+watch(setPool, (p) => {
+  if (!p) return
+  if (dom.value !== '__all' && !p.some(q => q.domain === dom.value)) { dom.value = '__all'; group.value = null }
+  else if (group.value && !p.some(q => q.pleGroup === group.value)) group.value = null
+})
 
-// chips เฉพาะ domain ที่มีข้ออย่างน้อย 1 ข้อ
-const domainChips = computed(() => DOMAINS.filter(d => (metaDomains.value[d.key] || 0) > 0))
+// chips เฉพาะ domain ที่มีข้ออย่างน้อย 1 ข้อ (เลือกชุดอยู่ = นับในชุด)
+const domainCounts = computed(() => examSet.value && setPool.value ? countBy('domain') : metaDomains.value)
+const domainChips = computed(() => DOMAINS.filter(d => (domainCounts.value[d.key] || 0) > 0))
 
 // กลุ่มโรค (pleGroup) ของหมวดที่เลือก — นับจาก meta.groups (แอดมินกด 🔄 meta) · ไม่มีข้อ = ไม่โชว์
 const group = ref(null)
 const metaGroups = ref({})
 const metaApprovedGroups = ref({})
 const groupChips = computed(() => {
-  if (dom.value === '__all' || examSet.value) return []
+  if (dom.value === '__all') return []
+  const counts = examSet.value && setPool.value ? countBy('pleGroup') : metaGroups.value
   return groupsOfDomain(dom.value)
-    .map(g => ({ key: g.key, label: g.th, count: metaGroups.value[g.key] || 0 }))
+    .map(g => ({ key: g.key, label: g.th, count: counts[g.key] || 0 }))
     .filter(g => g.count > 0)
 })
 
@@ -598,7 +624,13 @@ async function startSaved() {
 }
 
 // ดึงข้อสุ่ม n ข้อ — ตรรกะการสุ่มอยู่ใน useQuestionFeed (ใช้ร่วมกับ Time Attack)
-const fetchQuestions = (n) => feedQuestions(n, { domain: dom.value, group: group.value, examSet: examSet.value, approvedOnly: approvedOnly.value })
+const fetchQuestions = async (n) => {
+  if (examSet.value) {
+    if (!setPool.value) setPool.value = await fetchSetPool(examSet.value)
+    return shuffle(poolFiltered(approvedOnly.value)).slice(0, n)
+  }
+  return feedQuestions(n, { domain: dom.value, group: group.value, examSet: null, approvedOnly: approvedOnly.value })
+}
 
 async function start() {
   if (starting.value) return
