@@ -90,6 +90,8 @@
         <div class="sv-modes">
           <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
           <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
+          <!-- 🔖 ข้อที่บันทึกไว้ (user 20 พ.ย. 2026: ใต้ Zen เหนือข้อที่ผิด) -->
+          <QuizModeCard emoji="🔖" title="ข้อที่บันทึกไว้" :subtitle="savedN ? `${savedN} ข้อ · ทำทวนข้อที่กดบันทึกไว้` : 'กด 🔖 ระหว่างทำข้อสอบเพื่อเก็บข้อไว้ทวน'" to="/quiz?mode=saved" />
           <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
           <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
         </div>
@@ -331,6 +333,7 @@ const drugDbOpen = computed(() => isFeatureOpen(rawConfig.value, 'drugDbOpen', {
 function openDoor(t) { if (t === 'cc2') { router.push('/study/cc2'); return } if (t === 'drug') { router.push('/study/drugs'); return } if (t === 'stats') { router.push('/me'); return } if (t === 'daily') { router.push('/daily'); return } tab.value = t; search.value = ''; document.getElementById('main-content')?.scrollTo?.(0, 0) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 const playedToday = computed(() => authStore.userData?.dc?.last === dayKey())
+const savedN = computed(() => Object.keys(authStore.userData?.study?.saved || {}).length)
 const DOORS = computed(() => [
   { key: 'daily', emoji: '🌅', title: 'ข้อสอบประจำวัน', sub: playedToday.value ? 'เล่นแล้ว · ดูอันดับ' : '5 ข้อวันละรอบ · ลุ้นท็อป 10', badge: playedToday.value ? 0 : 'ใหม่' },
   { key: 'quiz',  emoji: '📝', title: 'ข้อสอบ',      sub: 'ทั่วไป · Zen · Time Attack · ข้อที่ผิด', badge: redoDue.value || 0 },
