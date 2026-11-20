@@ -167,7 +167,7 @@
 
         <!-- แพ้แล้วต้องมีทางไปต่อ ไม่ใช่ทางตัน — ผู้เรียกเป็นคนเลือกว่าปุ่มควรพาไปไหน (มันเห็นเหรียญ/ตั๋วจริง)
              ที่นี่แค่วาด: ไม่รู้ราคากาชา ไม่แตะ auth store -->
-        <div v-if="!data.won && data.loseTip" class="br-tip">
+<div v-if="!data.won && data.loseTip && !data.tutorial" class="br-tip">
           <div class="br-tip-text">{{ data.loseTip.text }}</div>
           <div class="br-tip-acts">
             <button v-for="a in data.loseTip.actions" :key="a.to" class="br-btn sm br-tip-btn" @click="goTip(a.to)">{{ a.label }}</button>

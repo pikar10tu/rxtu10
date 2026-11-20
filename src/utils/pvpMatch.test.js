@@ -95,3 +95,32 @@ test('pickMatch เลือกในย่านเรตใกล้', () => {
   const c = Array.from({ length: 30 }, (_, i) => ({ uid: 'u' + i, rating: 1000 + i * 100 }))
   for (let s = 1; s < 20; s++) assert.ok(pickMatch(c, 1000, [], s).rating < 1000 + 12 * 100)
 })
+
+// ⚖️ จับคู่สูสีนอกท็อป 10 (21 พ.ย. 2026)
+import { fairCandidates, FAIR_TOP } from './pvpMatch.js'
+test('fairCandidates: นอกท็อป 10 เจอเฉพาะพลัง ≤ เรา×1.1 · ท็อป 10 ไม่กรอง', () => {
+  const pw = (team) => team[0]
+  const c = [{ uid: 'weak', team: [50] }, { uid: 'near', team: [108] }, { uid: 'strong', team: [300] }]
+  assert.deepEqual(fairCandidates(c, 100, 25, pw).map(x => x.uid), ['weak', 'near'])
+  assert.deepEqual(fairCandidates(c, 100, FAIR_TOP, pw).map(x => x.uid), ['weak', 'near', 'strong'])
+  assert.deepEqual(fairCandidates(c, 10, 40, pw), [], 'ไม่มีใครเข้าเกณฑ์ = ว่าง → caller ใช้บอท')
+})
+
+import { matchPower } from './pvpMatch.js'
+test('matchPower: เกรดสำคัญสุด · ตำนาน ≈ +1.5 เกรด · แรร์ −1 (ตาม sim)', () => {
+  const t = (rarity, grade) => [0, 1, 2].map(() => ({ rarity, grade }))
+  assert.ok(matchPower(t('common', 1)) > matchPower(t('common', 0)))
+  assert.ok(matchPower(t('legendary', 0)) > matchPower(t('common', 1)))
+  assert.ok(matchPower(t('legendary', 0)) < matchPower(t('common', 2)))
+  assert.ok(matchPower(t('rare', 0)) < matchPower(t('common', 0)))
+  assert.equal(matchPower([]), 0)
+})
+
+import { tierMult, TIER_MULT_MIN, TIER_MULT_MAX } from './pvpMatch.js'
+test('tierMult: ทีมอ่อนตีกัน ×0.6 · บิลด์เต็มตีกัน ×1.5 · ไล่ขึ้นตามระดับ', () => {
+  const t = (rarity, grade) => [0, 1, 2].map(() => ({ rarity, grade }))
+  assert.equal(tierMult(t('common', 0), t('common', 0)), TIER_MULT_MIN)
+  assert.equal(tierMult(t('legendary', 5), t('legendary', 5)), TIER_MULT_MAX)
+  assert.ok(tierMult(t('common', 3), t('common', 3)) > tierMult(t('common', 1), t('common', 1)))
+  assert.equal(tierMult(t('rare', 0), t('rare', 0)), TIER_MULT_MIN, 'ติดลบไม่ต่ำกว่าพื้น')
+})

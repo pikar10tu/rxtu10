@@ -18,7 +18,10 @@ import {
 } from '../utils/pvpRating.js'
 import { currentSeasonId, applySeasonReset } from '../utils/pvpSeason.js'
 import { getFallbackBots, rookieBot, rookieBotChance } from '../utils/pvpBot.js'
-import { pickMatch, pushRecent } from '../utils/pvpMatch.js'
+import { pickMatch, pushRecent, fairCandidates, matchPower, tierMult, FAIR_TOP } from '../utils/pvpMatch.js'
+import { PETS } from '../data/index.js'
+import { inTutorial, tutDone, tutorialClaim, guideOf, TUT_FIGHTS, TUT_LEGENDS, TUT_EVENT } from '../utils/pvpTutorial.js'
+import { addDust, dustOf } from '../utils/stardust.js'
 import { energyState, spendEnergy, addEnergy, PVP_ENERGY_MAX, PVP_ENERGY_OVER, ENERGY_TICKET } from '../utils/pvpEnergy.js'
 import { dailyView, bumpDaily, canClaimDaily, PVP_DAILY_GOAL, PVP_DAILY_REWARD } from '../utils/pvpDaily.js'
 import { teamPower, coinForResult } from '../utils/pvpCoins.js'
@@ -73,8 +76,24 @@ export function useArena() {
     const seed = hashStr(`${uid || ''}|${Date.now()}|${Math.random()}`)
     // 🐣 มือใหม่/แต้มน้อย/แพ้ติด → มีโอกาสเจอหุ่นซ้อมที่เลียนทีมเรา (ดู pvpBot.js)
     const rookie = rookieBotChance({ rating: rating.value, loseStreak: auth.userData?.pvpLoseStreak, fights: auth.userData?.pvpFightsTotal })
-    if (rookie > 0 && Math.random() < rookie && myTeam.value.length) return rookieBot(myTeam.value, rating.value, seed, rawConfig.value?.gachaEvent)
-    const human = pickMatch(rosterOpponents(members.rosterRows || {}, uid), rating.value, auth.userData?.pvpRecent, seed)
+    if (rookie > 0 && Math.random() < rookie && myTeam.value.length) {
+      return { ...rookieBot(myTeam.value, rating.value, seed, rawConfig.value?.gachaEvent), rookie: true }
+    }
+    // ⚖️ นอกท็อป 10: เจอเฉพาะบิลด์ใกล้เคียง/อ่อนกว่า (≤ ×1.1) และเลือกจาก "บิลด์ใกล้สุด" แทนแต้มใกล้สุด
+    //    ท็อป 10: แบบเดิม (แต้มใกล้สุด ไม่กรอง) · ดู utils/pvpMatch.js matchPower/fairCandidates
+    const rows = members.rosterRows || {}
+    const myRank = rankOfScore(rows, uid, (r) => r?.r ?? PVP_RATING_START, rating.value)
+    const all = rosterOpponents(rows, uid)
+    let human
+    if (myRank <= FAIR_TOP) {
+      human = pickMatch(all, rating.value, auth.userData?.pvpRecent, seed)
+    } else {
+      const mine = matchPower(myTeam.value)
+      // pickMatch เรียงตามระยะ .rating → ใส่คะแนนบิลด์แทนเพื่อให้ "ใกล้สุด" = บิลด์ใกล้สุด
+      const pool = fairCandidates(all, mine, myRank, matchPower).map(c => ({ ...c, rating: matchPower(c.team), realRating: c.rating }))
+      const hit = pickMatch(pool, mine, auth.userData?.pvpRecent, seed)
+      human = hit ? { ...hit, rating: hit.realRating } : null
+    }
     if (human) return human
     // gachaEvent สด — กันเพ็ทรุ่นที่ยังไม่เปิดตัวโผล่ในทีมบอท (ดู pvpBot.js)
     return getFallbackBots(myPower.value, rating.value, seed, 1, rawConfig.value?.gachaEvent)[0] || null
@@ -84,7 +103,8 @@ export function useArena() {
   async function applyResult(opp, won) {
     const season = currentSeasonId()
     const base = applySeasonReset(auth.userData?.pvp, season)
-    const mult = opp.isBot ? BOT_RATING_MULT : 1
+    // ชนะ = คูณตามระดับทีมทั้งคู่ (ทีมแกร่งตีกันได้แต้มเยอะกว่า · utils/pvpMatch.js tierMult) · แพ้ไม่คูณ
+    const mult = (opp.isBot ? BOT_RATING_MULT : 1) * (won ? tierMult(myTeam.value, opp.team) : 1)
     const newRating = nextRating(base.rating, opp.rating, won, { mult })
     const nextPvp = {
       rating: newRating,
@@ -147,6 +167,7 @@ export function useArena() {
   async function fight() {
     // 🔒 ปิดช่วงเปลี่ยนซีซั่น (23:45 → แอดมินแจกเสร็จ) — เช็คสดจาก config ทุกครั้งที่กด (utils/seasonLock.js)
     if ((await checkSeasonLockNow()).locked) { toast('ซีซั่นจบแล้ว กำลังคำนวณผลคะแนนและรางวัลประจำเดือน เปิดอีกครั้งเร็วๆ นี้นะ', 'info'); return null }
+    if (tutorial.value) { toast('ซ้อมกับหุ่นให้ครบ 5 ครั้งก่อน แล้วค่อยหาคู่จริงนะ', 'info'); return null }   // 🐣 กันเรียกตรง
     if (attacksLeft.value <= 0) {
       const m = Math.ceil(energy.value.nextMs / 60000)
       toast(`พลังงานหมด อีก ${m} นาทีได้เพิ่ม 1 หน่วย`, 'info')
@@ -186,6 +207,37 @@ export function useArena() {
       loseTip: buildLoseTip('arena', auth.userData),
       rewardText: coin ? `ได้รับ: ${coin.toLocaleString()} เหรียญ` : '',
     }
+  }
+
+  // ── 🐣 ไฟต์ซ้อม 5 ตาแรก (utils/pvpTutorial.js) ──
+  //  ไม่ใช้พลังงาน ไม่แตะแต้ม/เหรียญ/สถิติ · จบแล้วต้องกดรับตำนานถึงจะนับตา (claimTutorial)
+  const tutorial = computed(() => inTutorial(auth.userData))
+  const tutorialNo = computed(() => tutDone(auth.userData) + 1)   // ตาที่กำลังจะสู้ (1..5)
+  function trainFight() {
+    if (!myTeam.value.length) { toast('จัดทีมก่อนนะ (อย่างน้อย 1 ตัว)', 'info'); return null }
+    if (!tutorial.value) return null
+    const seed = hashStr(`${auth.currentUser?.uid || ''}|tut|${Date.now()}`)
+    const opp = rookieBot(myTeam.value, rating.value, seed, rawConfig.value?.gachaEvent)
+    const result = simulateBattle(myTeam.value, opp.team, Date.now())
+    const no = tutorialNo.value
+    return {
+      result, playerTeam: myTeam.value, botTeam: opp.team, won: result.winner === 'A', opp,
+      vsLabel: `${TUT_EVENT.name} ${no}/${TUT_FIGHTS} · VS หุ่นซ้อม`,
+      winText: 'ชนะ!', loseText: 'แพ้ ไม่เป็นไร ซ้อมอยู่',
+      tutorial: { no, of: TUT_FIGHTS, guide: guideOf(no), picks: TUT_LEGENDS.map(id => PETS.find(p => p.id === id)), claimed: null },
+    }
+  }
+  /** กดรับตำนานหลังไฟต์ซ้อม → นับตา + ได้เพ็ท (ตัวซ้ำ = สำเนา · เต็มเพดาน = ประกายดาว) */
+  async function claimTutorial(petId) {
+    const p = tutorialClaim(auth.userData, petId)
+    if (!p) return null
+    const dustW = addDust(dustOf(auth.userData), p.dust)
+    const ok = await auth.patchUser(
+      { pets: p.pets, pvpTut: p.pvpTut, ...(dustW.changes.length ? { stardust: dustW.next } : {}) },
+      { pets: p.pets, pvpTut: p.pvpTut, ...Object.fromEntries(dustW.changes.map(([k, d]) => ['stardust.' + k, increment(d)])) },
+    )
+    if (!ok) { toast('รับเพ็ทไม่สำเร็จ ลองใหม่อีกครั้ง', 'error'); return null }
+    return p.summary
   }
 
   const antiLoss = computed(() => auth.userData?.antiLoss || 0)
@@ -248,5 +300,6 @@ export function useArena() {
     daily, dailyGoal, dailyReward, canClaim, claimDaily,
     antiLoss, canAntiLoss, useAntiLoss,
     energyTickets, canUseTicket, useEnergyTicket, buyEnergyTicket,
+    tutorial, tutorialNo, trainFight, claimTutorial,
   }
 }

@@ -56,7 +56,13 @@
         </span>
       </div>
       <!-- หาคู่ = เปิดหน้าจัดทีมก่อน (user 25 ต.ค. 2026) แล้วปุ่ม "หาคู่ต่อสู้" ในนั้นถึงเริ่มสุ่มจริง -->
-      <button class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0" @click="pickFight = true; pickOpen = true">
+      <!-- 🐣 ช่วงซ้อม 5 ตาแรก: ปุ่มหาคู่ล็อก → ซ้อมกับหุ่นแทน (ไม่ใช้พลังงาน) -->
+      <button v-if="tutorial" class="ar-find ar-train" :disabled="!canFight || busy" @click="onTrain">
+        <span class="ar-find-cap"><Emoji :char="TUT_EVENT.icon" /> {{ TUT_EVENT.name }} · แจกตำนานฟรี</span>
+        <span class="ar-find-main"><Emoji char="🐣" /> ซ้อมกับหุ่น {{ tutorialNo }}/{{ TUT_FIGHTS }}</span>
+        <span class="ar-find-sub">ซ้อมครบ {{ TUT_FIGHTS }} ครั้ง รับเพ็ทตำนานฟรีทุกครั้ง แล้วปลดล็อกการหาคู่</span>
+      </button>
+      <button v-else class="ar-find" :disabled="!canFight || busy || attacksLeft <= 0" @click="pickFight = true; pickOpen = true">
         <span class="ar-find-main"><Emoji char="⚔️" /> หาคู่ต่อสู้</span>
         <span class="ar-find-sub">{{ findSub }}</span>
       </button>
@@ -89,6 +95,25 @@
     <BattleReplay :data="replay" theme="arena" @close="replay = null">
       <!-- 💊 ยาแก้แพ้: แพ้แล้วกดใช้ได้เฉพาะบนจอนี้ -->
       <template #result-extra>
+        <!-- 🐣 ไฟต์ซ้อม: ไกด์ + เลือกตำนาน 1 ใน 3 · ไม่กดรับ = ตานี้ไม่นับ -->
+        <div v-if="replay?.tutorial" class="ar-tut">
+          <div class="ar-tut-guide">{{ replay.tutorial.guide }}</div>
+          <template v-if="!replay.tutorial.claimed">
+            <div class="ar-tut-h">เลือกรับเพ็ทตำนานฟรี 1 ตัว</div>
+            <div class="ar-tut-picks">
+              <button v-for="p in replay.tutorial.picks" :key="p.id" class="ar-tut-pick" :disabled="tutBusy" @click="onClaimTut(p.id)">
+                <span class="ar-tut-emo"><Emoji :char="p.emoji" /></span>
+                <b>{{ p.name }}</b>
+                <small>{{ ELEM_LABEL[p.element] }}</small>
+              </button>
+            </div>
+            <div class="ar-tut-note">ต้องกดรับก่อนปิด ไม่งั้นตานี้ไม่นับ · ได้ตัวซ้ำเอาไว้อัพขั้น</div>
+          </template>
+          <div v-else class="ar-tut-done">
+            <Emoji char="🎉" /> ได้รับ {{ replay.tutorial.claimed.name }}{{ replay.tutorial.claimed.isNew ? '' : ' (ตัวซ้ำ เก็บไว้อัพขั้น)' }} แล้ว
+            <template v-if="replay.tutorial.no >= replay.tutorial.of"> · ปลดล็อกการหาคู่แล้ว!</template>
+          </div>
+        </div>
         <div v-if="replay?.loss && !replay.lossUsed" class="ar-al">
           <span class="ar-al-ico"><Emoji :char="ANTI_LOSS.emoji" /></span>
           <span class="ar-al-t"><b>{{ ANTI_LOSS.name }}</b> · มี {{ antiLoss }} ชิ้น
@@ -111,6 +136,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useMembersStore } from '../stores/members.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
 import { useArena } from '../composables/useArena.js'
+import { TUT_FIGHTS, TUT_EVENT } from '../utils/pvpTutorial.js'
 import TeamPicker from '../components/battle/TeamPicker.vue'
 import BattleReplay from '../components/battle/BattleReplay.vue'
 import ArenaGuide from '../components/battle/ArenaGuide.vue'
@@ -135,7 +161,26 @@ import { toMember } from '../utils/roster.js'
 const authStore = useAuthStore()
 const members = useMembersStore()
 const { pvpOpen, rawConfig } = useAppConfig()
-const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily, antiLoss, canAntiLoss, useAntiLoss, energyTickets, canUseTicket, useEnergyTicket, buyEnergyTicket } = useArena()
+const { rating, wins, losses, attacksLeft, energy, energyMax, myTeam, fight, daily, dailyGoal, dailyReward, canClaim, claimDaily, antiLoss, canAntiLoss, useAntiLoss, energyTickets, canUseTicket, useEnergyTicket, buyEnergyTicket, tutorial, tutorialNo, trainFight, claimTutorial } = useArena()
+
+// 🐣 ไฟต์ซ้อม (utils/pvpTutorial.js) — ไม่มีรูเล็ต ไม่ใช้พลังงาน
+const ELEM_LABEL = { fist: '✊ จู่โจม', scissors: '✌️ สมดุล', paper: '✋ พิทักษ์' }
+const tutBusy = ref(false)
+function onTrain() {
+  if (busy.value) return
+  const r = trainFight()
+  if (r) replay.value = { ...r, sides: { top: { name: 'หุ่นซ้อม', rating: null }, bot: { name: 'คุณ', rating: null } }, arenas: { top: null, bot: rosterArena(authStore.userData) } }
+}
+async function onClaimTut(id) {
+  const r = replay.value
+  if (!r?.tutorial || r.tutorial.claimed || tutBusy.value) return
+  tutBusy.value = true
+  try {
+    const got = await claimTutorial(id)
+    // ⚠️ แก้บนก้อนเดิม (BattleReplay watch(props.data) — ก้อนใหม่ = เล่นไฟต์ซ้ำ · บั๊ก 2 ต.ค.)
+    if (got) r.tutorial.claimed = got
+  } finally { tutBusy.value = false }
+}
 
 // ⚡ ตั๋วพลังงาน — ทั้งซื้อและใช้ต้องยืนยันก่อน
 const { confirm } = useConfirm()
@@ -318,6 +363,20 @@ function openProfile(uid) {
 .ar-daily-btn { position: relative; flex-shrink: 0; border: var(--bw) solid var(--line); border-radius: 11px; padding: 9px 12px; font-family: inherit; font-weight: 800; font-size: .78rem; background: #fde68a; box-shadow: var(--pop); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .ar-daily-btn:disabled { background: #e2e8f0; color: rgba(0,0,0,.45); box-shadow: none; cursor: default; }
 .ar-login { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; font-size: .85rem; }
+/* 🐣 ไฟต์ซ้อม: ปุ่มเขียวอ่อน + การ์ดไกด์/เลือกตำนานบนจอผล (พื้นจอผลเข้ม → การ์ดขาว ตัวหนังสือเข้ม · CLAUDE.md ข้อ 13) */
+.ar-find-cap { font-size: .72rem; font-weight: 800; color: #15803d; letter-spacing: .02em; }
+.ar-find.ar-train { background: linear-gradient(160deg, #f0fdf4, #dcfce7); border-color: #86efac; }
+.ar-tut { margin: 10px auto 0; max-width: 340px; background: #fff; color: #1e293b; border-radius: 14px; padding: 12px; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+.ar-tut-guide { font-size: .84rem; line-height: 1.5; }
+.ar-tut-h { font-weight: 800; font-size: .86rem; color: #7c3aed; }
+.ar-tut-picks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ar-tut-pick { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border: 2px solid #e9d5ff; border-radius: 12px; background: linear-gradient(160deg, #fff, #faf5ff); color: #1e293b; cursor: pointer; }
+.ar-tut-pick:disabled { opacity: .5; }
+.ar-tut-pick b { font-size: .78rem; }
+.ar-tut-pick small { font-size: .7rem; color: #64748b; }
+.ar-tut-emo { font-size: 1.8rem; line-height: 1.1; }
+.ar-tut-note { font-size: .7rem; color: #64748b; }
+.ar-tut-done { font-weight: 700; font-size: .84rem; color: #15803d; }
 .ar-al { display: flex; align-items: center; gap: 10px; margin: 10px auto 0; max-width: 320px; background: #fff; color: #1e293b; border-radius: 14px; padding: 10px 12px; text-align: left; }
 .ar-al-ico { font-size: 1.8rem; line-height: 1; }
 .ar-al-t { flex: 1; min-width: 0; font-size: .8rem; }
