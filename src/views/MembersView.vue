@@ -31,7 +31,7 @@
     <div class="mv-sort">
       <label class="mv-sort-label" for="mv-sort-sel">เรียงตาม</label>
       <select id="mv-sort-sel" v-model="sortKey" class="mv-sort-sel">
-        <option value="fashion">เฉิดฉาย ✨</option>
+        <option value="fashion">รายการแนะนำ</option>
         <option value="level">เลเวลบ้าน</option>
         <option value="studentId">รหัสนักศึกษา</option>
         <option value="nickname">ชื่อเล่น</option>

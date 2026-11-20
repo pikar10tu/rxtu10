@@ -38,7 +38,7 @@ const tier = computed(() => getTier(n.value))
 const src = computed(() => IMGS[`../../assets/residence/res-${String(n.value).padStart(2, '0')}.png`])
 
 // จุดเท้า [x กลางตัว, y เท้า] ในพิกัดภาพ — ฉากที่พื้นไม่ได้อยู่ y 88 ต้องใส่ที่นี่ (ตรวจด้วยตาครบ 20 ฉากแล้ว)
-const FEET = { 12: [40, 84], 13: [36, 86], 15: [44, 76], 17: [38, 72], 19: [40, 78], 20: [42, 74] }
+const FEET = { 12: [40, 84], 13: [36, 86], 15: [44, 76], 17: [38, 72], 19: [40, 78], 20: [42, 79] }
 const dollPos = computed(() => {
   const [x, y] = FEET[n.value] || [40, 88]
   return { left: (x - 30) * S + 'px', top: (y - 52) * S + 'px' }

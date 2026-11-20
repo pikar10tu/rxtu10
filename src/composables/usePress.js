@@ -3,7 +3,9 @@
 // ท่าเริ่มของ "กดค้าง" กับ "ลาก" เหมือนกัน (นิ้วแตะค้าง) ⇒ แยกด้วยว่านิ้วขยับก่อนครบเวลาไหม
 //   · นิ้วนิ่งจนครบ LONG_MS          → onLong (เปิดการ์ด)
 //   · ขยับเกิน MOVE_PX ก่อนครบเวลา  → มี drag = เริ่มลาก · ไม่มี drag = ยกเลิกเฉยๆ (ปล่อยให้จอเลื่อน)
-//   · ยกนิ้วก่อนครบเวลา ไม่ขยับ      → onTap
+//   · ยกนิ้วก่อนครบเวลา ไม่ขยับ      → onTap — ยิงจาก event `click` ของเบราว์เซอร์ ไม่ใช่ pointerup (20 พ.ย. 2026)
+//     เหตุ: แอนดรอยด์ยิง click ตามหลัง pointerup เสมอ ถ้าเราเปิด sheet ตอน pointerup แล้ว click นั้นจะไปตก
+//     ที่พื้นหลัง sheet ที่เพิ่งโผล่ (@click.self="close") ⇒ sheet ปิดทันที = เพื่อนแอนดรอยด์เปลี่ยนเพ็ทในทีมไม่ได้
 // element ที่ลากได้ต้องตั้ง touch-action:none เอง ไม่งั้นมือถือจะเอาการลากไปเลื่อนจอ
 // กันเมนูเซฟรูป/คลุมข้อความของมือถือด้วย CSS: user-select:none + -webkit-touch-callout:none (ฝั่ง component)
 
@@ -45,7 +47,7 @@ function addRing(el) {
  * @returns ชุด listener ไว้กาง `v-on="press(...)"` บน element
  */
 export function pressHandlers(h) {
-  let sx = 0, sy = 0, timer = null, ring = null, longFired = false, moved = false, dragging = false, pid = null, el = null
+  let sx = 0, sy = 0, timer = null, ring = null, longFired = false, moved = false, dragging = false, pid = null, el = null, eat = false
 
   const clear = () => { clearTimeout(timer); timer = null; ring?.remove(); ring = null; el?.classList.remove('pressing') }
 
@@ -55,7 +57,7 @@ export function pressHandlers(h) {
       if (e.button > 0) return
       el = e.currentTarget
       sx = e.clientX; sy = e.clientY
-      longFired = false; moved = false; dragging = false; pid = e.pointerId
+      longFired = false; moved = false; dragging = false; pid = e.pointerId; eat = false
       el.classList.add('pressing')
       if (h.onLong) ring = addRing(el)
       if (h.drag) { try { el.setPointerCapture(pid) } catch { /* บางเบราว์เซอร์ไม่ให้ — ลากยังได้ แค่หลุดง่ายขึ้น */ } }
@@ -75,6 +77,11 @@ export function pressHandlers(h) {
     },
     pointerup(e) { finish(e, false) },
     pointercancel(e) { finish(e, true) },
+    // แตะ = click ของเบราว์เซอร์ (เคารพระยะนิ้วสั่นของแต่ละเครื่องเอง) · หลังกดค้าง/ลาก กลืน click ที่ตามมาทิ้ง
+    click(e) {
+      if (eat || longFired) { eat = false; e.preventDefault(); return }
+      h.onTap?.()
+    },
     keydown(e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); h.onTap?.() }
     },
@@ -83,7 +90,7 @@ export function pressHandlers(h) {
   function finish(e, cancelled) {
     if (e.pointerId !== pid) return
     clear(); pid = null
-    if (dragging) { dragging = false; h.drag.end(e, cancelled); return }
-    if (!cancelled && !longFired && !moved) h.onTap?.()
+    if (dragging || longFired || moved) eat = true
+    if (dragging) { dragging = false; h.drag.end(e, cancelled) }
   }
 }
