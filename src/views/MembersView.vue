@@ -41,7 +41,7 @@
     <div v-if="members.loading" class="mv-empty">กำลังโหลด…</div>
     <div v-else-if="!list.length" class="mv-empty">ไม่พบสมาชิก</div>
 
-    <div v-else ref="gridEl" class="mv-grid" :style="{ '--mk': mk }">
+    <div v-else class="mv-grid">
       <button
         v-for="m in list" :key="m.uid"
         class="mv-card" :class="{ off: !m.registered, me: m.uid === myUid }"
@@ -51,9 +51,7 @@
              ไม่มีอะไรทับฉากนอกจากป้ายเลเวลมุมขวา · ใต้ฉาก = รูปจิ๋ว + ชื่อ แล้วฉายา · สาย/รหัส ไปดูในการ์ดโปรไฟล์ · ภาพนิ่ง ไม่มีเอฟเฟค -->
         <template v-if="m.registered">
           <div class="mv-scene">
-            <div class="mv-scene-in" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
-              <DollFigure :eq="decodeDoll(m.doll)" :scale="2" glow-only :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
-            </div>
+            <MemberScene :src="sceneImg(m)" :eq="decodeDoll(m.doll)" :label="`อวาตาร์ของ ${m.nickname}`" />
             <span class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
           </div>
           <div class="mv-namerow">
@@ -82,12 +80,12 @@
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
 import Emoji from '../components/shared/Emoji.vue'
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
 import { useAuthStore } from '../stores/auth.js'
 import { getTier, sceneOf } from '../data/residence.js'
-import DollFigure from '../components/doll/DollFigure.vue'
+import MemberScene from '../components/members/MemberScene.vue'
 import { decodeDoll } from '../utils/dollCode.js'
 import { avatarUrl, fallbackAvatar } from '../utils/avatar.js'
 import { sortMembers } from '../utils/sortMembers.js'
@@ -149,17 +147,6 @@ const list = computed(() => {
 const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
-// ฉากบนการ์ด: วาดกล่อง 120×78 แล้วขยายทั้งก้อนให้เต็มความกว้างการ์ด (สัดส่วนคงที่ ไม่ยืด · user 20 พ.ย.)
-const gridEl = ref(null)
-const mk = ref(1)
-let mkRo = null
-watch(gridEl, (el) => {
-  mkRo?.disconnect()
-  if (!el) return
-  const fit = () => { const w = el.querySelector('.mv-scene')?.clientWidth; if (w) mk.value = w / 120 }
-  mkRo = new ResizeObserver(fit); mkRo.observe(el); requestAnimationFrame(fit)
-})
-onUnmounted(() => mkRo?.disconnect())
 const SCENES = import.meta.glob('../assets/residence/res-*.webp', { eager: true, import: 'default' })
 const sceneImg = (m) => SCENES[`../assets/residence/res-${String(sceneOf(m.residence)).padStart(2, '0')}.webp`]
 const avatarOf = (m) => avatarUrl(m, m.nickname)
@@ -200,13 +187,10 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
 .mv-sort-sel { border: var(--bw) solid var(--line); border-radius: 10px; padding: 5px 10px; font-family: inherit; font-size: .74rem; font-weight: 700; background: #fff; color: var(--ink); }
 .mv-empty { text-align: center; color: rgba(0,0,0,.4); padding: 28px 0; font-size: .85rem; }
 .mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.mv-card { position: relative; overflow: hidden; }
+.mv-card { position: relative; overflow: hidden; content-visibility: auto; contain-intrinsic-size: auto 150px; }   /* ข้ามวาดการ์ดนอกจอ (เลื่อนลื่น) */
 .mv-card > :not(.cz-bgl) { position: relative; z-index: 1; }
-/* ฉากบนการ์ด (B1): ส่วน x 48–168 y 16–94 ของฉาก (เห็นตัวบ้าน) วาดที่ 120×78 แล้วขยาย --mk ให้เต็มการ์ด · อวาตาร์ 2 เท่าครึ่งตัว */
+/* ฉากบนการ์ด (B1): ส่วน x 48–168 y 16–94 ของฉาก (เห็นตัวบ้าน) วาดลง canvas 120×78 (MemberScene) แล้ว CSS ขยายเต็มการ์ด · อวาตาร์ 2 เท่าครึ่งตัว */
 .mv-scene { align-self: stretch; margin: -14px -8px 2px; aspect-ratio: 120 / 78; position: relative; overflow: hidden; }
-.mv-scene-in { position: absolute; left: 0; top: 0; width: 120px; height: 78px; transform: scale(var(--mk, 1)); transform-origin: 0 0;
-  image-rendering: pixelated; background-repeat: no-repeat; background-size: 180px 100px; background-position: -48px -16px; }
-.mv-doll { position: absolute; left: -42px; top: -6px; }
 .mv-scene .mv-lv { right: 4px; top: 4px; bottom: auto; }
 .mv-namerow { align-self: stretch; display: flex; align-items: center; justify-content: flex-start; gap: 6px; min-width: 0; padding: 2px 2px 0; }
 .mv-namerow .mv-nick { min-width: 0; }
