@@ -6,11 +6,13 @@
 
     <template v-else>
       <!-- การ์ดโปรไฟล์: พื้นย้อมสีกรอบบ้าน (frameColor ของเลเวล) · ชื่อบ้าน · ทีมเฝ้าบ้าน · ตัวเลขหลัก -->
-      <section class="me-card" :class="{ 'me-darkbg': myBg?.dark }" :style="{ '--tier': tier.frameColor }">
-      <CosBg :id="myCos.g" />
-      <!-- หัวการ์ดจัดกลางแบบการ์ดโปรไฟล์: รูป (ปุ่มกล้องที่มุม) → ชื่อ → ฉายา → บ้าน → ปุ่มร้านตกแต่ง -->
+      <!-- 🏠 ฉากบ้านเป็นปกการ์ด อวาตาร์ยืนในฉาก (20 พ.ย. 2026 · พื้นการ์ดร้านตกแต่งเลิกแล้ว) · แตะอวาตาร์ = ห้องแต่งตัว -->
+      <section class="me-card" :style="{ '--tier': tier.frameColor }">
+      <ResidenceScene class="me-scene" :scene="myScene" :eq="myDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
+        <button type="button" class="me-scene-btn" @click="pickOpen = true"><Emoji char="🏠" /> เปลี่ยนฉาก</button>
+      </ResidenceScene>
+      <ScenePicker v-model:open="pickOpen" />
       <div class="me-hero">
-        <!-- รูป + อวาตาร์ยืนข้าง (20 พ.ย. 2026) · แตะอวาตาร์ = ห้องแต่งตัว (แทนลิงก์ตัวหนังสือเดิม) -->
         <div class="me-id">
         <div class="me-av-box">
           <CosFrame :id="myCos.f">
@@ -19,10 +21,6 @@
           <button class="me-cam" aria-label="เปลี่ยนรูป" @click="fileEl?.click()"><Emoji char="📷" /></button>
           <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
         </div>
-        <RouterLink to="/doll" class="me-doll" aria-label="ห้องแต่งตัว">
-          <DollFigure :eq="myDoll" :scale="2" label="อวาตาร์ของฉัน" />
-          <span class="me-doll-cap"><Emoji char="👗" /> แต่งตัว</span>
-        </RouterLink>
         </div>
         <!-- ปุ่มบันทึกต้องอยู่ใกล้รูป ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
              เดิมเลือกรูปแล้วเห็นรูปเปลี่ยนบนจอ แต่หาปุ่มบันทึกไม่เจอ ⇒ รีเฟรชแล้วรูปเด้งกลับ -->
@@ -37,7 +35,7 @@
         <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="goTab('ach')">
           <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
         </button>
-        <div class="me-home"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ tier.level }}</div>
+        <div class="me-home"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }} · บ้าน Lv.{{ tier.level }}</div>
       </div>
 
       <MockScoreCard />
@@ -140,7 +138,7 @@ import PvpHistory from '../components/battle/PvpHistory.vue'
 import NewsBoard from '../components/home/NewsBoard.vue'
 import ProfileModal from '../components/members/ProfileModal.vue'
 import { useMembersStore } from '../stores/members.js'
-import { getTier } from '../data/residence.js'
+import { getTier, sceneOf } from '../data/residence.js'
 import { getPetDef } from '../data/index.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { toMember } from '../utils/roster.js'
@@ -152,12 +150,11 @@ import { makeStreak } from '../utils/gags.js'
 import { grantSecret } from '../composables/useAchievements.js'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
-import CosBg from '../components/cosmetics/CosBg.vue'
+import ResidenceScene from '../components/residence/ResidenceScene.vue'
+import ScenePicker from '../components/residence/ScenePicker.vue'
 import TitlePill from '../components/shared/TitlePill.vue'
 import { cosOf } from '../utils/cosmetics.js'
-import DollFigure from '../components/doll/DollFigure.vue'
 import { dollOf } from '../utils/doll.js'
-import { getCosmetic } from '../data/cosmetics.js'
 import { getAchievement } from '../data/achievements.js'
 import { achievementTitle } from '../utils/achievements.js'
 import { sfx, sfxOn, setSfxOn } from '../utils/sfx.js'
@@ -168,7 +165,9 @@ const members = useMembersStore()
 // ── การ์ดโปรไฟล์ ──
 const tier = computed(() => getTier(auth.userData?.residence?.level || 1))
 const myCos = computed(() => cosOf(auth.userData))
-const myBg = computed(() => getCosmetic(myCos.value.g))
+const myScene = computed(() => sceneOf(auth.userData?.residence))
+const sceneTier = computed(() => getTier(myScene.value))
+const pickOpen = ref(false)
 const myDoll = computed(() => dollOf(auth.userData).eq)
 const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
   .map(p => getPetDef(p.id)?.emoji).filter(Boolean))
@@ -346,8 +345,6 @@ async function save() {
 .me-mbti-top { margin-top: 14px; }
 .me-pagetitle { margin-bottom: 16px; }
 .me-empty { text-align: center; color: rgba(0,0,0,.4); padding: 30px 0; }
-.me-card > :not(.cz-bgl) { position: relative; z-index: 1; }
-.me-card.me-darkbg .me-nick, .me-card.me-darkbg .me-home, .me-card.me-darkbg .me-guard { color: #fff; }
 /* ลิงก์ร้านตกแต่งเป็นปุ่มมีกรอบ — เดิมเป็นข้อความเปล่าๆ ไม่รู้ว่ากดได้ */
 .me-shoplink { align-self: flex-start; width: fit-content; display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; color: var(--primary-dark); text-decoration: none; margin: 2px 0 6px;
   background: #fff; border: 1px solid var(--primary-2); border-radius: 999px; padding: 2px 10px; box-shadow: 0 1px 3px rgba(43,53,80,.1); }
@@ -408,13 +405,13 @@ async function save() {
 
 
 /* ═══ หน้าฉัน จัดใหม่ (25 ก.ย. 2026) ═══ */
-.me-card { padding: 18px 14px 14px; }
+.me-card { padding: 0 14px 14px; overflow: hidden; }
+.me-scene { margin: 0 -14px; }
+.me-scene-btn { position: absolute; right: 8px; bottom: 8px; z-index: 2; border: var(--bw) solid var(--line); background: rgba(255,255,255,.92); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: .72rem; font-weight: 800; color: var(--ink); cursor: pointer; }
+.me-hero .me-av-box { margin-top: -34px; }
 .me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 .me-av-box { position: relative; margin-bottom: 4px; }
 .me-id { display: flex; align-items: flex-end; justify-content: center; gap: 12px; }
-.me-doll { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; transition: transform .15s; }
-.me-doll:active { transform: scale(.95); }
-.me-doll-cap { font-size: .7rem; font-weight: 800; color: var(--primary-dark); background: rgba(255,255,255,.85); border: var(--bw) solid var(--line); border-radius: 999px; padding: 1px 8px; }
 .me-avatar { width: 92px; height: 92px; }
 .me-cam { position: absolute; right: -2px; bottom: -2px; z-index: 3; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff;
   background: var(--primary); color: #fff; display: grid; place-items: center; font-size: .9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(43,53,80,.25); }
@@ -428,7 +425,6 @@ async function save() {
   border-radius: 14px; background: rgba(255,255,255,.88); }
 .me-stat b { font-size: 1rem; font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .me-stat small { margin-left: auto; white-space: nowrap; }
-.me-card.me-darkbg .me-nick :deep(.cz-txt:not([class*="cz-n-"])) { color: #fff; }
 .me-menu { margin-top: 16px; background: #fff; border: var(--bw) solid var(--line); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
 .me-menu .me-link { margin: 0; border: 0; border-radius: 0; box-shadow: none; border-top: 1px solid var(--border); padding: 13px 14px; }
 .me-menu .me-link:first-child { border-top: 0; }

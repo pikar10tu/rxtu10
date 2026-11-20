@@ -48,12 +48,13 @@ export function useResidence() {
     const saved = await auth.patchUser(
       {
         coins: coins.value - cost,
-        residence: { ...(auth.userData?.residence || {}), level: newLevel, upgradedAt: new Date() },
+        residence: { ...(auth.userData?.residence || {}), level: newLevel, upgradedAt: new Date(), scene: null },  // อัปบ้านแล้วโชว์ฉากใหม่ทันที
       },
       {
         coins: increment(-cost),
         'residence.level': newLevel,
         'residence.upgradedAt': serverTimestamp(),
+        'residence.scene': null,
       },
     )
     // เลเวลบ้านโชว์ในหน้าเพื่อน → อัปแถวตัวเอง · พ่วงข่าวกระดานไปกับ write เดียวกัน (ไม่มี write เพิ่ม)

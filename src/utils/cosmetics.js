@@ -6,7 +6,7 @@ export function cosOf(u) {
   const c = u?.cosmetics || {}
   const owned = Array.isArray(c.owned) ? c.owned.filter(id => getCosmetic(id)) : []
   const wear = (k) => (c[k] && owned.includes(c[k]) && getCosmetic(c[k])?.kind === k) ? c[k] : null
-  return { owned, n: wear('n'), f: wear('f'), b: wear('b'), g: wear('g') }
+  return { owned, n: wear('n'), f: wear('f'), b: wear('b'), g: null }   // 🌈 พื้นการ์ดเลิกแล้ว 20 พ.ย. 2026 (ฉากบ้านแทน · คืนเหรียญคนที่ซื้อ scripts/refund-card-bg.mjs)
 }
 
 /** ซื้อได้ไหม → { ok, reason: 'unknown'|'owned'|'coins', price } */

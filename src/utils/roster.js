@@ -73,6 +73,8 @@ export function buildRosterRow(u, prev) {
     n:  stripTrailingEmoji(d.nickname || d.name?.split(' ')[0] || '') || '?',
     t:  d.track ?? null,
     l:  num(d.residence?.level, 1),
+    // 🏠 ฉากที่เลือกโชว์ — ใส่เฉพาะเมื่อไม่ตรงเลเวลปัจจุบัน
+    ...(d.residence?.scene && d.residence.scene !== d.residence.level ? { rs: num(d.residence.scene, 1) } : {}),
     p:  d.googlePhoto ?? null,      // ⚠️ ไม่เอา customPhoto ตัวเต็ม — data URL ก้อนใหญ่
     // รูปที่อัปเอง = ตัวจิ๋ว 48px เท่านั้น (utils/photo.js คุมไว้ ≤3KB/คน)
     // ตัวเต็ม 256px อยู่ใน user doc ให้ ProfileModal อ่านตอนกดดูรายคน
@@ -183,7 +185,7 @@ export function toMember(uid, row) {
     studentId: row.s,
     nickname: row.n,
     track: row.t,
-    residence: { level: row.l },
+    residence: { level: row.l, scene: row.rs ?? null },
     googlePhoto: row.p,
     photoMini: row.pm ?? null,
     guestStatus: row.g,

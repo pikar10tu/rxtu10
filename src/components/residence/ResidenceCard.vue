@@ -1,12 +1,7 @@
 <template>
   <div class="res-card" :style="{ borderColor: currentTier.frameColor }">
     <div class="res-head">
-      <!-- อวาตาร์ยืนหน้าบ้าน (20 พ.ย. 2026) · แตะ = ห้องแต่งตัว · รอฉากบ้านพิกเซลจากแผนกอาร์ต (art-dept งาน C) มาแทนอีโมจิ -->
-      <RouterLink v-if="auth.isLoggedIn" to="/doll" class="res-art res-art-doll" :style="{ background: currentTier.frameColor + '22' }" aria-label="ห้องแต่งตัว">
-        <span class="res-art-home"><Emoji :char="currentTier.art" /></span>
-        <DollFigure :eq="myDoll" :scale="2" :aura="false" label="อวาตาร์ของฉัน" class="res-art-me" />
-      </RouterLink>
-      <div v-else class="res-art" :style="{ background: currentTier.frameColor + '22' }"><Emoji :char="currentTier.art" /></div>
+      <div class="res-art" :style="{ background: currentTier.frameColor + '22' }"><Emoji :char="currentTier.art" /></div>
       <div class="res-meta">
         <div class="res-name">
           {{ currentTier.tierName }}
@@ -43,13 +38,7 @@
 import Emoji from '../shared/Emoji.vue'
 import HelpButton from '../help/HelpButton.vue'
 import { useResidence } from '../../composables/useResidence.js'
-import { computed } from 'vue'
-import DollFigure from '../doll/DollFigure.vue'
-import { dollOf } from '../../utils/doll.js'
-import { useAuthStore } from '../../stores/auth.js'
 
-const auth = useAuthStore()
-const myDoll = computed(() => dollOf(auth.userData).eq)
 const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useResidence()
 </script>
 
@@ -69,10 +58,6 @@ const { level, currentTier, next, isMax, coins, canAfford, upgrade } = useReside
   display: flex; align-items: center; justify-content: center;
   font-size: 2rem; border-radius: 14px; flex-shrink: 0;
 }
-.res-art-doll { position: relative; width: 88px; height: 100px; overflow: hidden; text-decoration: none; }
-.res-art-doll:active { transform: scale(.95); }
-.res-art-home { position: absolute; right: 4px; top: 2px; font-size: 1.6rem; opacity: .85; }
-.res-art-me { position: absolute; left: -24px; bottom: -8px; }
 .res-meta { flex: 1; min-width: 0; }
 .res-name { font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 .res-lv { color: #fff; font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; }

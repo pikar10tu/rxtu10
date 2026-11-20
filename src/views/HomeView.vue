@@ -18,6 +18,11 @@
     </header>
 
     <template v-if="authStore.isLoggedIn">
+      <!-- 🏠 หน้าแรกแบบ B (user เคาะ 20 พ.ย. 2026): ฉากบ้านเต็มกว้าง อวาตาร์ยืนในฉาก · คำทักทายบนแถบฟ้า · แตะอวาตาร์ = ห้องแต่งตัว -->
+      <ResidenceScene class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
+        <div class="home-greet">{{ greet }} {{ authStore.userData?.nickname || '' }}</div>
+        <RouterLink to="/me" class="home-scene-tag"><Emoji :char="homeTier.art" /> {{ homeTier.tierName }}</RouterLink>
+      </ResidenceScene>
       <!-- จัดหน้าใหม่ (user เคาะ 11 พ.ย. 2026): ผลสอบจำลอง → วันนี้ของคุณ → ประจำวันสนุกๆ → บ้าน → ลิงก์ท้ายหน้า -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
       <MockScoreCard only-unseen class="home" />
@@ -61,6 +66,9 @@
 </template>
 
 <script setup>
+import ResidenceScene from '../components/residence/ResidenceScene.vue'
+import { getTier, sceneOf } from '../data/residence.js'
+import { dollOf } from '../utils/doll.js'
 import Emoji from '../components/shared/Emoji.vue'
 import MockScoreCard from '../components/me/MockScoreCard.vue'
 import FeedbackModal from '../components/shared/FeedbackModal.vue'
@@ -91,6 +99,10 @@ import HeaderIconButton from '../components/home/HeaderIconButton.vue'
 
 const authStore = useAuthStore()
 const mailbox = useMailbox()
+const homeScene = computed(() => sceneOf(authStore.userData?.residence))
+const homeTier = computed(() => getTier(homeScene.value))
+const homeDoll = computed(() => dollOf(authStore.userData).eq)
+const greet = (() => { const h = new Date().getHours(); return h < 11 ? 'สวัสดีตอนเช้า' : h < 16 ? 'สวัสดีตอนบ่าย' : h < 19 ? 'สวัสดีตอนเย็น' : 'ราตรีสวัสดิ์' })()
 
 const showMail = ref(false)
 const showQuest = ref(false)
@@ -149,6 +161,10 @@ function onCardSheet(name) { if (name === 'quest') showQuest.value = true }
 </script>
 
 <style scoped>
+/* 🏠 ฉากบ้านหัวหน้าแรก — ชิดขอบจอซ้ายขวา (ลบ padding ของ .tab-content) */
+.home-scene { margin: -12px -12px 14px; }
+.home-greet { position: absolute; left: 24px; right: 24px; top: 10px; z-index: 2; font-weight: 800; font-size: 1rem; color: var(--ink); text-shadow: 0 1px 0 rgba(255,255,255,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-scene-tag { position: absolute; right: 10px; bottom: 8px; z-index: 2; font-size: .7rem; font-weight: 800; color: var(--ink); text-decoration: none; background: rgba(255,255,255,.92); border: var(--bw) solid var(--line); border-radius: 999px; padding: 2px 9px; }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
 .home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
 .home-fun { display: grid; gap: 8px; margin-bottom: 12px; }

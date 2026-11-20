@@ -100,7 +100,12 @@ export const ACHIEVEMENTS = {
   home_max: { title: 'เจ้าของคฤหาสน์', icon: '🏰', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 12 }, desc: 'อัปบ้านถึงเลเวล 12', flavor: 'จากข้างถนนสู่ยอดพีระมิด' },
   home_13:  { title: 'เจ้าสมุทร',         icon: '🌊', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 13 }, desc: 'อัปบ้านถึงเลเวล 13 คฤหาสน์ลอยตัวกลางมหาสมุทร', flavor: 'ตื่นมาเจอทะเลทุกทิศ ไม่มีเพื่อนบ้านมากวน' },
   home_14:  { title: 'ราชันใต้บาดาล',      icon: '🔱', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 14 }, desc: 'อัปบ้านถึงเลเวล 14 มหานครใต้บาดาล', flavor: 'ทั้งเมืองใต้น้ำเป็นของเรา' },
-  home_15:  { title: 'ชาวสวรรค์',         icon: '☁️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 15 }, desc: 'อัปบ้านถึงเลเวล 15 สวนสวรรค์เหนือน่านฟ้า บ้านสูงสุดของเกม', flavor: 'สูงกว่านี้ไม่มีแล้ว นอกจากท้องฟ้า' },
+  home_15:  { title: 'ชาวสวรรค์',         icon: '☁️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 15 }, desc: 'อัปบ้านถึงเลเวล 15 สวนสวรรค์เหนือน่านฟ้า', flavor: 'สูงกว่านี้ไม่มีแล้ว นอกจากท้องฟ้า (ใช่เหรอ?)' },
+  home_16:  { title: 'ชาวจันทรา',         icon: '🌙', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 16 }, desc: 'อัปบ้านถึงเลเวล 16 วิมานบนดวงจันทร์', flavor: 'มองลงไปเห็นโลกกลมๆ ลอยอยู่ไกลๆ' },
+  home_17:  { title: 'นักบินอวกาศ',        icon: '🛸', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 17 }, desc: 'อัปบ้านถึงเลเวล 17 สถานีอวกาศแห่งดวงดาว', flavor: 'ไวไฟแรงกว่าหอพักแน่นอน' },
+  home_18:  { title: 'เจ้าวงแหวน',         icon: '🪐', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 18 }, desc: 'อัปบ้านถึงเลเวล 18 วังคริสตัลวงแหวนดาวเสาร์', flavor: 'ทั้งวงแหวนเป็นสนามหญ้าหน้าบ้าน' },
+  home_19:  { title: 'ผู้เดินเนบิวลา',      icon: '🌌', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 19 }, desc: 'อัปบ้านถึงเลเวล 19 มหานครเนบิวลาสีรุ้ง', flavor: 'ทุกเช้ามีรุ้งให้ดูไม่ซ้ำสี' },
+  home_20:  { title: 'จักรพรรดิสุริยะ',     icon: '☀️', type: 'milestone', trigger: { stat: 'residenceLevel', gte: 20 }, desc: 'อัปบ้านถึงเลเวล 20 อาณาจักรสุริยะนิรันดร์', flavor: 'ดวงอาทิตย์ก็แค่โคมไฟหน้าบ้าน' },
   // PharmaTeam (16 ต.ค. 2026) — endless ไม่มีชนะ วัดที่ด่านไกลสุดที่ทีมไปถึง (ด่านที่แลปแตกก็นับว่าไปถึง)
   pt_3:  { title: 'ทีมห้องยามือใหม่', icon: '🧪', type: 'milestone', trigger: { stat: 'pharmaTeamBest', gte: 3 },  desc: 'PharmaTeam ไปถึงด่าน 3', flavor: 'เริ่มรู้แล้วว่าใครถือปุ่มอะไร' },
   pt_5:  { title: 'ทีมเวิร์คระดับ ER', icon: '🏥', type: 'milestone', trigger: { stat: 'pharmaTeamBest', gte: 5 },  desc: 'PharmaTeam ไปถึงด่าน 5', flavor: 'ห้องฉุกเฉินก็ไม่หวั่น' },

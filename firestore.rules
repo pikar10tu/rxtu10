@@ -84,7 +84,7 @@ service cloud.firestore {
           && request.resource.data.get('coins', 0) >= 0
           && request.resource.data.get('coins', 0) <= 50000000
           && request.resource.data.get('residence', {}).get('level', 1) >= 1
-          && request.resource.data.get('residence', {}).get('level', 1) <= 15   // = MAX_RESIDENCE_LEVEL (data/residence.js)
+          && request.resource.data.get('residence', {}).get('level', 1) <= 20   // = MAX_RESIDENCE_LEVEL (data/residence.js)
           && request.resource.data.get('residence', {}).get('level', 1)
              <= resource.data.get('residence', {}).get('level', 1) + 1
           // CC2 OSPE บันทึกซ้อม (11 พ.ย. 2026 · utils/cc2Progress.js): กัน doc บวม — คลังมี ~352 เคส เผื่อ 600

@@ -4,24 +4,21 @@
   <div v-if="member" class="pf-ov" @click.self="$emit('close')">
     <div class="pf-box">
       <!-- Tier 1: hero (residence art = the flex background) -->
-      <div class="pf-hero" :class="{ 'pf-lightbg': cosBg && !cosBg.dark }" :style="heroStyle">
-        <CosBg :id="cos.g" />
-        <button v-if="isMe" class="pf-deco" aria-label="ไปห้องแต่งตัว" @click="goShop"><Emoji char="🎀" /></button>
-        <button class="pf-x" @click="$emit('close')">✕</button>
-        <div class="pf-hero-art"><Emoji :char="tier.art" /></div>
-        <!-- โปรไฟล์แบบ B (20 พ.ย. 2026): รูป+กรอบ แล้วอวาตาร์ยืนข้าง · ของตัวเองแตะอวาตาร์ = ไปห้องแต่งตัว -->
+      <!-- 🏠 ฉากบ้านที่เจ้าของเลือกโชว์เป็นปก อวาตาร์ยืนในฉาก (20 พ.ย. 2026 · พื้นการ์ดร้านตกแต่งเลิกแล้ว) -->
+      <ResidenceScene class="pf-scene" :scene="sceneN" :eq="dollEq" :doll-to="isMe ? '/doll' : ''" :label="`อวาตาร์ของ ${view.nickname || ''}`">
+        <button class="pf-x" aria-label="ปิด" @click="$emit('close')">✕</button>
+        <span class="pf-scene-tag"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }}</span>
+      </ResidenceScene>
+      <div class="pf-hero" :style="heroStyle">
         <div class="pf-id">
           <CosFrame :id="cos.f" class="pf-av-frame">
             <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
           </CosFrame>
-          <component :is="isMe ? 'button' : 'span'" class="pf-doll" :type="isMe ? 'button' : undefined" :aria-label="isMe ? 'ไปห้องแต่งตัว' : undefined" @click="isMe && goShop()">
-            <DollFigure :eq="dollEq" :scale="2" :label="`อวาตาร์ของ ${view.nickname || ''}`" />
-          </component>
         </div>
         <div v-if="view.realName" class="pf-real">{{ view.realName }}</div>
         <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
         <div v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.74" :fit="22" /></div>
-        <div class="pf-residence"><Emoji :char="tier.art" /> {{ tier.tierName }} · Lv.{{ lvl }}</div>
+        <div class="pf-residence">บ้าน Lv.{{ lvl }}</div>
         <div class="pf-chips">
           <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
           <!-- MBTI — โชว์แค่ในการ์ดโปรไฟล์ · กดแล้วเด้งการ์ดอ่านเต็ม (user 25 ต.ค. 2026) -->
@@ -93,7 +90,7 @@ import { useRouter } from 'vue-router'
 import { useMembersStore } from '../../stores/members.js'
 import { useAuthStore } from '../../stores/auth.js'
 import Emoji from '../shared/Emoji.vue'
-import { getTier } from '../../data/residence.js'
+import { getTier, sceneOf } from '../../data/residence.js'
 import { getPetDef } from '../../data/index.js'
 import { avatarUrl, fallbackAvatar } from '../../utils/avatar.js'
 import { resolveBattleTeam } from '../../utils/petTeam.js'
@@ -104,13 +101,11 @@ import AchievementGrid from '../shared/AchievementGrid.vue'
 import { fetchAchievementItems } from '../../composables/useAchievementItems.js'
 import CosFrame from '../cosmetics/CosFrame.vue'
 import CosName from '../cosmetics/CosName.vue'
-import CosBg from '../cosmetics/CosBg.vue'
+import ResidenceScene from '../residence/ResidenceScene.vue'
 import TitlePill from '../shared/TitlePill.vue'
-import DollFigure from '../doll/DollFigure.vue'
 import { dollOf } from '../../utils/doll.js'
 import { decodeDoll } from '../../utils/dollCode.js'
 import { cosOf } from '../../utils/cosmetics.js'
-import { getCosmetic } from '../../data/cosmetics.js'
 import { resolveShowcase, resolveTitle } from '../../utils/achievements.js'
 import PetStatPopup from '../pets/PetStatPopup.vue'
 import PetThumb from '../shared/PetThumb.vue'
@@ -169,7 +164,6 @@ const petPopup = ref(null)
 
 // ร้านตกแต่ง — doc เต็มมีครบทุกหมวด (รวมพื้นการ์ด) · ระหว่างรอใช้ของจากแถว roster (n/f/b)
 const cos = computed(() => full.value ? cosOf(full.value) : (props.member?.cosmetics || {}))
-const cosBg = computed(() => getCosmetic(cos.value.g))
 
 // 🧍 อวาตาร์: doc เต็มมีของจริง · ระหว่างรอใช้รหัสจากแถว roster (members.doll = dl) — ไม่มีจอว่าง
 const dollEq = computed(() => (full.value?.doll ? dollOf(full.value).eq : decodeDoll(props.member?.doll)))
@@ -177,10 +171,12 @@ const cc2Count = computed(() => Object.keys(view.value?.study?.cc2 || {}).length
 
 const lvl  = computed(() => view.value?.residence?.level || 1)
 const tier = computed(() => getTier(lvl.value))
+const sceneN = computed(() => sceneOf(view.value?.residence))
+const sceneTier = computed(() => getTier(sceneN.value))
 
 const avatar = computed(() => avatarUrl(view.value, view.value?.nickname))
 const heroStyle = computed(() => ({
-  background: `linear-gradient(135deg, ${tier.value.frameColor}, ${tier.value.frameColor}99)`,
+  background: `linear-gradient(180deg, ${tier.value.frameColor}26, #fff 80%)`,
 }))
 
 const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
@@ -211,10 +207,8 @@ const canDuel = computed(() => !!view.value?.uid && view.value.uid !== myUid.val
 // 🎀 ทางลัดร้านตกแต่ง — เฉพาะโปรไฟล์ตัวเองเท่านั้น (เดิมต้องปิดโมดัลแล้วไปเองที่หน้า "ฉัน")
 const router = useRouter()
 const isMe = computed(() => !!view.value?.uid && view.value.uid === myUid.value)
-function goShop() {
-  emit('close')
-  router.push('/doll')
-}
+// แตะอวาตาร์ตัวเอง = ไปห้องแต่งตัว (RouterLink ในฉาก) → เปลี่ยนหน้าแล้วปิดการ์ดเอง
+watch(() => router.currentRoute.value.fullPath, () => emit('close'))
 
 const duelReplay = ref(null)
 function startDuel() {
@@ -249,21 +243,13 @@ function startDuel() {
 .pf-mbti { border: 0; font: inherit; cursor: pointer; }
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pf-box { scrollbar-gutter: stable; background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
-.pf-hero { position: relative; padding: 22px 16px 16px; text-align: center; color: #fff; overflow: hidden; }
-.pf-hero > :not(.cz-bgl):not(.pf-x):not(.pf-deco) { position: relative; z-index: 1; }
-.pf-hero .pf-x, .pf-hero .pf-deco { z-index: 2; }
-/* พื้นการ์ดสีอ่อนจากร้าน → ตัวอักษรเข้ม (พื้นเดิมของ hero เข้ม ตัวอักษรขาว) */
-.pf-hero.pf-lightbg { color: var(--ink); }
+.pf-scene { position: relative; }
+.pf-scene-tag { position: absolute; right: 8px; bottom: 8px; z-index: 2; font-size: .7rem; font-weight: 800; color: var(--ink); background: rgba(255,255,255,.92); border: var(--bw) solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.pf-hero { position: relative; padding: 0 16px 16px; text-align: center; color: var(--ink); }
 /* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
-.pf-id { display: flex; align-items: flex-end; justify-content: center; gap: 10px; }
-.pf-doll { display: inline-flex; padding: 0; margin-bottom: -4px; background: none; border: 0; filter: drop-shadow(0 2px 0 rgba(0,0,0,.12)); }
-button.pf-doll { cursor: pointer; transition: transform .15s; }
-button.pf-doll:active { transform: scale(.95); }
-.pf-hero-art { position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: .25; }
-.pf-x { position: absolute; left: 12px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-/* ทางลัดร้านตกแต่ง — เฉพาะโปรไฟล์ตัวเอง วางถัดจาก ✕ ในกลุ่มปุ่มเดียวกัน (ขอบ/ขนาด/สไตล์ชุดเดียวกับ pf-x) */
-.pf-deco { position: absolute; left: 60px; top: 12px; border: none; background: rgba(255,255,255,.25); color: #fff; font-size: 1.1rem; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; z-index: 2; }
-.pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); object-fit: cover; background: #fff; }
+.pf-id { display: flex; justify-content: center; margin-top: -38px; }
+.pf-x { position: absolute; left: 10px; top: 10px; z-index: 2; border: var(--bw) solid var(--line); background: rgba(255,255,255,.88); color: var(--ink); border-radius: 10px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font: inherit; font-weight: 800; }
+.pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; background: #fff; }
 .pf-real {
   font-family: var(--font-display); font-weight: 400;
   font-size: 1.3rem; margin-top: 8px; padding: 0 14px;
