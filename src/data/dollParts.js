@@ -424,8 +424,8 @@ const AURA = {
   f22: { type: 'glow', color: '#B49BE0' }, f23: { type: 'glow', color: '#F08A80' }, f24: { type: 'glow', color: '#F6D77A' },
   f25: { type: 'glow', color: '#8FB0EA' }, f26: { type: 'glow', color: '#7FD3A8' },
   f14: { type: 'bubbles', color: '#FFB3AC' },      // มาสคอตแคปซูล: ฟองลอย
-  // ชุดวอร์มสุดเนี้ยบ: ประกายระยิบ (user ชอบแบบเดิม)
-  f15: { type: 'sparkle', color: '#DDEBFF' }, f16: { type: 'sparkle', color: '#C9C9D6' }, f17: { type: 'sparkle', color: '#FFB3AC' }, f18: { type: 'sparkle', color: '#A8C2EE' },
+  // ชุดวอร์มสุดเนี้ยบ: ระยิบสีขาวทั่วชุด (20 พ.ย. เดิมประกายล้อมรอบตัว user ว่าดูเป็นวงกลม)
+  f15: { type: 'shimmer', color: '#FFFFFF' }, f16: { type: 'shimmer', color: '#FFFFFF' }, f17: { type: 'shimmer', color: '#FFFFFF' }, f18: { type: 'shimmer', color: '#FFFFFF' },
 }
 for (const p of PARTS) { const a = AURA[p.id] ?? AURA[p.variantOf]; if (a) p.aura = a; else delete p.aura }
 

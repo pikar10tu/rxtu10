@@ -84,6 +84,16 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
   filter: drop-shadow(0 0 var(--px) var(--au));
   animation: dollSpk 2.4s steps(4) infinite;
 }
+/* ✨ ระยิบทั่วชุด: กากบาทเล็ก 3x3 วูบสั้นๆ บนตัวชุด ทีละจุดไล่กัน (ไม่ล้อมรอบตัว) */
+.pt-shimmer {
+  width: calc(var(--px) * 3); height: calc(var(--px) * 3); margin: calc(var(--px) * -1.5) 0 0 calc(var(--px) * -1.5);
+  background:
+    linear-gradient(var(--au), var(--au)) center / var(--px) 100% no-repeat,
+    linear-gradient(var(--au), var(--au)) center / 100% var(--px) no-repeat;
+  filter: drop-shadow(0 0 calc(var(--px) * .7) var(--au));
+  animation: dollShim 3.6s ease-in-out infinite;
+}
+@keyframes dollShim { 0%, 22%, 100% { opacity: 0; transform: scale(.3); } 10% { opacity: 1; transform: scale(1); } }
 @keyframes dollSpk { 0%, 100% { opacity: 0; transform: scale(.6); } 40% { opacity: 1; transform: scale(1); } 70% { opacity: .5; } }
 /* 💗 หัวใจลอย: หัวใจ 5x4 ลอยขึ้นแล้วจาง */
 .pt-hearts {
