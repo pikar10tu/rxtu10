@@ -350,7 +350,7 @@ const PRACTICE = computed(() => pick('quiz', 'cc2'))   // ป้ายเลข�
 const READ = computed(() => pick('sum', 'drug', 'tool').map(d => ({ ...d, ...READ_TILE[d.key] })))
 const READ_TILE = {
   sum: { tile: `${SUMMARIES.filter(x => x.ready).length} เรื่อง` },
-  drug: { short: 'ฐานยา', tile: 'DailyMed' },
+  drug: { short: 'ฐานข้อมูลยา', tile: 'DailyMed' },
   tool: { short: 'คำนวณ', tile: 'CrCl · เด็ก' },
 }
 // สรุปผลฝึกบรรทัดเดียว: หมวดแม่นสุด · หมวดควรฝึก (0 reads — study.gs)
