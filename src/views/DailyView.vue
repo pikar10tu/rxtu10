@@ -36,7 +36,8 @@
       <div v-if="stage === 'intro'" class="dc-card">
         <div class="dc-title"><Emoji char="🏅" /> อันดับวันนี้</div>
         <div v-if="!board.length" class="dc-sub">ยังไม่มีใครทำวันนี้ เป็นคนแรกเลย!</div>
-        <div v-for="r in board.slice(0, 10)" :key="r.uid" class="dc-row">
+        <DailyPodium v-else :rows="board" :me="uid" class="dc-podium" />
+        <div v-for="r in board.slice(3, 10)" :key="r.uid" class="dc-row">
           <span class="dc-rank">{{ medal(r.rank) }}</span>
           <span class="dc-name">{{ r.name || '?' }}</span>
           <span class="dc-pts">{{ r.score.toLocaleString() }}</span>
@@ -96,7 +97,8 @@
         <div class="dc-card">
           <div class="dc-title"><Emoji char="🏅" /> อันดับวันนี้</div>
           <div v-if="!board.length" class="dc-sub">ยังไม่มีใครเล่นเลย</div>
-          <div v-for="r in board.slice(0, 10)" :key="r.uid" class="dc-row" :class="{ me: r.uid === uid }">
+          <DailyPodium v-else :rows="board" :me="uid" class="dc-podium" />
+          <div v-for="r in board.slice(3, 10)" :key="r.uid" class="dc-row" :class="{ me: r.uid === uid }">
             <span class="dc-rank">{{ medal(r.rank) }}</span>
             <span class="dc-name">{{ r.name || '?' }}</span>
             <span class="dc-pts">{{ r.score.toLocaleString() }}</span>
@@ -121,6 +123,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useUsageStore } from '../stores/usage.js'
 import { useToast } from '../composables/useToast.js'
 import Emoji from '../components/shared/Emoji.vue'
+import DailyPodium from '../components/daily/DailyPodium.vue'
 import QuestionReport from '../components/study/QuestionReport.vue'
 import QuestionActions from '../components/quiz/QuestionActions.vue'
 import { loadQComments } from '../composables/useQComments.js'
@@ -431,5 +434,6 @@ onBeforeUnmount(() => clearInterval(timer))
 .dc-row { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 8px; padding: 9px 4px; border-top: 1px solid var(--line); font-size: .84rem; color: var(--ink); }
 .dc-row.me { background: var(--primary-light); border-radius: 10px; font-weight: 800; }
 .dc-rank { text-align: center; font-weight: 800; }
+.dc-podium { margin-bottom: 8px; }
 .dc-pts { font-weight: 800; color: var(--primary); }
 </style>
