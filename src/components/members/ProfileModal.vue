@@ -7,7 +7,7 @@
       <!-- 🏠 ฉากบ้านที่เจ้าของเลือกโชว์เป็นปก อวาตาร์ยืนในฉาก (20 พ.ย. 2026 · พื้นการ์ดร้านตกแต่งเลิกแล้ว) -->
       <ResidenceScene class="pf-scene" :scene="sceneN" :eq="dollEq" :doll-to="isMe ? '/doll' : ''" :label="`อวาตาร์ของ ${view.nickname || ''}`">
         <button class="pf-x" aria-label="ปิด" @click="$emit('close')">✕</button>
-        <span class="pf-scene-tag"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }}</span>
+        <span class="place-tag pf-scene-tag" :style="{ '--tier': sceneTier.frameColor, cursor: 'default' }"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }}</span>
       </ResidenceScene>
       <div class="pf-hero" :style="heroStyle">
         <div class="pf-id">
@@ -244,7 +244,7 @@ function startDuel() {
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pf-box { scrollbar-gutter: stable; background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-scene { position: relative; }
-.pf-scene-tag { position: absolute; right: 8px; bottom: 8px; z-index: 2; font-size: .7rem; font-weight: 800; color: var(--ink); background: rgba(255,255,255,.92); border: var(--bw) solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.pf-scene-tag { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
 .pf-hero { position: relative; padding: 0 16px 16px; text-align: center; color: var(--ink); }
 /* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
 .pf-id { display: flex; justify-content: center; margin-top: -38px; }

@@ -9,9 +9,9 @@
       <!-- 🏠 ฉากบ้านเป็นปกการ์ด อวาตาร์ยืนในฉาก (20 พ.ย. 2026 · พื้นการ์ดร้านตกแต่งเลิกแล้ว) · แตะอวาตาร์ = ห้องแต่งตัว -->
       <section class="me-card" :style="{ '--tier': tier.frameColor }">
       <ResidenceScene class="me-scene" :scene="myScene" :eq="myDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
-        <button type="button" class="me-scene-btn" @click="pickOpen = true"><Emoji char="🏠" /> เปลี่ยนฉาก</button>
+        <button type="button" class="place-tag me-place" :style="{ '--tier': sceneTier.frameColor }" @click="pickOpen = true"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }} <b>›</b></button>
       </ResidenceScene>
-      <ScenePicker v-model:open="pickOpen" />
+      <ResidenceSheet v-model:open="pickOpen" />
       <div class="me-hero">
         <div class="me-id">
         <div class="me-av-box">
@@ -151,7 +151,7 @@ import { grantSecret } from '../composables/useAchievements.js'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
 import ResidenceScene from '../components/residence/ResidenceScene.vue'
-import ScenePicker from '../components/residence/ScenePicker.vue'
+import ResidenceSheet from '../components/residence/ResidenceSheet.vue'
 import TitlePill from '../components/shared/TitlePill.vue'
 import { cosOf } from '../utils/cosmetics.js'
 import { dollOf } from '../utils/doll.js'
@@ -407,7 +407,7 @@ async function save() {
 /* ═══ หน้าฉัน จัดใหม่ (25 ก.ย. 2026) ═══ */
 .me-card { padding: 0 14px 14px; overflow: hidden; }
 .me-scene { margin: 0 -14px; }
-.me-scene-btn { position: absolute; right: 8px; bottom: 8px; z-index: 2; border: var(--bw) solid var(--line); background: rgba(255,255,255,.92); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: .72rem; font-weight: 800; color: var(--ink); cursor: pointer; }
+.me-place { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
 .me-hero .me-av-box { margin-top: -34px; }
 .me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 .me-av-box { position: relative; margin-bottom: 4px; }

@@ -5,9 +5,7 @@
       <div class="home-head-txt">
         <h1 class="home-head-title">RxTU10</h1>
         <!-- วันสอบย่อเหลือบรรทัดเดียว (13 พ.ย. 2026 แทนการ์ด ExamCountdown) · จิ้มรัวยังได้ความสำเร็จลับเหมือนเดิม -->
-        <p v-if="examLine" class="home-head-sub home-cd" :class="{ 'cd-jig': jig === 1, 'cd-panic': jig === 2 }" role="button" tabindex="0" data-sfx="none"
-           @click="poke" @keydown.enter="poke" @animationend="jig = 0"><Emoji char="🎯" /> {{ examLine }}</p>
-        <p v-else class="home-head-sub">เภสัช มธ. รุ่น 10 · หน้าหลัก</p>
+        <p class="home-head-sub">เภสัช มธ. รุ่น 10 · หน้าหลัก</p>
       </div>
       <!-- ปุ่มจดหมาย + เควส มุมขวา (จุดแดงเมื่อมีของค้าง) -->
       <div v-if="authStore.isLoggedIn" class="home-head-actions">
@@ -20,14 +18,23 @@
     <template v-if="authStore.isLoggedIn">
       <!-- 🏠 หน้าแรกแบบ B (user เคาะ 20 พ.ย. 2026): ฉากบ้านเต็มกว้าง อวาตาร์ยืนในฉาก · คำทักทายบนแถบฟ้า · แตะอวาตาร์ = ห้องแต่งตัว -->
       <ResidenceScene class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
-        <div class="home-greet">{{ greet }} {{ authStore.userData?.nickname || '' }}</div>
-        <RouterLink to="/me" class="home-scene-tag"><Emoji :char="homeTier.art" /> {{ homeTier.tierName }}</RouterLink>
+        <!-- ป้ายทักทาย + วันสอบ (ย้ายจากหัวหน้ามาไว้บนฟ้า) · จิ้มรัวยังได้ความสำเร็จลับเหมือนเดิม -->
+        <div class="greet-bubble home-greet" :class="{ 'cd-jig': jig === 1, 'cd-panic': jig === 2 }" role="button" tabindex="0" data-sfx="none"
+             @click="poke" @keydown.enter="poke" @animationend="jig = 0">
+          <b>{{ greet }} {{ authStore.userData?.nickname || '' }}</b>
+          <small v-if="examLine"><Emoji char="🎯" /> {{ examLine }}</small>
+        </div>
+        <!-- ป้ายชื่อสถานที่ = ปุ่มเปิดแผงบ้าน (อัปบ้าน + เลือกฉาก) แทนการ์ดอัปบ้านใหญ่ (user 20 พ.ย.) -->
+        <button type="button" class="place-tag home-place" :style="{ '--tier': homeTier.frameColor }" @click="homeOpen = true">
+          <Emoji :char="homeTier.art" /> {{ homeTier.tierName }} <b>›</b>
+        </button>
       </ResidenceScene>
+      <ResidenceSheet v-model:open="homeOpen" />
       <!-- จัดหน้าใหม่ (user เคาะ 11 พ.ย. 2026): ผลสอบจำลอง → วันนี้ของคุณ → ประจำวันสนุกๆ → บ้าน → ลิงก์ท้ายหน้า -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
       <MockScoreCard only-unseen class="home" />
       <!-- วันนี้ของคุณ = ข้อสอบประจำวัน · ข้อที่เคยผิด · รายได้ + รายละเอียดเดิมพับไว้ -->
-      <ContinueCard @sheet="onCardSheet" />
+      <ContinueCard />
 
       <!-- ประจำวันสนุกๆ: ดวง → อีเวนต์ → MBTI → เกร็ดความรู้เภสัช (13 พ.ย. แทนสถิติเว็บ — ยังอยู่ที่ /fun-facts) · ข้ามตัวที่ไม่มี · ครบ 4 = เกร็ดฯ ลงการ์ดเต็มกว้าง -->
       <div class="home-sec">ประจำวันสนุกๆ</div>
@@ -40,8 +47,6 @@
       </div>
       <PharmFactCard v-if="factsWide" />
 
-      <!-- ที่อยู่อาศัย (residence) — แกน prestige/coin-sink -->
-      <ResidenceCard />
       <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
 
       <!-- ลิงก์บรรทัดเดียวท้ายหน้า -->
@@ -67,6 +72,7 @@
 
 <script setup>
 import ResidenceScene from '../components/residence/ResidenceScene.vue'
+import ResidenceSheet from '../components/residence/ResidenceSheet.vue'
 import { getTier, sceneOf } from '../data/residence.js'
 import { dollOf } from '../utils/doll.js'
 import Emoji from '../components/shared/Emoji.vue'
@@ -78,7 +84,6 @@ import { useAuthStore } from '../stores/auth.js'
 import { useMailbox } from '../stores/mailbox.js'
 import { questNotClaimed } from '../utils/dailyQuest.js'
 import { pendingAnnounce } from '../utils/mailbox.js'
-import ResidenceCard from '../components/residence/ResidenceCard.vue'
 import ContinueCard from '../components/home/ContinueCard.vue'
 import GlobalSearchPanel from '../components/search/GlobalSearchPanel.vue'
 const HoroCard = defineAsyncComponent(() => import('../components/horo/HoroCard.vue'))
@@ -99,6 +104,7 @@ import HeaderIconButton from '../components/home/HeaderIconButton.vue'
 
 const authStore = useAuthStore()
 const mailbox = useMailbox()
+const homeOpen = ref(false)
 const homeScene = computed(() => sceneOf(authStore.userData?.residence))
 const homeTier = computed(() => getTier(homeScene.value))
 const homeDoll = computed(() => dollOf(authStore.userData).eq)
@@ -157,14 +163,13 @@ onMounted(async () => {
 })
 
 // การ์ดงานถัดไปสั่งเปิด bottom-sheet ได้ (เควสไม่มีหน้าแยก)
-function onCardSheet(name) { if (name === 'quest') showQuest.value = true }
 </script>
 
 <style scoped>
 /* 🏠 ฉากบ้านหัวหน้าแรก — ชิดขอบจอซ้ายขวา (ลบ padding ของ .tab-content) */
 .home-scene { margin: -12px -12px 14px; }
-.home-greet { position: absolute; left: 24px; right: 24px; top: 10px; z-index: 2; font-weight: 800; font-size: 1rem; color: var(--ink); text-shadow: 0 1px 0 rgba(255,255,255,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.home-scene-tag { position: absolute; right: 10px; bottom: 8px; z-index: 2; font-size: .7rem; font-weight: 800; color: var(--ink); text-decoration: none; background: rgba(255,255,255,.92); border: var(--bw) solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.home-greet { position: absolute; left: 22px; top: 8px; z-index: 2; max-width: calc(100% - 44px); }
+.home-place { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
 .home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
 .home-fun { display: grid; gap: 8px; margin-bottom: 12px; }

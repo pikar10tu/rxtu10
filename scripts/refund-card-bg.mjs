@@ -1,7 +1,7 @@
 // 🌈→🪙 คืนเหรียญพื้นการ์ด (cosmetics kind 'g') ที่เลิกขาย 20 พ.ย. 2026 — ฉากบ้านเป็นปกการ์ดแทน
 // node scripts/refund-card-bg.mjs          = dry run (อ่านอย่างเดียว พิมพ์ว่าใครได้คืนเท่าไร)
 // node scripts/refund-card-bg.mjs --write  = เขียนจริง (production ทุกคน — ทำเมื่อ user สั่งเท่านั้น หลัง push)
-// คืนตามราคาเหรียญเต็ม · ของอีเวนต์ (ราคา 0 ซื้อด้วยฟักทอง) ไม่คืนเหรียญ แค่ถอดออก (ตาม EVENT_REFUND ด้านล่าง)
+// คืนตามราคาเหรียญเต็ม · ของอีเวนต์ (ราคา 0 แลกด้วยฟักทอง) คืนตามขั้นความหายาก = ราคาถูกสุดของพื้นการ์ดเหรียญขั้นเดียวกัน (user 20 พ.ย.)
 // ใช้ token ของ firebase CLI ผ่าน REST (ข้าม rules) · เขียนแบบมีเงื่อนไข updateTime กันทับของที่เพิ่งเปลี่ยน
 import fs from 'node:fs'
 import os from 'node:os'
@@ -10,8 +10,11 @@ import { createRequire } from 'node:module'
 import { COSMETICS } from '../src/data/cosmetics.js'
 
 const WRITE = process.argv.includes('--write')
-const EVENT_REFUND = 0   // เหรียญต่อชิ้นสำหรับของอีเวนต์ฟักทอง (user ยังไม่เคาะ → 0)
-const G = Object.fromEntries(COSMETICS.filter(c => c.kind === 'g').map(c => [c.id, c.price || EVENT_REFUND]))
+const GS = COSMETICS.filter(c => c.kind === 'g')
+const TIER_PRICE = {}
+for (const c of GS) if (c.price > 0) TIER_PRICE[c.tier] = Math.min(TIER_PRICE[c.tier] ?? Infinity, c.price)
+const G = Object.fromEntries(GS.map(c => [c.id, c.price || TIER_PRICE[c.tier] || 0]))
+console.log('ของอีเวนต์คืน:', GS.filter(c => !c.price).map(c => `${c.id}=${G[c.id].toLocaleString()}`).join(' '))
 
 const require = createRequire(import.meta.url)
 const tools = path.join(process.env.APPDATA, 'npm/node_modules/firebase-tools/lib/auth.js')

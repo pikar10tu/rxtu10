@@ -1,7 +1,10 @@
-<!-- 🏠 เลือกฉากบ้านที่จะโชว์ (20 พ.ย. 2026) — เลือกได้ทุกขั้นที่ผ่านมาแล้ว ขั้นที่ยังไม่ถึงล็อกไว้ให้เห็นเป็นเป้า
+<!-- 🏠 แผง "บ้านของฉัน" (20 พ.ย. 2026): อัปบ้าน + เลือกฉากที่จะโชว์ · เปิดจากป้ายชื่อสถานที่บนฉาก (หน้าแรก/หน้าฉัน)
+     แทนการ์ดอัปบ้านใหญ่บนหน้าแรก (user: ไม่ให้รก) · — เลือกได้ทุกขั้นที่ผ่านมาแล้ว ขั้นที่ยังไม่ถึงล็อกไว้ให้เห็นเป็นเป้า
      เขียน residence.scene (null = ตามเลเวลปัจจุบัน) แล้วอัปแถว roster ให้เพื่อนเห็นฉากเดียวกัน -->
 <template>
-  <BottomSheet :open="open" icon="🏠" title="เลือกฉากบ้าน" @update:open="$emit('update:open', $event)">
+  <BottomSheet :open="open" icon="🏠" title="บ้านของฉัน" @update:open="$emit('update:open', $event)">
+    <ResidenceCard class="sp-up" />
+    <div class="sp-h">เลือกฉากที่จะโชว์</div>
     <p class="sp-hint">เลือกได้ทุกฉากที่เคยอยู่มาแล้ว เพื่อนจะเห็นฉากนี้ในการ์ดโปรไฟล์ของเรา</p>
     <div class="sp-grid">
       <button v-for="t in RESIDENCE_TIERS" :key="t.level" type="button" class="sp-item"
@@ -16,6 +19,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import BottomSheet from '../shared/BottomSheet.vue'
+import ResidenceCard from './ResidenceCard.vue'
 import { RESIDENCE_TIERS, clampLevel, sceneOf } from '../../data/residence.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useToast } from '../../composables/useToast.js'
@@ -47,6 +51,8 @@ async function pick(n) {
 </script>
 
 <style scoped>
+.sp-up { margin-bottom: 14px; }
+.sp-h { font-size: .86rem; font-weight: 800; margin: 0 0 2px; }
 .sp-hint { font-size: .76rem; color: var(--muted); margin: 0 0 10px; }
 .sp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .sp-item { display: flex; flex-direction: column; gap: 4px; padding: 4px; border: var(--bw) solid var(--line); border-radius: 12px; background: #fff; font: inherit; cursor: pointer; text-align: left; }

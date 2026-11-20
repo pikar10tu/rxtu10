@@ -1,98 +1,51 @@
 <!--
-  src/components/home/ContinueCard.vue — การ์ด "ฝึกต่อ" บน Home: dropdown เดียวรวมหน้าที่ของ
-  DailyCard.vue (รายได้ประจำวัน) + NextActionCard.vue (งานถัดไป) เดิม — 2 ไฟล์นั้นลบแล้ว 11 พ.ย. 2026 (ดูใน git ได้)
-  13 พ.ย. 2026: เปลี่ยนเป็น "วันนี้ของคุณ" เปิดค้าง (รายการวันนี้ + ปุ่มฝึกต่อ) · ของเดิมพับไว้ใต้ "รายละเอียด"
-  พับเป็นค่าเริ่ม (บรรทัดสรุป 1 บรรทัด) กดกางเห็นเนื้อหาเต็ม + เพิ่มเคส CC2 แนะนำ (weakCases จาก useCc2Progress
-  หรือเคสเริ่มต้นถ้ายังไม่มีผลฝึก) — CC2 เป็น self-learning ล้วน ไม่มีเหรียญ/รางวัลผูกอยู่ตรงนี้ (user เคาะ 11 พ.ย. 2026)
+  src/components/home/ContinueCard.vue — "วันนี้ของคุณ" บนหน้าแรก
+  20 พ.ย. 2026 (user): ดีไซน์ใหม่ให้อ่านง่าย · เน้นข้อสอบ MCQ ไม่ชวนแฟลชการ์ด · รายได้เป็นแถบ progress (รู้ว่าใกล้เต็ม 24 ชม. หรือยัง)
+  แต่ละแถว = ไอคอนวงกลม + ชื่อ + บรรทัดบอกสถานะ + ป้ายขวา · ทำแล้วเป็นติ๊กเขียว · หัวการ์ดนับ "ทำแล้ว x/y"
+  ประวัติ: รวม DailyCard + NextActionCard เดิม (11 พ.ย.) → วันนี้ของคุณเปิดค้าง (13 พ.ย.) → แบบนี้
 -->
 <template>
-  <div class="cc-wrap">
-    <!-- "วันนี้ของคุณ" เปิดค้าง (user เคาะ 11 พ.ย. 2026) — รายการสิ่งที่ควรทำวันนี้ + ปุ่มฝึกต่อ · รายละเอียดเดิมพับไว้ข้างล่าง -->
-    <div class="cc-hero">
-      <div class="cc-hero-h"><Emoji char="☀️" /> วันนี้ของคุณ</div>
-      <div class="cc-tasks">
-        <RouterLink to="/daily" class="cc-task">
-          <span><Emoji char="🌅" /> ข้อสอบประจำวัน</span>
-          <em :class="{ done: playedToday }">{{ playedToday ? 'ทำแล้ว ✓' : 'ยังไม่ทำ ›' }}</em>
-        </RouterLink>
-        <RouterLink v-if="redoDue" to="/quiz?mode=redo" class="cc-task">
-          <span><Emoji char="🔁" /> ข้อที่เคยผิด</span>
-          <em>{{ redoDue }} ข้อ ›</em>
-        </RouterLink>
-        <button type="button" class="cc-task" :disabled="accrued < 1" @click="claim">
-          <span><Emoji char="🪙" /> รายได้ประจำวัน</span>
-          <em v-if="accrued >= 1">เก็บ +{{ accrued.toLocaleString() }}</em>
-          <em v-else class="done">{{ isFull ? 'เต็มแล้ว' : `เต็มใน ${fmtRemain}` }}</em>
-        </button>
+  <section class="td">
+    <!-- 🪙 รายได้สะสม: แถบเติมจนเต็ม 24 ชม. · ใกล้เต็ม = ส้ม · เต็ม = ชมพูกะพริบเตือน -->
+    <div class="td-inc" :class="incState">
+      <div class="td-inc-top">
+        <span class="td-inc-l"><Emoji char="🪙" /> รายได้สะสม</span>
+        <span class="td-inc-t">{{ isFull ? 'เต็มแล้ว เก็บก่อนนะ!' : `เต็มใน ${fmtRemain}` }}</span>
       </div>
-      <div class="cc-hero-foot">
-        <RouterLink to="/study" class="cc-go">ฝึกต่อ ›</RouterLink>
-        <button class="cc-more" type="button" :aria-expanded="expanded" @click="expanded = !expanded">
-          {{ expanded ? 'ซ่อนรายละเอียด' : 'รายละเอียด' }} <span class="cc-chevron" :class="{ open: expanded }">⌄</span>
-        </button>
+      <div class="td-bar" role="progressbar" :aria-valuenow="Math.floor(fillPct)" aria-valuemin="0" aria-valuemax="100" :aria-label="`รายได้สะสม ${Math.floor(fillPct)}% ของ 24 ชั่วโมง`">
+        <i :style="{ width: fillPct + '%' }"></i>
+        <span v-for="h in [6, 12, 18]" :key="h" class="td-tick" :style="{ left: (h / 24 * 100) + '%' }"></span>
       </div>
+      <div class="td-inc-bot">
+        <span class="td-inc-amt"><b>{{ accrued.toLocaleString() }}</b> / {{ ratePerDay.toLocaleString() }}</span>
+        <button type="button" class="td-claim" :disabled="accrued < 1" @click="claim">{{ accrued >= 1 ? 'เก็บเหรียญ' : 'เพิ่งเก็บไป' }}</button>
+      </div>
+      <details class="td-why">
+        <summary>รายได้มาจากไหน</summary>
+        <div class="td-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
+        <div class="td-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
+        <div v-if="towerBonus" class="td-row"><span><Emoji char="🏯" /> หอคอย</span><b>{{ towerBonus.toLocaleString() }}/วัน</b></div>
+        <RouterLink v-else to="/tower" class="td-row td-tip"><span><Emoji char="🏯" /> หอคอยถึงชั้น {{ TOWER_HINT_FLOOR }}</span><b>+{{ towerHintBonus.toLocaleString() }}/วัน ›</b></RouterLink>
+        <div v-if="bonusPct" class="td-row"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
+        <div v-if="buffActive" class="td-row"><span><Emoji char="⚡" /> โบนัสเควสต์รายวัน</span><b>+50%</b></div>
+      </details>
     </div>
 
-    <div v-if="expanded" class="cc-body">
-      <!-- รายได้ประจำวัน (เดิม DailyCard) -->
-      <div class="cc-sec cc-daily">
-        <div class="cc-daily-top">
-          <div class="cc-coins">
-            <span class="cc-coins-label">เหรียญของคุณ</span>
-            <span class="cc-coins-val">{{ coins.toLocaleString() }}<Emoji char="🪙" /></span>
-            <span class="cc-rate">{{ ratePerHour.toLocaleString() }}<Emoji char="🪙" />/ชม. · เต็มวันละ {{ ratePerDay.toLocaleString() }}</span>
-          </div>
-          <div class="cc-ring" :class="{ full: isFull }" role="img" :aria-label="`รายได้สะสม ${Math.floor(fillPct)}%`">
-            <svg viewBox="0 0 92 92" aria-hidden="true">
-              <circle cx="46" cy="46" :r="R" class="cc-ring-bg" />
-              <circle cx="46" cy="46" :r="R" class="cc-ring-fg" :stroke-dasharray="CIRC" :stroke-dashoffset="CIRC * (1 - fillPct / 100)" />
-            </svg>
-            <div class="cc-ring-c"><b>{{ Math.floor(fillPct) }}%</b><small>{{ isFull ? 'เต็มแล้ว' : `เต็มใน ${fmtRemain}` }}</small></div>
-          </div>
-        </div>
-        <button class="cc-claim" :class="{ ready: accrued > 0 }" :disabled="accrued < 1" @click="claim">
-          <template v-if="accrued > 0">เก็บ +{{ accrued.toLocaleString() }}<Emoji char="🪙" /></template>
-          <template v-else>ยังไม่มีรายได้สะสม</template>
-        </button>
-        <RouterLink v-if="!towerBonus" to="/tower" class="cc-cta">
-          <span><Emoji char="🏯" /> หอคอย · ยังไม่ได้ไต่</span>
-          <b>ถึงชั้น {{ TOWER_HINT_FLOOR }} = +{{ towerHintBonus.toLocaleString() }}/วัน ›</b>
-        </RouterLink>
-        <details class="cc-breakdown">
-          <summary>รายได้มาจากไหน</summary>
-          <div class="cc-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
-          <div class="cc-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
-          <div v-if="towerBonus" class="cc-row"><span><Emoji char="🏯" /> หอคอย</span><b>{{ towerBonus.toLocaleString() }}/วัน</b></div>
-          <div v-if="bonusPct" class="cc-row cc-bonus"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
-          <div v-if="buffActive" class="cc-row cc-bonus"><span><Emoji char="⚡" /> โบนัสเควสต์รายวัน</span><b>+50%</b></div>
-          <div class="cc-row cc-total"><span>รวมเต็ม (24 ชม.)</span><b>{{ ratePerDay.toLocaleString() }}<Emoji char="🪙" /></b></div>
-        </details>
-      </div>
-
-      <!-- งานถัดไป (เดิม NextActionCard) -->
-      <component
-        :is="action.to ? RouterLink : 'button'" v-if="action" :to="action.to"
-        :type="action.to ? undefined : 'button'" class="cc-action" @click="onActionClick"
-      >
-        <span class="cc-action-ico"><Emoji :char="action.icon" /></span>
-        <span class="cc-action-txt"><b>{{ action.title }}</b><small>{{ action.sub }}</small></span>
-        <span class="cc-action-cta">{{ action.cta }} ›</span>
-      </component>
-
-      <!-- เคส CC2 แนะนำ (self-learning — ไม่มีเหรียญ/รางวัลตรงนี้) -->
-      <div v-if="cc2Items.length" class="cc-sec cc-cc2">
-        <div class="cc-cc2-label"><Emoji char="🩺" /> {{ cc2Label }}</div>
-        <RouterLink v-for="c in cc2Items" :key="c.id" :to="`/study/cc2/${c.id}`" class="cc-cc2-item">
-          <span class="cc-cc2-cat" :class="'cat-' + c.cat">{{ c.cat }}</span>
-          <span class="cc-cc2-title">{{ c.title }}</span>
-          <span class="cc-cc2-go">›</span>
-        </RouterLink>
-        <RouterLink to="/study/cc2" class="cc-cc2-more">ไปคลังเคส CC2 ทั้งหมด ›</RouterLink>
-      </div>
+    <!-- ☀️ วันนี้ของคุณ -->
+    <div class="td-h">
+      <span><Emoji char="☀️" /> วันนี้ของคุณ</span>
+      <span class="td-count" :class="{ all: doneN === goalN }">{{ doneN === goalN ? 'ครบแล้ว เก่งมาก!' : `ทำแล้ว ${doneN}/${goalN}` }}</span>
     </div>
-  </div>
+    <div class="td-list">
+      <RouterLink v-for="t in tasks" :key="t.k" :to="t.to" class="td-task" :class="{ done: t.done }">
+        <span class="td-ico" :style="{ background: t.bg }"><Emoji :char="t.done ? '✅' : t.icon" /></span>
+        <span class="td-txt"><b>{{ t.title }}</b><small>{{ t.sub }}</small></span>
+        <span class="td-go">{{ t.done ? 'ดูอีกครั้ง' : t.cta }} ›</span>
+      </RouterLink>
+    </div>
+    <RouterLink to="/quiz" class="td-main"><Emoji char="📝" /> ทำข้อสอบต่อ</RouterLink>
+  </section>
 </template>
-
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { computed, ref, onMounted } from 'vue'
@@ -100,18 +53,13 @@ import { RouterLink } from 'vue-router'
 import { getTowerBonus } from '../../data/towerFloors.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { useDaily } from '../../composables/useDaily.js'
-import { nextAction } from '../../utils/nextAction.js'
-import { useAppConfig } from '../../composables/useAppConfig.js'
 import { useCc2Progress } from '../../composables/useCc2Progress.js'
 import { loadCc2Index } from '../../composables/useCc2Data.js'
 import { dayKey } from '../../utils/dailyChallenge.js'
 import { dueCount as qcardsDueCount } from '../../utils/srsQuestions.js'
 
-const emit = defineEmits(['sheet'])
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
-const R = 40
-const CIRC = 2 * Math.PI * R
 const {
   baseIncome, petIncome, towerBonus, bonusPct, buffActive,
   ratePerDay, ratePerHour, accrued, fillPct, isFull, remainingMs, claim,
@@ -127,19 +75,6 @@ const fmtRemain = computed(() => {
   return h > 0 ? `${h}ชม ${m}น` : `${m}น`
 })
 
-// ── งานถัดไป ──
-const { pvpOpen } = useAppConfig()
-const action = computed(() => nextAction(
-  auth.userData,
-  {
-    today: new Date().toISOString().slice(0, 10),
-    now: Date.now(),
-    expeditionOpen: false, // ส่งผจญภัยพับเก็บ ไม่เปิดใช้
-    pvpOpen: pvpOpen.value,
-  },
-))
-function onActionClick() { if (action.value?.sheet) emit('sheet', action.value.sheet) }
-
 // ── CC2 แนะนำ — self-learning ล้วน ไม่มีเหรียญ/radar (user เคาะ 11 พ.ย. 2026) ──
 const { weakCases } = useCc2Progress()
 const cc2Index = ref([])
@@ -151,7 +86,7 @@ onMounted(async () => {
     console.error('[ContinueCard] โหลดดัชนี CC2 ไม่สำเร็จ', e)
   }
 })
-const CC2_SUGGEST_N = 3
+const CC2_SUGGEST_N = 1
 const cc2Items = computed(() => {
   const byId = new Map(cc2Index.value.map((c) => [c.id, c]))
   const weak = weakCases.value.map((id) => byId.get(id)).filter(Boolean).slice(0, CC2_SUGGEST_N)
@@ -169,73 +104,61 @@ const cc2Label = computed(() => (weakCases.value.length ? 'เคส CC2 ที�
 const playedToday = computed(() => auth.userData?.dc?.last === dayKey())
 const redoDue = computed(() => qcardsDueCount(auth.userData?.study?.qcards, Date.now()))
 
-// ── พับ/กาง รายละเอียด ──
-const expanded = ref(false)
+// ── แถวงานวันนี้ (ไม่มีแฟลชการ์ด — user 20 พ.ย.: ข้อสอบ MCQ คือหลัก) ──
+// นับ "ทำแล้ว x/y" เฉพาะงานที่มีวันละครั้ง (ประจำวัน + ข้อค้าง) · เคส CC2 เป็นคำแนะนำ ไม่นับ
+const tasks = computed(() => {
+  const list = [
+    { k: 'daily', to: '/daily', icon: '🌅', bg: '#fff1d6', title: 'ข้อสอบประจำวัน', sub: playedToday.value ? 'วันนี้ทำแล้ว' : 'ชุดสั้นของวันนี้ ทำเสร็จได้รางวัล', cta: 'ทำเลย', done: playedToday.value },
+    { k: 'redo', to: '/quiz?mode=redo', icon: '🔁', bg: '#ffe3ea', title: 'ข้อที่เคยผิด', sub: redoDue.value ? `ถึงรอบทบทวน ${redoDue.value} ข้อ` : 'ไม่มีข้อค้าง', cta: 'ทบทวน', done: !redoDue.value },
+  ]
+  const c = cc2Items.value[0]
+  if (c) list.push({ k: 'cc2', to: `/study/cc2/${c.id}`, icon: '🩺', bg: '#dcf5ec', title: weakCases.value.length ? 'เคส CC2 ที่ควรฝึกเพิ่ม' : 'ลองเคส CC2', sub: c.title, cta: 'เปิดเคส', done: false })
+  return list
+})
+const goalN = 2
+const doneN = computed(() => tasks.value.filter(t => t.k !== 'cc2' && t.done).length)
+const incState = computed(() => (isFull.value ? 'full' : fillPct.value >= 75 ? 'near' : ''))
 </script>
+
 <style scoped>
-.cc-wrap { background: linear-gradient(135deg, var(--primary-light), var(--accent-light)); border: var(--bw) solid var(--line); border-radius: 20px; margin-bottom: 14px; box-shadow: var(--pop); overflow: hidden; }
-.cc-hero { padding: 14px 16px; }
-.cc-hero-h { font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
-.cc-tasks { display: flex; flex-direction: column; gap: 6px; }
-.cc-task { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; background: #fff; border: var(--bw) solid var(--line); border-radius: 12px; font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; }
-.cc-task:disabled { cursor: default; }
-.cc-task:focus-visible, .cc-go:focus-visible, .cc-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.cc-task em { font-style: normal; font-weight: 800; color: var(--primary); white-space: nowrap; font-size: .8rem; }
-.cc-task em.done { color: var(--muted); font-weight: 600; }
-.cc-hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
-.cc-go { background: var(--primary); color: #fff; border-radius: 11px; padding: 8px 16px; font-size: .86rem; font-weight: 800; text-decoration: none; box-shadow: var(--pop); }
-.cc-more { all: unset; cursor: pointer; font-family: inherit; font-size: .76rem; color: var(--muted); padding: 6px 4px; }
-.cc-chevron { display: inline-block; font-size: .9rem; color: var(--muted); transition: transform .2s; }
-.cc-chevron.open { transform: rotate(180deg); }
-.cc-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
-
+.td { background: #fff; border: var(--bw) solid var(--line); border-radius: 20px; padding: 14px; margin-bottom: 14px; box-shadow: var(--pop); display: flex; flex-direction: column; gap: 10px; }
 /* รายได้ */
-.cc-sec { }
-.cc-daily-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-.cc-coins { display: flex; flex-direction: column; min-width: 0; }
-.cc-coins-label { font-size: .72rem; color: var(--muted); }
-.cc-coins-val { font-size: 1.7rem; font-weight: 800; color: #b45309; line-height: 1.1; font-variant-numeric: tabular-nums; word-break: break-all; }
-.cc-rate { font-size: .7rem; color: var(--muted); margin-top: 2px; }
-.cc-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
-.cc-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.cc-ring-bg { fill: none; stroke: rgba(43,53,80,.08); stroke-width: 9; }
-.cc-ring-fg { fill: none; stroke: var(--primary); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset .8s linear; }
-.cc-ring.full .cc-ring-fg { stroke: var(--gold); }
-.cc-ring-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
-.cc-ring-c b { font-size: .95rem; color: #b45309; font-variant-numeric: tabular-nums; }
-.cc-ring-c small { font-size: .7rem; color: var(--muted); }
-.cc-claim { width: 100%; border: var(--bw) solid var(--line); border-radius: 13px; padding: 12px; font-family: inherit; font-size: .88rem; font-weight: 800; color: #fff; background: #c9c2d4; cursor: pointer; transition: transform .12s, box-shadow .12s; }
-.cc-claim.ready { background: var(--mint); box-shadow: var(--pop); }
-.cc-claim.ready:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
-.cc-claim:disabled { cursor: default; opacity: .6; box-shadow: none; }
-.cc-cta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: #fff8ec; font-size: .74rem; color: rgba(0,0,0,.6); text-decoration: none; }
-.cc-cta b { color: #b45309; }
-.cc-breakdown { background: rgba(0,0,0,.03); border-radius: 10px; padding: 8px 12px; margin-top: 10px; }
-.cc-breakdown summary { font-size: .74rem; font-weight: 700; color: var(--primary-dark); cursor: pointer; }
-.cc-breakdown[open] summary { margin-bottom: 4px; }
-.cc-row { display: flex; justify-content: space-between; align-items: center; font-size: .74rem; color: rgba(0,0,0,.6); padding: 3px 0; }
-.cc-row b { color: #059669; }
-.cc-bonus b { color: #ec4899; }
-.cc-total { border-top: 1px dashed rgba(0,0,0,.12); margin-top: 4px; padding-top: 6px; font-weight: 800; color: rgba(0,0,0,.8); }
-.cc-total b { color: #b45309; }
-
-/* งานถัดไป */
-.cc-action { display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; text-align: left; text-decoration: none; background: var(--primary-light); border: var(--bw) solid var(--line); border-radius: 16px; padding: 14px; box-shadow: var(--pop); cursor: pointer; font-family: inherit; transition: transform .12s, box-shadow .12s; }
-.cc-action:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
-.cc-action-ico { font-size: 1.6rem; flex-shrink: 0; }
-.cc-action-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.cc-action-txt b { font-size: .88rem; color: var(--ink); line-height: 1.3; }
-.cc-action-txt small { font-size: .72rem; color: rgba(0,0,0,.55); line-height: 1.4; }
-.cc-action-cta { flex-shrink: 0; font-size: .72rem; font-weight: 800; color: var(--primary); }
-
-/* CC2 แนะนำ */
-.cc-cc2-label { font-size: .76rem; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
-.cc-cc2-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; margin-bottom: 6px; border: var(--bw) solid var(--line); border-radius: 12px; background: #fff; text-decoration: none; color: var(--ink); }
-.cc-cc2-cat { flex-shrink: 0; font-size: .7rem; font-weight: 800; padding: 2px 7px; border-radius: 7px; color: #fff; }
-.cc-cc2-cat.cat-Clinic { background: var(--primary); }
-.cc-cc2-cat.cat-Product { background: var(--mint); }
-.cc-cc2-cat.cat-SAP { background: var(--accent); }
-.cc-cc2-title { flex: 1; min-width: 0; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cc-cc2-go { flex-shrink: 0; color: var(--muted); }
-.cc-cc2-more { display: block; text-align: right; font-size: .72rem; color: var(--primary); margin-top: 2px; }
+.td-inc { --bar: #2fbf8f; background: var(--primary-light); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.td-inc.near { --bar: #f59e0b; background: #fff6e5; }
+.td-inc.full { --bar: #ec6a9c; background: var(--accent-light); }
+.td-inc-top, .td-inc-bot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.td-inc-l { font-size: .86rem; font-weight: 800; }
+.td-inc-t { font-size: .74rem; font-weight: 700; color: var(--muted); }
+.td-inc.near .td-inc-t { color: #b45309; }
+.td-inc.full .td-inc-t { color: #c2457a; }
+.td-bar { position: relative; height: 12px; border-radius: 999px; background: rgba(255,255,255,.9); border: var(--bw) solid var(--line); overflow: hidden; }
+.td-bar i { position: absolute; inset: 0 auto 0 0; background: var(--bar); border-radius: 999px; transition: width .6s ease; }
+.td-inc.full .td-bar i { animation: td-pulse 1.4s ease-in-out infinite; }
+@keyframes td-pulse { 50% { opacity: .65; } }
+.td-tick { position: absolute; top: 2px; bottom: 2px; width: 1px; background: rgba(0,0,0,.12); }
+.td-inc-amt { font-size: .76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.td-inc-amt b { color: var(--ink); font-size: .9rem; }
+.td-claim { border: none; border-radius: 10px; padding: 7px 14px; font: inherit; font-size: .8rem; font-weight: 800; color: #fff; background: var(--bar); cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+.td-claim:disabled { background: #d7d2e0; box-shadow: none; cursor: default; }
+.td-why summary { font-size: .72rem; color: var(--muted); cursor: pointer; }
+.td-row { display: flex; justify-content: space-between; font-size: .74rem; padding: 3px 0; color: var(--ink); text-decoration: none; }
+.td-tip b { color: var(--primary-dark); }
+/* วันนี้ของคุณ */
+.td-h { display: flex; justify-content: space-between; align-items: center; font-size: .98rem; font-weight: 800; margin-top: 2px; }
+.td-count { font-size: .72rem; font-weight: 800; color: var(--muted); background: var(--primary-light); border-radius: 999px; padding: 2px 9px; }
+.td-count.all { color: #fff; background: #2fbf8f; }
+.td-list { display: flex; flex-direction: column; gap: 8px; }
+.td-task { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: var(--bw) solid var(--line); border-radius: 14px; text-decoration: none; color: var(--ink); background: #fff; transition: transform .12s; }
+.td-task:active { transform: scale(.98); }
+.td-task.done { background: #f6fbf8; }
+.td-task.done .td-txt b { color: var(--muted); }
+.td-ico { width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 1.15rem; }
+.td-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.td-txt b { font-size: .86rem; line-height: 1.3; }
+.td-txt small { font-size: .72rem; color: var(--muted); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-go { flex: none; font-size: .74rem; font-weight: 800; color: var(--primary-dark); }
+.td-task.done .td-go { color: var(--muted); font-weight: 700; }
+.td-main { display: block; text-align: center; padding: 12px; border-radius: 14px; background: var(--primary); color: #fff; font-weight: 800; font-size: .92rem; text-decoration: none; box-shadow: var(--pop); }
+.td-main:active { transform: translateY(1px); }
+.td-task:focus-visible, .td-main:focus-visible, .td-claim:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 </style>
