@@ -99,7 +99,7 @@
       <!-- แถวป้าย: ข้อที่ · หมวด · สถานะตรวจ · คะแนน -->
       <div class="qv-meta">
         <span class="qv-tag">{{ variant === 'zen' ? `ข้อที่ ${idx + 1}` : `ข้อ ${idx + 1}/${quiz.length}` }}</span>
-        <span v-if="variant === 'redo'" class="qv-tag qv-tag-redo"><Emoji char="🔁" /> ทบทวน</span>
+        <span v-if="redoTag" class="qv-tag qv-tag-redo" :class="{ done: redoTag.done }"><Emoji :char="redoTag.done ? '✨' : '🔁'" /> {{ redoTag.text }}</span>
         <span v-if="variant === 'saved'" class="qv-tag qv-tag-saved"><Emoji char="🔖" /> ที่บันทึกไว้</span>
         <span v-if="current.domain" class="qv-tag">{{ domainLabel(current.domain) }}</span>
         <span v-for="n in setTags(current)" :key="n" class="qv-tag qv-tag-set"><Emoji char="📚" /> {{ n }}</span>
@@ -128,7 +128,7 @@
       <div v-if="picked !== null" class="qv-feedback">
         <div :class="picked === current.answer ? 'qv-fb ok' : 'qv-fb no'" role="status">
           <b>{{ picked === current.answer ? '✓ ถูกต้อง!' : '✗ ยังไม่ถูก' }}</b>
-          {{ picked === current.answer ? `ได้ +${QUIZ_COIN_PER_CORRECT} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้เข้าคิวทบทวนแล้ว` }}
+          {{ picked === current.answer ? `ได้ +${QUIZ_COIN_PER_CORRECT} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้อยู่ในกองข้อที่เคยผิด ถูกติดกัน ${GRADUATE_REPS} ครั้งถึงจะหาย` }}
         </div>
         <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
         <div v-if="current.keyBy === 'converter'" class="qv-note"><Emoji char="ℹ️" /> สรุปต้นฉบับไม่มีเฉลยข้อนี้ เฉลยเรียบเรียงโดยผู้แปลงสรุป — ถ้าเห็นว่าผิดกดแจ้งได้เลย</div>
@@ -283,7 +283,7 @@ import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
 import { QUIZ_COIN_PER_CORRECT, REPORT_HOLD_AT, REPORT_REWARD } from '../data/index.js'
-import { applyQuizResults, buildQcardsPatch, dueQuestionIds } from '../utils/srsQuestions.js'
+import { applyQuizResults, buildQcardsPatch, dueQuestionIds, GRADUATE_REPS } from '../utils/srsQuestions.js'
 import { buildSavedToggle, buildSavedRemove, savedIds, savedCount, isSaved, SAVED_MAX, SAVED_BATCH } from '../utils/savedQuestions.js'
 import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
 import { sfx } from '../utils/sfx.js'
@@ -539,6 +539,19 @@ const progress = computed(() => quiz.value.length ? Math.round((idx.value / quiz
 const pct = computed(() => sessionTotal.value ? Math.round((correct.value / sessionTotal.value) * 100) : 0)
 const resultEmoji = computed(() => pct.value >= 80 ? '🏆' : pct.value >= 50 ? '😊' : '📚')
 
+// 🔁 ป้ายความคืบหน้าข้อที่เคยผิด (21 พ.ย.) — ถูกติดกัน GRADUATE_REPS ครั้งออกจากกอง
+// กองเขียนตอนจบรอบ ระหว่างเล่นจึงอ่านค่าก่อนเริ่มรอบ แล้วโชว์ผลของคำตอบนี้ทันทีหลังตอบ
+const redoTag = computed(() => {
+  const q = current.value
+  const card = q && authStore.userData?.study?.qcards?.[q.id]
+  if (!card) return variant.value === 'redo' ? { text: 'ทบทวน' } : null
+  const r = Math.min(card.r || 0, GRADUATE_REPS - 1)
+  if (picked.value === null) return { text: `ข้อที่เคยผิด · ถูกแล้ว ${r}/${GRADUATE_REPS}` }
+  if (picked.value !== q.answer) return { text: `ตอบผิด · นับใหม่ 0/${GRADUATE_REPS}` }
+  return r + 1 >= GRADUATE_REPS
+    ? { text: `ครบ ${GRADUATE_REPS}/${GRADUATE_REPS} ออกจากกองแล้ว`, done: true }
+    : { text: `ถูกแล้ว ${r + 1}/${GRADUATE_REPS}` }
+})
 // ข้อที่เคยผิดถึงกำหนดทบทวน (นับจาก qcards ใน user doc ที่มีอยู่แล้ว — 0 read)
 const dueCount = computed(() => dueQuestionIds(authStore.userData?.study?.qcards, Date.now(), 999).length)
 
@@ -985,6 +998,7 @@ async function finish() {
 .qv-tag { font-size: .7rem; font-weight: 700; border-radius: 6px; padding: 2px 8px; background: var(--primary-light); color: var(--primary-dark); }
 .qv-tag-set { background: #eef2ff; color: #4338ca; }
 .qv-tag-redo { background: #fef3c7; color: #92400e; }
+.qv-tag-redo.done { background: #dcfce7; color: #166534; }
 .qv-tag-saved { background: var(--primary-light); color: var(--primary-dark); }
 .qv-count { font-size: .7rem; font-weight: 700; color: rgba(0,0,0,.5); flex-shrink: 0; }
 .qv-zen-tag { flex: 1; display: flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 800; color: var(--primary); }
