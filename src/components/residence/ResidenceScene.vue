@@ -4,6 +4,8 @@
      slot = ของที่ทับบนฉาก (ข้อความทักทาย ป้าย ปุ่ม) -->
 <template>
   <div class="rs" :style="{ height: 100 * S + 'px' }">
+    <!-- จอกว้างกว่า 360: เติมขอบซ้ายขวาด้วยฉากเดียวกันแบบเบลอ ไม่ให้เห็นแถบว่าง -->
+    <img class="rs-bg" :src="src" alt="" aria-hidden="true" draggable="false" />
     <div class="rs-in" :style="{ width: 180 * S + 'px', height: 100 * S + 'px' }">
       <img class="rs-img" :src="src" :alt="tier.tierName" width="180" height="100" draggable="false" />
       <canvas ref="fx" class="rs-fx" width="180" height="100" aria-hidden="true"></canvas>
@@ -78,6 +80,7 @@ watch(() => [n.value, props.fx], start)
 
 <style scoped>
 .rs { position: relative; overflow: hidden; background: var(--primary-light); }
+.rs-bg { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); object-fit: cover; filter: blur(8px) saturate(1.1); opacity: .9; }
 .rs-in { position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
 .rs-img, .rs-fx { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .rs-img { user-select: none; }
