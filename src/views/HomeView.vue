@@ -167,9 +167,9 @@ onMounted(async () => {
 
 <style scoped>
 /* 🏠 ฉากบ้านหัวหน้าแรก — ชิดขอบจอซ้ายขวา (ลบ padding ของ .tab-content) */
-.home-scene { margin: -12px -12px 14px; }
-.home-greet { position: absolute; left: 22px; top: 8px; z-index: 2; max-width: calc(100% - 44px); }
-.home-place { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
+.home-scene { margin: -12px -12px 14px; width: calc(100% + 24px); }
+.home-greet { position: absolute; left: 12px; top: 8px; z-index: 2; max-width: calc(100% - 24px); }
+.home-place { position: absolute; right: 12px; bottom: 8px; z-index: 2; }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
 .home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
 .home-fun { display: grid; gap: 8px; margin-bottom: 12px; }

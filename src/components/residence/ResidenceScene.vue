@@ -1,12 +1,11 @@
 <!-- 🏠 ฉากบ้านพิกเซล 180×100 (แผนกอาร์ต งาน C · 20 พ.ย. 2026) ขยาย 2 เท่าเสมอ = พิกเซลเท่าอวาตาร์
-     กล่องฉากกว้างเท่าไหร่ก็ได้: ตัวฉาก 360×200 อยู่กลาง ขอบซ้ายขวาโดนตัดได้ข้างละ ≤20px (ภาพเผื่อไว้แล้ว)
+     กล่องฉากเต็มความกว้างเสมอ สัดส่วน 9:5 คงที่ (user 20 พ.ย.: สูงขึ้นได้ ไม่ต้องเบลอขอบ ไม่ยืดภาพ)
+     วาดที่ 360×200 แล้วย่อ/ขยายทั้งก้อนด้วย transform ตามความกว้างจริง (--k) — อวาตาร์+ฉาก+เอฟเฟคขยายเท่ากันเป๊ะ
      อวาตาร์ยืนตามจุดเท้าของแต่ละฉาก (FEET) · เอฟเฟคแสงอลังการขึ้นตามขั้นฉาก (user 20 พ.ย.)
      slot = ของที่ทับบนฉาก (ข้อความทักทาย ป้าย ปุ่ม) -->
 <template>
-  <div class="rs" :style="{ height: 100 * S + 'px' }">
-    <!-- จอกว้างกว่า 360: เติมขอบซ้ายขวาด้วยฉากเดียวกันแบบเบลอ ไม่ให้เห็นแถบว่าง -->
-    <img class="rs-bg" :src="src" alt="" aria-hidden="true" draggable="false" />
-    <div class="rs-in" :style="{ width: 180 * S + 'px', height: 100 * S + 'px' }">
+  <div ref="box" class="rs">
+    <div class="rs-in" :style="{ width: 180 * S + 'px', height: 100 * S + 'px', transform: `scale(${k})` }">
       <img class="rs-img" :src="src" :alt="tier.tierName" width="180" height="100" draggable="false" />
       <canvas ref="fx" class="rs-fx" width="180" height="100" aria-hidden="true"></canvas>
       <component :is="dollTo ? RouterLink : 'span'" v-if="eq" :to="dollTo || undefined" class="rs-doll" :style="dollPos" :aria-label="dollTo ? 'ห้องแต่งตัว' : undefined">
@@ -47,6 +46,17 @@ const dollPos = computed(() => {
 })
 
 // ✨ เอฟเฟค: วาดบน canvas 180×100 ขยายแบบพิกเซลคม · หยุดเมื่อพ้นจอ/แท็บซ่อน/ผู้ใช้ตั้งลดการเคลื่อนไหว
+// ความกว้างจริง → อัตราขยาย
+const box = ref(null)
+const k = ref(1)
+let ro = null
+onMounted(() => {
+  const fit = () => { const w = box.value?.clientWidth; if (w) k.value = w / (180 * S) }
+  fit()
+  ro = new ResizeObserver(fit); ro.observe(box.value)
+})
+onBeforeUnmount(() => ro?.disconnect())
+
 const fx = ref(null)
 let raf = 0, io = null, visible = true, stop = null
 function start() {
@@ -79,9 +89,8 @@ watch(() => [n.value, props.fx], start)
 </script>
 
 <style scoped>
-.rs { position: relative; overflow: hidden; background: var(--primary-light); }
-.rs-bg { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); object-fit: cover; filter: blur(8px) saturate(1.1); opacity: .9; }
-.rs-in { position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
+.rs { position: relative; overflow: hidden; width: 100%; aspect-ratio: 9 / 5; background: var(--primary-light); }
+.rs-in { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .rs-img, .rs-fx { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .rs-img { user-select: none; }
 .rs-fx { pointer-events: none; }

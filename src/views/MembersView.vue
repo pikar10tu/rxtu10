@@ -41,7 +41,7 @@
     <div v-if="members.loading" class="mv-empty">กำลังโหลด…</div>
     <div v-else-if="!list.length" class="mv-empty">ไม่พบสมาชิก</div>
 
-    <div v-else class="mv-grid">
+    <div v-else ref="gridEl" class="mv-grid" :style="{ '--mk': mk }">
       <button
         v-for="m in list" :key="m.uid"
         class="mv-card" :class="{ off: !m.registered, me: m.uid === myUid }"
@@ -50,8 +50,10 @@
         <!-- 🏠 การ์ดแบบ B1 (user เคาะ 20 พ.ย. 2026): ฉากบ้านที่เพื่อนเลือก (ขนาดจริง เห็นตัวบ้าน) + อวาตาร์ครึ่งตัว (2 เท่า)
              ไม่มีอะไรทับฉากนอกจากป้ายเลเวลมุมขวา · ใต้ฉาก = รูปจิ๋ว + ชื่อ แล้วฉายา · สาย/รหัส ไปดูในการ์ดโปรไฟล์ · ภาพนิ่ง ไม่มีเอฟเฟค -->
         <template v-if="m.registered">
-          <div class="mv-scene" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
-            <DollFigure :eq="decodeDoll(m.doll)" :scale="2" :aura="false" :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
+          <div class="mv-scene">
+            <div class="mv-scene-in" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
+              <DollFigure :eq="decodeDoll(m.doll)" :scale="2" :aura="false" :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
+            </div>
             <span class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
           </div>
           <div class="mv-namerow">
@@ -67,7 +69,6 @@
           </div>
           <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
         </template>
-        <div v-if="titleOf(m)" class="mv-ttl"><TitlePill :label="titleOf(m).label" :icon="titleOf(m).icon" :fit="11" /></div>
         <span v-if="m.uid === myUid" class="mv-you">คุณ</span>
         <div v-if="!m.registered" class="mv-off-tag">ยังไม่เข้าระบบ</div>
       </button>
@@ -80,11 +81,8 @@
 <script setup>
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
-import TitlePill from '../components/shared/TitlePill.vue'
-import { getAchievement } from '../data/achievements.js'
-import { achievementTitle } from '../utils/achievements.js'
 import Emoji from '../components/shared/Emoji.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -151,15 +149,20 @@ const list = computed(() => {
 const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
+// ฉากบนการ์ด: วาดกล่อง 120×78 แล้วขยายทั้งก้อนให้เต็มความกว้างการ์ด (สัดส่วนคงที่ ไม่ยืด · user 20 พ.ย.)
+const gridEl = ref(null)
+const mk = ref(1)
+let mkRo = null
+watch(gridEl, (el) => {
+  mkRo?.disconnect()
+  if (!el) return
+  const fit = () => { const w = el.querySelector('.mv-scene')?.clientWidth; if (w) mk.value = w / 120 }
+  mkRo = new ResizeObserver(fit); mkRo.observe(el); requestAnimationFrame(fit)
+})
+onUnmounted(() => mkRo?.disconnect())
 const SCENES = import.meta.glob('../assets/residence/res-*.webp', { eager: true, import: 'default' })
 const sceneImg = (m) => SCENES[`../assets/residence/res-${String(sceneOf(m.residence)).padStart(2, '0')}.webp`]
 const avatarOf = (m) => avatarUrl(m, m.nickname)
-// ฉายาจากแถว roster (docId = achId หรือ achId__date) → { icon, label } · id ไม่รู้จัก = ไม่โชว์
-function titleOf(m) {
-  const [achId, date] = String(m.equipTitle || '').split('__')
-  const def = achId && getAchievement(achId)
-  return def ? { icon: def.icon, label: achievementTitle(def, date || null) } : null
-}
 </script>
 
 <style scoped>
@@ -199,15 +202,17 @@ function titleOf(m) {
 .mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mv-card { position: relative; overflow: hidden; }
 .mv-card > :not(.cz-bgl) { position: relative; z-index: 1; }
-/* ฉากบ้านบนการ์ด (B1): ภาพ 1 เท่า ส่วน x 48–168 (เห็นตัวบ้าน) · อวาตาร์ 2 เท่าครึ่งตัว ยืนที่ x66 ของฉาก */
-.mv-scene { align-self: stretch; margin: -14px -8px 2px; height: 78px; position: relative; overflow: hidden; image-rendering: pixelated;
-  background-repeat: no-repeat; background-size: 180px 100px; background-position: calc(50% - 18px) -16px; }
-.mv-doll { position: absolute; left: calc(50% - 42px); top: -6px; transform: translateX(-50%); }
+/* ฉากบนการ์ด (B1): ส่วน x 48–168 y 16–94 ของฉาก (เห็นตัวบ้าน) วาดที่ 120×78 แล้วขยาย --mk ให้เต็มการ์ด · อวาตาร์ 2 เท่าครึ่งตัว */
+.mv-scene { align-self: stretch; margin: -14px -8px 2px; aspect-ratio: 120 / 78; position: relative; overflow: hidden; }
+.mv-scene-in { position: absolute; left: 0; top: 0; width: 120px; height: 78px; transform: scale(var(--mk, 1)); transform-origin: 0 0;
+  image-rendering: pixelated; background-repeat: no-repeat; background-size: 180px 100px; background-position: -48px -16px; }
+.mv-doll { position: absolute; left: -42px; top: -6px; }
 .mv-scene .mv-lv { right: 4px; top: 4px; bottom: auto; }
-.mv-namerow { display: flex; align-items: center; justify-content: center; gap: 4px; max-width: 100%; min-width: 0; }
+.mv-namerow { align-self: stretch; display: flex; align-items: center; justify-content: flex-start; gap: 6px; min-width: 0; padding: 2px 2px 0; }
 .mv-namerow .mv-nick { min-width: 0; }
 .mv-mini { flex: none; display: flex; }
-.mv-mini .mv-avatar { width: 18px; height: 18px; border-width: 1px; border-color: #fff; }
+.mv-namerow .mv-avatar { flex: none; width: 26px; height: 26px; border-width: 1.5px; border-color: #fff; }
+.mv-namerow .mv-nick { flex: 1; text-align: left; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;

@@ -21,10 +21,10 @@
           </div>
           <div class="me-plate-txt">
             <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
-            <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="goTab('ach')">
-              <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.7" :fit="18" />
-            </button>
             <div class="me-chips">
+              <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="goTab('ach')">
+                <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.7" :fit="18" />
+              </button>
               <span v-if="myTrack" class="me-chip" :style="{ background: myTrack[1] }">{{ myTrack[0] }}</span>
               <span v-if="myMbti" class="me-chip" :style="{ background: myMbti.color }"><Emoji :char="MBTI_ICON[myMbti.code]" /> {{ myMbti.code }}</span>
             </div>
@@ -415,16 +415,16 @@ async function save() {
 
 /* ═══ หน้าฉัน จัดใหม่ (25 ก.ย. 2026) ═══ */
 .me-card { padding: 0 14px 14px; overflow: hidden; }
-.me-scene { margin: 0 -14px; }
-.me-place { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
-.me-plate { position: absolute; left: 22px; top: 10px; z-index: 2; display: flex; gap: 8px; align-items: center; max-width: calc(100% - 44px); box-sizing: border-box;
-  padding: 6px 12px 6px 6px; border-radius: 16px; background: rgba(255,255,255,.93); box-shadow: 0 3px 12px rgba(40,30,70,.18); }
-.me-plate .me-avatar { width: 48px; height: 48px; }
+.me-scene { margin: 0 -14px; width: calc(100% + 28px); }
+.me-place { position: absolute; right: 10px; bottom: 8px; z-index: 2; }
+.me-plate { position: absolute; left: 10px; top: 8px; z-index: 2; display: flex; gap: 8px; align-items: center; max-width: calc(100% - 44px); box-sizing: border-box;
+  padding: 5px 10px 5px 5px; border-radius: 14px; background: rgba(255,255,255,.93); box-shadow: 0 3px 12px rgba(40,30,70,.18); }
+.me-plate .me-avatar { width: 40px; height: 40px; }
 .me-plate .me-cam { transform: scale(.75); transform-origin: bottom right; }
 .me-plate-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; text-align: left; }
 .me-plate .me-nick { font-size: 1.05rem; font-weight: 800; line-height: 1.2; }
 .me-plate .me-title { margin: 0; }
-.me-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.me-chips { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
 .me-chip { font-size: .7rem; font-weight: 800; color: #fff; padding: 1px 8px; border-radius: 999px; }
 .me-hero { padding-top: 8px; }
 .me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }

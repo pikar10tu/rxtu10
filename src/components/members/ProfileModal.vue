@@ -15,8 +15,8 @@
           </CosFrame>
           <div class="pf-plate-txt">
             <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
-            <div v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.7" :fit="18" /></div>
             <div class="pf-chips">
+              <span v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.7" :fit="18" /></span>
               <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
               <!-- MBTI — กดแล้วเด้งการ์ดอ่านเต็ม (user 25 ต.ค. 2026) -->
               <button v-if="mbti" class="pf-chip pf-mbti" :style="{ background: mbti.color }" :title="mbti.groupLabel" @click="mbtiOpen = true"><Emoji :char="MBTI_ICON[mbti.code]" /> {{ mbti.code }} ›</button>
@@ -250,18 +250,18 @@ function startDuel() {
 .pf-ov { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; padding: 18px; }
 .pf-box { scrollbar-gutter: stable; background: #fff; width: 100%; max-width: 400px; border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop-lg); overflow: hidden; max-height: 88vh; overflow-y: auto; }
 .pf-scene { position: relative; }
-.pf-scene-tag { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
+.pf-scene-tag { position: absolute; right: 10px; bottom: 8px; z-index: 2; }
 .pf-hero { position: relative; padding: 0 16px 16px; text-align: center; color: var(--ink); }
 /* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
 .pf-x { position: absolute; right: 10px; top: 10px; z-index: 2; border: var(--bw) solid var(--line); background: rgba(255,255,255,.88); color: var(--ink); border-radius: 10px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font: inherit; font-weight: 800; }
 .pf-plate { position: absolute; left: 10px; top: 10px; z-index: 2; display: flex; gap: 8px; align-items: center; max-width: calc(100% - 70px); box-sizing: border-box;
-  padding: 6px 12px 6px 6px; border-radius: 16px; background: rgba(255,255,255,.93); box-shadow: 0 3px 12px rgba(40,30,70,.18); text-align: left; }
-.pf-plate-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+  padding: 5px 10px 5px 5px; border-radius: 14px; background: rgba(255,255,255,.93); box-shadow: 0 3px 12px rgba(40,30,70,.18); text-align: left; }
+.pf-plate-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
 .pf-plate .pf-name { font-size: 1.05rem; font-weight: 800; opacity: 1; margin: 0; line-height: 1.2; }
 .pf-plate .pf-title { margin: 0; padding: 0; border: 0; background: none; }
-.pf-plate .pf-chips { margin: 0; justify-content: flex-start; }
+.pf-plate .pf-chips { margin: 0; justify-content: flex-start; align-items: center; gap: 4px; }
 .pf-sub { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; font-size: .74rem; font-weight: 700; color: var(--muted); padding-top: 10px; }
-.pf-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; background: #fff; }
+.pf-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; background: #fff; }
 .pf-name { font-size: .82rem; font-weight: 600; opacity: .85; margin-top: 1px; }
 .pf-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
 .pf-chip { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; }
