@@ -6,7 +6,7 @@
 <template>
   <div class="dv">
     <header class="dv-top">
-      <BackButton />
+      <BackButton @click="goBack" />
       <h1 class="dv-title">ห้องแต่งตัว</h1>
       <span class="dv-coins"><Emoji char="🪙" /> {{ coins.toLocaleString() }}</span>
     </header>
@@ -101,7 +101,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { increment } from 'firebase/firestore'
 import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
@@ -118,6 +118,9 @@ import { sfx } from '../utils/sfx.js'
 
 const auth = useAuthStore()
 const route = useRoute()
+const router = useRouter()
+// ‹ กลับ: มาจากหน้าไหนก็กลับหน้านั้น · เปิดลิงก์ตรง (ไม่มีประวัติ) → หน้าแรก
+function goBack() { if (window.history.state?.back) router.back(); else router.push('/') }
 const { toast } = useToast()
 const { confirm } = useConfirm()
 const { syncRosterRow } = useRosterSync()
@@ -136,6 +139,8 @@ const filter = ref('all')
 const groupTabs = computed(() => GROUPS.find(x => x.k === group.value).slots.map(k => TABS.find(t => t.k === k)))
 function setGroup(k) { group.value = k; const f = GROUPS.find(x => x.k === k).first; if (f) tab.value = f }
 const busy = ref(false)
+// 👗 เคยเข้าห้องแต่งตัวแล้ว → บับเบิ้ล "ลองแต่งตัว" หน้าแรกไม่ขึ้นอีก (เห็นครั้งเดียว · ข้ามเครื่องได้)
+watch(() => auth.userData, (u) => { if (u && !u.dollSeen) auth.patchUser({ dollSeen: true }, { dollSeen: true }) }, { immediate: true })
 
 const coins = computed(() => auth.userData?.coins || 0)
 const mine = computed(() => dollOf(auth.userData))

@@ -26,6 +26,11 @@
           <b>{{ greet }} {{ authStore.userData?.nickname || '' }}</b>
           <small>{{ cheer }}</small>
         </div>
+        <!-- 👗 ชวนลองแต่งตัว: ขึ้นจนกว่าจะเคยเข้าห้องแต่งตัวครั้งแรก (user 20 พ.ย. 2026) -->
+        <RouterLink v-if="authStore.userData && !authStore.userData.dollSeen" to="/doll" class="try-dress"
+                    :style="{ left: headX + 26 + 'px', top: headY + 6 + 'px' }">
+          <Emoji char="👗" /> ลองแต่งตัว
+        </RouterLink>
         <!-- ป้ายชื่อสถานที่ = ปุ่มเปิดแผงบ้าน (อัปบ้าน + เลือกฉาก) แทนการ์ดอัปบ้านใหญ่ (user 20 พ.ย.) -->
         <button type="button" class="place-tag home-place" :style="{ '--tier': homeTier.frameColor }" @click="homeOpen = true">
           <Emoji :char="homeTier.art" /> {{ homeTier.tierName }} <b>›</b>
@@ -227,6 +232,9 @@ onMounted(async () => {
 <style scoped>
 /* 🏠 ฉากบ้านหัวหน้าแรก — ชิดขอบจอซ้ายขวา (ลบ padding ของ .tab-content) */
 .home-scene { margin: -12px -12px 14px; width: calc(100% + 24px); }
+.try-dress { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; font-weight: 800; color: var(--primary-dark); background: #fff; border: var(--bw) solid var(--line); border-radius: 999px; padding: 4px 10px; box-shadow: var(--pop); text-decoration: none; white-space: nowrap; animation: try-bob 1.6s ease-in-out infinite; }
+.try-dress::before { content: ''; position: absolute; left: -5px; top: 50%; width: 8px; height: 8px; margin-top: -4px; background: #fff; border-left: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); transform: rotate(45deg); }
+@keyframes try-bob { 50% { transform: translateY(-3px); } }
 .home-greet { position: absolute; z-index: 2; max-width: calc(100% - 24px); }
 .home-place { position: absolute; right: 12px; bottom: 8px; z-index: 2; }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
