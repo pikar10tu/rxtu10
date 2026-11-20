@@ -246,6 +246,7 @@
 </template>
 
 <script setup>
+import { dayKey } from '../utils/dailyChallenge.js'
 import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
 import Emoji from '../components/shared/Emoji.vue'
@@ -839,9 +840,14 @@ async function finish() {
   const perfect = answered.value >= 10 && correct.value === answered.value
   if (answered.value >= 5 && isOwlHour()) grantSecret('gag_owl')   // achievement ลับ นกฮูกราตรี
 
+  // 📝 ข้อที่ทำวันนี้ (หลอด "เป้าวันนี้" หน้าแรก · 20 พ.ย. 2026) — ข้ามวัน = เริ่มนับใหม่
+  const qtDay = dayKey()
+  const qtPrev = authStore.userData?.qToday
+  const qToday = { d: qtDay, n: (qtPrev?.d === qtDay ? (qtPrev.n || 0) : 0) + answered.value }
   const ok = await authStore.patchUser(
     {
       coins: (authStore.userData?.coins || 0) + grant,
+      qToday,
       quizHigh: newHigh,
       quizDoneTotal: (authStore.userData?.quizDoneTotal || 0) + answered.value,
       dailyQuest: dq,
@@ -851,6 +857,7 @@ async function finish() {
     },
     {
       ...(grant ? { coins: increment(grant) } : {}),
+      ...(qtPrev?.d === qtDay ? { 'qToday.n': increment(answered.value) } : { qToday }),
       quizHigh: newHigh,
       quizDoneTotal: increment(answered.value),
       dailyQuest: dq,

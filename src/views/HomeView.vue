@@ -21,8 +21,8 @@
       <!-- 🏠 หน้าแรกแบบ B (user เคาะ 20 พ.ย. 2026): ฉากบ้านเต็มกว้าง อวาตาร์ยืนในฉาก · คำทักทายบนแถบฟ้า · แตะอวาตาร์ = ห้องแต่งตัว -->
       <ResidenceScene v-slot="{ headX, headY }" class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
         <!-- ป้ายทักทาย + วันสอบ (ย้ายจากหัวหน้ามาไว้บนฟ้า) · จิ้มรัวยังได้ความสำเร็จลับเหมือนเดิม -->
-        <!-- บับเบิ้ลคำพูด: หางชี้ลงเหนือหัวอวาตาร์ เว้น 14px (ตามจุดยืนของแต่ละฉาก) -->
-        <div class="greet-bubble home-greet" :style="{ left: Math.max(8, headX - 27) + 'px', bottom: `calc(100% - ${headY - 14}px)` }">
+        <!-- บับเบิ้ลคำพูด: หางชี้ลงเหนือหัวอวาตาร์ เว้น 24px (ตามจุดยืนของแต่ละฉาก) -->
+        <div class="greet-bubble home-greet" :style="{ left: Math.max(8, headX - 27) + 'px', bottom: `calc(100% - ${headY - 24}px)` }">
           <b>{{ greet }} {{ authStore.userData?.nickname || '' }}</b>
           <small>{{ cheer }}</small>
         </div>
@@ -46,7 +46,18 @@
         <div class="home-go-r">
           <div class="home-go-sub">
             <span v-for="e in otherExams" :key="e.id">{{ examShort(e) }} อีก {{ e.days }} วัน</span>
-            <span>วันนี้ทำแล้ว {{ todayDone }}/2</span>
+          </div>
+          <!-- 🔥 ข้อสอบประจำวัน 7 วันล่าสุด (วงส้ม = ทำแล้ว · วงขวาสุด = วันนี้) -->
+          <RouterLink to="/daily" class="home-streak" :aria-label="`ข้อสอบประจำวันติดกัน ${streakN} วัน`">
+            <span class="home-dots">
+              <i v-for="d in week" :key="d.k" :class="{ on: d.on, today: d.today }"><small>{{ d.w }}</small></i>
+            </span>
+            <span class="home-streak-t">{{ streakN ? `🔥 ติดกัน ${streakN} วัน` : 'เริ่มวันนี้เลย' }}</span>
+          </RouterLink>
+          <!-- 📝 เป้าวันนี้: ข้อสอบที่ทำวันนี้ (ทุกโหมดควิซ) -->
+          <div class="home-goal" role="progressbar" :aria-valuenow="qDone" aria-valuemin="0" :aria-valuemax="GOAL">
+            <div class="home-goal-t"><span>ทำข้อสอบวันนี้</span><b>{{ qDone }}/{{ GOAL }} ข้อ</b></div>
+            <div class="home-goal-bar"><i :style="{ width: Math.min(100, qDone / GOAL * 100) + '%' }"></i></div>
           </div>
           <RouterLink to="/study" class="home-go-btn"><Emoji char="📚" /> ไปเรียน</RouterLink>
         </div>
@@ -54,9 +65,8 @@
       <RouterLink v-else to="/study" class="home-go-btn solo"><Emoji char="📚" /> ไปเรียน</RouterLink>
 
       <!-- ประจำวันสนุกๆ: ดวง → อีเวนต์ → MBTI → เกร็ดความรู้เภสัช (13 พ.ย. แทนสถิติเว็บ — ยังอยู่ที่ /fun-facts) · ข้ามตัวที่ไม่มี · ครบ 4 = เกร็ดฯ ลงการ์ดเต็มกว้าง -->
-      <div class="home-sec">ประจำวันสนุกๆ</div>
-      <!-- ย่อเป็นแถบเลื่อนข้างแถวเดียว (20 พ.ย. 2026) -->
-      <div class="home-fun">
+      <!-- แถวเดียว กว้างเท่ากันทุกช่อง สูงเท่ากัน · ไม่มีหัวข้อ (user 20 พ.ย. 2026) -->
+      <div class="home-fun" :style="{ gridTemplateColumns: `repeat(${funN}, minmax(0, 1fr))` }">
         <HoroCard tile />
         <TreeTile />
         <EventBanner v-if="hasEvent" tile />
@@ -138,8 +148,22 @@ const showQuest = ref(false)
 const showToday = ref(false)
 const { fillPct } = useDaily()
 const playedToday = computed(() => authStore.userData?.dc?.last === dayKey())
-const redoLeft = computed(() => qcardsDueCount(authStore.userData?.study?.qcards, Date.now()))
-const todayDone = computed(() => (playedToday.value ? 1 : 0) + (redoLeft.value ? 0 : 1))
+// 🔥 แถบ 7 วัน + เป้าวันนี้ (user เลือก 1+2 · 20 พ.ย. 2026)
+const GOAL = 30
+const qDone = computed(() => { const q = authStore.userData?.qToday; return q?.d === dayKey() ? q.n || 0 : 0 })
+const WD = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส']
+const playedDays = computed(() => new Set([...(authStore.userData?.dc?.days || []), authStore.userData?.dc?.last].filter(Boolean)))
+const week = computed(() => [...Array(7)].map((_, i) => {
+  const ms = Date.now() - (6 - i) * 864e5
+  const k = dayKey(ms)
+  return { k, w: WD[new Date(k + 'T12:00:00+07:00').getDay()], on: playedDays.value.has(k), today: i === 6 }
+}))
+// นับติดกันย้อนจากวันนี้ (วันนี้ยังไม่เล่น = นับจากเมื่อวาน ไม่ตัดสาย)
+const streakN = computed(() => {
+  let n = 0
+  for (let i = playedDays.value.has(dayKey()) ? 0 : 1; i < 400; i++) { if (playedDays.value.has(dayKey(Date.now() - i * 864e5))) n++; else break }
+  return n
+})
 const todayDot = computed(() => fillPct.value >= 50 || !playedToday.value)
 const exams = computed(() => upcomingExams(EXAMS))
 const nextExam = computed(() => exams.value[0] || null)
@@ -171,6 +195,7 @@ function poke() {
 // ── แถวประจำวันสนุกๆ ──
 const hasEvent = !!activeEvent()
 const hasMbtiPromo = computed(() => !!authStore.userData && !authStore.userData.mbti)
+const funN = computed(() => 3 + (hasEvent ? 1 : 0) + (hasMbtiPromo.value ? 1 : 0))
 // ต้นไม้รุ่น 10 อยู่แถวนี้ด้วย (15 พ.ย.) · แถวละไม่เกิน 4 ช่อง → ครบ 4 แล้วเกร็ดฯ ค่อยลงการ์ดเต็มกว้าง
 
 // จุดแดงเควส = วันนี้ยังไม่กดรับรางวัล
@@ -206,9 +231,8 @@ onMounted(async () => {
 .home-place { position: absolute; right: 12px; bottom: 8px; z-index: 2; }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
 .home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
-.home-fun { display: flex; gap: 8px; margin: 0 -12px 12px; padding: 2px 12px 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-.home-fun::-webkit-scrollbar { display: none; }
-.home-fun > * { flex: 0 0 116px; scroll-snap-align: start; }
+.home-fun { display: grid; gap: 8px; margin-bottom: 12px; align-items: stretch; }
+.home-fun > * { min-width: 0; height: 100%; }
 /* 🎯 นับถอยหลัง + ไปเรียน */
 .home-go { display: flex; align-items: center; gap: 12px; background: #fff; border: var(--bw) solid var(--line); border-radius: 20px; padding: 12px 14px; margin-bottom: 14px; box-shadow: var(--pop); }
 .home-go-cd { flex: none; width: 84px; display: flex; flex-direction: column; align-items: center; border-radius: 16px; padding: 6px 0; background: linear-gradient(160deg, var(--accent-light), var(--primary-light)); cursor: pointer; user-select: none; }
@@ -216,6 +240,19 @@ onMounted(async () => {
 .home-go-cd small { font-size: .7rem; font-weight: 700; color: var(--muted); }
 .home-go-r { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .home-go-sub { display: flex; flex-direction: column; gap: 1px; font-size: .76rem; font-weight: 700; color: var(--muted); }
+.home-go-sub:empty { display: none; }
+.home-streak { display: flex; align-items: center; justify-content: space-between; gap: 6px; text-decoration: none; color: var(--ink); }
+.home-dots { display: flex; gap: 4px; }
+.home-dots i { width: 22px; height: 22px; border-radius: 50%; background: var(--primary-light); border: 1.5px solid var(--line); display: grid; place-items: center; box-sizing: border-box; }
+.home-dots i small { font-size: .7rem; font-weight: 700; color: var(--muted); font-style: normal; line-height: 1; }
+.home-dots i.on { background: #ffb547; border-color: #f59e0b; }
+.home-dots i.on small { color: #fff; }
+.home-dots i.today { outline: 2px solid var(--primary); outline-offset: 1px; }
+.home-streak-t { font-size: .74rem; font-weight: 800; white-space: nowrap; }
+.home-goal-t { display: flex; justify-content: space-between; font-size: .74rem; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
+.home-goal-t b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.home-goal-bar { height: 8px; border-radius: 999px; background: var(--primary-light); overflow: hidden; }
+.home-goal-bar i { display: block; height: 100%; background: var(--primary); border-radius: 999px; transition: width .6s ease; }
 .home-go-btn { display: block; text-align: center; padding: 11px; border-radius: 14px; background: var(--primary); color: #fff; font-weight: 800; font-size: .95rem; text-decoration: none; box-shadow: var(--pop); }
 .home-go-btn.solo { margin-bottom: 14px; }
 .home-go-btn:active { transform: translateY(1px); }

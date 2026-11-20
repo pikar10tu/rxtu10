@@ -41,6 +41,7 @@ export const USER_DEFAULTS = {
   likedBy: {},
   totalSpent: 0,
   pityClaimedRounds: 0,
+  qToday: null,            // { d: dayKey, n } ข้อสอบที่ทำวันนี้ (หลอดเป้าวันนี้หน้าแรก)
   quizDoneTotal: 0,        // lifetime: ข้อสอบที่ทำ (achievement)
   studyReviewedTotal: 0,   // lifetime: แฟลชการ์ดที่ทบทวน (achievement)
   farmSalesTotal: 0,       // lifetime: เหรียญจากการขายฟาร์ม (achievement)

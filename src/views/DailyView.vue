@@ -293,7 +293,9 @@ async function start() {
     const set = await ensureSet()
     qsRaw = set
     // จองสิทธิ์ก่อนเริ่ม: dc.last = วันนี้ → ออกกลางทางก็เล่นซ้ำไม่ได้
-    const ok = await auth.patchUser({ dc: { ...(auth.userData?.dc || {}), last: today } }, { 'dc.last': today })
+    // dc.days = วันที่เล่น 14 วันล่าสุด (แถบไฟติดต่อกันหน้าแรก · 20 พ.ย. 2026)
+    const days = [...(auth.userData?.dc?.days || []).filter(d => d !== today), today].slice(-14)
+    const ok = await auth.patchUser({ dc: { ...(auth.userData?.dc || {}), last: today, days } }, { 'dc.last': today, 'dc.days': days })
     if (!ok) { toast('เริ่มไม่สำเร็จ — ลองใหม่อีกครั้ง', 'error'); return }
     qs.value = set.map(shuffleChoices)
     idx.value = 0; score.value = 0; answers.value = []; totalMs = 0
