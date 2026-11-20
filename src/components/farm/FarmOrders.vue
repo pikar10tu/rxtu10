@@ -15,6 +15,11 @@
 
         <!-- ช่องที่มีออเดอร์ -->
         <template v-else>
+          <!-- 🧑‍🌾 ผู้สั่ง + คำพูดสั้นๆ (21 พ.ย.) — สุ่มตายตัวจาก id ออเดอร์ ไม่ต้องเก็บใน doc -->
+          <div class="fo-who">
+            <span class="fo-av"><Emoji :char="clientOf(o).icon" /></span>
+            <span class="fo-who-t"><b>{{ clientOf(o).name }}</b><small>“{{ clientOf(o).say }}”</small></span>
+          </div>
           <!-- แถวละชนิด: ไอคอนใหญ่ + ชื่อ + มี/ต้องการ — สมุนไพรหลายตัวเขียวเรียวคล้ายกัน ไอคอนเล็กอย่างเดียวแยกไม่ออก (user 28 ก.ย.) -->
           <ul class="fo-items">
             <li v-for="(qty, id) in o.items" :key="id" class="fo-row" :class="{ lack: missing(o)[id] }">
@@ -23,13 +28,21 @@
               <span class="fo-have">{{ Math.min(have(id), qty) }}/{{ qty }}</span>
             </li>
           </ul>
-          <div class="fo-pay"><Emoji char="🪙" /> {{ o.reward.coins.toLocaleString() }}<span class="sr-only">เหรียญ</span></div>
+          <div class="fo-pay">
+            <span><Emoji char="🪙" /> {{ o.reward.coins.toLocaleString() }}<span class="sr-only">เหรียญ</span></span>
+            <span class="fo-tag" :class="valueOf(o).better ? 'mkt' : 'good'">{{ valueOf(o).text }}</span>
+          </div>
           <div class="fo-btns">
             <button
+              v-if="ready(o)"
               class="fo-send"
-              :disabled="!ready(o) || !!busyId"
+              :disabled="!!busyId"
               @click="onDeliver(i, o)"
-            >{{ ready(o) ? 'ส่ง' : 'ของไม่พอ' }}</button>
+            >ส่งออเดอร์</button>
+            <!-- ของไม่พอ → บอกว่าขาดอะไร กดแล้วเปิดแผ่นเมล็ดพร้อมเลือกตัวที่ขาดไว้ให้ -->
+            <button v-else class="fo-send plant" :disabled="!!busyId" @click="$emit('plant', firstLack(o).id)">
+              ขาด{{ lackText(o) }} · ปลูกเลย
+            </button>
             <button class="fo-skip" :disabled="!!busyId" aria-label="ทิ้งออเดอร์ใบนี้" @click="onReroll(i, o)">✕</button>
           </div>
         </template>
@@ -47,6 +60,7 @@ import { useFarmOrders } from '../../composables/useFarmOrders.js'
 import { useConfirm } from '../../composables/useConfirm.js'
 import { missingItems, canDeliver, REROLL_MS } from '../../data/farmOrders.js'
 import { getCrop } from '../../data/crops.js'
+import { useFarmMarket } from '../../composables/useFarmMarket.js'
 
 const board = useFarmOrders()
 const { confirm } = useConfirm()
@@ -67,6 +81,35 @@ onMounted(async () => {
   }, 1000)
 })
 onUnmounted(() => { dead = true; clearInterval(timer) })
+
+defineEmits(['plant'])
+const mkt = useFarmMarket()
+
+// ผู้สั่ง — คนทั่วไปในเมือง (ไม่เกี่ยวกับคณะ · user 21 พ.ย.) · เลือกจาก id ออเดอร์ ⇒ ใบเดิมได้คนเดิมเสมอ
+const CLIENTS = [
+  { icon: '🏥', name: 'ร้านยาป้าแดง', say: 'ลูกค้าถามหาทั้งวันเลย' },
+  { icon: '🍵', name: 'ร้านชาสมุนไพรริมทาง', say: 'เมนูใหม่ขายดีเกินคาด' },
+  { icon: '🧓', name: 'คุณตาหมอยาพื้นบ้าน', say: 'เตรียมของไว้ให้ชาวบ้าน' },
+  { icon: '🧴', name: 'แบรนด์สกินแคร์มือใหม่', say: 'ทำล็อตทดลองชุดแรก' },
+  { icon: '🍛', name: 'ร้านข้าวแกงเจ๊หมวย', say: 'ของหมดครัวตั้งแต่เช้า' },
+  { icon: '💆', name: 'ร้านนวดแผนไทยหัวมุม', say: 'ลูกค้าเยอะช่วงนี้' },
+  { icon: '🏨', name: 'โรงแรมริมแม่น้ำ', say: 'จัดของต้อนรับแขก' },
+  { icon: '🛒', name: 'ร้านค้าส่งตลาดเช้า', say: 'เหมาไปขายต่อ' },
+  { icon: '🎁', name: 'ร้านของฝากหน้าวัด', say: 'จัดกระเช้าให้ลูกค้า' },
+  { icon: '👩‍🍳', name: 'เชฟร้านอาหารไทยร่วมสมัย', say: 'คิดเมนูใหม่อยู่' },
+]
+const clientOf = (o) => { let h = 0; for (const ch of String(o.id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return CLIENTS[h % CLIENTS.length] }
+
+// เทียบกับขายตลาด "วันนี้" (รวมราคาข่าวตลาด) — วันที่ราคาพุ่งแรง ขายเองอาจคุ้มกว่า บอกตรงๆ
+function valueOf(o) {
+  let base = 0, today = 0
+  for (const [id, q] of Object.entries(o.items)) { const p = getCrop(id)?.sellPrice || 0; base += p * q; today += mkt.priceOf(id, p) * q }
+  if (!base) return { better: false, text: '' }
+  if (today >= o.reward.coins) return { better: true, text: `🔥 วันนี้ขายตลาดได้ ${today.toLocaleString()}` }
+  return { better: false, text: `คุ้มกว่าขาย +${Math.round((o.reward.coins / today - 1) * 100)}%` }
+}
+const firstLack = (o) => { const m = missing(o); const id = Object.keys(m)[0]; return { id, n: m[id] } }
+const lackText = (o) => Object.entries(missing(o)).map(([id, n]) => `${cropOf(id).name} ${n}`).join(' · ')
 
 const cropOf = (id) => getCrop(id) || { name: id, emoji: '❓' }
 const missing = (o) => missingItems(o, board.inventory.value)
@@ -106,7 +149,7 @@ async function onReroll(i, o) {
    (วัดจากจอจริง 27 ส.ค.: ราง 892px ในกล่อง 487px → main ล้น 816/545) */
 .fo-rail { display: flex; gap: 8px; overflow-x: auto; min-width: 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
 .fo { min-width: 0; }
-.fo-card { position: relative; /* กัน .sr-only (absolute) หลุดกรอบราง → ทั้งหน้าเลื่อนซ้ายขวาได้ 15 พ.ย. */ flex: 0 0 196px; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 118px; border: 1px solid rgba(180,83,9,.2); border-radius: 12px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.06)); padding: 10px; }
+.fo-card { position: relative; /* กัน .sr-only (absolute) หลุดกรอบราง → ทั้งหน้าเลื่อนซ้ายขวาได้ 15 พ.ย. */ flex: 0 0 212px; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 118px; border: 1px solid rgba(180,83,9,.2); border-radius: 12px; background: linear-gradient(160deg,#fff,rgba(245,158,11,.06)); padding: 10px; }
 .fo-card.waiting { background: rgba(0,0,0,.03); border-style: dashed; }
 .fo-wait { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 100%; color: rgba(0,0,0,.45); font-size: .75rem; font-weight: 700; }
 .fo-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -116,7 +159,16 @@ async function onReroll(i, o) {
 .fo-name { flex: 1; min-width: 0; font-size: .76rem; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fo-have { font-size: .76rem; font-weight: 800; color: #15803d; font-variant-numeric: tabular-nums; }
 .fo-row.lack .fo-have { color: #b91c1c; }
-.fo-pay { font-size: .82rem; font-weight: 800; color: #b45309; }
+.fo-pay { font-size: .82rem; font-weight: 800; color: #b45309; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+.fo-tag { font-size: .7rem; font-weight: 800; border-radius: 999px; padding: 1px 8px; }
+.fo-tag.good { background: rgba(34,197,94,.13); color: #15803d; }
+.fo-tag.mkt { background: #ffe9e4; color: #c2410c; }
+.fo-who { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.fo-av { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+.fo-who-t { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.fo-who-t b { font-size: .76rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fo-who-t small { font-size: .7rem; color: rgba(0,0,0,.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fo-send.plant { background: linear-gradient(135deg,#5b9fe0,#3b82c4); font-size: .72rem; }
 .fo-btns { display: flex; gap: 6px; }
 .fo-send { flex: 1; border: none; background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; font-weight: 800; font-size: .76rem; padding: 7px; border-radius: 9px; cursor: pointer; font-family: inherit; }
 .fo-send:disabled { background: rgba(0,0,0,.12); color: rgba(0,0,0,.38); cursor: not-allowed; }

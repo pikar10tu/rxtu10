@@ -23,6 +23,7 @@
             <div class="news-foot">
               <span class="news-time">{{ timeAgo(g.head.t, now) }}</span>
               <RouterLink v-if="isTree(g.head)" to="/tree" class="news-read">ไปดู ›</RouterLink>
+              <RouterLink v-if="isFarm(g.head)" to="/play/farm" class="news-read">ไปฟาร์ม ›</RouterLink>
               <button v-if="factOf(g.head)" type="button" class="news-read" @click="readFact(g.head)">อ่านเต็ม ›</button>
               <button v-if="likeKeyOf(g.head)" type="button" class="news-like" :class="{ pop: popKey === g.head.id }"
                       :aria-label="`กดใจ (${countOf(likeKeyOf(g.head))})`" @click="tapLike(g.head)">
@@ -43,6 +44,7 @@
               <div class="news-foot">
                 <span class="news-time">{{ timeAgo(n.t, now) }}</span>
                 <RouterLink v-if="isTree(n)" to="/tree" class="news-read">ไปดู ›</RouterLink>
+                <RouterLink v-if="isFarm(n)" to="/play/farm" class="news-read">ไปฟาร์ม ›</RouterLink>
                 <button v-if="factOf(n)" type="button" class="news-read" @click="readFact(n)">อ่านเต็ม ›</button>
                 <button v-if="likeKeyOf(n)" type="button" class="news-like" :class="{ pop: popKey === n.id }"
                         :aria-label="`กดใจ (${countOf(likeKeyOf(n))})`" @click="tapLike(n)">
@@ -89,6 +91,7 @@ import { buildFeed, groupFeed, timeAgo } from '../../utils/newsFeed.js'
 import { prefersReducedMotion } from '../../utils/motionPref.js'
 import { useNewsLikes, likeKeyOf } from '../../composables/useNewsLikes.js'
 import { grantSecret } from '../../composables/useAchievements.js'
+import { postFarmNewsOnce } from '../../composables/useFarmMarket.js'
 
 const usage = useUsageStore()
 const members = useMembersStore()
@@ -125,6 +128,7 @@ const whoOf = (g) => g.head.uid === auth.currentUser?.uid ? 'คุณ' : (membe
 const factOf = (item) => { const m = /แชร์เกร็ดความรู้ #(\d+)/.exec(item?.text || ''); const f = m && PHARM_FACTS[+m[1] - 1]; return f ? { no: +m[1], ...f } : null }
 const fact = ref(null)
 const isTree = (item) => /ในต้นไม้รุ่น$/.test(item?.text || '')
+const isFarm = (item) => String(item?.id || '').startsWith('news:farm-')   // 📰 ข่าวตลาดสมุนไพรรายวัน
 function readFact(item) { fact.value = factOf(item) }
 
 // ── กดใจ (ไม่จำกัด · รวบส่งทีเดียว ดู useNewsLikes) ──
@@ -161,6 +165,7 @@ onMounted(async () => {
   try {
     await members.loadRoster()
     likes.load()   // ไม่ await — ใจโผล่ตามหลังได้ ไม่ต้องให้ข่าวรอ
+    await postFarmNewsOnce()   // 📰 คนแรกของวันโพสต์ข่าวตลาด (เครื่องละครั้งต่อวัน) — ก่อนโหลดข่าวจะได้เห็นเลย
     const snap = await getDocs(query(collection(db, 'news'), orderBy('ts', 'desc'), limit(5)))
     usage.track(snap.size)
     newsDocs.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))

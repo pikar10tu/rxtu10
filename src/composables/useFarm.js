@@ -10,6 +10,7 @@ import { nextPlotInfo, MAX_PLOTS } from '../data/farmPlots.js'
 import { rollGold, goldPrice } from '../data/farmMastery.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { sfx } from '../utils/sfx.js'
+import { useFarmMarket } from './useFarmMarket.js'
 
 /**
  * Farming logic bound to the logged-in user.
@@ -20,6 +21,7 @@ import { sfx } from '../utils/sfx.js'
 export function useFarm() {
   const auth = useAuthStore()
   const { toast } = useToast()
+  const mkt = useFarmMarket()
 
   const level     = computed(() => auth.userData?.residence?.level || 1)
   // เพดานตามเลเวลบ้าน (เดิม = จำนวนแปลงจริง → เปลี่ยนเป็น "เพดานสูงสุดที่ปลดได้")
@@ -205,7 +207,7 @@ export function useFarm() {
     const n = qty == null ? have : Math.min(qty, have)
     if (n <= 0) return
     const crop = getCrop(cropId)
-    const gain = crop.sellPrice * n
+    const gain = mkt.priceOf(cropId, crop.sellPrice) * n   // 📰 ราคาตลาดวันนี้
     const inv = { ...inventory.value }
     inv[cropId] = have - n
     if (inv[cropId] <= 0) delete inv[cropId]
@@ -219,7 +221,7 @@ export function useFarm() {
     const n = qty == null ? have : Math.min(qty, have)
     if (n <= 0) return
     const crop = getCrop(cropId)
-    const gain = goldPrice(crop) * n
+    const gain = mkt.priceOf(cropId, goldPrice(crop)) * n
     const g = { ...gold.value }
     g[cropId] = have - n
     if (g[cropId] <= 0) delete g[cropId]
@@ -231,10 +233,10 @@ export function useFarm() {
     const inv = inventory.value
     let gain = 0
     for (const [id, qty] of Object.entries(inv)) {
-      const c = getCrop(id); if (c) gain += c.sellPrice * qty
+      const c = getCrop(id); if (c) gain += mkt.priceOf(id, c.sellPrice) * qty
     }
     for (const [id, qty] of Object.entries(gold.value)) {
-      const c = getCrop(id); if (c) gain += goldPrice(c) * qty
+      const c = getCrop(id); if (c) gain += mkt.priceOf(id, goldPrice(c)) * qty
     }
     if (gain <= 0) { toast('ไม่มีผลผลิตให้ขาย', 'info'); return }
     await commit(clonePlots(), { coinDelta: gain, inventory: {}, salesGain: gain, extra: { gold: {} } })

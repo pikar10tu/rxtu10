@@ -15,15 +15,16 @@
       </label>
       <div class="sp-list">
         <button
-          v-for="c in choices"
+          v-for="c in list"
           :key="c.id"
           class="sp-item"
+          :class="{ focus: c.id === focus }"
           :disabled="coins < c.seedCost"
           @click="$emit('pick', c.id, allOn)"
         >
           <span class="sp-emoji"><Emoji :char="c.emoji" /></span>
           <div class="sp-info">
-            <div class="sp-name">{{ c.name }} <span v-if="starsOf(c)" class="sp-stars">{{ "★".repeat(starsOf(c)) }}</span></div>
+            <div class="sp-name">{{ c.name }} <span v-if="starsOf(c)" class="sp-stars">{{ "★".repeat(starsOf(c)) }}</span> <span v-if="mkt.pctOf(c.id)" class="sp-hot">🔥 ราคาวันนี้ +{{ mkt.pctOf(c.id) }}%</span></div>
             <div class="sp-meta"><Emoji char="⏱" /> {{ growLabel(c) }} (เสร็จ {{ doneAt(c) }}) · ขายได้ {{ c.sellPrice.toLocaleString() }}<Emoji char="🪙" /></div>
           </div>
           <span class="sp-cost" :class="{ no: coins < c.seedCost }">{{ (c.seedCost * (allOn ? Math.min(emptyCount, Math.max(1, Math.floor(coins / c.seedCost))) : 1)).toLocaleString() }}<Emoji char="🪙" /><small v-if="allOn"> ×{{ Math.min(emptyCount, Math.max(1, Math.floor(coins / c.seedCost))) }}</small></span>
@@ -37,6 +38,8 @@
 <script setup>
 import Emoji from '../shared/Emoji.vue'
 import { growLabel, growMs } from '../../data/crops.js'
+import { useFarmMarket } from '../../composables/useFarmMarket.js'
+const mkt = useFarmMarket()
 import { ref, computed, watch } from 'vue'
 import { masteryStars } from '../../data/farmMastery.js'
 import { useFarm } from '../../composables/useFarm.js'
@@ -46,6 +49,11 @@ const props = defineProps({
   choices: { type: Array, default: () => [] },
   coins: { type: Number, default: 0 },
   emptyCount: { type: Number, default: 0 },
+  focus: { type: String, default: null },   // มาจากออเดอร์ "ปลูกเลย" → ยกเมล็ดนี้ขึ้นบนสุด + ไฮไลต์
+})
+const list = computed(() => {
+  const f = props.choices.find(c => c.id === props.focus)
+  return f ? [f, ...props.choices.filter(c => c !== f)] : props.choices
 })
 const ALL_KEY = 'rxtu-farm-plant-all'
 const all = ref((() => { try { return localStorage.getItem(ALL_KEY) === '1' } catch { return false } })())
@@ -77,6 +85,8 @@ const starsOf = (c) => masteryStars(farm.harvests.value[c.id])
 .sp-info { flex: 1; min-width: 0; }
 .sp-name { font-weight: 700; font-size: .86rem; }
 .sp-stars { color: #f0b400; font-size: .78rem; letter-spacing: 1px; }
+.sp-item.focus { border: 2px solid #5b9fe0; background: rgba(91,159,224,.08); }
+.sp-hot { font-size: .7rem; font-weight: 800; color: #c2410c; background: #ffedd5; border-radius: 999px; padding: 0 6px; white-space: nowrap; }
 .sp-meta { font-size: .7rem; color: rgba(0,0,0,.5); }
 .sp-cost { font-weight: 800; font-size: .8rem; color: #b45309; white-space: nowrap; }
 .sp-all { display: flex; align-items: center; gap: 8px; margin: 10px 12px 0; padding: 9px 12px; border-radius: 12px; background: var(--mint-light, #e9f8f1); font-size: .82rem; font-weight: 700; cursor: pointer; }

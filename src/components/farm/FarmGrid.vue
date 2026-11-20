@@ -1,5 +1,5 @@
 <template>
-  <div class="farm">
+  <div ref="rootEl" class="farm">
     <div class="farm-head">
       <span class="farm-title"><Emoji char="🌾" /> ฟาร์ม <HelpButton topic="farm" /></span>
       <span class="farm-head-r">
@@ -62,6 +62,7 @@
           <span class="inv-emoji"><Emoji :char="it.emoji" /></span>
           <span class="inv-name">{{ it.name }}</span>
           <span class="inv-qty">×{{ it.qty }}</span>
+          <span v-if="it.hot" class="inv-hot">🔥 +{{ it.hot }}%</span>
           <span class="inv-sell">ขาย {{ (it.sellPrice * it.qty).toLocaleString() }}<Emoji char="🪙" /></span>
         </button>
       </div>
@@ -88,8 +89,9 @@
       :choices="farm.seedChoices.value"
       :coins="coins"
       :empty-count="emptyCount"
+      :focus="focusSeed"
       @pick="onPick"
-      @close="pickIndex = null"
+      @close="pickIndex = null; focusSeed = null"
     />
     <FarmBook :open="bookOpen" @close="bookOpen = false" />
   </div>
@@ -103,6 +105,7 @@ import { useAuthStore } from '../../stores/auth.js'
 import { useFarm } from '../../composables/useFarm.js'
 import { useCountUp } from '../../composables/useCountUp.js'
 import { useConfirm } from '../../composables/useConfirm.js'
+import { useToast } from '../../composables/useToast.js'
 import { getCrop, stageEmoji, DEFAULT_STAGES } from '../../data/crops.js'
 import { fluentFile } from '../../utils/emoji.js'
 import { flyTo, cancelFarmFx } from '../../utils/farmfx.js'
@@ -110,10 +113,13 @@ import SeedPicker from './SeedPicker.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
 import FarmBook from './FarmBook.vue'
 import { goldEmoji, goldPrice } from '../../data/farmMastery.js'
+import { useFarmMarket } from '../../composables/useFarmMarket.js'
 
 const auth = useAuthStore()
 const farm = useFarm()
+const mkt = useFarmMarket()
 const { confirm } = useConfirm()
+const { toast } = useToast()
 
 const now = ref(Date.now())
 let timer = null
@@ -150,12 +156,24 @@ const bookOpen = ref(false)
 const pickIndex = ref(null)
 function openPicker(i) { pickIndex.value = i }
 function onPick(seedId, all) {
-  const i = pickIndex.value; pickIndex.value = null
+  const i = pickIndex.value; pickIndex.value = null; focusSeed.value = null
   if (i === null) return
   if (all) farm.plantAll(seedId)
   else farm.plant(i, seedId)
 }
 const emptyCount = computed(() => plots.value.filter(p => !p).length)
+
+// 📋 จากออเดอร์ "ขาด… · ปลูกเลย" (21 พ.ย.) — เปิดแผ่นเมล็ดที่แปลงว่างแรก พร้อมยกเมล็ดที่ขาดขึ้นบนสุด
+const focusSeed = ref(null)
+const rootEl = ref(null)
+function plantFor(cropId) {
+  rootEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const i = plots.value.findIndex(p => !p)
+  if (i < 0) { toast('แปลงเต็มอยู่ เก็บเกี่ยวก่อนแล้วค่อยปลูกนะ', 'info'); return }
+  focusSeed.value = cropId
+  pickIndex.value = i
+}
+defineExpose({ plantFor })
 
 // reactive plot status (re-evaluates as `now` ticks)
 function stat(plot) { return farm.status(plot, now.value) }
@@ -267,10 +285,10 @@ function fmt(ms) {
 const invList = computed(() => [
   ...Object.entries(farm.gold.value)
     .filter(([id, q]) => q > 0 && getCrop(id))
-    .map(([id, qty]) => { const c = getCrop(id); return { key: 'g:' + id, id, qty, gold: true, emoji: goldEmoji(c), name: c.name + 'ทอง', sellPrice: goldPrice(c) } }),
+    .map(([id, qty]) => { const c = getCrop(id); return { key: 'g:' + id, id, qty, gold: true, emoji: goldEmoji(c), name: c.name + 'ทอง', sellPrice: mkt.priceOf(id, goldPrice(c)), hot: mkt.pctOf(id) } }),
   ...Object.entries(farm.inventory.value)
     .filter(([, q]) => q > 0)
-    .map(([id, qty]) => { const c = getCrop(id); return { key: id, id, qty, gold: false, emoji: c?.emoji, name: c?.name, sellPrice: c?.sellPrice || 0 } }),
+    .map(([id, qty]) => { const c = getCrop(id); return { key: id, id, qty, gold: false, emoji: c?.emoji, name: c?.name, sellPrice: mkt.priceOf(id, c?.sellPrice || 0), hot: mkt.pctOf(id) } }),
 ])
 </script>
 
@@ -315,6 +333,7 @@ const invList = computed(() => [
 .inv-name { font-size: .72rem; font-weight: 700; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .inv-qty { font-weight: 800; font-size: .74rem; }
 .inv-sell { font-size: .7rem; color: #b45309; font-weight: 700; }
+.inv-hot { font-size: .7rem; font-weight: 800; color: #c2410c; background: #ffedd5; border-radius: 999px; padding: 0 6px; }
 .sq { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 10px; }
 .sq-n { text-align: center; font-size: 1.6rem; font-weight: 800; color: var(--ink, #333); }
 .sq-n small { font-size: .75rem; font-weight: 600; opacity: .6; }
