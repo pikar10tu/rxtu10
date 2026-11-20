@@ -12,7 +12,8 @@
         <DollFigure :eq="eq" :scale="S" :aura="aura" :label="label" />
       </component>
     </div>
-    <slot />
+    <!-- slot ได้ตำแหน่งหัวอวาตาร์ (px จริงในกล่อง) ไว้วางบับเบิ้ลคำพูด -->
+    <slot :head-x="head.x" :head-y="head.y" />
   </div>
 </template>
 
@@ -38,14 +39,6 @@ const n = computed(() => clampLevel(props.scene))
 const tier = computed(() => getTier(n.value))
 const src = computed(() => IMGS[`../../assets/residence/res-${String(n.value).padStart(2, '0')}.webp`])
 
-// จุดเท้า [x กลางตัว, y เท้า] ในพิกัดภาพ — ฉากที่พื้นไม่ได้อยู่ y 88 ต้องใส่ที่นี่ (ตรวจด้วยตาครบ 20 ฉากแล้ว)
-const FEET = { 12: [40, 84], 13: [36, 86], 15: [44, 76], 17: [38, 72], 19: [40, 78], 20: [42, 79] }
-const dollPos = computed(() => {
-  const [x, y] = FEET[n.value] || [40, 88]
-  return { left: (x - 30) * S + 'px', top: (y - 52) * S + 'px' }
-})
-
-// ✨ เอฟเฟค: วาดบน canvas 180×100 ขยายแบบพิกเซลคม · หยุดเมื่อพ้นจอ/แท็บซ่อน/ผู้ใช้ตั้งลดการเคลื่อนไหว
 // ความกว้างจริง → อัตราขยาย
 const box = ref(null)
 const k = ref(1)
@@ -56,6 +49,22 @@ onMounted(() => {
   ro = new ResizeObserver(fit); ro.observe(box.value)
 })
 onBeforeUnmount(() => ro?.disconnect())
+
+// จุดเท้า [x กลางตัว, y เท้า] ในพิกัดภาพ — ฉากที่พื้นไม่ได้อยู่ y 88 ต้องใส่ที่นี่ (ตรวจด้วยตาครบ 20 ฉากแล้ว)
+const FEET = { 12: [40, 84], 13: [36, 86], 15: [44, 76], 17: [38, 72], 19: [40, 78], 20: [42, 79] }
+// ตำแหน่งยอดหัวอวาตาร์ (กลางตัว) เป็น px ในกล่องจริง — ตัวสูง ~42 พิกเซลจากเท้า
+const head = computed(() => {
+  const [x, y] = FEET[n.value] || [40, 88]
+  return { x: x * S * k.value, y: (y - 42) * S * k.value }
+})
+const dollPos = computed(() => {
+  const [x, y] = FEET[n.value] || [40, 88]
+  return { left: (x - 30) * S + 'px', top: (y - 52) * S + 'px' }
+})
+
+// ✨ เอฟเฟค: วาดบน canvas 180×100 ขยายแบบพิกเซลคม · หยุดเมื่อพ้นจอ/แท็บซ่อน/ผู้ใช้ตั้งลดการเคลื่อนไหว
+
+
 
 const fx = ref(null)
 let raf = 0, io = null, visible = true, stop = null

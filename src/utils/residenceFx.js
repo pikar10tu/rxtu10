@@ -8,7 +8,7 @@
 
 // [ชนิด, สี, จำนวนตั้งต้น, y0, y1]
 const KIND = {
-  1: ['leaf', '#9cc58a', 4, 20, 90], 2: ['flick', '#ffd98a', 0, 0, 0], 3: ['mote', '#fff6d8', 8, 10, 90],
+  1: ['leaf', '#9cc58a', 4, 20, 90], 2: ['flick', '#ffd98a', 4, 40, 85], 3: ['mote', '#fff6d8', 8, 10, 90],
   4: ['leaf', '#c9a46a', 5, 20, 90], 5: ['mote', '#fff3dc', 8, 10, 90], 6: ['leaf', '#a6d6c4', 5, 20, 90],
   7: ['twinkle', '#ffe9a8', 10, 30, 60], 8: ['cloud', '#ffffff', 3, 4, 26], 9: ['sparkle', '#ffffff', 10, 48, 66],
   10: ['sparkle', '#ffffff', 8, 82, 96], 11: ['twinkle', '#ffe9a8', 12, 50, 66], 12: ['sparkle', '#ffffff', 12, 58, 92],
@@ -52,7 +52,8 @@ export function sceneFx(n) {
       if (kind === 'leaf' || kind === 'petal') {
         x = ((a * 180 + t * (0.25 + b * 0.2)) % 190) - 5 + Math.sin(t / 20 + i) * 3
         y = y0 + ((t * (0.15 + a * 0.1) + b * 80) % (y1 - y0)); s = kind === 'petal' ? 2 : 1
-      } else if (kind === 'mote') {
+      } else if (kind === 'mote' || kind === 'flick') {
+        if (kind === 'flick') { x = 110 + a * 60 }
         x += Math.sin(t / 60 + i) * 4; y += Math.cos(t / 70 + i) * 3; al = 0.4 + 0.4 * Math.sin(t / 30 + i)
       } else if (kind === 'twinkle' || kind === 'sparkle') {
         al = Math.max(0, Math.sin(t / (kind === 'sparkle' ? 14 : 25) + i * 1.7))
@@ -78,9 +79,10 @@ export function sceneFx(n) {
         g.fillRect((x - 1) | 0, (y + 0.5) | 0, 4, 1); g.fillRect((x + 0.5) | 0, (y - 1) | 0, 1, 4)
       }
     }
-    if (kind === 'flick') {   // ไฟเพิงกะพริบ
-      g.globalAlpha = 0.10 + 0.08 * Math.sin(t / 7) + (rnd(t, 3) < 0.03 ? 0.15 : 0)
-      g.fillStyle = col; g.fillRect(100, 20, 80, 80)
+    if (kind === 'flick') {   // ไฟเพิง: เรืองอุ่นหายใจช้าๆ (เดิมกะพริบถี่ แย่งความสนใจ · user 20 พ.ย.) + หิ่งห้อยลอยรอบเพิง
+      const gr = g.createRadialGradient(140, 55, 2, 140, 55, 45)
+      gr.addColorStop(0, col); gr.addColorStop(1, 'transparent')
+      g.globalAlpha = 0.10 + 0.04 * Math.sin(t / 80); g.fillStyle = gr; g.fillRect(90, 10, 90, 90)
     }
     g.globalAlpha = 1
   }

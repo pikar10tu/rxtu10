@@ -19,9 +19,13 @@
 
     <template v-if="authStore.isLoggedIn">
       <!-- 🏠 หน้าแรกแบบ B (user เคาะ 20 พ.ย. 2026): ฉากบ้านเต็มกว้าง อวาตาร์ยืนในฉาก · คำทักทายบนแถบฟ้า · แตะอวาตาร์ = ห้องแต่งตัว -->
-      <ResidenceScene class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
+      <ResidenceScene v-slot="{ headX, headY }" class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
         <!-- ป้ายทักทาย + วันสอบ (ย้ายจากหัวหน้ามาไว้บนฟ้า) · จิ้มรัวยังได้ความสำเร็จลับเหมือนเดิม -->
-        <div class="greet-bubble home-greet"><b>{{ greet }} {{ authStore.userData?.nickname || '' }}</b></div>
+        <!-- บับเบิ้ลคำพูด: หางชี้ลงเหนือหัวอวาตาร์ เว้น 14px (ตามจุดยืนของแต่ละฉาก) -->
+        <div class="greet-bubble home-greet" :style="{ left: Math.max(8, headX - 27) + 'px', bottom: `calc(100% - ${headY - 14}px)` }">
+          <b>{{ greet }} {{ authStore.userData?.nickname || '' }}</b>
+          <small>{{ cheer }}</small>
+        </div>
         <!-- ป้ายชื่อสถานที่ = ปุ่มเปิดแผงบ้าน (อัปบ้าน + เลือกฉาก) แทนการ์ดอัปบ้านใหญ่ (user 20 พ.ย.) -->
         <button type="button" class="place-tag home-place" :style="{ '--tier': homeTier.frameColor }" @click="homeOpen = true">
           <Emoji :char="homeTier.art" /> {{ homeTier.tierName }} <b>›</b>
@@ -140,6 +144,13 @@ const todayDot = computed(() => fillPct.value >= 50 || !playedToday.value)
 const exams = computed(() => upcomingExams(EXAMS))
 const nextExam = computed(() => exams.value[0] || null)
 const otherExams = computed(() => exams.value.slice(1, 2))
+const cheer = computed(() => {
+  const d = nextExam.value?.days
+  if (d == null) return 'วันนี้ก็สู้ๆ นะ'
+  if (d <= 0) return 'วันสอบแล้ว! ทำเต็มที่นะ'
+  if (d <= 30) return 'ใกล้สอบแล้ว สู้ๆ นะ'
+  return 'ค่อยๆ เก็บทีละนิด สู้ๆ นะ'
+})
 const examShort = (e) => (e.id === 'ple-cc2' ? 'สอบ CC2' : e.id === 'ple-cc1' ? 'สอบ CC1' : e.label)
 const searchOpen = ref(false)
 const searchQuery = ref('')
@@ -191,7 +202,7 @@ onMounted(async () => {
 <style scoped>
 /* 🏠 ฉากบ้านหัวหน้าแรก — ชิดขอบจอซ้ายขวา (ลบ padding ของ .tab-content) */
 .home-scene { margin: -12px -12px 14px; width: calc(100% + 24px); }
-.home-greet { position: absolute; left: 12px; top: 8px; z-index: 2; max-width: calc(100% - 24px); }
+.home-greet { position: absolute; z-index: 2; max-width: calc(100% - 24px); }
 .home-place { position: absolute; right: 12px; bottom: 8px; z-index: 2; }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
 .home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
