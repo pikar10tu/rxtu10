@@ -27,8 +27,8 @@ import { useRosterSync } from '../../composables/useRosterSync.js'
 
 defineProps({ open: Boolean })
 defineEmits(['update:open'])
-const IMGS = import.meta.glob('../../assets/residence/res-*.png', { eager: true, import: 'default' })
-const thumb = (n) => IMGS[`../../assets/residence/res-${String(n).padStart(2, '0')}.png`]
+const IMGS = import.meta.glob('../../assets/residence/res-*.webp', { eager: true, import: 'default' })
+const thumb = (n) => IMGS[`../../assets/residence/res-${String(n).padStart(2, '0')}.webp`]
 const auth = useAuthStore()
 const { toast } = useToast()
 const { syncRosterRow } = useRosterSync()

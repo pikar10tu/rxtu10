@@ -34,10 +34,10 @@ const props = defineProps({
   fx: { type: Boolean, default: true },
 })
 const S = 2
-const IMGS = import.meta.glob('../../assets/residence/res-*.png', { eager: true, import: 'default' })
+const IMGS = import.meta.glob('../../assets/residence/res-*.webp', { eager: true, import: 'default' })
 const n = computed(() => clampLevel(props.scene))
 const tier = computed(() => getTier(n.value))
-const src = computed(() => IMGS[`../../assets/residence/res-${String(n.value).padStart(2, '0')}.png`])
+const src = computed(() => IMGS[`../../assets/residence/res-${String(n.value).padStart(2, '0')}.webp`])
 
 // จุดเท้า [x กลางตัว, y เท้า] ในพิกัดภาพ — ฉากที่พื้นไม่ได้อยู่ y 88 ต้องใส่ที่นี่ (ตรวจด้วยตาครบ 20 ฉากแล้ว)
 const FEET = { 12: [40, 84], 13: [36, 86], 15: [44, 76], 17: [38, 72], 19: [40, 78], 20: [42, 79] }

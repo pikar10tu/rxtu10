@@ -33,22 +33,8 @@
         </div>
         <!-- ── หน้าแรกแบบจัดกลุ่ม (user เคาะ 11 พ.ย. 2026): ทำวันนี้ → ฝึกทำ → อ่าน+ค้น → ผลฝึก ── -->
         <template v-else>
-          <section class="sv-today" aria-label="ทำวันนี้">
-            <div class="sv-sec-h"><Emoji char="✅" /> ทำวันนี้ <span class="sv-days">อีก {{ daysLeft }} วันสอบ</span></div>
-            <div v-if="todayItems.length" class="sv-today-list">
-              <button v-for="t in todayItems" :key="t.key" type="button" class="sv-today-row" @click="openDoor(t.door)">
-                <span class="sv-today-em"><Emoji :char="t.emoji" /></span>
-                <span class="sv-today-t"><b>{{ t.title }}</b><small>{{ t.sub }}</small></span>
-                <span class="sv-today-go">›</span>
-              </button>
-            </div>
-            <div v-else class="sv-today-clear">
-              <span><Emoji char="🎉" /> วันนี้ครบแล้ว เก่งมาก</span>
-              <button type="button" class="sv-today-free" @click="openDoor('flash')">แฟลชการ์ดอิสระ <Emoji char="🎲" /></button>
-            </div>
-          </section>
-
-          <div class="sv-sec-h"><Emoji char="✍️" /> ฝึกทำ</div>
+          <!-- เตรียมสอบแบบ A (user เคาะ 20 พ.ย. 2026): เป็นคลังล้วน · "ทำวันนี้" ย้ายไปอยู่หน้าแรกที่เดียว (เดิมซ้ำ 2 ที่) -->
+          <div class="sv-sec-h"><Emoji char="✍️" /> ฝึกทำ <span class="sv-days">อีก {{ daysLeft }} วันสอบ</span></div>
           <div class="sv-doors big">
             <button v-for="d in PRACTICE" :key="d.key" type="button" class="sv-door" :class="'d-' + d.key" @click="openDoor(d.key)">
               <span v-if="d.badge" class="sv-door-badge">{{ d.badge }}</span>
@@ -355,12 +341,6 @@ const READ_TILE = {
   drug: { short: 'ฐานยา', tile: 'DailyMed' },
   tool: { short: 'คำนวณ', tile: 'CrCl · เด็ก' },
 }
-// แถบ "ทำวันนี้" — โชว์เฉพาะที่ยังค้าง · ว่างหมด = วันนี้ครบแล้ว
-const todayItems = computed(() => [
-  !playedToday.value && { key: 'daily', door: 'daily', emoji: '🌅', title: 'ข้อสอบประจำวัน', sub: '5 ข้อวันละรอบ · ลุ้นท็อป 10' },
-  redoDue.value && { key: 'redo', door: 'quiz', emoji: '🔁', title: `ข้อที่เคยผิด ${redoDue.value} ข้อ`, sub: 'ตอบใหม่จนถูก 3 ครั้งติดแล้วหลุดกอง' },
-  queueSize.value && { key: 'flash', door: 'flash', emoji: '🧠', title: `แฟลชการ์ด ${queueSize.value} ใบ`, sub: `ประมาณ ${estMin(queueSize.value)} นาที` },
-].filter(Boolean))
 // สรุปผลฝึกบรรทัดเดียว: หมวดแม่นสุด · หมวดควรฝึก (0 reads — study.gs)
 const statLine = computed(() => {
   const rows = axisStats(authStore.userData?.study?.gs).filter(r => r.t >= MIN_ANSWERED)

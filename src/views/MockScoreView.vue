@@ -205,7 +205,9 @@ function pick(id) { router.replace({ query: { ...route.query, exam: id } }) }
 
 onMounted(() => { loadMockScores(auth.currentUser?.uid, true); loadMockComments() })
 watch(() => auth.currentUser?.uid, uid => loadMockScores(uid))
-watch(() => loaded.value && exam.value?.id, id => { if (id && !exam.value.pending && !exam.value.summaryOnly) markSeen(id, !!my.value) }, { immediate: true })
+// ⚠️ ต้องเฝ้า my ด้วย: รายชื่อรอบโหลดเสร็จก่อนคะแนนของเรา → เดิมจดว่า "เห็นแค่ค่าเฉลี่ย" แล้วไม่จดซ้ำตอนคะแนนมา
+//    การ์ดหน้าแรก (ต้อง 'score') เลยเด้งกลับมาทุกเซสชันใหม่ / ทุกครั้งที่เว็บอัปเดต (user แจ้ง 20 พ.ย. 2026)
+watch(() => [loaded.value && exam.value?.id, !!my.value], ([id, has]) => { if (id && !exam.value.pending && !exam.value.summaryOnly) markSeen(id, has) }, { immediate: true })
 </script>
 
 <style scoped>

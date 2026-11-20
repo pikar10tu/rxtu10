@@ -30,6 +30,10 @@
 
     <div class="mv-sort">
       <label class="mv-sort-label" for="mv-sort-sel">เรียงตาม</label>
+      <div class="mv-avmode" role="group" aria-label="ขนาดอวาตาร์">
+        <button type="button" :class="{ on: avMode === 'half' }" @click="setAvMode('half')">ครึ่งตัว</button>
+        <button type="button" :class="{ on: avMode === 'full' }" @click="setAvMode('full')">เต็มตัว</button>
+      </div>
       <select id="mv-sort-sel" v-model="sortKey" class="mv-sort-sel">
         <option value="fashion">รายการแนะนำ</option>
         <option value="level">เลเวลบ้าน</option>
@@ -47,8 +51,11 @@
         class="mv-card" :class="{ off: !m.registered, me: m.uid === myUid }"
         @click="m.registered && (selected = m)"
       >
-        <!-- พื้นการ์ดจากร้านตกแต่ง: จางๆ + ภาพนิ่ง (หน้ารวมคนเยอะ ของขยับพร้อมกันมือถือหนัก) -->
-        <!-- พื้นการ์ด g เลิกแล้ว 20 พ.ย. 2026 -->
+        <!-- 🏠 ฉากบ้านที่เพื่อนเลือก + อวาตาร์ยืนในฉาก (20 พ.ย. 2026 แทนพื้นการ์ดร้านตกแต่ง) · ภาพนิ่ง ไม่มีเอฟเฟค (หน้ารวมคนเยอะ)
+             avMode: half = ครึ่งตัว ขยาย 2 เท่า · full = เต็มตัว ขนาดจริง (user อยากลองทั้งคู่) -->
+        <div v-if="m.registered" class="mv-scene" :class="avMode" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
+          <DollFigure :eq="decodeDoll(m.doll)" :scale="avMode === 'half' ? 2 : 1" :aura="false" :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
+        </div>
         <div class="mv-av-wrap" :style="{ '--ring': trackColor(m.track) }">
           <CosFrame :id="m.cosmetics?.f" still>
             <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
@@ -80,7 +87,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useMembersStore } from '../stores/members.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
 import { useAuthStore } from '../stores/auth.js'
-import { getTier } from '../data/residence.js'
+import { getTier, sceneOf } from '../data/residence.js'
+import DollFigure from '../components/doll/DollFigure.vue'
+import { decodeDoll } from '../utils/dollCode.js'
 import { avatarUrl, fallbackAvatar } from '../utils/avatar.js'
 import { sortMembers } from '../utils/sortMembers.js'
 import ProfileModal from '../components/members/ProfileModal.vue'
@@ -142,6 +151,11 @@ const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Gue
 const trackLabel = (t) => TRACK[t]?.[0] || 'สมาชิก'
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
+const SCENES = import.meta.glob('../assets/residence/res-*.webp', { eager: true, import: 'default' })
+const sceneImg = (m) => SCENES[`../assets/residence/res-${String(sceneOf(m.residence)).padStart(2, '0')}.webp`]
+// ครึ่งตัว/เต็มตัว — จำไว้ในเครื่อง (ลองทั้งสองแบบก่อนเคาะ)
+const avMode = ref((() => { try { return localStorage.getItem('mvAvMode') || 'half' } catch { return 'half' } })())
+function setAvMode(v) { avMode.value = v; try { localStorage.setItem('mvAvMode', v) } catch { /* private mode */ } }
 const avatarOf = (m) => avatarUrl(m, m.nickname)
 // ฉายาจากแถว roster (docId = achId หรือ achId__date) → { icon, label } · id ไม่รู้จัก = ไม่โชว์
 function titleOf(m) {
@@ -188,6 +202,19 @@ function titleOf(m) {
 .mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mv-card { position: relative; overflow: hidden; }
 .mv-card > :not(.cz-bgl) { position: relative; z-index: 1; }
+/* ฉากบ้านบนการ์ด: ภาพ 180×100 · ตรึงจุดยืนอวาตาร์ (x40) ไว้กลางการ์ด
+   full = ขนาดจริง โชว์ y 30–100 · half = 2 เท่า โชว์ช่วงหัวถึงเอว */
+.mv-scene { align-self: stretch; margin: -14px -8px 0; position: relative; overflow: hidden; image-rendering: pixelated; background-repeat: no-repeat; }
+.mv-scene.full { height: 66px; background-size: 180px 100px; background-position: calc(50% + 50px) -30px; }
+.mv-scene.half { height: 70px; background-size: 360px 200px; background-position: calc(50% + 100px) -72px; }
+.mv-doll { position: absolute; left: 50%; transform: translateX(-50%); }
+.mv-scene.full .mv-doll { top: 6px; }
+.mv-scene.half .mv-doll { top: 2px; }
+.mv-scene + .mv-av-wrap { margin-top: -22px; }
+.mv-scene + .mv-av-wrap .mv-avatar { width: 44px; height: 44px; border-width: 2px; }
+.mv-avmode { display: inline-flex; border: var(--bw) solid var(--line); border-radius: 10px; overflow: hidden; margin-right: auto; }
+.mv-avmode button { border: 0; background: #fff; font: inherit; font-size: .72rem; font-weight: 700; padding: 5px 9px; color: var(--muted); cursor: pointer; }
+.mv-avmode button.on { background: var(--primary); color: #fff; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;

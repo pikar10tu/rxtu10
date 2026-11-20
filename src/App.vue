@@ -22,11 +22,11 @@
       <main id="main-content"><ErrorBoundary><RouterView /></ErrorBoundary></main>
 
       <nav id="bottom-nav">
-        <RouterLink to="/"        class="bn-item"><span class="bn-icon"><Emoji char="🏠" /><span v-if="homeDot" class="nav-dot" aria-label="มีรายได้รอเก็บ"></span></span>Home</RouterLink>
-        <RouterLink to="/members" class="bn-item"><span class="bn-icon"><Emoji char="👥" /></span>Members</RouterLink>
-        <RouterLink to="/study"   class="bn-item bn-center"><span class="bn-icon"><Emoji char="📚" /></span>Study</RouterLink>
-        <RouterLink to="/play"    class="bn-item"><span class="bn-icon"><Emoji char="🎮" /><span v-if="playDot" class="nav-dot" aria-label="มีของรอเก็บ"></span></span>Play</RouterLink>
-        <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>Me</RouterLink>
+        <RouterLink to="/"        class="bn-item"><span class="bn-icon"><Emoji char="🏠" /><span v-if="homeDot" class="nav-dot" aria-label="มีรายได้รอเก็บ"></span></span>หน้าแรก</RouterLink>
+        <RouterLink to="/members" class="bn-item"><span class="bn-icon"><Emoji char="👥" /></span>เพื่อน</RouterLink>
+        <RouterLink to="/study"   class="bn-item bn-center"><span class="bn-icon"><Emoji char="📚" /></span>เตรียมสอบ</RouterLink>
+        <RouterLink to="/play"    class="bn-item"><span class="bn-icon"><Emoji char="🎮" /><span v-if="playDot" class="nav-dot" aria-label="มีของรอเก็บ"></span></span>เกม</RouterLink>
+        <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>ฉัน</RouterLink>
       </nav>
 
       <HelpModal />
