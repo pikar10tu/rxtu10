@@ -21,20 +21,26 @@
       <div class="dv-side">
         <button class="dv-mini" @click="randomize"><Emoji char="🎲" /> สุ่มชุด</button>
         <button class="dv-mini" @click="stripAll">↺ ถอดทั้งหมด</button>
-        <div class="dv-lab">ชุดโปรด</div>
-        <div class="dv-slots">
-          <button
-            v-for="(sv, i) in saved" :key="i" class="dv-slot" :class="{ on: sv }"
-            :aria-label="sv ? `ใส่ชุดโปรด ${i + 1}` : `บันทึกชุดที่ลองไว้ในช่อง ${i + 1}`"
-            @click="sv ? useSaved(i) : saveSlot(i)"
-          >{{ sv ? i + 1 : '+' }}</button>
-        </div>
-        <button v-if="saved.some(Boolean)" class="dv-link" @click="editSaved = !editSaved">{{ editSaved ? 'เสร็จ' : 'บันทึกทับ' }}</button>
-        <div v-if="editSaved" class="dv-slots">
-          <button v-for="(sv, i) in saved" :key="i" class="dv-slot over" :aria-label="`บันทึกทับช่อง ${i + 1}`" @click="saveSlot(i)">{{ i + 1 }}</button>
-        </div>
+        <!-- 💾 บันทึก/โหลดชุด แยกปุ่มชัดๆ (20 พ.ย. เพื่อนงงช่อง 1-2-3 แบบเดิมที่กดแล้วบันทึกบ้างใส่บ้าง) -->
+        <button class="dv-mini" @click="slotSheet = 'save'"><Emoji char="💾" /> บันทึกชุด</button>
+        <button class="dv-mini" :disabled="!saved.some(Boolean)" @click="slotSheet = 'load'"><Emoji char="📂" /> โหลดชุด</button>
       </div>
     </div>
+    <BottomSheet :open="!!slotSheet" :icon="slotSheet === 'save' ? '💾' : '📂'" :title="slotSheet === 'save' ? 'บันทึกชุดที่ลองอยู่' : 'โหลดชุดที่บันทึกไว้'" @update:open="v => { if (!v) slotSheet = null }">
+      <div class="dv-sheet-sub">{{ slotSheet === 'save' ? 'เลือกช่องที่จะเก็บชุดนี้ · ของที่ยังไม่ได้ซื้อก็เก็บได้' : 'เลือกชุดมาลอง · ถูกใจแล้วกด "ใส่ชุดนี้" (ชิ้นที่ยังไม่มีจะขึ้นให้ซื้อ)' }}</div>
+      <div class="dv-saverow">
+        <button
+          v-for="(sv, i) in saved" :key="i" class="dv-savecard" :class="{ empty: !sv }"
+          :disabled="slotSheet === 'load' && !sv"
+          @click="slotSheet === 'save' ? saveSlot(i) : useSaved(i)"
+        >
+          <DollFigure v-if="sv" :eq="{ ...DEFAULT_EQ, ...sv }" :scale="2" :aura="false" :label="`ชุดช่อง ${i + 1}`" />
+          <span v-else class="dv-savecard-empty">ว่าง</span>
+          <b>ช่อง {{ i + 1 }}</b>
+          <small v-if="slotSheet === 'save' && sv">บันทึกทับ</small>
+        </button>
+      </div>
+    </BottomSheet>
 
     <div class="dv-groups" role="tablist">
       <button v-for="g in GROUPS" :key="g.k" class="dv-group" :class="{ on: group === g.k }" role="tab" :aria-selected="group === g.k" @click="setGroup(g.k)">
@@ -105,6 +111,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { increment } from 'firebase/firestore'
 import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
+import BottomSheet from '../components/shared/BottomSheet.vue'
 import DollFigure from '../components/doll/DollFigure.vue'
 import DollThumb from '../components/doll/DollThumb.vue'
 import CosmeticShop from '../components/shop/CosmeticShop.vue'
@@ -191,14 +198,22 @@ const saved = computed(() => {
   const a = Array.isArray(auth.userData?.dollSaved) ? auth.userData.dollSaved : []
   return [0, 1, 2].map(i => (a[i] && typeof a[i] === 'object' ? a[i] : null))
 })
-const editSaved = ref(false)
-function useSaved(i) { const sv = saved.value[i]; if (sv) trying.value = { ...DEFAULT_EQ, ...sv } }
+const slotSheet = ref(null)   // 'save' | 'load' | null
+function useSaved(i) {
+  const sv = saved.value[i]
+  if (!sv) return
+  trying.value = { ...DEFAULT_EQ, ...sv }
+  slotSheet.value = null
+  toast(`โหลดชุดช่อง ${i + 1} มาลองแล้ว`, 'success')
+}
 async function saveSlot(i) {
+  slotSheet.value = null   // ปิดแผ่นก่อน ไม่ให้กล่องยืนยันไปจมใต้แผ่น
+  if (saved.value[i] && !(await confirm(`ช่อง ${i + 1} มีชุดอยู่แล้ว บันทึกทับเลยไหม?`))) return
   const next = saved.value.slice()
   next[i] = { ...trying.value }
   const ok = await auth.patchUser({ dollSaved: next }, { dollSaved: next })
-  editSaved.value = false
-  toast(ok ? `บันทึกชุดโปรด ${i + 1} แล้ว` : 'บันทึกไม่สำเร็จ', ok ? 'success' : 'error')
+  slotSheet.value = null
+  toast(ok ? `บันทึกชุดลงช่อง ${i + 1} แล้ว` : 'บันทึกไม่สำเร็จ', ok ? 'success' : 'error')
 }
 
 async function doBuy() {
@@ -247,12 +262,15 @@ async function doEquip() {
 .dv-note { font-size: .72rem; color: var(--muted); font-weight: 700; }
 .dv-side { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
 .dv-mini { font: inherit; font-size: .74rem; font-weight: 700; border: var(--bw) solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
-.dv-lab { font-size: .72rem; font-weight: 800; color: var(--muted); margin-top: 2px; }
-.dv-slots { display: flex; gap: 4px; }
-.dv-slot { width: 34px; height: 34px; font: inherit; font-size: .78rem; font-weight: 800; border: 1.5px dashed var(--line); background: var(--surface); color: var(--muted); border-radius: 10px; cursor: pointer; padding: 0; }
-.dv-slot.on { border-style: solid; border-color: var(--primary); color: var(--primary-dark); }
-.dv-slot.over { border-style: solid; border-color: #e0a93a; color: #a06b00; }
-.dv-link { font: inherit; font-size: .7rem; font-weight: 700; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-align: left; }
+.dv-mini:disabled { opacity: .45; cursor: default; }
+.dv-sheet-sub { font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+.dv-saverow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.dv-savecard { font: inherit; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-height: 130px; padding: 8px 4px; border: var(--bw) solid var(--line); background: var(--surface); border-radius: 12px; cursor: pointer; color: var(--ink); }
+.dv-savecard.empty { border-style: dashed; color: var(--muted); }
+.dv-savecard:disabled { opacity: .5; cursor: default; }
+.dv-savecard b { font-size: .8rem; }
+.dv-savecard small { font-size: .7rem; color: #a06b00; }
+.dv-savecard-empty { flex: 1; display: grid; place-items: center; font-size: .8rem; }
 .dv-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--surface); border: var(--bw) solid var(--line); border-radius: 14px; padding: 4px; }
 .dv-group { font: inherit; font-size: .8rem; font-weight: 800; border: 0; border-radius: 10px; padding: 8px 2px; background: none; color: var(--muted); cursor: pointer; }
 .dv-group.on { background: var(--primary); color: #fff; }
