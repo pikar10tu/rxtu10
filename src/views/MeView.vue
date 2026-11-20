@@ -10,18 +10,29 @@
       <section class="me-card" :style="{ '--tier': tier.frameColor }">
       <ResidenceScene class="me-scene" :scene="myScene" :eq="myDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
         <button type="button" class="place-tag me-place" :style="{ '--tier': sceneTier.frameColor }" @click="pickOpen = true"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }} <b>›</b></button>
+        <!-- 🪪 ป้ายชื่อลอยบนฟ้า (แบบ 1 เหมือนการ์ดโปรไฟล์ · user 20 พ.ย. 2026) -->
+        <div class="me-plate">
+          <div class="me-av-box">
+            <CosFrame :id="myCos.f">
+              <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" @click="pokeMirror" />
+            </CosFrame>
+            <button class="me-cam" aria-label="เปลี่ยนรูป" @click="fileEl?.click()"><Emoji char="📷" /></button>
+            <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
+          </div>
+          <div class="me-plate-txt">
+            <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
+            <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="goTab('ach')">
+              <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.7" :fit="18" />
+            </button>
+            <div class="me-chips">
+              <span v-if="myTrack" class="me-chip" :style="{ background: myTrack[1] }">{{ myTrack[0] }}</span>
+              <span v-if="myMbti" class="me-chip" :style="{ background: myMbti.color }"><Emoji :char="MBTI_ICON[myMbti.code]" /> {{ myMbti.code }}</span>
+            </div>
+          </div>
+        </div>
       </ResidenceScene>
       <ResidenceSheet v-model:open="pickOpen" />
       <div class="me-hero">
-        <div class="me-id">
-        <div class="me-av-box">
-          <CosFrame :id="myCos.f">
-            <img class="me-avatar" :src="previewPhoto" alt="me" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, auth.userData?.nickname)" @click="pokeMirror" />
-          </CosFrame>
-          <button class="me-cam" aria-label="เปลี่ยนรูป" @click="fileEl?.click()"><Emoji char="📷" /></button>
-          <input ref="fileEl" type="file" accept="image/*" hidden @change="onFile" />
-        </div>
-        </div>
         <!-- ปุ่มบันทึกต้องอยู่ใกล้รูป ไม่ใช่ในกล่อง "ข้อมูลติดต่อ" ที่พับอยู่ —
              เดิมเลือกรูปแล้วเห็นรูปเปลี่ยนบนจอ แต่หาปุ่มบันทึกไม่เจอ ⇒ รีเฟรชแล้วรูปเด้งกลับ -->
         <div v-if="newPhoto" class="me-photo-save">
@@ -31,11 +42,6 @@
           </button>
           <button class="me-btn-sm ghost" :disabled="saving" @click="cancelPhoto">ยกเลิก</button>
         </div>
-        <div class="me-nick"><CosName :name="auth.userData?.nickname || 'ฉัน'" :cos="myCos" /></div>
-        <button class="me-title" :class="{ empty: !auth.userData?.equipTitle }" @click="goTab('ach')">
-          <TitlePill :label="auth.userData?.equipTitle ? titleLabel : 'เลือกฉายา'" icon="🎖️" :base="0.74" :fit="22" />
-        </button>
-        <div class="me-home"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }} · บ้าน Lv.{{ tier.level }}</div>
       </div>
 
       <MockScoreCard />
@@ -150,6 +156,7 @@ import { makeStreak } from '../utils/gags.js'
 import { grantSecret } from '../composables/useAchievements.js'
 import CosFrame from '../components/cosmetics/CosFrame.vue'
 import CosName from '../components/cosmetics/CosName.vue'
+import { mbtiOf, MBTI_ICON } from '../data/mbti.js'
 import ResidenceScene from '../components/residence/ResidenceScene.vue'
 import ResidenceSheet from '../components/residence/ResidenceSheet.vue'
 import TitlePill from '../components/shared/TitlePill.vue'
@@ -168,6 +175,8 @@ const myCos = computed(() => cosOf(auth.userData))
 const myScene = computed(() => sceneOf(auth.userData?.residence))
 const sceneTier = computed(() => getTier(myScene.value))
 const pickOpen = ref(false)
+const myTrack = computed(() => ({ sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'] })[auth.userData?.track] || null)
+const myMbti = computed(() => mbtiOf(auth.userData?.mbti))
 const myDoll = computed(() => dollOf(auth.userData).eq)
 const guard = computed(() => resolveBattleTeam(auth.userData?.activePets, auth.userData?.pets)
   .map(p => getPetDef(p.id)?.emoji).filter(Boolean))
@@ -408,7 +417,16 @@ async function save() {
 .me-card { padding: 0 14px 14px; overflow: hidden; }
 .me-scene { margin: 0 -14px; }
 .me-place { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
-.me-hero .me-av-box { margin-top: -34px; }
+.me-plate { position: absolute; left: 22px; top: 10px; z-index: 2; display: flex; gap: 8px; align-items: center; max-width: calc(100% - 44px); box-sizing: border-box;
+  padding: 6px 12px 6px 6px; border-radius: 16px; background: rgba(255,255,255,.93); box-shadow: 0 3px 12px rgba(40,30,70,.18); }
+.me-plate .me-avatar { width: 48px; height: 48px; }
+.me-plate .me-cam { transform: scale(.75); transform-origin: bottom right; }
+.me-plate-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; text-align: left; }
+.me-plate .me-nick { font-size: 1.05rem; font-weight: 800; line-height: 1.2; }
+.me-plate .me-title { margin: 0; }
+.me-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.me-chip { font-size: .7rem; font-weight: 800; color: #fff; padding: 1px 8px; border-radius: 999px; }
+.me-hero { padding-top: 8px; }
 .me-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 .me-av-box { position: relative; margin-bottom: 4px; }
 .me-id { display: flex; align-items: flex-end; justify-content: center; gap: 12px; }

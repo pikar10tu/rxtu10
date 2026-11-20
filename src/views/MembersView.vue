@@ -30,10 +30,6 @@
 
     <div class="mv-sort">
       <label class="mv-sort-label" for="mv-sort-sel">เรียงตาม</label>
-      <div class="mv-avmode" role="group" aria-label="ขนาดอวาตาร์">
-        <button type="button" :class="{ on: avMode === 'half' }" @click="setAvMode('half')">ครึ่งตัว</button>
-        <button type="button" :class="{ on: avMode === 'full' }" @click="setAvMode('full')">เต็มตัว</button>
-      </div>
       <select id="mv-sort-sel" v-model="sortKey" class="mv-sort-sel">
         <option value="fashion">รายการแนะนำ</option>
         <option value="level">เลเวลบ้าน</option>
@@ -51,23 +47,28 @@
         class="mv-card" :class="{ off: !m.registered, me: m.uid === myUid }"
         @click="m.registered && (selected = m)"
       >
-        <!-- 🏠 ฉากบ้านที่เพื่อนเลือก + อวาตาร์ยืนในฉาก (20 พ.ย. 2026 แทนพื้นการ์ดร้านตกแต่ง) · ภาพนิ่ง ไม่มีเอฟเฟค (หน้ารวมคนเยอะ)
-             avMode: half = ครึ่งตัว ขยาย 2 เท่า · full = เต็มตัว ขนาดจริง (user อยากลองทั้งคู่) -->
-        <div v-if="m.registered" class="mv-scene" :class="avMode" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
-          <DollFigure :eq="decodeDoll(m.doll)" :scale="avMode === 'half' ? 2 : 1" :aura="false" :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
-        </div>
-        <div class="mv-av-wrap" :style="{ '--ring': trackColor(m.track) }">
-          <CosFrame :id="m.cosmetics?.f" still>
+        <!-- 🏠 การ์ดแบบ B1 (user เคาะ 20 พ.ย. 2026): ฉากบ้านที่เพื่อนเลือก (ขนาดจริง เห็นตัวบ้าน) + อวาตาร์ครึ่งตัว (2 เท่า)
+             ไม่มีอะไรทับฉากนอกจากป้ายเลเวลมุมขวา · ใต้ฉาก = รูปจิ๋ว + ชื่อ แล้วฉายา · สาย/รหัส ไปดูในการ์ดโปรไฟล์ · ภาพนิ่ง ไม่มีเอฟเฟค -->
+        <template v-if="m.registered">
+          <div class="mv-scene" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
+            <DollFigure :eq="decodeDoll(m.doll)" :scale="2" :aura="false" :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
+            <span class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
+          </div>
+          <div class="mv-namerow">
+            <CosFrame :id="m.cosmetics?.f" still class="mv-mini">
+              <img class="mv-avatar" :src="avatarOf(m)" alt="" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
+            </CosFrame>
+            <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="mv-av-wrap" :style="{ '--ring': trackColor(m.track) }">
             <img class="mv-avatar" :src="avatarOf(m)" :alt="m.nickname" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
-          </CosFrame>
-          <span v-if="m.registered" class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
-        </div>
-        <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
-        <!-- บรรทัดฉายา (เดิมเป็นป้าย "คุณ") — ไม่ได้สวม = ไม่มีบรรทัด · "คุณ" ย้ายไปมุมการ์ด + กรอบนอก -->
+          </div>
+          <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
+        </template>
         <div v-if="titleOf(m)" class="mv-ttl"><TitlePill :label="titleOf(m).label" :icon="titleOf(m).icon" :fit="11" /></div>
         <span v-if="m.uid === myUid" class="mv-you">คุณ</span>
-        <div class="mv-track" :style="{ color: trackColor(m.track) }">{{ trackLabel(m.track) }}</div>
-        <div v-if="m.studentId" class="mv-sid">{{ m.studentId }}</div>
         <div v-if="!m.registered" class="mv-off-tag">ยังไม่เข้าระบบ</div>
       </button>
     </div>
@@ -148,14 +149,10 @@ const list = computed(() => {
 })
 
 const TRACK = { sci: ['Sci', '#22c55e'], care: ['Care', '#3b82f6'], guest: ['Guest', '#9ca3af'] }
-const trackLabel = (t) => TRACK[t]?.[0] || 'สมาชิก'
 const trackColor = (t) => TRACK[t]?.[1] || '#6366f1'
 const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
 const SCENES = import.meta.glob('../assets/residence/res-*.webp', { eager: true, import: 'default' })
 const sceneImg = (m) => SCENES[`../assets/residence/res-${String(sceneOf(m.residence)).padStart(2, '0')}.webp`]
-// ครึ่งตัว/เต็มตัว — จำไว้ในเครื่อง (ลองทั้งสองแบบก่อนเคาะ)
-const avMode = ref((() => { try { return localStorage.getItem('mvAvMode') || 'half' } catch { return 'half' } })())
-function setAvMode(v) { avMode.value = v; try { localStorage.setItem('mvAvMode', v) } catch { /* private mode */ } }
 const avatarOf = (m) => avatarUrl(m, m.nickname)
 // ฉายาจากแถว roster (docId = achId หรือ achId__date) → { icon, label } · id ไม่รู้จัก = ไม่โชว์
 function titleOf(m) {
@@ -202,19 +199,15 @@ function titleOf(m) {
 .mv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mv-card { position: relative; overflow: hidden; }
 .mv-card > :not(.cz-bgl) { position: relative; z-index: 1; }
-/* ฉากบ้านบนการ์ด: ภาพ 180×100 · ตรึงจุดยืนอวาตาร์ (x40) ไว้กลางการ์ด
-   full = ขนาดจริง โชว์ y 30–100 · half = 2 เท่า โชว์ช่วงหัวถึงเอว */
-.mv-scene { align-self: stretch; margin: -14px -8px 0; position: relative; overflow: hidden; image-rendering: pixelated; background-repeat: no-repeat; }
-.mv-scene.full { height: 66px; background-size: 180px 100px; background-position: calc(50% + 50px) -30px; }
-.mv-scene.half { height: 70px; background-size: 360px 200px; background-position: calc(50% + 100px) -72px; }
-.mv-doll { position: absolute; left: 50%; transform: translateX(-50%); }
-.mv-scene.full .mv-doll { top: 6px; }
-.mv-scene.half .mv-doll { top: 2px; }
-.mv-scene + .mv-av-wrap { margin-top: -22px; }
-.mv-scene + .mv-av-wrap .mv-avatar { width: 44px; height: 44px; border-width: 2px; }
-.mv-avmode { display: inline-flex; border: var(--bw) solid var(--line); border-radius: 10px; overflow: hidden; margin-right: auto; }
-.mv-avmode button { border: 0; background: #fff; font: inherit; font-size: .72rem; font-weight: 700; padding: 5px 9px; color: var(--muted); cursor: pointer; }
-.mv-avmode button.on { background: var(--primary); color: #fff; }
+/* ฉากบ้านบนการ์ด (B1): ภาพ 1 เท่า ส่วน x 48–168 (เห็นตัวบ้าน) · อวาตาร์ 2 เท่าครึ่งตัว ยืนที่ x66 ของฉาก */
+.mv-scene { align-self: stretch; margin: -14px -8px 2px; height: 78px; position: relative; overflow: hidden; image-rendering: pixelated;
+  background-repeat: no-repeat; background-size: 180px 100px; background-position: calc(50% - 18px) -16px; }
+.mv-doll { position: absolute; left: calc(50% - 42px); top: -6px; transform: translateX(-50%); }
+.mv-scene .mv-lv { right: 4px; top: 4px; bottom: auto; }
+.mv-namerow { display: flex; align-items: center; justify-content: center; gap: 4px; max-width: 100%; min-width: 0; }
+.mv-namerow .mv-nick { min-width: 0; }
+.mv-mini { flex: none; display: flex; }
+.mv-mini .mv-avatar { width: 18px; height: 18px; border-width: 1px; border-color: #fff; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
@@ -250,7 +243,5 @@ function titleOf(m) {
 .mv-card .mv-you { position: absolute; top: 5px; left: 5px; z-index: 2; font-size: .7rem; font-weight: 700; line-height: 1.35; color: #fff; background: var(--primary); border-radius: 999px; padding: 0 6px; }
 /* ป้ายฉายา: บรรทัดเดียว หดตัวอักษรตามความยาว (TitlePill · ข้อยกเว้นกฎ .7rem เฉพาะป้ายนี้) */
 .mv-ttl { max-width: 100%; font-weight: 600; color: #a23b6c; background: var(--accent-light); border: 1px solid rgba(242,139,176,.55); border-radius: 999px; padding: 0 6px; overflow: hidden; }
-.mv-track { font-size: .7rem; font-weight: 700; }
-.mv-sid { font-size: .7rem; color: rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
 .mv-off-tag { font-size: .7rem; color: rgba(0,0,0,.35); }
 </style>

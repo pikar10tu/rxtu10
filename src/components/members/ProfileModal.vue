@@ -8,23 +8,29 @@
       <ResidenceScene class="pf-scene" :scene="sceneN" :eq="dollEq" :doll-to="isMe ? '/doll' : ''" :label="`อวาตาร์ของ ${view.nickname || ''}`">
         <button class="pf-x" aria-label="ปิด" @click="$emit('close')">✕</button>
         <span class="place-tag pf-scene-tag" :style="{ '--tier': sceneTier.frameColor, cursor: 'default' }"><Emoji :char="sceneTier.art" /> {{ sceneTier.tierName }}</span>
-      </ResidenceScene>
-      <div class="pf-hero" :style="heroStyle">
-        <div class="pf-id">
+        <!-- 🪪 ป้ายชื่อลอยบนฟ้า (แบบ 1 · user เคาะ 20 พ.ย. 2026 "เผื่อเพื่อนแคปไปอวด"): รูป + ชื่อ + ฉายา + สาย + MBTI อยู่ในฉากเดียว -->
+        <div class="pf-plate">
           <CosFrame :id="cos.f" class="pf-av-frame">
             <img class="pf-avatar" :src="avatar" :alt="view.nickname" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, view?.nickname)" />
           </CosFrame>
+          <div class="pf-plate-txt">
+            <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
+            <div v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.7" :fit="18" /></div>
+            <div class="pf-chips">
+              <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
+              <!-- MBTI — กดแล้วเด้งการ์ดอ่านเต็ม (user 25 ต.ค. 2026) -->
+              <button v-if="mbti" class="pf-chip pf-mbti" :style="{ background: mbti.color }" :title="mbti.groupLabel" @click="mbtiOpen = true"><Emoji :char="MBTI_ICON[mbti.code]" /> {{ mbti.code }} ›</button>
+            </div>
+          </div>
         </div>
-        <div v-if="view.realName" class="pf-real">{{ view.realName }}</div>
-        <div class="pf-name"><CosName :name="view.nickname" :cos="cos" /></div>
-        <div v-if="title" class="pf-title"><TitlePill :label="title.label" :icon="title.icon" :base="0.74" :fit="22" /></div>
-        <div class="pf-residence">บ้าน Lv.{{ lvl }}</div>
-        <div class="pf-chips">
-          <span class="pf-chip" :style="{ background: trackColor }">{{ trackLabel }}</span>
-          <!-- MBTI — โชว์แค่ในการ์ดโปรไฟล์ · กดแล้วเด้งการ์ดอ่านเต็ม (user 25 ต.ค. 2026) -->
-          <button v-if="mbti" class="pf-chip pf-mbti" :style="{ background: mbti.color }" :title="mbti.groupLabel" @click="mbtiOpen = true"><Emoji :char="MBTI_ICON[mbti.code]" /> {{ mbti.code }} ›</button>
+      </ResidenceScene>
+      <div class="pf-hero" :style="heroStyle">
+        <div class="pf-sub">
+          <span v-if="view.realName">{{ view.realName }}</span>
+          <span v-if="view.studentId">รหัส {{ view.studentId }}</span>
+          <span>บ้าน Lv.{{ lvl }}</span>
         </div>
-        <div class="pf-chips" style="margin-top:5px"><TagChips :member="view" /></div>
+        <div class="pf-chips"><TagChips :member="view" /></div>
       </div>
 
       <!-- 🏆 ตู้โชว์: 3 ชิ้นที่เจ้าของปักไว้ (ไม่ได้ปัก = ล่าสุด 3) · ทั้งหมดพับไว้ใต้ปุ่ม
@@ -247,22 +253,19 @@ function startDuel() {
 .pf-scene-tag { position: absolute; right: 22px; bottom: 8px; z-index: 2; }
 .pf-hero { position: relative; padding: 0 16px 16px; text-align: center; color: var(--ink); }
 /* ไม่ override display ของ .cz-fw (inline-flex) — inline-block ทำให้รูปมีช่องใต้บรรทัด วงกรอบเหลื่อม */
-.pf-id { display: flex; justify-content: center; margin-top: -38px; }
-.pf-x { position: absolute; left: 10px; top: 10px; z-index: 2; border: var(--bw) solid var(--line); background: rgba(255,255,255,.88); color: var(--ink); border-radius: 10px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font: inherit; font-weight: 800; }
-.pf-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; background: #fff; }
-.pf-real {
-  font-family: var(--font-display); font-weight: 400;
-  font-size: 1.3rem; margin-top: 8px; padding: 0 14px;
-  line-height: 1.25;
-}
+.pf-x { position: absolute; right: 10px; top: 10px; z-index: 2; border: var(--bw) solid var(--line); background: rgba(255,255,255,.88); color: var(--ink); border-radius: 10px; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font: inherit; font-weight: 800; }
+.pf-plate { position: absolute; left: 10px; top: 10px; z-index: 2; display: flex; gap: 8px; align-items: center; max-width: calc(100% - 70px); box-sizing: border-box;
+  padding: 6px 12px 6px 6px; border-radius: 16px; background: rgba(255,255,255,.93); box-shadow: 0 3px 12px rgba(40,30,70,.18); text-align: left; }
+.pf-plate-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.pf-plate .pf-name { font-size: 1.05rem; font-weight: 800; opacity: 1; margin: 0; line-height: 1.2; }
+.pf-plate .pf-title { margin: 0; padding: 0; border: 0; background: none; }
+.pf-plate .pf-chips { margin: 0; justify-content: flex-start; }
+.pf-sub { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; font-size: .74rem; font-weight: 700; color: var(--muted); padding-top: 10px; }
+.pf-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; background: #fff; }
 .pf-name { font-size: .82rem; font-weight: 600; opacity: .85; margin-top: 1px; }
 .pf-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
 .pf-chip { font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; }
 .pf-chip.founder { background: rgba(0,0,0,.3); }
-.pf-residence {
-  font-size: .72rem; font-weight: 700; margin-top: 6px; opacity: .95; padding: 0 14px;
-  line-height: 1.3;
-}
 .pf-title { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: .74rem; font-weight: 800; color: #a23b6c; background: rgba(255,240,246,.95); border: 1px solid #f4a6c8; border-radius: 999px; padding: 2px 10px; }
 .pf-shelf-wrap { margin: 12px 16px 0; padding: 10px 12px; border-radius: 16px; background: linear-gradient(180deg, var(--primary-light), #fff); border: var(--bw) solid var(--line); }
 .pf-shelf-head { font-size: .78rem; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
