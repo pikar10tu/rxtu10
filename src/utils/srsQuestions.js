@@ -34,17 +34,19 @@ export function unpackCard(p) {
   }
 }
 
-/** จำนวนข้อที่ครบกำหนดทบทวน (ใช้ทำ subtitle การ์ดใน StudyView — 0 reads) */
-export function dueCount(qcards, now) {
+// 21 พ.ย. 2026 (เพื่อนรายงาน): เลิกเว้นระยะแบบ SRS — ทุกข้อในกอง = ต้องทวนตอนนี้
+// เดิมตอบถูก/ผิดใน redo แล้วข้อถูกเลื่อนไปวันหลัง → ตัวเลขหายทั้งที่ยังไม่ได้แก้ · ข้อเก่าที่ due อนาคตจะกลับมานับเอง
+// (`now` คงไว้ในลายเซ็นให้ผู้เรียกเดิมไม่ต้องแก้)
+/** จำนวนข้อในกองที่ต้องทวน (ใช้ทำ subtitle การ์ดใน StudyView — 0 reads) */
+export function dueCount(qcards, _now) {
   if (!qcards || typeof qcards !== 'object') return 0
-  return Object.values(qcards).filter(p => num(p?.d, 0) <= now).length
+  return Object.keys(qcards).length
 }
 
-/** id ที่ครบกำหนด เรียง due เก่าสุดก่อน ตัดที่ limit */
-export function dueQuestionIds(qcards, now, limit) {
+/** id ในกอง เรียงข้อที่ค้างนานสุดก่อน ตัดที่ limit */
+export function dueQuestionIds(qcards, _now, limit) {
   if (!qcards || typeof qcards !== 'object') return []
   return Object.entries(qcards)
-    .filter(([, p]) => num(p?.d, 0) <= now)
     .sort((a, b) => num(a[1]?.d, 0) - num(b[1]?.d, 0))
     .slice(0, limit)
     .map(([id]) => id)
@@ -61,30 +63,24 @@ export function applyQuizResults({ qcards = {}, answers = [], variant = 'normal'
 
   for (const a of answers) {
     if (!a || !a.id) continue
-    const prev = unpackCard(pool[a.id])
-
-    // ควิซปกติ/Zen: ตอบถูกไม่แตะกอง · ตอบผิด = เข้ากองและ due ทันที (เพิ่งพลาด ควรได้แก้วันนี้)
-    if (variant !== 'redo') {
-      if (a.correct) continue
-      const u = sm2Update(prev, 1)
-      set[a.id] = packCard({
-        ...u, lapses: prev.lapses + 1, totalReviews: prev.totalReviews + 1, dueAt: now,
-      })
+    // 21 พ.ย. 2026 กฎเดียวทุกโหมด (เพื่อนรายงาน "ถูกแล้วยังอยู่ · ผิดซ้ำแต่เลขหาย" · user: ถูก 3 ครั้งค่อยหาย):
+    //   ข้อในกอง ตอบถูก = นับ +1 ครบ GRADUATE_REPS ติดกันออกจากกอง · ตอบผิด = นับใหม่จาก 0
+    //   ไม่เลื่อนวันอีกแล้ว — ทุกข้อในกองนับและทวนได้ทันที (เดิมถูก/ผิดใน redo แล้วข้อถูกซ่อนไปวันหลัง ตัวเลขหาย)
+    // ข้อเดียวกันโผล่ซ้ำในรอบ (Zen) → ไล่ตามลำดับคำตอบ
+    const inPool = has(pool, a.id) || has(set, a.id)
+    if (a.correct) {
+      if (!inPool || remove.includes(a.id)) continue          // ไม่เคยผิด = ไม่เกี่ยวกับกอง
+      const prev = unpackCard(set[a.id] || pool[a.id])
+      const r = prev.repetitions + 1
+      if (r >= GRADUATE_REPS) { delete set[a.id]; if (has(pool, a.id)) remove.push(a.id); continue }
+      set[a.id] = packCard({ ...prev, repetitions: r, totalReviews: prev.totalReviews + 1, dueAt: now })
       continue
     }
-
-    // โหมด redo
-    if (!a.correct) {
-      const u = sm2Update(prev, 1)
-      set[a.id] = packCard({
-        ...u, lapses: prev.lapses + 1, totalReviews: prev.totalReviews + 1, dueAt: now + DAY_MS,
-      })
-      continue
-    }
-    const u = sm2Update(prev, 4)
-    if (u.repetitions >= GRADUATE_REPS) { remove.push(a.id); continue }
+    const ri = remove.indexOf(a.id); if (ri >= 0) remove.splice(ri, 1)
+    const prev = unpackCard(set[a.id] || (ri >= 0 ? null : pool[a.id]))
+    const u = sm2Update(prev, 1)
     set[a.id] = packCard({
-      ...u, lapses: prev.lapses, totalReviews: prev.totalReviews + 1, dueAt: now + u.interval * DAY_MS,
+      ...u, lapses: prev.lapses + 1, totalReviews: prev.totalReviews + 1, dueAt: now,
     })
   }
 

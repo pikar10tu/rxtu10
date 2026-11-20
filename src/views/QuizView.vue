@@ -847,7 +847,7 @@ async function finish() {
   const newHigh = Math.max(authStore.userData?.quizHigh || 0, correct.value)
   const dq = bumpDailyQuest(authStore.userData?.dailyQuest, 'quiz', today, answered.value)
 
-  // SRS: ผิด = เข้ากอง · ถูกในควิซปกติไม่แตะ · ใน redo ถูกติดกัน 3 ครั้งหลุดกอง
+  // กองข้อที่เคยผิด (21 พ.ย.): ผิด = เข้ากอง/นับใหม่ ทวนได้ทันที · ถูกติดกัน 3 ครั้ง = ออกจากกอง (ทุกโหมด ไม่เลื่อนวัน)
   // เติมลง patch ก้อนนี้เลย = ไม่มีการเขียน Firestore เพิ่ม
   const { set: qcSet, remove: qcRemove } = applyQuizResults({
     qcards: authStore.userData?.study?.qcards,

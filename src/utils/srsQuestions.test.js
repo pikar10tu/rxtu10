@@ -30,58 +30,43 @@ test('ตอบผิดซ้ำในควิซปกติ → lapses เ�
   assert.equal(set.q1.d, NOW)
 })
 
-test('ตอบถูกในควิซปกติ → ไม่แตะกองเลย แม้ข้อนั้นมีการ์ดค้างอยู่', () => {
-  const qcards = { q1: { e: 2.2, i: 6, r: 2, l: 1, t: 3, d: NOW } }
-  const { set, remove } = applyQuizResults({
-    qcards, answers: [{ id: 'q1', correct: true }, { id: 'q2', correct: true }],
-    variant: 'normal', now: NOW,
-  })
-  assert.deepEqual(set, {})
-  assert.deepEqual(remove, [])
+// 21 พ.ย. 2026 กฎใหม่ (ทุกโหมด): ถูกติดกันครบ GRADUATE_REPS = ออกจากกอง · ผิด = นับใหม่ · ไม่เลื่อนวัน
+test('ตอบถูกข้อที่ไม่อยู่ในกอง → ไม่แตะกอง', () => {
+  const { set, remove } = applyQuizResults({ qcards: {}, answers: [{ id: 'q2', correct: true }], now: NOW })
+  assert.deepEqual(set, {}); assert.deepEqual(remove, [])
 })
 
-test('redo ตอบถูก 1–2 ครั้ง → การ์ดยังอยู่ interval ยืดออก', () => {
-  const r1 = applyQuizResults({
-    qcards: { q1: { e: 2.5, i: 1, r: 0, l: 1, t: 1, d: NOW } },
-    answers: [{ id: 'q1', correct: true }], variant: 'redo', now: NOW,
-  })
-  assert.deepEqual(r1.remove, [])
-  assert.equal(r1.set.q1.r, 1)
-  assert.equal(r1.set.q1.i, 1)
-  assert.equal(r1.set.q1.d, NOW + 1 * DAY_MS)
-
-  const r2 = applyQuizResults({
-    qcards: { q1: r1.set.q1 },
-    answers: [{ id: 'q1', correct: true }], variant: 'redo', now: NOW,
-  })
-  assert.deepEqual(r2.remove, [])
-  assert.equal(r2.set.q1.r, 2)
-  assert.equal(r2.set.q1.i, 6)
-  assert.equal(r2.set.q1.d, NOW + 6 * DAY_MS)
+test(`ถูกครั้งที่ 1–2 → ยังอยู่ในกอง นับเพิ่ม และยังทวนได้ทันที (ตัวเลขไม่หาย)`, () => {
+  const r1 = applyQuizResults({ qcards: { q1: { r: 0, l: 1, t: 1, d: NOW } }, answers: [{ id: 'q1', correct: true }], variant: 'redo', now: NOW })
+  assert.deepEqual(r1.remove, []); assert.equal(r1.set.q1.r, 1); assert.equal(r1.set.q1.d, NOW)
+  const r2 = applyQuizResults({ qcards: { q1: r1.set.q1 }, answers: [{ id: 'q1', correct: true }], variant: 'normal', now: NOW })
+  assert.deepEqual(r2.remove, []); assert.equal(r2.set.q1.r, 2)
+  assert.equal(dueCount({ q1: r2.set.q1 }, NOW), 1)
 })
 
-test(`redo ตอบถูกติดกันครบ ${GRADUATE_REPS} ครั้ง → หลุดกอง`, () => {
-  let qcards = { q1: { e: 2.5, i: 1, r: 0, l: 1, t: 1, d: NOW } }
-  let last
-  for (let n = 0; n < GRADUATE_REPS; n++) {
-    last = applyQuizResults({
-      qcards, answers: [{ id: 'q1', correct: true }], variant: 'redo', now: NOW,
-    })
-    if (last.set.q1) qcards = { q1: last.set.q1 }
-  }
-  assert.deepEqual(last.remove, ['q1'], 'ครั้งที่ 3 ต้องหลุดกอง')
-  assert.equal(last.set.q1, undefined, 'หลุดกองแล้วห้ามเขียนค่ากลับ')
+test(`ถูกติดกันครบ ${GRADUATE_REPS} ครั้ง → ออกจากกอง`, () => {
+  const { set, remove } = applyQuizResults({ qcards: { q1: { r: GRADUATE_REPS - 1, l: 1, t: 3, d: NOW } }, answers: [{ id: 'q1', correct: true }], now: NOW })
+  assert.deepEqual(remove, ['q1']); assert.equal(set.q1, undefined, 'ออกจากกองแล้วห้ามเขียนค่ากลับ')
 })
 
-test('redo ตอบถูก 2 ครั้งแล้วผิด → repetitions รีเซ็ต ไม่หลุดกอง due พรุ่งนี้', () => {
+test('redo ตอบผิดซ้ำ → ยังอยู่ในกอง และต้องทวนทันที (ไม่เลื่อนไปพรุ่งนี้)', () => {
   const qcards = { q1: { e: 2.5, i: 6, r: 2, l: 1, t: 3, d: NOW } }
   const { set, remove } = applyQuizResults({
     qcards, answers: [{ id: 'q1', correct: false }], variant: 'redo', now: NOW,
   })
   assert.deepEqual(remove, [])
-  assert.equal(set.q1.r, 0)
   assert.equal(set.q1.l, 2)
-  assert.equal(set.q1.d, NOW + DAY_MS, 'ฝึกไปแล้ววันนี้ ไม่วนซ้ำในวันเดียว')
+  assert.equal(set.q1.r, 0, 'ผิดแล้วนับถูกใหม่จาก 0')
+  assert.equal(set.q1.d, NOW)
+  assert.equal(dueCount({ q1: set.q1 }, NOW), 1, 'ตัวเลขต้องยังนับข้อนี้')
+})
+
+test('ข้อเดียวกันโผล่ซ้ำในรอบ → ไล่ตามลำดับ', () => {
+  const qcards = { q1: { r: 2, d: NOW } }
+  const a = applyQuizResults({ qcards, answers: [{ id: 'q1', correct: false }, { id: 'q1', correct: true }], now: NOW })
+  assert.deepEqual(a.remove, []); assert.equal(a.set.q1.r, 1, 'ผิด (0) แล้วถูก (1)')
+  const b = applyQuizResults({ qcards, answers: [{ id: 'q1', correct: true }, { id: 'q1', correct: false }], now: NOW })
+  assert.deepEqual(b.remove, [], 'ครบ 3 แล้วผิดซ้ำในรอบเดียวกัน = กลับเข้ากอง'); assert.equal(b.set.q1.r, 0)
 })
 
 test('packCard/unpackCard ครบรอบได้ค่าเดิม', () => {
@@ -96,16 +81,16 @@ test('unpackCard ทน entry เสีย/ว่าง → คืนค่า�
   assert.equal(d.dueAt, 0)
 })
 
-test('dueQuestionIds: เรียง due เก่าสุดก่อน + ตัดที่ limit + ข้อยังไม่ครบกำหนดไม่เอา', () => {
+test('dueQuestionIds: ทุกข้อในกองนับหมด (รวม due อนาคตจากระบบเก่า) · เรียงค้างนานสุดก่อน + ตัดที่ limit', () => {
   const qcards = {
     a: { d: NOW - 3 * DAY_MS },
     b: { d: NOW - 1 * DAY_MS },
-    c: { d: NOW + 5 * DAY_MS },   // ยังไม่ครบกำหนด
+    c: { d: NOW + 5 * DAY_MS },   // ระบบเก่าเลื่อนไว้ → ต้องกลับมานับ
     e: { d: NOW - 2 * DAY_MS },
   }
-  assert.deepEqual(dueQuestionIds(qcards, NOW, 10), ['a', 'e', 'b'])
+  assert.deepEqual(dueQuestionIds(qcards, NOW, 10), ['a', 'e', 'b', 'c'])
   assert.deepEqual(dueQuestionIds(qcards, NOW, 2), ['a', 'e'])
-  assert.equal(dueCount(qcards, NOW), 3)
+  assert.equal(dueCount(qcards, NOW), 4)
   assert.deepEqual(dueQuestionIds(undefined, NOW, 10), [])
   assert.equal(dueCount(undefined, NOW), 0)
 })
