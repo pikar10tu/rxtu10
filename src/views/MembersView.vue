@@ -52,7 +52,7 @@
         <template v-if="m.registered">
           <div class="mv-scene">
             <div class="mv-scene-in" :style="{ backgroundImage: `url(${sceneImg(m)})` }">
-              <DollFigure :eq="decodeDoll(m.doll)" :scale="2" :aura="false" :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
+              <DollFigure :eq="decodeDoll(m.doll)" :scale="2" glow-only :label="`อวาตาร์ของ ${m.nickname}`" class="mv-doll" />
             </div>
             <span class="mv-lv" :style="{ background: tierColor(m) }">{{ m.residence?.level || 1 }}</span>
           </div>

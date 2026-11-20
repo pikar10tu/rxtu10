@@ -23,6 +23,7 @@ const props = defineProps({
   scale: { type: Number, default: 4 },
   label: { type: String, default: 'ตัวละคร' },
   aura: { type: Boolean, default: true },   // ✨ ออร่าของแพง (ปิดได้ถ้าหน้าไหนอยากนิ่ง)
+  glowOnly: { type: Boolean, default: false },   // เหลือแค่แสงเรืองรอบตัว ไม่มีอนุภาค/วงใต้เท้า (การ์ดเพื่อนครึ่งตัว — กันเอฟเฟคล้น · 20 พ.ย.)
 })
 const cv = ref(null)
 const s = computed(() => Math.max(1, Math.round(props.scale)))
@@ -35,11 +36,11 @@ const out = computed(() => render(props.eq))
 const size = computed(() => ({ w: out.value.w, h: out.value.h }))
 // ✨ ออร่า 8 แบบ หลายอันพร้อมกันได้ (utils/dollAura.js) — glow รวมเป็น drop-shadow ต่อกัน · ring = วงใต้เท้า · ที่เหลือเป็นอนุภาค CSS
 const auras = computed(() => (props.aura ? aurasOf(props.eq) : []))
-const layers = computed(() => auraLayers(auras.value))
+const layers = computed(() => { const L = auraLayers(auras.value); return props.glowOnly ? { ...L, rings: [], particles: [] } : L })
 const glows = computed(() => layers.value.glows)
 const shadow = (m) => glows.value.map(c => `drop-shadow(0 0 calc(var(--px) * ${m}) ${c})`).join(' ')
 const wrapStyle = computed(() => (auras.value.length
-  ? { '--px': px.value + 'px', ...(glows.value.length ? { '--gl1': shadow(1), '--gl3': shadow(3) } : {}) }
+  ? { '--px': px.value + 'px', ...(glows.value.length ? { '--gl1': shadow(props.glowOnly ? .6 : 1), '--gl3': shadow(props.glowOnly ? 1.5 : 3) } : {}) }
   : null))
 
 function draw() {
