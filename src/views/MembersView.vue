@@ -58,7 +58,7 @@
             <CosFrame :id="m.cosmetics?.f" still class="mv-mini">
               <img class="mv-avatar" :src="avatarOf(m)" alt="" loading="lazy" referrerpolicy="no-referrer" @error="(e) => fallbackAvatar(e, m.nickname)" />
             </CosFrame>
-            <div class="mv-nick"><CosName :name="m.nickname" :cos="m.cosmetics" reserve still /></div>
+            <div class="mv-nick" :style="{ fontSize: nickSize(m) }"><CosName :name="m.nickname" :cos="m.cosmetics" still /></div>
           </div>
         </template>
         <template v-else>
@@ -150,6 +150,12 @@ const tierColor = (m) => getTier(m.residence?.level || 1).frameColor
 const SCENES = import.meta.glob('../assets/residence/res-*.webp', { eager: true, import: 'default' })
 const sceneImg = (m) => SCENES[`../assets/residence/res-${String(sceneOf(m.residence)).padStart(2, '0')}.webp`]
 const avatarOf = (m) => avatarUrl(m, m.nickname)
+// ชื่อยาว = หดตัวอักษรให้อยู่บรรทัดเดียว (user ขอ 21 พ.ย. แทนขึ้น 2 บรรทัด · ข้อยกเว้นกฎ .7rem แบบ TitlePill)
+// นับเฉพาะตัวที่กินที่ — สระบน/ล่าง วรรณยุกต์ไม่กินความกว้าง
+const nickSize = (m) => {
+  const n = (m.nickname || '').replace(/[ัิ-ฺ็-๎]/g, '').length + (m.cosmetics?.b ? 2 : 0)
+  return n <= 7 ? '.74rem' : n <= 9 ? '.66rem' : n <= 11 ? '.58rem' : '.52rem'
+}
 </script>
 
 <style scoped>
@@ -196,7 +202,8 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
 .mv-namerow .mv-nick { min-width: 0; }
 .mv-mini { flex: none; display: flex; }
 .mv-namerow .mv-avatar { flex: none; width: 26px; height: 26px; border-width: 1.5px; border-color: #fff; }
-.mv-namerow .mv-nick { flex: 1; text-align: left; }
+.mv-namerow .mv-nick { flex: 1; text-align: left; }   /* ขนาดตัวอักษรหดตามความยาวชื่อ — nickSize() */
+.mv-namerow .mv-avatar { width: 22px; height: 22px; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
   padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
