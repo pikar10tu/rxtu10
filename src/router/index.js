@@ -45,6 +45,7 @@ const routes = [
     { path: '/dungeon', name: 'dungeon', component: () => import('../views/DungeonView.vue') },
     { path: '/event', name: 'event', component: () => import('../views/EventView.vue') },
     { path: '/play/poker', name: 'poker', component: () => import('../views/PokerView.vue') },
+    { path: '/focus', name: 'focus', component: () => import('../views/FocusView.vue') },   // 🎯 โหมดโฟกัส (ทดลอง 22 พ.ย. 2026)
     { path: '/tree', name: 'tree', component: () => import('../views/TreeView.vue') },
     { path: '/fun-facts', name: 'funFacts', component: () => import('../views/FunFactsView.vue') },
     // 🧍 เดโมตุ๊กตาชั่วคราว (A1 18 พ.ย. 2026) — ไม่มีลิงก์ในเมนู · ลบเมื่อมีตู้เสื้อผ้า

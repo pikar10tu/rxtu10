@@ -26,7 +26,7 @@ const props = defineProps({
   glowOnly: { type: Boolean, default: false },   // เหลือแค่แสงเรืองรอบตัว ไม่มีอนุภาค/วงใต้เท้า (การ์ดเพื่อนครึ่งตัว — กันเอฟเฟคล้น · 20 พ.ย.)
 })
 const cv = ref(null)
-const s = computed(() => Math.max(1, Math.round(props.scale)))
+const s = computed(() => Math.max(1, props.scale))   // รับเศษได้ (โหมดโฟกัสใช้ 1.5) — k ด้านล่างปัดเป็นจุดจอเต็มจำนวนอยู่แล้ว ภาพคมเสมอ
 // จอสเกลเศษ (Windows 125% · มือถือ DPR 2.75) → 1 พิกเซลตุ๊กตา = จุดจอไม่เต็มจำนวน → บางช่องกว้างกว่าช่องอื่น ซ้ายขวาไม่เท่ากัน
 // แก้: วาดเป็น "จุดจอจริง" จำนวนเต็มต่อพิกเซล (k) แล้วย่อ CSS กลับด้วย dpr — ขนาดคลาดจาก scale ได้นิดหน่อย แต่ทุกช่องเท่ากันเป๊ะ (19 พ.ย. 2026)
 const dpr = ref(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1)

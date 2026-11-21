@@ -29,6 +29,7 @@
         <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>ฉัน</RouterLink>
       </nav>
 
+      <FocusPill v-if="authStore.isAdmin" />
       <HelpModal />
       <MigrationWelcome />
       <IntroTour />
@@ -66,6 +67,7 @@ import OnboardingWizard   from './components/onboarding/OnboardingWizard.vue'
 import GuestPendingScreen from './components/onboarding/GuestPendingScreen.vue'
 import LoginLanding       from './components/onboarding/LoginLanding.vue'
 import WelcomeBox         from './components/WelcomeBox.vue'
+import FocusPill          from './components/focus/FocusPill.vue'
 import { onboardingGate } from './utils/onboarding.js'
 import { CONSENT_VERSION } from './firebase/config.js'
 import { activeEvent } from './utils/event.js'

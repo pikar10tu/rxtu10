@@ -35,6 +35,8 @@
         <template v-else>
           <!-- เตรียมสอบแบบ A (user เคาะ 20 พ.ย. 2026): เป็นคลังล้วน · "ทำวันนี้" ย้ายไปอยู่หน้าแรกที่เดียว (เดิมซ้ำ 2 ที่) -->
           <!-- 🌅 ข้อสอบประจำวัน — แบนเนอร์ยาวบนหัวข้อฝึกทำ (user 20 พ.ย. 2026 · เดิมอยู่ในกล่องทำวันนี้ที่ย้ายออกไป) -->
+          <!-- 🎯 ทางเข้าโหมดโฟกัส (ทดลอง 22 พ.ย. 2026 · แอดมินเห็นคนเดียว) — สลับแบบ A/B/C เพื่อเลือก -->
+          <FocusEntry v-if="authStore.isAdmin" variant="A" class="sv-focus" />
           <button type="button" class="sv-daily" :class="{ done: playedToday }" @click="openDoor('daily')">
             <span class="sv-daily-em"><Emoji char="🌅" /></span>
             <span class="sv-daily-t">
@@ -267,6 +269,7 @@
 </template>
 
 <script setup>
+import FocusEntry from '../components/focus/FocusEntry.vue'
 import BackButton from '../components/shared/BackButton.vue'
 import GlobalSearchPanel from '../components/search/GlobalSearchPanel.vue'
 import { useEscapeKey } from '../composables/useEscapeKey.js'
@@ -791,4 +794,5 @@ async function sendReport() {
 .sv-rep-input:focus { outline: 2px solid var(--primary-2)aa; border-color: transparent; }
 .sv-rep-send { width: 100%; margin-top: 10px; border: none; border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#ef4444,#dc2626); cursor: pointer; }
 .sv-rep-send:disabled { background: #cbd5e1; cursor: default; }
+.sv-focus { margin-bottom: 10px; }
 </style>
