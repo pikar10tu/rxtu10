@@ -224,7 +224,7 @@ const avatarOf = (m) => avatarUrl(m, m.nickname)
   z-index: 3;   /* อยู่เหนือกรอบตกแต่ง (รูป z1 · ของประดับ z2) */
 }
 .mv-nick {
-  font-size: .92rem; font-weight: 800; white-space: nowrap;
+  font-size: .74rem; font-weight: 800; white-space: nowrap;  /* เดิม .92 มือถือเหลือ 1–2 ตัวอักษร (21 พ.ย.) */
   overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 /* การ์ดของเรา: กรอบนอก + ป้าย "คุณ" ที่มุมซ้ายบน */
