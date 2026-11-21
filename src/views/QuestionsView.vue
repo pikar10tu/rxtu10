@@ -890,7 +890,10 @@ async function recomputeMeta() {
     // หมวดที่มากับ import รอบก่อนๆ จึงกลับขึ้น dropdown หน้าตรวจข้อสอบ
     const addedTopics = await registerTopics(distinctCategories(all), 'recompute')
     const tail = addedTopics.length ? ` · เก็บหมวดตกทะเบียนเข้า dropdown ${addedTopics.length} หมวด` : ''
-    toast(`อัปเดต meta: เผยแพร่ ${meta.publishedTotal} ข้อ, ${meta.categories.length} หมวด${tail}`, 'success')
+    // นับกลุ่ม/หมวดย่อยแยกกัน — categories รวมสองระดับไว้ด้วยกัน นับรวมแล้วขึ้น "100 กว่าหมวด" ชวนเข้าใจผิด (user ถาม 21 พ.ย. 2026)
+    const nGroups = new Set(all.filter(q => q.isPublished && q.pleGroup).map(q => q.pleGroup)).size
+    const nSubs = new Set(all.filter(q => q.isPublished && q.pleSub).map(q => q.pleGroup + '|' + q.pleSub)).size
+    toast(`อัปเดต meta: เผยแพร่ ${meta.publishedTotal} ข้อ · ${nGroups} กลุ่ม · ${nSubs} หมวดย่อย${tail}`, 'success')
   } catch (e) {
     console.error('[recompute meta]', e); toast('อัปเดต meta ไม่สำเร็จ', 'error')
   } finally { recomputingMeta.value = false }
