@@ -1,8 +1,8 @@
-<!-- 🎯 โหมดโฟกัส · Co-working space (ทดลอง 22 พ.ย. 2026 · เห็นเฉพาะแอดมิน)
+<!-- 🎯 โหมดโฟกัส · Co-working space (22 พ.ย. 2026 · เปิดทุกคน)
      เข้าแล้วจับเวลาทันที · กดได้แค่ "ไปทำข้อสอบ" หรือนั่ง AFK ในห้อง · จิ้มพื้นเดิน จิ้มใกล้เคาน์เตอร์ว่างนั่ง
      ฉากพิกเซล 160×100 (Claude วาดด้วย pxl · ต้นฉบับ Claude outputs/focus-room-demo/art/room.px.js)
      ชั้นภาพเรียงตามตำแหน่งเท้า: คนหลังเคาน์เตอร์ถูกบัง คนเดินหน้าเคาน์เตอร์อยู่บน · เคาน์เตอร์เดินทะลุไม่ได้ (BFS)
-     ⚠️ ทดลอง: เพื่อนในห้อง/แชทเป็นตัวอย่างในเครื่อง ยังไม่ต่อ Realtime Database · เหรียญยังไม่เข้ากระเป๋าจริง -->
+     คนในห้อง/แชท = Realtime Database (composables/useFocusRoom.js) · เหรียญ/เวลาสะสม = Firestore ทุก 60 วิ (useFocusMode) -->
 <template>
   <div class="tab-content fo">
     <header class="fo-head">
@@ -23,30 +23,32 @@
       </div>
       <div class="fo-zsw" @click.stop>
         <button type="button" aria-label="โซนก่อนหน้า" @click="stepZone(-1)">‹</button>
-        <span @dblclick="sfx?.trigger()">{{ ZONES[ZI].label }}</span>
+        <span>{{ ZONES[ZI].label }}</span>
         <button type="button" aria-label="โซนถัดไป" @click="stepZone(1)">›</button>
       </div>
       <div v-for="(c, i) in COUNTERS" :key="'c' + i" class="fo-ent fo-desk" :style="entStyle(c[0], c[1], c[1] + 8.4)">
         <img :src="ART['desk_' + fm.state.zone]" alt="" draggable="false">
       </div>
-      <div v-for="p in friends" :key="p.name" class="fo-ent fo-av" :style="entStyle(SEATS[p.seat][0], SEATS[p.seat][1] + 3, SEATS[p.seat][1] + 3)">
-        <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> {{ STATUS_ICON[p.status] }}</template></span><span v-if="!narrow" class="fo-st">{{ STATUS_LABEL[p.status] }}</span></div>
-        <div v-if="bubbles[p.name]" class="fo-bubble">{{ bubbles[p.name] }}</div>
-        <span v-for="c in (fcoins[p.name] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ p.house }}</span>
-        <div class="fo-doll" :style="{ filter: `hue-rotate(${p.hue}deg)` }"><DollFigure :eq="p.eq" :scale="dollScale" :label="p.name" /></div>
-      </div>
-      <div v-if="fm.state.active" class="fo-ent fo-av me" :class="{ walk: walking }" :style="entStyle(me.x, me.y, me.y)">
+      <template v-for="p in others" :key="p.uid">
+        <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="{ walk: pos[p.uid].walking, away: p.away }" :style="entStyle(pos[p.uid].x, pos[p.uid].y, pos[p.uid].y)">
+          <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> {{ p.away ? '💤' : STATUS_ICON[p.st] }}</template></span><span v-if="!narrow" class="fo-st">{{ p.away ? '💤 พักสายตา' : STATUS_LABEL[p.st] || STATUS_LABEL.afk }}</span></div>
+          <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
+          <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ p.house || 1 }}</span>
+          <div class="fo-doll"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
+        </div>
+      </template>
+      <div v-if="fm.state.active" class="fo-ent fo-av me" :class="{ walk: me.walking }" :style="entStyle(me.x, me.y, me.y)">
         <div class="fo-label"><span class="fo-nm">{{ myName }}<template v-if="narrow"> {{ STATUS_ICON[fm.status.value] }}</template></span><span v-if="!narrow" class="fo-st">{{ STATUS_LABEL[fm.status.value] }}</span></div>
-        <div v-if="bubbles.__me" class="fo-bubble">{{ bubbles.__me }}</div>
+        <div v-if="bubbles[room.myUid()]" class="fo-bubble">{{ bubbles[room.myUid()] }}</div>
         <span v-for="c in coins" :key="c.id" class="fo-coin"><Emoji char="🪙" />+{{ c.v }}</span>
         <div class="fo-doll"><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
       </div>
       <div v-if="!fm.state.active" class="fo-join" @click.stop>
-        <p>{{ friends.length }} คนอยู่ในห้อง</p>
+        <p>{{ others.length ? `${others.length} คนอยู่ในห้อง` : 'ยังไม่มีใครในห้องนี้ · เป็นคนแรกเลย' }}</p>
         <button type="button" class="fo-btn primary big" @click="join">🎯 เริ่มโฟกัส</button>
         <small>อ่านหนังสือเพื่อสร้างรายได้ · +{{ house }}/วิ</small>
       </div>
-      <FocusSceneFx ref="sfx" :zone="fm.state.zone" :me="fm.state.active ? me : null" @tod="tod = $event" />
+      <FocusSceneFx ref="sfx" :zone="fm.state.zone" :me="fm.state.active ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
       <span v-for="t in taps" :key="t.id" class="fo-tap" :style="{ left: t.x / 1.6 + '%', top: t.y + '%' }"></span>
 
       <!-- แชทแบบเกมออนไลน์ยุคก่อน: มุมซ้ายล่าง ข้อความใหม่อยู่ล่างสุด เก่าดันหายไป · แตะเพื่อเลื่อนอ่านย้อน 50 ข้อความ -->
@@ -62,7 +64,7 @@
     </div>
 
     <form class="fo-say" @submit.prevent="send">
-      <input v-model="draft" maxlength="80" placeholder="พิมพ์คุยกับเพื่อนในห้อง…" aria-label="ข้อความแชท" autocomplete="off">
+      <input v-model="draft" maxlength="80" :disabled="!fm.state.active" :placeholder="fm.state.active ? 'พิมพ์คุยกับเพื่อนในห้อง…' : 'กดเริ่มโฟกัสก่อนถึงจะคุยได้'" aria-label="ข้อความแชท" autocomplete="off">
       <button type="submit" class="fo-btn">ส่ง</button>
     </form>
 
@@ -168,7 +170,9 @@ import FocusSceneFx from '../components/focus/FocusSceneFx.vue'
 import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { dollOf } from '../utils/doll.js'
-import { cleanText } from '../utils/text.js'
+import { decodeDoll } from '../utils/dollCode.js'
+import { useFocusRoom } from '../composables/useFocusRoom.js'
+import { SEATS, COUNTERS, DOOR, seatFoot, freeSeat } from '../utils/focusLayout.js'
 import { PLE_CC_DATE } from '../firebase/config.js'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { useFocusMode, STATUS_LABEL, fmtClock, COIN_CAP_SECS } from '../composables/useFocusMode.js'
@@ -177,9 +181,6 @@ import { TRACKS, NOISES, audioState as audio, playTrack, stopTrack, playNoise, s
 const ART = Object.fromEntries(Object.entries(import.meta.glob('../assets/focus/*.png', { eager: true, import: 'default' }))
   .map(([k, v]) => [k.split('/').pop().replace('.png', ''), v]))
 const ZONES = [{ key: 'lib', label: '📚 ห้องสมุด' }, { key: 'cafe', label: '☕ คาเฟ่' }, { key: 'forest', label: '🌳 สวน' }]
-// ที่นั่ง = กลางเคาน์เตอร์ x · ขอบบน y (หน่วยพิกเซลฉาก) · เคาน์เตอร์ยาวซ้าย/ขวา 2 แถว กลางห้องโล่งไว้เดิน
-const SEATS = [[18, 66], [42, 66], [118, 66], [142, 66], [18, 90], [42, 90], [118, 90], [142, 90]]
-const COUNTERS = [[30, 66], [30, 90], [130, 66], [130, 90]]
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -205,17 +206,14 @@ const sfx = ref(null)
 const tod = ref('day')
 const capLeft = computed(() => { const m = Math.ceil((COIN_CAP_SECS - fm.state.day.coinSecs) / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม. ${m % 60} น.` : `${m} น.` })
 
-// ── ตัวอย่างเพื่อน (ทดลอง) ──
-const DEMO = [['ปอนด์', 'quiz', 0], ['มายด์', 'afk', 140], ['ต้นข้าว', 'quiz', 200], ['เฟิร์น', 'afk', 300], ['บอส', 'quiz', 60]]
-const friends = ref([])
-const me = reactive({ x: 0, y: 0, seat: 0 })
-function seatAll() {
-  const o = [...Array(8).keys()].sort(() => Math.random() - 0.5)
-  me.seat = o[0]; me.x = SEATS[o[0]][0]; me.y = SEATS[o[0]][1] + 3
-  const eq = dollOf({}).eq
-  friends.value = DEMO.map((d, i) => ({ name: d[0], status: d[1], hue: d[2], seat: o[i + 1], eq, house: [4, 9, 12, 15, 20][i] }))
-}
-function pickZone(z) { fm.setZone(z); seatAll(); stopWalk() }
+// ── คนในห้อง (Realtime Database) ──
+const room = useFocusRoom()
+const others = computed(() => room.people.value.filter(p => p.zone === fm.state.zone && p.uid !== room.myUid()))
+const takenSeats = () => new Set(others.value.map(p => p.seat).filter(s => s >= 0))
+const DEFAULT_EQ = dollOf({}).eq
+const eqCache = {}
+const eqOf = (code) => (code ? (eqCache[code] ||= (decodeDoll(code) || DEFAULT_EQ)) : DEFAULT_EQ)
+const me = reactive({ x: DOOR[0], y: DOOR[1], seat: -1, walking: false })
 
 // ── วาง entity: ซ้าย/บนเป็น % ของฉาก · z เรียงตามตำแหน่งเท้า ──
 const entStyle = (x, y, depth) => ({ left: (x / 160 * 100) + '%', top: y + '%', zIndex: Math.round(depth * 10) })
@@ -240,31 +238,63 @@ function findPath(sx, sy, tx, ty) {
       prev.set(kk, key(i, j)); q.push([ni, nj])
     }
   }
-  if (!prev.has(key(ti, tj))) return null
+  if (!prev.has(key(ti, tj))) return [[sx, sy], [tx, ty]]   // หาทางไม่เจอ (เช่นเริ่มในเคาน์เตอร์) → เดินตรง
   const out = []
   for (let c = key(ti, tj); c !== -1; c = prev.get(c)) out.unshift([(c % GW) * CELL, Math.floor(c / GW) * CELL])
   out[0] = [sx, sy]; out[out.length - 1] = [tx, ty]
   return out
 }
-const walking = ref(false)
-let raf = 0
-function stopWalk() { cancelAnimationFrame(raf); walking.value = false }
-function walk(pts) {
-  stopWalk()
-  if (!pts || pts.length < 2) return
-  walking.value = true
+// เดินตามจุด (ใช้ทั้งตัวเราและเพื่อน) · obj = reactive { x, y, walking }
+const rafs = new Map()
+function animate(obj, pts, done) {
+  cancelAnimationFrame(rafs.get(obj))
+  if (!pts || pts.length < 2) { obj.walking = false; done?.(); return }
+  obj.walking = true
   let i = 1, last = performance.now()
   const step = (now) => {
     const dt = Math.min(0.05, (now - last) / 1000); last = now
     let move = 45 * dt
     while (move > 0 && i < pts.length) {
-      const [tx, ty] = pts[i], dx = tx - me.x, dy = ty - me.y, d = Math.hypot(dx, dy)
-      if (d <= move) { me.x = tx; me.y = ty; move -= d; i++ } else { me.x += dx / d * move; me.y += dy / d * move; move = 0 }
+      const [tx, ty] = pts[i], dx = tx - obj.x, dy = ty - obj.y, d = Math.hypot(dx, dy)
+      if (d <= move) { obj.x = tx; obj.y = ty; move -= d; i++ } else { obj.x += dx / d * move; obj.y += dy / d * move; move = 0 }
     }
-    if (i < pts.length) raf = requestAnimationFrame(step); else walking.value = false
+    if (i < pts.length) rafs.set(obj, requestAnimationFrame(step)); else { obj.walking = false; rafs.delete(obj); done?.() }
   }
-  raf = requestAnimationFrame(step)
+  rafs.set(obj, requestAnimationFrame(step))
 }
+const walkTo = (obj, tx, ty, done) => animate(obj, findPath(obj.x, obj.y, tx, ty), done)
+function stopAllWalks() { rafs.forEach(id => cancelAnimationFrame(id)); rafs.clear(); me.walking = false }
+
+// ตำแหน่งที่วาดของเพื่อน — เป้าหมายเปลี่ยน = เดินไปตามทาง · คนเพิ่งเข้า = เดินจากประตู
+const pos = reactive({})
+const mountedAt = Date.now()
+watch(others, (list) => {
+  const seen = new Set()
+  for (const p of list) {
+    seen.add(p.uid)
+    const tx = p.x ?? DOOR[0], ty = p.y ?? DOOR[1]
+    let o = pos[p.uid]
+    if (!o) {
+      const fresh = Date.now() - mountedAt > 2500
+      pos[p.uid] = o = reactive({ x: fresh ? DOOR[0] : tx, y: fresh ? DOOR[1] : ty, walking: false, tx, ty })
+      if (fresh) walkTo(o, tx, ty)
+    } else if (o.tx !== tx || o.ty !== ty) { o.tx = tx; o.ty = ty; walkTo(o, tx, ty) }
+  }
+  for (const uid of Object.keys(pos)) if (!seen.has(uid)) { cancelAnimationFrame(rafs.get(pos[uid])); delete pos[uid] }
+}, { immediate: true, deep: true })
+
+function pickZone(z) {
+  stopAllWalks()
+  fm.setZone(z)
+  room.watchChat(z)
+  if (!fm.state.active) return
+  const seat = freeSeat(takenSeats())
+  const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
+  me.seat = seat; me.x = DOOR[0]; me.y = DOOR[1]
+  room.patch({ zone: z, seat, x: tx, y: ty })
+  walkTo(me, tx, ty)
+}
+
 const sceneEl = ref(null)
 const sceneW = ref(480)
 let ro = null
@@ -276,32 +306,37 @@ const STATUS_ICON = { quiz: '✍️', afk: '💤' }
 const taps = ref([])
 let tapId = 0
 function onFloor(e) {
+  if (!fm.state.active) return
   const r = sceneEl.value.getBoundingClientRect()
   const x = (e.clientX - r.left) / r.width * 160, y = (e.clientY - r.top) / r.height * 100
   const id = ++tapId; taps.value.push({ id, x, y }); setTimeout(() => { taps.value = taps.value.filter(t => t.id !== id) }, 600)
-  const taken = new Set(friends.value.map(p => p.seat))
+  const taken = takenSeats()
   let best = -1, bd = 12
   SEATS.forEach(([sx, sy], i) => { if (taken.has(i)) return; const d = Math.hypot((sx - x) / 1.5, sy - y); if (d < bd) { bd = d; best = i } })
   let tx, ty
-  if (best >= 0) { me.seat = best; tx = SEATS[best][0]; ty = SEATS[best][1] + 3 }
+  if (best >= 0) [tx, ty] = seatFoot(best)
   else {
     tx = Math.max(8, Math.min(152, x)); ty = Math.max(Y0, Math.min(Y1, y))
     const c = inCounter(tx, ty); if (c) ty = c[1] + 12   // จิ้มโดนเคาน์เตอร์ → ไปยืนหน้าเคาน์เตอร์
   }
-  walk(findPath(me.x, me.y, tx, ty))
+  me.seat = best
+  walkTo(me, tx, ty, () => room.patch({ seat: best, x: tx, y: ty }))   // ส่งตำแหน่งตอนถึงที่เท่านั้น
 }
 
 // ── เหรียญเด้ง ──
 const coins = ref([])
-// เพื่อน: เด้งวิละครั้งเหมือนเรา (เหลื่อมเวลากันนิดหน่อยไม่ให้เด้งพร้อมกันทั้งห้อง) · ของจริงอ่านระดับบ้านจาก presence แล้ววาดเองในเครื่อง
+// เพื่อน: เด้งวิละครั้งตามระดับบ้านของเพื่อน (ไม่บอก ให้สังเกตเอง) · เครื่องเราวาดเอง ไม่ใช้เน็ต · คนปัดจอ (away) ไม่เด้ง
 const fcoins = reactive({})
 let fcoinTimer = 0, fcoinId = 0
 function friendPop() {
-  friends.value.forEach((p, i) => setTimeout(() => {
-    const id = ++fcoinId
-    ;(fcoins[p.name] ||= []).push(id)
-    setTimeout(() => { fcoins[p.name] = (fcoins[p.name] || []).filter(x => x !== id) }, 1600)
-  }, i * 170))
+  others.value.forEach((p, i) => {
+    if (p.away) return
+    setTimeout(() => {
+      const id = ++fcoinId
+      ;(fcoins[p.uid] ||= []).push(id)
+      setTimeout(() => { fcoins[p.uid] = (fcoins[p.uid] || []).filter(x => x !== id) }, 1600)
+    }, (i * 170) % 900)
+  })
 }
 let coinId = 0
 watch(() => fm.state.pops, () => {
@@ -311,43 +346,47 @@ watch(() => fm.state.pops, () => {
   setTimeout(() => { coins.value = coins.value.filter(c => c.id !== id) }, 1600)
 })
 
-// ── แชท (ทดลอง: ในเครื่อง) · บับเบิ้ลค้างเหนือหัว 5 วิ · เก็บย้อน 50 ข้อความ ──
-const chat = ref([])
+// ── แชท (RTDB รายวัน แยกโซน) · บับเบิ้ลค้างเหนือหัว 5 วิ · ย้อน 50 ข้อความ ──
 const chatOpen = ref(false)
-watch(chatOpen, () => nextTick(() => { if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight }))
 const chatBox = ref(null)
+watch(chatOpen, () => nextTick(() => { if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight }))
+const hhmm = (ms) => (typeof ms === 'number' ? new Date(ms) : new Date()).toTimeString().slice(0, 5)
+const chat = computed(() => room.chat.value.map(m => ({ id: m.id, who: m.name, text: m.text, time: hhmm(m.at) })))
 const bubbles = reactive({})
-const draft = ref('')
-let lastSend = 0, msgId = 0
-const hhmm = () => new Date().toTimeString().slice(0, 5)
-function post(who, text, bubbleKey) {
-  chat.value.push({ id: ++msgId, who, text, time: hhmm() })
-  if (chat.value.length > 50) chat.value.splice(0, chat.value.length - 50)
-  bubbles[bubbleKey] = text
-  setTimeout(() => { if (bubbles[bubbleKey] === text) delete bubbles[bubbleKey] }, 5000)
+const seenMsg = new Set()
+let chatPrimed = false
+watch(() => room.chat.value, (list) => {
+  for (const m of list) {
+    if (seenMsg.has(m.id)) continue
+    seenMsg.add(m.id)
+    if (!chatPrimed) continue   // ข้อความเก่าตอนเพิ่งเปิด ไม่ต้องเด้งบับเบิ้ล
+    bubbles[m.uid] = m.text
+    setTimeout(() => { if (bubbles[m.uid] === m.text) delete bubbles[m.uid] }, 5000)
+  }
+  chatPrimed = true
   nextTick(() => { if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight })
-}
+})
+const draft = ref('')
+let lastSend = 0
 function send() {
-  const t = cleanText(draft.value, 80)
-  if (!t) return
+  if (!fm.state.active || !draft.value.trim()) return
   if (Date.now() - lastSend < 3000) return
-  lastSend = Date.now()
-  post(myName.value, t, '__me'); draft.value = ''
+  if (room.say(fm.state.zone, draft.value)) { lastSend = Date.now(); draft.value = '' }
 }
-const LINES = ['ใครทำชุดวันนี้แล้วบ้าง', 'ข้อ 7 งงมาก 555', 'สู้ๆ นะทุกคน', 'พักกินข้าวแป๊บ', 'เพลงนี้เพราะดี', 'อีก 10 ข้อจบละ', 'CC2 ใกล้แล้ว 😭']
-let demoChat = 0
 
 const quizOpen = ref(false)
 const listOpen = ref(false)
 const why = ref(false)
 function join() {   // เข้าห้อง: เดินจากประตูล่างกลางไปที่นั่งว่าง แล้วเริ่มจับเวลา
   fm.enter()
-  me.x = 80; me.y = 98
-  walk(findPath(80, 98, SEATS[me.seat][0], SEATS[me.seat][1] + 3))
-  post('ระบบ', `${myName.value} เข้ามาในห้อง`, '__sys')
+  const seat = freeSeat(takenSeats())
+  const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
+  me.seat = seat; me.x = DOOR[0]; me.y = DOOR[1]
+  room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value })
+  walkTo(me, tx, ty)
   if (audio.track < 0) play(Math.floor(Math.random() * TRACKS.length))
 }
-function leave() { fm.leave(); stopAll(); stopWalk(); post('ระบบ', `${myName.value} ออกจากห้อง`, '__sys') }
+function leave() { fm.leave(); room.leave(); stopAll(); stopAllWalks() }
 // มินิเพลเยอร์
 const lastTrack = ref(0)
 const nowName = computed(() => TRACKS[audio.track >= 0 ? audio.track : lastTrack.value].name)
@@ -368,12 +407,19 @@ function toggleShuffle() {
 }
 
 onMounted(() => {
-  seatAll()
+  room.watchChat(fm.state.zone)
+  if (fm.state.active) {
+    const mine = room.people.value.find(p => p.uid === room.myUid())
+    if (mine) { me.x = mine.x; me.y = mine.y; me.seat = mine.seat ?? -1 }
+    else {   // รีเฟรชแล้ว presence หาย (onDisconnect) → เข้าห้องใหม่ที่นั่งว่าง
+      const seat = freeSeat(takenSeats()); const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
+      me.seat = seat; me.x = tx; me.y = ty
+      room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value })
+    }
+  }
   fcoinTimer = setInterval(() => { if (!document.hidden) friendPop() }, 1000)
-  post('ระบบ', 'เพื่อนในห้องตอนนี้เป็นตัวอย่าง (ทดลอง)', '__sys')
-  demoChat = setInterval(() => { const p = friends.value[Math.floor(Math.random() * friends.value.length)]; if (p) post(p.name, LINES[Math.floor(Math.random() * LINES.length)], p.name) }, 9000)
 })
-onBeforeUnmount(() => { clearInterval(fcoinTimer); clearInterval(demoChat); clearInterval(shuffleTimer); stopWalk() })
+onBeforeUnmount(() => { clearInterval(fcoinTimer); clearInterval(shuffleTimer); stopAllWalks(); room.unwatchChat(); room.release() })
 </script>
 
 <style scoped>
@@ -449,6 +495,7 @@ onBeforeUnmount(() => { clearInterval(fcoinTimer); clearInterval(demoChat); clea
 .fo-desk { width: calc(54 / 160 * 100%); transform: translate(-50%, -30%); }
 .fo-desk img { width: 100%; display: block; }
 .fo-doll { line-height: 0; }
+.fo-av.away { opacity: .5; }
 .fo-av.walk .fo-doll { animation: fo-step .25s steps(2) infinite; }
 @keyframes fo-step { 50% { transform: translateY(-2px); } }
 .fo-label { position: absolute; bottom: 100%; display: flex; flex-direction: column; align-items: center; gap: 1px; margin-bottom: -10px; }

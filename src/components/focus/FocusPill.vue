@@ -16,6 +16,8 @@ import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
 import { useFocusMode, fmtClock } from '../../composables/useFocusMode.js'
 import { audioState as audio } from '../../utils/focusAudio.js'
+import { useFocusRoom } from '../../composables/useFocusRoom.js'
+import { freeSeat, seatFoot } from '../../utils/focusLayout.js'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -23,6 +25,15 @@ const house = computed(() => auth.userData?.residence?.level || 1)
 const fm = useFocusMode(() => house.value)
 const show = computed(() => fm.state.active && route.name !== 'focus')
 watch(() => route.name, (n) => fm.setOnQuiz(['quiz', 'daily', 'timeAttack'].includes(n)), { immediate: true })
+// สถานะในห้อง (✍️/💤) ส่งให้เพื่อนเห็น · รีเฟรชหน้าอื่นระหว่างอยู่ในห้อง → presence หาย (onDisconnect) → เข้าห้องให้ใหม่
+const room = useFocusRoom()
+watch(() => fm.status.value, (st) => room.patch({ st }))
+watch(() => [fm.state.active, room.joined.value, auth.userData?.uid || auth.userData?.nickname], ([active, joined, ready]) => {
+  if (!active || joined || !ready || route.name === 'focus') return   // หน้าโฟกัสจัดการเอง
+  const taken = new Set(room.people.value.filter(p => p.zone === fm.state.zone).map(p => p.seat))
+  const seat = freeSeat(taken); const [x, y] = seat >= 0 ? seatFoot(seat) : [80, 80]
+  room.join({ zone: fm.state.zone, seat, x, y, st: fm.status.value })
+}, { immediate: true })
 </script>
 
 <style scoped>

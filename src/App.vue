@@ -29,7 +29,7 @@
         <RouterLink to="/me"      class="bn-item"><span class="bn-icon"><Emoji char="👤" /></span>ฉัน</RouterLink>
       </nav>
 
-      <FocusPill v-if="authStore.isAdmin" />
+      <FocusPill />
       <HelpModal />
       <MigrationWelcome />
       <IntroTour />

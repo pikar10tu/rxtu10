@@ -42,6 +42,8 @@ export const USER_DEFAULTS = {
   totalSpent: 0,
   pityClaimedRounds: 0,
   qToday: null,            // { d: dayKey, n } ข้อสอบที่ทำวันนี้ (หลอดเป้าวันนี้หน้าแรก)
+  focusSecs: 0,            // lifetime: เวลาโฟกัสสะสม (วินาที) — การ์ดสมาชิก + ความสำเร็จ (useFocusMode 22 พ.ย. 2026)
+  focusDay: null,          // { d, secs, coinSecs, coins } ยอดโหมดโฟกัสวันนี้ — กันเพดาน 2 ชม. ข้ามเครื่อง
   quizDoneTotal: 0,        // lifetime: ข้อสอบที่ทำ (achievement)
   studyReviewedTotal: 0,   // lifetime: แฟลชการ์ดที่ทบทวน (achievement)
   farmSalesTotal: 0,       // lifetime: เหรียญจากการขายฟาร์ม (achievement)

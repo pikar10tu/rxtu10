@@ -101,10 +101,10 @@ const pct = (x) => (x / 160 * 100) + '%'
 const pct2 = (y) => y + '%'
 
 // ── เวลาของวัน ──
-// ทดสอบ: ต่อท้าย URL ?tod=night|dusk|morning|day เพื่อบังคับช่วงเวลา
+// ทดสอบ (เฉพาะ npm run dev): ต่อท้าย URL ?tod=night|dusk|morning|day เพื่อบังคับช่วงเวลา
 const forced = (() => { try { return new URLSearchParams(location.hash.split('?')[1] || '').get('tod') } catch { return null } })()
 const hour = ref(new Date().getHours())
-const tod = computed(() => { if (['night', 'dusk', 'morning', 'day'].includes(forced)) return forced; const h = hour.value; return h >= 5 && h < 8 ? 'morning' : h >= 8 && h < 17 ? 'day' : h >= 17 && h < 19 ? 'dusk' : 'night' })
+const tod = computed(() => { if (import.meta.env.DEV && ['night', 'dusk', 'morning', 'day'].includes(forced)) return forced; const h = hour.value; return h >= 5 && h < 8 ? 'morning' : h >= 8 && h < 17 ? 'day' : h >= 17 && h < 19 ? 'dusk' : 'night' })
 watch(tod, (t) => emit('tod', t), { immediate: true })
 let clock = 0
 

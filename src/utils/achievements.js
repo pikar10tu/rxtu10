@@ -10,6 +10,7 @@ export function computeProgress(userData) {
     petCount: pets.length,
     petSpeciesCount: new Set(pets.map(p => p && p.id).filter(Boolean)).size,
     quizDoneTotal: u.quizDoneTotal || 0,
+    focusHours: Math.floor((u.focusSecs || 0) / 3600),
     studyReviewedTotal: u.studyReviewedTotal || 0,
     farmSalesTotal: u.farmSalesTotal || 0,
     totalSpent: u.totalSpent || 0,

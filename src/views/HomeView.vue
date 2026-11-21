@@ -36,8 +36,6 @@
           <Emoji :char="homeTier.art" /> {{ homeTier.tierName }} <b>›</b>
         </button>
       </ResidenceScene>
-      <!-- 🎯 แถบโหมดโฟกัส (ทดลอง · แอดมิน) ขึ้นเฉพาะเมื่อมีเพื่อนในห้อง -->
-      <FocusEntry v-if="authStore.isAdmin" variant="H" class="home-focus" />
       <ResidenceSheet v-model:open="homeOpen" />
       <!-- จัดหน้าใหม่ (user เคาะ 11 พ.ย. 2026): ผลสอบจำลอง → วันนี้ของคุณ → ประจำวันสนุกๆ → บ้าน → ลิงก์ท้ายหน้า -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
@@ -112,7 +110,6 @@ import { useDaily } from '../composables/useDaily.js'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { dueCount as qcardsDueCount } from '../utils/srsQuestions.js'
 import ResidenceScene from '../components/residence/ResidenceScene.vue'
-import FocusEntry from '../components/focus/FocusEntry.vue'
 import ResidenceSheet from '../components/residence/ResidenceSheet.vue'
 import { getTier, sceneOf } from '../data/residence.js'
 import { dollOf } from '../utils/doll.js'
@@ -235,7 +232,6 @@ onMounted(async () => {
 <style scoped>
 /* 🏠 ฉากบ้านหัวหน้าแรก — ชิดขอบจอซ้ายขวา (ลบ padding ของ .tab-content) */
 .home-scene { margin: -12px -12px 14px; width: calc(100% + 24px); }
-.home-focus { margin-bottom: 12px; }
 .try-dress { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; font-weight: 800; color: var(--primary-dark); background: #fff; border: var(--bw) solid var(--line); border-radius: 999px; padding: 4px 10px; box-shadow: var(--pop); text-decoration: none; white-space: nowrap; animation: try-bob 1.6s ease-in-out infinite; }
 .try-dress::before { content: ''; position: absolute; left: -5px; top: 50%; width: 8px; height: 8px; margin-top: -4px; background: #fff; border-left: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); transform: rotate(45deg); }
 @keyframes try-bob { 50% { transform: translateY(-3px); } }

@@ -11,6 +11,12 @@ export const ACHIEVEMENTS = {
   quiz_10:  { title: 'มือใหม่หัดจ่ายยา',     icon: '📝', type: 'milestone', trigger: { stat: 'quizDoneTotal', gte: 10 },  desc: 'ทำข้อสอบครบ 10 ข้อ', flavor: 'ก้าวแรกหลังเคาน์เตอร์' },
   quiz_50:  { title: 'นักศึกษาฝึกงาน', icon: '✍️', type: 'milestone', trigger: { stat: 'quizDoneTotal', gte: 50 },  desc: 'ทำข้อสอบครบ 50 ข้อ', flavor: 'เริ่มจับทางข้อสอบได้แล้ว' },
   quiz_100: { title: 'ผู้ช่วยเภสัชกร', icon: '🎓', type: 'milestone', trigger: { stat: 'quizDoneTotal', gte: 100 }, desc: 'ทำข้อสอบครบ 100 ข้อ', flavor: 'ร้อยข้อผ่านมือ ไม่ใช่เล่นๆ' },
+  // 🎯 โหมดโฟกัส (22 พ.ย. 2026) — ชั่วโมงสะสมในห้อง Co-working space
+  focus_1:   { title: 'นั่งติดเก้าอี้', icon: '🪑', type: 'milestone', trigger: { stat: 'focusHours', gte: 1 },   desc: 'โฟกัสรวม 1 ชั่วโมง', flavor: 'ก้นเริ่มรู้จักเก้าอี้' },
+  focus_5:   { title: 'ขาประจำห้องสมุด', icon: '📚', type: 'milestone', trigger: { stat: 'focusHours', gte: 5 },   desc: 'โฟกัสรวม 5 ชั่วโมง', flavor: 'บรรณารักษ์เริ่มจำหน้าได้' },
+  focus_10:  { title: 'คนคุ้นหน้าในคาเฟ่', icon: '☕', type: 'milestone', trigger: { stat: 'focusHours', gte: 10 },  desc: 'โฟกัสรวม 10 ชั่วโมง', flavor: 'บาริสต้าทำเมนูเดิมให้ไม่ต้องสั่ง' },
+  focus_50:  { title: 'โหมดเทพลงมาเกิด', icon: '🔥', type: 'milestone', trigger: { stat: 'focusHours', gte: 50 },  desc: 'โฟกัสรวม 50 ชั่วโมง', flavor: 'แมวในห้องยังต้องเกรงใจ' },
+  focus_100: { title: 'ผู้พิทักษ์สมาธิ', icon: '🧘', type: 'milestone', trigger: { stat: 'focusHours', gte: 100 }, desc: 'โฟกัสรวม 100 ชั่วโมง', flavor: 'ร้อยชั่วโมงที่ไม่มีใครเห็น แต่ผลสอบจะบอกเอง' },
   flash_10:  { title: 'ท่องจนฝันเป็นยา',      icon: '📚', type: 'milestone', trigger: { stat: 'studyReviewedTotal', gte: 10 },  desc: 'ทบทวนแฟลชการ์ด 10 ใบ', flavor: 'หลับตาก็ยังเห็นชื่อยา' },
   flash_50:  { title: 'สมองสำรองยา', icon: '📖', type: 'milestone', trigger: { stat: 'studyReviewedTotal', gte: 50 },  desc: 'ทบทวนแฟลชการ์ด 50 ใบ', flavor: 'จำได้ก่อนเปิดตำรา' },
   flash_100: { title: 'คลังยาเดินได้',       icon: '🧠', type: 'milestone', trigger: { stat: 'studyReviewedTotal', gte: 100 }, desc: 'ทบทวนแฟลชการ์ด 100 ใบ', flavor: 'ถามยาอะไร ตอบได้หมด' },

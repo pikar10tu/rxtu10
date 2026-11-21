@@ -1,11 +1,11 @@
 <!-- 🎯 ทางเข้าโหมดโฟกัส — ทดลองหลายแบบให้ user เลือก (22 พ.ย. 2026 · แอดมินเห็นคนเดียว)
      A = การ์ดใหญ่บนสุดหน้าเตรียมสอบ · B = แบนเนอร์บางในแถวเดียวกับข้อสอบประจำวัน · C = ปุ่มลอยมุมขวาล่าง
      H = แถบบนหน้าแรก (ขึ้นเฉพาะเมื่อมีเพื่อนในห้อง)
-     ตัวเลขเพื่อนในห้องตอนนี้เป็นตัวอย่าง (ยังไม่ต่อ Realtime Database) -->
+     จำนวน/ชื่อคนในห้อง = RTDB focus/presence (useFocusPeople) -->
 <template>
   <RouterLink v-if="variant === 'A'" to="/focus" class="fe-a">
     <span class="fe-a-top"><b>🎯 โหมดโฟกัส</b><small>Co-working space</small><span class="fe-go">{{ fm.state.active ? 'กลับเข้าห้อง' : 'เข้าห้อง' }} →</span></span>
-    <span class="fe-count">🟢 {{ names.length }} คนอยู่ในห้อง · <span class="fe-sub">อ่านหนังสือเพื่อสร้างรายได้</span></span>
+    <span class="fe-count">{{ names.length ? `🟢 ${names.length} คนอยู่ในห้อง` : 'ห้องว่างอยู่' }} · <span class="fe-sub">อ่านหนังสือเพื่อสร้างรายได้</span></span>
   </RouterLink>
 
   <RouterLink v-else-if="variant === 'B'" to="/focus" class="fe-b">
@@ -27,17 +27,22 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
-import { useFocusMode, fmtClock } from '../../composables/useFocusMode.js'
+import { useFocusMode } from '../../composables/useFocusMode.js'
+import { useFocusPeople } from '../../composables/useFocusRoom.js'
+import { onBeforeUnmount } from 'vue'
+import { getAuth } from 'firebase/auth'
+import { app } from '../../firebase/config.js'
 
 defineProps({ variant: { type: String, default: 'A' } })
 const auth = useAuthStore()
 const house = computed(() => auth.userData?.residence?.level || 1)
 const fm = useFocusMode(() => house.value)
-const names = ['ปอนด์', 'มายด์', 'ต้นข้าว', 'เฟิร์น', 'บอส']   // ตัวอย่าง
-const todayLine = computed(() => {
-  const secs = fm.state.day.secs
-  return 'อ่านหนังสือเพื่อสร้างรายได้'
-})
+// คนในห้องตอนนี้ (ทุกโซน · RTDB) — เลิกฟังตอนการ์ดหายจากจอ
+const { people, stop } = useFocusPeople()
+onBeforeUnmount(stop)
+// ไม่นับตัวเอง (เราอยู่ในห้องแล้วไม่ต้องชวนตัวเองไปนั่ง)
+const names = computed(() => people.value.filter(p => p.uid !== getAuth(app).currentUser?.uid).map(p => p.name))
+const todayLine = 'อ่านหนังสือเพื่อสร้างรายได้'
 </script>
 
 <style scoped>

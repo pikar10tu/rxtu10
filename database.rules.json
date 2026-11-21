@@ -228,6 +228,29 @@
           }
         }
       }
+    },
+    "focus": {
+      "presence": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "!newData.exists() || (newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('zone').isString() && newData.child('zone').val().matches(/^(lib|cafe|forest)$/) && newData.child('x').isNumber() && newData.child('y').isNumber() && (!newData.child('doll').exists() || (newData.child('doll').isString() && newData.child('doll').val().length <= 300)))"
+        }
+      },
+      "chat": {
+        "$day": {
+          "$zone": {
+            ".read": "auth != null",
+            ".indexOn": [
+              "at"
+            ],
+            "$msg": {
+              ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (!newData.exists() && auth.token.email === 'prawich.aum@dome.tu.ac.th'))",
+              ".validate": "!newData.exists() || (newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 80 && newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('at').val() === now)"
+            }
+          }
+        }
+      }
     }
   }
 }

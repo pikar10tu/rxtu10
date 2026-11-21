@@ -35,8 +35,8 @@
         <template v-else>
           <!-- เตรียมสอบแบบ A (user เคาะ 20 พ.ย. 2026): เป็นคลังล้วน · "ทำวันนี้" ย้ายไปอยู่หน้าแรกที่เดียว (เดิมซ้ำ 2 ที่) -->
           <!-- 🌅 ข้อสอบประจำวัน — แบนเนอร์ยาวบนหัวข้อฝึกทำ (user 20 พ.ย. 2026 · เดิมอยู่ในกล่องทำวันนี้ที่ย้ายออกไป) -->
-          <!-- 🎯 ทางเข้าโหมดโฟกัส (ทดลอง 22 พ.ย. 2026 · แอดมินเห็นคนเดียว) — สลับแบบ A/B/C เพื่อเลือก -->
-          <FocusEntry v-if="authStore.isAdmin" variant="A" class="sv-focus" />
+          <!-- 🎯 ทางเข้าโหมดโฟกัส แบบ A (user เคาะ 22 พ.ย. 2026 · เปิดทุกคน) -->
+          <FocusEntry variant="A" class="sv-focus" />
           <button type="button" class="sv-daily" :class="{ done: playedToday }" @click="openDoor('daily')">
             <span class="sv-daily-em"><Emoji char="🌅" /></span>
             <span class="sv-daily-t">
