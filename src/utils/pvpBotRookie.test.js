@@ -3,7 +3,9 @@ import assert from 'node:assert/strict'
 import { rookieBotChance, rookieBot } from './pvpBot.js'
 
 test('โอกาสเจอหุ่นซ้อมมือใหม่', () => {
-  assert.equal(rookieBotChance({ rating: 1000, fights: 0 }), 1)
+  // 21 พ.ย.: ROOKIE_FIGHTS = 0 (มือใหม่ไปซ้อมหุ่น 5 ตาในค่ายฝึกแทน) → ตาแรกไม่บังคับเจอหุ่นแล้ว ใช้กฎแพ้ติดตามช่วงแต้ม
+  assert.equal(rookieBotChance({ rating: 1000, fights: 0 }), 0)
+  assert.equal(rookieBotChance({ rating: 1000, fights: 0, loseStreak: 2 }), 0.5)
   assert.equal(rookieBotChance({ rating: 950, fights: 10 }), 0.7)
   assert.equal(rookieBotChance({ rating: 950, fights: 10, loseStreak: 2 }), 1)
   assert.equal(rookieBotChance({ rating: 1050, fights: 10, loseStreak: 1 }), 0)
