@@ -55,8 +55,8 @@
       <div class="pf-stats">
         <!-- 20 พ.ย. 2026: เรียน 2 ช่อง + เล่น 1 ช่อง (เดิมเกมล้วน ชนะ/หอคอย/เพ็ท) -->
         <div class="pf-stat" style="background:rgba(45,168,255,.12)"><span><Emoji char="📝" /></span><b>{{ (view.quizDoneTotal || 0).toLocaleString() }}</b><small>ข้อสอบที่ทำ</small></div>
-        <!-- 22 พ.ย. 2026: ช่อง 2 เปลี่ยนจากเคส CC2 → เวลาโฟกัสสะสม (โหมดโฟกัส) -->
-        <div class="pf-stat" style="background:rgba(23,195,154,.12)"><span><Emoji char="⏱️" /></span><b>{{ fmtHours(view.focusSecs) }}</b><small>เวลาโฟกัส</small></div>
+        <!-- 22 พ.ย. 2026: ช่อง 2 เปลี่ยนจากเคส CC2 → เวลาโฟกัสสะสม เป็นวินาที (user: ดูเยอะดี) -->
+        <div class="pf-stat" style="background:rgba(23,195,154,.12)"><span><Emoji char="⏱️" /></span><b>{{ (view.focusSecs || 0).toLocaleString() }}</b><small>วินาทีโฟกัส</small></div>
         <div class="pf-stat" style="background:rgba(255,176,32,.12)"><span><Emoji char="⚔️" /></span><b>{{ (view.pvp?.rating || 1000).toLocaleString() }}</b><small>แต้มประลอง</small></div>
       </div>
 
@@ -174,7 +174,6 @@ const cos = computed(() => full.value ? cosOf(full.value) : (props.member?.cosme
 
 // 🧍 อวาตาร์: doc เต็มมีของจริง · ระหว่างรอใช้รหัสจากแถว roster (members.doll = dl) — ไม่มีจอว่าง
 const dollEq = computed(() => (full.value?.doll ? dollOf(full.value).eq : decodeDoll(props.member?.doll)))
-import { fmtHours } from '../../composables/useFocusMode.js'
 
 const lvl  = computed(() => view.value?.residence?.level || 1)
 const tier = computed(() => getTier(lvl.value))
