@@ -21812,5 +21812,3280 @@
    "date": "22 ก.ค. 2026",
    "set": "7ab3210e-eed1-479a-afc0-f72b5b776883"
   }
+ },
+ {
+  "id": "paracetamol",
+  "name": "Paracetamol (Acetaminophen)",
+  "group": "ยาแก้ปวดและ NSAIDs",
+  "cls": "Analgesic/antipyretic (non-opioid)",
+  "chips": [
+   "≤4 g/วัน",
+   "พิษต่อตับ",
+   "ระวังยาสูตรผสม"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "แนะนำให้ใช้เป็น first-line drug สำหรับ osteoarthritis",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้งการสร้าง prostaglandin ในระบบประสาทส่วนกลางเป็นหลัก ฤทธิ์ต้านการอักเสบส่วนปลายน้อย จึงแก้ปวดลดไข้ได้แต่ไม่ลดการอักเสบ",
+   "r": []
+  },
+  "exam": [
+   {
+    "t": "ผู้ใหญ่และเด็ก ≥12 ปี: <b>650 mg (325 mg × 2 เม็ด) ทุก 4–6 ชม.</b> เมื่อมีอาการ · ไม่เกิน 10 เม็ด (3,250 mg)/วันตามฉลากนี้",
+    "r": [
+     "fda:Directions"
+    ]
+   },
+   {
+    "t": "<b>พิษต่อตับรุนแรง</b>ถ้าผู้ใหญ่ได้รับ <b>>4,000 mg ใน 24 ชม.</b> หรือดื่มสุรา ≥3 แก้ว/วันขณะใช้ยา",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "<b>ห้ามใช้ร่วมยาอื่นที่มี acetaminophen</b> (ยาแก้หวัดสูตรผสมหลายตัวมี) เป็นสาเหตุใช้เกินขนาดโดยไม่ตั้งใจ",
+    "r": [
+     "fda:Do not use"
+    ]
+   },
+   {
+    "t": "ผื่นแพ้รุนแรง (ผิวแดง ตุ่มพอง) หยุดยาและพบแพทย์ทันที",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "NLEM: <b>first-line สำหรับ osteoarthritis</b> · ACR 2019 ให้ใช้ได้ในบางรายแต่ผลไม่มาก",
+    "r": [
+     "nlem",
+     "g_oa"
+    ]
+   },
+   {
+    "t": "ปวดเกิน 10 วัน (เด็ก 5 วัน) หรือไข้เกิน 3 วัน ให้พบแพทย์",
+    "r": [
+     "fda:Stop use"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "บรรเทาปวดเล็กน้อยถึงปานกลาง (ปวดหัว ปวดฟัน ปวดกล้ามเนื้อ ปวดประจำเดือน)",
+    "d": "ผู้ใหญ่ 650 mg ทุก 4–6 ชม. ไม่เกิน 3,250 mg/วันตามฉลากนี้",
+    "r": [
+     "fda:Uses",
+     "fda:Directions"
+    ]
+   },
+   {
+    "i": "ลดไข้",
+    "d": "ขนาดเดียวกัน · เด็ก 6–11 ปี 325 mg ทุก 4–6 ชม. ไม่เกิน 5 ครั้ง/วัน",
+    "r": [
+     "fda:Uses",
+     "fda:Directions"
+    ]
+   }
+  ],
+  "doseNotes": [
+   "ในสหรัฐฯ paracetamol ชนิดกินเป็นยา OTC ฉลากจึงเป็นแบบ Drug Facts",
+   {
+    "t": "เด็กอายุต่ำกว่า 6 ปี ปรึกษาแพทย์",
+    "r": [
+     "fda:Directions"
+    ]
+   }
+  ],
+  "hepatic": {
+   "t": "โรคตับ: ปรึกษาแพทย์ก่อนใช้",
+   "r": [
+    "fda:Ask a doctor"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ปริมาณ acetaminophen รวมจากทุกผลิตภัณฑ์ใน 24 ชม.",
+    "r": [
+     "fda:Warnings",
+     "fda:Do not use"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ acetaminophen",
+    "r": [
+     "fda:Do not use"
+    ]
+   },
+   {
+    "t": "ใช้ร่วมยาอื่นที่มี acetaminophen",
+    "r": [
+     "fda:Do not use"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "Liver warning: >4 g/วัน หรือดื่มสุรา ≥3 แก้ว/วัน",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ผื่นแพ้รุนแรง",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "โรคตับ ปรึกษาแพทย์ก่อนใช้",
+    "r": [
+     "fda:Ask a doctor"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "พบน้อยเมื่อใช้ขนาดปกติ · พิษต่อตับเมื่อเกินขนาด · ผื่นผิวหนังรุนแรง (พบน้อย)",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "ยาอื่นที่มี acetaminophen: ซ้ำซ้อน เกินขนาด",
+    "r": [
+     "fda:Do not use"
+    ]
+   },
+   {
+    "t": "แอลกอฮอล์: เพิ่มพิษต่อตับ",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนมน้อย เป็นยาแก้ปวดลดไข้ที่เลือกใช้ได้",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "เด็ก <6 ปี: ใช้ขนาดตามน้ำหนัก ปรึกษาแพทย์",
+    "r": [
+     "fda:Directions"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ได้รับเกินขนาดให้ไปพบแพทย์ทันทีแม้ยังไม่มีอาการ",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ดูฉลากยาแก้หวัด/ยาแก้ปวดอื่นว่ามี paracetamol หรือไม่",
+    "r": [
+     "fda:Do not use"
+    ]
+   },
+   {
+    "t": "ไม่ดื่มสุราระหว่างใช้ยา",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Paracetamol (Acetaminophen) — เอกสารกำกับยา US FDA (Tylenol Regular Strength · Kenvue (ฉลาก OTC แบบ Drug Facts))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=01f41fae-4abb-4b96-ab09-a7d3dfc286cd",
+    "src": "DailyMed · ฉบับ 26 ม.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_oa",
+    "title": "2019 ACR/Arthritis Foundation Guideline for the Management of Osteoarthritis of the Hand, Hip, and Knee",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31908149/",
+    "src": "Kolasinski SL, et al. Arthritis Care Res. 2020;72:149–162"
+   },
+   {
+    "id": "lact",
+    "title": "Acetaminophen — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501194/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Tylenol Regular Strength · Kenvue (ฉลาก OTC แบบ Drug Facts)",
+   "date": "26 ม.ค. 2026",
+   "set": "01f41fae-4abb-4b96-ab09-a7d3dfc286cd"
+  }
+ },
+ {
+  "id": "ibuprofen",
+  "name": "Ibuprofen",
+  "group": "ยาแก้ปวดและ NSAIDs",
+  "cls": "NSAID (non-selective COX inhibitor) · propionic acid",
+  "chips": [
+   "Boxed: หัวใจ/GI",
+   "ไตวาย",
+   "ห้ามหลัง CABG"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "ไม่ควรใช้ระยะยาวในผู้ใช้ low dose aspirin · ใช้ในเด็กอายุ ≥3 เดือน",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "NSAIDs: หัวใจและทางเดินอาหาร",
+  "bw": {
+   "t": "<b>Boxed warning</b>: เพิ่มความเสี่ยง <b>หัวใจขาดเลือด/อัมพาต</b> (เกิดได้ตั้งแต่ช่วงแรก) · ห้ามใช้ช่วงผ่าตัด <b>CABG</b> · เพิ่มความเสี่ยง<b>เลือดออก แผล ทะลุในทางเดินอาหาร</b> ผู้สูงอายุเสี่ยงสูง",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง <b>COX-1 และ COX-2</b> แบบผันกลับได้ → ลด prostaglandin · แก้ปวด ลดไข้ ต้านอักเสบ",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "RA/OA: <b>400–800 mg วันละ 3–4 ครั้ง</b> · ปวดเล็กน้อย–ปานกลาง 400 mg ทุก 4–6 ชม. · <b>ไม่เกิน 3,200 mg/วัน</b>",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "กินพร้อมอาหารหรือนมถ้าระคายกระเพาะ",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "<b>ทำให้ aspirin ขนาดต่ำได้ผลลดลง</b> (แย่งจับ COX-1 เกล็ดเลือด) · NLEM ไม่ให้ใช้ระยะยาวร่วม low dose aspirin",
+    "r": [
+     "fda:Drug Interactions",
+     "nlem"
+    ]
+   },
+   {
+    "t": "เลี่ยงใน<b>หัวใจล้มเหลว</b> ความดันสูงคุมไม่ได้ · ทำ<b>ไตวายเฉียบพลัน</b> โดยเฉพาะกับ ACEI/ARB + ยาขับปัสสาวะ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ห้ามในผู้ที่เคย<b>หอบ ลมพิษหลังกิน aspirin/NSAIDs</b>",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ตั้งครรภ์: เลี่ยงตั้งแต่ ~20 สัปดาห์ (น้ำคร่ำน้อย) และ ≥30 สัปดาห์ (ductus arteriosus ปิดก่อนกำหนด)",
+    "r": [
+     "fda:Warnings",
+     "fda:Pregnancy"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "อาการของ RA และ OA",
+    "d": "1,200–3,200 mg/วัน แบ่งให้วันละ 3–4 ครั้ง",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ปวดเล็กน้อยถึงปานกลาง",
+    "d": "400 mg ทุก 4–6 ชม. เมื่อมีอาการ",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "ปวดประจำเดือน",
+    "d": "400 mg ทุก 4 ชม. เมื่อมีอาการ",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ใช้ขนาดต่ำสุดที่ได้ผล ระยะสั้นที่สุด",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไตเสื่อมรุนแรง: ไม่แนะนำ · ติดตามไตในผู้เสี่ยง (ผู้สูงอายุ หัวใจล้มเหลว ใช้ยาขับปัสสาวะ/ACEI)",
+   "r": [
+    "fda:Warnings"
+   ]
+  },
+  "hepatic": {
+   "t": "อาจทำเอนไซม์ตับสูง · หยุดยาถ้ามีอาการตับอักเสบ",
+   "r": [
+    "fda:Warnings"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ความดันโลหิต",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "CBC ไต ตับ ในผู้ใช้ระยะยาว",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "อาการเลือดออกทางเดินอาหาร",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ ibuprofen",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคยหอบ ลมพิษ หรือแพ้หลังใช้ aspirin/NSAIDs",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ช่วงผ่าตัด CABG",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "หัวใจขาดเลือด อัมพาต",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "เลือดออก แผล ทะลุในทางเดินอาหาร",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ความดันสูงขึ้น หัวใจล้มเหลวและบวมน้ำ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ไตวาย K สูง",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "แพ้รุนแรง ผื่นรุนแรง (SJS/TEN, DRESS)",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ตั้งครรภ์ระยะหลัง",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปวดท้อง คลื่นไส้ แสบท้อง · บวมน้ำ · มึนงง ผื่น",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Aspirin: ลดผลต้านเกล็ดเลือดของ aspirin และเพิ่มแผลกระเพาะ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Warfarin, SSRI: เลือดออกมากขึ้น",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ACEI/ARB, ยาขับปัสสาวะ: ลดผลลดความดัน เสี่ยงไตวาย",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Lithium, methotrexate: ระดับยาสูงขึ้น",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: เลี่ยงตั้งแต่ 20 สัปดาห์",
+    "r": [
+     "fda:Pregnancy",
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนมน้อยมาก เป็นยาที่เลือกใช้ได้",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เสี่ยง GI ไต หัวใจ",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ซึม ปวดท้อง คลื่นไส้ · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินพร้อมอาหาร · อุจจาระดำ อาเจียนเป็นเลือด ให้หยุดยาและพบแพทย์",
+    "r": [
+     "fda:Dosage and Administration",
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "ครึ่งชีวิต",
+    "~2 ชม.",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ตับเปลี่ยนเป็น metabolite ไม่มีฤทธิ์ ขับทางปัสสาวะ",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Ibuprofen — เอกสารกำกับยา US FDA (Ibuprofen tablets 400/600/800 mg · Amneal (ฉลากรูปแบบเก่า))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=17577b3b-e755-45d1-8b53-775d058578b2",
+    "src": "DailyMed · ฉบับ 29 ก.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_oa",
+    "title": "2019 ACR/Arthritis Foundation Guideline for the Management of Osteoarthritis of the Hand, Hip, and Knee",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31908149/",
+    "src": "Kolasinski SL, et al. Arthritis Care Res. 2020;72:149–162"
+   },
+   {
+    "id": "lact",
+    "title": "Ibuprofen — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK500986/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Ibuprofen tablets 400/600/800 mg · Amneal (ฉลากรูปแบบเก่า)",
+   "date": "29 ก.ค. 2026",
+   "set": "17577b3b-e755-45d1-8b53-775d058578b2"
+  }
+ },
+ {
+  "id": "diclofenac",
+  "name": "Diclofenac sodium",
+  "group": "ยาแก้ปวดและ NSAIDs",
+  "cls": "NSAID (non-selective) · acetic acid derivative",
+  "chips": [
+   "Boxed: หัวใจ/GI",
+   "เม็ดเคลือบ ห้ามเคี้ยว",
+   "พิษต่อตับ"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "bwTitle": "NSAIDs: หัวใจและทางเดินอาหาร",
+  "bw": {
+   "t": "<b>Boxed warning</b>: เพิ่มความเสี่ยง <b>หัวใจขาดเลือด/อัมพาต</b> (เกิดได้ตั้งแต่ช่วงแรก) · ห้ามใช้ช่วงผ่าตัด <b>CABG</b> · เพิ่มความเสี่ยง<b>เลือดออก แผล ทะลุในทางเดินอาหาร</b> ผู้สูงอายุเสี่ยงสูง",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง COX-1 และ COX-2 → ลด prostaglandin",
+   "r": [
+    "fda:Clinical Pharmacology"
+   ]
+  },
+  "exam": [
+   {
+    "t": "OA: <b>100–150 mg/วัน</b> แบ่งให้ (50 mg วันละ 2–3 ครั้ง) · RA: 150–200 mg/วัน · AS: 100–125 mg/วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "เม็ดเคลือบ (EC/DR) · <b>diclofenac sodium EC, ER และ diclofenac potassium IR ไม่ใช่ bioequivalent</b> แม้ mg เท่ากัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "<b>เอนไซม์ตับสูง/ตับอักเสบ</b>พบบ่อยกว่า NSAIDs อื่น · ตรวจ transaminase ระหว่างใช้ระยะยาว",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ทุกข้อของ NSAIDs: หัวใจ GI ไต ความดัน ข้อห้ามใน CABG และผู้แพ้ aspirin",
+    "r": [
+     "fda:Boxed",
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ACR 2019: <b>NSAIDs ทาเฉพาะที่</b> (diclofenac gel) แนะนำสำหรับข้อเข่า OA ก่อนชนิดกิน",
+    "r": [
+     "g_oa"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "อาการของ OA",
+    "d": "50 mg วันละ 2–3 ครั้ง หรือ 75 mg วันละ 2 ครั้ง",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "อาการของ RA",
+    "d": "150–200 mg/วัน แบ่งให้",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "i": "Ankylosing spondylitis",
+    "d": "25 mg วันละ 4 ครั้ง (+25 mg ก่อนนอนถ้าจำเป็น)",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ใช้ขนาดต่ำสุดที่ได้ผล ระยะสั้นที่สุด",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไตเสื่อมรุนแรง: ไม่แนะนำ",
+   "r": [
+    "fda:Warnings"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับเสื่อม: อาจต้องลดขนาด · หยุดยาถ้ามีอาการตับอักเสบ",
+   "r": [
+    "fda:Warnings"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ALT/AST ภายใน 4–8 สัปดาห์หลังเริ่ม แล้วเป็นระยะ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ความดัน CBC ไต",
+    "r": [
+     "fda:Warnings",
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ diclofenac",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคยหอบ ลมพิษหลังใช้ aspirin/NSAIDs",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ช่วงผ่าตัด CABG",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "หัวใจขาดเลือด อัมพาต",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "เลือดออกทางเดินอาหาร",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ตับอักเสบ",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ความดันสูง หัวใจล้มเหลว",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ไตวาย",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปวดท้อง ท้องเสีย คลื่นไส้ · บวม · เอนไซม์ตับสูง",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Warfarin, aspirin, SSRI: เลือดออก",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "ACEI/ARB, ยาขับปัสสาวะ: ไตวาย ลดผลลดความดัน",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "Lithium, methotrexate, cyclosporine: ระดับ/พิษเพิ่ม",
+    "r": [
+     "fda:Precautions"
+    ]
+   },
+   {
+    "t": "CYP2C9 inhibitor (เช่น voriconazole): ระดับ diclofenac สูงขึ้น",
+    "r": [
+     "fda:Precautions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: เลี่ยงตั้งแต่ 20 สัปดาห์",
+    "r": [
+     "fda:Warnings"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ข้อมูลน้อย ผ่านน้ำนมน้อย",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เสี่ยงผลข้างเคียงสูง",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ซึม คลื่นไส้ ปวดท้อง · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กลืนทั้งเม็ด ห้ามบด/เคี้ยว",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "ตัวเหลือง ปัสสาวะสีเข้ม หยุดยาและพบแพทย์",
+    "r": [
+     "fda:Warnings"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "ครึ่งชีวิต",
+    "~2 ชม.",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ],
+   [
+    "เมแทบอลิซึม",
+    "ตับ ผ่าน CYP2C9 เป็นหลัก",
+    [
+     "fda:Clinical Pharmacology"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Diclofenac sodium — เอกสารกำกับยา US FDA (Diclofenac sodium delayed-release tablets · Umedica (ฉลากรูปแบบเก่า))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=0e5c6669-390f-4c32-b9b8-13ed3c517462",
+    "src": "DailyMed · ฉบับ 23 ต.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_oa",
+    "title": "2019 ACR/Arthritis Foundation Guideline for the Management of Osteoarthritis of the Hand, Hip, and Knee",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31908149/",
+    "src": "Kolasinski SL, et al. Arthritis Care Res. 2020;72:149–162"
+   },
+   {
+    "id": "lact",
+    "title": "Diclofenac — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501800/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Diclofenac sodium delayed-release tablets · Umedica (ฉลากรูปแบบเก่า)",
+   "date": "23 ต.ค. 2026",
+   "set": "0e5c6669-390f-4c32-b9b8-13ed3c517462"
+  }
+ },
+ {
+  "id": "celecoxib",
+  "name": "Celecoxib",
+  "group": "ยาแก้ปวดและ NSAIDs",
+  "cls": "NSAID · COX-2 selective inhibitor",
+  "chips": [
+   "Boxed: หัวใจ/GI",
+   "แพ้ sulfonamide",
+   "CYP2C9"
+  ],
+  "nlem": null,
+  "bwTitle": "NSAIDs: หัวใจและทางเดินอาหาร",
+  "bw": {
+   "t": "<b>Boxed warning</b>: เพิ่มความเสี่ยงหัวใจขาดเลือด/อัมพาต · ห้ามใช้ในช่วงผ่าตัด CABG · เลือดออก แผล ทะลุในทางเดินอาหาร",
+   "r": [
+    "fda:5.1",
+    "fda:5.2"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง <b>COX-2</b> แบบเลือกจำเพาะ → ลด prostaglandin ที่การอักเสบ · <b>ไม่ยับยั้ง COX-1 ที่เกล็ดเลือด</b> จึงไม่ต้านเกล็ดเลือดและแทน aspirin ไม่ได้",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "OA: <b>200 mg วันละครั้ง</b> หรือ 100 mg วันละ 2 ครั้ง · RA: 100–200 mg วันละ 2 ครั้ง",
+    "r": [
+     "fda:2.2",
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ปวดเฉียบพลัน/ปวดประจำเดือน: <b>400 mg ครั้งแรก</b> + 200 mg ถ้าจำเป็นในวันแรก แล้ว 200 mg วันละ 2 ครั้ง",
+    "r": [
+     "fda:2.6"
+    ]
+   },
+   {
+    "t": "ข้อดี: <b>แผลกระเพาะน้อยกว่า</b> NSAIDs ทั่วไป แต่<b>ยังเสี่ยงหัวใจ</b>เหมือน NSAIDs ทุกตัว",
+    "r": [
+     "fda:5.1",
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ตับบกพร่อง Child-Pugh B: <b>ลดขนาด 50%</b> · CYP2C9 poor metabolizer: พิจารณาลด 50%",
+    "r": [
+     "fda:2.7"
+    ]
+   },
+   {
+    "t": "ห้ามในผู้เคย<b>แพ้ sulfonamide</b> · ห้ามในผู้แพ้ aspirin/NSAIDs · ห้ามช่วง CABG",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "DDI: <b>fluconazole</b> (ยับยั้ง CYP2C9) ทำระดับ celecoxib สูงขึ้น ~2 เท่า",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Osteoarthritis",
+    "d": "200 mg/วัน (ครั้งเดียวหรือแบ่ง 2)",
+    "r": [
+     "fda:1.1",
+     "fda:2.2"
+    ]
+   },
+   {
+    "i": "Rheumatoid arthritis",
+    "d": "100–200 mg วันละ 2 ครั้ง",
+    "r": [
+     "fda:1.2",
+     "fda:2.3"
+    ]
+   },
+   {
+    "i": "JRA อายุ ≥2 ปี",
+    "d": "10–25 kg: 50 mg bid · >25 kg: 100 mg bid",
+    "r": [
+     "fda:1.3",
+     "fda:2.4"
+    ]
+   },
+   {
+    "i": "Ankylosing spondylitis",
+    "d": "200 mg/วัน · ไม่ได้ผลใน 6 สัปดาห์ ลอง 400 mg",
+    "r": [
+     "fda:1.4",
+     "fda:2.5"
+    ]
+   },
+   {
+    "i": "ปวดเฉียบพลัน ปวดประจำเดือน",
+    "d": "400 mg แล้ว 200 mg ถ้าจำเป็น · วันต่อไป 200 mg bid",
+    "r": [
+     "fda:1.5",
+     "fda:1.6",
+     "fda:2.6"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "กินพร้อมหรือไม่พร้อมอาหารก็ได้",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "กลืนแคปซูลไม่ได้ แกะผงโรยบน applesauce แล้วกินทันที",
+    "r": [
+     "fda:2.4"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "ไตเสื่อมรุนแรง: ไม่แนะนำ",
+   "r": [
+    "fda:5.6",
+    "fda:8.7"
+   ]
+  },
+  "hepatic": {
+   "t": "Child-Pugh B: ลด 50% · Child-Pugh C: ไม่แนะนำ",
+   "r": [
+    "fda:2.7",
+    "fda:8.6"
+   ]
+  },
+  "mon": [
+   {
+    "t": "ความดันโลหิต",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "CBC ไต ตับ ในผู้ใช้ระยะยาว",
+    "r": [
+     "fda:5.14"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "แพ้ celecoxib",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคยแพ้ sulfonamide",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคยหอบ ลมพิษหลังใช้ aspirin/NSAIDs",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ช่วงผ่าตัด CABG",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "หัวใจขาดเลือด",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "GI",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ตับ",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "หัวใจล้มเหลว บวม",
+    "r": [
+     "fda:5.5"
+    ]
+   },
+   {
+    "t": "ไต K สูง",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "แพ้รุนแรง",
+    "r": [
+     "fda:5.7"
+    ]
+   },
+   {
+    "t": "หอบหืดที่แพ้ aspirin",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "ผื่นรุนแรง",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "DRESS",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "ตั้งครรภ์",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "ซีด",
+    "r": [
+     "fda:5.12"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ปวดท้อง ท้องเสีย อาหารไม่ย่อย · บวม · ปวดหัว",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Warfarin, aspirin, SSRI/SNRI: เลือดออก",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ACEI/ARB, ยาขับปัสสาวะ: ไตวาย ลดผลลดความดัน",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Lithium: ระดับ lithium สูงขึ้น",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Fluconazole: ระดับ celecoxib สูงขึ้น ใช้ขนาดต่ำสุด",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: จำกัดช่วง 20–30 สัปดาห์ เลี่ยงตั้งแต่ ~30 สัปดาห์",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนมน้อยมาก ใช้ได้",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เสี่ยงหัวใจ GI ไต",
+    "r": [
+     "fda:8.5"
+    ]
+   },
+   {
+    "t": "CYP2C9 poor metabolizer: ลดขนาด",
+    "r": [
+     "fda:8.8"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ซึม คลื่นไส้ ปวดท้อง เลือดออก GI (พบน้อย) · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "แจ้งแพทย์ถ้าเคยแพ้ยา sulfa",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เจ็บหน้าอก หอบ แขนขาอ่อนแรง พูดไม่ชัด รีบพบแพทย์",
+    "r": [
+     "fda:5.1"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "ระดับสูงสุด",
+    "~3 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "เมแทบอลิซึม",
+    "CYP2C9 เป็นหลัก",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "ครึ่งชีวิต",
+    "~11 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Celecoxib — เอกสารกำกับยา US FDA (Celebrex · Viatris)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2d6675e4-5859-4be2-8037-a20ce9f707aa",
+    "src": "DailyMed · ฉบับ 22 พ.ย. 2024"
+   },
+   {
+    "id": "g_oa",
+    "title": "2019 ACR/Arthritis Foundation Guideline for the Management of Osteoarthritis of the Hand, Hip, and Knee",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31908149/",
+    "src": "Kolasinski SL, et al. Arthritis Care Res. 2020;72:149–162"
+   },
+   {
+    "id": "lact",
+    "title": "Celecoxib — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501475/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Celebrex · Viatris",
+   "date": "22 พ.ย. 2024",
+   "set": "2d6675e4-5859-4be2-8037-a20ce9f707aa"
+  }
+ },
+ {
+  "id": "tramadol",
+  "name": "Tramadol",
+  "group": "ยาแก้ปวดและ NSAIDs",
+  "cls": "Opioid analgesic (weak μ agonist) + ยับยั้งการเก็บกลับ 5-HT/NE",
+  "chips": [
+   "ชัก",
+   "Serotonin syndrome",
+   "CYP2D6",
+   "ห้ามเด็ก <12 ปี"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ค)",
+  "bwTitle": "Opioid: ติดยา กดการหายใจ",
+  "bw": {
+   "t": "Boxed warning: ติดยา/ใช้ผิดวัตถุประสงค์ · <b>กดการหายใจถึงชีวิต</b> · กลืนโดยไม่ตั้งใจ (เด็ก) · ใช้ร่วม <b>benzodiazepine/ยากด CNS</b> → กดการหายใจ ซึม เสียชีวิต · <b>neonatal opioid withdrawal syndrome</b> · <b>CYP2D6 ultra-rapid metabolizer</b> ในเด็กเสียชีวิต · ปฏิกิริยากับยาที่ผ่าน CYP",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ตัวยาและ <b>M1 (O-desmethyltramadol)</b> จับตัวรับ μ-opioid (M1 แรงกว่า) + ยับยั้งการเก็บกลับ <b>serotonin และ norepinephrine</b>",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "เริ่ม <b>25 mg/วัน</b> เพิ่มทีละ 25 mg ทุก 3 วัน ถึง 100 mg/วัน แล้วเพิ่มทีละ 50 mg ทุก 3 วัน ถึง 200 mg/วัน · จากนั้น 50–100 mg ทุก 4–6 ชม. <b>ไม่เกิน 400 mg/วัน</b>",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "CrCl <b><30</b>: ทุก <b>12 ชม.</b> ไม่เกิน <b>200 mg/วัน</b> · ตับแข็งรุนแรง: 50 mg ทุก 12 ชม.",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "<b>ชัก</b> (แม้ขนาดปกติ) เสี่ยงขึ้นในผู้มีประวัติชัก หรือใช้ SSRI, TCA, ยาอื่นที่ลดเกณฑ์ชัก",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "<b>Serotonin syndrome</b> เมื่อใช้ร่วม SSRI, SNRI, TCA, triptan, MAOI",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "<b>CYP2D6</b>: inhibitor (fluoxetine, paroxetine) → M1 ลด ปวดไม่หาย แต่ tramadol สูง เสี่ยงชัก/serotonin · ultra-rapid metabolizer → M1 สูง กดการหายใจ",
+    "r": [
+     "fda:Drug Interactions",
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "ห้ามใน<b>เด็ก <12 ปี</b> และเด็ก <18 ปีหลังผ่าตัดทอนซิล/อะดีนอยด์",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ADR อื่น: <b>Na ต่ำ</b> (SIADH) · <b>น้ำตาลต่ำ</b>",
+    "r": [
+     "fda:5.20",
+     "fda:5.21"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ปวดรุนแรงที่จำเป็นต้องใช้ opioid และวิธีอื่นไม่พอ (ผู้ใหญ่)",
+    "d": "50–100 mg ทุก 4–6 ชม. เมื่อมีอาการ ≤400 mg/วัน (หลังไต่ขนาด)",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:2.3"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ปวดเฉียบพลันส่วนใหญ่ใช้ opioid ไม่เกิน 2–3 วัน",
+    "r": [
+     "fda:2.1",
+     "g_opioid"
+    ]
+   },
+   {
+    "t": "พูดคุยเรื่อง naloxone กับผู้ป่วยและผู้ดูแล",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "หยุดยาในผู้ที่ติดยาทางร่างกาย: ค่อยๆ ลดขนาด ห้ามหยุดทันที",
+    "r": [
+     "fda:2.5"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl <30: ทุก 12 ชม. ≤200 mg/วัน · ฟอกเลือดได้ยาตามปกติในวันฟอก",
+   "r": [
+    "fda:2.3"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับแข็งรุนแรง: 50 mg ทุก 12 ชม.",
+   "r": [
+    "fda:2.3"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การหายใจ ความง่วง โดยเฉพาะช่วงเริ่มยา/เพิ่มขนาด",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "พฤติกรรมติดยา ใช้ผิดวัตถุประสงค์",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "อาการ serotonin syndrome, ชัก",
+    "r": [
+     "fda:5.9",
+     "fda:5.10"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "เด็ก <12 ปี · เด็ก <18 ปีหลังผ่าตัดทอนซิล/อะดีนอยด์",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "กดการหายใจรุนแรง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "หอบหืดเฉียบพลันรุนแรงโดยไม่มีอุปกรณ์กู้ชีพ",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ทางเดินอาหารอุดตัน ลำไส้ไม่ทำงาน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "แพ้ tramadol",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ MAOI ภายใน 14 วัน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ติดยา ใช้ผิดวัตถุประสงค์",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "กดการหายใจ",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ร่วม benzodiazepine/ยากด CNS",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ทารกถอนยา",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ultra-rapid metabolizer",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "Serotonin syndrome",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "ชัก",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "ฆ่าตัวตาย",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "ต่อมหมวกไตบกพร่อง",
+    "r": [
+     "fda:5.13"
+    ]
+   },
+   {
+    "t": "ความดันต่ำรุนแรง",
+    "r": [
+     "fda:5.14"
+    ]
+   },
+   {
+    "t": "อาการถอนยา",
+    "r": [
+     "fda:5.18"
+    ]
+   },
+   {
+    "t": "Na ต่ำ",
+    "r": [
+     "fda:5.20"
+    ]
+   },
+   {
+    "t": "น้ำตาลต่ำ",
+    "r": [
+     "fda:5.21"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "มึนงง คลื่นไส้ <b>ท้องผูก</b> ปวดหัว ง่วง อาเจียน คัน",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "CYP2D6 inhibitor: ปวดไม่หาย/ถอนยา + tramadol สูง",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "CYP3A4 inhibitor: tramadol สูง · inducer (carbamazepine, rifampin): ระดับลด",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ยา serotonergic: serotonin syndrome",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Benzodiazepine, แอลกอฮอล์: กดการหายใจ",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Warfarin: INR เปลี่ยน",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้นานทำให้ทารกถอนยา",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: <b>ไม่แนะนำ</b> (ultra-rapid metabolizer)",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ >75 ปี: ไม่เกิน 300 mg/วัน",
+    "r": [
+     "fda:2.3",
+     "fda:8.5"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "กดการหายใจ ม่านตาหด ซึม ชัก · ให้ naloxone (แก้ชักไม่ได้ทั้งหมด)",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ห้ามดื่มสุราหรือใช้ยานอนหลับร่วม",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ท้องผูก ให้ดื่มน้ำ กินใยอาหาร",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "ระวังขับรถ",
+    "r": [
+     "fda:5.1"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "ครึ่งชีวิต",
+    "~6–7 ชม. (tramadol) · M1 ~7 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "เมแทบอลิซึม",
+    "CYP2D6 → M1 (มีฤทธิ์) · CYP3A4 → M2",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Tramadol — เอกสารกำกับยา US FDA (Tramadol HCl tablets · Amneal (Ultram ไม่มีใน DailyMed แล้ว))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8ec4e4e5-a56e-4198-8428-6b770b9bf27d",
+    "src": "DailyMed · ฉบับ 6 มิ.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_opioid",
+    "title": "CDC Clinical Practice Guideline for Prescribing Opioids for Pain — United States, 2022",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36327391/",
+    "src": "Dowell D, et al. MMWR Recomm Rep. 2022;71(3):1–95"
+   },
+   {
+    "id": "lact",
+    "title": "Tramadol — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501260/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Tramadol HCl tablets · Amneal (Ultram ไม่มีใน DailyMed แล้ว)",
+   "date": "6 มิ.ย. 2026",
+   "set": "8ec4e4e5-a56e-4198-8428-6b770b9bf27d"
+  }
+ },
+ {
+  "id": "morphine",
+  "name": "Morphine sulfate",
+  "group": "ยาแก้ปวดและ NSAIDs",
+  "cls": "Opioid agonist (μ) · ยาเสพติดให้โทษประเภท 2",
+  "chips": [
+   "กดการหายใจ",
+   "ท้องผูก",
+   "ER ห้ามบด",
+   "ไตเสื่อม: metabolite สะสม"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ค)",
+  "nlemCond": {
+   "t": "ยาเสพติดให้โทษประเภท 2 · ชนิดฉีดในหมวดยาระงับปวดช่วงผ่าตัดเป็นบัญชี b",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "Opioid: ติดยา กดการหายใจ",
+  "bw": {
+   "t": "Boxed warning: ติดยา/ใช้ผิดวัตถุประสงค์ · <b>กดการหายใจถึงชีวิต</b> · กลืนโดยไม่ตั้งใจ (เด็ก) · ใช้ร่วม <b>benzodiazepine/ยากด CNS</b> → กดการหายใจ ซึม เสียชีวิต · <b>neonatal opioid withdrawal syndrome</b> · ER: <b>ห้ามบด เคี้ยว หัก</b> (ได้ยาเกินขนาดถึงตาย)",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "Full agonist ที่ตัวรับ <b>μ-opioid</b> ในสมองและไขสันหลัง → แก้ปวด · ผลอื่น: กดการหายใจ ม่านตาหด ท้องผูก",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "MS Contin = ชนิด<b>ออกฤทธิ์นาน</b> ให้ทุก 8–12 ชม. · ใช้ในปวดรุนแรงต่อเนื่อง<b>ที่ไม่ตอบสนองยาอื่น</b> ไม่ใช่ยาใช้เมื่อปวด",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "<b>กลืนทั้งเม็ด ห้ามบด เคี้ยว หัก ละลาย</b> (ยาออกทันทีเกินขนาดถึงตาย)",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ขนาด >60 mg/ครั้ง หรือ >120 mg/วัน ใช้ได้เฉพาะผู้ที่<b>ทนต่อ opioid</b> แล้ว (ได้ morphine ≥60 mg/วัน ≥1 สัปดาห์)",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ADR ที่<b>ไม่หายไปเมื่อใช้ต่อ</b> = <b>ท้องผูก</b> และม่านตาหด · ให้ยาระบายป้องกันไว้เลย",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "<b>ไตเสื่อม</b>: metabolite (M3G/M6G) สะสม → ซึม กดการหายใจ · เริ่มขนาดต่ำ ไต่ช้า",
+    "r": [
+     "fda:8.7"
+    ]
+   },
+   {
+    "t": "ยาต้านพิษ: <b>naloxone</b> · ห้ามใช้ร่วม MAOI",
+    "r": [
+     "fda:Contraindications",
+     "fda:Overdosage"
+    ]
+   },
+   {
+    "t": "CDC 2022: เริ่มด้วย opioid <b>ชนิดออกฤทธิ์สั้น</b>ก่อน ไม่ใช่ชนิดออกฤทธิ์นาน · ใช้ขนาดต่ำสุดที่ได้ผล",
+    "r": [
+     "g_opioid"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ปวดรุนแรงต่อเนื่องที่ต้องใช้ opioid และวิธีอื่น (รวม opioid ออกฤทธิ์สั้น) ไม่พอ",
+    "d": "ผู้ไม่เคยใช้ opioid: 15 mg ทุก 8–12 ชม. แล้วไต่ขนาด",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:2.3"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "เปลี่ยนจาก opioid อื่น: ประเมินขนาดต่ำไว้ก่อนแล้วให้ยาแก้ปวดเสริม",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ไต่ขนาดทุก 1–2 วัน",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "หยุดยา: ค่อยๆ ลดขนาด",
+    "r": [
+     "fda:2.6"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "เริ่มขนาดต่ำ ไต่ช้า ติดตามการหายใจ ความง่วง ความดัน",
+   "r": [
+    "fda:8.7"
+   ]
+  },
+  "hepatic": {
+   "t": "เริ่มขนาดต่ำ ไต่ช้า",
+   "r": [
+    "fda:8.6"
+   ]
+  },
+  "mon": [
+   {
+    "t": "การหายใจ ความง่วง ช่วง 24–72 ชม. แรกและหลังเพิ่มขนาด",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ท้องผูก",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   },
+   {
+    "t": "พฤติกรรมติดยา",
+    "r": [
+     "fda:5.1"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "กดการหายใจรุนแรง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "หอบหืดเฉียบพลันรุนแรงโดยไม่มีอุปกรณ์กู้ชีพ",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ใช้ MAOI ภายใน 14 วัน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ทางเดินอาหารอุดตัน ลำไส้ไม่ทำงาน",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "แพ้ morphine",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ติดยา",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "กดการหายใจ",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ร่วม benzodiazepine",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "ทารกถอนยา",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ปวดมากขึ้นจาก opioid (OIH)",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "โรคปอดเรื้อรัง ผู้สูงอายุ",
+    "r": [
+     "fda:5.7"
+    ]
+   },
+   {
+    "t": "MAOI",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "ต่อมหมวกไต",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "ความดันต่ำรุนแรง",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "ความดันในกะโหลกสูง",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "ทางเดินอาหารอุดตัน",
+    "r": [
+     "fda:5.12"
+    ]
+   },
+   {
+    "t": "ชัก",
+    "r": [
+     "fda:5.13"
+    ]
+   },
+   {
+    "t": "อาการถอนยา",
+    "r": [
+     "fda:5.14"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "<b>ท้องผูก</b> คลื่นไส้ ง่วง มึนงง อาเจียน คัน เหงื่อออก",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Benzodiazepine, แอลกอฮอล์ ยากด CNS: กดการหายใจ เสียชีวิต",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "MAOI: ห้าม",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "Mixed agonist/antagonist (buprenorphine, nalbuphine): ลดฤทธิ์ เกิดอาการถอนยา",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ยาขับปัสสาวะ: ฤทธิ์ลดลง ปัสสาวะคั่ง",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "ยา anticholinergic: ท้องผูก ปัสสาวะคั่งรุนแรง",
+    "r": [
+     "fda:Drug Interactions"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ใช้นานทำให้ทารกถอนยา",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: <b>ไม่แนะนำ</b> (ER) · LactMed: ขนาดต่ำช่วงสั้นยอมรับได้ เฝ้าดูทารกซึม",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: เริ่มต่ำ",
+    "r": [
+     "fda:8.5"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "<b>ม่านตาหดเล็ก</b> กดการหายใจ ซึม/โคม่า · ให้ <b>naloxone</b> (ER อาจต้องให้ซ้ำ)",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กลืนทั้งเม็ด",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "เก็บยาให้พ้นมือเด็ก",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "ไม่ดื่มสุรา",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "กินยาระบายป้องกันท้องผูก",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "Bioavailability",
+    "ทางปากต่ำ (first-pass)",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "เมแทบอลิซึม",
+    "glucuronidation → M3G, M6G (มีฤทธิ์) ขับทางไต",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "ครึ่งชีวิต",
+    "2–4 ชม. (IV)",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Morphine sulfate — เอกสารกำกับยา US FDA (MS Contin (ชนิดออกฤทธิ์นาน) · Rhodes)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=c354b3bf-86c0-4bb8-8b1f-be2164942698",
+    "src": "DailyMed · ฉบับ 14 ส.ค. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_opioid",
+    "title": "CDC Clinical Practice Guideline for Prescribing Opioids for Pain — United States, 2022",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36327391/",
+    "src": "Dowell D, et al. MMWR Recomm Rep. 2022;71(3):1–95"
+   },
+   {
+    "id": "lact",
+    "title": "Morphine — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501237/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "MS Contin (ชนิดออกฤทธิ์นาน) · Rhodes",
+   "date": "14 ส.ค. 2026",
+   "set": "c354b3bf-86c0-4bb8-8b1f-be2164942698"
+  }
+ },
+ {
+  "id": "colchicine",
+  "name": "Colchicine",
+  "group": "เกาต์และโรคข้อ",
+  "cls": "Anti-gout · ยับยั้ง microtubule (alkaloid)",
+  "chips": [
+   "ท้องเสีย",
+   "CYP3A4/P-gp",
+   "ไต/ตับเสื่อม"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "ทำให้อุจจาระร่วงและอาจทำกล้ามเนื้อลายสลาย · ระวังใช้ร่วม statins",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "จับ <b>tubulin</b> ยับยั้งการสร้าง microtubule → <b>ยับยั้งการเคลื่อนที่และทำงานของ neutrophil</b> ไปที่ข้อ · <b>ไม่ลดกรดยูริก ไม่ใช่ยาแก้ปวด</b>",
+   "r": [
+    "fda:12.1",
+    "fda:Dosage and Administration"
+   ]
+  },
+  "exam": [
+   {
+    "t": "รักษา gout flare: <b>1.2 mg ทันทีเมื่อเริ่มมีอาการ แล้ว 0.6 mg อีก 1 ชม.</b> (รวม 1.8 mg) · ขนาดสูงไม่ได้ผลเพิ่ม",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ป้องกัน flare (ช่วงเริ่มยาลดกรดยูริก): <b>0.6 mg วันละ 1–2 ครั้ง</b> ≤1.2 mg/วัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ACR 2020: ให้ยาป้องกัน flare (colchicine/NSAID/steroid) <b>3–6 เดือน</b> เมื่อเริ่ม ULT",
+    "r": [
+     "g_gout"
+    ]
+   },
+   {
+    "t": "<b>CYP3A4 และ P-gp substrate</b>: clarithromycin, ketoconazole, ritonavir, cyclosporine, verapamil, diltiazem → พิษถึงตาย · <b>ห้ามในผู้ไต/ตับเสื่อม</b>ที่ใช้ยาเหล่านี้",
+    "r": [
+     "fda:2.4",
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "ADR: <b>ท้องเสีย</b> คลื่นไส้ (พบบ่อยสุด) · ขนาดสูง/ยาตีกัน: <b>กดไขกระดูก</b>, <b>กล้ามเนื้ออักเสบ/rhabdomyolysis</b> (ระวังร่วม statin, fibrate)",
+    "r": [
+     "fda:Adverse Reactions",
+     "fda:5.2",
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ไตเสื่อมรุนแรง: flare ไม่ต้องลดขนาดแต่ห้ามให้ซ้ำภายใน 2 สัปดาห์ · ป้องกัน flare เริ่ม 0.3 mg/วัน",
+    "r": [
+     "fda:2.5"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "รักษา gout flare (ผู้ใหญ่)",
+    "d": "1.2 mg แล้ว 0.6 mg อีก 1 ชม. (≤1.8 mg ใน 1 ชม.)",
+    "r": [
+     "fda:1.1",
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "ป้องกัน gout flare (อายุ >16 ปี)",
+    "d": "0.6 mg วันละ 1–2 ครั้ง ≤1.2 mg/วัน",
+    "r": [
+     "fda:1.1",
+     "fda:2.1"
+    ]
+   },
+   {
+    "i": "Familial Mediterranean fever",
+    "d": "ผู้ใหญ่ 1.2–2.4 mg/วัน แบ่ง 1–2 ครั้ง",
+    "r": [
+     "fda:1.2",
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ใช้ป้องกัน flare อยู่แล้วเกิด flare: ให้ 1.2+0.6 mg ได้ แล้วรอ 12 ชม. ค่อยกลับไปขนาดป้องกัน",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ได้ยาที่ยับยั้ง CYP3A4/P-gp ภายใน 14 วัน: ลดขนาดตามตาราง",
+    "r": [
+     "fda:2.4"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl 30–80: ไม่ต้องปรับ แต่ติดตามใกล้ชิด · CrCl <30: ป้องกัน เริ่ม 0.3 mg/วัน · flare ไม่ซ้ำภายใน 2 สัปดาห์ · ฟอกเลือด: flare 0.6 mg ครั้งเดียว",
+   "r": [
+    "fda:2.5",
+    "fda:8.6"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับเสื่อมรุนแรง: พิจารณาลดขนาดป้องกัน · flare ไม่ซ้ำภายใน 2 สัปดาห์",
+   "r": [
+    "fda:2.6",
+    "fda:8.7"
+   ]
+  },
+  "mon": [
+   {
+    "t": "CBC (กดไขกระดูก)",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "อาการปวดกล้ามเนื้อ อ่อนแรง (CK)",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ท้องเสียมาก",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "ไตหรือตับเสื่อมที่ใช้ยายับยั้ง P-gp หรือ CYP3A4 แรง (รวม protease inhibitor)",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "พิษถึงตายเมื่อเกินขนาด",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "กดไขกระดูก",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ยาตีกัน",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "กล้ามเนื้อ/เส้นประสาท อักเสบ rhabdomyolysis",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "<b>ท้องเสีย</b> คลื่นไส้ อาเจียน ปวดท้อง · คอหอยอักเสบ (FMF)",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "CYP3A4 แรง (clarithromycin, ketoconazole, ritonavir): ลดขนาดมาก/ห้าม",
+    "r": [
+     "fda:2.4",
+     "fda:Drug Interactions"
+    ]
+   },
+   {
+    "t": "CYP3A4 ปานกลาง (diltiazem, verapamil, fluconazole, grapefruit): ลดขนาด",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "P-gp inhibitor (cyclosporine, ranolazine): ลดขนาด",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "Statin, fibrate, digoxin: กล้ามเนื้ออักเสบ",
+    "r": [
+     "fda:Drug Interactions",
+     "nlem"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ข้อมูลไม่พบความเสี่ยงชัดเจน",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: LactMed — ผ่านน้ำนมน้อย ใช้ได้",
+    "r": [
+     "lact"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: ระวังไตเสื่อม",
+    "r": [
+     "fda:8.5"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ระยะ 1: ท้องเสีย อาเจียน (24 ชม.) → ระยะ 2: ไขกระดูกล้มเหลว อวัยวะล้มเหลว · ไม่มียาต้านพิษ ฟอกเลือดไม่ได้ผล",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินทันทีเมื่อเริ่มปวด · ไม่ใช่ยาแก้ปวดอื่นๆ",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   },
+   {
+    "t": "หลีกเลี่ยง grapefruit",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "t": "ปวดกล้ามเนื้อ อ่อนแรง ไข้ เจ็บคอ แจ้งแพทย์",
+    "r": [
+     "fda:5.2",
+     "fda:5.4"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "Bioavailability",
+    "~45%",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "เมแทบอลิซึม",
+    "CYP3A4 · ขับออกผ่าน P-gp",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "ครึ่งชีวิต",
+    "~24–31 ชม. (สะสมในเนื้อเยื่อ)",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Colchicine — เอกสารกำกับยา US FDA (Colchicine tablets 0.6 mg · Northstar)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=94bee24f-d846-4344-bc42-b2eae6b433ba",
+    "src": "DailyMed · ฉบับ 4 พ.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_gout",
+    "title": "2020 American College of Rheumatology Guideline for the Management of Gout",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/32391934/",
+    "src": "FitzGerald JD, et al. Arthritis Care Res. 2020;72:744–760"
+   },
+   {
+    "id": "lact",
+    "title": "Colchicine — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501213/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Colchicine tablets 0.6 mg · Northstar",
+   "date": "4 พ.ย. 2026",
+   "set": "94bee24f-d846-4344-bc42-b2eae6b433ba"
+  }
+ },
+ {
+  "id": "allopurinol",
+  "name": "Allopurinol",
+  "group": "เกาต์และโรคข้อ",
+  "cls": "Xanthine oxidase inhibitor (ULT)",
+  "chips": [
+   "HLA-B*58:01",
+   "SJS/TEN",
+   "start low go slow",
+   "azathioprine"
+  ],
+  "nlem": "b · บัญชียาพื้นฐาน (เดิม ก)",
+  "nlemCond": {
+   "t": "ลดความเสี่ยง SCAR: เฝ้าระวังใกล้ชิดช่วง 2–4 สัปดาห์แรก · เริ่มขนาดต่ำและเพิ่มช้าในผู้สูงอายุและไตเสื่อม",
+   "r": [
+    "nlem"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง <b>xanthine oxidase</b> (allopurinol และ <b>oxypurinol</b> ที่ออกฤทธิ์ยาว) → ลดการสร้างกรดยูริก",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "ไตปกติ: เริ่ม <b>100 mg/วัน</b> เพิ่มทีละ 100 mg ทุกสัปดาห์จน<b>กรดยูริก ≤6 mg/dL</b> · สูงสุด 800 mg/วัน · ขนาด >300 mg แบ่งให้",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ไตเสื่อม: เริ่ม <b>50 mg/วัน</b> เพิ่มทีละ 50 mg ทุก 2–4 สัปดาห์",
+    "r": [
+     "fda:2.6"
+    ]
+   },
+   {
+    "t": "<b>HLA-B*58:01</b> เสี่ยง SJS/TEN/DRESS สูง (พบบ่อยในคนไทย/เอเชีย) · ACR 2020 แนะนำตรวจก่อนเริ่มยาในคนเชื้อสายเอเชียตะวันออกเฉียงใต้",
+    "r": [
+     "fda:5.1",
+     "g_gout"
+    ]
+   },
+   {
+    "t": "<b>ผื่นครั้งแรก = หยุดยาถาวรทันที</b>",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "<b>Azathioprine/mercaptopurine</b>: ต้องลดขนาด (ถูกทำลายด้วย XO) ไม่งั้นกดไขกระดูก · ห้ามกับ capecitabine · thiazide/ampicillin เพิ่มผื่น",
+    "r": [
+     "fda:7.1",
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "เริ่มยาแล้ว gout flare ได้ → <b>ให้ยาป้องกัน flare</b> · ACR 2020: เริ่ม ULT ระหว่าง flare ได้",
+    "r": [
+     "fda:2.2",
+     "g_gout"
+    ]
+   },
+   {
+    "t": "ACR 2020: allopurinol เป็น ULT ตัวแรก · เป้า sUA <6 mg/dL (treat-to-target)",
+    "r": [
+     "g_gout"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "โรคเกาต์ (flare ซ้ำ tophi ข้อถูกทำลาย นิ่วกรดยูริก)",
+    "d": "เริ่ม 100 mg/วัน เพิ่มทีละ 100 mg/สัปดาห์ ≤800 mg/วัน",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "i": "กรดยูริกสูงจากการรักษามะเร็ง",
+    "d": "ผู้ใหญ่ 300–800 mg/วัน",
+    "r": [
+     "fda:2.4"
+    ]
+   },
+   {
+    "i": "นิ่ว calcium oxalate ซ้ำ",
+    "d": "200–300 mg/วัน",
+    "r": [
+     "fda:2.5"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ตรวจก่อนเริ่ม: กรดยูริก CBC chemistry ตับ ไต",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ดื่มน้ำให้ได้ปัสสาวะ ≥2 ลิตร/วัน",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "เริ่ม 50 mg/วัน (ตาม eGFR) เพิ่ม 50 mg ทุก 2–4 สัปดาห์ · ติดตามไต",
+   "r": [
+    "fda:2.6",
+    "fda:8.6"
+   ]
+  },
+  "mon": [
+   {
+    "t": "กรดยูริก เป้า ≤6 mg/dL",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "ผื่น อาการแพ้ ช่วงแรก",
+    "r": [
+     "fda:5.1",
+     "nlem"
+    ]
+   },
+   {
+    "t": "ไต ตับ CBC",
+    "r": [
+     "fda:5.3",
+     "fda:5.4",
+     "fda:5.5"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "เคยแพ้ allopurinol",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ผื่นรุนแรง SJS/TEN DRESS",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "Gout flare ช่วงเริ่มยา",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "พิษต่อไต",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "พิษต่อตับ",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "กดไขกระดูก",
+    "r": [
+     "fda:5.5"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "ผื่น (พบบ่อยสุด) · gout flare · ท้องเสีย คลื่นไส้ · เอนไซม์ตับสูง",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Azathioprine, mercaptopurine: ลดขนาดยาเหล่านั้น",
+    "r": [
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "Capecitabine: เลี่ยง",
+    "r": [
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "Pegloticase: หยุด allopurinol",
+    "r": [
+     "fda:7.2"
+    ]
+   },
+   {
+    "t": "Thiazide, ampicillin/amoxicillin, bendamustine: ผื่นมากขึ้น",
+    "r": [
+     "fda:7.1"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: อาจเป็นอันตรายต่อทารก",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ฉลากแนะนำไม่ให้นม · LactMed: oxypurinol ผ่านน้ำนม ข้อมูลน้อย",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ข้อมูลจำกัด · รักษาตามอาการ",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "ผื่นขึ้น ตุ่มพอง แผลในปาก ไข้ ให้หยุดยาและพบแพทย์ทันที",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "อย่าหยุดยาเองเมื่อมี flare",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ดื่มน้ำมากๆ",
+    "r": [
+     "fda:Dosage and Administration"
+    ]
+   }
+  ],
+  "bw": null,
+  "pk": [
+   [
+    "ครึ่งชีวิต",
+    "allopurinol 1–2 ชม. · oxypurinol ~15 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "oxypurinol ขับทางไต (สะสมในไตเสื่อม)",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Allopurinol — เอกสารกำกับยา US FDA (Allopurinol tablets · Dr. Reddy's (ฉลากแบบใหม่ 2024))",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=19a138b8-d225-03e6-f762-abe71560204b",
+    "src": "DailyMed · ฉบับ 3 ก.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_gout",
+    "title": "2020 American College of Rheumatology Guideline for the Management of Gout",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/32391934/",
+    "src": "FitzGerald JD, et al. Arthritis Care Res. 2020;72:744–760"
+   },
+   {
+    "id": "lact",
+    "title": "Allopurinol — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501198/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Allopurinol tablets · Dr. Reddy's (ฉลากแบบใหม่ 2024)",
+   "date": "3 ก.ย. 2026",
+   "set": "19a138b8-d225-03e6-f762-abe71560204b"
+  }
+ },
+ {
+  "id": "febuxostat",
+  "name": "Febuxostat",
+  "group": "เกาต์และโรคข้อ",
+  "cls": "Xanthine oxidase inhibitor (non-purine)",
+  "chips": [
+   "Boxed: CV death",
+   "ห้ามกับ azathioprine",
+   "ไม่ต้องปรับไตเสื่อมเล็กน้อย"
+  ],
+  "nlem": "ex · บัญชียาเฉพาะโรค (เดิม ง)",
+  "nlemCond": {
+   "t": "ใช้เมื่อแพ้ allopurinol รุนแรง/มี HLA-B*58:01 และใช้ uricosuric ไม่ได้ หรือกรดยูริกยัง >6 mg/dL หลัง uricosuric ฯลฯ · ระวังในผู้มีโรค/ความเสี่ยงหัวใจและหลอดเลือด",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "Cardiovascular death",
+  "bw": {
+   "t": "ผู้ป่วยเกาต์ที่มีโรคหัวใจและหลอดเลือดอยู่แล้ว <b>เสียชีวิตจากหัวใจมากกว่า allopurinol</b> (CARES) · ใช้เฉพาะเมื่อ allopurinol ขนาดสูงสุดไม่ได้ผล ทนไม่ได้ หรือใช้ไม่ได้",
+   "r": [
+    "fda:Boxed",
+    "fda:5.1"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง <b>xanthine oxidase</b> แบบไม่ใช่ purine analog → ลดกรดยูริก",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "เริ่ม <b>40 mg วันละครั้ง</b> · 2 สัปดาห์แล้วกรดยูริกยัง ≥6 mg/dL เพิ่มเป็น <b>80 mg</b>",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "<b>ไม่ต้องปรับในไตเสื่อมเล็กน้อย–ปานกลาง</b> · ไตเสื่อมรุนแรง จำกัด 40 mg/วัน",
+    "r": [
+     "fda:2.2"
+    ]
+   },
+   {
+    "t": "<b>ห้ามใช้ร่วม azathioprine/mercaptopurine</b>",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "<b>Boxed: CV death</b> → เป็นยาทางเลือกหลัง allopurinol (ทั้งฉลาก US และ NLEM ง/ex)",
+    "r": [
+     "fda:Boxed",
+     "nlem"
+    ]
+   },
+   {
+    "t": "ให้ยาป้องกัน flare (NSAID หรือ colchicine) เมื่อเริ่มยา",
+    "r": [
+     "fda:2.4",
+     "fda:5.2"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "ภาวะกรดยูริกสูงเรื้อรังในโรคเกาต์ ที่ allopurinol ไม่ได้ผล/ทนไม่ได้/ใช้ไม่ได้",
+    "d": "40 mg/วัน → 80 mg/วัน",
+    "r": [
+     "fda:Indications and Usage",
+     "fda:2.1"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "กินพร้อมหรือไม่พร้อมอาหาร หรือยาลดกรดก็ได้",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "ตรวจกรดยูริกได้ตั้งแต่ 2 สัปดาห์",
+    "r": [
+     "fda:2.3"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "เล็กน้อย–ปานกลาง: ไม่ต้องปรับ · รุนแรง: ≤40 mg/วัน",
+   "r": [
+    "fda:2.2",
+    "fda:8.6"
+   ]
+  },
+  "hepatic": {
+   "t": "เล็กน้อย–ปานกลาง: ไม่ต้องปรับ · รุนแรง: ไม่มีข้อมูล ระวัง",
+   "r": [
+    "fda:2.2",
+    "fda:8.7"
+   ]
+  },
+  "mon": [
+   {
+    "t": "LFT ก่อนเริ่ม",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "อาการหัวใจขาดเลือด อัมพาต",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "กรดยูริก",
+    "r": [
+     "fda:2.3"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "ใช้ azathioprine หรือ mercaptopurine",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "CV death",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "Gout flare",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ตับ",
+    "r": [
+     "fda:5.3"
+    ]
+   },
+   {
+    "t": "แพ้รุนแรง SJS DRESS (ระวังในผู้เคยแพ้ allopurinol รุนแรง)",
+    "r": [
+     "fda:5.4"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "เอนไซม์ตับสูง คลื่นไส้ ปวดข้อ ผื่น",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "Azathioprine/mercaptopurine: ห้าม",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "Theophylline: ระวัง",
+    "r": [
+     "fda:7.1"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ข้อมูลไม่พอ",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ไม่มีข้อมูล",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   },
+   {
+    "t": "Secondary hyperuricemia (มะเร็ง ปลูกถ่าย): ไม่แนะนำ",
+    "r": [
+     "fda:8.8"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "เจ็บหน้าอก หอบ แขนขาอ่อนแรง พูดไม่ชัด รีบพบแพทย์",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "อย่าหยุดยาเองเมื่อมี flare",
+    "r": [
+     "fda:5.2"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "ครึ่งชีวิต",
+    "~5–8 ชม.",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "เมแทบอลิซึม",
+    "ตับ (UGT, CYP) · ขับทั้งทางไตและอุจจาระ",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Febuxostat — เอกสารกำกับยา US FDA (Uloric · Takeda)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=54de10ef-fe5f-4930-b91d-6bbb04c664bd",
+    "src": "DailyMed · ฉบับ 24 ธ.ค. 2025"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_gout",
+    "title": "2020 American College of Rheumatology Guideline for the Management of Gout",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/32391934/",
+    "src": "FitzGerald JD, et al. Arthritis Care Res. 2020;72:744–760"
+   },
+   {
+    "id": "lact",
+    "title": "Febuxostat — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK573043/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Uloric · Takeda",
+   "date": "24 ธ.ค. 2025",
+   "set": "54de10ef-fe5f-4930-b91d-6bbb04c664bd"
+  }
+ },
+ {
+  "id": "methotrexate",
+  "name": "Methotrexate (ชนิดกิน)",
+  "group": "เกาต์และโรคข้อ",
+  "cls": "Antimetabolite · DHFR inhibitor · csDMARD",
+  "chips": [
+   "สัปดาห์ละครั้ง",
+   "Boxed",
+   "folic acid",
+   "ห้ามตั้งครรภ์"
+  ],
+  "nlem": "s · บัญชียาทางเลือก (เดิม ค)",
+  "nlemCond": {
+   "t": "กลุ่ม DMARDs เป็นบัญชี s · ระวังกดไขกระดูกและพิษต่อตับ · กลุ่มยามะเร็งเป็น b",
+   "r": [
+    "nlem"
+   ]
+  },
+  "bwTitle": "Embryo-fetal toxicity, hypersensitivity, ADR รุนแรง, ใช้ยาผิด",
+  "bw": {
+   "t": "<b>ทำให้ทารกตาย/พิการ</b> ห้ามในหญิงตั้งครรภ์ที่ใช้รักษาโรคที่ไม่ใช่มะเร็ง · แพ้รุนแรง · ADR รุนแรง (กดไขกระดูก ติดเชื้อ ไต GI ตับ ปอด ผิวหนัง) · <b>ใช้ยาผิดเป็นทุกวันแทนสัปดาห์ละครั้ง → เสียชีวิต</b>",
+   "r": [
+    "fda:Boxed"
+   ]
+  },
+  "moa": {
+   "t": "ยับยั้ง <b>dihydrofolate reductase</b> → ลด tetrahydrofolate → ยับยั้งการสร้าง DNA · ใน RA ขนาดต่ำมีฤทธิ์ต้านการอักเสบ (adenosine)",
+   "r": [
+    "fda:12.1"
+   ]
+  },
+  "exam": [
+   {
+    "t": "RA: เริ่ม <b>7.5 mg สัปดาห์ละครั้ง</b> ปรับเพิ่มตามการตอบสนอง · <b>>20 mg/สัปดาห์</b> เสี่ยงกดไขกระดูก",
+    "r": [
+     "fda:2.3"
+    ]
+   },
+   {
+    "t": "<b>กินสัปดาห์ละครั้ง ไม่ใช่ทุกวัน</b> — ความผิดพลาดนี้ทำให้เสียชีวิต · ระบุวันในสัปดาห์ให้ชัด",
+    "r": [
+     "fda:2.1",
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "RA/psoriasis: ให้ <b>folic acid</b> ลดผลข้างเคียง (เช่น 1 mg/วัน หรือ 5 mg/สัปดาห์ เว้นวันที่กิน MTX)",
+    "r": [
+     "fda:2.3",
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "ACR 2021: <b>MTX เป็นยาตัวแรก</b>ใน RA ปานกลาง–รุนแรง",
+    "r": [
+     "g_ra"
+    ]
+   },
+   {
+    "t": "<b>ไตเสื่อม</b> (CrCl <90) ขับ MTX ช้า พิษมากขึ้น ลดขนาดหรือหยุด",
+    "r": [
+     "fda:8.6"
+    ]
+   },
+   {
+    "t": "DDI: <b>NSAIDs, PPI, penicillin, sulfonamide (co-trimoxazole)</b>, probenecid เพิ่มระดับ MTX · co-trimoxazole + MTX กดไขกระดูกรุนแรง",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "ห้ามตั้งครรภ์ · ตรวจการตั้งครรภ์ก่อนเริ่ม · คุมกำเนิด",
+    "r": [
+     "fda:Contraindications",
+     "fda:5.1"
+    ]
+   }
+  ],
+  "ind": [
+   {
+    "i": "Rheumatoid arthritis",
+    "d": "เริ่ม 7.5 mg สัปดาห์ละครั้ง",
+    "r": [
+     "fda:1.2",
+     "fda:2.3"
+    ]
+   },
+   {
+    "i": "Polyarticular JIA",
+    "d": "10 mg/m² สัปดาห์ละครั้ง",
+    "r": [
+     "fda:1.3",
+     "fda:2.4"
+    ]
+   },
+   {
+    "i": "Psoriasis",
+    "d": "10–25 mg สัปดาห์ละครั้ง",
+    "r": [
+     "fda:2.5"
+    ]
+   },
+   {
+    "i": "ALL (maintenance)",
+    "d": "20 mg/m² สัปดาห์ละครั้ง",
+    "r": [
+     "fda:1.1",
+     "fda:2.2"
+    ]
+   }
+  ],
+  "doseNotes": [
+   {
+    "t": "ตรวจการตั้งครรภ์ก่อนเริ่มยา",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "การตอบสนองใน RA ส่วนใหญ่เห็นที่ 3–6 สัปดาห์ (ถึง 12 สัปดาห์)",
+    "r": [
+     "fda:2.3"
+    ]
+   }
+  ],
+  "renal": {
+   "t": "CrCl <90 mL/min: ติดตามใกล้ชิด ลดขนาดหรือหยุด",
+   "r": [
+    "fda:8.6",
+    "fda:5.8"
+   ]
+  },
+  "hepatic": {
+   "t": "ตับเสื่อม: ระวัง พิษต่อตับ",
+   "r": [
+    "fda:8.7"
+   ]
+  },
+  "mon": [
+   {
+    "t": "CBC ไต ตับ เป็นระยะ",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "อาการปอดอักเสบ (ไอแห้ง หอบ ไข้)",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "การติดเชื้อ",
+    "r": [
+     "fda:5.11"
+    ]
+   }
+  ],
+  "ci": [
+   {
+    "t": "หญิงตั้งครรภ์ที่ใช้รักษาโรคที่ไม่ใช่มะเร็ง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   },
+   {
+    "t": "เคยแพ้ methotrexate รุนแรง",
+    "r": [
+     "fda:Contraindications"
+    ]
+   }
+  ],
+  "warn": [
+   {
+    "t": "ทารกพิการ/ตาย",
+    "r": [
+     "fda:5.1"
+    ]
+   },
+   {
+    "t": "แพ้ยา",
+    "r": [
+     "fda:5.2"
+    ]
+   },
+   {
+    "t": "ทางเดินอาหาร (แผลในปาก ท้องเสีย)",
+    "r": [
+     "fda:5.4"
+    ]
+   },
+   {
+    "t": "ปอดอักเสบ",
+    "r": [
+     "fda:5.6"
+    ]
+   },
+   {
+    "t": "ผิวหนังรุนแรง",
+    "r": [
+     "fda:5.7"
+    ]
+   },
+   {
+    "t": "ไต",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "ใช้ยาผิดความถี่",
+    "r": [
+     "fda:5.9"
+    ]
+   },
+   {
+    "t": "Folic acid",
+    "r": [
+     "fda:5.10"
+    ]
+   },
+   {
+    "t": "ติดเชื้อรุนแรง",
+    "r": [
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "มะเร็งทุติยภูมิ",
+    "r": [
+     "fda:5.13"
+    ]
+   },
+   {
+    "t": "วัคซีนเชื้อเป็น",
+    "r": [
+     "fda:5.15"
+    ]
+   },
+   {
+    "t": "ภาวะเจริญพันธุ์",
+    "r": [
+     "fda:5.16"
+    ]
+   }
+  ],
+  "ae": [
+   {
+    "t": "<b>แผลในปาก</b> คลื่นไส้ ท้องเสีย · เอนไซม์ตับสูง · กดไขกระดูก · ติดเชื้อ · ผมร่วง",
+    "r": [
+     "fda:Adverse Reactions"
+    ]
+   }
+  ],
+  "ddi": [
+   {
+    "t": "NSAIDs, aspirin, PPI, penicillin, sulfonamide, probenecid: ระดับ MTX สูง",
+    "r": [
+     "fda:7.1"
+    ]
+   },
+   {
+    "t": "ยาที่เป็นพิษต่อตับ/ไต: พิษเพิ่ม",
+    "r": [
+     "fda:7.1"
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "t": "ตั้งครรภ์: ห้าม (โรคที่ไม่ใช่มะเร็ง)",
+    "r": [
+     "fda:8.1"
+    ]
+   },
+   {
+    "t": "ให้นมบุตร: ห้ามให้นม",
+    "r": [
+     "fda:8.2",
+     "lact"
+    ]
+   },
+   {
+    "t": "คุมกำเนิดระหว่างใช้ (หญิง 6 เดือน ชาย 3 เดือนหลังหยุด)",
+    "r": [
+     "fda:8.3"
+    ]
+   },
+   {
+    "t": "ผู้สูงอายุ: ไตลดลง เสี่ยงพิษ",
+    "r": [
+     "fda:8.5"
+    ]
+   }
+  ],
+  "od": [
+   {
+    "t": "ยาต้านพิษ: <b>leucovorin (folinic acid)</b> ให้เร็วที่สุด",
+    "r": [
+     "fda:Overdosage"
+    ]
+   }
+  ],
+  "cou": [
+   {
+    "t": "กินสัปดาห์ละครั้งในวันเดิม",
+    "r": [
+     "fda:2.1"
+    ]
+   },
+   {
+    "t": "แผลในปาก ไข้ เจ็บคอ ไอ หอบ ให้พบแพทย์",
+    "r": [
+     "fda:5.4",
+     "fda:5.6",
+     "fda:5.11"
+    ]
+   },
+   {
+    "t": "งดดื่มสุรา",
+    "r": [
+     "fda:5.8"
+    ]
+   },
+   {
+    "t": "คุมกำเนิด",
+    "r": [
+     "fda:8.3"
+    ]
+   }
+  ],
+  "pk": [
+   [
+    "การดูดซึม",
+    "ขึ้นกับขนาด อิ่มตัวเมื่อขนาดสูง",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "การขับออก",
+    "ไตเป็นหลัก",
+    [
+     "fda:12.3"
+    ]
+   ],
+   [
+    "ครึ่งชีวิต",
+    "3–10 ชม. (ขนาดต่ำ)",
+    [
+     "fda:12.3"
+    ]
+   ]
+  ],
+  "refs": [
+   {
+    "id": "fda",
+    "title": "Methotrexate (ชนิดกิน) — เอกสารกำกับยา US FDA (Trexall · Teva)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e942f8db-510f-44d6-acb5-b822196f5e8c",
+    "src": "DailyMed · ฉบับ 17 มิ.ย. 2026"
+   },
+   {
+    "id": "nlem",
+    "title": "ประกาศคณะกรรมการพัฒนาระบบยาแห่งชาติ เรื่อง บัญชียาหลักแห่งชาติ พ.ศ. 2569",
+    "url": "https://ndp.fda.moph.go.th/nlem/69-1",
+    "src": "กองนโยบายแห่งชาติด้านยา อย. · ลงวันที่ 12 ก.พ. 2569 · ราชกิจจาฯ 30 มี.ค. 2569"
+   },
+   {
+    "id": "g_ra",
+    "title": "2021 American College of Rheumatology Guideline for the Treatment of Rheumatoid Arthritis",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/34101387/",
+    "src": "Fraenkel L, et al. Arthritis Care Res. 2021;73:924–939"
+   },
+   {
+    "id": "lact",
+    "title": "Methotrexate — Drugs and Lactation Database (LactMed)",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK501341/",
+    "src": "NIH/NLM"
+   }
+  ],
+  "src": {
+   "lab": "Trexall · Teva",
+   "date": "17 มิ.ย. 2026",
+   "set": "e942f8db-510f-44d6-acb5-b822196f5e8c"
+  }
  }
 ]
