@@ -202,7 +202,8 @@ const nickSize = (m) => {
 .mv-namerow .mv-nick { min-width: 0; }
 .mv-mini { flex: none; display: flex; }
 .mv-namerow .mv-avatar { flex: none; width: 26px; height: 26px; border-width: 1.5px; border-color: #fff; }
-.mv-namerow .mv-nick { flex: 1; text-align: left; }   /* ขนาดตัวอักษรหดตามความยาวชื่อ — nickSize() */
+.mv-namerow { justify-content: center; }   /* รูปเล็ก+ชื่อจับกลุ่มอยู่กลางการ์ด — ชื่อสั้นไม่ชิดซ้ายจนชนกรอบรูป (21 พ.ย.) */
+.mv-namerow .mv-nick { flex: 0 1 auto; text-align: left; }   /* ขนาดตัวอักษรหดตามความยาวชื่อ — nickSize() */
 .mv-namerow .mv-avatar { width: 22px; height: 22px; }
 .mv-card {
   background: #fff; border: var(--bw) solid var(--line); border-radius: 16px;
