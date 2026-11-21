@@ -176,7 +176,7 @@ import { SEATS, COUNTERS, DOOR, seatFoot, freeSeat } from '../utils/focusLayout.
 import { PLE_CC_DATE } from '../firebase/config.js'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { useFocusMode, STATUS_LABEL, fmtClock, COIN_CAP_SECS } from '../composables/useFocusMode.js'
-import { TRACKS, NOISES, audioState as audio, playTrack, stopTrack, playNoise, stopNoise, setVolume, setMuted, stopAll } from '../utils/focusAudio.js'
+import { chime, TRACKS, NOISES, audioState as audio, playTrack, stopTrack, playNoise, stopNoise, setVolume, setMuted, stopAll } from '../utils/focusAudio.js'
 
 const ART = Object.fromEntries(Object.entries(import.meta.glob('../assets/focus/*.png', { eager: true, import: 'default' }))
   .map(([k, v]) => [k.split('/').pop().replace('.png', ''), v]))
@@ -277,7 +277,7 @@ watch(others, (list) => {
     if (!o) {
       const fresh = Date.now() - mountedAt > 2500
       pos[p.uid] = o = reactive({ x: fresh ? DOOR[0] : tx, y: fresh ? DOOR[1] : ty, walking: false, tx, ty })
-      if (fresh) walkTo(o, tx, ty)
+      if (fresh) { walkTo(o, tx, ty); if (fm.state.active) chime('door') }   // 🔔 กริ๊ง: มีคนเพิ่งเข้าห้อง
     } else if (o.tx !== tx || o.ty !== ty) { o.tx = tx; o.ty = ty; walkTo(o, tx, ty) }
   }
   for (const uid of Object.keys(pos)) if (!seen.has(uid)) { cancelAnimationFrame(rafs.get(pos[uid])); delete pos[uid] }
@@ -354,12 +354,15 @@ const hhmm = (ms) => (typeof ms === 'number' ? new Date(ms) : new Date()).toTime
 const chat = computed(() => room.chat.value.map(m => ({ id: m.id, who: m.name, text: m.text, time: hhmm(m.at) })))
 const bubbles = reactive({})
 const seenMsg = new Set()
+let lastChime = 0
 let chatPrimed = false
 watch(() => room.chat.value, (list) => {
   for (const m of list) {
     if (seenMsg.has(m.id)) continue
     seenMsg.add(m.id)
     if (!chatPrimed) continue   // ข้อความเก่าตอนเพิ่งเปิด ไม่ต้องเด้งบับเบิ้ล
+    // 🔔 ป๊อก: เฉพาะข้อความคนอื่น · ไม่เกินทุก 5 วิ · เฉพาะตอนเราอยู่ในห้อง
+    if (m.uid !== room.myUid() && fm.state.active && Date.now() - lastChime > 5000) { lastChime = Date.now(); chime('chat') }
     bubbles[m.uid] = m.text
     setTimeout(() => { if (bubbles[m.uid] === m.text) delete bubbles[m.uid] }, 5000)
   }

@@ -163,3 +163,20 @@ export function playNoise(kind) {
   noiseNode = { s, g, drip }
 }
 export function stopAll() { stopTrack(); stopNoise() }
+
+// 🔔 เสียงแจ้งในห้อง (22 พ.ย. 2026) — เบา นุ่ม ไม่แหลม · เงียบตามปุ่ม 🔇 (ผ่าน master)
+//   chat = "ป๊อก" นุ่ม 1 ครั้ง · door = กระดิ่งประตูร้าน 2 โน้ต
+export function chime(kind) {
+  if (!ctx() || audioState.muted) return
+  const t = ac.currentTime, g = ac.createGain(), lp = ac.createBiquadFilter()
+  lp.type = 'lowpass'; lp.frequency.value = 1800
+  g.gain.value = 0.5; lp.connect(g).connect(master)
+  const note = (f, at, len, vol) => {
+    const o = ac.createOscillator(), e = ac.createGain()
+    o.type = 'sine'; o.frequency.setValueAtTime(f, t + at)
+    e.gain.setValueAtTime(0.0001, t + at); e.gain.exponentialRampToValueAtTime(vol, t + at + 0.01); e.gain.exponentialRampToValueAtTime(0.0001, t + at + len)
+    o.connect(e).connect(lp); o.start(t + at); o.stop(t + at + len + 0.05)
+  }
+  if (kind === 'door') { note(784, 0, 0.9, 0.12); note(659, 0.14, 1.1, 0.1) }   // กริ๊ง
+  else { note(520, 0, 0.18, 0.12); note(390, 0.03, 0.2, 0.06) }                 // ป๊อก
+}
