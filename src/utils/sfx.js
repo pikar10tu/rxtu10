@@ -28,7 +28,14 @@ function audio() {
     ctx = new AC()
     out = ctx.createGain()
     out.gain.value = MASTER
-    out.connect(ctx.destination)
+    // limiter กันเสียงแตกตอนหลายเสียงซ้อนกัน (สกิลรัว/คริ) — ค่าตาม web-game-audio: -6dB knee0 ratio20
+    let lim = null
+    try {
+      lim = ctx.createDynamicsCompressor()
+      lim.threshold.value = -6; lim.knee.value = 0; lim.ratio.value = 20
+      lim.attack.value = 0.003; lim.release.value = 0.12
+    } catch { lim = null }
+    if (lim) { out.connect(lim); lim.connect(ctx.destination) } else out.connect(ctx.destination)
   }
   if (ctx.state === 'suspended') ctx.resume().catch(() => {})
   return ctx
