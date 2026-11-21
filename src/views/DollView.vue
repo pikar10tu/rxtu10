@@ -138,7 +138,7 @@ const GROUPS = [
   { k: 'wear', icon: '👕', label: 'แต่งตัว', slots: WEAR_TABS, first: 't' },
   { k: 'card', icon: '🪪', label: 'การ์ดโปรไฟล์', slots: [], first: null },
 ]
-const FILTERS = [{ k: 'all', label: 'ทั้งหมด' }, { k: 'own', label: 'มีแล้ว' }, { k: 'not', label: 'ยังไม่มี' }, { k: 'new', label: 'ใหม่' }]
+const FILTERS = [{ k: 'all', label: 'ทั้งหมด' }, { k: 'own', label: 'มีแล้ว' }, { k: 'not', label: 'ยังไม่มี' }, ...(NEW_PARTS.size ? [{ k: 'new', label: 'ใหม่' }] : [])]
 // ?g=card = ลิงก์จากร้านค้าเดิม (แท็บร้านตกแต่ง) พามาหมวดการ์ดโปรไฟล์
 const group = ref(GROUPS.some(g => g.k === route.query.g) ? route.query.g : 'wear')
 const tab = ref(GROUPS.find(g => g.k === group.value).first || 't')
