@@ -292,5 +292,16 @@ onMounted(async () => {
   letter-spacing: .5px;
 }
 .home-head-sub { font-size: .7rem; color: var(--muted); margin: 4px 0 0; font-weight: 600; }
+/* 📱 จอมือถือ (user 21 พ.ย. 2026): ปุ่ม 4 อันขวาบนทับชื่อเว็บ → ซ่อนโลโก้ ย่อช่องไฟ · แถวจุด 7 วันล้นการ์ด → ป้าย 🔥 ลงบรรทัดใหม่ */
+@media (max-width: 480px) {
+  .home-head { gap: 8px; }
+  .home-head-badge { display: none; }
+  .home-head-actions { gap: 6px; }
+  .home-head-title { font-size: 1.6rem; }
+  .home-head-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .home-go { padding: 12px; gap: 10px; }
+  .home-go-cd { width: 70px; }
+  .home-streak { flex-wrap: wrap; row-gap: 4px; }
+}
 
 </style>

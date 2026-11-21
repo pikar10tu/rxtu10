@@ -261,6 +261,10 @@ async function doEquip() {
 .dv-set { font-size: .72rem; font-weight: 800; background: #fff4d6; color: #a06b00; border-radius: 999px; padding: 1px 10px; }
 .dv-note { font-size: .72rem; color: var(--muted); font-weight: 700; }
 .dv-side { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+/* 📱 ตัวละคร scale 5 = กว้าง 288px ตายตัว → มือถือแคบดันปุ่มลัดขวาล้นจอ (21 พ.ย. 2026) · ย่อด้วย zoom ให้ออร่า/อนุภาคย่อตามไปด้วย */
+.dv-stage { grid-template-columns: minmax(0, 1fr) auto; }
+@media (max-width: 420px) { .dv-fig :deep(.dollw) { zoom: .8; } }
+@media (max-width: 370px) { .dv-fig :deep(.dollw) { zoom: .7; } }
 .dv-mini { font: inherit; font-size: .74rem; font-weight: 700; border: var(--bw) solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
 .dv-mini:disabled { opacity: .45; cursor: default; }
 .dv-sheet-sub { font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
