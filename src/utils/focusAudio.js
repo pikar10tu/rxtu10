@@ -166,6 +166,21 @@ export function stopAll() { stopTrack(); stopNoise() }
 
 // 🔔 เสียงแจ้งในห้อง (22 พ.ย. 2026) — เบา นุ่ม ไม่แหลม · เงียบตามปุ่ม 🔇 (ผ่าน master)
 //   chat = "ป๊อก" นุ่ม 1 ครั้ง · door = กระดิ่งประตูร้าน 2 โน้ต
+// 🐈 เสียงแมว: ตัดจากไฟล์ Pixabay (dragon-studio) 7 ท่อน · อบค่าที่ user เลือกลงไฟล์แล้ว 22 พ.ย.
+//    (ลดแหลม -18 dB @4k · ลดย่านจี๊ด -12 dB @3k · สูงขึ้น 4 ครึ่งเสียง · ดัง 30%) → เล่นตรงไม่ต้องประมวลผลซ้ำ
+const MEOW_URLS = Object.values(import.meta.glob('../assets/focus/meow/*.mp3', { eager: true, import: 'default' }))
+const meowBufs = []
+let lastMeow = -1
+async function playMeow() {
+  if (!ctx() || audioState.muted || !MEOW_URLS.length) return
+  let i = Math.floor(Math.random() * MEOW_URLS.length)
+  if (i === lastMeow && MEOW_URLS.length > 1) i = (i + 1) % MEOW_URLS.length   // ไม่ซ้ำท่อนเดิมติดกัน
+  lastMeow = i
+  try {
+    meowBufs[i] ||= await fetch(MEOW_URLS[i]).then(r => r.arrayBuffer()).then(b => ac.decodeAudioData(b))
+    const src = ac.createBufferSource(); src.buffer = meowBufs[i]; src.connect(master); src.start()
+  } catch { /* โหลดไม่ได้ = เงียบไป */ }
+}
 export function chime(kind) {
   if (!ctx() || audioState.muted) return
   const t = ac.currentTime, g = ac.createGain(), lp = ac.createBiquadFilter()
@@ -185,16 +200,7 @@ export function chime(kind) {
     src.buffer = buf; src.connect(bp).connect(e).connect(master); src.start(t)
     return
   }
-  if (kind === 'meow') {   // เมี๊ยว~ = โทนเลื่อยผ่าน bandpass เลื่อนเสียงขึ้นแล้วตก
-    const o = ac.createOscillator(), bp = ac.createBiquadFilter(), e = ac.createGain()
-    o.type = 'sawtooth'
-    o.frequency.setValueAtTime(520, t); o.frequency.linearRampToValueAtTime(820, t + 0.16); o.frequency.exponentialRampToValueAtTime(480, t + 0.55)
-    bp.type = 'bandpass'; bp.Q.value = 3
-    bp.frequency.setValueAtTime(900, t); bp.frequency.linearRampToValueAtTime(1800, t + 0.18); bp.frequency.linearRampToValueAtTime(1000, t + 0.55)
-    e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.35, t + 0.05); e.gain.setValueAtTime(0.35, t + 0.3); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.6)
-    o.connect(bp).connect(e).connect(master); o.start(t); o.stop(t + 0.65)
-    return
-  }
+  if (kind === 'meow') { playMeow(); return }   // เสียงแมวจริง (ไฟล์) สุ่ม 1 ใน 7
   if (kind === 'door') { note(784, 0, 0.9, 0.12); note(659, 0.14, 1.1, 0.1) }   // กริ๊ง
   else { note(520, 0, 0.18, 0.12); note(390, 0.03, 0.2, 0.06) }                 // ป๊อก
 }

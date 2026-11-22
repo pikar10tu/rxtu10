@@ -104,20 +104,46 @@ const petIdx = computed(() => {
   })
   return best
 })
+// 🎲 อารมณ์แมว (สุ่มทุกครั้งที่เราเดินมาหา) — ไม่วุ่นวาย แต่เดาไม่ได้
+//   friendly 55% นั่งรอให้ลูบ · aloof 25% นั่งอยู่แต่ลูบแล้วบางทีสะบัดหน้าหนี (ลูบไปเรื่อยๆ จะใจอ่อน)
+//   shy 20% ลุกเดินหนีไปมุมไกล · ตอนเราเดินจากไป มีโอกาส 30% ที่น้องเดินตามมานั่งใกล้ๆ
+function fleeFrom(i, p) {
+  const far = (SPOTS[props.zone] || []).map(([x, y]) => [x, y, Math.hypot(x - p.x, y - p.y)]).sort((a, b) => b[2] - a[2]).slice(0, 3)
+  const [tx, ty] = far[Math.floor(Math.random() * far.length)] || [cats.value[i].x, cats.value[i].y]
+  walkTo(i, tx, ty, 22)
+}
 watch(petIdx, (i, old) => {
-  if (i >= 0) clearTimeout(catTimers[i])        // มีคนมาหา → อยู่นิ่ง
-  if (old >= 0 && old !== i && cats.value[old]) idle(old)   // คนเดินไปแล้ว → กลับไปเดินเล่น
+  if (i >= 0) {
+    const c = cats.value[i]
+    clearTimeout(catTimers[i])        // มีคนมาหา → อยู่นิ่ง
+    const r = Math.random()
+    c.mood = r < 0.55 ? 'friendly' : r < 0.8 ? 'aloof' : 'shy'
+    c.snubs = 0
+    if (c.mood === 'shy') { const me = props.me; catTimers[i] = setTimeout(() => { if (me) fleeFrom(i, me) }, 400 + Math.random() * 900) }
+  }
+  if (old >= 0 && old !== i && cats.value[old]) {
+    if (Math.random() < 0.3 && cats.value[old].mood !== 'shy') {   // เดินตาม
+      catTimers[old] = setTimeout(() => {
+        const m = props.me, c = cats.value[old]
+        if (!m || !c || c.s === 'cat_walk') { idle(old); return }
+        const side = Math.random() < 0.5 ? -1 : 1
+        walkTo(old, Math.max(10, Math.min(150, m.x + side * 11)), Math.max(56, Math.min(98, m.y + 2)), 13)
+      }, 1200 + Math.random() * 1500)
+    } else idle(old)   // คนเดินไปแล้ว → กลับไปเดินเล่น
+  }
 })
 let heartId = 0
 function petCat(i) {
   const c = cats.value[i]; if (!c) return
   if (c.s === 'cat_loaf') { c.s = 'cat_sit' }   // นอนอยู่ → ลุกนั่ง
+  // เมินเรา: สะบัดหน้าหนีเงียบๆ (ไม่มีหัวใจ ไม่ร้อง) · โดนลูบซ้ำๆ แล้วใจอ่อนเอง
+  if (c.mood === 'aloof' && c.snubs < 3 && Math.random() < 0.6 - c.snubs * 0.15) { c.snubs++; c.flip = !c.flip; return }
   const add = (meow, dx, delay) => setTimeout(() => {
     const id = ++heartId
     c.hearts = [...(c.hearts || []), { id, meow, dx }]
     setTimeout(() => { c.hearts = (c.hearts || []).filter(h => h.id !== id) }, 1400)
   }, delay)
-  add(true, 0, 0); add(false, -8, 150); add(false, 8, 320)
+  add(false, 0, 0); add(false, -8, 150); add(false, 8, 320)   // หัวใจล้วน ไม่มีคำว่าเมี๊ยว (user 22 พ.ย.)
   chime('meow')
 }
 const pct = (x) => (x / 160 * 100) + '%'
