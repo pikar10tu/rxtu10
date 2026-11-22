@@ -46,3 +46,4 @@ public/cc2/drug-links.json
 .claude/skills/pixel-art-studio/
 .claude/skills/pixel-art-sprites/
 src/data/dollInbox.local.js
+scripts/art/out/

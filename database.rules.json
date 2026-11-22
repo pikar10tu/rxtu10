@@ -251,6 +251,27 @@
           }
         }
       }
+    },
+    "tycoon": {
+      "rooms": {
+        "$code": {
+          ".read": "auth != null",
+          ".write": "auth != null && $code.matches(/^[A-Z0-9]{4}$/)",
+          "game": {
+            "json": {
+              ".validate": "newData.isString() && newData.val().length < 200000"
+            },
+            "ev": {
+              ".validate": "newData.isString() && newData.val().length < 50000"
+            }
+          },
+          "pres": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid"
+            }
+          }
+        }
+      }
     }
   }
 }

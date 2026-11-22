@@ -32,6 +32,15 @@
         </span>
       </RouterLink>
 
+      <!-- 🎲 เศรษฐีรอบโลก (เดโม 22 พ.ย. 2026) — เห็นเฉพาะแอดมิน + config/app.tycoonTesters -->
+      <RouterLink v-if="tycoonOk" to="/play/tycoon" class="hall tycoon">
+        <span class="hall-top">
+          <span class="hall-name"><Emoji char="🎲" /> เศรษฐีรอบโลก <i class="ty-beta">ทดลอง</i></span>
+          <span class="hall-go">เข้า ›</span>
+        </span>
+        <span class="hall-status"><span>เล่นกับบอท หรือสร้างห้องชวนเพื่อน 2–4 คน</span></span>
+      </RouterLink>
+
       <RouterLink to="/play/farm" class="hall farm">
         <span v-if="readyCount" class="nav-dot hall-dot" aria-hidden="true"></span>
         <span class="hall-top">
@@ -113,6 +122,7 @@ import SectionTitle from '../components/shared/SectionTitle.vue'
 import SoonCard from '../components/shared/SoonCard.vue'
 import { MINIGAMES } from '../data/minigames.js'
 import { useAppConfig } from '../composables/useAppConfig.js'
+import { canPlayTycoon } from '../utils/tycoonAccess.js'
 import { useNavDots } from '../composables/useNavDots.js'
 import { resolveBattleTeam } from '../utils/petTeam.js'
 import { getPetDef, RARITY, ELEMENTS } from '../data/index.js'
@@ -120,7 +130,8 @@ import { getCrop } from '../data/crops.js'
 import { BATTLE_SLOTS } from '../data/residence.js'
 
 const authStore = useAuthStore()
-const { arcadeOpen, pvpOpen } = useAppConfig()   // มินิเกมซ่อนจากทุกคนรวมแอดมิน (27 ส.ค.)
+const { arcadeOpen, pvpOpen, rawConfig } = useAppConfig()
+const tycoonOk = computed(() => canPlayTycoon(rawConfig.value, authStore.currentUser?.uid, authStore.isAdmin))   // มินิเกมซ่อนจากทุกคนรวมแอดมิน (27 ส.ค.)
 const farm = useFarm()
 const { petModeDot, towerDot, arenaDot, dustDot } = useNavDots()
 const { exp } = useExpedition()
@@ -162,6 +173,8 @@ const plotCells = computed(() => farm.plots.value.slice(0, 10).map(p => {
 .hall { display: block; text-decoration: none; color: var(--ink); position: relative; margin-top: 10px; padding: 14px; border-radius: 22px; border: var(--bw) solid var(--line); box-shadow: var(--pop); }
 .hall.pet { background: linear-gradient(150deg, #ece8ff, #d9d2ff); }
 .hall.farm { background: linear-gradient(150deg, #e3f8ec, #c6efd8); }
+.hall.tycoon { background: linear-gradient(150deg, #fff3c4, #ffd9e6); }
+.ty-beta { font-style: normal; font-size: .7rem; background: #ffd25a; border-radius: 6px; padding: 1px 6px; margin-left: 4px; }
 .hall-dot { top: 10px; right: 10px; width: 12px; height: 12px; }
 .hall-top { display: flex; align-items: baseline; justify-content: space-between; padding-right: 18px; }
 .hall-name { font-size: 1.05rem; font-weight: 800; }

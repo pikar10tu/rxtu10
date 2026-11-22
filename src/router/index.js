@@ -10,6 +10,7 @@ const routes = [
     { path: '/',          name: 'home',      component: () => import('../views/HomeView.vue')      },
     { path: '/members',   name: 'members',   component: () => import('../views/MembersView.vue')   },
     { path: '/play',      name: 'play',      component: () => import('../views/PlayView.vue')      },
+    { path: '/play/tycoon', name: 'tycoon', component: () => import('../views/TycoonView.vue') },   // 🎲 เดโม (แอดมิน+ผู้ทดสอบ)
     { path: '/study',     name: 'study',     component: () => import('../views/StudyView.vue')     },
     { path: '/study/summary/:id', name: 'summary', component: () => import('../views/SummaryView.vue') },
     { path: '/study/drugs', name: 'drugdb', component: () => import('../views/DrugDbView.vue') },

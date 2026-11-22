@@ -16,6 +16,7 @@
       </nav>
 
       <template v-if="tab === 'daily'">
+      <AdminTycoon />
       <!-- ───── โหมดซ่อมบำรุง (config/app.maintenance) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🚧" /> โหมดซ่อมบำรุง</span></div>
@@ -529,6 +530,7 @@
 <script setup>
 import AdminBattleLab from '../components/admin/AdminBattleLab.vue'
 import AdminCoinWatch from '../components/admin/AdminCoinWatch.vue'
+import AdminTycoon from '../components/admin/AdminTycoon.vue'
 import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
 import { WEEKLY_EFFECTS, WEEKLY_DAYS, activeWeekly } from '../data/pvpWeekly.js'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'

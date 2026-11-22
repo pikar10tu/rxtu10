@@ -55,3 +55,11 @@ export const SIDES = [0, 1, 2, 3].map(s => TILES.slice(s * 8 + 1, s * 8 + 8).map
 export const TOURS = TILES.filter(t => t.type === 'tour').map(t => t.idx)
 export const GROUP_TILES = GROUPS.map((_, g) => TILES.filter(t => t.group === g).map(t => t.idx))
 export const isOwnable = (idx) => TILES[idx].type === 'city' || TILES[idx].type === 'tour'
+
+/** ตำแหน่งบนตาราง 9×9 (เริ่มมุมขวาล่าง เดินทวนเข็มไปทางซ้าย) → { row, col } 1-based สำหรับ CSS grid */
+export function tileGrid(idx) {
+  if (idx <= 8) return { row: 9, col: 9 - idx }
+  if (idx <= 16) return { row: 9 - (idx - 8), col: 1 }
+  if (idx <= 24) return { row: 1, col: 1 + (idx - 16) }
+  return { row: 1 + (idx - 24), col: 9 }
+}

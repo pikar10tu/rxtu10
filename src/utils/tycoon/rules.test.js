@@ -58,3 +58,10 @@ test('ชนะพิเศษ: แถว · สามสี · ท่องเ�
   assert.equal(specialWin(0, own(GROUP_TILES[0])), null)
   assert.equal(specialWin(1, own(TOURS)), null)
 })
+
+import { tileGrid } from '../../data/tycoon/board.js'
+test('ตำแหน่งตาราง: มุมทั้ง 4 + ไม่มีช่องซ้อนกัน', () => {
+  assert.deepEqual([0, 8, 16, 24].map(tileGrid), [{ row: 9, col: 9 }, { row: 9, col: 1 }, { row: 1, col: 1 }, { row: 1, col: 9 }])
+  const keys = new Set(TILES.map(t => { const g = tileGrid(t.idx); return g.row + ',' + g.col }))
+  assert.equal(keys.size, 32)
+})
