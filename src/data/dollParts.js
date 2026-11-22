@@ -250,8 +250,8 @@ export const PARTS = [
   I('x2', 'x', 'cute', 'บีนนี่มิ้นต์', { m: [P(16, 2, 'BBBB'), P(15, 3, 'BBBBB'), R(14, 4, 6, 3, 'B'), R(13, 6, 7, 2, 'b')], o: [P(19, 0, 'WW'), P(18, 1, 'WWWW')], pal: { B: '#7FC8A9', b: '#5FAE8D' } }),
   I('x3', 'x', 'fantasy', 'มงกุฎ', { m: [P(15, 0, 'Y..Y'), P(15, 1, 'YY.YY'), R(15, 2, 5, 2, 'Y'), R(15, 3, 5, 1, 'y')], o: [P(19, 2, 'RR'), P(16, 2, 'G'), P(23, 2, 'G')], pal: { Y: '#F6C453', y: '#D9A23A', R: '#E0524A', G: '#4FA3D9' } }),
   I('x4', 'x', 'fantasy', 'หมวกแม่มด', { o: [P(22, 0, 'VV'), P(20, 1, 'VVVV'), P(19, 2, 'VVVV'), P(18, 3, 'VVVVV'), P(16, 4, 'VVVVVVVV'), P(15, 5, 'vvvvvvvvvv'), R(11, 6, 18, 2, 'V'), R(11, 7, 18, 1, 'w')], pal: { V: '#5B4585', w: '#45346A', v: '#F6C453' } }),
-  I('x5', 'x', 'cute', 'หูแมว', { m: [P(14, 1, 'H'), P(14, 2, 'HH'), P(14, 3, 'HPH')], pal: { P: '#F7B6C8' } }),
-  I('x6', 'x', 'cute', 'หูกระต่าย', { m: [R(15, 0, 2, 4, 'W'), R(16, 1, 1, 2, 'P')], pal: { W: '#FFFFFF', P: '#F7B6C8' } }),
+  I('x5', 'x', 'cute', 'หูแมว', { m: [P(14, -1, 'H'), P(13, 0, 'hHH'), P(13, 1, 'hPPH'), P(13, 2, 'hPPHH')], pal: { P: '#F7B6C8' } }),
+  I('x6', 'x', 'cute', 'หูกระต่าย', { m: [P(16, -4, 'W'), P(15, -3, 'WWw'), R(15, -2, 3, 5, 'W'), R(16, -2, 1, 4, 'P'), R(17, -2, 1, 5, 'w')], o: [P(18, 2, 'B.B'), P(18, 3, 'BbB')], pal: { W: '#FFFFFF', w: '#EFEAF6', P: '#F7B6C8', B: '#F7A1C0', b: '#D97C99' } }),
   I('x7', 'x', 'fantasy', 'วงแหวนนางฟ้า', { m: [P(16, 0, 'YYYY'), P(15, 1, 'Y')], pal: { Y: '#F6C453' } }),
   I('x8', 'x', 'fantasy', 'เขาปีศาจ', { m: [P(14, 1, 'R'), P(14, 2, 'RR'), P(15, 3, 'RR')], pal: { R: '#E0524A' } }),
   I('x9', 'x', 'uniform', 'หมวกบัณฑิต', { m: [R(11, 2, 9, 1, 'G'), P(13, 3, 'GGGGGGG'), R(14, 4, 6, 2, 'G')], o: [R(27, 2, 1, 4, 'Y'), R(26, 6, 2, 1, 'Y')], pal: { G: '#2B2B33', Y: '#F6C453' } }),
@@ -495,6 +495,13 @@ const AURA = {
   f44: { type: 'butterfly', color: '#B79BEA' },   // 22 พ.ย. เดิมกลีบปลิว → ผีเสื้อบิน
   f45: { type: 'hearts', color: '#F7A8C8' },
   f46: { type: 'glow', color: '#B49BE0' },
+  // 💎 ของแพง (≥30k) ที่ยังไม่มีเอฟเฟค — 22 พ.ย. user เคาะตามตาราง
+  i4: { type: 'sparkle', color: '#F6C453' }, i5: { type: 'sparkle', color: '#EEF4FF' },
+  x4: { type: 'stardust', color: '#9B6BD9' }, x7: { type: 'sparkle', color: '#FFFFFF' }, x8: { type: 'stardust', color: '#C0404E' },
+  n1: { type: 'wind', color: '#FFB3AC' }, n8: { type: 'wind', color: '#8A84A0' }, n9: { type: 'wind', color: '#FFFFFF' },
+  n16: { type: 'stardust', color: '#BFF0C0' }, x27: { type: 'bubbles', color: '#FFB3AC' }, x43: { type: 'stardust', color: '#C9B8FF' },
+  x44: { type: 'sparkle', color: '#EEF4FF' }, a17: { type: 'sparkle', color: '#8FD4F7' }, a13: { type: 'sparkle', color: '#FFE7A8' },
+  a16: { type: 'sparkle', color: '#FFE7A8' }, a18: { type: 'sparkle', color: '#F6A04D' },
   // 🐾 ชุดสัตว์ = เรืองสีตัวสัตว์ (ใส่ฮู้ดคู่ยังได้อนุภาคเซ็ตเพิ่ม) · 22 พ.ย. user ขอเอฟเฟคให้ชุดคอสเพลย์
   f5: { type: 'glow', color: '#9ED98C' }, f9: { type: 'glow', color: '#E0B888' }, f10: { type: 'glow', color: '#F7B07A' },
   f11: { type: 'glow', color: '#F7B6C8' }, f12: { type: 'glow', color: '#A8E07A' }, f13: { type: 'glow', color: '#C9F0D0' },
