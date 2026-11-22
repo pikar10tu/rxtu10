@@ -4,7 +4,7 @@
      3) random event ทุก ~45–80 วิ ตามโซน: แมวเดินผ่าน · หนูวิ่ง · หนังสือหล่น · นกบินผ่าน · ผีเสื้อ · ใบไม้ร่วง · โคมกะพริบ
      สไปรต์พิกเซลวาดด้วย pxl (Claude outputs/focus-room-demo/art/fx.px.js) · พิกัดทั้งหมดเป็นพิกเซลฉาก 160×100 -->
 <template>
-  <div class="sfx" :class="'tod-' + tod" aria-hidden="true">
+  <div class="sfx" :class="'tod-' + tod">
     <!-- บรรยากาศประจำ -->
     <template v-if="zone === 'cafe'">
       <i v-for="n in 3" :key="'st' + n" class="steam" :style="{ left: pct(86), top: pct2(9), animationDelay: n * 1.2 + 's' }"></i>
@@ -23,9 +23,12 @@
     </template>
 
     <!-- 🐈 แมวประจำห้อง (ห้องสมุด/สวน) -->
-    <div v-for="c in cats" :key="c.id" class="res"
-      :style="{ left: pct(c.x), top: pct2(c.y), width: (SPR[c.s][0] * CAT_K / 160 * 100) + '%', zIndex: Math.round(c.y * 10), transitionDuration: c.dur + 's' }">
+    <div v-for="(c, i) in cats" :key="c.id" class="res"
+      :style="{ left: pct(c.x), top: pct2(c.y), width: (SPR[c.s][0] * CAT_K / 160 * 100) + '%', zIndex: petIdx === i ? 1550 : Math.round(c.y * 10), transitionDuration: c.dur + 's' }">
       <span class="spr" :class="c.s === 'cat_walk' ? 'f2' : c.s" :style="spr(c.s + '_' + c.coat, c.flip ? { transform: 'scaleX(-1)' } : {})"></span>
+      <!-- 💗 เดินไปใกล้น้องแมว (ตัวที่อยู่พื้น) → ปุ่มหัวใจโผล่ · กดแล้วเมี๊ยว + หัวใจลอย (เห็นในเครื่องเราคนเดียว) -->
+      <button v-if="petIdx === i" type="button" class="pet-btn" aria-label="ลูบน้องแมว" @click.stop="petCat(i)">💗</button>
+      <span v-for="h in (c.hearts || [])" :key="h.id" class="heart" :style="{ '--dx': h.dx + 'px' }" aria-hidden="true">{{ h.meow ? 'เมี๊ยว~' : '♥' }}</span>
     </div>
 
     <!-- random events -->
@@ -37,6 +40,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { chime } from '../../utils/focusAudio.js'
 
 const props = defineProps({ zone: { type: String, default: 'lib' }, me: { type: Object, default: null } })
 const emit = defineEmits(['tod'])
@@ -86,17 +90,36 @@ function wander(i) {
   const [tx, ty] = opts[Math.floor(Math.random() * opts.length)] || [c.x, c.y]
   walkTo(i, tx, ty)
 }
-// คนเดินเข้าใกล้ (ไม่เกิน ~14px ฉาก) → แมวลุกเดินหนีไปจุดที่ไกลจากคนที่สุด (เร็วกว่าเดินเล่น)
-watch(() => props.me && [Math.round(props.me.x), Math.round(props.me.y)], (p) => {
-  if (!p) return
+// 💗 เล่นกับแมว (22 พ.ย. · แทนของเดิมที่เดินใกล้แล้วแมวหนี) — เราหยุดยืนใกล้แมวที่อยู่พื้น (ไม่นับตัวบนตู้)
+//    → ปุ่มหัวใจโผล่ · แมวอยู่นิ่งรอให้ลูบ ไม่ลุกเดินหนี · กด = เมี๊ยว + หัวใจลอย · เราเดินออก = แมวกลับไปเดินเล่นตามปกติ
+const NEAR = 18
+const petIdx = computed(() => {
+  const m = props.me
+  if (!m) return -1
+  let best = -1, bd = NEAR
   cats.value.forEach((c, i) => {
     if (c.fixed || c.s === 'cat_walk') return
-    if (Math.hypot(c.x - p[0], c.y - p[1]) > 14) return
-    const far = (SPOTS[props.zone] || []).map(([x, y]) => [x, y, Math.hypot(x - p[0], y - p[1])]).sort((a, b) => b[2] - a[2]).slice(0, 3)
-    const [tx, ty] = far[Math.floor(Math.random() * far.length)] || [c.x, c.y]
-    walkTo(i, tx, ty, 22)
+    const d = Math.hypot(c.x - m.x, c.y - m.y)
+    if (d < bd) { bd = d; best = i }
   })
+  return best
 })
+watch(petIdx, (i, old) => {
+  if (i >= 0) clearTimeout(catTimers[i])        // มีคนมาหา → อยู่นิ่ง
+  if (old >= 0 && old !== i && cats.value[old]) idle(old)   // คนเดินไปแล้ว → กลับไปเดินเล่น
+})
+let heartId = 0
+function petCat(i) {
+  const c = cats.value[i]; if (!c) return
+  if (c.s === 'cat_loaf') { c.s = 'cat_sit' }   // นอนอยู่ → ลุกนั่ง
+  const add = (meow, dx, delay) => setTimeout(() => {
+    const id = ++heartId
+    c.hearts = [...(c.hearts || []), { id, meow, dx }]
+    setTimeout(() => { c.hearts = (c.hearts || []).filter(h => h.id !== id) }, 1400)
+  }, delay)
+  add(true, 0, 0); add(false, -8, 150); add(false, 8, 320)
+  chime('meow')
+}
 const pct = (x) => (x / 160 * 100) + '%'
 const pct2 = (y) => y + '%'
 
@@ -146,6 +169,8 @@ function add(cls, name, style, dur, extra = {}) {
 const R = (a, b) => a + Math.random() * (b - a)
 const walker = (name, y, dur) => {
   if (name === 'cat') name = 'cat_walk_' + COATS[Math.floor(Math.random() * 4)]   // เดินผ่านพื้นจากซ้ายไปขวาหรือกลับกัน
+  // 🐈 แมวเดินผ่านร้องเมี๊ยวกลางทาง (สุ่ม 60% · เฉพาะตอนเรานั่งอยู่ในห้อง เหมือนเสียงกริ่ง)
+  if (name.startsWith('cat_walk') && Math.random() < 0.6) setTimeout(() => { if (props.me && !document.hidden) chime('meow') }, (dur * (0.3 + Math.random() * 0.4)) * 1000)
   const ltr = Math.random() < 0.5
   add('walk' + (ltr ? '' : ' rtl'), name, { ...(name.startsWith('cat') ? { width: (15 * CAT_K / 160 * 100) + '%' } : {}), '--x0': ltr ? '-10%' : '105%', '--x1': ltr ? '105%' : '-10%', '--y': y + '%', zIndex: Math.round(y * 10) }, dur)
 }
@@ -202,6 +227,11 @@ onBeforeUnmount(() => { clearTimeout(evTimer); clearInterval(clock); catTimers.f
 @keyframes breathe { 0%, 49.9% { background-position: 0 0; } 50%, 100% { background-position: 100% 0; } }
 .spr.cat_sit { animation: blink 4.5s linear infinite; }
 @keyframes blink { 0%, 93.9% { background-position: 0 0; } 94%, 100% { background-position: 100% 0; } }
+/* 💗 ลูบแมว */
+.pet-btn { position: absolute; left: 50%; bottom: 100%; margin-bottom: 6px; transform: translateX(-50%); pointer-events: auto; width: 30px; height: 30px; border: 0; border-radius: 50%; background: #fff; box-shadow: var(--pop); font-size: .95rem; line-height: 1; cursor: pointer; display: grid; place-items: center; animation: pet-bob 1.4s ease-in-out infinite; }
+@keyframes pet-bob { 50% { transform: translateX(-50%) translateY(-3px); } }
+.heart { position: absolute; left: 50%; bottom: 100%; margin-bottom: 30px; white-space: nowrap; font-weight: 800; font-size: .8rem; color: #e11d74; text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff; pointer-events: none; animation: heart-up 1.4s ease-out forwards; }
+@keyframes heart-up { 0% { transform: translate(calc(-50% + var(--dx)), 6px) scale(.6); opacity: 0; } 20% { transform: translate(calc(-50% + var(--dx)), 0) scale(1.15); opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), -22px) scale(1); opacity: 0; } }
 /* events */
 .ev { animation-timing-function: linear; animation-fill-mode: forwards; }
 .spr { display: block; image-rendering: pixelated; background-repeat: no-repeat; background-position: 0 0; }

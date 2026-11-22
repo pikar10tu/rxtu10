@@ -185,6 +185,16 @@ export function chime(kind) {
     src.buffer = buf; src.connect(bp).connect(e).connect(master); src.start(t)
     return
   }
+  if (kind === 'meow') {   // เมี๊ยว~ = โทนเลื่อยผ่าน bandpass เลื่อนเสียงขึ้นแล้วตก
+    const o = ac.createOscillator(), bp = ac.createBiquadFilter(), e = ac.createGain()
+    o.type = 'sawtooth'
+    o.frequency.setValueAtTime(520, t); o.frequency.linearRampToValueAtTime(820, t + 0.16); o.frequency.exponentialRampToValueAtTime(480, t + 0.55)
+    bp.type = 'bandpass'; bp.Q.value = 3
+    bp.frequency.setValueAtTime(900, t); bp.frequency.linearRampToValueAtTime(1800, t + 0.18); bp.frequency.linearRampToValueAtTime(1000, t + 0.55)
+    e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.35, t + 0.05); e.gain.setValueAtTime(0.35, t + 0.3); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.6)
+    o.connect(bp).connect(e).connect(master); o.start(t); o.stop(t + 0.65)
+    return
+  }
   if (kind === 'door') { note(784, 0, 0.9, 0.12); note(659, 0.14, 1.1, 0.1) }   // กริ๊ง
   else { note(520, 0, 0.18, 0.12); note(390, 0.03, 0.2, 0.06) }                 // ป๊อก
 }
