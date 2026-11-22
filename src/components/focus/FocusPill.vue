@@ -2,7 +2,7 @@
      mount ใน App.vue ระดับ root (sibling ของ nav) · ลอยเหนือแถบล่าง ไม่ทับปุ่มหัวหน้า
      หน้าที่สอง: ตั้งสถานะ "ทำข้อสอบ" เมื่ออยู่หน้า /quiz (สถานะ derive จาก route) -->
 <template>
-  <RouterLink v-if="show" to="/focus" class="fp" aria-label="กลับโหมดโฟกัส">
+  <RouterLink v-if="show" to="/focus" class="fp" aria-label="กลับ Co-working space">
     <span class="fp-dot" aria-hidden="true"></span>
     🎯 {{ fmtClock(fm.state.secs) }}
     <small v-if="!fm.capFull.value">+{{ house }}/วิ</small>

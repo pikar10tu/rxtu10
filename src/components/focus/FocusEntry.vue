@@ -4,18 +4,18 @@
      จำนวน/ชื่อคนในห้อง = RTDB focus/presence (useFocusPeople) -->
 <template>
   <RouterLink v-if="variant === 'A'" to="/focus" class="fe-a">
-    <span class="fe-a-top"><b>🎯 โหมดโฟกัส</b><small>Co-working space</small><span class="fe-go">{{ fm.state.active ? 'กลับเข้าห้อง' : 'เข้าห้อง' }} →</span></span>
+    <span class="fe-a-top"><b>🎯 Co-working space</b><small>ห้องอ่านหนังสือกับเพื่อน</small><span class="fe-go">{{ fm.state.active ? 'กลับเข้าห้อง' : 'เข้าห้อง' }} →</span></span>
     <span class="fe-count">{{ names.length ? `🟢 ${names.length} คนอยู่ในห้อง` : 'ห้องว่างอยู่' }} · <span class="fe-sub">อ่านหนังสือเพื่อสร้างรายได้</span></span>
   </RouterLink>
 
   <RouterLink v-else-if="variant === 'B'" to="/focus" class="fe-b">
     <span class="fe-b-em">🎯</span>
-    <span class="fe-b-t"><b>โหมดโฟกัส</b><small>{{ names.length }} คนอยู่ในห้อง · ได้ +{{ house }}/วิ</small></span>
+    <span class="fe-b-t"><b>Co-working space</b><small>{{ names.length }} คนอยู่ในห้อง · ได้ +{{ house }}/วิ</small></span>
     <span class="fe-b-live" aria-hidden="true"></span>
   </RouterLink>
 
   <Teleport v-else-if="variant === 'C' && !fm.state.active" to="body">
-    <RouterLink to="/focus" class="fe-c" aria-label="เข้าโหมดโฟกัส">🎯<span>{{ names.length }}</span></RouterLink>
+    <RouterLink to="/focus" class="fe-c" aria-label="เข้า Co-working space">🎯<span>{{ names.length }}</span></RouterLink>
   </Teleport>
 
   <RouterLink v-else-if="variant === 'H' && names.length" to="/focus" class="fe-h">

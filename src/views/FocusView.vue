@@ -4,10 +4,10 @@
      ชั้นภาพเรียงตามตำแหน่งเท้า: คนหลังเคาน์เตอร์ถูกบัง คนเดินหน้าเคาน์เตอร์อยู่บน · เคาน์เตอร์เดินทะลุไม่ได้ (BFS)
      คนในห้อง/แชท = Realtime Database (composables/useFocusRoom.js) · เหรียญ/เวลาสะสม = Firestore ทุก 60 วิ (useFocusMode) -->
 <template>
-  <div class="tab-content fo">
+  <div class="tab-content fo" :class="{ saving: saver }">
     <header class="fo-head">
       <BackButton aria-label="ย้อนกลับ" @click="$router.back()" />
-      <div class="fo-title"><b>🎯 โหมดโฟกัส</b><small>Co-working space</small></div>
+      <div class="fo-title"><b>🎯 Co-working space</b><small>ห้องอ่านหนังสือกับเพื่อน</small></div>
       <button type="button" class="fo-fb" @click="fbOpen = true">🐞 แจ้งบัค/ข้อเสนอแนะ</button>
     </header>
 
@@ -95,10 +95,26 @@
         </div>
         <div class="fo-actions">
           <button type="button" class="fo-btn primary" @click="quizOpen = true">✍️ ไปทำข้อสอบ</button>
+          <button type="button" class="fo-btn" @click="startSaver">🌙 โหมดโฟกัส</button>
           <button type="button" class="fo-btn" @click="leave">ออกจากห้อง</button>
         </div>
       </section>
     </template>
+
+    <!-- 🌙 โหมดโฟกัส: จอดำเหมือนล็อกจอ (ประหยัดแบต) ไปอ่านหนังสือ/ไอแพดได้ · เวลา+เหรียญนับต่อ · กดค้าง 1.5 วิเพื่อกลับ -->
+    <Teleport to="body">
+      <div v-if="saver" class="fo-saver" @pointerdown="holdStart" @pointerup="holdEnd" @pointercancel="holdEnd" @pointerleave="holdEnd" @contextmenu.prevent>
+        <div class="sv-mid">
+          <small>🌙 โหมดโฟกัส</small>
+          <b>{{ fmtClock(fm.state.secs) }}</b>
+          <small>🪙 วันนี้ {{ Math.floor(fm.state.day.coins).toLocaleString() }}</small>
+        </div>
+        <div class="sv-hold">
+          <svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" class="bg" /><circle cx="22" cy="22" r="19" class="fg" :class="{ run: holding }" /></svg>
+          <span>{{ holding ? 'ปล่อย = ยกเลิก' : 'กดค้างเพื่อกลับ' }}</span>
+        </div>
+      </div>
+    </Teleport>
 
     <FeedbackModal v-model="fbOpen" source="focus" placeholder="เจอบั๊กหรืออยากให้ห้องโฟกัสมีอะไรเพิ่ม เล่าได้เลย…" />
 
@@ -329,7 +345,7 @@ onMounted(() => { ro = new ResizeObserver(([e]) => { sceneW.value = e.contentRec
 onBeforeUnmount(() => ro?.disconnect())
 const narrow = computed(() => sceneW.value < 440)
 const dollScale = computed(() => (narrow.value ? 1 : 1.5))
-const STATUS_ICON = { here: '🟢', quiz: '✍️', game: '🎮', afk: '💤' }
+const STATUS_ICON = { here: '🟢', quiz: '✍️', game: '🎮', deep: '🌙', afk: '💤' }
 const taps = ref([])
 let tapId = 0
 function onFloor(e) {
@@ -431,6 +447,8 @@ watch(() => room.chat.value, (list) => {
     if (seenMsg.has(m.id)) continue
     seenMsg.add(m.id)
     if (!chatPrimed) continue   // ข้อความเก่าตอนเพิ่งเปิด ไม่ต้องเด้งบับเบิ้ล
+    // เข้าห้อง/สลับห้องที่ดู = ได้ประวัติทั้งชุดมาใหม่ → บับเบิ้ล+เสียงเฉพาะข้อความสด (ไม่เกิน 10 วิ) · m.at ยังไม่ประทับ = เพิ่งส่ง
+    if (typeof m.at === 'number' && Date.now() - m.at > 10000) continue
     // 🔔 ป๊อก: เฉพาะข้อความคนอื่น · ไม่เกินทุก 5 วิ · เฉพาะตอนเราอยู่ในห้อง
     if (m.uid !== room.myUid() && fm.state.active && Date.now() - lastChime > 5000) { lastChime = Date.now(); chime('chat') }
     if (m.sys) continue   // ข้อความระบบ (ไฮไฟว์) ไม่ขึ้นบับเบิ้ล
@@ -448,6 +466,21 @@ function send() {
   if (room.say(fm.state.zone, draft.value)) { lastSend = Date.now(); draft.value = '' }
 }
 
+// ── 🌙 โหมดโฟกัส (จอดำประหยัดแบต) ──
+// หน้าห้องถูกซ่อนด้วย content-visibility (ไม่วาดอะไรเลย) · ขอ wake lock กันจอดับ (เครื่องไหนไม่ให้ก็ไม่เป็นไร)
+const saver = ref(false)
+const holding = ref(false)
+let holdT = 0, wake = null
+async function lockOn() { try { wake = await navigator.wakeLock?.request('screen') } catch { wake = null } }
+function onVis() { if (saver.value && !document.hidden) lockOn() }   // กลับจากปัดจอ wake lock หลุด → ขอใหม่
+function startSaver() { saver.value = true; fm.setSaver(true); lockOn(); document.addEventListener('visibilitychange', onVis) }
+function stopSaver() {
+  saver.value = false; holding.value = false; clearTimeout(holdT); fm.setSaver(false)
+  wake?.release?.().catch(() => {}); wake = null; document.removeEventListener('visibilitychange', onVis)
+}
+function holdStart() { holding.value = true; clearTimeout(holdT); holdT = setTimeout(stopSaver, 1500) }
+function holdEnd() { holding.value = false; clearTimeout(holdT) }
+
 const quizOpen = ref(false)
 const listOpen = ref(false)
 const why = ref(false)
@@ -460,7 +493,7 @@ function join() {   // เข้าห้อง: เดินจากประ�
   walkTo(me, tx, ty)
   if (audio.track < 0) play(Math.floor(Math.random() * TRACKS.length))
 }
-function leave() { if (myHandUp.value) lowerHand(); viewZone.value = fm.state.zone; fm.leave(); room.leave(); stopAll(); stopAllWalks() }
+function leave() { stopSaver(); if (myHandUp.value) lowerHand(); viewZone.value = fm.state.zone; fm.leave(); room.leave(); stopAll(); stopAllWalks() }
 // มินิเพลเยอร์
 const lastTrack = ref(0)
 const nowName = computed(() => TRACKS[audio.track >= 0 ? audio.track : lastTrack.value].name)
@@ -491,14 +524,26 @@ onMounted(() => {
       room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value })
     }
   }
-  fcoinTimer = setInterval(() => { if (!document.hidden) friendPop() }, 1000)
+  fcoinTimer = setInterval(() => { if (!document.hidden && !saver.value) friendPop() }, 1000)
   hfTick = setInterval(() => { nowTick.value = Date.now() }, 1000)
 })
-onBeforeUnmount(() => { clearInterval(hfTick); clearTimeout(hfOff); clearInterval(fcoinTimer); clearInterval(shuffleTimer); stopAllWalks(); room.unwatchChat(); room.release() })
+onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff); clearInterval(fcoinTimer); clearInterval(shuffleTimer); stopAllWalks(); room.unwatchChat(); room.release() })
 </script>
 
 <style scoped>
 .fo { display: flex; flex-direction: column; gap: 10px; }
+.fo.saving { content-visibility: hidden; }   /* โหมดโฟกัส: ไม่วาดห้องเลย */
+.fo-saver { position: fixed; inset: 0; z-index: 600; background: #000; color: rgba(255,255,255,.45); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 30vh 16px calc(48px + env(safe-area-inset-bottom, 0px)); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
+.sv-mid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.sv-mid b { font-size: 3rem; font-weight: 300; letter-spacing: .04em; font-variant-numeric: tabular-nums; color: rgba(255,255,255,.6); }
+.sv-mid small { font-size: .85rem; }
+.sv-hold { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: .8rem; }
+.sv-hold svg { width: 56px; height: 56px; transform: rotate(-90deg); }
+.sv-hold circle { fill: none; stroke-width: 3; }
+.sv-hold .bg { stroke: rgba(255,255,255,.12); }
+.sv-hold .fg { stroke: rgba(255,255,255,.7); stroke-linecap: round; stroke-dasharray: 119.4; stroke-dashoffset: 119.4; }
+.sv-hold .fg.run { animation: sv-fill 1.5s linear forwards; }
+@keyframes sv-fill { to { stroke-dashoffset: 0; } }
 .fo-head { display: flex; align-items: center; gap: 10px; }
 .fo-title { flex: 1; display: flex; flex-direction: column; line-height: 1.2; }
 .fo-title b { font-size: 1.05rem; }

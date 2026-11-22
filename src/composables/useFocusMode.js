@@ -30,7 +30,8 @@ const state = reactive({
   zone: s0?.zone || 'lib',
   secs: s0?.secs || 0,                 // เวลาโฟกัสรอบนี้
   onQuiz: false,
-  onGame: false,   // อยู่หน้าเกม → 🎮 เล่นเกม (เหรียญยังนับ · user 22 พ.ย. เพื่อนโตแล้ว)
+  onGame: false,
+  saver: false,   // 🌙 โหมดโฟกัส (จอดำ อ่านนอกจอ) → ไม่ตัดเป็นไม่อยู่   // อยู่หน้าเกม → 🎮 เล่นเกม (เหรียญยังนับ · user 22 พ.ย. เพื่อนโตแล้ว)
   idle: false,   // ไม่แตะจอเกิน 30 วิ → ไม่อยู่
   // ⚠️ ยอดในเครื่องช่วงทดลอง (ก่อน 22 พ.ย. เย็น) ไม่ได้เข้ากระเป๋าจริง — เริ่มนับใหม่จากค่าใน Firestore (syncDay)
   day: d0?.day === dayKey() && d0?.v === 2 ? d0 : { ...freshDay(), v: 2 },
@@ -112,16 +113,17 @@ export function useFocusMode(getHouseLevel) {
     state,
     capFull: computed(() => state.day.coinSecs >= COIN_CAP_SECS),
     capPct: computed(() => Math.min(1, state.day.coinSecs / COIN_CAP_SECS)),
-    status: computed(() => (state.onQuiz ? 'quiz' : state.idle ? 'afk' : state.onGame ? 'game' : 'here')),
+    status: computed(() => (state.onQuiz ? 'quiz' : state.saver ? 'deep' : state.idle ? 'afk' : state.onGame ? 'game' : 'here')),
     enter(zone) { if (zone) state.zone = zone; if (!state.active) { state.active = true; state.secs = 0 } persist(); ensureTimer() },
     leave() { flush(); state.active = false; persist(); ensureTimer() },
     setZone(z) { state.zone = z; persist() },
     setOnQuiz(v) { state.onQuiz = !!v },
     setOnGame(v) { state.onGame = !!v },
+    setSaver(v) { state.saver = !!v },
   }
 }
 
-export const STATUS_LABEL = { here: '🟢 อยู่จอ', quiz: '✍️ ทำข้อสอบ', game: '🎮 เล่นเกม', afk: '💤 ไม่อยู่' }
+export const STATUS_LABEL = { here: '🟢 อยู่จอ', quiz: '✍️ ทำข้อสอบ', game: '🎮 เล่นเกม', deep: '🌙 โหมดโฟกัส', afk: '💤 ไม่อยู่' }
 
 // ── ตรวจว่าอยู่หน้าจอไหม (22 พ.ย.) — ไม่แตะ/ไม่เลื่อน/ไม่พิมพ์เกิน 30 วิ = ไม่อยู่ · ขยับเมื่อไหร่กลับเป็นอยู่จอ ──
 const IDLE_MS = 30000
