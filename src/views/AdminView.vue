@@ -81,7 +81,7 @@
           <li v-for="g in pendingGuests" :key="g.uid" class="role-row">
             <div class="role-top">
               <div class="role-info">
-                <div class="role-name">{{ g.nickname }}</div>
+                <div class="role-name"><template v-if="g.instructorClaim"><Emoji char="🩺" /> อาจารย์ · {{ g.realName }} · </template>{{ g.nickname }}</div>
                 <div class="role-sub">{{ g.email }}</div>
                 <div class="gq-reason">{{ g.guestReason }}</div>
               </div>
@@ -478,6 +478,7 @@
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูสถิติ</div>
       </section>
 
+      <AdminCoinWatch />
       <AdminBattleLab />
       </template>
 
@@ -527,6 +528,7 @@
 
 <script setup>
 import AdminBattleLab from '../components/admin/AdminBattleLab.vue'
+import AdminCoinWatch from '../components/admin/AdminCoinWatch.vue'
 import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
 import { WEEKLY_EFFECTS, WEEKLY_DAYS, activeWeekly } from '../data/pvpWeekly.js'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
@@ -543,6 +545,7 @@ import { useAppConfig } from '../composables/useAppConfig.js'
 import { eventState, timeLeftText } from '../utils/gachaEvent.js'
 import { LATEST_THEME_WAVE, themeOf } from '../data/gachaThemes.js'
 import { useToast } from '../composables/useToast.js'
+import { useNewsPost } from '../composables/useNewsPost.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
 import MaintenanceScreen from '../components/layout/MaintenanceScreen.vue'
@@ -1218,12 +1221,14 @@ const pendingGuests = computed(() =>
   (members.guestUsers || []).filter(g => g.guestStatus === 'pending'))
 
 const pendingInstructors = computed(() =>
-  (members.guestUsers || []).filter(g => g.instructorClaim === true && g.role !== 'instructor'))
+  (members.guestUsers || []).filter(g => g.instructorClaim === true && g.role !== 'instructor' && g.guestStatus === 'approved'))   // ยังรออนุมัติ = อยู่คิวคำขอเข้าชมด้านบน
 
 async function setGuestStatus(g, status) {
   try {
     await updateDoc(doc(db, 'users', g.uid), { guestStatus: status })
     g.guestStatus = status
+    // ข่าว "อาจารย์แวะมา" ยิงตอนอนุมัติ (เดิมยิงตอนสมัครเพราะ auto-approve) · best-effort
+    if (status === 'approved' && g.instructorClaim) useNewsPost().postNews({ type: 'instructor', icon: '🩺', msg: `อาจารย์ ${g.realName || g.nickname} แวะมาเยือนแล้ว!` })
     toast(status === 'approved' ? `อนุมัติ ${g.nickname} แล้ว` : `ปฏิเสธ ${g.nickname} แล้ว`, 'success')
   } catch (e) { console.error('[guest status]', e); toast('อัปเดตไม่สำเร็จ', 'error') }
 }

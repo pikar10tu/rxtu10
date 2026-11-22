@@ -235,11 +235,15 @@ export function useFarm() {
     for (const [id, qty] of Object.entries(inv)) {
       const c = getCrop(id); if (c) gain += mkt.priceOf(id, c.sellPrice) * qty
     }
+    const invGain = gain
     for (const [id, qty] of Object.entries(gold.value)) {
       const c = getCrop(id); if (c) gain += mkt.priceOf(id, goldPrice(c)) * qty
     }
     if (gain <= 0) { toast('ไม่มีผลผลิตให้ขาย', 'info'); return }
-    await commit(clonePlots(), { coinDelta: gain, inventory: {}, salesGain: gain, extra: { gold: {} } })
+    // 🪙 แยกเขียน 2 ครั้ง (คลังปกติ → คลังทอง) — rules ตรวจราคาขายได้ทีละคลัง (เพดาน 1000 expressions · ดู firestore.rules farmSalePick)
+    const goldGain = gain - invGain
+    if (invGain > 0) await commit(clonePlots(), { coinDelta: invGain, inventory: {}, salesGain: invGain })
+    if (goldGain > 0) await commit(clonePlots(), { coinDelta: goldGain, salesGain: goldGain, extra: { gold: {} } })
     toast(`ขายทั้งหมด +${gain.toLocaleString()} เหรียญ`, 'success')
   }
 

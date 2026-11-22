@@ -71,7 +71,8 @@ export const useMailbox = defineStore('mailbox', () => {
         const arena = rewardArena(data)
         tx.update(ref, { claimed: true, read: true })
         const userPatch = {}
-        if (c > 0) userPatch.coins = increment(c)
+        // lastMailClaim: rules ใช้ยืนยันว่าเหรียญก้อนใหญ่ (>2 ล้าน) มาจากจดหมายฉบับนี้จริง (firestore.rules coinGainOk)
+        if (c > 0) { userPatch.coins = increment(c); userPatch.lastMailClaim = id }
         if (t > 0) userPatch.freeGachaTickets = increment(t)
         if (al > 0) userPatch.antiLoss = increment(al)
         if (ach) {

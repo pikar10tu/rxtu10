@@ -277,9 +277,9 @@ export const useAuthStore = defineStore('auth', () => {
         return patchUser(patch, patch)
     }
 
-    // สมัคร "ฉันเป็นอาจารย์" → auto-approve ทันที (เข้าเล่นแอปได้เลยเหมือน guest ที่ approved แล้ว)
-    // role ยังเป็น 'student' เหมือนเดิม — instructorClaim แค่ติดป้ายให้ admin เห็นคิว แล้วไปกด
-    // "ตั้งเป็นอาจารย์" เอง (ดู AdminView) rules คุมไว้แล้วว่า auto-approve ได้แค่ครั้งแรกที่สมัครจริงๆ
+    // สมัคร "ฉันเป็นอาจารย์" → รอแอดมินอนุมัติ (pending) เหมือน guest
+    // 22 พ.ย. 2026: เลิก auto-approve — ใครติ๊กอาจารย์ก็กลายเป็นคนในรุ่น อ่านข้อมูลเพื่อนได้ทันที
+    // instructorClaim ติดป้ายให้ admin เห็นในคิว · role ยังเป็น 'student' จนแอดมินกด "ตั้งเป็นอาจารย์"
     async function registerInstructor(nickname, realName, reason) {
         const nick = cleanText(nickname, LIMITS.nickname)
         const name = cleanText(realName, LIMITS.realName)
@@ -287,7 +287,7 @@ export const useAuthStore = defineStore('auth', () => {
         if (!nick || !name || !why) return false
         const patch = {
             nickname: nick, realName: name, guestReason: why,
-            accountType: 'guest', guestStatus: 'approved', instructorClaim: true,
+            accountType: 'guest', guestStatus: 'pending', instructorClaim: true,
             onboarded: true,
         }
         return patchUser(patch, patch)

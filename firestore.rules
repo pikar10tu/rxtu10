@@ -52,6 +52,64 @@ service cloud.firestore {
         || me.get('track', null) == 'guest';
     }
 
+    // ── 🪙 กันปั๊มเหรียญ (22 พ.ย. 2026) ──
+    //  เขียน user doc ตัวเองครั้งเดียว เหรียญเพิ่มได้ไม่เกิน COIN_STEP_MAX (2 ล้าน)
+    //  เกินนั้นผ่านได้ 2 ทางเท่านั้น:
+    //   1) ขายผลผลิต/ส่งออเดอร์ — เหรียญที่ได้ ≤ Σ จำนวนที่หายจากคลัง × ราคาฐาน × เพดานตัวคูณ
+    //      (ตลาดขึ้นสูงสุด +100% = ×2 · พืชทอง ×3 → ×6 · ออเดอร์ 170% < ×2 อยู่แล้ว)
+    //   2) กดรับจดหมาย — client ใส่ lastMailClaim = mailId ในทรานแซคชันเดียวกัน
+    //      rules เช็คจดหมายจริง: ก่อนหน้ายังไม่รับ · หลังเขียน = รับแล้ว · เหรียญ ≤ reward.coins
+    //  ⚠️ ราคาในบรรทัด sold('id', ราคา, …) ต้องตรงกับ data/crops.js — firestoreRulesCoinGuard.test.js เช็คให้
+    //     แก้ราคา/เพิ่มพืช = แก้ตรงนี้ + deploy rules ก่อน push
+    function coinGain() {
+      return request.resource.data.get('coins', 0) - resource.data.get('coins', 0);
+    }
+    // มูลค่าสูงสุดของของที่หายจากคลังพืชหนึ่งชนิด (p = ราคาฐาน · ใส่ตรงๆ ทีละบรรทัด ไม่ทำเป็น map เพราะสร้างใหม่ทุกครั้งที่เรียก)
+    function sold(id, p, o, n) { return p * (o.get(id, 0) - n.get(id, 0)); }
+    // ⚠️ เพดาน 1000 expressions/คำขอ: คิด 28 พืช × 2 คลังในคำขอเดียวไม่พอ (ทดลองแล้วได้ ~16–21 พืช)
+    //    ⇒ เขียนครั้งเดียวต้องขายคลังเดียว: คลังปกติ (×2) หรือคลังทอง (×6) — ขายทั้งหมดฝั่ง client แยกเป็น 2 ครั้ง (useFarm.sellAll)
+    //    ส่งแมพเป็นอาร์กิวเมนต์ ไม่ใช้ let (let ถูกคำนวณใหม่ทุกครั้งที่อ้างถึง)
+    function farmSaleMax() {
+      return farmSaleOf(resource.data.get('farm', {}), request.resource.data.get('farm', {}));
+    }
+    function farmSaleOf(of, nf) {
+      return farmSalePick(of.get('inventory', {}), nf.get('inventory', {}), of.get('gold', {}), nf.get('gold', {}));
+    }
+    function farmSalePick(oi, ni, og, ng) {
+      return og == ng ? 2 * cropSum(oi, ni) : (oi == ni ? 6 * cropSum(og, ng) : 0);
+    }
+    function cropSum(o, n) {
+      return sold('lettuce', 45, o, n) + sold('tomato', 320, o, n) 
+        + sold('corn', 1300, o, n) + sold('potato', 4200, o, n) 
+        + sold('strawberry', 160, o, n) + sold('chili', 800, o, n) 
+        + sold('eggplant', 2900, o, n) + sold('melon', 9000, o, n) 
+        + sold('mushroom', 380, o, n) + sold('herb', 1900, o, n) 
+        + sold('ginseng', 6800, o, n) + sold('pumpkin', 20000, o, n) 
+        + sold('glowflower', 1100, o, n) + sold('lotus', 5600, o, n) 
+        + sold('sunflower', 22000, o, n) + sold('moneytree', 70000, o, n) 
+        + sold('clinacanthus', 1830, o, n) + sold('garlic', 6600, o, n) 
+        + sold('thunbergia', 10800, o, n) + sold('solanum', 4000, o, n) 
+        + sold('catswhisker', 4000, o, n) + sold('tinospora', 16000, o, n) 
+        + sold('capsicum', 22000, o, n) + sold('annona', 22500, o, n) 
+        + sold('bittergourd', 4000, o, n) + sold('flowergrass', 47000, o, n) 
+        + sold('clove', 95000, o, n) + sold('derris', 150000, o, n);
+    }
+    function mailClaimOk(userId) {
+      let id = request.resource.data.get('lastMailClaim', '');
+      let p = /databases/$(database)/documents/users/$(userId)/mail/$(id);
+      return id is string && id != ''
+        && id != resource.data.get('lastMailClaim', '')
+        && exists(p)
+        && get(p).data.get('claimed', false) == false
+        && getAfter(p).data.get('claimed', false) == true
+        && coinGain() <= getAfter(p).data.get('reward', {}).get('coins', 0);
+    }
+    function coinGainOk(userId) {
+      return coinGain() <= 2000000
+        || coinGain() <= farmSaleMax()
+        || mailClaimOk(userId);
+    }
+
     // ── Users ──
     //  read: any logged-in user (members list)
     //  create: only your own doc
@@ -83,6 +141,7 @@ service cloud.firestore {
           // light anti-cheat: coins in sane range; residence level can't jump >1
           && request.resource.data.get('coins', 0) >= 0
           && request.resource.data.get('coins', 0) <= 50000000
+          && coinGainOk(userId)   // 🪙 เพิ่มเกิน 2 ล้าน/ครั้ง ต้องเป็นขายผลผลิตหรือรับจดหมายจริง
           && request.resource.data.get('residence', {}).get('level', 1) >= 1
           && request.resource.data.get('residence', {}).get('level', 1) <= 20   // = MAX_RESIDENCE_LEVEL (data/residence.js)
           && request.resource.data.get('residence', {}).get('level', 1)
@@ -91,18 +150,11 @@ service cloud.firestore {
           && request.resource.data.get('study', {}).get('cc2', {}).size() <= 600
           // 🔖 ข้อสอบที่บันทึกไว้ (18 พ.ย. 2026 · utils/savedQuestions.js SAVED_MAX)
           && request.resource.data.get('study', {}).get('saved', {}).size() <= 500
-          // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร guest ปกติ) — approve/reject = admin เท่านั้น
-          // ข้อยกเว้น: self-declare "อาจารย์" (instructorClaim:true) auto-approve ได้ทันที
-          //   แต่แค่ครั้งแรกที่สมัครจริงๆ เท่านั้น (guestStatus เดิมต้องเป็น null) — กันคนโดน
-          //   ปฏิเสธ/อยู่คิว pending ปกติมาลัดคิวทีหลัง · role ไม่อยู่ในเงื่อนไขนี้เลย (ยังกันอยู่ด้านบน)
+          // owner ตั้ง guestStatus ได้แค่ 'pending' (สมัคร guest/อาจารย์) — approve/reject = admin เท่านั้น
+          // 22 พ.ย. 2026: ถอดข้อยกเว้น "อาจารย์ auto-approve" (คนนอกติ๊กอาจารย์แล้วเป็น isMember ทันที อ่านข้อมูลเพื่อนได้)
           && (
             request.resource.data.get('guestStatus', null) == resource.data.get('guestStatus', null)
             || request.resource.data.get('guestStatus', null) == 'pending'
-            || (
-              request.resource.data.get('guestStatus', null) == 'approved'
-              && request.resource.data.get('instructorClaim', false) == true
-              && resource.data.get('guestStatus', null) == null
-            )
           )
         )
         // PvP ตั้งรับชนะ (28 ก.ย. 2026): คนบุกที่แพ้ +1 ตัวนับของเจ้าของทีมได้ ฟิลด์เดียว ทีละ 1 พอดี
@@ -212,6 +264,11 @@ service cloud.firestore {
     }
 
     // ── Cheat logs — anyone may log themselves; only admin reads ──
+    // 🕵️ จุดเทียบเหรียญ (22 พ.ย. 2026 · components/admin/AdminCoinWatch.vue) — แอดมินเท่านั้น
+    match /adminSnaps/{id} {
+      allow read, write: if isAdmin();
+    }
+
     match /cheatLogs/{id} {
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow read, update, delete: if isAdmin();

@@ -59,7 +59,7 @@
         </button>
       </template>
 
-      <!-- ขั้น 2c: อาจารย์ (self-declare, auto-approve) -->
+      <!-- ขั้น 2c: อาจารย์ (self-declare → รอแอดมินอนุมัติ) -->
       <template v-else-if="step === 'instructor'">
         <button class="ow-back" @click="step = 'type'">‹ กลับ</button>
         <div class="ow-title">สมัครเป็นอาจารย์</div>
@@ -68,7 +68,7 @@
         <textarea v-model="iReason" class="ow-input ow-ta" rows="3" :maxlength="LIMITS.guestReason" placeholder="วิชาที่สอน/เหตุผลที่มาช่วยตรวจข้อสอบ"></textarea>
         <div v-if="iErr" class="ow-err"><Emoji char="⚠️" /> {{ iErr }}</div>
         <button class="ow-btn" :disabled="busy" @click="submitInstructor">
-          {{ busy ? 'กำลังบันทึก…' : 'เข้าระบบ →' }}
+          {{ busy ? 'กำลังบันทึก…' : 'ส่งคำขอ →' }}
         </button>
       </template>
     </div>
@@ -83,12 +83,10 @@ import { useMembersStore } from '../../stores/members.js'
 import { validateGuest, validateInstructor, matchRoster } from '../../utils/onboarding.js'
 import { LIMITS } from '../../utils/text.js'
 import { useToast } from '../../composables/useToast.js'
-import { useNewsPost } from '../../composables/useNewsPost.js'
 
 const auth = useAuthStore()
 const members = useMembersStore()
 const { toast } = useToast()
-const { postNews } = useNewsPost()
 
 const step = ref('type')
 const busy = ref(false)
@@ -144,9 +142,7 @@ async function submitInstructor() {
   const ok = await auth.registerInstructor(iNick.value, iRealName.value, iReason.value)
   busy.value = false
   if (!ok) { iErr.value = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'; toast('บันทึกไม่สำเร็จ', 'error'); return }
-  // สำเร็จ → guestStatus=approved ทันที → gate เข้า 'ok' เอง (ไม่ผ่าน guest-pending)
-  // ยิงข่าวแบบ best-effort — ไม่ await ผลเพื่อไม่ให้ผู้ใช้รอ (postNews ล้มเหลวเงียบเองอยู่แล้ว)
-  postNews({ type: 'instructor', icon: '🩺', msg: `อาจารย์ ${iRealName.value} แวะมาเยือนแล้ว!` })
+  // สำเร็จ → guestStatus=pending → gate ไป GuestPendingScreen (ข่าว "อาจารย์แวะมา" ย้ายไปยิงตอนแอดมินอนุมัติ · AdminView)
 }
 
 const TRACK = { sci: 'สาย Sci', care: 'สาย Care' }
