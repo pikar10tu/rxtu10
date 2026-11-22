@@ -25,6 +25,9 @@ const house = computed(() => auth.userData?.residence?.level || 1)
 const fm = useFocusMode(() => house.value)
 const show = computed(() => fm.state.active && route.name !== 'focus')
 watch(() => route.name, (n) => fm.setOnQuiz(['quiz', 'daily', 'timeAttack'].includes(n)), { immediate: true })
+// 🎮 หน้าเกม (ทุกอย่างใต้ /play + เกมเพ็ท) → สถานะเล่นเกม · ฟาร์ม/เพ็ท/ร้านไม่นับเป็นเกม
+const GAME_ROUTES = ['tower', 'arena', 'team', 'dungeon', 'expedition', 'event']
+watch(() => route.path, () => fm.setOnGame(route.path.startsWith('/play') || GAME_ROUTES.includes(route.name)), { immediate: true })
 // สถานะในห้อง (✍️/💤) ส่งให้เพื่อนเห็น · รีเฟรชหน้าอื่นระหว่างอยู่ในห้อง → presence หาย (onDisconnect) → เข้าห้องให้ใหม่
 const room = useFocusRoom()
 watch(() => fm.status.value, (st) => room.patch({ st }))

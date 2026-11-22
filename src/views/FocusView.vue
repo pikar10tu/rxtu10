@@ -329,7 +329,7 @@ onMounted(() => { ro = new ResizeObserver(([e]) => { sceneW.value = e.contentRec
 onBeforeUnmount(() => ro?.disconnect())
 const narrow = computed(() => sceneW.value < 440)
 const dollScale = computed(() => (narrow.value ? 1 : 1.5))
-const STATUS_ICON = { here: '🟢', quiz: '✍️', afk: '💤' }
+const STATUS_ICON = { here: '🟢', quiz: '✍️', game: '🎮', afk: '💤' }
 const taps = ref([])
 let tapId = 0
 function onFloor(e) {

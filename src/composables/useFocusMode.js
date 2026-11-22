@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════
 //  useFocusMode — สถานะโหมดโฟกัส (Co-working space) ระดับทั้งแอป · singleton
-//  เข้าโหมด = เริ่มจับเวลา · สถานะ 3: ✍️ ทำข้อสอบ (อยู่หน้า quiz/daily/timeAttack · derive จาก route) / 🟢 อยู่จอ / 💤 ไม่อยู่ (ไม่แตะจอ 30 วิ)
+//  เข้าโหมด = เริ่มจับเวลา · สถานะ 3: ✍️ ทำข้อสอบ (อยู่หน้า quiz/daily/timeAttack · derive จาก route) / 🎮 เล่นเกม (หน้าเกม) / 🟢 อยู่จอ / 💤 ไม่อยู่ (ไม่แตะจอ 30 วิ)
 //  เหรียญ: เด้งวิละครั้ง ครั้งละ = ระดับบ้าน · เพดาน 2 ชม./วัน ครบแล้วไม่เด้ง (user 22 พ.ย. 2026)
 //  นับเฉพาะตอนจอเปิด (document.visible) · เปิดหลายแท็บ = นับแท็บเดียว (ล็อกผ่าน localStorage)
 //  เขียน Firestore รวมทุก 60 วิ + ตอนออกห้อง/ปัดจอ/ปิดแท็บ (ไม่ยิงทุกวินาที):
@@ -30,6 +30,7 @@ const state = reactive({
   zone: s0?.zone || 'lib',
   secs: s0?.secs || 0,                 // เวลาโฟกัสรอบนี้
   onQuiz: false,
+  onGame: false,   // อยู่หน้าเกม → 🎮 เล่นเกม (เหรียญยังนับ · user 22 พ.ย. เพื่อนโตแล้ว)
   idle: false,   // ไม่แตะจอเกิน 30 วิ → ไม่อยู่
   // ⚠️ ยอดในเครื่องช่วงทดลอง (ก่อน 22 พ.ย. เย็น) ไม่ได้เข้ากระเป๋าจริง — เริ่มนับใหม่จากค่าใน Firestore (syncDay)
   day: d0?.day === dayKey() && d0?.v === 2 ? d0 : { ...freshDay(), v: 2 },
@@ -111,15 +112,16 @@ export function useFocusMode(getHouseLevel) {
     state,
     capFull: computed(() => state.day.coinSecs >= COIN_CAP_SECS),
     capPct: computed(() => Math.min(1, state.day.coinSecs / COIN_CAP_SECS)),
-    status: computed(() => (state.onQuiz ? 'quiz' : state.idle ? 'afk' : 'here')),
+    status: computed(() => (state.onQuiz ? 'quiz' : state.idle ? 'afk' : state.onGame ? 'game' : 'here')),
     enter(zone) { if (zone) state.zone = zone; if (!state.active) { state.active = true; state.secs = 0 } persist(); ensureTimer() },
     leave() { flush(); state.active = false; persist(); ensureTimer() },
     setZone(z) { state.zone = z; persist() },
     setOnQuiz(v) { state.onQuiz = !!v },
+    setOnGame(v) { state.onGame = !!v },
   }
 }
 
-export const STATUS_LABEL = { here: '🟢 อยู่จอ', quiz: '✍️ ทำข้อสอบ', afk: '💤 ไม่อยู่' }
+export const STATUS_LABEL = { here: '🟢 อยู่จอ', quiz: '✍️ ทำข้อสอบ', game: '🎮 เล่นเกม', afk: '💤 ไม่อยู่' }
 
 // ── ตรวจว่าอยู่หน้าจอไหม (22 พ.ย.) — ไม่แตะ/ไม่เลื่อน/ไม่พิมพ์เกิน 30 วิ = ไม่อยู่ · ขยับเมื่อไหร่กลับเป็นอยู่จอ ──
 const IDLE_MS = 30000
