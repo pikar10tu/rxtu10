@@ -495,6 +495,25 @@ const AURA = {
   f44: { type: 'butterfly', color: '#B79BEA' },   // 22 พ.ย. เดิมกลีบปลิว → ผีเสื้อบิน
   f45: { type: 'hearts', color: '#F7A8C8' },
   f46: { type: 'glow', color: '#B49BE0' },
+  // 🐾 ชุดสัตว์ = เรืองสีตัวสัตว์ (ใส่ฮู้ดคู่ยังได้อนุภาคเซ็ตเพิ่ม) · 22 พ.ย. user ขอเอฟเฟคให้ชุดคอสเพลย์
+  f5: { type: 'glow', color: '#9ED98C' }, f9: { type: 'glow', color: '#E0B888' }, f10: { type: 'glow', color: '#F7B07A' },
+  f11: { type: 'glow', color: '#F7B6C8' }, f12: { type: 'glow', color: '#A8E07A' }, f13: { type: 'glow', color: '#C9F0D0' },
+  // 👑 เจ้าหญิง 6 ชุด = อนุภาคตามธีม
+  f27: { type: 'stardust', color: '#CFEFFF' }, f28: { type: 'petals', color: '#F6C453' }, f29: { type: 'sparkle', color: '#EEF4FF' },
+  f30: { type: 'hearts', color: '#E8304A' }, f31: { type: 'bubbles', color: '#7FD8E8' }, f32: { type: 'petals', color: '#F7A8C8' },
+  // 🎌 คอสเพลย์อนิเมะ/อื่นๆ
+  f40: { type: 'glow', color: '#FFE36E' },       // กะลาสีอัศวินจันทรา: เรืองทอง
+  f36: { type: 'glow', color: '#F6A04D' },       // วอร์มส้มนินจา: จักระส้ม
+  f33: { type: 'glow', color: '#8FD4F7' },       // ชุดฝึกโกจู: เรืองฟ้า
+  f37: { type: 'stardust', color: '#9B6BD9' },   // นักเรียนไสยเวท: ละอองม่วง
+  f38: { type: 'bubbles', color: '#8FC8F0' },    // ฮาโอริตารางมรกต: ฟองน้ำ
+  f39: { type: 'sparkle', color: '#F6C453' },    // นักเรียนเอเดน: ประกายทอง
+  f41: { type: 'petals', color: '#FFFFFF' },     // หน่วยสำรวจ: ขนนกขาวปลิว
+  f34: { type: 'sparkle', color: '#F6C453' },    // กัปตันโจรสลัด: ประกายทอง
+  f35: { type: 'stardust', color: '#C9B8FF' },   // นักบินอวกาศ: ละอองดาว
+  f4: { type: 'hearts', color: '#F7A8C8' },      // ชุดเมด
+  f7: { type: 'petals', color: '#F7B6C8' },      // ยูกาตะ: ซากุระ
+  f2: { type: 'sparkle', color: '#F6C453' },     // ครุย: ประกายวันรับปริญญา
   // 🎀 ชุดแนวซานริโอ = เรืองรอบตัวตามสีตัวละคร (22 พ.ย. user)
   f51: { type: 'glow', color: '#FF8FB8' }, f52: { type: 'glow', color: '#8FD4F7' }, f53: { type: 'glow', color: '#C9A0FF' },
   f54: { type: 'glow', color: '#FF5C6E' }, f55: { type: 'glow', color: '#B48CE8' },
