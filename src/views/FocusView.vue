@@ -1,5 +1,5 @@
 <!-- 🎯 โหมดโฟกัส · Co-working space (22 พ.ย. 2026 · เปิดทุกคน)
-     เข้าแล้วจับเวลาทันที · กดได้แค่ "ไปทำข้อสอบ" หรือนั่ง AFK ในห้อง · จิ้มพื้นเดิน จิ้มใกล้เคาน์เตอร์ว่างนั่ง
+     เข้าแล้วจับเวลาทันที · กดได้แค่ "ไปทำข้อสอบ" หรือนั่งในห้อง · จิ้มพื้นเดิน จิ้มใกล้เคาน์เตอร์ว่างนั่ง
      ฉากพิกเซล 160×100 (Claude วาดด้วย pxl · ต้นฉบับ Claude outputs/focus-room-demo/art/room.px.js)
      ชั้นภาพเรียงตามตำแหน่งเท้า: คนหลังเคาน์เตอร์ถูกบัง คนเดินหน้าเคาน์เตอร์อยู่บน · เคาน์เตอร์เดินทะลุไม่ได้ (BFS)
      คนในห้อง/แชท = Realtime Database (composables/useFocusRoom.js) · เหรียญ/เวลาสะสม = Firestore ทุก 60 วิ (useFocusMode) -->
@@ -329,7 +329,7 @@ onMounted(() => { ro = new ResizeObserver(([e]) => { sceneW.value = e.contentRec
 onBeforeUnmount(() => ro?.disconnect())
 const narrow = computed(() => sceneW.value < 440)
 const dollScale = computed(() => (narrow.value ? 1 : 1.5))
-const STATUS_ICON = { quiz: '✍️', afk: '💤' }
+const STATUS_ICON = { here: '🟢', quiz: '✍️', afk: '💤' }
 const taps = ref([])
 let tapId = 0
 function onFloor(e) {
