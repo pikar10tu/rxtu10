@@ -7,6 +7,7 @@
     :style="{ width: size.w * k / dpr + 'px', height: size.h * k / dpr + 'px' }"
     :aria-label="label" role="img"
   ></canvas>
+  <i v-if="glows.length" class="au-halo" :style="{ '--au': glows[0] }"></i>
   <i v-for="(f, i) in layers.floors" :key="'f' + i" class="au-floor" :style="{ '--au': f }"></i>
   <template v-for="(r, i) in layers.rings" :key="'r' + i">
     <i v-for="j in 2" :key="j" class="au-ring" :style="{ '--au': r, animationDelay: i * 0.8 + (j - 1) * 1.3 + 's', bottom: 'calc(var(--px) * ' + (3 + i * 2) + ')' }"></i>
@@ -76,7 +77,7 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 </script>
 
 <style scoped>
-.doll { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.doll { image-rendering: pixelated; image-rendering: crisp-edges; display: block; position: relative; }  /* relative = อยู่เหนือ .au-halo ที่วางก่อนหน้า */
 .dollw { position: relative; display: inline-block; line-height: 0; }
 /* อนุภาคออร่า (utils/dollAura.js) — พิกเซลวาดด้วย box-shadow/gradient ขนาดตาม --px (1 พิกเซลตุ๊กตา)
    22 พ.ย. ยกเครื่อง: ไฮไลต์ขาว (--hi) + เรืองนุ่ม · ดาวสี่แฉก · เปลว 3 สี+ถ่าน · วง 2 ชั้น+ลำแสง · ขอบเรืองคม */
@@ -118,8 +119,10 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 .pt-pillar{width:var(--px);height:calc(var(--px)*5);background:linear-gradient(transparent,var(--au) 60%,var(--hi));filter:drop-shadow(0 0 var(--px) var(--au));animation:dollPillar 2.2s ease-out infinite}
 @keyframes dollPillar{0%{opacity:0;transform:translateY(0) scaleY(.4)}25%{opacity:1;transform:translateY(calc(var(--px)*-4)) scaleY(1)}100%{opacity:0;transform:translateY(calc(var(--px)*-20)) scaleY(.6)}}
 /* 🌟 เรือง: ขอบพิกเซลสีชัดรอบตัว + หายใจเรือง + ละอองสีลอยออกจากตัว */
-.au-glow .doll{animation:dollGlow 2.8s ease-in-out infinite}
-@keyframes dollGlow{0%,100%{filter:var(--rim) var(--gl1)}50%{filter:var(--rim) var(--gl3)}}
+.au-glow .doll{filter:var(--rim) var(--gl1)}
+/* 22 พ.ย. แลค: เดิมหายใจด้วยการ animate filter (วาดใหม่ทุกเฟรม × คนหลายสิบในห้องโฟกัส) → ขอบ+เรืองนิ่ง แล้วให้วงแสงด้านหลังหายใจด้วย opacity/transform แทน (การ์ดจอทำให้ ไม่วาดใหม่) */
+.au-halo{position:absolute;left:18%;right:18%;top:12%;bottom:6%;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--au) 70%,transparent),transparent);pointer-events:none;animation:dollHalo 2.8s ease-in-out infinite;will-change:opacity,transform}
+@keyframes dollHalo{0%,100%{opacity:.35;transform:scale(.92)}50%{opacity:.85;transform:scale(1.06)}}
 .pt-mote{background:var(--hi);box-shadow:0 0 0 var(--px) color-mix(in srgb,var(--au) 60%,transparent);animation:dollMote 3.4s ease-out infinite}
 @keyframes dollMote{0%{opacity:0;transform:translate(0,0) scale(.5)}25%{opacity:1;transform:translate(0,calc(var(--px)*-3)) scale(1)}100%{opacity:0;transform:translate(var(--dx,0),calc(var(--px)*-16)) scale(.6)}}
 /* 🦋 ผีเสื้อ: ปีก 2 ข้าง + ตัวเข้ม · กระพือ (scaleX) แล้วบินวนขึ้น */
@@ -132,4 +135,6 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 /* 🌫️ หมอก: ก้อนวงรีนุ่ม จางๆ ลอยเลื่อนข้างแล้วหาย */
 .pt-mist{width:calc(var(--px)*12);height:calc(var(--px)*4);margin-left:calc(var(--px)*-6);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--au) 75%,transparent),transparent);animation:dollMist 5s ease-in-out infinite}
 @keyframes dollMist{0%{opacity:0;transform:translateX(calc(var(--px)*-4)) scale(.7)}30%{opacity:.9}70%{opacity:.7}100%{opacity:0;transform:translateX(calc(var(--px)*5)) scale(1.2)}}
+/* 🍎 แอปเปิ้ล 4x4: ลูกสี --au + ขั้วใบเขียว + ไฮไลต์ขาว · ลอยส่ายแบบหัวใจ */
+.pt-apples{box-shadow:calc(var(--px)*2) 0 #6FBF5A,0 var(--px) var(--au),var(--px) var(--px) var(--hi),calc(var(--px)*2) var(--px) var(--au),calc(var(--px)*3) var(--px) var(--au),0 calc(var(--px)*2) var(--au),var(--px) calc(var(--px)*2) var(--au),calc(var(--px)*2) calc(var(--px)*2) var(--au),calc(var(--px)*3) calc(var(--px)*2) var(--au),var(--px) calc(var(--px)*3) var(--au),calc(var(--px)*2) calc(var(--px)*3) var(--au);filter:drop-shadow(0 0 var(--px) var(--au));animation:dollHeart 3.6s ease-out infinite}
 </style>

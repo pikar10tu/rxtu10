@@ -500,7 +500,7 @@ const AURA = {
   f11: { type: 'glow', color: '#F7B6C8' }, f12: { type: 'glow', color: '#A8E07A' }, f13: { type: 'glow', color: '#C9F0D0' },
   // 👑 เจ้าหญิง 6 ชุด = อนุภาคตามธีม
   f27: { type: 'stardust', color: '#CFEFFF' }, f28: { type: 'petals', color: '#F6C453' }, f29: { type: 'sparkle', color: '#EEF4FF' },
-  f30: { type: 'hearts', color: '#E8304A' }, f31: { type: 'bubbles', color: '#7FD8E8' }, f32: { type: 'petals', color: '#F7A8C8' },
+  f30: { type: 'apples', color: '#E8304A' }, f31: { type: 'bubbles', color: '#7FD8E8' }, f32: { type: 'petals', color: '#F7A8C8' },
   // 🎌 คอสเพลย์อนิเมะ/อื่นๆ
   f40: { type: 'glow', color: '#FFE36E' },       // กะลาสีอัศวินจันทรา: เรืองทอง
   f36: { type: 'glow', color: '#F6A04D' },       // วอร์มส้มนินจา: จักระส้ม
