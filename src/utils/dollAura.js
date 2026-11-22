@@ -57,6 +57,7 @@ export function auraLayers(auras = []) {
     if (!pts) continue
     const n = seen[a.type] = (seen[a.type] ?? -1) + 1   // แบบเดียวกันอันที่ 2+ → เลื่อนตำแหน่ง/จังหวะไม่ให้ทับ
     pts.forEach(([x, y, d], i) => {
+      if (i % 3 === 2) return   // 22 พ.ย. user: ลดอนุภาคเหลือ ~2/3 กันแลคตอนคนเยอะ (ตำแหน่งยังกระจายครบรอบตัว)
       const [x2, y2] = pts[(i + n * 2) % pts.length]
       particles.push({
         type: a.type, color: a.color,
