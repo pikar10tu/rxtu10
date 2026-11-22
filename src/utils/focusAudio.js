@@ -177,6 +177,14 @@ export function chime(kind) {
     e.gain.setValueAtTime(0.0001, t + at); e.gain.exponentialRampToValueAtTime(vol, t + at + 0.01); e.gain.exponentialRampToValueAtTime(0.0001, t + at + len)
     o.connect(e).connect(lp); o.start(t + at); o.stop(t + at + len + 0.05)
   }
+  if (kind === 'clap') {   // แปะ! = noise สั้นๆ ผ่าน bandpass
+    const n = Math.floor(ac.sampleRate * 0.12), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0)
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4)
+    const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), e = ac.createGain()
+    bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 0.8; e.gain.value = 0.9
+    src.buffer = buf; src.connect(bp).connect(e).connect(master); src.start(t)
+    return
+  }
   if (kind === 'door') { note(784, 0, 0.9, 0.12); note(659, 0.14, 1.1, 0.1) }   // กริ๊ง
   else { note(520, 0, 0.18, 0.12); note(390, 0.03, 0.2, 0.06) }                 // ป๊อก
 }

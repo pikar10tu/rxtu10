@@ -1,7 +1,7 @@
 // ════════════════════════════════════════════════════════════
 //  useFocusRoom — คนในห้องโฟกัส + แชท ผ่าน Realtime Database (22 พ.ย. 2026) · singleton ระดับแอป
 //  (ตัวเราอยู่ในห้องต่อแม้ออกไปทำข้อสอบ — หน้าโฟกัส unmount แล้ว presence ยังอยู่)
-//  focus/presence/{uid}  { name, zone, seat, x, y, st:'quiz'|'afk', house, doll, at, away }
+//  focus/presence/{uid}  { name, zone, seat, x, y, st:'quiz'|'afk', house, doll, at, away, hf? = ยกมือไฮไฟว์ (เวลาเซิร์ฟเวอร์) }
 //     · เขียนตอน เข้า/เปลี่ยนโซน/เดินถึงที่/เปลี่ยนสถานะ/ปัดจอ + ชีพจรทุก 60 วิ (ไม่ส่งทุกก้าว ไม่ส่งเหรียญ)
 //     · onDisconnect → ลบตัวเองทิ้ง (ปิดแท็บ/ปิดแอป/เน็ตหลุด = หายจากห้องเอง) · รีเฟรช → FocusPill เข้าห้องให้ใหม่
 //     · ปัดจอ (hidden) → away:true (ขึ้น 💤 จาง) · กลับมา → away:false
@@ -100,10 +100,10 @@ function watchChat(zone) {
   }, () => { chat.value = [] })
 }
 function unwatchChat() { chatOff?.(); chatOff = null; chatZone = '' }
-function say(zone, text) {
+function say(zone, text, extra = {}) {   // extra.sys = ข้อความระบบ เช่น 'hf' ไฮไฟว์
   const t = cleanText(text, 80)
   if (!t || !myUid()) return false
-  push(dbRef(rtdb(), `focus/chat/${dayKey()}/${zone}`), { uid: myUid(), name: base().name, text: t, at: serverTimestamp() }).catch(() => {})
+  push(dbRef(rtdb(), `focus/chat/${dayKey()}/${zone}`), { uid: myUid(), name: base().name, text: t, at: serverTimestamp(), ...extra }).catch(() => {})
   return true
 }
 

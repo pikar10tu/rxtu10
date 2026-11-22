@@ -13,11 +13,11 @@
 
 
     <!-- ฉาก -->
-    <div ref="sceneEl" class="fo-scene" :class="['tod-' + tod, 'z-' + fm.state.zone]" @click="onFloor">
-      <img class="fo-bg" :src="ART['bg_' + fm.state.zone]" alt="" draggable="false">
+    <div ref="sceneEl" class="fo-scene" :class="['tod-' + tod, 'z-' + viewZone]" @click="onFloor">
+      <img class="fo-bg" :src="ART['bg_' + viewZone]" alt="" draggable="false">
       <div class="fo-tint"></div>
       <!-- 📅 ปฏิทินฉีกนับวันสอบ CC2 (เฉพาะห้องสมุด) — เข้าห้องแล้วหน้าเมื่อวานฉีกปลิวออก -->
-      <div v-if="fm.state.zone === 'lib'" class="fo-cal" :aria-label="`อีก ${daysLeft} วันสอบ CC2`" role="img">
+      <div v-if="viewZone === 'lib'" class="fo-cal" :aria-label="`อีก ${daysLeft} วันสอบ CC2`" role="img">
         <span class="fo-cal-pg"><b>{{ daysLeft }}</b><small>วัน</small></span>
         <span v-if="tearToday" class="fo-cal-pg tear" aria-hidden="true"><b>{{ daysLeft + 1 }}</b><small>วัน</small></span>
       </div>
@@ -27,28 +27,39 @@
         <button type="button" aria-label="โซนถัดไป" @click="stepZone(1)">›</button>
       </div>
       <div v-for="(c, i) in COUNTERS" :key="'c' + i" class="fo-ent fo-desk" :style="entStyle(c[0], c[1], c[1] + 8.4)">
-        <img :src="ART['desk_' + fm.state.zone]" alt="" draggable="false">
+        <img :src="ART['desk_' + viewZone]" alt="" draggable="false">
       </div>
       <template v-for="p in others" :key="p.uid">
         <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="{ walk: pos[p.uid].walking, away: p.away }" :style="entStyle(pos[p.uid].x, pos[p.uid].y, pos[p.uid].y)">
           <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> {{ p.away ? '💤' : STATUS_ICON[p.st] }}</template></span><span v-if="!narrow" class="fo-st">{{ p.away ? '💤 พักสายตา' : STATUS_LABEL[p.st] || STATUS_LABEL.afk }}</span></div>
           <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
+          <span v-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
           <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ p.house || 1 }}</span>
           <div class="fo-doll"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
         </div>
       </template>
-      <div v-if="fm.state.active" class="fo-ent fo-av me" :class="{ walk: me.walking }" :style="entStyle(me.x, me.y, me.y)">
+      <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="{ walk: me.walking }" :style="entStyle(me.x, me.y, me.y)">
         <div class="fo-label"><span class="fo-nm">{{ myName }}<template v-if="narrow"> {{ STATUS_ICON[fm.status.value] }}</template></span><span v-if="!narrow" class="fo-st">{{ STATUS_LABEL[fm.status.value] }}</span></div>
         <div v-if="bubbles[room.myUid()]" class="fo-bubble">{{ bubbles[room.myUid()] }}</div>
+        <span v-if="myHandUp" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
         <span v-for="c in coins" :key="c.id" class="fo-coin"><Emoji char="🪙" />+{{ c.v }}</span>
         <div class="fo-doll"><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
+      </div>
+      <!-- ดูห้องอื่นอยู่ = แค่ดู · จะย้ายต้องกดปุ่มนี้ (หน้าตาเดียวกับปุ่มเริ่มโฟกัส · อยู่ห้องนี้แล้วหาย) -->
+      <div v-if="peeking" class="fo-join" @click.stop>
+        <p>{{ others.length ? `${others.length} คนอยู่ในห้อง` : 'ยังไม่มีใครในห้องนี้' }}</p>
+        <button type="button" class="fo-btn primary big" @click="moveHere">🚪 เข้าห้องนี้</button>
+        <small>เวลาโฟกัสและเหรียญเดินต่อ ไม่เริ่มนับใหม่</small>
       </div>
       <div v-if="!fm.state.active" class="fo-join" @click.stop>
         <p>{{ others.length ? `${others.length} คนอยู่ในห้อง` : 'ยังไม่มีใครในห้องนี้ · เป็นคนแรกเลย' }}</p>
         <button type="button" class="fo-btn primary big" @click="join">🎯 เริ่มโฟกัส</button>
         <small>อ่านหนังสือเพื่อสร้างรายได้ · +{{ house }}/วิ</small>
       </div>
-      <FocusSceneFx ref="sfx" :zone="fm.state.zone" :me="fm.state.active ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
+      <FocusSceneFx ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
+      <div v-for="c in claps" :key="c.id" class="fo-ent fo-clap" :style="entStyle(c.x, c.y, 999)" aria-hidden="true">
+        <span class="l"><Emoji char="✋" /></span><span class="r"><Emoji char="✋" /></span><b>แปะ!</b>
+      </div>
       <span v-for="t in taps" :key="t.id" class="fo-tap" :style="{ left: t.x / 1.6 + '%', top: t.y + '%' }"></span>
 
       <!-- แชทแบบเกมออนไลน์ยุคก่อน: มุมซ้ายล่าง ข้อความใหม่อยู่ล่างสุด เก่าดันหายไป · แตะเพื่อเลื่อนอ่านย้อน 50 ข้อความ -->
@@ -56,15 +67,16 @@
       <div class="fo-chat" :class="{ open: chatOpen }" @click.stop>
         <div ref="chatBox" class="fo-chat-in">
           <div v-for="m in (chatOpen ? chat : chat.slice(narrow ? -3 : -5))" :key="m.id" class="fo-line">
-            <time>{{ m.time }}</time> <b>{{ m.who }}:</b> {{ m.text }}
+            <time>{{ m.time }}</time> <template v-if="m.sys"><b>{{ m.text }}</b></template><template v-else><b>{{ m.who }}:</b> {{ m.text }}</template>
           </div>
         </div>
       </div>
       <button type="button" class="fo-chat-btn" :class="{ on: chatOpen }" :aria-label="chatOpen ? 'ปิดประวัติแชท' : 'อ่านแชทย้อนหลัง'" @click.stop="chatOpen = !chatOpen">💬</button>
+      <button v-if="fm.state.active && !peeking" type="button" class="fo-hf-btn" :class="{ on: myHandUp }" :aria-pressed="myHandUp" :aria-label="myHandUp ? 'เอามือลง' : 'ยกมือไฮไฟว์ · เพื่อนที่อยู่ใกล้กดด้วยก็ตบกัน'" @click.stop="toggleHand"><Emoji char="✋" /></button>
     </div>
 
     <form class="fo-say" @submit.prevent="send">
-      <input v-model="draft" maxlength="80" :disabled="!fm.state.active" :placeholder="fm.state.active ? 'พิมพ์คุยกับเพื่อนในห้อง…' : 'กดเริ่มโฟกัสก่อนถึงจะคุยได้'" aria-label="ข้อความแชท" autocomplete="off">
+      <input v-model="draft" maxlength="80" :disabled="!fm.state.active || peeking" :placeholder="!fm.state.active ? 'กดเริ่มโฟกัสก่อนถึงจะคุยได้' : peeking ? 'กำลังดูห้องอื่น · เข้าห้องนี้ก่อนถึงจะคุยได้' : 'พิมพ์คุยกับเพื่อนในห้อง…'" aria-label="ข้อความแชท" autocomplete="off">
       <button type="submit" class="fo-btn">ส่ง</button>
     </form>
 
@@ -171,6 +183,7 @@ import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { dollOf } from '../utils/doll.js'
 import { decodeDoll } from '../utils/dollCode.js'
+import { serverTimestamp } from 'firebase/database'
 import { useFocusRoom } from '../composables/useFocusRoom.js'
 import { SEATS, COUNTERS, DOOR, seatFoot, freeSeat } from '../utils/focusLayout.js'
 import { PLE_CC_DATE } from '../firebase/config.js'
@@ -188,27 +201,39 @@ const house = computed(() => auth.userData?.residence?.level || 1)
 const fm = useFocusMode(() => house.value)
 const myEq = computed(() => dollOf(auth.userData).eq)
 const myName = computed(() => auth.userData?.nickname || 'ฉัน')
-const ZI = computed(() => Math.max(0, ZONES.findIndex(z => z.key === fm.state.zone)))
-function stepZone(d) { pickZone(ZONES[(ZI.value + d + ZONES.length) % ZONES.length].key) }
+// ห้องที่ "กำลังดู" แยกจากห้องที่ "นั่งอยู่" (fm.state.zone) · เลื่อน ‹ › = แค่ดู ไม่ย้าย
+const viewZone = ref(fm.state.zone)
+const peeking = computed(() => fm.state.active && viewZone.value !== fm.state.zone)
+const ZI = computed(() => Math.max(0, ZONES.findIndex(z => z.key === viewZone.value)))
+function stepZone(d) { setView(ZONES[(ZI.value + d + ZONES.length) % ZONES.length].key) }
+function setView(z) {
+  if (z === viewZone.value) return
+  if (myHandUp.value) lowerHand()   // ไปดูห้องอื่น = เอามือลง
+  viewedAt = Date.now()   // คนที่อยู่ในห้องนั้นก่อนแล้ว → โผล่ที่เดิม ไม่เดินจากประตู ไม่มีกริ่ง
+  viewZone.value = z
+  room.watchChat(z)
+  if (!fm.state.active) fm.setZone(z)
+}
+function moveHere() { pickZone(viewZone.value) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 // ฉีกหน้าเมื่อวานแค่ครั้งแรกของวัน (จำในเครื่อง) — รอบต่อไปเห็นเลขวันนี้นิ่งๆ
 const CAL_KEY = 'rxtu.focus.calTorn'
 const tearToday = ref(false)
 function maybeTear() {
-  if (fm.state.zone !== 'lib') return
+  if (viewZone.value !== 'lib') return
   let last = ''; try { last = localStorage.getItem(CAL_KEY) || '' } catch { /* private mode */ }
   if (last === dayKey()) return
   tearToday.value = true
   try { localStorage.setItem(CAL_KEY, dayKey()) } catch { /* private mode */ }
 }
-watch(() => fm.state.zone, maybeTear, { immediate: true })
+watch(viewZone, maybeTear, { immediate: true })
 const sfx = ref(null)
 const tod = ref('day')
 const capLeft = computed(() => { const m = Math.ceil((COIN_CAP_SECS - fm.state.day.coinSecs) / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม. ${m % 60} น.` : `${m} น.` })
 
 // ── คนในห้อง (Realtime Database) ──
 const room = useFocusRoom()
-const others = computed(() => room.people.value.filter(p => p.zone === fm.state.zone && p.uid !== room.myUid()))
+const others = computed(() => room.people.value.filter(p => p.zone === viewZone.value && p.uid !== room.myUid()))
 const takenSeats = () => new Set(others.value.map(p => p.seat).filter(s => s >= 0))
 const DEFAULT_EQ = dollOf({}).eq
 const eqCache = {}
@@ -267,7 +292,7 @@ function stopAllWalks() { rafs.forEach(id => cancelAnimationFrame(id)); rafs.cle
 
 // ตำแหน่งที่วาดของเพื่อน — เป้าหมายเปลี่ยน = เดินไปตามทาง · คนเพิ่งเข้า = เดินจากประตู
 const pos = reactive({})
-const mountedAt = Date.now()
+let viewedAt = Date.now()   // เพิ่งเปิดหน้า/เพิ่งสลับห้องที่ดู
 watch(others, (list) => {
   const seen = new Set()
   for (const p of list) {
@@ -275,7 +300,7 @@ watch(others, (list) => {
     const tx = p.x ?? DOOR[0], ty = p.y ?? DOOR[1]
     let o = pos[p.uid]
     if (!o) {
-      const fresh = Date.now() - mountedAt > 2500
+      const fresh = Date.now() - viewedAt > 2500
       pos[p.uid] = o = reactive({ x: fresh ? DOOR[0] : tx, y: fresh ? DOOR[1] : ty, walking: false, tx, ty })
       if (fresh) { walkTo(o, tx, ty); if (fm.state.active) chime('door') }   // 🔔 กริ๊ง: มีคนเพิ่งเข้าห้อง
     } else if (o.tx !== tx || o.ty !== ty) { o.tx = tx; o.ty = ty; walkTo(o, tx, ty) }
@@ -285,7 +310,9 @@ watch(others, (list) => {
 
 function pickZone(z) {
   stopAllWalks()
+  if (myHandUp.value) lowerHand()
   fm.setZone(z)
+  if (viewZone.value !== z) { viewedAt = Date.now(); viewZone.value = z }
   room.watchChat(z)
   if (!fm.state.active) return
   const seat = freeSeat(takenSeats())
@@ -306,7 +333,7 @@ const STATUS_ICON = { quiz: '✍️', afk: '💤' }
 const taps = ref([])
 let tapId = 0
 function onFloor(e) {
-  if (!fm.state.active) return
+  if (!fm.state.active || peeking.value) return
   const r = sceneEl.value.getBoundingClientRect()
   const x = (e.clientX - r.left) / r.width * 160, y = (e.clientY - r.top) / r.height * 100
   const id = ++tapId; taps.value.push({ id, x, y }); setTimeout(() => { taps.value = taps.value.filter(t => t.id !== id) }, 600)
@@ -322,6 +349,49 @@ function onFloor(e) {
   me.seat = best
   walkTo(me, tx, ty, () => room.patch({ seat: best, x: tx, y: ty }))   // ส่งตำแหน่งตอนถึงที่เท่านั้น
 }
+
+// ── ✋ ไฮไฟว์ (22 พ.ย.) ──
+// ยกมือ = presence.hf (เวลาเซิร์ฟเวอร์) ค้าง 30 วิ · สองคนยกพร้อมกันและอยู่ใกล้ (เคาน์เตอร์เดียวกัน/ยืนติดกัน) = ตบกัน
+// ทุกเครื่องตรวจคู่เอง (คนดูก็เห็นแปะ) · เจ้าของมือเอามือตัวเองลง · ข้อความในแชทให้ uid น้อยกว่าเป็นคนเขียน (ขึ้นครั้งเดียว)
+const HF_MS = 30000
+const nowTick = ref(Date.now())
+let hfTick = 0
+const raisedAt = (p) => (typeof p?.hf === 'number' ? p.hf : 0)
+const handUp = (p) => raisedAt(p) > 0 && nowTick.value - raisedAt(p) < HF_MS
+const myPres = computed(() => room.people.value.find(p => p.uid === room.myUid()))
+const handPending = ref(false)   // กดแล้วรอเซิร์ฟเวอร์ประทับเวลา
+const myHandUp = computed(() => fm.state.active && !peeking.value && (handPending.value || handUp(myPres.value)))
+let hfOff = 0
+function toggleHand() {
+  if (myHandUp.value) { lowerHand(); return }
+  handPending.value = true
+  room.patch({ hf: serverTimestamp() })
+  clearTimeout(hfOff); hfOff = setTimeout(lowerHand, HF_MS)
+}
+function lowerHand() { handPending.value = false; clearTimeout(hfOff); room.patch({ hf: null }) }
+watch(myPres, (p) => { if (raisedAt(p)) handPending.value = false })
+const near = (a, b) => Math.abs(a.x - b.x) <= 30 && Math.abs(a.y - b.y) <= 14
+const claps = ref([])
+const clapped = new Set()
+let clapId = 0
+watch([() => room.people.value, nowTick], () => {
+  const up = room.people.value.filter(p => p.zone === viewZone.value && handUp(p) && typeof p.x === 'number')
+  const used = new Set()
+  for (const a of up) for (const b of up) {
+    if (a.uid >= b.uid || used.has(a.uid) || used.has(b.uid) || !near(a, b)) continue
+    used.add(a.uid); used.add(b.uid)
+    const key = `${a.uid}:${raisedAt(a)}|${b.uid}:${raisedAt(b)}`
+    if (clapped.has(key)) continue
+    clapped.add(key)
+    const id = ++clapId
+    claps.value.push({ id, x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - 22 })
+    setTimeout(() => { claps.value = claps.value.filter(c => c.id !== id) }, 1300)
+    chime('clap')
+    const mine = room.myUid()
+    if (a.uid === mine || b.uid === mine) lowerHand()
+    if (a.uid === mine) room.say(viewZone.value, `✋ ${a.name} และ ${b.name} ได้ไฮไฟว์กัน!`, { sys: 'hf' })
+  }
+})
 
 // ── เหรียญเด้ง ──
 const coins = ref([])
@@ -351,7 +421,7 @@ const chatOpen = ref(false)
 const chatBox = ref(null)
 watch(chatOpen, () => nextTick(() => { if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight }))
 const hhmm = (ms) => (typeof ms === 'number' ? new Date(ms) : new Date()).toTimeString().slice(0, 5)
-const chat = computed(() => room.chat.value.map(m => ({ id: m.id, who: m.name, text: m.text, time: hhmm(m.at) })))
+const chat = computed(() => room.chat.value.map(m => ({ id: m.id, who: m.name, text: m.text, sys: !!m.sys, time: hhmm(m.at) })))
 const bubbles = reactive({})
 const seenMsg = new Set()
 let lastChime = 0
@@ -363,6 +433,7 @@ watch(() => room.chat.value, (list) => {
     if (!chatPrimed) continue   // ข้อความเก่าตอนเพิ่งเปิด ไม่ต้องเด้งบับเบิ้ล
     // 🔔 ป๊อก: เฉพาะข้อความคนอื่น · ไม่เกินทุก 5 วิ · เฉพาะตอนเราอยู่ในห้อง
     if (m.uid !== room.myUid() && fm.state.active && Date.now() - lastChime > 5000) { lastChime = Date.now(); chime('chat') }
+    if (m.sys) continue   // ข้อความระบบ (ไฮไฟว์) ไม่ขึ้นบับเบิ้ล
     bubbles[m.uid] = m.text
     setTimeout(() => { if (bubbles[m.uid] === m.text) delete bubbles[m.uid] }, 5000)
   }
@@ -372,7 +443,7 @@ watch(() => room.chat.value, (list) => {
 const draft = ref('')
 let lastSend = 0
 function send() {
-  if (!fm.state.active || !draft.value.trim()) return
+  if (!fm.state.active || peeking.value || !draft.value.trim()) return
   if (Date.now() - lastSend < 3000) return
   if (room.say(fm.state.zone, draft.value)) { lastSend = Date.now(); draft.value = '' }
 }
@@ -389,7 +460,7 @@ function join() {   // เข้าห้อง: เดินจากประ�
   walkTo(me, tx, ty)
   if (audio.track < 0) play(Math.floor(Math.random() * TRACKS.length))
 }
-function leave() { fm.leave(); room.leave(); stopAll(); stopAllWalks() }
+function leave() { if (myHandUp.value) lowerHand(); viewZone.value = fm.state.zone; fm.leave(); room.leave(); stopAll(); stopAllWalks() }
 // มินิเพลเยอร์
 const lastTrack = ref(0)
 const nowName = computed(() => TRACKS[audio.track >= 0 ? audio.track : lastTrack.value].name)
@@ -421,8 +492,9 @@ onMounted(() => {
     }
   }
   fcoinTimer = setInterval(() => { if (!document.hidden) friendPop() }, 1000)
+  hfTick = setInterval(() => { nowTick.value = Date.now() }, 1000)
 })
-onBeforeUnmount(() => { clearInterval(fcoinTimer); clearInterval(shuffleTimer); stopAllWalks(); room.unwatchChat(); room.release() })
+onBeforeUnmount(() => { clearInterval(hfTick); clearTimeout(hfOff); clearInterval(fcoinTimer); clearInterval(shuffleTimer); stopAllWalks(); room.unwatchChat(); room.release() })
 </script>
 
 <style scoped>
@@ -517,6 +589,19 @@ onBeforeUnmount(() => { clearInterval(fcoinTimer); clearInterval(shuffleTimer); 
 .fo-chat { position: absolute; left: 6px; bottom: 6px; z-index: 2000; max-width: 70%; pointer-events: none; }
 .fo-chat.open { pointer-events: auto; bottom: 40px; }
 .fo-chat-btn { position: absolute; left: 6px; bottom: 6px; z-index: 2001; width: 30px; height: 30px; border: 0; border-radius: 50%; background: rgba(15,23,42,.45); color: #fff; font-size: .9rem; cursor: pointer; display: none; }
+.fo-hf-btn { position: absolute; right: 6px; bottom: 6px; z-index: 2001; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(15,23,42,.45); font-size: 1.1rem; cursor: pointer; display: grid; place-items: center; }
+.fo-hf-btn.on { background: var(--accent); }
+.fo-hf-btn.on :deep(*), .fo-hand { animation: fo-wave 1s ease-in-out infinite; transform-origin: bottom center; }
+.fo-hand { position: absolute; bottom: 100%; right: -6px; margin-bottom: 4px; font-size: 1.1rem; }
+@keyframes fo-wave { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+.fo-clap { pointer-events: none; display: flex; flex-direction: row; align-items: center; transform: translate(-50%, -50%); }
+.fo-clap .l, .fo-clap .r { font-size: 1.4rem; display: inline-block; }
+.fo-clap .l { animation: fo-clap-l 1.3s ease-out forwards; }
+.fo-clap .r { animation: fo-clap-r 1.3s ease-out forwards; }
+.fo-clap b { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); font-size: .85rem; color: #b45309; white-space: nowrap; text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff; animation: fo-pop 1.3s ease-out forwards; }
+@keyframes fo-clap-l { 0% { transform: translateX(-18px) rotate(20deg); } 25%, 70% { transform: translateX(2px) rotate(20deg); } 100% { transform: translateX(2px) rotate(20deg); opacity: 0; } }
+@keyframes fo-clap-r { 0% { transform: scaleX(-1) translateX(-18px) rotate(20deg); } 25%, 70% { transform: scaleX(-1) translateX(2px) rotate(20deg); } 100% { transform: scaleX(-1) translateX(2px) rotate(20deg); opacity: 0; } }
+@keyframes fo-pop { 0%, 22% { opacity: 0; transform: translateX(-50%) scale(.6); } 35% { opacity: 1; transform: translateX(-50%) scale(1.25); } 75% { opacity: 1; transform: translateX(-50%) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-8px); } }
 .fo-chat-btn.on { background: var(--primary); }
 .fo-chat-in { display: flex; flex-direction: column; gap: 1px; max-height: 6.8em; overflow: hidden; }
 .fo-chat.open .fo-chat-in { max-height: 55%; height: 150px; overflow-y: auto; background: rgba(15,23,42,.62); border-radius: 8px; padding: 4px 6px; }
