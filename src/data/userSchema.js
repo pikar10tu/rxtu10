@@ -63,7 +63,7 @@ export const USER_DEFAULTS = {
   cosmetics: { owned: [], n: null, f: null, b: null, g: null },  // ร้านตกแต่ง (data/cosmetics.js · utils/cosmetics.js)
   doll: null,              // ตู้เสื้อผ้าตุ๊กตา { owned: [], eq: {…} } · null = ยังไม่เคยแต่ง → utils/doll.js dollOf() คืนชุดเริ่มต้นฟรี (18 พ.ย. 2026)
   dollSeen: false,       // เคยเข้าห้องแต่งตัวแล้ว = ซ่อนบับเบิ้ล "ลองแต่งตัว" หน้าแรก (20 พ.ย. 2026)
-  dollSaved: null,        // ชุดโปรด 3 ช่องในห้องแต่งตัว [eq|null ×3] (19 พ.ย. 2026)
+  dollSaved: null,        // ชุดโปรด 5 ช่องในห้องแต่งตัว [eq|null ×5] (เดิม 3 → 5 เมื่อ 24 พ.ย.) (19 พ.ย. 2026)
   arenas: { owned: [], on: null, champ: {} },   // สนามประลอง (data/arenas.js · utils/arenas.js) · champ = { 'YYYY-MM': อันดับ }
   // ── v2 fields ──
   role: 'student',                            // 'student' | 'academic' | 'instructor' | 'admin'

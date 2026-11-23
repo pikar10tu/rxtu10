@@ -193,10 +193,11 @@ function randomize() {
   trying.value = eq
 }
 
-// 💾 ชุดโปรด 3 ช่อง — users/{uid}.dollSaved = [eq|null ×3] (เก็บชุดที่ลอง รวมของที่ยังไม่ซื้อได้ ใส่แล้วค่อยขึ้นตะกร้า)
+// 💾 ชุดโปรด 5 ช่อง (เดิม 3 · user ขอเพิ่ม 24 พ.ย. 2026) — users/{uid}.dollSaved = [eq|null ×5] (เก็บชุดที่ลอง รวมของที่ยังไม่ซื้อได้ ใส่แล้วค่อยขึ้นตะกร้า)
+const SAVE_SLOTS = 5
 const saved = computed(() => {
   const a = Array.isArray(auth.userData?.dollSaved) ? auth.userData.dollSaved : []
-  return [0, 1, 2].map(i => (a[i] && typeof a[i] === 'object' ? a[i] : null))
+  return Array.from({ length: SAVE_SLOTS }, (_, i) => i).map(i => (a[i] && typeof a[i] === 'object' ? a[i] : null))
 })
 const slotSheet = ref(null)   // 'save' | 'load' | null
 function useSaved(i) {
