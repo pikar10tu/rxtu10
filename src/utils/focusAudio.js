@@ -44,6 +44,8 @@ function ctx() {
   if (!ac) {
     const AC = window.AudioContext || window.webkitAudioContext
     if (!AC) return null
+    // 📱 iOS 16.4+: บอกเครื่องว่าเป็นเครื่องเล่นเพลง → เสียงดังแม้เปิดสวิตช์เงียบ (24 พ.ย. user) · เครื่องเก่าไม่มี = เหมือนเดิม
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback' } catch { /* ไม่รองรับ */ }
     ac = new AC()
     master = ac.createGain()
     const lim = ac.createDynamicsCompressor()
@@ -135,42 +137,68 @@ function noiseBuf(kind) {
   }
   return b
 }
-// 🎧 เสียงพื้นจากไฟล์: โหลดทั้งก้อน (บอก %) → decode → วนด้วย BufferSource (ไม่มีช่องเงียบแบบ <audio loop>)
-const fileBufs = {}
+// 🎧 เสียงพื้นจากไฟล์ (แก้ 23 พ.ย.): สตรีมด้วย <audio> แล้วต่อเข้า Web Audio (ปุ่มเสียงยังคุมได้)
+//  เดิม fetch ทั้งก้อน → decodeAudioData = PCM ~77 MB (3:38 สเตอริโอ) มือถือค้างที่ 99% ตอน decode
+//  วนเพลงเนียน: ตัวเล่น 2 ตัว (A/B) — ก่อนจบ XF วินาที ตัวถัดไปเริ่มจากต้นเพลงแล้วเฟดไขว้กัน (ไม่มีช่องเงียบ/เสียงโดด)
+//  iOS: ทุก <audio> ต้อง play() ครั้งแรกในจังหวะกด → ตอนกดปลุกตัวที่ 2 ไว้ (play แล้ว pause ทันที)
+const XF = 1   // วินาทีที่เฟดไขว้ (user 23 พ.ย.: 1 วิ ไม่ซ้อนนานเกิน)
+const fileSets = {}
 let loadSeq = 0
-async function loadFile(url, seq) {
-  const r = await fetch(url)
-  if (!r.ok) throw new Error('http ' + r.status)
-  const total = +r.headers.get('content-length') || 0, parts = []
-  if (r.body && total) {
-    const rd = r.body.getReader(); let got = 0
-    for (;;) {
-      const { done, value } = await rd.read()
-      if (done) break
-      parts.push(value); got += value.length
-      if (seq === loadSeq) audioState.loadPct = Math.min(99, Math.round(got / total * 100))
-    }
-  } else parts.push(new Uint8Array(await r.arrayBuffer()))
-  const buf = new Uint8Array(parts.reduce((n, p) => n + p.length, 0))
-  let o = 0; for (const p of parts) { buf.set(p, o); o += p.length }
-  return await new Promise((res, rej) => ac.decodeAudioData(buf.buffer, res, rej))   // แบบ callback รองรับ Safari เก่า
-}
-async function playNoiseFile(kind) {
-  const N0 = NOISES.find(n => n.key === kind), seq = ++loadSeq
-  audioState.loadError = ''
-  if (!fileBufs[kind]) {
-    audioState.noiseLoading = kind; audioState.loadPct = 0
-    try { fileBufs[kind] = await loadFile(import.meta.env.BASE_URL + N0.src, seq) }
-    catch { if (seq === loadSeq) { audioState.noiseLoading = ''; audioState.loadError = kind } return }
+function filePair(kind, url) {
+  if (!fileSets[kind]) {
+    fileSets[kind] = [0, 1].map(() => {
+      const el = new Audio(url)
+      el.preload = 'auto'; el.crossOrigin = 'anonymous'
+      const g = ac.createGain(); g.gain.value = 0
+      ac.createMediaElementSource(el).connect(g)
+      return { el, g }
+    })
   }
-  if (seq !== loadSeq) return   // ระหว่างโหลดกดอย่างอื่นไปแล้ว
-  audioState.noiseLoading = ''
-  stopNoise(true); audioState.noise = kind
-  const s = ac.createBufferSource(), g = ac.createGain()
-  s.buffer = fileBufs[kind]; s.loop = true
-  g.gain.setValueAtTime(0, ac.currentTime); g.gain.linearRampToValueAtTime(N0.vol ?? 1, ac.currentTime + FADE)
-  s.connect(g).connect(nBus); s.start()
-  noiseNode = { s, g, drip: null }
+  return fileSets[kind]
+}
+const ramp = (g, to, sec) => { const t = ac.currentTime; g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(to, t + sec) }
+function playNoiseFile(kind) {
+  const N0 = NOISES.find(n => n.key === kind), seq = ++loadSeq, vol = N0.vol ?? 1
+  audioState.loadError = ''
+  const pair = filePair(kind, import.meta.env.BASE_URL + N0.src)
+  stopNoise(true)
+  const out = ac.createGain(); out.gain.setValueAtTime(0, ac.currentTime); out.connect(nBus)   // fade รวมตอนเริ่ม/หยุด
+  pair.forEach(p => { p.g.disconnect(); p.g.connect(out); p.el.pause(); p.el.currentTime = 0; p.g.gain.value = 0 })
+  let cur = 0, timer = null
+  const node = { g: out, drip: null, s: { stop: () => { clearInterval(timer); pair.forEach(p => { p.el.pause(); try { p.g.disconnect() } catch { /* ok */ } }) } } }
+  noiseNode = node; audioState.noise = kind
+  // ปลุกตัวที่ 2 ในจังหวะกด (iOS) แล้วหยุดไว้
+  const b = pair[1].el; b.play().then(() => { if (cur === 0) b.pause() }).catch(() => {})
+  const A = pair[0]
+  const ready = A.el.readyState >= 3
+  if (!ready) { audioState.noiseLoading = kind; audioState.loadPct = 0 }
+  const pct = () => {
+    if (seq !== loadSeq || !A.el.duration) return
+    const end = A.el.buffered.length ? A.el.buffered.end(A.el.buffered.length - 1) : 0
+    audioState.loadPct = Math.min(99, Math.round(end / A.el.duration * 100))
+  }
+  const tick = () => {   // ใกล้จบ → เริ่มอีกตัวจากต้นเพลง แล้วเฟดไขว้
+    if (noiseNode !== node) return clearInterval(timer)
+    const now = pair[cur], d = now.el.duration
+    if (!d || d - now.el.currentTime > XF) return
+    const nx = pair[1 - cur]
+    nx.el.currentTime = 0; nx.el.play().catch(() => {})
+    ramp(nx.g, 1, XF); ramp(now.g, 0, XF)
+    const old = now.el; setTimeout(() => { if (noiseNode === node && pair[cur].el !== old) old.pause() }, XF * 1000 + 300)
+    cur = 1 - cur
+  }
+  const done = (ok) => {
+    A.el.removeEventListener('progress', pct); clearTimeout(tm)
+    if (seq !== loadSeq) return
+    audioState.noiseLoading = ''
+    if (!ok) { audioState.loadError = kind; if (noiseNode === node) stopNoise(true); return }
+    A.g.gain.value = 1; ramp(out, vol, FADE)
+    timer = setInterval(tick, 250)
+  }
+  A.el.addEventListener('progress', pct)
+  A.el.addEventListener('playing', () => done(true), { once: true })
+  const tm = setTimeout(() => done(false), 45000)   // เน็ตแย่จริงๆ 45 วิ → บอกให้ลองใหม่
+  A.el.play().catch(() => done(false))
 }
 export function stopNoise(keepLoad) {
   if (!keepLoad) { loadSeq++; audioState.noiseLoading = '' }
