@@ -565,8 +565,8 @@ const AURA = {
   f2: { type: 'sparkle', color: '#F6C453' },     // ครุย: ประกายวันรับปริญญา
   // 🎀 ชุดแนวซานริโอ = เรืองรอบตัวตามสีตัวละคร (22 พ.ย. user)
   f51: { type: 'glow', color: '#FF8FB8' }, f52: { type: 'glow', color: '#8FD4F7' }, f53: { type: 'glow', color: '#C9A0FF' },
-  f54: { type: 'glow', color: '#FF5C6E' }, f55: { type: 'glow', color: '#B48CE8' },
-  f47: { type: 'mist', color: '#CFEDEA' },   // 22 พ.ย. หมอกจางรอบเท้า (เดิมเรือง)
+  f54: { type: 'glow', color: '#FFC2D1' }, f55: { type: 'glow', color: '#B48CE8' },
+  f47: { type: 'mist', color: '#CFEDEA' },   // หมอกจาง คลุมทั้งตัว (24 พ.ย.)
   f48: { type: 'stardust', color: '#A8E0B8' },
   f49: { type: 'notes', color: '#F6D77A' },       // 22 พ.ย. เสาหลักเสียง: โน้ตดนตรีลอย
   f50: { type: 'ring', color: '#C9A27A' },
