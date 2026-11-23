@@ -1,6 +1,7 @@
 // 🧍 ตู้เสื้อผ้าตุ๊กตา — ตรรกะล้วน (ไม่แตะ Firestore/Vue) · เทส: node --test src/utils/doll.test.js
 // users/{uid}.doll = { owned: [id…], eq: { s,c,h,e,m,t,b,k,o,x,a,i,w } } (handover §6)
 // แบบเดียวกับ utils/cosmetics.js: ซื้อครั้งเดียวเก็บถาวร · ใส่ได้ช่องละ 1 · ลองใส่ก่อนซื้อ · ซื้อรวดเดียวทั้งชุดที่ลอง
+import { hiddenSlots } from './dollRender.js'
 import { PART, SKINS, HAIRC, FREE, DEFAULT_EQ, REQUIRED, SETS } from '../data/dollParts.js'
 
 const SLOT_KEYS = ['s', 'c', 'h', 'e', 'm', 'f', 'j', 't', 'b', 'k', 'n', 'x', 'a', 'i', 'w']
@@ -84,11 +85,12 @@ export function sameEq(a, b) {
 // ✨ ออร่าทุกชิ้นที่ใส่และมีออร่า (user 19 พ.ย.: ใส่ของแพงหลายชิ้น = ออร่าหลายอัน) · แพงสุดก่อน · ชิ้นที่ถูกชุดเต็มตัวบังไม่นับ
 export function aurasOf(eq) {
   const list = []
+  const hidden = hiddenSlots(eq || {})   // 24 พ.ย. ชิ้นที่ถูกชุดบัง (covers/full) ไม่มีออร่า — เดิมเช็คแค่ b
   for (const [k, id] of Object.entries(eq || {})) {
     if (k === 's' || k === 'c') continue
     const p = PART[id]
     if (!p?.aura || p.slot !== k) continue
-    if (k === 'b' && PART[eq.t]?.full) continue
+    if (hidden.has(k)) continue
     list.push(p)
   }
   const auras = list.sort((a, b) => b.price - a.price).map(p => p.aura)

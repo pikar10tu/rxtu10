@@ -77,8 +77,10 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 </script>
 
 <style scoped>
-.doll { image-rendering: pixelated; image-rendering: crisp-edges; display: block; position: relative; }  /* relative = อยู่เหนือ .au-halo ที่วางก่อนหน้า */
-.dollw { position: relative; display: inline-block; line-height: 0; }
+.doll { image-rendering: pixelated; image-rendering: crisp-edges; display: block; position: relative; z-index: 1; }  /* 24 พ.ย. เดิมไม่มี z-index → halo/แสงพื้น/วง (absolute วางหลัง canvas) ทับตัวละคร */
+.dollw { position: relative; display: inline-block; line-height: 0; isolation: isolate; }
+.au-halo, .au-floor, .au-ring { z-index: 0; }
+.pt { z-index: 2; }
 /* อนุภาคออร่า (utils/dollAura.js) — พิกเซลวาดด้วย box-shadow/gradient ขนาดตาม --px (1 พิกเซลตุ๊กตา)
    22 พ.ย. ยกเครื่อง: ไฮไลต์ขาว (--hi) + เรืองนุ่ม · ดาวสี่แฉก · เปลว 3 สี+ถ่าน · วง 2 ชั้น+ลำแสง · ขอบเรืองคม */
 .pt { position: absolute; width: var(--px); height: var(--px); pointer-events: none; opacity: 0; }
