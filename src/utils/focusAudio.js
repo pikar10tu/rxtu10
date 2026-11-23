@@ -27,13 +27,15 @@ export const NOISES = [
   { key: 'brown', name: 'Brown noise', mood: 'ทุ้ม นุ่ม' },
   { key: 'pink', name: 'Pink noise', mood: 'สมดุล' },
   { key: 'rain', name: 'ฝนตกเบาๆ', mood: 'ธรรมชาติ' },
+  // 🎧 ไฟล์จริง (เพื่อนรีเควส 23 พ.ย.) · โหลดเมื่อกดเท่านั้น
+  { key: '40hz', name: '40 Hz Study Music', mood: 'ใส่หูฟัง', src: 'focus/40hz-study.m4a', vol: 0.8 },
 ]
 
 const FADE = 0.5   // วินาที — เปลี่ยนเพลงเฟดข้ามกัน (user 22 พ.ย.)
 const KEY = 'rxtu.focusAudio'
 function readPrefs() { try { return JSON.parse(localStorage.getItem(KEY)) || {} } catch { return {} } }
 const p0 = readPrefs()
-export const audioState = reactive({ track: -1, noise: '', music: p0.music ?? 50, bg: p0.bg ?? 50, muted: false })
+export const audioState = reactive({ noiseLoading: '', loadPct: 0, loadError: '', track: -1, noise: '', music: p0.music ?? 50, bg: p0.bg ?? 50, muted: false })
 function savePrefs() { try { localStorage.setItem(KEY, JSON.stringify({ music: audioState.music, bg: audioState.bg })) } catch { /* private mode */ } }
 
 let ac = null, master, mBus, nBus, tBus = null, timer = null, noiseNode = null
@@ -133,7 +135,45 @@ function noiseBuf(kind) {
   }
   return b
 }
-export function stopNoise() {
+// 🎧 เสียงพื้นจากไฟล์: โหลดทั้งก้อน (บอก %) → decode → วนด้วย BufferSource (ไม่มีช่องเงียบแบบ <audio loop>)
+const fileBufs = {}
+let loadSeq = 0
+async function loadFile(url, seq) {
+  const r = await fetch(url)
+  if (!r.ok) throw new Error('http ' + r.status)
+  const total = +r.headers.get('content-length') || 0, parts = []
+  if (r.body && total) {
+    const rd = r.body.getReader(); let got = 0
+    for (;;) {
+      const { done, value } = await rd.read()
+      if (done) break
+      parts.push(value); got += value.length
+      if (seq === loadSeq) audioState.loadPct = Math.min(99, Math.round(got / total * 100))
+    }
+  } else parts.push(new Uint8Array(await r.arrayBuffer()))
+  const buf = new Uint8Array(parts.reduce((n, p) => n + p.length, 0))
+  let o = 0; for (const p of parts) { buf.set(p, o); o += p.length }
+  return await new Promise((res, rej) => ac.decodeAudioData(buf.buffer, res, rej))   // แบบ callback รองรับ Safari เก่า
+}
+async function playNoiseFile(kind) {
+  const N0 = NOISES.find(n => n.key === kind), seq = ++loadSeq
+  audioState.loadError = ''
+  if (!fileBufs[kind]) {
+    audioState.noiseLoading = kind; audioState.loadPct = 0
+    try { fileBufs[kind] = await loadFile(import.meta.env.BASE_URL + N0.src, seq) }
+    catch { if (seq === loadSeq) { audioState.noiseLoading = ''; audioState.loadError = kind } return }
+  }
+  if (seq !== loadSeq) return   // ระหว่างโหลดกดอย่างอื่นไปแล้ว
+  audioState.noiseLoading = ''
+  stopNoise(true); audioState.noise = kind
+  const s = ac.createBufferSource(), g = ac.createGain()
+  s.buffer = fileBufs[kind]; s.loop = true
+  g.gain.setValueAtTime(0, ac.currentTime); g.gain.linearRampToValueAtTime(N0.vol ?? 1, ac.currentTime + FADE)
+  s.connect(g).connect(nBus); s.start()
+  noiseNode = { s, g, drip: null }
+}
+export function stopNoise(keepLoad) {
+  if (!keepLoad) { loadSeq++; audioState.noiseLoading = '' }
   if (noiseNode) {
     const { s, g, drip } = noiseNode, t = ac.currentTime
     clearInterval(drip); g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(0, t + FADE)
@@ -143,6 +183,7 @@ export function stopNoise() {
 }
 export function playNoise(kind) {
   if (!ctx()) return
+  if (NOISES.find(n => n.key === kind)?.src) { playNoiseFile(kind); return }
   stopNoise(); audioState.noise = kind
   const s = ac.createBufferSource(); s.buffer = noiseBuf(kind === 'brown' ? 'brown' : 'pink'); s.loop = true
   const f = ac.createBiquadFilter(), g = ac.createGain()

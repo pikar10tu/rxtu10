@@ -125,6 +125,7 @@
       <div class="fo-whybox">
         <p><b>กลบเสียงคนคุย:</b> งานวิจัยด้านความจำพบมานานว่าเสียงคนพูดที่ฟังรู้เรื่องรบกวนการอ่านและจำมากที่สุด แม้ไม่ได้ตั้งใจฟัง (irrelevant speech effect) เสียงพื้นหลังที่สม่ำเสมอช่วยกลบเสียงพวกนี้ได้</p>
         <p><b>Brown noise:</b> เสียงทุ้ม กลบเสียงย่านต่ำอย่างเสียงรถ แอร์ หรือคนคุยไกลๆ ได้ดี ไม่บาดหูเท่า white noise เลยเปิดยาวๆ ได้สบาย หลายคนบอกว่าหัวเงียบลงและตั้งใจได้นานขึ้น งานวิจัยที่ทดสอบ brown noise ตรงๆ ยังไม่มาก แต่หลักการกลบเสียงใช้ได้เหมือนกัน</p>
+        <p><b>40 Hz:</b> เพลงที่มีจังหวะสั่น 40 ครั้งต่อวินาที ตรงกับคลื่นสมองช่วงแกมมา หลายคนเปิดตอนอ่านหนังสือแล้วรู้สึกโฟกัสดีขึ้น งานวิจัยยังเบื้องต้นอยู่ ฟังผ่านหูฟังจะได้ยินเต็มกว่าลำโพงมือถือ</p>
         <p><b>Pink noise:</b> สมดุลกว่า คล้ายน้ำตกไกลๆ มีงานที่เปิดเป็นจังหวะระหว่างหลับลึกแล้วความจำวันถัดไปดีขึ้น (Papalambros และคณะ, 2017) แต่เป็นตอนนอน ไม่ใช่ตอนอ่าน</p>
         <p><b>คนสมาธิหลุดง่ายอาจได้มากกว่า:</b> Söderlund และคณะ (2007) พบว่าเสียงพื้นหลังช่วยเด็กที่สมาธิหลุดง่ายจำได้ดีขึ้น แต่รบกวนเด็กที่ตั้งใจดีอยู่แล้วเล็กน้อย</p>
         <p class="fo-muted">สรุป: ช่วยกลบเสียงรอบตัวได้แน่ ที่เหลือแล้วแต่คน ลองเปิดเบาๆ ดู</p>
@@ -162,7 +163,9 @@
       <div class="mp-row mp-amb" role="group" aria-label="เสียงพื้นหลัง">
         <span class="mp-lbl">เสียงพื้นหลัง</span>
         <button type="button" class="mp-q" :aria-expanded="why" aria-label="เสียงพื้นหลังช่วยอะไร" @click="why = !why">?</button>
-        <button v-for="n in AMB" :key="n.key" type="button" class="mp-chip" :aria-pressed="audio.noise === n.key" @click="n.key ? playNoise(n.key) : stopNoise()">{{ n.short }}</button>
+        <button v-for="n in AMB" :key="n.key" type="button" class="mp-chip" :aria-pressed="audio.noise === n.key || audio.noiseLoading === n.key" :aria-busy="audio.noiseLoading === n.key" @click="!n.key || audio.noiseLoading === n.key ? stopNoise() : playNoise(n.key)"><template v-if="audio.noiseLoading === n.key"><span class="mp-spin" aria-hidden="true"></span> {{ audio.loadPct }}%</template><template v-else>{{ audio.loadError === n.key ? '⚠️ ' : '' }}{{ n.short }}</template></button>
+      </div>
+      <div v-if="audio.noiseLoading || audio.loadError" class="mp-row mp-load" role="status">{{ audio.noiseLoading ? `⏳ กำลังโหลดเสียง ${audio.loadPct}% · รอแป๊บนะ (โหลดครั้งแรกครั้งเดียว)` : '⚠️ โหลดเสียงไม่สำเร็จ · ลองกดใหม่อีกครั้ง' }}
       </div>
       <label class="mp-row mp-vol"><span aria-hidden="true">🌧️</span><input type="range" min="0" max="100" :value="audio.bg" aria-label="ระดับเสียงพื้นหลัง" @input="setVolume('bg', +$event.target.value)"><span class="mp-num">{{ audio.bg }}</span></label>
     </section>
@@ -179,8 +182,8 @@
         <small class="fo-muted">เสียงพื้นหลัง · เปิดคู่กับเพลงได้</small>
         <ul class="fo-list">
           <li v-for="n in NOISES" :key="n.key">
-            <button type="button" class="fo-trk" :class="{ on: audio.noise === n.key }" @click="audio.noise === n.key ? stopNoise() : playNoise(n.key)">
-              <span class="ic">{{ audio.noise === n.key ? '❚❚' : '▶' }}</span><span class="tn">{{ n.name }}</span><span class="md">{{ n.mood }}</span>
+            <button type="button" class="fo-trk" :class="{ on: audio.noise === n.key || audio.noiseLoading === n.key }" :aria-busy="audio.noiseLoading === n.key" @click="audio.noise === n.key || audio.noiseLoading === n.key ? stopNoise() : playNoise(n.key)">
+              <span class="ic"><span v-if="audio.noiseLoading === n.key" class="mp-spin" aria-hidden="true"></span><template v-else>{{ audio.noise === n.key ? '❚❚' : '▶' }}</template></span><span class="tn">{{ n.name }}</span><span class="md">{{ audio.noiseLoading === n.key ? `⏳ ${audio.loadPct}%` : audio.loadError === n.key ? '⚠️ โหลดไม่สำเร็จ' : n.mood }}</span>
             </button>
           </li>
         </ul>
@@ -515,7 +518,7 @@ const noiseName = computed(() => NOISES.find(n => n.key === audio.noise)?.name |
 function play(i) { lastTrack.value = i; playTrack(i) }
 function togglePlay() { if (audio.track >= 0) stopTrack(); else play(lastTrack.value) }
 function skip(d) { play(shuffle.value ? randomOther() : ((audio.track >= 0 ? audio.track : lastTrack.value) + d + TRACKS.length) % TRACKS.length) }
-const AMB = [{ key: '', short: 'ปิด' }, { key: 'brown', short: 'Brown' }, { key: 'pink', short: 'Pink' }, { key: 'rain', short: 'ฝน' }]
+const AMB = [{ key: '', short: 'ปิด' }, { key: 'brown', short: 'Brown' }, { key: 'pink', short: 'Pink' }, { key: 'rain', short: 'ฝน' }, { key: '40hz', short: '40 Hz' }]
 // 🔀 สุ่ม: กดข้าม = สุ่มเพลงอื่น · เปิดไว้แล้วเปลี่ยนเพลงเองทุก ~3 นาที
 const shuffle = ref(false)
 let shuffleTimer = 0
@@ -705,4 +708,8 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-whybox { font-size: .8rem; line-height: 1.55; background: var(--bg); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
 .fo-vol { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
 .fo-vol input { flex: 1; }
+.mp-spin { display: inline-block; width: .9em; height: .9em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: mp-spin .8s linear infinite; vertical-align: -0.12em }
+@keyframes mp-spin { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) { .mp-spin { animation-duration: 2.4s } }
+.mp-load { font-size: .78rem; opacity: .85; justify-content: center }
 </style>
