@@ -81,15 +81,20 @@ test('unpackCard ทน entry เสีย/ว่าง → คืนค่า�
   assert.equal(d.dueAt, 0)
 })
 
-test('dueQuestionIds: ทุกข้อในกองนับหมด (รวม due อนาคตจากระบบเก่า) · เรียงค้างนานสุดก่อน + ตัดที่ limit', () => {
+test('dueQuestionIds: สุ่มจากทั้งกอง (รวม d อนาคตจากระบบเก่า) + ตัดที่ limit', () => {
   const qcards = {
     a: { d: NOW - 3 * DAY_MS },
     b: { d: NOW - 1 * DAY_MS },
-    c: { d: NOW + 5 * DAY_MS },   // ระบบเก่าเลื่อนไว้ → ต้องกลับมานับ
+    c: { d: NOW + 5 * DAY_MS },
     e: { d: NOW - 2 * DAY_MS },
   }
-  assert.deepEqual(dueQuestionIds(qcards, NOW, 10), ['a', 'e', 'b', 'c'])
-  assert.deepEqual(dueQuestionIds(qcards, NOW, 2), ['a', 'e'])
+  const all = dueQuestionIds(qcards, NOW, 10)
+  assert.deepEqual([...all].sort(), ['a', 'b', 'c', 'e'])
+  assert.equal(dueQuestionIds(qcards, NOW, 2).length, 2)
+  // ข้อ d อนาคต (ข้อเก่า) ต้องมีโอกาสขึ้นหัวแถว
+  let cFirst = 0
+  for (let k = 0; k < 400; k++) if (dueQuestionIds(qcards, NOW, 1)[0] === 'c') cFirst++
+  assert.ok(cFirst > 50 && cFirst < 150, `c ขึ้นก่อน ${cFirst}/400 ควรราว 100`)
   assert.equal(dueCount(qcards, NOW), 4)
   assert.deepEqual(dueQuestionIds(undefined, NOW, 10), [])
   assert.equal(dueCount(undefined, NOW), 0)

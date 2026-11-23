@@ -43,13 +43,20 @@ export function dueCount(qcards, _now) {
   return Object.keys(qcards).length
 }
 
-/** id ในกอง เรียงข้อที่ค้างนานสุดก่อน ตัดที่ limit */
-export function dueQuestionIds(qcards, _now, limit) {
+/**
+ * id ในกอง สุ่มทั้งกองแล้วตัดที่ limit
+ * 24 พ.ย. 2026 (เพื่อนรายงาน "วนแต่ข้อที่เพิ่งทำ ข้อเก่าไม่มา"): เดิมเรียงตาม d แต่ d ค้างวันอนาคตจากระบบ SRS เก่า
+ * → ข้อเก่าไปท้ายแถวตลอด · user: ใกล้สอบ ไม่ต้องคิดเรื่องวัน สุ่มเลย ใครทำเยอะก็เคลียร์กองได้
+ * @param {() => number} [rand] ใส่ได้เพื่อเทส
+ */
+export function dueQuestionIds(qcards, _now, limit, rand = Math.random) {
   if (!qcards || typeof qcards !== 'object') return []
-  return Object.entries(qcards)
-    .sort((a, b) => num(a[1]?.d, 0) - num(b[1]?.d, 0))
-    .slice(0, limit)
-    .map(([id]) => id)
+  const ids = Object.keys(qcards)
+  for (let i = ids.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]]
+  }
+  return ids.slice(0, limit)
 }
 
 /**
