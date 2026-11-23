@@ -54,7 +54,7 @@
       <div v-if="!fm.state.active" class="fo-join" @click.stop>
         <p>{{ others.length ? `${others.length} คนอยู่ในห้อง` : 'ยังไม่มีใครในห้องนี้ · เป็นคนแรกเลย' }}</p>
         <button type="button" class="fo-btn primary big" @click="join">🎯 เริ่มโฟกัส</button>
-        <small>อ่านหนังสือเพื่อสร้างรายได้ · +{{ house }}/วิ</small>
+        <small>อ่านหนังสือเพื่อสร้างรายได้ตามระดับที่อยู่ของคุณ<br>ตอนนี้ +{{ house }} เหรียญ/วิ</small>
       </div>
       <FocusSceneFx ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
       <div v-for="c in claps" :key="c.id" class="fo-ent fo-clap" :style="entStyle(c.x, c.y, 999)" aria-hidden="true">
@@ -163,7 +163,7 @@
       <div class="mp-row mp-amb" role="group" aria-label="เสียงพื้นหลัง">
         <span class="mp-lbl">เสียงพื้นหลัง</span>
         <button type="button" class="mp-q" :aria-expanded="why" aria-label="เสียงพื้นหลังช่วยอะไร" @click="why = !why">?</button>
-        <button v-for="n in AMB" :key="n.key" type="button" class="mp-chip" :aria-pressed="audio.noise === n.key || audio.noiseLoading === n.key" :aria-busy="audio.noiseLoading === n.key" @click="!n.key || audio.noiseLoading === n.key ? stopNoise() : playNoise(n.key)"><template v-if="audio.noiseLoading === n.key"><span class="mp-spin" aria-hidden="true"></span> {{ audio.loadPct }}%</template><template v-else>{{ audio.loadError === n.key ? '⚠️ ' : '' }}{{ n.short }}</template></button>
+        <button v-for="n in AMB" :key="n.key" type="button" class="mp-chip" :aria-pressed="audio.noise === n.key || ambLoading(n.key)" :aria-busy="ambLoading(n.key)" @click="!n.key || ambLoading(n.key) ? stopNoise() : playNoise(n.key)"><template v-if="ambLoading(n.key)"><span class="mp-spin" aria-hidden="true"></span> {{ audio.loadPct }}%</template><template v-else>{{ ambError(n.key) ? '⚠️ ' : '' }}{{ n.short }}</template></button>
       </div>
       <div v-if="audio.noiseLoading || audio.loadError" class="mp-row mp-load" role="status">{{ audio.noiseLoading ? `⏳ กำลังโหลดเสียง ${audio.loadPct}% · รอแป๊บนะ (โหลดครั้งแรกครั้งเดียว)` : '⚠️ โหลดเสียงไม่สำเร็จ · ลองกดใหม่อีกครั้ง' }}
       </div>
@@ -518,6 +518,9 @@ const noiseName = computed(() => NOISES.find(n => n.key === audio.noise)?.name |
 function play(i) { lastTrack.value = i; playTrack(i) }
 function togglePlay() { if (audio.track >= 0) stopTrack(); else play(lastTrack.value) }
 function skip(d) { play(shuffle.value ? randomOther() : ((audio.track >= 0 ? audio.track : lastTrack.value) + d + TRACKS.length) % TRACKS.length) }
+// ปุ่ม "ปิด" มี key '' ตรงกับสถานะว่าง ('' = ไม่ได้โหลด) → ต้องกันไม่ให้นับว่ากำลังโหลด/พัง (บั๊ก 24 พ.ย. ปุ่มปิดหมุน 0% ค้าง)
+const ambLoading = (k) => !!k && audio.noiseLoading === k
+const ambError = (k) => !!k && audio.loadError === k
 const AMB = [{ key: '', short: 'ปิด' }, { key: 'brown', short: 'Brown' }, { key: 'pink', short: 'Pink' }, { key: 'rain', short: 'ฝน' }, { key: '40hz', short: '40 Hz' }]
 // 🔀 สุ่ม: กดข้าม = สุ่มเพลงอื่น · เปิดไว้แล้วเปลี่ยนเพลงเองทุก ~3 นาที
 const shuffle = ref(false)
