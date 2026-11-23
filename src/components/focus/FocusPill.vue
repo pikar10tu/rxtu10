@@ -17,6 +17,7 @@ import { useAuthStore } from '../../stores/auth.js'
 import { useFocusMode, fmtClock } from '../../composables/useFocusMode.js'
 import { audioState as audio } from '../../utils/focusAudio.js'
 import { useFocusRoom } from '../../composables/useFocusRoom.js'
+import { useToast } from '../../composables/useToast.js'
 import { freeSeat, seatFoot } from '../../utils/focusLayout.js'
 
 const route = useRoute()
@@ -35,8 +36,15 @@ watch(() => [fm.state.active, room.joined.value, auth.userData?.uid || auth.user
   if (!active || joined || !ready || route.name === 'focus') return   // หน้าโฟกัสจัดการเอง
   const taken = new Set(room.people.value.filter(p => p.zone === fm.state.zone).map(p => p.seat))
   const seat = freeSeat(taken); const [x, y] = seat >= 0 ? seatFoot(seat) : [80, 80]
-  room.join({ zone: fm.state.zone, seat, x, y, st: fm.status.value })
+  room.join({ zone: fm.state.zone, seat, x, y, st: fm.status.value }, { auto: true })
 }, { immediate: true })
+// 📱 เครื่องอื่นเข้าห้องแทน → เครื่องนี้ออก (นับเครื่องเดียว)
+const { toast } = useToast()
+watch(() => room.kicked.value, () => {
+  if (!fm.state.active) return
+  fm.leave()
+  toast('ย้ายไปนั่งที่เครื่องอื่นแล้ว · เครื่องนี้ออกจากห้อง', 'info')
+})
 </script>
 
 <style scoped>

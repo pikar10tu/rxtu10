@@ -1,27 +1,31 @@
 // ════════════════════════════════════════════════════════════
 //  useFocusMode — สถานะโหมดโฟกัส (Co-working space) ระดับทั้งแอป · singleton
 //  เข้าโหมด = เริ่มจับเวลา · สถานะ 3: ✍️ ทำข้อสอบ (อยู่หน้า quiz/daily/timeAttack · derive จาก route) / 🎮 เล่นเกม (หน้าเกม) / 🟢 อยู่จอ / 💤 ไม่อยู่ (ไม่แตะจอ 30 วิ)
-//  เหรียญ: เด้งวิละครั้ง ครั้งละ = ระดับบ้าน · เพดาน 2 ชม./วัน ครบแล้วไม่เด้ง (user 22 พ.ย. 2026)
+//  เหรียญ (23 พ.ย. 2026): ไม่มีเพดานรายวันแล้ว · นั่งในห้อง = สะสมวินาทีเข้า "กระปุก" เต็มที่ 2 ชม.
+//    กดรับ → เหรียญ = วินาทีในกระปุก × ระดับบ้าน · กันโกง: ยอดรับ ≤ เวลาจริงที่ผ่านไปนับจากรับครั้งก่อน
+//    (focusClaimAt = serverTimestamp) — เปิดหลายเครื่องพร้อมกันก็ได้ไม่เกินเวลาจริง
 //  นับเฉพาะตอนจอเปิด (document.visible) · เปิดหลายแท็บ = นับแท็บเดียว (ล็อกผ่าน localStorage)
 //  เขียน Firestore รวมทุก 60 วิ + ตอนออกห้อง/ปัดจอ/ปิดแท็บ (ไม่ยิงทุกวินาที):
-//    coins += increment · focusSecs += increment (เวลาโฟกัสสะสมตลอดชีพ → การ์ดสมาชิก + ความสำเร็จ)
-//    focusDay = { d, secs, coinSecs, coins } (ยอดวันนี้ — ใช้กันเพดานข้ามเครื่อง)
+//    focusSecs += increment (เวลาโฟกัสสะสมตลอดชีพ → การ์ดสมาชิก + ความสำเร็จ)
+//    focusBank = { secs, c } (กระปุก · c = เวลารับครั้งล่าสุด ms ใช้รู้ว่าเครื่องอื่นกดรับไปแล้ว)
+//    focusDay = { d, secs, coins } (ยอดวันนี้ โชว์อย่างเดียว)
 // ════════════════════════════════════════════════════════════
 import { reactive, computed } from 'vue'
-import { increment } from 'firebase/firestore'
+import { increment, serverTimestamp } from 'firebase/firestore'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { useAuthStore } from '../stores/auth.js'
 
-export const COIN_CAP_SECS = 2 * 60 * 60
+export const COIN_CAP_SECS = 2 * 60 * 60   // กระปุกเต็มที่ 2 ชม.
 const FLUSH_EVERY = 60
 const SKEY = 'rxtu.focus.session'   // sessionStorage: รีเฟรชแล้วยังอยู่ในโหมด
 const DKEY = 'rxtu.focus.day'       // localStorage: ยอดวันนี้ (สำรองระหว่างรอ flush)
+const BKEY = 'rxtu.focus.bank'      // localStorage: กระปุก { secs, c }
 const LKEY = 'rxtu.focus.leader'    // localStorage: แท็บไหนเป็นคนนับ
 const TAB = Math.random().toString(36).slice(2)
 
 function load(store, key, def) { try { return JSON.parse(globalThis[store]?.getItem(key)) || def } catch { return def } }
 function save(store, key, v) { try { globalThis[store]?.setItem(key, JSON.stringify(v)) } catch { /* private mode */ } }
-const freshDay = () => ({ day: dayKey(), coinSecs: 0, coins: 0, secs: 0 })
+const freshDay = () => ({ day: dayKey(), coins: 0, secs: 0 })
 
 const s0 = load('sessionStorage', SKEY, null)
 const d0 = load('localStorage', DKEY, null)
@@ -35,17 +39,21 @@ const state = reactive({
   idle: false,   // ไม่แตะจอเกิน 30 วิ → ไม่อยู่
   // ⚠️ ยอดในเครื่องช่วงทดลอง (ก่อน 22 พ.ย. เย็น) ไม่ได้เข้ากระเป๋าจริง — เริ่มนับใหม่จากค่าใน Firestore (syncDay)
   day: d0?.day === dayKey() && d0?.v === 2 ? d0 : { ...freshDay(), v: 2 },
+  bank: load('localStorage', BKEY, null) || { secs: 0, c: 0 },
+  claiming: false,
   pops: 0,                             // นับครั้งที่เหรียญเด้ง — หน้าห้อง watch ตัวนี้เพื่อวาดเลขลอย
   lastGain: 0,
 })
-const pending = { secs: 0, coins: 0 }
+const pending = { secs: 0 }
 let timer = null, sinceFlush = 0, synced = false
 let houseLevel = () => 1
 
 function persist() {
   save('sessionStorage', SKEY, { active: state.active, zone: state.zone, secs: state.secs })
   save('localStorage', DKEY, state.day)
+  save('localStorage', BKEY, state.bank)
 }
+const tsMs = (t) => (t?.toMillis ? t.toMillis() : typeof t === 'number' ? t : t instanceof Date ? t.getTime() : 0)
 // ยอดวันนี้จากเครื่องอื่น (Firestore) — เอาค่ามากกว่า กันเพดานรีเซ็ตเมื่อสลับเครื่อง
 function syncDay() {
   if (synced) return
@@ -54,9 +62,13 @@ function syncDay() {
   synced = true
   const fd = u.focusDay
   if (fd?.d === state.day.day) {
-    state.day.coinSecs = Math.max(state.day.coinSecs, fd.coinSecs || 0)
     state.day.secs = Math.max(state.day.secs, fd.secs || 0)
     state.day.coins = Math.max(state.day.coins, fd.coins || 0)
+  }
+  const fb = u.focusBank
+  if (fb) {
+    if ((fb.c || 0) > (state.bank.c || 0)) state.bank = { secs: fb.secs || 0, c: fb.c }   // เครื่องอื่นกดรับไปแล้ว → เริ่มจากยอดนั้น
+    else if (fb.c === state.bank.c) state.bank.secs = Math.max(state.bank.secs, fb.secs || 0)
   }
 }
 function isLeader() {
@@ -66,16 +78,17 @@ function isLeader() {
   return true
 }
 function flush() {
-  if (!pending.secs && !pending.coins) return
+  if (!pending.secs) return
   const auth = useAuthStore(), u = auth.userData
   if (!u) return
-  const ps = pending.secs, pc = pending.coins
-  pending.secs = 0; pending.coins = 0; sinceFlush = 0
-  const fd = { d: state.day.day, secs: state.day.secs, coinSecs: state.day.coinSecs, coins: state.day.coins }
+  const ps = pending.secs
+  pending.secs = 0; sinceFlush = 0
+  const fd = { d: state.day.day, secs: state.day.secs, coins: state.day.coins }
+  const fb = { secs: state.bank.secs, c: state.bank.c || 0 }
   Promise.resolve(auth.patchUser(
-    { coins: (u.coins || 0) + pc, focusSecs: (u.focusSecs || 0) + ps, focusDay: fd },
-    { coins: increment(pc), focusSecs: increment(ps), focusDay: fd },
-  )).then((ok) => { if (ok === false) { pending.secs += ps; pending.coins += pc } })   // ไม่ผ่าน → คืนยอดไว้ส่งรอบหน้า
+    { focusSecs: (u.focusSecs || 0) + ps, focusDay: fd, focusBank: fb },
+    { focusSecs: increment(ps), focusDay: fd, focusBank: fb },
+  )).then((ok) => { if (ok === false) pending.secs += ps })   // ไม่ผ่าน → คืนยอดไว้ส่งรอบหน้า
   persist()
 }
 function tick() {
@@ -86,16 +99,39 @@ function tick() {
   state.secs += 1
   state.day.secs += 1
   pending.secs += 1
-  if (state.day.coinSecs < COIN_CAP_SECS) {
-    const gain = Math.max(1, Math.round(houseLevel()))
-    state.day.coinSecs += 1
-    state.day.coins += gain
-    pending.coins += gain
-    state.lastGain = gain
+  if (state.bank.secs < COIN_CAP_SECS) {
+    state.bank.secs += 1
+    state.lastGain = Math.max(1, Math.round(houseLevel()))
     state.pops++
   }
   if (++sinceFlush >= FLUSH_EVERY) flush()
   else if (state.secs % 5 === 0) persist()
+}
+// 🪙 กดรับเหรียญจากกระปุก — ยอดที่รับได้ ≤ เวลาจริงนับจากรับครั้งก่อน (กันปั๊มวินาที/หลายเครื่อง)
+async function claim() {
+  const auth = useAuthStore(), u = auth.userData
+  if (!u || state.claiming) return 0
+  syncDay()
+  const now = Date.now()
+  const last = tsMs(u.focusClaimAt)
+  const real = last ? Math.max(0, Math.floor((now - last) / 1000)) : COIN_CAP_SECS
+  const secs = Math.min(Math.floor(state.bank.secs), real, COIN_CAP_SECS)
+  if (secs <= 0) return 0
+  const coins = secs * Math.max(1, Math.round(houseLevel()))
+  state.claiming = true
+  const ps = pending.secs; pending.secs = 0; sinceFlush = 0
+  const fb = { secs: 0, c: now }
+  const fd = { d: state.day.day, secs: state.day.secs, coins: state.day.coins + coins }
+  const ok = await auth.patchUser(
+    { coins: (u.coins || 0) + coins, focusSecs: (u.focusSecs || 0) + ps, focusDay: fd, focusBank: fb, focusClaimAt: new Date(now) },
+    { coins: increment(coins), focusSecs: increment(ps), focusDay: fd, focusBank: fb, focusClaimAt: serverTimestamp() },
+  )
+  state.claiming = false
+  if (ok === false) { pending.secs += ps; return 0 }
+  state.bank = { secs: 0, c: now }
+  state.day.coins = fd.coins
+  persist()
+  return coins
 }
 function ensureTimer() {
   if (state.active && !timer) timer = setInterval(tick, 1000)
@@ -111,8 +147,10 @@ export function useFocusMode(getHouseLevel) {
   if (getHouseLevel) houseLevel = getHouseLevel
   return {
     state,
-    capFull: computed(() => state.day.coinSecs >= COIN_CAP_SECS),
-    capPct: computed(() => Math.min(1, state.day.coinSecs / COIN_CAP_SECS)),
+    capFull: computed(() => state.bank.secs >= COIN_CAP_SECS),
+    capPct: computed(() => Math.min(1, state.bank.secs / COIN_CAP_SECS)),
+    bankCoins: computed(() => Math.floor(state.bank.secs) * Math.max(1, Math.round(houseLevel()))),
+    claim,
     status: computed(() => (state.onQuiz ? 'quiz' : state.saver ? 'deep' : state.idle ? 'afk' : state.onGame ? 'game' : 'here')),
     enter(zone) { if (zone) state.zone = zone; if (!state.active) { state.active = true; state.secs = 0 } persist(); ensureTimer() },
     leave() { flush(); state.active = false; persist(); ensureTimer() },

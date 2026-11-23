@@ -43,7 +43,9 @@ export const USER_DEFAULTS = {
   pityClaimedRounds: 0,
   qToday: null,            // { d: dayKey, n } ข้อสอบที่ทำวันนี้ (หลอดเป้าวันนี้หน้าแรก)
   focusSecs: 0,            // lifetime: เวลาโฟกัสสะสม (วินาที) — การ์ดสมาชิก + ความสำเร็จ (useFocusMode 22 พ.ย. 2026)
-  focusDay: null,          // { d, secs, coinSecs, coins } ยอดโหมดโฟกัสวันนี้ — กันเพดาน 2 ชม. ข้ามเครื่อง
+  focusDay: null,          // { d, secs, coins } ยอดโหมดโฟกัสวันนี้ (โชว์)
+  focusBank: null,         // { secs, c } กระปุกเหรียญโฟกัส (เต็ม 2 ชม.) · c = เวลารับครั้งล่าสุด
+  focusClaimAt: null,      // serverTimestamp รับครั้งล่าสุด — ยอดรับ ≤ เวลาจริงที่ผ่านไป
   quizDoneTotal: 0,        // lifetime: ข้อสอบที่ทำ (achievement)
   studyReviewedTotal: 0,   // lifetime: แฟลชการ์ดที่ทบทวน (achievement)
   farmSalesTotal: 0,       // lifetime: เหรียญจากการขายฟาร์ม (achievement)

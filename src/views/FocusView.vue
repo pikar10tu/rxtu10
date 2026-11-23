@@ -90,8 +90,11 @@
             <div class="fo-num"><small>⏱️ โฟกัสรอบนี้</small><b>{{ fmtClock(fm.state.secs) }}</b></div>
             <div class="fo-num"><small>🪙 เหรียญวันนี้</small><b>{{ Math.floor(fm.state.day.coins).toLocaleString() }}</b></div>
           </div>
-          <div class="fo-cap" :class="{ full: fm.capFull.value }" role="progressbar" :aria-valuenow="Math.round(fm.capPct.value * 100)" aria-valuemin="0" aria-valuemax="100" aria-label="เวลาที่ยังได้เหรียญวันนี้"><i :style="{ width: fm.capPct.value * 100 + '%' }"></i></div>
-          <small class="fo-capt">{{ fm.capFull.value ? 'ครบ 2 ชม. แล้ว · นั่งต่อได้ ไม่ได้เหรียญเพิ่ม' : `ได้ +${house} ต่อวินาที · อีก ${capLeft} ครบเพดานวันนี้` }}</small>
+          <div class="fo-cap" :class="{ full: fm.capFull.value }" role="progressbar" :aria-valuenow="Math.round(fm.capPct.value * 100)" aria-valuemin="0" aria-valuemax="100" aria-label="กระปุกเหรียญ"><i :style="{ width: fm.capPct.value * 100 + '%' }"></i></div>
+          <div class="fo-bank">
+            <small class="fo-capt">{{ fm.capFull.value ? 'กระปุกเต็มแล้ว · กดรับก่อนถึงจะสะสมต่อ' : `สะสม +${house}/วิ · อีก ${capLeft} กระปุกเต็ม` }}</small>
+            <button type="button" class="fo-claim" :disabled="!fm.bankCoins.value || fm.state.claiming" @click="claimCoins"><Emoji char="🪙" /> รับ {{ fm.bankCoins.value.toLocaleString() }}</button>
+          </div>
         </div>
         <div class="fo-actions">
           <button type="button" class="fo-btn primary" @click="quizOpen = true">✍️ ไปทำข้อสอบ</button>
@@ -191,6 +194,8 @@ import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } 
 import { useRouter } from 'vue-router'
 import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
+import { useToast } from '../composables/useToast.js'
+import { useConfirm } from '../composables/useConfirm.js'
 import DollFigure from '../components/doll/DollFigure.vue'
 import BottomSheet from '../components/shared/BottomSheet.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
@@ -245,7 +250,13 @@ function maybeTear() {
 watch(viewZone, maybeTear, { immediate: true })
 const sfx = ref(null)
 const tod = ref('day')
-const capLeft = computed(() => { const m = Math.ceil((COIN_CAP_SECS - fm.state.day.coinSecs) / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม. ${m % 60} น.` : `${m} น.` })
+const { toast } = useToast()
+const { confirm } = useConfirm()
+async function claimCoins() {
+  const got = await fm.claim()
+  if (got) toast(`รับ ${got.toLocaleString()} เหรียญแล้ว 🪙`, 'success')
+}
+const capLeft = computed(() => { const m = Math.ceil((COIN_CAP_SECS - fm.state.bank.secs) / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม. ${m % 60} น.` : `${m} น.` })
 
 // ── คนในห้อง (Realtime Database) ──
 const room = useFocusRoom()
@@ -484,7 +495,9 @@ function holdEnd() { holding.value = false; clearTimeout(holdT) }
 const quizOpen = ref(false)
 const listOpen = ref(false)
 const why = ref(false)
-function join() {   // เข้าห้อง: เดินจากประตูล่างกลางไปที่นั่งว่าง แล้วเริ่มจับเวลา
+async function join() {   // เข้าห้อง: เดินจากประตูล่างกลางไปที่นั่งว่าง แล้วเริ่มจับเวลา
+  // 📱 นับเครื่องเดียว: มีอีกเครื่องนั่งอยู่ → ถามก่อน ยืนยันแล้วเครื่องนั้นออก
+  if (await room.otherDevice() && !await confirm('ตอนนี้คุณนั่งอยู่ในห้องจากอีกเครื่อง 📱\nเข้าจากเครื่องนี้แทน?\nเครื่องก่อนหน้าจะออกจากห้อง')) return
   fm.enter()
   const seat = freeSeat(takenSeats())
   const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
@@ -521,12 +534,14 @@ onMounted(() => {
     else {   // รีเฟรชแล้ว presence หาย (onDisconnect) → เข้าห้องใหม่ที่นั่งว่าง
       const seat = freeSeat(takenSeats()); const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
       me.seat = seat; me.x = tx; me.y = ty
-      room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value })
+      room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value }, { auto: true })
     }
   }
   fcoinTimer = setInterval(() => { if (!document.hidden && !saver.value) friendPop() }, 1000)
   hfTick = setInterval(() => { nowTick.value = Date.now() }, 1000)
 })
+// เครื่องอื่นยึดห้อง → ปิดจอดำ/เพลงในเครื่องนี้ (fm.leave อยู่ที่ FocusPill)
+watch(() => room.kicked.value, () => { stopSaver(); handPending.value = false; stopAll(); stopAllWalks(); viewZone.value = fm.state.zone })
 onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff); clearInterval(fcoinTimer); clearInterval(shuffleTimer); stopAllWalks(); room.unwatchChat(); room.release() })
 </script>
 
@@ -670,6 +685,10 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-cap i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--gold), #f97316); transition: width .5s; }
 .fo-cap.full i { background: var(--care); }
 .fo-capt { font-size: .72rem; color: var(--muted); }
+.fo-bank { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fo-claim { flex: none; border: 0; border-radius: 99px; padding: 4px 12px; font-weight: 800; font-size: .78rem; background: linear-gradient(90deg, var(--gold), #f97316); color: #fff; cursor: pointer; }
+.fo-claim:disabled { opacity: .45; cursor: default; }
+.fo-claim :deep(img), .fo-claim :deep(.emoji) { width: 1em; height: 1em; vertical-align: -.12em; }
 .fo-actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
 .fo-actions .fo-btn { padding: 7px 12px; font-size: .82rem; }
 .fo-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

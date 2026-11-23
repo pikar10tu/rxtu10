@@ -12,7 +12,7 @@
 // ════════════════════════════════════════════════════════════
 import { ref, computed } from 'vue'
 import {
-  getDatabase, ref as dbRef, onValue, update, remove, push, onDisconnect,
+  getDatabase, ref as dbRef, onValue, update, remove, push, onDisconnect, get,
   serverTimestamp, query, limitToLast,
 } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
@@ -27,6 +27,12 @@ let _db = null
 const rtdb = () => (_db ||= getDatabase(app))
 const myUid = () => getAuth(app).currentUser?.uid || ''
 const STALE_MS = 30 * 60 * 1000
+// 📱 นับเครื่องเดียว (23 พ.ย. 2026): presence/{uid}.dev = รหัสเครื่องที่ถือห้องอยู่ · เครื่องที่เข้าทีหลังยึดแทน เครื่องเดิมโดนเชิญออก
+const DEV = (() => {
+  try { let d = localStorage.getItem('rxtu.focus.dev'); if (!d) { d = Math.random().toString(36).slice(2, 12); localStorage.setItem('rxtu.focus.dev', d) } return d }
+  catch { return Math.random().toString(36).slice(2, 12) }
+})()
+const kicked = ref(0)   // นับครั้งที่โดนเครื่องอื่นยึด — FocusPill/FocusView watch แล้วออกจากห้องในเครื่องนี้
 
 // ── รายชื่อคนในห้อง (ทุกโซน) — ใช้ร่วมกับการ์ดทางเข้า/แถบหน้าแรก ──
 const all = ref({})
@@ -35,7 +41,7 @@ let presSubs = 0, presOff = null
 function attachPresence() {
   if (presOff || presSubs <= 0) return
   if (!myUid()) { setTimeout(attachPresence, 1500); return }
-  presOff = onValue(dbRef(rtdb(), 'focus/presence'), (s) => { all.value = s.val() || {} }, () => {
+  presOff = onValue(dbRef(rtdb(), 'focus/presence'), (s) => { all.value = s.val() || {}; checkMine() }, () => {
     all.value = {}; presOff = null; setTimeout(attachPresence, 3000)
   })
 }
@@ -67,22 +73,45 @@ function patch(p) {
   const v = { ...p, at: serverTimestamp() }
   if ('x' in v) v.x = Math.round(v.x)
   if ('y' in v) v.y = Math.round(v.y)
+  if (lastP) for (const k of ['zone', 'seat', 'x', 'y']) if (k in v) lastP[k] = v[k]
   update(meRef(), v).catch(() => {})
 }
-async function join(p) {   // p = { zone, seat, x, y, st }
+// เครื่องอื่นของบัญชีเดียวกันกำลังอยู่ในห้องไหม (อ่านสด ไม่พึ่ง cache)
+async function otherDevice() {
+  if (!myUid()) return false
+  const v = await get(meRef()).then(s => s.val()).catch(() => null)
+  return !!(v && v.dev && v.dev !== DEV && (typeof v.at !== 'number' || Date.now() - v.at < STALE_MS))
+}
+let lastP = null
+function checkMine() {
+  if (!joined.value || !myUid()) return
+  const v = all.value[myUid()]
+  if (v?.dev && v.dev !== DEV) {   // เครื่องอื่นยึดห้องไปแล้ว → ออกเงียบๆ ห้ามลบ presence (เป็นของเครื่องใหม่)
+    joined.value = false; clearInterval(beat)
+    onDisconnect(meRef()).cancel().catch(() => {})
+    unsubPresence()
+    kicked.value++
+  } else if (!v && lastP) {        // ตัวหาย (onDisconnect ของเครื่องเก่าลบทับ) → เขียนตัวเองกลับ
+    update(meRef(), { ...base(), ...lastP, dev: DEV }).catch(() => {})
+  }
+}
+// opts.auto = เข้าห้องอัตโนมัติ (รีเฟรช/เปิดแอปใหม่) → ถ้าเครื่องอื่นถืออยู่ ไม่ยึด คืน 'taken'
+async function join(p, opts = {}) {   // p = { zone, seat, x, y, st }
   if (!myUid()) return
+  if (opts.auto && await otherDevice()) { kicked.value++; return 'taken' }
   subPresence()   // ค้างไว้ตลอดที่อยู่ในห้อง (ป้ายลอยใช้)
   joined.value = true
+  lastP = { zone: p.zone, seat: p.seat, x: Math.round(p.x), y: Math.round(p.y) }
   onDisconnect(meRef()).remove().catch(() => {})
   // เขียนไม่ผ่าน (rules/เน็ต) → ถือว่ายังไม่ได้เข้าห้อง ให้ป้ายลอย/หน้าโฟกัสลองเข้าใหม่ได้ (เดิมค้าง joined=true แต่ไม่มีตัวในห้อง)
-  await update(meRef(), { ...base(), ...p, x: Math.round(p.x), y: Math.round(p.y), away: !!document.hidden }).catch(() => { joined.value = false })
+  await update(meRef(), { ...base(), ...p, x: Math.round(p.x), y: Math.round(p.y), away: !!document.hidden, dev: DEV }).catch(() => { joined.value = false })
   clearInterval(beat)
   beat = setInterval(() => { if (joined.value && !document.hidden) update(meRef(), { at: serverTimestamp() }).catch(() => {}) }, 60000)
   if (!visBound) { visBound = true; document.addEventListener('visibilitychange', () => patch({ away: document.hidden })) }
 }
 function leave() {
   if (!joined.value) return
-  joined.value = false; clearInterval(beat)
+  joined.value = false; clearInterval(beat); lastP = null
   if (myUid()) { onDisconnect(meRef()).cancel().catch(() => {}); remove(meRef()).catch(() => {}) }
   unsubPresence()
 }
@@ -109,5 +138,5 @@ function say(zone, text, extra = {}) {   // extra.sys = ข้อความร
 
 export function useFocusRoom() {
   subPresence()
-  return { people: live, joined, myUid, join, patch, leave, watchChat, unwatchChat, chat, say, release: unsubPresence }
+  return { people: live, joined, myUid, join, otherDevice, kicked, patch, leave, watchChat, unwatchChat, chat, say, release: unsubPresence }
 }
