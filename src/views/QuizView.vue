@@ -135,7 +135,8 @@
         <AiReviewNote :q="current" />
         <div v-if="current.reviewNote" class="qv-note"><Emoji char="📝" /> หมายเหตุจากผู้ตรวจ: {{ current.reviewNote }}</div>
         <!-- 🚩 แจ้งข้อผิด -->
-        <button v-if="authStore.isQuestionEditor" class="qv-report-btn qv-edit-btn" @click="quickEditOpen = true">
+        <div v-if="quickRemoved.has(current.id)" class="qv-note"><Emoji char="🗑️" /> ลบข้อนี้แล้ว · ไม่โผล่ให้เพื่อนอีก (กู้คืนได้ที่คลังข้อสอบ)</div>
+        <button v-else-if="authStore.isQuestionEditor" class="qv-report-btn qv-edit-btn" @click="quickEditOpen = true">
           <Emoji char="✏️" /> {{ quickEdited.has(current.id) ? 'แก้แล้ว · แก้อีก' : 'แก้ข้อนี้ (วิชาการ)' }}
         </button>
         <div class="qv-report">
@@ -241,7 +242,7 @@
         </div>
       </template>
     </template>
-    <QuickEditModal v-model="quickEditOpen" :question-id="current?.id || null" @saved="quickEdited.add($event.id)" />
+    <QuickEditModal v-model="quickEditOpen" :question-id="current?.id || null" @saved="quickEdited.add($event.id)" @removed="quickRemoved.add($event.id)" />
   </div>
 </template>
 
@@ -484,6 +485,7 @@ const reportSending = ref(false)
 const reportedIds = ref(new Set())
 // ทีมวิชาการแก้ข้อได้จากตรงนี้เลย (QuickEditModal) — จำข้อที่แก้ในเซสชันไว้บอกบนปุ่ม
 const quickEditOpen = ref(false)
+const quickRemoved = reactive(new Set())   // ลบ (นำออก) จากหน้านี้ในเซสชัน
 const quickEdited = reactive(new Set())   // กันสแปมในเซสชันเดียว (ข้ามเซสชัน deterministic id ทับเอง)
 
 function resetReport() { reportOpen.value = false; reportReason.value = ''; reportNote.value = '' }

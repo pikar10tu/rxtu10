@@ -227,6 +227,9 @@
         <button v-if="draft.id && !isDraftRetired" class="qz-mini" style="margin-top:8px" @click="retireQuestion">
           <Emoji char="🗑️" /> นำออกจากการใช้งาน (ไม่ลบ — เก็บไว้ นำกลับมาได้)
         </button>
+        <div v-if="draft.id && isDraftRetired && retiredInfo" class="qz-retinfo">
+          <Emoji char="🗑️" /> ถูกนำออกโดย {{ retiredInfo.retiredByName || 'ไม่ระบุ' }}<template v-if="retiredInfo.retireReason"> · เหตุผล: {{ retiredInfo.retireReason }}</template>
+        </div>
         <button v-if="draft.id && isDraftRetired" class="qz-mini" style="margin-top:8px" @click="unretireQuestion">
           <Emoji char="↩️" /> นำกลับมาใช้ (กลับเข้าคิวตรวจใหม่)
         </button>
@@ -979,6 +982,7 @@ async function loadEditReviews(q) {
   } catch (e) { console.error('[edit reviews]', e) }
 }
 
+const retiredInfo = computed(() => list.value.find(x => x.id === draft.value.id) || null)
 const isDraftRetired = computed(() => {
   const q = list.value.find(x => x.id === draft.value.id)
   return !!q?.retired
@@ -1242,4 +1246,5 @@ async function loadReports() {
 .qz-audit-reason { display: block; font-size: .72rem; color: rgba(0,0,0,.65); line-height: 1.4; margin-top: 2px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .qz-audit-time { color: rgba(0,0,0,.4); font-size: .7rem; }
 .qz-audit-ref { color: rgba(0,0,0,.45); font-size: .7rem; margin-top: 2px; overflow-wrap: anywhere; }
+.qz-retinfo { margin-top: 8px; font-size: .78rem; line-height: 1.5; padding: 8px 10px; border-radius: 10px; background: #FFF6F5; color: #8C2A20; }
 </style>

@@ -19,6 +19,20 @@
           <button class="qe-save" :disabled="!canSave || saving" @click="save">
             {{ saving ? 'กำลังบันทึก…' : 'บันทึกการแก้' }}
           </button>
+          <!-- 🗑️ ลบข้อ (23 พ.ย. user สั่ง) = "นำออก" แบบเดียวกับหน้าตรวจ: ซ่อนไว้ ไม่ลบจริง · บังคับเหตุผล
+               กู้คืนได้ที่ คลังข้อสอบ → สถานะตรวจ "นำออก" → เปิดข้อ → "นำกลับมาใช้" -->
+          <template v-if="auth.isAcademic">
+            <button v-if="!delOpen" type="button" class="qe-del" :disabled="saving" @click="delOpen = true"><Emoji char="🗑️" /> ลบข้อนี้</button>
+            <div v-else class="qe-delbox">
+              <label class="qe-dellbl" for="qe-delr">เหตุผลที่ลบ (จำเป็น)</label>
+              <textarea id="qe-delr" v-model="delReason" rows="3" maxlength="1000" placeholder="เช่น โจทย์ผิดหลักวิชาการจนแก้ไม่คุ้ม / ซ้ำกับข้ออื่น / เกินขอบเขตสอบ"></textarea>
+              <div class="qe-note">ข้อนี้จะถูกซ่อนจากทุกโหมด ไม่ได้ลบทิ้งจริง ถ้าลบผิด กู้คืนได้ที่คลังข้อสอบ (สถานะตรวจ "นำออก")</div>
+              <div class="qe-delrow">
+                <button type="button" class="qe-delno" :disabled="saving" @click="delOpen = false">ยกเลิก</button>
+                <button type="button" class="qe-delyes" :disabled="!canDelete || saving" @click="removeQ">{{ saving ? 'กำลังลบ…' : 'ยืนยันลบ' }}</button>
+              </div>
+            </div>
+          </template>
         </template>
       </div>
     </div>
@@ -46,11 +60,14 @@ import Emoji from '../shared/Emoji.vue'
 
 const open = defineModel({ type: Boolean, default: false })
 const props = defineProps({ questionId: { type: String, default: null } })
-const emit = defineEmits(['saved'])
+const emit = defineEmits(['saved', 'removed'])
 
 const auth = useAuthStore()
 const { toast } = useToast()
-const { writeFix } = useReviewWrites()
+const { writeFix, writeRetireWithCredit } = useReviewWrites()
+const delOpen = ref(false)
+const delReason = ref('')
+const canDelete = computed(() => delReason.value.trim().length >= 5)
 const loading = ref(false)
 const saving = ref(false)
 const fresh = ref(null)
@@ -58,7 +75,7 @@ const draft = ref(null)
 
 watch(open, async (v) => {
   if (!v || !props.questionId) return
-  loading.value = true; draft.value = null; fresh.value = null
+  loading.value = true; draft.value = null; fresh.value = null; delOpen.value = false; delReason.value = ''
   try {
     const snap = await getDoc(doc(db, 'questions', props.questionId))
     if (snap.exists()) { fresh.value = { id: snap.id, ...snap.data() }; draft.value = draftFrom(fresh.value) }
@@ -87,6 +104,19 @@ async function save() {
     console.error('[quick edit save]', e); toast('บันทึกไม่สำเร็จ', 'error')
   } finally { saving.value = false }
 }
+
+async function removeQ() {
+  if (!canDelete.value || saving.value || !fresh.value) return
+  saving.value = true
+  try {
+    await writeRetireWithCredit(fresh.value, delReason.value.trim())
+    toast('ลบข้อนี้แล้ว (ซ่อนไว้ กู้คืนได้ที่คลังข้อสอบ)', 'success')
+    emit('removed', { id: fresh.value.id })
+    open.value = false
+  } catch (e) {
+    console.error('[quick edit remove]', e); toast('ลบไม่สำเร็จ', 'error')
+  } finally { saving.value = false }
+}
 </script>
 
 <style scoped>
@@ -98,4 +128,13 @@ async function save() {
 .qe-note { font-size: .74rem; color: rgba(0,0,0,.55); margin: 10px 0 4px; line-height: 1.5; }
 .qe-save { width: 100%; margin-top: 8px; border: var(--bw) solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; }
 .qe-save:disabled { background: #cbd5e1; box-shadow: none; cursor: default; }
+.qe-del { width: 100%; margin-top: 10px; border: 1.5px solid #E0524A; border-radius: 12px; padding: 10px; font-family: inherit; font-size: .8rem; font-weight: 700; color: #C0392B; background: #fff; cursor: pointer; }
+.qe-delbox { margin-top: 10px; border: 1.5px solid #E0524A; border-radius: 12px; padding: 10px; background: #FFF6F5; }
+.qe-dellbl { display: block; font-size: .8rem; font-weight: 800; color: #C0392B; margin-bottom: 6px; }
+.qe-delbox textarea { width: 100%; box-sizing: border-box; border: 1px solid rgba(0,0,0,.2); border-radius: 10px; padding: 8px; font-family: inherit; font-size: 16px; resize: vertical; }
+.qe-delrow { display: flex; gap: 8px; margin-top: 8px; }
+.qe-delrow button { flex: 1; border-radius: 10px; padding: 10px; font-family: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; min-height: 44px; }
+.qe-delno { border: 1px solid rgba(0,0,0,.2); background: #fff; }
+.qe-delyes { border: none; background: #E0524A; color: #fff; }
+.qe-delyes:disabled { background: #e8b4ae; cursor: default; }
 </style>
