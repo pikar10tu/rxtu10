@@ -138,6 +138,8 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 /* 🍎 แอปเปิ้ล 4x4: ลูกสี --au + ขั้วใบเขียว + ไฮไลต์ขาว · ลอยส่ายแบบหัวใจ */
 .pt-apples{box-shadow:calc(var(--px)*2) 0 #6FBF5A,0 var(--px) var(--au),var(--px) var(--px) var(--hi),calc(var(--px)*2) var(--px) var(--au),calc(var(--px)*3) var(--px) var(--au),0 calc(var(--px)*2) var(--au),var(--px) calc(var(--px)*2) var(--au),calc(var(--px)*2) calc(var(--px)*2) var(--au),calc(var(--px)*3) calc(var(--px)*2) var(--au),var(--px) calc(var(--px)*3) var(--au),calc(var(--px)*2) calc(var(--px)*3) var(--au);filter:drop-shadow(0 0 var(--px) var(--au));animation:dollHeart 3.6s ease-out infinite}
 /* 🌬️ ลม: เส้นจางยาว 6 พิกเซล พัดผ่านไปทางขวาแล้วหาย */
+.pt-foxfire{width:calc(var(--px)*3);height:calc(var(--px)*4);margin:calc(var(--px)*-2) 0 0 calc(var(--px)*-1.5);border-radius:50% 50% 50% 50%/65% 65% 35% 35%;background:radial-gradient(circle at 50% 70%,var(--hi) 0 25%,var(--au) 45%,color-mix(in srgb,var(--au) 40%,transparent) 80%);filter:drop-shadow(0 0 calc(var(--px)*1.5) var(--au));animation:dollFox 3.2s ease-in-out infinite}
+@keyframes dollFox{0%,100%{opacity:0;transform:translate(0,0) scale(.5)}20%{opacity:1;transform:translate(calc(var(--px)*1),calc(var(--px)*-2)) scale(1)}50%{opacity:.85;transform:translate(calc(var(--px)*-1),calc(var(--px)*-5)) scale(1.1,.9)}80%{opacity:1;transform:translate(calc(var(--px)*1),calc(var(--px)*-8)) scale(.9,1.1)}}
 .pt-wind{width:calc(var(--px)*6);height:var(--px);background:linear-gradient(90deg,transparent,var(--au) 60%,var(--hi));animation:dollWind 2.2s ease-in infinite}
 @keyframes dollWind{0%{opacity:0;transform:translateX(calc(var(--px)*-6))}25%{opacity:.9}100%{opacity:0;transform:translateX(calc(var(--px)*12))}}
 </style>

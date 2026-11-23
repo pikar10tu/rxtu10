@@ -107,7 +107,7 @@ export function composeWide(eq, { bare = false } = {}) {
     const p = PART[eq[k]]
     if (!p) continue
     const pal = { ...glob, ...p.pal }
-    if (k === 'w') { apply(g, p.back, pal, true, false, p.off); continue }
+    if (k === 'w') { apply(g, p.back, pal, true, false, p.off); apply(g, p.ob, pal, false, false, p.off); continue }   // ob = ไม่สะท้อน (หางสัตว์)
     apply(g, p.m, pal, true, false, p.off)
     apply(g, p.o, pal, false, false, p.off)
   }
