@@ -35,7 +35,7 @@ const FADE = 0.5   // วินาที — เปลี่ยนเพลง�
 const KEY = 'rxtu.focusAudio'
 function readPrefs() { try { return JSON.parse(localStorage.getItem(KEY)) || {} } catch { return {} } }
 const p0 = readPrefs()
-export const audioState = reactive({ noiseLoading: '', loadPct: 0, loadError: '', track: -1, noise: '', music: p0.music ?? 50, bg: p0.bg ?? 50, muted: false })
+export const audioState = reactive({ noiseLoading: '', loadPct: 0, loadError: '', track: -1, noise: '', music: p0.music ?? 50, bg: p0.bg ?? 50, muted: false, quiet: false })
 function savePrefs() { try { localStorage.setItem(KEY, JSON.stringify({ music: audioState.music, bg: audioState.bg })) } catch { /* private mode */ } }
 
 let ac = null, master, mBus, nBus, tBus = null, timer = null, noiseNode = null
@@ -65,6 +65,8 @@ function applyVol() {
 }
 export function setVolume(kind, v) { audioState[kind] = v; applyVol(); savePrefs() }
 export function setMuted(v) { audioState.muted = !!v; applyVol() }
+// 🌙 โหมดโฟกัส (24 พ.ย. user ขอ): เงียบเสียงแจ้งในห้อง (แมว/คนเข้า/แชท) · เพลง+เสียงพื้นหลังเล่นต่อ
+export function setQuiet(v) { audioState.quiet = !!v }
 
 const N = (n) => 440 * Math.pow(2, (n - 69) / 12)
 function hit(f, d, vol, type, at, to) {
@@ -241,7 +243,7 @@ const MEOW_URLS = Object.values(import.meta.glob('../assets/focus/meow/*.mp3', {
 const meowBufs = []
 let lastMeow = -1
 async function playMeow() {
-  if (!ctx() || audioState.muted || !MEOW_URLS.length) return
+  if (!ctx() || audioState.muted || audioState.quiet || !MEOW_URLS.length) return
   let i = Math.floor(Math.random() * MEOW_URLS.length)
   if (i === lastMeow && MEOW_URLS.length > 1) i = (i + 1) % MEOW_URLS.length   // ไม่ซ้ำท่อนเดิมติดกัน
   lastMeow = i
@@ -251,7 +253,7 @@ async function playMeow() {
   } catch { /* โหลดไม่ได้ = เงียบไป */ }
 }
 export function chime(kind) {
-  if (!ctx() || audioState.muted) return
+  if (!ctx() || audioState.muted || audioState.quiet) return
   const t = ac.currentTime, g = ac.createGain(), lp = ac.createBiquadFilter()
   lp.type = 'lowpass'; lp.frequency.value = 1800
   g.gain.value = 0.5; lp.connect(g).connect(master)

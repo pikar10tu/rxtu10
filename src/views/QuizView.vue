@@ -21,26 +21,19 @@
           </button>
         </div>
 
-        <div v-if="domainChips.length" class="qv-card">
-          <div class="qv-label">หมวด</div>
-          <div class="qv-chips">
-            <button class="qv-chip" :class="{ on: dom === '__all' }" @click="pickDomain('__all')">ทั้งหมด</button>
-            <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="pickDomain(d.key)">{{ d.label }}</button>
+        <!-- ① ทำจากไหน (24 พ.ย. จัดหน้าใหม่ — ชุดย้อนหลังเยอะขึ้นมาก เลือกหลายชุดได้) -->
+        <div class="qv-card">
+          <div class="qv-label"><span class="qv-step">1</span> ทำจากไหน</div>
+          <div class="qv-seg qv-seg2" role="group" aria-label="แหล่งข้อสอบ">
+            <button :class="{ on: !examSet }" :aria-pressed="!examSet" @click="examSets = []"><Emoji char="🎲" /> สุ่มทั้งคลัง</button>
+            <button v-if="examSetChips.length" :class="{ on: examSet }" :aria-pressed="examSet" @click="openSetSheet"><Emoji char="📜" /> เลือกชุดย้อนหลัง</button>
           </div>
-          <template v-if="groupChips.length">
-            <div class="qv-label qv-sub-label">เจาะกลุ่มโรค / หัวข้อ</div>
-            <div class="qv-chips">
-              <button class="qv-chip qv-chip-sm" :class="{ on: !group }" @click="group = null">ทั้งหมวด</button>
-              <button v-for="g in groupChips" :key="g.key" class="qv-chip qv-chip-sm" :class="{ on: group === g.key }" @click="group = g.key">{{ g.label }} <small>{{ g.count }}</small></button>
-            </div>
-          </template>
+          <div v-if="examSet" class="qv-picked">
+            <span v-for="n in examSets" :key="n" class="qv-pickchip">{{ shortSetName(n) }}<button :aria-label="'เอา ' + n + ' ออก'" @click="removeSet(n)">✕</button></span>
+            <button class="qv-setmini" @click="openSetSheet">＋ แก้ชุด</button>
+          </div>
         </div>
 
-        <!-- ชุดย้อนหลังพับไว้ในแผ่นเลือก — เดิมเรียงเป็นกำแพง 12+ ชิปดันตัวเลือกลงใต้ปุ่มเริ่ม (รีวิว 31 ต.ค.) -->
-        <button v-if="examSetChips.length" class="qv-card qv-setbtn" :class="{ on: examSet }" @click="setSheet = true">
-          <span class="qv-setbtn-l"><Emoji char="📜" /> ข้อสอบย้อนหลัง</span>
-          <span class="qv-setbtn-r">{{ examSet ? examSetName : `เลือกชุด (${examSetChips.length})` }} ›</span>
-        </button>
         <!-- 🔖 ข้อที่บันทึกไว้ — โชว์เมื่อมีอย่างน้อย 1 ข้อ (หน้าแรกไม่รกสำหรับคนยังไม่ใช้) -->
         <div v-if="savedTotal" class="qv-card qv-setbtn qv-saved">
           <span class="qv-setbtn-l"><Emoji char="🔖" /> ข้อที่บันทึกไว้ <small class="qv-saved-n">{{ savedTotal }} ข้อ</small></span>
@@ -49,30 +42,66 @@
             <button class="qv-saved-btn main" :disabled="starting" @click="startSaved">ทำชุดนี้ ›</button>
           </span>
         </div>
+
+        <!-- ② เรื่อง — กลุ่มโรคเลื่อนแนวนอน ไม่ดันหน้ายาว -->
+        <div v-if="domainChips.length" class="qv-card">
+          <div class="qv-label"><span class="qv-step">2</span> เรื่อง <small class="qv-opt">ไม่เลือกก็ได้</small></div>
+          <div class="qv-chips">
+            <button class="qv-chip" :class="{ on: dom === '__all' }" @click="pickDomain('__all')">ทุกหมวด</button>
+            <button v-for="d in domainChips" :key="d.key" class="qv-chip" :class="{ on: dom === d.key }" @click="pickDomain(d.key)">{{ d.label }}</button>
+          </div>
+          <div v-if="groupChips.length" class="qv-scroller">
+            <button class="qv-chip qv-chip-sm" :class="{ on: !group }" @click="group = null">ทั้งหมวด</button>
+            <button v-for="g in groupChips" :key="g.key" class="qv-chip qv-chip-sm" :class="{ on: group === g.key }" @click="group = g.key">{{ g.label }} <small>{{ g.count }}</small></button>
+          </div>
+        </div>
+
         <BottomSheet :open="setSheet" icon="📜" title="ข้อสอบย้อนหลัง" @update:open="setSheet = $event">
-          <div class="qv-setlist">
-            <button v-if="examSet" class="qv-setrow clear" @click="pickExamSet(examSet); setSheet = false">✕ ไม่เลือกชุด (สุ่มจากทั้งคลัง)</button>
-            <button
-              v-for="s in examSetChips" :key="s.name"
-              class="qv-setrow" :class="{ on: examSet === s.name }"
-              @click="examSet === s.name || pickExamSet(s.name); setSheet = false"
-            ><span>{{ s.name }}<span v-if="s.year" class="qv-setyear"> · {{ s.year }}</span></span><b>{{ s.count }} ข้อ</b></button>
+          <!-- เลือกได้หลายชุด · แบ่งกลุ่ม · การ์ด 2 คอลัมน์ ลดการเลื่อน -->
+          <section v-for="sec in setSections" :key="sec.key" class="qv-setsec">
+            <div class="qv-sethead">
+              <b>{{ sec.label }}</b>
+              <button class="qv-setmini" @click="toggleSection(sec)">{{ sec.items.every(s => draftSets.includes(s.name)) ? 'เอาออกทั้งกลุ่ม' : 'เลือกทั้งกลุ่ม' }}</button>
+            </div>
+            <div class="qv-setgrid">
+              <button
+                v-for="s in sec.items" :key="s.name"
+                class="qv-settile" :class="{ on: draftSets.includes(s.name) }"
+                role="checkbox" :aria-checked="draftSets.includes(s.name)" :title="s.name"
+                @click="toggleDraft(s.name)"
+              >
+                <span class="qv-setcheck" aria-hidden="true">✓</span>
+                <span class="qv-settile-name">{{ shortSetName(s.name) }}</span>
+                <span class="qv-settile-meta">{{ s.count }} ข้อ<template v-if="s.year && !shortSetName(s.name).includes(String(s.year))"> · {{ s.year }}</template></span>
+              </button>
+            </div>
+          </section>
+          <div class="qv-setdock">
+            <button v-if="draftSets.length" class="qv-setclear" @click="draftSets = []">ล้าง</button>
+            <button class="qv-start" @click="applySets">
+              {{ draftSets.length ? `ใช้ ${draftSets.length} ชุด · ${draftTotal.toLocaleString()} ข้อ` : 'ไม่เลือกชุด (สุ่มทั้งคลัง)' }}
+            </button>
           </div>
         </BottomSheet>
 
+        <!-- ③ จำนวนข้อ -->
         <div class="qv-card">
-        <div class="qv-label">แหล่งข้อ</div>
-        <div class="qv-chips">
-          <button class="qv-chip" :class="{ on: !approvedOnly }" @click="approvedOnly = false">ทำทั้งหมด ({{ activeCount }})</button>
-          <button class="qv-chip" :class="{ on: approvedOnly }" @click="approvedOnly = true">เฉพาะที่ผ่านตรวจแล้ว ({{ approvedCount }})</button>
-        </div>
-        <div v-if="approvedOnly && approvedCount > 0 && approvedCount < 5" class="qv-hint">
-          มีข้อผ่านตรวจในหมวดนี้ไม่เยอะ ({{ approvedCount }} ข้อ) — ทำได้ตามปกติ แค่แจ้งให้รู้ไว้ก่อน
-        </div>
-
-        <div class="qv-label">จำนวนข้อ</div>
+        <div class="qv-label"><span class="qv-step">3</span> จำนวนข้อ</div>
         <div class="qv-seg" role="group" aria-label="จำนวนข้อ">
           <button v-for="n in lenChoices" :key="n" :class="{ on: len === n }" :aria-pressed="len === n" @click="len = n">{{ n }}</button>
+          <button :class="{ on: len === 'zen' }" :aria-pressed="len === 'zen'" aria-label="Zen ทำเรื่อยๆ ไม่จำกัด" @click="len = 'zen'">♾️</button>
+        </div>
+        <div v-if="len === 'zen'" class="qv-hint">♾️ Zen — สุ่มจากที่เลือกไว้ไปเรื่อยๆ ไม่จำกัด จนกว่าจะกดออก</div>
+        <div v-if="shortBy" class="qv-hint">
+          ที่เลือกไว้มี {{ poolAvail }} ข้อ เลยได้ {{ poolAvail }} ข้อ — อยากได้ครบ {{ len }} ลองเลือกเพิ่มชุด หรือขยายหมวดดูนะ
+        </div>
+        <label class="qv-switch">
+          <input v-model="approvedOnly" type="checkbox" role="switch">
+          <span class="qv-switch-ui" aria-hidden="true"></span>
+          <span>เฉพาะข้อที่ผ่านตรวจแล้ว <small>({{ approvedCount }} จาก {{ activeCount }})</small></span>
+        </label>
+        <div v-if="approvedOnly && approvedCount > 0 && approvedCount < 5" class="qv-hint">
+          มีข้อผ่านตรวจในหมวดนี้ไม่เยอะ ({{ approvedCount }} ข้อ) — ทำได้ตามปกติ แค่แจ้งให้รู้ไว้ก่อน
         </div>
         </div>
 
@@ -82,7 +111,7 @@
         <!-- ปุ่มหลักติดขอบล่าง (sticky ใน #main-content) — ไม่ต้องเลื่อนหา -->
         <div class="qv-dock">
           <button class="qv-start" :disabled="starting || (approvedOnly ? !approvedCount : !activeCount)" @click="start">
-            {{ starting ? 'กำลังสุ่มข้อ…' : `เริ่มทำ ${quizCount} ข้อ →` }}
+            {{ starting ? 'กำลังสุ่มข้อ…' : (len === 'zen' ? 'เริ่ม Zen ♾️ →' : `เริ่มทำ ${quizCount} ข้อ →`) }}
           </button>
         </div>
       </template>
@@ -300,8 +329,8 @@ const route = useRoute()
 const { fetchQuestions: feedQuestions, fetchSetPool } = useQuestionFeed()
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
-const LEN_CHOICES = [5, 10, 15, 20]
-const DEFAULT_LEN = 5
+const LEN_CHOICES = [10, 20, 60, 120]   // 24 พ.ย. เพื่อนขอ 60/120 (ตัด 5/15 ให้ปุ่มยังพอดี 4 ช่อง)
+const DEFAULT_LEN = 10
 
 // ── home: อ่านแค่ config/questionsMeta (1 read) แทนการโหลดข้อทั้งคลัง ──
 const publishedTotal = ref(0)
@@ -337,7 +366,7 @@ onMounted(() => {
   // /quiz?group=cvs จากแท็บผลฝึกหน้าฉัน → เลือกหมวด+กลุ่มให้เลย
   const qg = typeof route.query.group === 'string' ? groupByKey(route.query.group) : null
   if (qg) { dom.value = qg.domain; group.value = qg.key }
-  if (route.query.mode === 'zen') startZen()
+  if (route.query.mode === 'zen') len.value = 'zen'   // 24 พ.ย. ไม่เริ่มทันที — ให้เลือกชุด/หมวดก่อน
   else if (route.query.mode === 'redo') whenUserDataReady(startRedo)
   else if (route.query.mode === 'saved') whenUserDataReady(startSaved)
   else if (route.query.view === 'history') openHistory()
@@ -350,10 +379,43 @@ function whenUserDataReady(fn) {
 }
 
 const dom = ref('__all')
-const examSet = ref(null)                       // ชื่อชุดที่เลือก (null = ไม่เลือก) — สลับกับ dom
+// ชุดที่เลือก — หลายชุดได้ (24 พ.ย.) · examSet = มีเลือกอยู่ไหม (เก็บชื่อเดิมไว้ ให้ที่อื่นในไฟล์อ่านเหมือนเดิม)
+const examSets = ref([])
+const examSet = computed(() => examSets.value.length > 0)
 const metaExamSets = ref([])
 const setSheet = ref(false)
-const examSetName = computed(() => { const c = examSetChips.value.find(x => x.name === examSet.value); return c ? (c.year ? `${c.name} · ${c.year}` : c.name) : '' })                    // [{ name, count }] จาก meta (published)
+const examSetName = computed(() => {
+  if (examSets.value.length > 1) return `${examSets.value.length} ชุด`
+  const c = examSetChips.value.find(x => x.name === examSets.value[0])
+  return c ? (c.year ? `${c.name} · ${c.year}` : c.name) : ''
+})
+// แผ่นเลือกชุด: ติ๊กเป็นร่างก่อน กดยืนยันค่อยโหลด (ไม่ยิง query ทุกครั้งที่แตะ)
+const draftSets = ref([])
+const draftTotal = computed(() => examSetChips.value.filter(s => draftSets.value.includes(s.name)).reduce((t, s) => t + s.count, 0))
+function openSetSheet() { draftSets.value = [...examSets.value]; setSheet.value = true }
+function toggleDraft(name) {
+  draftSets.value = draftSets.value.includes(name) ? draftSets.value.filter(n => n !== name) : [...draftSets.value, name]
+}
+function applySets() { examSets.value = [...draftSets.value]; setSheet.value = false }
+function removeSet(name) { examSets.value = examSets.value.filter(n => n !== name) }
+function toggleSection(sec) {
+  const names = sec.items.map(s => s.name)
+  const allIn = names.every(n => draftSets.value.includes(n))
+  draftSets.value = allIn ? draftSets.value.filter(n => !names.includes(n)) : [...new Set([...draftSets.value, ...names])]
+}
+// แบ่งกลุ่มชุดตามชื่อ (ไม่มีฟิลด์กลุ่มใน config) — ชุดใหม่ที่ไม่เข้าแพทเทิร์นไปอยู่ "อื่นๆ จากสถาบัน"
+const SET_SECTIONS = [
+  { key: 'ple', label: '🏛️ PLE-CC1 ของจริง', test: n => /^PLE-CC1/i.test(n) },
+  { key: 'old', label: '📦 ข้อสอบเก่า / ตัวอย่างสภาฯ', test: n => /ข้อสอบเก่า|ตัวอย่าง/.test(n) },
+  { key: 'uni', label: '🎓 จากมหาวิทยาลัย / แยกบท', test: () => true },
+]
+const setSections = computed(() => {
+  const out = SET_SECTIONS.map(x => ({ ...x, items: [] }))
+  for (const c of examSetChips.value) out.find(x => x.test(c.name)).items.push(c)
+  return out.filter(x => x.items.length)
+})
+// ชื่อสั้นบนการ์ด: ตัดคำนำหน้าที่หัวกลุ่มบอกแล้ว
+function shortSetName(n) { return n.replace(/^PLE-CC1\s*/i, '').replace(/^ตัวอย่างข้อสอบสภาฯ\s*/, 'สภาฯ ') || n }
 const { sets: examSetConfig, loadExamSets } = useExamSets()  // ปีของแต่ละชุด (config/examSets)
 
 // ชิปชุด: เฉพาะชุดที่มีข้อ published (count>0) + ผสมปีจาก config · เรียงปีใหม่→เก่า แล้วชื่อ
@@ -368,13 +430,24 @@ const examSetChips = computed(() => {
 // ชุดที่เลือก โหลดทั้งก้อนไว้ในเครื่อง → กรองหมวด/กลุ่มโรคซ้อนได้ (เพื่อนขอ 20 พ.ย.)
 const setPool = ref(null)          // null = ยังไม่โหลด/ไม่เลือกชุด
 const setPoolLoading = ref(false)
-watch(examSet, async (name) => {
+// โหลดทีละชุดแล้วจำไว้ · รวมหลายชุด = ตัดข้อซ้ำ (ข้อเดียวอยู่หลายชุดได้)
+const poolCache = new Map()
+async function loadSetsPool(names) {
+  const lists = await Promise.all(names.map(async n => {
+    if (!poolCache.has(n)) poolCache.set(n, await fetchSetPool(n))
+    return poolCache.get(n)
+  }))
+  const seen = new Map()
+  for (const list of lists) for (const q of list) if (!seen.has(q.id)) seen.set(q.id, q)
+  return [...seen.values()]
+}
+watch(examSets, async (names) => {
   setPool.value = null
-  if (!name) return
+  if (!names.length) return
   setPoolLoading.value = true
   try {
-    const pool = await fetchSetPool(name)
-    if (examSet.value === name) setPool.value = pool
+    const pool = await loadSetsPool(names)
+    if (examSets.value === names) setPool.value = pool
   } catch (e) { console.error('[set pool]', e); toast('โหลดชุดข้อสอบไม่สำเร็จ', 'error') }
   finally { setPoolLoading.value = false }
 })
@@ -407,7 +480,6 @@ function setTags(q) {
 }
 // หมวด × ชุด กรองซ้อนกันได้แล้ว (20 พ.ย.) — เปลี่ยนชุดล้างแค่หมวดที่ชุดใหม่ไม่มี (เช็คใน watch ข้างล่าง)
 function pickDomain(key) { dom.value = key; group.value = null }
-function pickExamSet(name) { examSet.value = examSet.value === name ? null : name }
 // โหลดชุดเสร็จแล้วหมวด/กลุ่มที่เลือกอยู่ไม่มีในชุด → ปล่อยเป็นทั้งหมด
 watch(setPool, (p) => {
   if (!p) return
@@ -433,7 +505,10 @@ const groupChips = computed(() => {
 
 const len = ref(DEFAULT_LEN)
 const lenChoices = computed(() => LEN_CHOICES)
-const quizCount = computed(() => len.value) // ขอ N; ได้จริงอาจน้อยกว่าถ้าคลัง/หมวดมีไม่พอ
+// มีให้ทำจริงเท่าไร (ตามชุด/หมวด/ผ่านตรวจ) — ขอเกินก็ได้เท่าที่มี
+const poolAvail = computed(() => approvedOnly.value ? approvedCount.value : activeCount.value)
+const shortBy = computed(() => len.value !== 'zen' && !setPoolLoading.value && poolAvail.value > 0 && poolAvail.value < len.value)
+const quizCount = computed(() => shortBy.value ? poolAvail.value : len.value)
 
 // ── session state ──
 const mode = ref('home')          // home | quiz | result | history
@@ -641,13 +716,14 @@ async function startSaved() {
 // ดึงข้อสุ่ม n ข้อ — ตรรกะการสุ่มอยู่ใน useQuestionFeed (ใช้ร่วมกับ Time Attack)
 const fetchQuestions = async (n) => {
   if (examSet.value) {
-    if (!setPool.value) setPool.value = await fetchSetPool(examSet.value)
+    if (!setPool.value) setPool.value = await loadSetsPool(examSets.value)
     return shuffle(poolFiltered(approvedOnly.value)).slice(0, n)
   }
   return feedQuestions(n, { domain: dom.value, group: group.value, examSet: null, approvedOnly: approvedOnly.value })
 }
 
 async function start() {
+  if (len.value === 'zen') return startZen()
   if (starting.value) return
   starting.value = true
   variant.value = 'normal'
@@ -661,15 +737,11 @@ async function start() {
     console.error('[quiz start]', e); toast('เริ่มข้อสอบไม่สำเร็จ', 'error')
   } finally { starting.value = false }
 }
-// Zen — ทำต่อเนื่องไม่จำกัด ทุกหมวด จนกดออก
+// Zen — ทำต่อเนื่องไม่จำกัด จนกดออก · ใช้ชุด/หมวด/ผ่านตรวจที่เลือกไว้ (24 พ.ย. เพื่อนขอเลือกชุดได้)
 async function startZen() {
   if (starting.value) return
   starting.value = true
   variant.value = 'zen'
-  dom.value = '__all'
-  examSet.value = null
-  group.value = null
-  approvedOnly.value = false
   try {
     const picks = await fetchQuestions(ZEN_BATCH)
     quiz.value = shuffle(picks).map(shuffleChoices)
@@ -683,7 +755,13 @@ async function startZen() {
 // โหลดข้อเพิ่มต่อท้ายเมื่อใกล้หมด batch
 async function loadMoreZen() {
   try {
-    const more = await fetchQuestions(ZEN_BATCH)
+    let more = await fetchQuestions(ZEN_BATCH)
+    // เลือกชุดไว้ = สุ่มจากคลังในเครื่อง → เลี่ยงข้อที่ทำไปแล้วในรอบนี้ก่อน ครบทุกข้อแล้วค่อยวนซ้ำ
+    if (examSet.value && setPool.value) {
+      const done = new Set(quiz.value.map(q => q.id))
+      const fresh = shuffle(poolFiltered(approvedOnly.value).filter(q => !done.has(q.id))).slice(0, ZEN_BATCH)
+      if (fresh.length) more = fresh
+    }
     if (more.length) quiz.value = [...quiz.value, ...shuffle(more).map(shuffleChoices)]
   } catch (e) { console.error('[zen more]', e) }
 }
@@ -836,7 +914,7 @@ async function finish() {
       correct: correct.value,
       pct: pct.value,
       domain: dom.value === '__all' ? null : dom.value,
-      examSet: examSet.value || null,
+      examSet: examSets.value.join(', ') || null,
       category: null,
       domainStats,
       ts: serverTimestamp(),
@@ -949,7 +1027,7 @@ async function finish() {
 .qv-hero-due { margin-left: auto; text-align: right; font: inherit; font-size: .72rem; line-height: 1.35; color: #fff; background: rgba(255,255,255,.22); border: 0; border-radius: 12px; padding: 7px 10px; cursor: pointer; }
 .qv-hero-due b { display: block; font-size: 1rem; }
 .qv-card { background: var(--surface); border: var(--bw) solid var(--line); border-radius: 20px; box-shadow: var(--pop); padding: 4px 14px 14px; margin-bottom: 12px; }
-.qv-seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--primary-light); border-radius: 12px; padding: 3px; }
+.qv-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 3px; background: var(--primary-light); border-radius: 12px; padding: 3px; }
 .qv-seg button { font: inherit; font-size: .8rem; font-weight: 700; border: 0; background: transparent; color: var(--muted); border-radius: 9px; padding: 7px 0; cursor: pointer; }
 .qv-seg button.on { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(43,53,80,.14); }
 /* ปุ่มหลักติดขอบล่างของพื้นที่เลื่อน */
@@ -978,6 +1056,42 @@ async function finish() {
 .qv-setrow b { white-space: nowrap; font-size: .74rem; color: var(--muted); }
 .qv-setrow.on { border-color: var(--primary); background: var(--primary-light); }
 .qv-setrow.clear { color: var(--muted); font-weight: 700; }
+.qv-sethead { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .74rem; color: var(--muted); margin-bottom: 8px; }
+.qv-setmini { font: inherit; font-size: .74rem; font-weight: 700; color: var(--primary); background: var(--primary-light); border: 0; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.qv-setname { flex: 1; min-width: 0; }
+.qv-setcheck { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 999px; border: var(--bw) solid var(--line); color: transparent; font-size: .74rem; font-weight: 800; transition: background .15s, color .15s, border-color .15s; }
+.qv-setrow.on .qv-setcheck { background: var(--primary); border-color: var(--primary); color: #fff; }
+.qv-setdock { position: sticky; z-index: 1; margin: 12px 0 -22px; bottom: -22px; padding: 10px 0 22px; background: #fff; box-shadow: 0 -8px 12px -8px rgba(0,0,0,.08); }
+.qv-setdock { display: flex; gap: 8px; }
+.qv-setdock .qv-start { flex: 1; margin-top: 0; }
+.qv-setclear { font: inherit; font-weight: 700; font-size: .8rem; color: var(--muted); background: #fff; border: var(--bw) solid var(--line); border-radius: 14px; padding: 0 16px; cursor: pointer; }
+.qv-step { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 999px; background: var(--primary); color: #fff; font-size: .7rem; margin-right: 4px; }
+.qv-opt { font-weight: 600; color: var(--muted); margin-left: 4px; }
+.qv-seg2 { grid-template-columns: 1fr 1fr; }
+.qv-seg2 button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.qv-picked { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+.qv-pickchip { display: inline-flex; align-items: center; gap: 2px; background: var(--primary-light); color: var(--primary); border-radius: 999px; padding: 4px 4px 4px 10px; font-size: .74rem; font-weight: 700; }
+.qv-pickchip button { border: 0; background: transparent; color: inherit; font-size: .7rem; width: 22px; height: 22px; border-radius: 999px; cursor: pointer; }
+.qv-scroller { display: flex; gap: 6px; overflow-x: auto; margin-top: 10px; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.qv-scroller::-webkit-scrollbar { display: none; }
+.qv-scroller .qv-chip { flex-shrink: 0; white-space: nowrap; }
+.qv-setsec + .qv-setsec { margin-top: 14px; }
+.qv-sethead b { color: var(--ink); font-size: .8rem; }
+.qv-setgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.qv-settile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; min-width: 0; border: var(--bw) solid var(--line); background: #fff; border-radius: 12px; padding: 9px 32px 9px 10px; font-family: inherit; color: var(--ink); cursor: pointer; transition: border-color .15s, background .15s; }
+.qv-settile.on { border-color: var(--primary); background: var(--primary-light); }
+.qv-settile .qv-setcheck { position: absolute; top: 8px; right: 8px; }
+.qv-settile.on .qv-setcheck { background: var(--primary); border-color: var(--primary); color: #fff; }
+.qv-settile-name { font-size: .78rem; font-weight: 700; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.qv-settile-meta { font-size: .7rem; color: var(--muted); }
+.qv-switch { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.qv-switch small { font-weight: 600; color: var(--muted); }
+.qv-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.qv-switch-ui { flex-shrink: 0; width: 38px; height: 22px; border-radius: 999px; background: var(--line); position: relative; transition: background .2s; }
+.qv-switch-ui::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .2s; }
+.qv-switch input:checked + .qv-switch-ui { background: var(--primary); }
+.qv-switch input:checked + .qv-switch-ui::after { transform: translateX(16px); }
+.qv-switch input:focus-visible + .qv-switch-ui { outline: 2px solid var(--primary); outline-offset: 2px; }
 .qv-setyear { color: var(--muted); }
 .qv-chip-sm { padding: 5px 11px; font-size: .72rem; }
 .qv-chip small { font-size: .7rem; opacity: .7; margin-left: 2px; }

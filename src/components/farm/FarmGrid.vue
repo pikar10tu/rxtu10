@@ -39,6 +39,7 @@
             <button class="plot-btn harvest" @click="onHarvest(i, plot)"><Emoji char="✅" /> {{ dense ? 'เก็บ' : 'เก็บเกี่ยว' }}</button>
           </template>
           <template v-else>
+            <button class="plot-uproot" :aria-label="'ถอน' + stat(plot).crop.name" title="ถอนพืช" @click="onUproot(i, plot)"><Emoji char="🪓" /></button>
             <div class="plot-bar"><div class="plot-fill" :style="{ width: (stat(plot).progress * 100) + '%' }"></div></div>
             <div class="plot-time"><Emoji v-if="!dense" char="⏱" /> {{ fmt(stat(plot).remainingMs) }}<template v-if="!dense"> · {{ Math.round(stat(plot).progress * 100) }}%</template></div>
           </template>
@@ -220,6 +221,15 @@ function onHarvest(i, plot) {
   })
 }
 
+// 🪓 ถอนพืชทีละแปลง — ยืนยันก่อนเสมอ คืนครึ่งราคาเมล็ด
+async function onUproot(i, plot) {
+  const c = stat(plot).crop
+  const back = farm.uprootRefund(plot.seedId)
+  if (!await confirm(`ถอน${c?.name || 'พืช'}ทิ้ง? ได้เหรียญคืน ${back.toLocaleString()} (ครึ่งราคาเมล็ด)`)) return
+  if (plots.value[i] !== plot) return       // ระหว่างรอยืนยัน แปลงเปลี่ยนไปแล้ว
+  farm.uproot(i)
+}
+
 // กล่องผลผลิตเด้งรับของ
 let popTimer = null
 function popBasket() {
@@ -321,6 +331,8 @@ const invList = computed(() => [
 .plot-bar { position: relative; z-index: 1; width: 100%; height: 6px; background: rgba(255,255,255,.4); border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.15); }
 .plot-fill { height: 100%; background: linear-gradient(90deg,#84cc16,#22c55e); border-radius: 999px; transition: width .8s linear; }
 .plot-time { position: relative; z-index: 1; font-size: .7rem; color: #fff; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.plot-uproot { position: absolute; top: 4px; left: 4px; z-index: 2; width: 24px; height: 24px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(0,0,0,.1); border-radius: 999px; background: rgba(255,255,255,.75); font-size: .7rem; cursor: pointer; opacity: .75; transition: opacity .15s, transform .15s; }
+.plot-uproot:hover { opacity: 1; transform: scale(1.08); }
 .plot-btn.harvest { position: relative; z-index: 1; border: none; background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; font-weight: 800; font-size: .7rem; padding: 5px 8px; border-radius: 8px; cursor: pointer; font-family: inherit; }
 .inv { margin-top: 14px; border-top: 1px dashed rgba(0,0,0,.12); padding-top: 12px; }
 .inv-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: .82rem; margin-bottom: 8px; }

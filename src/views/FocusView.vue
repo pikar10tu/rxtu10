@@ -56,7 +56,7 @@
         <button type="button" class="fo-btn primary big" @click="join">🎯 เริ่มโฟกัส</button>
         <small>อ่านหนังสือเพื่อสร้างรายได้ตามระดับที่อยู่ของคุณ<br>ตอนนี้ +{{ house }} เหรียญ/วิ</small>
       </div>
-      <FocusSceneFx ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
+      <FocusSceneFx v-if="!saver" ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
       <div v-for="c in claps" :key="c.id" class="fo-ent fo-clap" :style="entStyle(c.x, c.y, 999)" aria-hidden="true">
         <span class="l"><Emoji char="✋" /></span><span class="r"><Emoji char="✋" /></span><b>แปะ!</b>
       </div>
@@ -213,7 +213,7 @@ import { SEATS, COUNTERS, DOOR, seatFoot, freeSeat } from '../utils/focusLayout.
 import { PLE_CC_DATE } from '../firebase/config.js'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { useFocusMode, STATUS_LABEL, fmtClock, COIN_CAP_SECS } from '../composables/useFocusMode.js'
-import { chime, TRACKS, NOISES, audioState as audio, playTrack, stopTrack, playNoise, stopNoise, setVolume, setMuted, stopAll } from '../utils/focusAudio.js'
+import { chime, TRACKS, NOISES, audioState as audio, playTrack, stopTrack, playNoise, stopNoise, setVolume, setMuted, setQuiet, stopAll } from '../utils/focusAudio.js'
 
 const ART = Object.fromEntries(Object.entries(import.meta.glob('../assets/focus/*.png', { eager: true, import: 'default' }))
   .map(([k, v]) => [k.split('/').pop().replace('.png', ''), v]))
@@ -487,9 +487,9 @@ const holding = ref(false)
 let holdT = 0, wake = null
 async function lockOn() { try { wake = await navigator.wakeLock?.request('screen') } catch { wake = null } }
 function onVis() { if (saver.value && !document.hidden) lockOn() }   // กลับจากปัดจอ wake lock หลุด → ขอใหม่
-function startSaver() { saver.value = true; fm.setSaver(true); lockOn(); document.addEventListener('visibilitychange', onVis) }
+function startSaver() { saver.value = true; setQuiet(true); fm.setSaver(true); lockOn(); document.addEventListener('visibilitychange', onVis) }
 function stopSaver() {
-  saver.value = false; holding.value = false; clearTimeout(holdT); fm.setSaver(false)
+  saver.value = false; setQuiet(false); holding.value = false; clearTimeout(holdT); fm.setSaver(false)
   wake?.release?.().catch(() => {}); wake = null; document.removeEventListener('visibilitychange', onVis)
 }
 function holdStart() { holding.value = true; clearTimeout(holdT); holdT = setTimeout(stopSaver, 1500) }

@@ -107,6 +107,20 @@ export function useFarm() {
     toast(`ปลูก ${crop.name} แล้ว`, 'success')
   }
 
+  // 🪓 ถอนพืชที่ยังไม่โต (24 พ.ย. — เพื่อนขอ ปลูกผิดต้นแล้วเสียเวลา) · คืนครึ่งราคาเมล็ด ปัดลง
+  //   ไม่หักเควสรายวันคืน (นับตอนปลูกไปแล้ว — ปั๊มเควสด้วยวิธีนี้ต้องเสียเงินครึ่งหนึ่งทุกรอบ ไม่คุ้ม)
+  function uprootRefund(seedId) { return Math.floor((getCrop(seedId)?.seedCost || 0) / 2) }
+  async function uproot(i) {
+    const p = plots.value[i]
+    if (!p) return
+    if (status(p, Date.now()).ready) { toast('โตแล้ว เก็บเกี่ยวได้เลย', 'info'); return }
+    const refund = uprootRefund(p.seedId)
+    const next = clonePlots()
+    next[i] = null
+    await commit(next, { coinDelta: refund })
+    toast(`ถอน ${getCrop(p.seedId)?.name || 'พืช'} แล้ว · คืน ${refund.toLocaleString()} เหรียญ`, 'success')
+  }
+
   // onCollected({ gold }) ถูกเรียกทันทีที่รู้ผล ก่อนรอ Firestore — ให้จอยิงของลอยได้ไม่ดีเลย์
   async function harvest(i, onCollected) {
     const p = plots.value[i]
@@ -269,6 +283,6 @@ export function useFarm() {
     level, ceiling, plotsUnlocked, plotCount, nextPlot,
     plots, inventory, harvests, gold, goldFound, seedChoices, upcomingSeed,
     status,
-    plant, plantAll, harvest, harvestAll, sell, sellGold, sellAll, unlockPlot,
+    plant, plantAll, harvest, uproot, uprootRefund, harvestAll, sell, sellGold, sellAll, unlockPlot,
   }
 }
