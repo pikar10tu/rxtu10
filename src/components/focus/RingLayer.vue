@@ -11,7 +11,7 @@
     </template>
 
     <!-- ปุ่มลอยแบบลูบแมว -->
-    <button v-if="showBtn" type="button" class="rg-btn" :style="pos(RING_BTN[0], RING_BTN[1])" :aria-label="m && !m.b ? `ชกกับ ${m.r.name}` : 'ขึ้นสังเวียน'" @click.stop="onClaim">
+    <button v-if="showBtn" type="button" class="rg-btn" :style="pos(RING_BTN[0], RING_BTN[1])" :aria-label="m && !m.b ? `ชกกับ ${m.r?.name || 'เพื่อน'}` : 'ขึ้นสังเวียน'" @click.stop="onClaim">
       <Emoji char="🥊" />
       <span v-if="m && !m.b" class="rg-btn-t">ท้าชก!</span>
     </button>
