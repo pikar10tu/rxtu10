@@ -209,8 +209,8 @@ import BottomSheet from '../components/shared/BottomSheet.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import FocusSceneFx from '../components/focus/FocusSceneFx.vue'
 import RingLayer from '../components/focus/RingLayer.vue'
-import { ringFx } from '../composables/useRing.js'
-import { SPECTATE } from '../utils/ringMatch.js'
+import { ringFx, ringMine } from '../composables/useRing.js'
+import { SPECTATE, RING } from '../utils/ringMatch.js'
 import { useCoffee } from '../composables/useCoffee.js'
 import { examFestMulti } from '../utils/examFest.js'
 import { focusBonus } from '../utils/supporter.js'
@@ -298,7 +298,9 @@ const entStyle = (x, y, depth) => ({ left: (x / 160 * 100) + '%', top: y + '%', 
 // ── เดิน: BFS กริด 2px เลี่ยงเคาน์เตอร์ (ช่วงหน้าเคาน์เตอร์ y+4..y+10) ──
 const CELL = 2, GW = 80, GH = 50, Y0 = 52, Y1 = 98
 const inCounter = (x, y) => zoneCounters(viewZone.value).find(([cx, cy]) => x >= cx - 28 && x <= cx + 28 && y >= cy + 4 && y <= cy + 10)
-const blocked = (x, y) => y < Y0 || y > Y1 || x < 6 || x > 154 || !!inCounter(x, y)
+// 🥊 เวทีเดินขึ้นเองไม่ได้ (ขึ้นได้ตอนกดขึ้นชกเท่านั้น — ringGoto เดินตรงข้ามไปได้เพราะหาทางไม่เจอ = เดินตรง)
+const inRing = (x, y) => viewZone.value === 'ring' && x > RING.x0 - 2 && x < RING.x1 + 2 && y > RING.y0 - 3 && y < RING.y1 + 3
+const blocked = (x, y) => y < Y0 || y > Y1 || x < 6 || x > 154 || !!inCounter(x, y) || inRing(x, y)
 function findPath(sx, sy, tx, ty) {
   const key = (i, j) => j * GW + i
   const si = Math.round(sx / CELL), sj = Math.round(sy / CELL), ti = Math.round(tx / CELL), tj = Math.round(ty / CELL)
@@ -388,6 +390,7 @@ const taps = ref([])
 let tapId = 0
 function onFloor(e) {
   if (!fm.state.active || peeking.value) return
+  if (ringMine.value) return   // 🥊 กำลังชกอยู่บนเวที = เดินไม่ได้
   const r = sceneEl.value.getBoundingClientRect()
   const x = (e.clientX - r.left) / r.width * 160, y = (e.clientY - r.top) / r.height * 100
   const id = ++tapId; taps.value.push({ id, x, y }); setTimeout(() => { taps.value = taps.value.filter(t => t.id !== id) }, 600)
@@ -399,6 +402,11 @@ function onFloor(e) {
   else {
     tx = Math.max(8, Math.min(152, x)); ty = Math.max(Y0, Math.min(Y1, y))
     const c = inCounter(tx, ty); if (c) ty = c[1] + 12   // จิ้มโดนเคาน์เตอร์ → ไปยืนหน้าเคาน์เตอร์
+    if (inRing(tx, ty)) {   // จิ้มบนเวที → ไปยืนขอบเวทีด้านที่ใกล้สุด
+      const opts = [[RING.x0 - 4, ty], [RING.x1 + 4, ty], [tx, RING.y1 + 6]]
+      ;[tx, ty] = opts.sort((a, b) => Math.hypot(a[0] - tx, a[1] - ty) - Math.hypot(b[0] - tx, b[1] - ty))[0]
+      ty = Math.min(Y1, ty)
+    }
   }
   me.seat = best
   walkTo(me, tx, ty, () => room.patch({ seat: best, x: tx, y: ty }))   // ส่งตำแหน่งตอนถึงที่เท่านั้น

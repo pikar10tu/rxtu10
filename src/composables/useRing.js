@@ -32,6 +32,11 @@ function attach() {
 }
 function detach() { offM?.(); offB?.(); offM = offB = null }
 
+// ตัวเราอยู่บนเวทีไหม (FocusView ห้ามเดินระหว่างชก)
+// ล็อกตั้งแต่ขึ้นเวทีจนเวทีถูกล้าง (รวมช่วงฉลองหลังจบ) · เวทีหมดอายุ (รอคู่ชกเกิน 3 นาที/ค้าง) = ปลดล็อก
+export const ringMine = computed(() => { const m = match.value, u = uid(); return !!(u && m && !isStale(m) && (m.r?.uid === u || m.b?.uid === u)) })
+/** ล้างเอฟเฟกต์บนตัวทุกคน (จบไฟต์/ออกห้อง) — ไม่อิง uid จาก match เพราะ match อาจถูกล้างไปก่อนแล้ว */
+export function clearRingFx() { for (const k of Object.keys(ringFx.hands)) delete ringFx.hands[k]; for (const k of Object.keys(ringFx.cls)) delete ringFx.cls[k] }
 const isStale = (m, now = Date.now()) => !m || !m.r || (typeof m.at === 'number' && (now - m.at > STALE_MS || (!m.b && now - m.at > WAIT_MS)))
 
 export function useRing() {

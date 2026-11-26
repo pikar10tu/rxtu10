@@ -32,7 +32,7 @@
     <!-- แผงคู่ชก -->
     <div v-if="mySide && m && !m.b" class="rg-panel" @click.stop>
       <span>รอคู่ชก… เพื่อนเดินมาใกล้เวทีแล้วกด <Emoji char="🥊" /> ได้เลย</span>
-      <button type="button" class="rg-pill" @click="ring.leaveRing()">ลงจากเวที</button>
+      <button type="button" class="rg-pill" @click="stepDown">ลงจากเวที</button>
     </div>
     <div v-else-if="picking" class="rg-panel picks" @click.stop>
       <div class="rg-timer"><i :style="{ animationDuration: PICK_MS + 'ms' }" :key="pickKey"></i></div>
@@ -57,7 +57,7 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
-import { useRing, ringFx } from '../../composables/useRing.js'
+import { useRing, ringFx, clearRingFx, WAIT_MS } from '../../composables/useRing.js'
 import { useFocusRoom } from '../../composables/useFocusRoom.js'
 import {
   HANDS, HAND_EMOJI, HAND_LABEL, WIN_ROUNDS, PICK_MS, RING, CORNER, RING_BTN, SPECTATE,
@@ -152,6 +152,7 @@ async function playThrow(t) {
 
 async function playEnd(winner, forfeit) {
   const cur = m.value; if (!cur || ended) return
+  const wasMine = !!mySide.value   // จำไว้ก่อน — อีกเครื่องอาจล้างเวทีก่อนเราฉลองจบ แล้ว mySide กลายเป็น null (เดิมตัวค้างบนเวที)
   ended = true; picking.value = false
   const loser = winner === 'r' ? 'b' : 'r'
   if (!forfeit) { setCls(loser, 'ko'); await sleep(500) }
@@ -166,8 +167,8 @@ async function playEnd(winner, forfeit) {
     ring.record({ w: wName, l: lName, s: forfeit ? '' : scoreText(score, winner), ...(forfeit ? { f: true } : {}) })
   }
   await sleep(2600)
-  for (const s of ['r', 'b']) { setHand(s, null); setCls(s, null) }
-  if (mySide.value) emit('goto', SPECTATE[Math.floor(Math.random() * SPECTATE.length)])
+  clearRingFx()   // 27 พ.ย. เดิมล้างตาม uid ใน match → ถ้าอีกเครื่องล้างเวทีไปก่อน ท่าล้มค้างตอนเดิน
+  if (wasMine) goDown()
   ring.clear(cur.id)
 }
 function addConfetti() {
@@ -217,6 +218,7 @@ async function pump() {
 watch(m, (cur, old) => {
   // ไฟต์ใหม่ → รีเซ็ต · เปิดหน้ามากลางไฟต์ = ข้ามยกที่ผ่านไปแล้ว
   if (cur?.id !== shownId) {
+    clearRingFx()
     shownId = cur?.id || null; ended = false; pickedIdx = -1; picking.value = false; clearTimeout(pickTimer); clearTimeout(waitTimer)
     const st = deriveMatch(cur?.h)
     const fresh = !old || !old.id   // เห็นตั้งแต่เริ่ม
@@ -231,9 +233,17 @@ watch(m, (cur, old) => {
   pump()
 }, { deep: true })
 
+const goDown = () => emit('goto', SPECTATE[Math.floor(Math.random() * SPECTATE.length)])
+async function stepDown() { await ring.leaveRing(); goDown() }
+// รอคู่ชกจนเวทีหมดอายุ → ลงเอง (เดิมค้างยืนมุมแดง)
+let waitDownT = 0
+watch(() => [mySide.value, !!m.value?.b], ([side, hasB]) => {
+  clearTimeout(waitDownT)
+  if (side && !hasB) waitDownT = setTimeout(() => { if (mySide.value && !m.value?.b) stepDown() }, WAIT_MS + 1000)
+}, { immediate: true })
 const ranking = computed(() => ringRanking(ring.board.value))
 const boardOpen = ref(false)
-onBeforeUnmount(() => { clearTimeout(pickTimer); clearTimeout(waitTimer); ring.release(); room.release() })
+onBeforeUnmount(() => { clearRingFx(); clearTimeout(waitDownT); clearTimeout(pickTimer); clearTimeout(waitTimer); ring.release(); room.release() })
 </script>
 
 <style scoped>
@@ -251,7 +261,7 @@ onBeforeUnmount(() => { clearTimeout(pickTimer); clearTimeout(waitTimer); ring.r
 @keyframes rg-bob { 50% { transform: translate(-50%, calc(-100% - 3px)); } }
 .rg-bar { position: absolute; right: 2cqw; top: 12cqw; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }   /* ล่างซ้าย = แชต · ล่างขวา = ปุ่มไฮไฟว์ */
 .rg-pill { font: inherit; font-size: .72rem; font-weight: 700; border: 0; border-radius: 99px; background: rgba(255,255,255,.92); color: var(--ink); padding: 3px 9px; box-shadow: var(--pop); cursor: pointer; }
-.rg-panel { position: absolute; left: 50%; top: 10cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.95); border-radius: 14px; padding: 6px 10px; box-shadow: var(--pop); font-size: .75rem; font-weight: 600; white-space: nowrap; }
+.rg-panel { position: absolute; left: 50%; bottom: 1.5cqw; z-index: 10;   /* 27 พ.ย. user: ด้านบนโดนป้าย ยกที่… บัง → ย้ายลงล่าง */ transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.95); border-radius: 14px; padding: 6px 10px; box-shadow: var(--pop); font-size: .75rem; font-weight: 600; white-space: nowrap; }
 .rg-panel.picks { flex-wrap: wrap; justify-content: center; gap: 6px; padding: 6px 8px 8px; }
 .rg-timer { flex-basis: 100%; height: 4px; border-radius: 99px; background: #edf0f5; overflow: hidden; }
 .rg-timer i { display: block; height: 100%; background: var(--accent); transform-origin: left; animation: rg-time linear forwards; }
