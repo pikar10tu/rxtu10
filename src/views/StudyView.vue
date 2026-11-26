@@ -297,11 +297,12 @@ import { axisStats, suggestAxes, MIN_ANSWERED } from '../utils/practiceStats.js'
 const authStore = useAuthStore()
 const { toast } = useToast()
 
+import { examFestMulti } from '../utils/examFest.js'
 const DECK = DRUGS
 const NEW_PER_SESSION = 5
 const MATURE_DAYS = 21
-const COIN_PER_CARD = 5
-const STUDY_DAILY_CAP = 150   // เพดานเหรียญจากการทบทวน/วัน (กันฟาร์ม "ฝึกอิสระ" วนไม่จำกัด)
+const COIN_PER_CARD = 5 * examFestMulti()   // 📚 เทศกาลสอบ ×2 ถึงสิ้น ธ.ค.
+const STUDY_DAILY_CAP = 150 * examFestMulti()  // เพดานเหรียญจากการทบทวน/วัน (กันฟาร์ม "ฝึกอิสระ" วนไม่จำกัด)
 
 // ── persistent SRS state: userData.study.cards keyed by drug name ──
 const study = computed(() => authStore.userData?.study || { cards: {} })

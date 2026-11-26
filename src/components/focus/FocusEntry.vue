@@ -4,26 +4,27 @@
      จำนวน/ชื่อคนในห้อง = RTDB focus/presence (useFocusPeople) -->
 <template>
   <RouterLink v-if="variant === 'A'" to="/focus" class="fe-a">
-    <span class="fe-a-top"><b>🎯 Co-working space</b><small>ห้องอ่านหนังสือกับเพื่อน</small><span class="fe-go">{{ fm.state.active ? 'กลับเข้าห้อง' : 'เข้าห้อง' }} →</span></span>
-    <span class="fe-count">{{ names.length ? `🟢 ${names.length} คนอยู่ในห้อง` : 'ห้องว่างอยู่' }} · <span class="fe-sub">อ่านหนังสือเพื่อสร้างรายได้</span></span>
+    <span class="fe-a-top"><b><Emoji char="🎯" /> Co-working space <span v-if="FEST" class="x2-pill">เหรียญ ×2</span></b><small>ห้องอ่านหนังสือกับเพื่อน</small><span class="fe-go">{{ fm.state.active ? 'กลับเข้าห้อง' : 'เข้าห้อง' }} →</span></span>
+    <span class="fe-count"><template v-if="names.length"><Emoji char="🟢" /> {{ names.length }} คนอยู่ในห้อง</template><template v-else>ห้องว่างอยู่</template> · <span class="fe-sub">อ่านหนังสือเพื่อสร้างรายได้</span></span>
   </RouterLink>
 
   <RouterLink v-else-if="variant === 'B'" to="/focus" class="fe-b">
-    <span class="fe-b-em">🎯</span>
-    <span class="fe-b-t"><b>Co-working space</b><small>{{ names.length }} คนอยู่ในห้อง · ได้ +{{ house }}/วิ</small></span>
+    <span class="fe-b-em"><Emoji char="🎯" /></span>
+    <span class="fe-b-t"><b>Co-working space <span v-if="FEST" class="x2-pill">×2</span></b><small>{{ names.length }} คนอยู่ในห้อง · ได้ +{{ house * (FEST ? 2 : 1) }}/วิ</small></span>
     <span class="fe-b-live" aria-hidden="true"></span>
   </RouterLink>
 
   <Teleport v-else-if="variant === 'C' && !fm.state.active" to="body">
-    <RouterLink to="/focus" class="fe-c" aria-label="เข้า Co-working space">🎯<span>{{ names.length }}</span></RouterLink>
+    <RouterLink to="/focus" class="fe-c" aria-label="เข้า Co-working space"><Emoji char="🎯" /><span>{{ names.length }}</span></RouterLink>
   </Teleport>
 
   <RouterLink v-else-if="variant === 'H' && names.length" to="/focus" class="fe-h">
-    📚 <b>{{ names.slice(0, 2).join(', ') }}</b>{{ names.length > 2 ? ` และอีก ${names.length - 2} คน` : '' }} กำลังโฟกัสอยู่ · <u>ไปนั่งด้วย</u>
+    <Emoji char="📚" /> <b>{{ names.slice(0, 2).join(', ') }}</b>{{ names.length > 2 ? ` และอีก ${names.length - 2} คน` : '' }} กำลังโฟกัสอยู่ · <u>ไปนั่งด้วย</u>
   </RouterLink>
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
@@ -32,6 +33,8 @@ import { useFocusPeople } from '../../composables/useFocusRoom.js'
 import { onBeforeUnmount } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { app } from '../../firebase/config.js'
+import { examFestMulti } from '../../utils/examFest.js'
+const FEST = examFestMulti() > 1   // 📚 ป้าย ×2 หายเองหลัง 31 ธ.ค.
 
 defineProps({ variant: { type: String, default: 'A' } })
 const auth = useAuthStore()
@@ -67,4 +70,5 @@ const todayLine = 'อ่านหนังสือเพื่อสร้า�
 .fe-c span { position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; border-radius: 99px; background: #22c55e; font-size: .7rem; font-weight: 800; display: grid; place-items: center; border: 2px solid #fff; }
 
 .fe-h { display: block; padding: 8px 12px; border-radius: 12px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e; font-size: .8rem; }
+.x2-pill { display: inline-block; margin-left: 4px; padding: 0 7px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; font-size: .7rem; vertical-align: 1px; }
 </style>

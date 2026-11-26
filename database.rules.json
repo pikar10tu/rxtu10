@@ -24,7 +24,7 @@
           },
           "players": {
             "$uid": {
-              ".write": "auth != null && ((auth.uid === $uid && (!newData.exists() || !data.parent().parent().child('banned').child($uid).exists())) || data.parent().parent().child('meta/hostUid').val() === auth.uid)"
+              ".write": "auth != null && ((auth.uid === $uid && (!newData.exists() || !data.parent().parent().child('banned').child($uid).exists())) || data.parent().parent().child('meta/hostUid').val() === auth.uid || (!newData.exists() && data.parent().child(auth.uid).exists() && data.child('off').isNumber() && data.child('off').val() < now - 360000))"
             }
           },
           "banned": {

@@ -82,6 +82,7 @@
       <!-- ส่งผจญภัยพับเก็บ 25 ก.ย. 2026 — โค้ด/route/ข้อมูลเก็บไว้ ไม่ลบ -->
 
       <!-- ลิงก์บรรทัดเดียวท้ายหน้า -->
+      <button type="button" class="home-link" @click="openCoffee"><span><Emoji char="☕" /> เลี้ยงกาแฟผู้พัฒนา</span><span>›</span></button>
       <button type="button" class="home-link" @click="fbOpen = true"><span><Emoji char="💬" /> ส่งข้อเสนอแนะ / รายงานปัญหา</span><span>›</span></button>
       <RouterLink v-if="authStore.isAdmin" to="/admin" class="home-link"><span><Emoji char="⚙️" /> แผงผู้ดูแลระบบ</span><span>›</span></RouterLink>
       <FeedbackModal v-model="fbOpen" />
@@ -107,6 +108,8 @@
 
 <script setup>
 import { useDaily } from '../composables/useDaily.js'
+import { useCoffee } from '../composables/useCoffee.js'
+const { openCoffee } = useCoffee()
 import { dayKey } from '../utils/dailyChallenge.js'
 import { dueCount as qcardsDueCount } from '../utils/srsQuestions.js'
 import ResidenceScene from '../components/residence/ResidenceScene.vue'

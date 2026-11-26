@@ -106,7 +106,7 @@
         </div>
 
         <button class="qv-history-btn" @click="openHistory"><Emoji char="📊" /> ประวัติของฉัน</button>
-        <div class="qv-hint">ทำข้อสอบได้เหรียญ +{{ QUIZ_COIN_PER_CORRECT }}/ข้อที่ถูก · ทำมากได้มาก ไม่จำกัดต่อวัน</div>
+        <div class="qv-hint">ทำข้อสอบได้เหรียญ +{{ QUIZ_COIN }}/ข้อที่ถูก<span v-if="FEST" class="x2-pill">×2 ถึง 31 ธ.ค.</span> · ทำมากได้มาก ไม่จำกัดต่อวัน</div>
 
         <!-- ปุ่มหลักติดขอบล่าง (sticky ใน #main-content) — ไม่ต้องเลื่อนหา -->
         <div class="qv-dock">
@@ -157,7 +157,7 @@
       <div v-if="picked !== null" class="qv-feedback">
         <div :class="picked === current.answer ? 'qv-fb ok' : 'qv-fb no'" role="status">
           <b>{{ picked === current.answer ? '✓ ถูกต้อง!' : '✗ ยังไม่ถูก' }}</b>
-          {{ picked === current.answer ? `ได้ +${QUIZ_COIN_PER_CORRECT} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้อยู่ในกองข้อที่เคยผิด ถูกติดกัน ${GRADUATE_REPS} ครั้งถึงจะหาย` }}
+          {{ picked === current.answer ? `ได้ +${QUIZ_COIN} เหรียญ` : `เฉลยคือข้อ ${LETTERS[current.answer]} · ข้อนี้อยู่ในกองข้อที่เคยผิด ถูกติดกัน ${GRADUATE_REPS} ครั้งถึงจะหาย` }}
         </div>
         <div v-if="current.explanation" class="qv-exp"><Emoji char="💡" /> {{ current.explanation }}</div>
         <div v-if="current.keyBy === 'converter'" class="qv-note"><Emoji char="ℹ️" /> สรุปต้นฉบับไม่มีเฉลยข้อนี้ เฉลยเรียบเรียงโดยผู้แปลงสรุป — ถ้าเห็นว่าผิดกดแจ้งได้เลย</div>
@@ -313,6 +313,9 @@ import { aggregateExamStats } from '../utils/examStats.js'
 import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import { tallyAnswers } from '../utils/questionStats.js'
 import { QUIZ_COIN_PER_CORRECT, REPORT_HOLD_AT, REPORT_REWARD } from '../data/index.js'
+import { examFestMulti } from '../utils/examFest.js'
+const FEST = examFestMulti() > 1
+const QUIZ_COIN = QUIZ_COIN_PER_CORRECT * examFestMulti()   // 📚 เทศกาลสอบ ×2 ถึงสิ้น ธ.ค.
 import { applyQuizResults, buildQcardsPatch, dueQuestionIds, GRADUATE_REPS } from '../utils/srsQuestions.js'
 import { buildSavedToggle, buildSavedRemove, savedIds, savedCount, isSaved, SAVED_MAX, SAVED_BATCH } from '../utils/savedQuestions.js'
 import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
@@ -887,7 +890,7 @@ async function finish() {
 
   // เหรียญข้อสอบ — ไม่มีเพดานรายวันแล้ว ทำมากได้มาก (rate ต่อข้อที่ถูก)
   const today = new Date().toISOString().slice(0, 10)
-  const grant = correct.value * QUIZ_COIN_PER_CORRECT
+  const grant = correct.value * QUIZ_COIN
   coinsEarned.value = grant
   // แต้มอีเวนต์ — ได้จากข้อสอบเท่านั้น เฉพาะข้อที่ตอบถูก 2 ลูก (user 26 ต.ค. 2026)
   const ev = activeEvent()
@@ -1201,4 +1204,5 @@ async function finish() {
 .qv-dom-bar { flex: 1; height: 14px; background: rgba(0,0,0,.07); border-radius: 999px; overflow: hidden; }
 .qv-dom-fill { display: block; height: 100%; background: var(--primary); }
 .qv-dom-val { font-size: .72rem; font-variant-numeric: tabular-nums; color: rgba(0,0,0,.6); }
+.x2-pill { display: inline-block; margin-left: 4px; padding: 0 7px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; font-size: .7rem; vertical-align: 1px; }
 </style>

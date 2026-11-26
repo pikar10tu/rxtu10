@@ -371,6 +371,11 @@ export const PARTS = [
   I('w16', 'w', 'cute', 'หางกระรอก', { ob: [P(29, 11, 'WWwW'), P(29, 12, 'WWwww'), P(30, 13, 'Wwwww'), P(30, 14, 'WWwwwf'), P(31, 15, 'WWwwff'), P(31, 16, 'FWWfff'), P(31, 17, 'FFFffff'), P(31, 18, 'FFFFfff'), P(31, 19, 'FFFFfff'), P(31, 20, 'FFFFfff'), P(30, 21, 'FFFFFfff'), P(30, 22, 'FFFFFFff'), P(29, 23, 'FFFFFFFff'), P(28, 24, 'FFFFFFFff'), P(26, 25, 'FFFFFFFFFf'), P(20, 26, 'FFFFFFFFFFFFFFFf'), P(20, 27, 'FFFFFFFFFFFFFF'), P(22, 28, 'FFFFFFFFFFF')], pal: { F: '#B5733F', f: '#8E5530', W: '#E8C9A0', w: '#CDA77A' } }),
   I('w17', 'w', 'cute', 'หางกระต่าย', { ob: [P(28, 24, '.WWW.'), P(27, 25, 'WWWWWw'), P(27, 26, 'WWWWWw'), P(27, 27, 'WWWWWw'), P(27, 28, 'WWWWww'), P(28, 29, '.www.')], pal: { W: '#FFFFFF', w: '#C3C9D9' } }),
   I('w6', 'w', 'fantasy', 'ผ้าคลุมฮีโร่', { back: [P(12, 17, 'RRRRRRRR'), R(11, 18, 9, 19, 'R'), R(11, 37, 9, 1, 'r'), R(11, 18, 1, 19, 'r')], pal: { R: '#E0524A', r: '#B53B35' } }),
+  // 🎨 ชุดเบค (27 พ.ย. 2026 · ของขอบคุณคนเลี้ยงกาแฟ · เจ้าตัวอนุมัติ) — ใส่เสื้อ/ชุด/หมวกชิ้นไหนก็ได้ = โฟกัส +5/วิ (utils/supporter.js) · limited = โชว์ในตู้ ไม่มีราคา ซื้อไม่ได้ ได้จากจดหมายขอบคุณเท่านั้น · ปีกสายรุ้งไม่มีบัฟ
+  I('t20', 't', 'fashion', 'เสื้อเบค', { limited: true, o: [P(15, 17, 'uKKSSSSKKT'), P(12, 18, 'BGuTTKkSSkKTTtGB'), P(12, 19, 'GbTBBTkTTkTBBtBG'), P(12, 20, 'TTBGWTTtTTTGBtTT'), P(12, 21, 'ttbBGTTtTTTTbttt'), P(14, 22, 'TbTTTWTTFFTt'), P(14, 23, 'TTYYTtTFRFRt'), P(14, 24, 'GTTYTtTFFFFt'), P(14, 25, 'GGTTTWTTNNTt'), P(14, 26, 'TBBBTtTTbBTt')], pal: { B: '#3E6FD8', F: '#F7DDB0', G: '#3FA08A', K: '#2F7F86', N: '#3A2E2A', R: '#E8445A', T: '#F26B3A', W: '#FFFFFF', Y: '#FFC93C', b: '#2C55B0', k: '#22626A', t: '#CF5230', u: '#FF9A5C' } }),
+  I('f64', 't', 'fashion', 'ชุดเบคเต็มตัว', { limited: true, full: true, o: [P(15, 17, 'KKKSSSSKKK'), P(12, 18, 'KGGRKKKSSYYKKkKK'), P(12, 19, 'GGgRRKKkKYYYKkKV'), P(12, 20, 'GKRRrKYkKKYOKkVVV'), P(12, 21, 'KYKKBBKkKKKGKkVVb'), P(14, 22, 'KKBBBkKKGGBk'), P(14, 23, 'KKKBbkOKGGgk'), P(14, 24, 'KVVKKOOOKKRR'), P(14, 25, 'VVbKKOOrKRRr'), P(14, 26, 'VKKKKkKKKRKk'), P(14, 27, 'KKYKKKKBBKKk'), P(14, 28, 'KYYYKKKBBBKk'), P(15, 29, 'YYOK.VKBbk'), P(15, 30, 'KKGG..KRKk'), P(15, 31, 'KGGg..RRRk'), P(15, 32, 'kGkk..RRrk')], pal: { B: '#4DA8F0', G: '#4CD18A', K: '#2A2533', O: '#FF9F43', R: '#FF5A5F', V: '#9B6BD9', Y: '#FFD93D', b: '#2F7FCC', g: '#2FA86A', k: '#1A1622', r: '#D93A48' } }),
+  I('x58', 'x', 'fashion', 'หมวกเบค', { limited: true, o: [P(16, 0, 'KRRKKYYK'), P(14, 1, 'KBBKKGGGKKKK'), P(14, 2, 'KKKKKKKKKOOK'), P(14, 3, 'VVKKYYKKKKKK'), P(14, 4, 'kkkkkkkkkkkk'), P(12, 5, 'kGGKKOOKKBBKRRRk')], pal: { B: '#4DA8F0', G: '#4CD18A', K: '#2A2533', O: '#FF9F43', R: '#FF5A5F', V: '#9B6BD9', Y: '#FFD93D', k: '#1A1622' } }),
+  I('w28', 'w', 'fantasy', 'ปีกสายรุ้ง', { limited: true, back: [P(8, 9, 'WW'), P(5, 10, 'WWWWW'), P(3, 11, 'WWWWWWWW'), P(2, 12, 'WWWWWWWWWW'), P(1, 13, 'RRWWWWWWWWW'), P(1, 14, 'OORRWWWWWWW'), P(1, 15, 'YYOORRWWWWg'), P(2, 16, 'GGYYOORWWg'), P(2, 17, 'BBGGYYOOg'), P(3, 18, 'VBBGGYYg'), P(4, 19, 'VVBBGG'), P(5, 20, 'VVBB'), P(6, 21, 'VV')], pal: { W: '#FFFFFF', g: '#D9DEE8', R: '#FF9AA2', O: '#FFC48C', Y: '#FFE88A', G: '#A8E6B8', B: '#9DD0F5', V: '#C9B0F0' } }),
 ];
 // ── ตัวแปรสี (19 พ.ย. 2026) — ใช้รูปทรงของชิ้นแม่ เปลี่ยนแค่สี · แก้ทรงชิ้นแม่ = ทุกสีเปลี่ยนตาม ──
 // [ชิ้นแม่, id ใหม่, ชื่อ, สีที่ทับ] — K ในหูฟัง = สีโครง (ทับสีหมึกเฉพาะชิ้นนี้)
@@ -567,6 +572,8 @@ const AURA = {
   // 🎀 ชุดแนวซานริโอ = เรืองรอบตัวตามสีตัวละคร (22 พ.ย. user)
   f51: { type: 'glow', color: '#FF8FB8' }, f52: { type: 'glow', color: '#8FD4F7' }, f53: { type: 'glow', color: '#C9A0FF' },
   f54: { type: 'glow', color: '#FF5C6E' }, f55: { type: 'glow', color: '#B48CE8' },
+  // 🎨 ชุดเบค (27 พ.ย.) สาดสีรุ้ง · เสื้อ/ชุด/หมวกใส่พร้อมกันได้ชุดเดียว (dollAura ตัดซ้ำ)
+  t20: { type: 'rainbow', color: '#FFD93D' }, f64: { type: 'rainbow', color: '#FFD93D' }, x58: { type: 'rainbow', color: '#FFD93D' },
   f47: { type: 'mist', color: '#CFEDEA' },   // หมอกจาง คลุมทั้งตัว (24 พ.ย.)
   f48: { type: 'stardust', color: '#A8E0B8' },
   f49: { type: 'notes', color: '#F6D77A' },       // 22 พ.ย. เสาหลักเสียง: โน้ตดนตรีลอย

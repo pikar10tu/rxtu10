@@ -7,6 +7,7 @@
     :style="{ width: size.w * k / dpr + 'px', height: size.h * k / dpr + 'px' }"
     :aria-label="label" role="img"
   ></canvas>
+  <i v-if="layers.rainbow" class="au-rainbow"></i>
   <i v-if="glows.length" class="au-halo" :style="{ '--au': glows[0] }"></i>
   <i v-for="(f, i) in layers.floors" :key="'f' + i" class="au-floor" :style="{ '--au': f }"></i>
   <template v-for="(r, i) in layers.rings" :key="'r' + i">
@@ -40,7 +41,7 @@ const out = computed(() => render(props.eq))
 const size = computed(() => ({ w: out.value.w, h: out.value.h }))
 // ✨ ออร่า 8 แบบ หลายอันพร้อมกันได้ (utils/dollAura.js) — glow รวมเป็น drop-shadow ต่อกัน · ring = วงใต้เท้า · ที่เหลือเป็นอนุภาค CSS
 const auras = computed(() => (props.aura ? aurasOf(props.eq) : []))
-const layers = computed(() => { const L = auraLayers(auras.value); return props.glowOnly ? { ...L, rings: [], floors: [], particles: [] } : L })
+const layers = computed(() => { const L = auraLayers(auras.value); return props.glowOnly ? { ...L, rings: [], floors: [], particles: [] } : L })   // glowOnly ยังเก็บ rainbow (เป็นแสงรอบตัว)
 const glows = computed(() => layers.value.glows)
 const shadow = (m) => glows.value.map(c => `drop-shadow(0 0 calc(var(--px) * ${m}) ${c})`).join(' ')
 // ขอบพิกเซลสีคมรอบตัว (drop-shadow ไม่เบลอ 4 ทิศ) — ชุดเรืองดูมีขอบแสงชัด (22 พ.ย.)
@@ -79,7 +80,7 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 <style scoped>
 .doll { image-rendering: pixelated; image-rendering: crisp-edges; display: block; position: relative; z-index: 1; }  /* 24 พ.ย. เดิมไม่มี z-index → halo/แสงพื้น/วง (absolute วางหลัง canvas) ทับตัวละคร */
 .dollw { position: relative; display: inline-block; line-height: 0; isolation: isolate; }
-.au-halo, .au-floor, .au-ring { z-index: 0; }
+.au-halo, .au-floor, .au-ring, .au-rainbow { z-index: 0; }
 .pt { z-index: 2; }
 /* อนุภาคออร่า (utils/dollAura.js) — พิกเซลวาดด้วย box-shadow/gradient ขนาดตาม --px (1 พิกเซลตุ๊กตา)
    22 พ.ย. ยกเครื่อง: ไฮไลต์ขาว (--hi) + เรืองนุ่ม · ดาวสี่แฉก · เปลว 3 สี+ถ่าน · วง 2 ชั้น+ลำแสง · ขอบเรืองคม */
@@ -144,4 +145,10 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 @keyframes dollFox{0%,100%{opacity:0;transform:translate(0,0) scale(.5)}20%{opacity:1;transform:translate(calc(var(--px)*1),calc(var(--px)*-2)) scale(1)}50%{opacity:.85;transform:translate(calc(var(--px)*-1),calc(var(--px)*-5)) scale(1.1,.9)}80%{opacity:1;transform:translate(calc(var(--px)*1),calc(var(--px)*-8)) scale(.9,1.1)}}
 .pt-wind{width:calc(var(--px)*6);height:var(--px);background:linear-gradient(90deg,transparent,var(--au) 60%,var(--hi));animation:dollWind 2.2s ease-in infinite}
 @keyframes dollWind{0%{opacity:0;transform:translateX(calc(var(--px)*-6))}25%{opacity:.9}100%{opacity:0;transform:translateX(calc(var(--px)*12))}}
+/* 🎨 สาดสีรุ้ง (ชุดเบค 27 พ.ย.): วงแสงรุ้งหมุนหลังตัว — หมุนด้วย transform อย่างเดียว ไม่ animate filter (กันแลคห้องโฟกัส) */
+.au-rainbow{position:absolute;left:14%;right:14%;top:10%;bottom:4%;border-radius:50%;background:conic-gradient(#FF5A5F,#FF9F43,#FFD93D,#4CD18A,#4DA8F0,#9B6BD9,#FF5A5F);-webkit-mask:radial-gradient(closest-side,#000 30%,transparent);mask:radial-gradient(closest-side,#000 30%,transparent);opacity:.6;pointer-events:none;animation:dollRainbow 5s linear infinite;will-change:transform}
+@keyframes dollRainbow{to{transform:rotate(360deg)}}
+/* หยดสี 2x2 + ไฮไลต์ · พุ่งออกจากตัวแล้วหยดลง */
+.pt-splash{width:calc(var(--px)*2);height:calc(var(--px)*2);background:var(--au);box-shadow:inset calc(var(--px)*-.5) calc(var(--px)*-.5) 0 color-mix(in srgb,var(--au) 70%,#000),0 0 calc(var(--px)*1.5) var(--au);border-radius:calc(var(--px)*.6);animation:dollSplash 2.8s cubic-bezier(.2,.8,.4,1) infinite}
+@keyframes dollSplash{0%{opacity:0;transform:translate(0,0) scale(.3)}15%{opacity:1;transform:translate(calc(var(--dx)*1.2),calc(var(--px)*-4)) scale(1.2)}60%{opacity:1;transform:translate(calc(var(--dx)*2),calc(var(--px)*-2)) scale(1)}100%{opacity:0;transform:translate(calc(var(--dx)*2.4),calc(var(--px)*6)) scale(.7)}}
 </style>

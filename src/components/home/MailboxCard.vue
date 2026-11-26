@@ -32,6 +32,7 @@
               <template v-if="rewardTickets(m) > 0"> +{{ rewardTickets(m) }}<Emoji char="🎟️" /></template>
               <template v-if="rewardAntiLoss(m) > 0"> +{{ rewardAntiLoss(m) }}<Emoji char="💊" /></template>
               <template v-if="rewardArena(m)"> +สนาม<Emoji char="🏟️" /></template>
+              <template v-if="rewardDoll(m).length"> +ชุด<Emoji char="👕" /></template>
             </template>
           </button>
           <button v-if="canDelete(m)" class="mb-del" :disabled="deletingId === m.id"
@@ -49,7 +50,8 @@ import Emoji from '../shared/Emoji.vue'
 import { ref } from 'vue'
 import { useMailbox } from '../../stores/mailbox.js'
 import { useToast } from '../../composables/useToast.js'
-import { canClaim, canDelete, rewardCoins, rewardTickets, rewardAntiLoss, rewardArena } from '../../utils/mailbox.js'
+import { canClaim, canDelete, rewardCoins, rewardTickets, rewardAntiLoss, rewardArena, rewardDoll } from '../../utils/mailbox.js'
+import { PART } from '../../data/dollParts.js'
 import { getArena } from '../../data/arenas.js'
 
 const mailbox = useMailbox()
@@ -66,7 +68,7 @@ async function onDelete(m) {
 
 // mailbox.load() ย้ายไป HomeView onMounted แล้ว (ให้จุดแดงโชว์โดยไม่ต้องเปิดแผง)
 
-function hasReward(m) { return rewardCoins(m) > 0 || rewardTickets(m) > 0 || rewardAntiLoss(m) > 0 || !!rewardArena(m) }
+function hasReward(m) { return rewardCoins(m) > 0 || rewardTickets(m) > 0 || rewardAntiLoss(m) > 0 || !!rewardArena(m) || rewardDoll(m).length > 0 }
 function typeIcon(m) { return m.type === 'reward' ? '🎁' : m.type === 'gift' ? '🎁' : '📢' }
 function fromLabel(from) {
   return from === 'system' ? 'ระบบ' : from === 'daily' ? 'รายวัน' : from === 'admin' ? 'แอดมิน' : 'เพื่อน'
@@ -88,6 +90,7 @@ async function onClaim(m) {
     if (res.tickets > 0) parts.push(`${res.tickets} ตั๋ว`)
     if (res.antiLoss > 0) parts.push(`ยาแก้แพ้ ${res.antiLoss} ชิ้น`)
     if (res.arena) parts.push(`สนาม "${getArena(res.arena.id)?.name}" (ไปใส่ได้ที่สนามประลอง)`)
+    if (res.doll?.length) parts.push(`${res.doll.map(id => PART[id]?.label).join(', ')} (ไปใส่ได้ที่ห้องแต่งตัว)`)
     if (parts.length) toast(`รับ ${parts.join(' + ')} แล้ว`, 'success')
     else toast('จดหมายนี้รับไปแล้ว', 'info')
   } finally { claimingId.value = null }

@@ -28,7 +28,7 @@
           <li>ยิ่งตอบถูกไว ยิ่งได้แต้มเยอะ</li>
           <li>นับอันดับรอบแรกรอบเดียว กดเริ่มแล้วลุยให้จบนะ</li>
           <li>จบแล้วฝึกซ้ำได้ แต่ไม่นับแต้ม</li>
-          <li>ถูกข้อละ {{ DC_COIN_PER_CORRECT }} 🪙 รับเลย</li>
+          <li>ถูกข้อละ {{ DC_COIN }} 🪙 รับเลย</li>
           <li>ติดท็อป 10 ของวัน มีรางวัลรอพรุ่งนี้ สูงสุด 10,000 🪙</li>
         </ul>
         <button class="dc-btn dc-btn-wide" :disabled="starting" @click="start">{{ starting ? 'กำลังเตรียม…' : 'เริ่มเลย →' }}</button>
@@ -135,6 +135,8 @@ import { bumpDailyQuest } from '../utils/dailyQuest.js'
 import {
   DC_TIME_MS, DC_COIN_PER_CORRECT, dayKey, dayStartMs, questionScore, rankRows, prizeFor, pendingClaimDay, pickDaily,
 } from '../utils/dailyChallenge.js'
+import { examFestMulti } from '../utils/examFest.js'
+const DC_COIN = DC_COIN_PER_CORRECT * examFestMulti()   // 📚 เทศกาลสอบ ×2 ถึงสิ้น ธ.ค.
 
 const auth = useAuthStore()
 const usage = useUsageStore()
@@ -341,7 +343,7 @@ async function finish() {
   } catch (e) { console.error('[daily result]', e); toast('บันทึกอันดับไม่สำเร็จ', 'error') }
 
   // เหรียญ + แต้มอีเวนต์ + กองข้อผิด + สถิติรายกลุ่ม — patch ก้อนเดียว (CLAUDE.md ข้อ 9: หยิบค่าก่อน)
-  const grant = correct * DC_COIN_PER_CORRECT
+  const grant = correct * DC_COIN
   const ev = activeEvent()
   const evPts = quizPts(ev, answers.value.length, correct)
   const evp = grantPatch(u, ev, evPts, increment)

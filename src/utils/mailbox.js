@@ -7,6 +7,7 @@
 
 import { WELCOME_GIFT_COINS, WELCOME_GIFT_TICKETS } from '../data/userSchema.js'
 import { getArena } from '../data/arenas.js'
+import { PART } from '../data/dollParts.js'
 
 // เหรียญในจดหมาย (>0 เท่านั้น ไม่งั้น 0)
 export function rewardCoins(mail) {
@@ -33,9 +34,15 @@ export function rewardArena(mail) {
   return { id: a.id, rank: Number(a.rank) || 10 }
 }
 
+// 🧍 ชิ้นอวาตาร์ในจดหมาย (ชุดเบค ของขอบคุณคนเลี้ยงกาแฟ · 27 พ.ย. 2026) — เฉพาะ id ที่มีจริง
+export function rewardDoll(mail) {
+  const ids = mail?.reward?.doll
+  return Array.isArray(ids) ? ids.filter(id => PART[id]) : []
+}
+
 // กดรับได้ไหม = มีรางวัล (เหรียญ/ตั๋ว > 0 · achievement · สนาม) และยังไม่เคยรับ
 export function canClaim(mail) {
-  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || rewardTickets(mail) > 0 || rewardAntiLoss(mail) > 0 || !!mail?.reward?.achievement || !!rewardArena(mail))
+  return !!mail && !mail.claimed && (rewardCoins(mail) > 0 || rewardTickets(mail) > 0 || rewardAntiLoss(mail) > 0 || !!mail?.reward?.achievement || !!rewardArena(mail) || rewardDoll(mail).length > 0)
 }
 
 // ต้องสนใจไหม = ยังไม่อ่าน หรือ ยังกดรับได้ (ใช้คิด badge)
@@ -135,7 +142,7 @@ export function buildReportResultMail(report, note, createdAt) {
 // สร้าง payload จดหมาย broadcast จาก admin (ประกาศ/ของขวัญ/achievement)
 //   coins > 0 หรือ tickets > 0 หรือมี achievement → type 'reward' (มีปุ่มรับ) · ไม่งั้น 'notice' (อ่านอย่างเดียว ไม่มี key reward)
 //   caller เติม createdAt = serverTimestamp()
-export function buildBroadcastMail({ title, body, coins, tickets, antiLoss, from, achievement, arena, kind, mode, season, tier } = {}, createdAt) {
+export function buildBroadcastMail({ title, body, coins, tickets, antiLoss, from, achievement, arena, doll, kind, mode, season, tier } = {}, createdAt) {
   const c = (typeof coins === 'number' && coins > 0) ? coins : 0
   const t = (typeof tickets === 'number' && tickets > 0) ? tickets : 0
   const hasAch = achievement && achievement.id
@@ -147,7 +154,9 @@ export function buildBroadcastMail({ title, body, coins, tickets, antiLoss, from
   if (hasAch) reward.achievement = { id: achievement.id, ...(achievement.date ? { date: achievement.date } : {}) }
   const hasArena = !!(arena && arena.id)
   if (hasArena) reward.arena = { id: arena.id, rank: Number(arena.rank) || 10 }   // สนามแชมป์ (รางวัลซีซั่นอารีน่า)
-  const hasReward = c > 0 || t > 0 || al > 0 || hasAch || hasArena
+  const dl = Array.isArray(doll) ? doll.filter(id => PART[id]) : []
+  if (dl.length) reward.doll = dl
+  const hasReward = c > 0 || t > 0 || al > 0 || hasAch || hasArena || dl.length > 0
   return {
     type: hasReward ? 'reward' : 'notice',
     title: title || '',

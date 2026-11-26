@@ -43,7 +43,7 @@
       </div>
 
       <div class="ta-hint">
-        ตอบถูกได้เหรียญ +{{ QUIZ_COIN_PER_CORRECT }}/ข้อ เท่าโหมดปกติ ·
+        ตอบถูกได้เหรียญ +{{ QUIZ_COIN }}/ข้อ เท่าโหมดปกติ ·
         ข้อที่ตอบผิดจะถูกเก็บไปไว้ในโหมด "ข้อที่เคยผิด" ให้อัตโนมัติ
       </div>
     </template>
@@ -141,6 +141,8 @@ import { tallyAnswers } from '../utils/questionStats.js'
 import { applyQuizResults, buildQcardsPatch } from '../utils/srsQuestions.js'
 import { tallyGroups, buildGsPatch } from '../utils/practiceStats.js'
 import { QUIZ_COIN_PER_CORRECT } from '../data/index.js'
+import { examFestMulti } from '../utils/examFest.js'
+const QUIZ_COIN = QUIZ_COIN_PER_CORRECT * examFestMulti()   // 📚 เทศกาลสอบ ×2 ถึงสิ้น ธ.ค.
 import {
   TA_MODES, TA_BATCH, TA_REFILL_AT, TA_FLASH_MS, TA_TICK_MS, TA_EMPTY_STREAK_MAX,
   remainingMs, clockLabel, newBest,
@@ -315,7 +317,7 @@ async function finish(reason) {
   const snapAnswers = answers.value.slice()
   const snapAnswered = answered.value
   const snapCorrect = correct.value
-  const grant = snapCorrect * QUIZ_COIN_PER_CORRECT
+  const grant = snapCorrect * QUIZ_COIN
   coinsEarned.value = grant
   // แต้มอีเวนต์ (เหมือน QuizView)
   const ev = activeEvent()

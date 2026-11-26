@@ -7,8 +7,8 @@
   <div class="tab-content fo" :class="{ saving: saver }">
     <header class="fo-head">
       <BackButton aria-label="ย้อนกลับ" @click="$router.back()" />
-      <div class="fo-title"><b>🎯 Co-working space</b><small>ห้องอ่านหนังสือกับเพื่อน</small></div>
-      <button type="button" class="fo-fb" @click="fbOpen = true">🐞 แจ้งบัค/ข้อเสนอแนะ</button>
+      <div class="fo-title"><b><Emoji char="🎯" /> Co-working space</b><small>ห้องอ่านหนังสือกับเพื่อน</small></div>
+      <button type="button" class="fo-fb" @click="fbOpen = true"><Emoji char="🐞" /> แจ้งบัค/ข้อเสนอแนะ</button>
     </header>
 
 
@@ -21,6 +21,8 @@
         <span class="fo-cal-pg"><b>{{ daysLeft }}</b><small>วัน</small></span>
         <span v-if="tearToday" class="fo-cal-pg tear" aria-hidden="true"><b>{{ daysLeft + 1 }}</b><small>วัน</small></span>
       </div>
+      <!-- ☕ เคาน์เตอร์คาเฟ่ → เลี้ยงกาแฟผู้พัฒนา (27 พ.ย. 2026) -->
+      <button v-if="viewZone === 'cafe'" type="button" class="fo-coffee" aria-label="เคาน์เตอร์คาเฟ่ เลี้ยงกาแฟผู้พัฒนา" @click.stop="openCoffee"><span><Emoji char="☕" /></span></button>
       <div class="fo-zsw" @click.stop>
         <button type="button" aria-label="โซนก่อนหน้า" @click="stepZone(-1)">‹</button>
         <span>{{ ZONES[ZI].label }}</span>
@@ -31,15 +33,15 @@
       </div>
       <template v-for="p in others" :key="p.uid">
         <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="{ walk: pos[p.uid].walking, away: p.away }" :style="entStyle(pos[p.uid].x, pos[p.uid].y, pos[p.uid].y)">
-          <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> {{ p.away ? '💤' : STATUS_ICON[p.st] }}</template></span><span v-if="!narrow" class="fo-st">{{ p.away ? '💤 พักสายตา' : STATUS_LABEL[p.st] || STATUS_LABEL.afk }}</span></div>
+          <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> <Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /> {{ p.away ? 'พักสายตา' : stText(p.st) }}</span></div>
           <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
           <span v-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
-          <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ p.house || 1 }}</span>
+          <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ (p.house || 1) * FEST_X }}</span>
           <div class="fo-doll"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
         </div>
       </template>
       <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="{ walk: me.walking }" :style="entStyle(me.x, me.y, me.y)">
-        <div class="fo-label"><span class="fo-nm">{{ myName }}<template v-if="narrow"> {{ STATUS_ICON[fm.status.value] }}</template></span><span v-if="!narrow" class="fo-st">{{ STATUS_LABEL[fm.status.value] }}</span></div>
+        <div class="fo-label"><span class="fo-nm">{{ myName }}<template v-if="narrow"> <Emoji :char="STATUS_ICON[fm.status.value]" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="STATUS_ICON[fm.status.value]" /> {{ stText(fm.status.value) }}</span></div>
         <div v-if="bubbles[room.myUid()]" class="fo-bubble">{{ bubbles[room.myUid()] }}</div>
         <span v-if="myHandUp" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
         <span v-for="c in coins" :key="c.id" class="fo-coin"><Emoji char="🪙" />+{{ c.v }}</span>
@@ -48,13 +50,13 @@
       <!-- ดูห้องอื่นอยู่ = แค่ดู · จะย้ายต้องกดปุ่มนี้ (หน้าตาเดียวกับปุ่มเริ่มโฟกัส · อยู่ห้องนี้แล้วหาย) -->
       <div v-if="peeking" class="fo-join" @click.stop>
         <p>{{ others.length ? `${others.length} คนอยู่ในห้อง` : 'ยังไม่มีใครในห้องนี้' }}</p>
-        <button type="button" class="fo-btn primary big" @click="moveHere">🚪 เข้าห้องนี้</button>
+        <button type="button" class="fo-btn primary big" @click="moveHere"><Emoji char="🚪" /> เข้าห้องนี้</button>
         <small>เวลาโฟกัสและเหรียญเดินต่อ ไม่เริ่มนับใหม่</small>
       </div>
       <div v-if="!fm.state.active" class="fo-join" @click.stop>
         <p>{{ others.length ? `${others.length} คนอยู่ในห้อง` : 'ยังไม่มีใครในห้องนี้ · เป็นคนแรกเลย' }}</p>
-        <button type="button" class="fo-btn primary big" @click="join">🎯 เริ่มโฟกัส</button>
-        <small>อ่านหนังสือเพื่อสร้างรายได้ตามระดับที่อยู่ของคุณ<br>ตอนนี้ +{{ house }} เหรียญ/วิ</small>
+        <button type="button" class="fo-btn primary big" @click="join"><Emoji char="🎯" /> เริ่มโฟกัส</button>
+        <small>อ่านหนังสือเพื่อสร้างรายได้ตามระดับที่อยู่ของคุณ<br>ตอนนี้ +{{ rateNow }} เหรียญ/วิ<template v-if="FEST_X > 1"> (×2 ถึง 31 ธ.ค.)</template></small>
       </div>
       <FocusSceneFx v-if="!saver" ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
       <div v-for="c in claps" :key="c.id" class="fo-ent fo-clap" :style="entStyle(c.x, c.y, 999)" aria-hidden="true">
@@ -71,7 +73,7 @@
           </div>
         </div>
       </div>
-      <button type="button" class="fo-chat-btn" :class="{ on: chatOpen }" :aria-label="chatOpen ? 'ปิดประวัติแชท' : 'อ่านแชทย้อนหลัง'" @click.stop="chatOpen = !chatOpen">💬</button>
+      <button type="button" class="fo-chat-btn" :class="{ on: chatOpen }" :aria-label="chatOpen ? 'ปิดประวัติแชท' : 'อ่านแชทย้อนหลัง'" @click.stop="chatOpen = !chatOpen"><Emoji char="💬" /></button>
       <button v-if="fm.state.active && !peeking" type="button" class="fo-hf-btn" :class="{ on: myHandUp }" :aria-pressed="myHandUp" :aria-label="myHandUp ? 'เอามือลง' : 'ยกมือไฮไฟว์ · เพื่อนที่อยู่ใกล้กดด้วยก็ตบกัน'" @click.stop="toggleHand"><Emoji char="✋" /></button>
     </div>
 
@@ -88,7 +90,7 @@
         <div class="fo-left">
           <div class="fo-nums">
             <div class="fo-num"><small>⏱️ โฟกัสรอบนี้</small><b>{{ fmtClock(fm.state.secs) }}</b></div>
-            <div class="fo-num"><small>🪙 เหรียญวันนี้</small><b>{{ Math.floor(fm.state.day.coins).toLocaleString() }}</b></div>
+            <div class="fo-num"><small><Emoji char="🪙" /> เหรียญวันนี้</small><b>{{ Math.floor(fm.state.day.coins).toLocaleString() }}</b></div>
           </div>
           <div class="fo-cap" :class="{ full: fm.capFull.value }" role="progressbar" :aria-valuenow="Math.round(fm.capPct.value * 100)" aria-valuemin="0" aria-valuemax="100" aria-label="กระปุกเหรียญ"><i :style="{ width: fm.capPct.value * 100 + '%' }"></i></div>
           <div class="fo-bank">
@@ -97,8 +99,8 @@
           </div>
         </div>
         <div class="fo-actions">
-          <button type="button" class="fo-btn primary" @click="quizOpen = true">✍️ ไปทำข้อสอบ</button>
-          <button type="button" class="fo-btn" @click="startSaver">🌙 โหมดโฟกัส</button>
+          <button type="button" class="fo-btn primary" @click="quizOpen = true"><Emoji char="✍️" /> ไปทำข้อสอบ</button>
+          <button type="button" class="fo-btn" @click="startSaver"><Emoji char="🌙" /> โหมดโฟกัส</button>
           <button type="button" class="fo-btn" @click="leave">ออกจากห้อง</button>
         </div>
       </section>
@@ -108,9 +110,9 @@
     <Teleport to="body">
       <div v-if="saver" class="fo-saver" @pointerdown="holdStart" @pointerup="holdEnd" @pointercancel="holdEnd" @pointerleave="holdEnd" @contextmenu.prevent>
         <div class="sv-mid">
-          <small>🌙 โหมดโฟกัส</small>
+          <small><Emoji char="🌙" /> โหมดโฟกัส</small>
           <b>{{ fmtClock(fm.state.secs) }}</b>
-          <small>🪙 วันนี้ {{ Math.floor(fm.state.day.coins).toLocaleString() }}</small>
+          <small><Emoji char="🪙" /> วันนี้ {{ Math.floor(fm.state.day.coins).toLocaleString() }}</small>
         </div>
         <div class="sv-hold">
           <svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" class="bg" /><circle cx="22" cy="22" r="19" class="fg" :class="{ run: holding }" /></svg>
@@ -134,7 +136,7 @@
 
     <!-- เลือกว่าจะทำข้อสอบแบบไหน (การ์ดเดียวกับหน้าเตรียมสอบ) -->
     <BottomSheet :open="quizOpen" icon="✍️" title="ทำข้อสอบแบบไหนดี" @update:open="quizOpen = $event">
-      <p class="fo-lead">🪙 ระหว่างทำข้อสอบ เวลาโฟกัสและเหรียญยังเดินต่อ · แตะป้าย 🎯 มุมจอเพื่อกลับห้องได้ทุกเมื่อ</p>
+      <p class="fo-lead"><Emoji char="🪙" /> ระหว่างทำข้อสอบ เวลาโฟกัสและเหรียญยังเดินต่อ · แตะป้าย <Emoji char="🎯" /> มุมจอเพื่อกลับห้องได้ทุกเมื่อ</p>
       <div class="fo-modes">
         <QuizModeCard emoji="🌅" title="ข้อสอบประจำวัน" subtitle="5 ข้อวันละรอบ · ลุ้นท็อป 10" to="/daily" />
         <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ" to="/quiz" />
@@ -155,11 +157,11 @@
           <span class="mp-name"><span :class="{ run: audio.track >= 0 }">{{ nowName }}</span></span>
           <small>{{ nowMood }}</small>
         </button>
-        <button type="button" class="mp-b" :class="{ on: shuffle }" :aria-pressed="shuffle" aria-label="สุ่มเพลง" @click="toggleShuffle">🔀</button>
-        <button type="button" class="mp-b" :aria-label="audio.muted ? 'เปิดเสียง' : 'ปิดเสียง'" @click="setMuted(!audio.muted)">{{ audio.muted ? '🔇' : '🔊' }}</button>
+        <button type="button" class="mp-b" :class="{ on: shuffle }" :aria-pressed="shuffle" aria-label="สุ่มเพลง" @click="toggleShuffle"><Emoji char="🔀" /></button>
+        <button type="button" class="mp-b" :aria-label="audio.muted ? 'เปิดเสียง' : 'ปิดเสียง'" @click="setMuted(!audio.muted)"><Emoji :char="audio.muted ? '🔇' : '🔊'" /></button>
         <button type="button" class="mp-b" aria-label="เพลย์ลิสต์" @click="listOpen = true">☰</button>
       </div>
-      <label class="mp-row mp-vol"><span aria-hidden="true">🎵</span><input type="range" min="0" max="100" :value="audio.music" aria-label="ระดับเสียงเพลง" @input="setVolume('music', +$event.target.value)"><span class="mp-num">{{ audio.music }}</span></label>
+      <label class="mp-row mp-vol"><span aria-hidden="true"><Emoji char="🎵" /></span><input type="range" min="0" max="100" :value="audio.music" aria-label="ระดับเสียงเพลง" @input="setVolume('music', +$event.target.value)"><span class="mp-num">{{ audio.music }}</span></label>
       <div class="mp-row mp-amb" role="group" aria-label="เสียงพื้นหลัง">
         <span class="mp-lbl">เสียงพื้นหลัง</span>
         <button type="button" class="mp-q" :aria-expanded="why" aria-label="เสียงพื้นหลังช่วยอะไร" @click="why = !why">?</button>
@@ -167,7 +169,7 @@
       </div>
       <div v-if="audio.noiseLoading || audio.loadError" class="mp-row mp-load" role="status">{{ audio.noiseLoading ? `⏳ กำลังโหลดเสียง ${audio.loadPct}% · รอแป๊บนะ (โหลดครั้งแรกครั้งเดียว)` : '⚠️ โหลดเสียงไม่สำเร็จ · ลองกดใหม่อีกครั้ง' }}
       </div>
-      <label class="mp-row mp-vol"><span aria-hidden="true">🌧️</span><input type="range" min="0" max="100" :value="audio.bg" aria-label="ระดับเสียงพื้นหลัง" @input="setVolume('bg', +$event.target.value)"><span class="mp-num">{{ audio.bg }}</span></label>
+      <label class="mp-row mp-vol"><span aria-hidden="true"><Emoji char="🌧️" /></span><input type="range" min="0" max="100" :value="audio.bg" aria-label="ระดับเสียงพื้นหลัง" @input="setVolume('bg', +$event.target.value)"><span class="mp-num">{{ audio.bg }}</span></label>
     </section>
 
     <BottomSheet :open="listOpen" icon="🎵" title="เพลง & เสียงพื้นหลัง" @update:open="listOpen = $event">
@@ -203,6 +205,9 @@ import DollFigure from '../components/doll/DollFigure.vue'
 import BottomSheet from '../components/shared/BottomSheet.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import FocusSceneFx from '../components/focus/FocusSceneFx.vue'
+import { useCoffee } from '../composables/useCoffee.js'
+import { examFestMulti } from '../utils/examFest.js'
+import { focusBonus } from '../utils/supporter.js'
 import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { dollOf } from '../utils/doll.js'
@@ -263,6 +268,9 @@ const capLeft = computed(() => { const m = Math.ceil((COIN_CAP_SECS - fm.state.b
 
 // ── คนในห้อง (Realtime Database) ──
 const room = useFocusRoom()
+const { openCoffee } = useCoffee()
+const FEST_X = examFestMulti()
+const rateNow = computed(() => (house.value + focusBonus(auth.userData)) * FEST_X)   // ☕ ชุดเบค +5 · 📚 ×2
 const others = computed(() => room.people.value.filter(p => p.zone === viewZone.value && p.uid !== room.myUid()))
 const takenSeats = () => new Set(others.value.map(p => p.seat).filter(s => s >= 0))
 const DEFAULT_EQ = dollOf({}).eq
@@ -360,6 +368,8 @@ onBeforeUnmount(() => ro?.disconnect())
 const narrow = computed(() => sceneW.value < 440)
 const dollScale = computed(() => (narrow.value ? 1 : 1.5))
 const STATUS_ICON = { here: '🟢', quiz: '✍️', game: '🎮', deep: '🌙', afk: '💤' }
+// ป้ายสถานะแบบไม่มีอีโมจินำหน้า (อีโมจิวาดด้วย <Emoji> แยก ให้เป็น Fluent เหมือนทั้งเว็บ)
+const stText = (st) => (STATUS_LABEL[st] || STATUS_LABEL.afk).replace(/^\S+\s/, '')
 const taps = ref([])
 let tapId = 0
 function onFloor(e) {
@@ -544,7 +554,7 @@ onMounted(() => {
     }
   }
   fcoinTimer = setInterval(() => { if (!document.hidden && !saver.value) friendPop() }, 1000)
-  hfTick = setInterval(() => { nowTick.value = Date.now() }, 1000)
+  hfTick = setInterval(() => { if (!document.hidden && !saver.value) nowTick.value = Date.now() }, 1000)   // 🔋 จอดำ/ปัดแอป = ไม่ต้องวาดใหม่ทุกวิ
 })
 // เครื่องอื่นยึดห้อง → ปิดจอดำ/เพลงในเครื่องนี้ (fm.leave อยู่ที่ FocusPill)
 watch(() => room.kicked.value, () => { stopSaver(); handPending.value = false; stopAll(); stopAllWalks(); viewZone.value = fm.state.zone })
@@ -554,6 +564,11 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 <style scoped>
 .fo { display: flex; flex-direction: column; gap: 10px; }
 .fo.saving { content-visibility: hidden; }   /* โหมดโฟกัส: ไม่วาดห้องเลย */
+/* 🔋 ประหยัดพลังงาน (27 พ.ย.): จอดำโหมดโฟกัสอยู่ → ซ่อนฉาก+หยุดอนิเมชันข้างใต้ (เดิมยังวาดตัวละคร/ออร่า/แสงอยู่ใต้จอดำ) */
+.fo.saving > :not(.fo-saver) { visibility: hidden; }
+.fo.saving *, .fo.saving *::before, .fo.saving *::after { animation-play-state: paused !important; }
+.fo.saving .fo-saver { visibility: visible; }
+.fo.saving .fo-saver, .fo.saving .fo-saver * { animation-play-state: running !important; }
 .fo-saver { position: fixed; inset: 0; z-index: 600; background: #000; color: rgba(255,255,255,.45); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 30vh 16px calc(48px + env(safe-area-inset-bottom, 0px)); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
 .sv-mid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .sv-mid b { font-size: 3rem; font-weight: 300; letter-spacing: .04em; font-variant-numeric: tabular-nums; color: rgba(255,255,255,.6); }
@@ -631,6 +646,10 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .tod-night .fo-desk img { filter: brightness(.6) saturate(.8); }
 .fo-scene { container-type: inline-size; position: relative; width: 100%; aspect-ratio: 160 / 100; border-radius: 14px; overflow: hidden; cursor: pointer; background: #222; box-shadow: var(--shadow-md); }
 .fo-bg, .fo-ent img { image-rendering: pixelated; user-select: none; }
+.fo-coffee { position: absolute; left: 40%; top: 12%; width: 20%; height: 30%; z-index: 3; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 8px; }
+.fo-coffee span { position: absolute; left: 50%; top: -2px; transform: translateX(-50%); display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: var(--pop); font-size: .9rem; animation: foCoffee 1.8s ease-in-out infinite; }
+.fo-coffee:hover, .fo-coffee:focus-visible { background: rgba(255,255,255,.14); outline: 2px solid rgba(255,255,255,.7); }
+@keyframes foCoffee { 50% { transform: translate(-50%, -4px); } }
 .fo-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fo-ent { position: absolute; transform: translate(-50%, -100%); pointer-events: none; display: flex; flex-direction: column; align-items: center; }
 .fo-desk { width: calc(54 / 160 * 100%); transform: translate(-50%, -30%); }

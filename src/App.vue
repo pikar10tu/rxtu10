@@ -31,6 +31,7 @@
 
       <FocusPill />
       <HelpModal />
+      <CoffeeSheet />
       <MigrationWelcome />
       <IntroTour />
       <WelcomeBox />
@@ -57,6 +58,7 @@ import { useNavDots } from './composables/useNavDots.js'
 import ToastContainer   from './components/layout/ToastContainer.vue'
 import ConfirmModal     from './components/layout/ConfirmModal.vue'
 import HelpModal        from './components/help/HelpModal.vue'
+import CoffeeSheet      from './components/coffee/CoffeeSheet.vue'
 import MigrationWelcome from './components/onboarding/MigrationWelcome.vue'
 import IntroTour from './components/onboarding/IntroTour.vue'
 import MaintenanceScreen from './components/layout/MaintenanceScreen.vue'

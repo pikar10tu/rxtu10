@@ -16,7 +16,6 @@
       </nav>
 
       <template v-if="tab === 'daily'">
-      <AdminTycoon />
       <!-- ───── โหมดซ่อมบำรุง (config/app.maintenance) ───── -->
       <section class="admin-card">
         <div class="admin-card-head"><span><Emoji char="🚧" /> โหมดซ่อมบำรุง</span></div>
@@ -129,9 +128,12 @@
         <div v-if="!feedback.length" class="admin-empty">ยังไม่มีข้อเสนอแนะ</div>
         <ul v-else class="log-list">
           <li v-for="f in feedback" :key="f.id" class="rep-row">
-            <div class="rep-top"><span class="fb-cat">{{ fbCatLabel(f.category) }}</span><button class="rep-done" @click="resolveDoc('feedback', f.id)">✓ ปิด</button></div>
-            <div class="rep-note">{{ f.message }}</div>
-            <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ fmtTs(f.ts) }}</div>
+            <div class="rep-top"><span class="fb-cat">{{ fbCatLabel(f.category) }}<b v-if="f.amount"> · {{ f.amount }} บาท</b></span><button class="rep-done" @click="resolveDoc('feedback', f.id)">✓ ปิด</button></div>
+            <div v-if="f.message" class="rep-note">{{ f.message }}</div>
+            <button v-if="f.category === 'coffee' && f.reporterUid" class="btn-mini btn-gold" :disabled="coffeeBusy === f.id" @click="approveCoffee(f)">
+              {{ coffeeBusy === f.id ? 'กำลังส่ง…' : `☕ เจอยอด ${f.amount} แล้ว · ส่งจดหมายขอบคุณ` }}
+            </button>
+            <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ f.category === 'coffee' ? 'แจ้งโอนเมื่อ ' : '' }}{{ fmtTs(f.ts) }}</div>
           </li>
         </ul>
       </section>
@@ -392,7 +394,7 @@
             </li>
           </ul>
           <button v-if="!spPreview.paid && !spIsCurrent" class="btn-mini btn-gold" :disabled="spBusy || !spPreview.mails" @click="paySeason">
-            {{ spBusy ? 'กำลังส่ง…' : `แจก ${spPreview.mails} ฉบับ + รีเซตหอคอย` }}
+            {{ spBusy ? 'กำลังส่ง…' : `แจก ${spPreview.mails} ฉบับ${towerResetsAfter(spSeason) ? ' + รีเซตหอคอย' : ' (ไม่รีหอคอย)'}` }}
           </button>
         </template>
       </section>
@@ -530,7 +532,7 @@
 <script setup>
 import AdminBattleLab from '../components/admin/AdminBattleLab.vue'
 import AdminCoinWatch from '../components/admin/AdminCoinWatch.vue'
-import AdminTycoon from '../components/admin/AdminTycoon.vue'
+// 🎲 เศรษฐีรอบโลก: ถอดการ์ดออกจากแผงแอดมิน 27 พ.ย. (user สั่งเคลีย) · ไฟล์ components/admin/AdminTycoon.vue ยังอยู่
 import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
 import { WEEKLY_EFFECTS, WEEKLY_DAYS, activeWeekly } from '../data/pvpWeekly.js'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
@@ -574,6 +576,8 @@ function pleCatsDrifted(q) {
 }
 import { distinctCategories } from '../utils/questionsFilter.js'
 import { useTopics } from '../composables/useTopics.js'
+import { towerResetsAfter } from '../data/towerMilestones.js'
+import { BEK_GIFT_PARTS } from '../utils/supporter.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
@@ -744,7 +748,7 @@ async function paySeason() {
   const p = spPreview.value, season = spSeason.value
   if (!p || p.paid || spIsCurrent.value || spBusy.value) return
   const label = seasonMonthLabel(season, true)
-  const ok = await confirm(`แจกรางวัลซีซั่น ${label}?\n• จดหมาย ${p.mails} ฉบับ (หอคอย ${p.tower} · อารีน่า ${p.arena})\n• รีเซตหอคอยทุกคน ${spUserDocs.length} คน → ชั้น 1\n• กดแล้วกดซ้ำซีซั่นนี้ไม่ได้`)
+  const ok = await confirm(`แจกรางวัลซีซั่น ${label}?\n• จดหมาย ${p.mails} ฉบับ (หอคอย ${p.tower} · อารีน่า ${p.arena})\n• ${towerResetsAfter(season) ? `รีเซตหอคอยทุกคน ${spUserDocs.length} คน → ชั้น 1` : 'ไม่รีเซตหอคอย (ชั้นคงเดิม)'}\n• กดแล้วกดซ้ำซีซั่นนี้ไม่ได้`)
   if (!ok) return
   spBusy.value = true
   const payRef = doc(db, 'config', 'seasonPayouts')
@@ -765,10 +769,12 @@ async function paySeason() {
     // PvP: คนที่ถูกรีซีซั่นไปแล้วก่อนกดแจก (เปิดเว็บหลังเที่ยงคืน) ด้วยสูตรบีบเข้ากลางแบบเก่า และยังไม่ได้สู้ในซีซั่นใหม่ → ตั้ง 1000
     //  คนที่ยังไม่ถูกรี applySeasonReset จะตั้ง 1000 ให้เองตอนเปิดเว็บ · คนที่สู้ไปแล้วไม่แตะ (กันลบผลไฟต์)
     const nowSeason = currentSeasonId()
+    const resetTower = towerResetsAfter(season)
     for (const d of spUserDocs) {
       const pvp = d.data().pvp
       const fixPvp = pvp?.seasonId === nowSeason && !((pvp.wins || 0) + (pvp.losses || 0)) && pvp.rating !== PVP_RATING_START
-      ops.push((bt) => bt.set(d.ref, { towerFloor: 1, towerBest: 0, towerClaims: [], ...(fixPvp ? { pvp: { rating: PVP_RATING_START } } : {}) }, { merge: true }))
+      const patch = { ...(resetTower ? { towerFloor: 1, towerBest: 0, towerClaims: [] } : {}), ...(fixPvp ? { pvp: { rating: PVP_RATING_START } } : {}) }
+      if (Object.keys(patch).length) ops.push((bt) => bt.set(d.ref, patch, { merge: true }))
     }
     for (let i = 0; i < ops.length; i += 450) {   // < 500 ops/batch ของ Firestore
       const batch = writeBatch(db)
@@ -781,7 +787,7 @@ async function paySeason() {
       const rosterRows = rs.data()?.rows || {}
       const hof = buildHof(season, p.rows, rosterRows)
       // ล้าง tb ในแถว roster ด้วย — ไม่งั้นอันดับหอคอยค้างเลขซีซั่นก่อนจนเจ้าตัวเปิดเว็บ (เกิดจริง 1 พ.ย. 2026)
-      const tbReset = Object.fromEntries(Object.keys(rosterRows).filter(k => rosterRows[k]?.tb).map(k => [`rows.${k}.tb`, 0]))
+      const tbReset = !resetTower ? {} : Object.fromEntries(Object.keys(rosterRows).filter(k => rosterRows[k]?.tb).map(k => [`rows.${k}.tb`, 0]))
       if (hof || Object.keys(tbReset).length) await updateDoc(doc(db, 'roster', 'current'), { ...tbReset, ...(hof ? { hof } : {}) })
       usage.track(1, 1)
     } catch (e) { console.error('[season hof]', e) }
@@ -1126,7 +1132,34 @@ async function resolveDoc(coll, id) {
     toast('ปิดรายการแล้ว', 'success')
   } catch (e) { console.error('[admin resolve]', e); toast('ลบไม่สำเร็จ', 'error') }
 }
-const fbCatLabel = (c) => ({ idea: '💡 ไอเดีย', bug: '🐞 ปัญหา', other: '📝 อื่นๆ' }[c] || '📝 อื่นๆ')
+const fbCatLabel = (c) => ({ idea: '💡 ไอเดีย', bug: '🐞 ปัญหา', other: '📝 อื่นๆ', coffee: '☕ เลี้ยงกาแฟ', 'coffee-msg': '☕ ข้อความถึงผู้ดูแล' }[c] || '📝 อื่นๆ')
+
+// ☕ อนุมัติเลี้ยงกาแฟ (27 พ.ย. 2026): แอดมินเทียบยอดเฉพาะตัว (เศษสตางค์) ในแอปธนาคารแล้วกด → จดหมายขอบคุณ + ชุดเบค (เฉพาะชิ้นที่ยังไม่มี)
+// doc id ตายตัว coffee-<feedbackId> กันกดซ้ำแล้วได้ 2 ฉบับ · ส่งแล้วลบรายการ feedback
+const coffeeBusy = ref(null)
+async function approveCoffee(f) {
+  if (coffeeBusy.value) return
+  coffeeBusy.value = f.id
+  try {
+    const u = await getDoc(doc(db, 'users', f.reporterUid))
+    const times = (u.data()?.coffeeCount || 0) + 1   // เลี้ยงซ้ำได้ · ครั้งแรกเท่านั้นที่แนบชุด (ชิ้นที่ยังไม่มี)
+    if (!(await confirm(`ยืนยันว่าเจอยอด ${f.amount} บาท ของ ${f.reporterName || 'ไม่ระบุ'} ในแอปธนาคารแล้ว?
+แจ้งเมื่อ ${fmtTs(f.ts)} · เลี้ยงครั้งที่ ${times}
+จะส่งจดหมายขอบคุณ${times === 1 ? ' (แนบชุดเบค)' : ''}`))) return
+    const owned = u.data()?.doll?.owned || []
+    const gift = BEK_GIFT_PARTS.filter(id => !owned.includes(id))
+    const body = gift.length
+      ? `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณมากๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ ตั้งใจจะดูแลเว็บให้ดีที่สุด มีของที่ระลึกเล็กๆ มาฝาก เป็นชุดเท่ๆ ใส่แล้วนั่งอ่านได้เหรียญเพิ่มนิดหน่อย กดรับแล้วไปใส่ได้ที่ห้องแต่งตัวเลย`
+      : `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณอีกครั้งจริงๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ`
+    await setDoc(doc(db, 'users', f.reporterUid, 'mail', `coffee-${f.id}`),
+      buildBroadcastMail({ title: '☕ ขอบคุณที่เลี้ยงกาแฟนะ', body, doll: gift, from: 'admin', kind: 'coffee' }, serverTimestamp()))
+    await updateDoc(doc(db, 'users', f.reporterUid), { coffeeCount: increment(1) })
+    await deleteDoc(doc(db, 'feedback', f.id))
+    feedback.value = feedback.value.filter(x => x.id !== f.id)
+    toast('ส่งจดหมายขอบคุณแล้ว', 'success')
+  } catch (e) { console.error('[coffee approve]', e); toast('ส่งไม่สำเร็จ', 'error') }
+  finally { coffeeBusy.value = null }
+}
 
 async function loadCheatLogs() {
   loadingLogs.value = true

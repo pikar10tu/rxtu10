@@ -53,10 +53,11 @@ export function cartFor(u, eq) {
   return { items, total: items.reduce((a, p) => a + p.price, 0) }
 }
 
-/** ซื้อทั้งชุดได้ไหม → { ok, reason: 'none'|'coins'|null, total } */
+/** ซื้อทั้งชุดได้ไหม → { ok, reason: 'none'|'limited'|'coins'|null, total } · limited = ของลิมิเต็ด ได้จากจดหมายเท่านั้น */
 export function canBuyCart(u, eq) {
   const { items, total } = cartFor(u, eq)
   if (!items.length) return { ok: false, reason: 'none', total: 0 }
+  if (items.some(p => p.limited)) return { ok: false, reason: 'limited', total }
   if ((u?.coins || 0) < total) return { ok: false, reason: 'coins', total }
   return { ok: true, reason: null, total }
 }

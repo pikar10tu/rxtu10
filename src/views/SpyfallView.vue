@@ -42,7 +42,7 @@
       <ul class="sfv-players">
         <li v-for="p in players" :key="p.uid">
           <Emoji :char="p.uid === room.meta?.hostUid ? '👑' : '🧑‍⚕️'" />
-          <span class="sfv-pname">{{ p.name }}<span v-if="p.uid === uid"> (คุณ)</span></span>
+          <span class="sfv-pname">{{ p.name }}<span v-if="p.uid === uid"> (คุณ)</span><span v-if="p.away" class="sfv-away"> · พักจอ</span></span>
           <span v-if="p.uid === room.meta?.hostUid" class="sfv-tag host">หัวห้อง</span>
           <span v-else class="sfv-tag" :class="p.ready ? 'ok' : 'wait'">{{ p.ready ? 'พร้อม' : 'ยังไม่พร้อม' }}</span>
           <button v-if="isHost && p.uid !== uid" class="sfv-kick" :class="{ armed: kickArm === p.uid }" @click="onKick(p.uid)">
@@ -265,6 +265,7 @@ watch(roomId, id => { if (id) stopRooms(); else listenRooms() })
 .sfv-players { list-style: none; padding: 0; margin: 0; }
 .sfv-players li { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px dashed rgba(0,0,0,.08); font-weight: 600; }
 .sfv-pname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sfv-away { color: var(--muted); font-size: .74rem; }
 .sfv-kick { border: 1px solid var(--accent); color: var(--accent); background: #fff; border-radius: 8px; padding: 3px 9px; font-size: .75rem; font-weight: 700; cursor: pointer; }
 .sfv-kick.armed { background: var(--accent); color: #fff; }
 .sfv-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }

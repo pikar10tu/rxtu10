@@ -85,6 +85,7 @@
               <span class="dv-nm">{{ p.label }}</span>
               <span v-if="mine.eq[p.slot] === p.id" class="dv-st on">ใส่อยู่</span>
               <span v-else-if="has(p.id)" class="dv-st">มีแล้ว</span>
+              <span v-else-if="p.limited" class="dv-st lim">ลิมิเต็ด</span>
               <span v-else class="dv-price"><Emoji char="🪙" /> {{ fmt(p.price) }}</span>
             </button>
           </div>
@@ -97,7 +98,8 @@
     <div v-if="changed && group !== 'card'" class="dv-dock">
       <button class="dv-btn ghost" :disabled="busy" @click="reset">ย้อนกลับ</button>
       <button v-if="cart.items.length" class="dv-btn" :disabled="busy || !buy.ok" @click="doBuy">
-        <template v-if="buy.reason === 'coins'">เหรียญไม่พอ (ขาด {{ (cart.total - coins).toLocaleString() }})</template>
+        <template v-if="buy.reason === 'limited'">มีของลิมิเต็ด ซื้อไม่ได้ (ลองใส่ได้)</template>
+        <template v-else-if="buy.reason === 'coins'">เหรียญไม่พอ (ขาด {{ (cart.total - coins).toLocaleString() }})</template>
         <template v-else>ซื้อ {{ cart.items.length }} ชิ้นแล้วใส่ · <Emoji char="🪙" /> {{ cart.total.toLocaleString() }}</template>
       </button>
       <button v-else class="dv-btn" :disabled="busy" @click="doEquip">ใส่ชุดนี้</button>
@@ -303,6 +305,7 @@ async function doEquip() {
 .dv-bd.au { right: 3px; background: #fff4d6; }
 .dv-none { height: 96px; display: grid; place-items: center; font-size: .78rem; font-weight: 700; color: var(--muted); }
 .dv-nm { font-size: .7rem; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
+.dv-st.lim { color: #c0457a; }
 .dv-price { font-size: .72rem; font-weight: 800; color: #b7791f; font-variant-numeric: tabular-nums; }
 .dv-st { font-size: .7rem; font-weight: 800; color: var(--muted); }
 .dv-st.on { color: var(--primary-dark); }

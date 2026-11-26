@@ -4,13 +4,16 @@
 <template>
   <RouterLink v-if="show" to="/focus" class="fp" aria-label="กลับ Co-working space">
     <span class="fp-dot" aria-hidden="true"></span>
-    🎯 {{ fmtClock(fm.state.secs) }}
-    <small v-if="!fm.capFull.value">+{{ house }}/วิ</small>
+    <Emoji char="🎯" /> {{ fmtClock(fm.state.secs) }}
+    <small v-if="!fm.capFull.value">+{{ rate }}/วิ</small>
     <small v-if="audio.track >= 0">♪</small>
   </RouterLink>
 </template>
 
 <script setup>
+import Emoji from '../shared/Emoji.vue'
+import { examFestMulti } from '../../utils/examFest.js'
+import { focusBonus } from '../../utils/supporter.js'
 import { computed, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
@@ -23,6 +26,7 @@ import { freeSeat, seatFoot } from '../../utils/focusLayout.js'
 const route = useRoute()
 const auth = useAuthStore()
 const house = computed(() => auth.userData?.residence?.level || 1)
+const rate = computed(() => (house.value + focusBonus(auth.userData)) * examFestMulti())   // 📚 ×2 · ☕ ชุดเบค +5
 const fm = useFocusMode(() => house.value)
 const show = computed(() => fm.state.active && route.name !== 'focus')
 watch(() => route.name, (n) => fm.setOnQuiz(['quiz', 'daily', 'timeAttack'].includes(n)), { immediate: true })

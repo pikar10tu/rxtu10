@@ -2,7 +2,7 @@
 //  useSpyfall — ห้อง Pharm Spyfall บน RTDB (โครงเดียวกับ usePharmaTeam)
 //    spyfall/rooms/{room}
 //      meta     { hostUid, hostName, createdAt, mode, minutes }   ← หัวห้องตั้งค่า
-//      players  { [uid]: { name, joinedAt, ready } }               ← onDisconnect ลบตัวเอง
+//      players  { [uid]: { name, joinedAt, ready, off? } }         ← หลุดเน็ต/ล็อกจอ = ติด off (เวลา) · เกิน OFF_GRACE_MS ใครในห้องก็ลบได้
 //      banned   { [uid]: true }                                     ← หัวห้องเตะ = กลับเข้าห้องนี้ไม่ได้ (rules บังคับ)
 //      state    { status: play|vote|end, round, mode, options[], roster{uid:name}, starterUid, endsAt, stoppedBy, result }
 //               ← หัวห้องเขียนคนเดียว · ไม่มี state = อยู่ล็อบบี้
@@ -26,6 +26,10 @@ const ROOT = 'spyfall/rooms'
 const SECRETS = 'spyfall/secrets'
 const DEALER = 'spyfall/dealer'
 const TICK_MS = 500
+// 📴 ล็อกจอคุยกันต่อหน้า (27 พ.ย. user เทสแล้วหลุดห้องฉ่ำ) → ไม่ลบทันที เผื่อ 6 นาทีค่อยหลุดห้อง
+// ⚠️ ต้องตรงกับ database.rules.json (spyfall players: off < now - 360000)
+export const OFF_GRACE_MS = 6 * 60 * 1000
+const SWEEP_MS = 20000
 
 let _db = null
 const rtdb = () => (_db ||= getDatabase(app))
@@ -81,7 +85,7 @@ export function useSpyfall() {
     .sort((a, b) => b.createdAt - a.createdAt))
 
   // ── เข้า/ออกห้อง ──
-  let roomRef = null, myPlayerRef = null, secretRef = null
+  let roomRef = null, myPlayerRef = null, secretRef = null, connRef = null
   function subscribeRoom(id) {
     roomId.value = id
     kicked.value = false
@@ -97,7 +101,31 @@ export function useSpyfall() {
     secretRef = dbRef(rtdb(), `${SECRETS}/${id}/${uid.value}`)
     onValue(secretRef, s => { secret.value = s.val() }, () => { secret.value = null })
     myPlayerRef = dbRef(rtdb(), `${ROOT}/${id}/players/${uid.value}`)
-    onDisconnect(myPlayerRef).remove()
+    // หลุด = ติดเวลา off ไว้ (ไม่ลบ) · ต่อเน็ตกลับมา = ล้าง off แล้วตั้งใหม่ (onDisconnect ใช้ได้ครั้งเดียวต่อการเชื่อมต่อ)
+    connRef = dbRef(rtdb(), '.info/connected')
+    onValue(connRef, c => {
+      if (!c.val() || !myPlayerRef) return
+      const me = myPlayerRef
+      // ยังอยู่ในห้อง (หรือเพิ่งเข้า room ยังไม่โหลด) เท่านั้น — ถูกกวาดออกไปแล้วไม่สร้างแถวผีกลับ
+      if (room.value && !room.value.players?.[uid.value]) return
+      update(me, { off: null }).catch(() => {})
+      onDisconnect(dbRef(rtdb(), `${ROOT}/${id}/players/${uid.value}/off`)).set(serverTimestamp())
+    })
+    startSweep()
+  }
+
+  // 🧹 ลบคนที่หลุดเกิน OFF_GRACE_MS (ทุกคนในห้องช่วยกวาด · rules อนุญาตเฉพาะคนที่ off นานพอ)
+  let sweepTimer = null
+  function startSweep() {
+    if (sweepTimer) return
+    sweepTimer = setInterval(() => {
+      const ps = room.value?.players || {}
+      for (const [id, p] of Object.entries(ps)) {
+        if (id !== uid.value && typeof p.off === 'number' && now() - p.off > OFF_GRACE_MS + 5000) {
+          remove(dbRef(rtdb(), roomPath(`/players/${id}`))).catch(() => {})
+        }
+      }
+    }, SWEEP_MS)
   }
 
   async function createRoom() {
@@ -129,8 +157,10 @@ export function useSpyfall() {
     stopHost()
     if (roomRef) off(roomRef)
     if (secretRef) off(secretRef)
-    if (myPlayerRef) onDisconnect(myPlayerRef).cancel().catch(() => {})
-    roomRef = null; myPlayerRef = null; secretRef = null
+    if (myPlayerRef) onDisconnect(dbRef(rtdb(), `${ROOT}/${roomId.value}/players/${uid.value}/off`)).cancel().catch(() => {})
+    if (connRef) off(connRef)
+    clearInterval(sweepTimer); sweepTimer = null
+    roomRef = null; myPlayerRef = null; secretRef = null; connRef = null
     room.value = null; roomId.value = null; secret.value = null
   }
 
@@ -146,7 +176,7 @@ export function useSpyfall() {
   const isHost = computed(() => !!room.value && room.value.meta?.hostUid === uid.value)
   const players = computed(() => Object.entries(room.value?.players || {})
     .sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0))
-    .map(([id, p]) => ({ uid: id, name: p.name, ready: !!p.ready })))
+    .map(([id, p]) => ({ uid: id, name: p.name, ready: !!p.ready, away: typeof p.off === 'number' })))
   const othersReady = computed(() => players.value.filter(p => p.uid !== room.value?.meta?.hostUid).every(p => p.ready))
   const minPlayers = computed(() => auth.isAdmin ? 1 : MIN_PLAYERS)   // แอดมินเทสคนเดียวได้
   const canStart = computed(() => isHost.value && players.value.length >= minPlayers.value && othersReady.value)

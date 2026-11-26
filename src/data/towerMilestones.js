@@ -4,6 +4,11 @@
 // เริ่มซีซั่น ต.ค. 2026 (user สั่ง 30 ก.ย. "ซีซั่นนี้ไม่อยากแจกอะไรเพิ่ม")
 export const MILESTONE_START = '2026-10'
 
+// 🏯 ซีซั่นที่แจกรางวัลแล้ว "ไม่รีเซตหอคอย" (ชั้น/towerBest/towerClaims คงเดิม ไต่ต่อซีซั่นถัดไป)
+// user สั่ง 26 พ.ย. 2026: ธ.ค. สอบ PLE → แจก พ.ย. ตามปกติ แต่ไม่รีหอคอย · รีแค่อารีน่า · รางวัลขั้นไม่ล้าง (กันรับซ้ำ)
+export const TOWER_NO_RESET_SEASONS = ['2026-11']
+export const towerResetsAfter = (season) => !TOWER_NO_RESET_SEASONS.includes(season)
+
 /** '2026-10' → '2026-09' */
 export function prevSeasonId(season) {
   const [y, m] = season.split('-').map(Number)

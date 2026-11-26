@@ -4,7 +4,7 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, runTran
 import { db } from '../firebase/config.js'
 import { useAuthStore } from './auth.js'
 import { useUsageStore } from './usage.js'
-import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardAntiLoss, rewardArena, isSeasonMail } from '../utils/mailbox.js'
+import { attentionCount, canClaim, canDelete, rewardCoins, rewardTickets, rewardAntiLoss, rewardArena, rewardDoll, isSeasonMail } from '../utils/mailbox.js'
 import { getArena } from '../data/arenas.js'
 import { announceAchievement, addEarned } from '../composables/useAchievements.js'
 import { achievementDocId } from '../utils/achievements.js'
@@ -69,6 +69,7 @@ export const useMailbox = defineStore('mailbox', () => {
         const al = rewardAntiLoss(data)
         const ach = data.reward?.achievement || null
         const arena = rewardArena(data)
+        const doll = rewardDoll(data)
         tx.update(ref, { claimed: true, read: true })
         const userPatch = {}
         // lastMailClaim: rules ใช้ยืนยันว่าเหรียญก้อนใหญ่ (>2 ล้าน) มาจากจดหมายฉบับนี้จริง (firestore.rules coinGainOk)
@@ -85,17 +86,19 @@ export const useMailbox = defineStore('mailbox', () => {
           userPatch['arenas.owned'] = arrayUnion(arena.id)
           userPatch[`arenas.champ.${getArena(arena.id).season}`] = arena.rank
         }
+        // 🧍 ชิ้นอวาตาร์ → เข้าตู้ (ไม่ใส่ให้เอง)
+        if (doll.length) userPatch['doll.owned'] = arrayUnion(...doll)
         if (ach?.id === 'tower_champ') userPatch.towerChampTotal = increment(1)
         if (ach?.id === 'arena_champ') userPatch.arenaChampTotal = increment(1)
         // จดหมายรางวัลแจ้งข้อผิด (kind ใหม่ · ของเก่าดูจากหัวข้อ)
         if (data.kind === 'report' || data.title === 'รางวัลแจ้งข้อสอบผิด') userPatch.reportsConfirmed = increment(1)
         if (Object.keys(userPatch).length) tx.update(doc(db, 'users', uid), userPatch)
-        return { coins: c, tickets: t, ach, arena, antiLoss: al }
+        return { coins: c, tickets: t, ach, arena, antiLoss: al, doll }
       })
       usage.track(0, 1)
-      if (result.coins > 0 || result.tickets > 0 || result.antiLoss > 0 || result.ach || result.arena) { m.claimed = true; m.read = true } // optimistic local (coins/tickets อัปเดตผ่าน auth onSnapshot)
+      if (result.coins > 0 || result.tickets > 0 || result.antiLoss > 0 || result.ach || result.arena || result.doll?.length) { m.claimed = true; m.read = true } // optimistic local (coins/tickets อัปเดตผ่าน auth onSnapshot)
       if (result.ach) { addEarned(result.ach.id); await announceAchievement(result.ach.id, result.ach.date || null) }
-      return { coins: result.coins, tickets: result.tickets, arena: result.arena, antiLoss: result.antiLoss }
+      return { coins: result.coins, tickets: result.tickets, arena: result.arena, antiLoss: result.antiLoss, doll: result.doll }
     } catch (e) { console.error('[mail claim]', e); return false }
   }
 

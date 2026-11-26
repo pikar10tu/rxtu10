@@ -20,8 +20,9 @@ export const AURA_TYPES = {
   apples: 'แอปเปิ้ลลอย',
   wind: 'ลมพัด',
   foxfire: 'ไฟจิ้งจอก',
+  rainbow: 'สาดสีรุ้ง',
 }
-export const BODY_AURAS = ['glow', 'ring']
+export const BODY_AURAS = ['glow', 'ring', 'rainbow']
 
 // ตำแหน่ง (% ของกรอบ) + ดีเลย์ (วินาที) ของอนุภาคแต่ละแบบ — กระจายรอบตัว ไม่ทับหน้า
 const LAYOUT = {
@@ -42,18 +43,31 @@ const LAYOUT = {
   foxfire: [[8, 36, 0], [88, 30, 1.1], [14, 62, 2.2], [84, 58, 0.6], [4, 48, 1.7], [92, 46, 2.8]],
   wind: [[2, 40, 0], [62, 30, 0.8], [8, 64, 1.6], [60, 56, 0.4], [30, 20, 1.2]],
   // ชนิดพ่วง
+  // 🎨 สาดสีรุ้ง (ชุดเบค 27 พ.ย.) หยดสีกระเด็นออกจากตัวรอบทิศ · สีวนรุ้งตามลำดับ (ไม่ใช้ --au ของชิ้น)
+  splash: [[20, 30, 0], [80, 26, 0.4], [12, 56, 0.8], [88, 52, 1.2], [26, 80, 1.6], [74, 82, 2.0], [50, 10, 2.4], [8, 38, 2.8], [92, 70, 3.2]],
   ember: [[38, 86, 0], [56, 84, 0.8], [46, 88, 1.6], [62, 86, 0.4]],
   pillar: [[24, 88, 0], [74, 88, 0.7], [36, 92, 1.4], [64, 92, 0.35], [50, 94, 1.1]],
   mote: [[30, 40, 0], [66, 36, 0.85], [22, 62, 1.7], [74, 60, 2.5], [48, 24, 1.2]],
 }
-const EXTRA = { flame: 'ember', ring: 'pillar', glow: 'mote' }
+const EXTRA = { flame: 'ember', ring: 'pillar', glow: 'mote', rainbow: 'splash' }
+export const RAINBOW = ['#FF5A5F', '#FF9F43', '#FFD93D', '#4CD18A', '#4DA8F0', '#9B6BD9']
 
 /** แยกออร่าเป็นชั้นให้ตัววาด: glows (สีเรือง) · rings (สีวงใต้เท้า) · floors (สีแสงพื้น) · particles (อนุภาคพร้อมตำแหน่ง) */
 export function auraLayers(auras = []) {
-  const glows = auras.filter(a => a.type === 'glow').map(a => a.color)
-  const rings = auras.filter(a => a.type === 'ring').map(a => a.color)
-  const floors = auras.filter(a => a.type === 'flame' || a.type === 'ring').map(a => a.color)
-  const list = [...auras, ...auras.filter(a => EXTRA[a.type]).map(a => ({ type: EXTRA[a.type], color: a.color }))]
+  // 27 พ.ย. (user): ออร่าซ้ำ = อันเดียว · ต่างกัน = โชว์ร่วมกันได้สวยๆ
+  //  ซ้ำ = ชนิด+สีเดียวกัน (สาดสีรุ้งนับชนิดเดียวพอ เพราะไม่ใช้สีของชิ้น) · ลำดับเดิม (แพงสุดก่อน) จึงเก็บอันแพงไว้
+  const keyOf = a => (a.type === 'rainbow' ? 'rainbow' : `${a.type}|${String(a.color).toUpperCase()}`)
+  const seenKey = new Set()
+  const uniq = auras.filter(a => { const k = keyOf(a); if (seenKey.has(k)) return false; seenKey.add(k); return true })
+  // เลเยอร์ (หลัง → หน้า): สาดสีรุ้ง (กว้างสุด) → วงเรือง → แสงพื้น/วงใต้เท้า → ตัวละคร → อนุภาค
+  const glows = [...new Set(uniq.filter(a => a.type === 'glow').map(a => a.color))]
+  const rings = uniq.filter(a => a.type === 'ring').map(a => a.color)
+  const rainbow = uniq.some(a => a.type === 'rainbow')
+  const floors = uniq.filter(a => a.type === 'flame' || a.type === 'ring').map(a => a.color)
+  // อนุภาค: ไม่เกิน 3 แหล่ง (แพงสุดก่อน) กันรกและแลคตอนใส่หลายชิ้น · ชนิดพ่วงตามแหล่งที่ได้โชว์เท่านั้น
+  const PART_SRC_MAX = 3
+  const srcs = uniq.filter(a => LAYOUT[a.type] || EXTRA[a.type]).slice(0, PART_SRC_MAX)
+  const list = [...srcs, ...srcs.filter(a => EXTRA[a.type]).map(a => ({ type: EXTRA[a.type], color: a.color }))]
   const particles = []
   const seen = {}
   for (const a of list) {
@@ -64,7 +78,7 @@ export function auraLayers(auras = []) {
       if (i % 3 === 2) return   // 22 พ.ย. user: ลดอนุภาคเหลือ ~2/3 กันแลคตอนคนเยอะ (ตำแหน่งยังกระจายครบรอบตัว)
       const [x2, y2] = pts[(i + n * 2) % pts.length]
       particles.push({
-        type: a.type, color: a.color,
+        type: a.type, color: a.type === 'splash' ? RAINBOW[i % RAINBOW.length] : a.color,
         left: n ? (x + x2) / 2 + 3 * n : x,
         top: n ? (y + y2) / 2 : y,
         delay: d + n * 0.6,
@@ -72,5 +86,5 @@ export function auraLayers(auras = []) {
       })
     })
   }
-  return { glows, rings, floors: [...new Set(floors)], particles }
+  return { glows, rings, rainbow, floors: [...new Set(floors)], particles }
 }

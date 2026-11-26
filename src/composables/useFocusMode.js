@@ -14,6 +14,8 @@ import { reactive, computed } from 'vue'
 import { increment, serverTimestamp } from 'firebase/firestore'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { useAuthStore } from '../stores/auth.js'
+import { examFestMulti } from '../utils/examFest.js'
+import { focusBonus } from '../utils/supporter.js'
 
 export const COIN_CAP_SECS = 2 * 60 * 60   // กระปุกเต็มที่ 2 ชม.
 const FLUSH_EVERY = 60
@@ -47,6 +49,8 @@ const state = reactive({
 const pending = { secs: 0 }
 let timer = null, sinceFlush = 0, synced = false
 let houseLevel = () => 1
+// เหรียญต่อวินาที = เลเวลบ้าน + บัฟชุดเบค (+5) แล้วคูณเทศกาลสอบ
+const perSec = () => (Math.max(1, Math.round(houseLevel())) + focusBonus(useAuthStore().userData)) * examFestMulti()
 
 function persist() {
   save('sessionStorage', SKEY, { active: state.active, zone: state.zone, secs: state.secs })
@@ -101,7 +105,7 @@ function tick() {
   pending.secs += 1
   if (state.bank.secs < COIN_CAP_SECS) {
     state.bank.secs += 1
-    state.lastGain = Math.max(1, Math.round(houseLevel()))
+    state.lastGain = perSec()
     state.pops++
   }
   if (++sinceFlush >= FLUSH_EVERY) flush()
@@ -117,7 +121,7 @@ async function claim() {
   const real = last ? Math.max(0, Math.floor((now - last) / 1000)) : COIN_CAP_SECS
   const secs = Math.min(Math.floor(state.bank.secs), real, COIN_CAP_SECS)
   if (secs <= 0) return 0
-  const coins = secs * Math.max(1, Math.round(houseLevel()))
+  const coins = secs * perSec()   // 📚 เทศกาลสอบ ×2 + ☕ บัฟชุดเบค
   state.claiming = true
   const ps = pending.secs; pending.secs = 0; sinceFlush = 0
   const fb = { secs: 0, c: now }
@@ -149,7 +153,7 @@ export function useFocusMode(getHouseLevel) {
     state,
     capFull: computed(() => state.bank.secs >= COIN_CAP_SECS),
     capPct: computed(() => Math.min(1, state.bank.secs / COIN_CAP_SECS)),
-    bankCoins: computed(() => Math.floor(state.bank.secs) * Math.max(1, Math.round(houseLevel()))),
+    bankCoins: computed(() => Math.floor(state.bank.secs) * perSec()),
     claim,
     status: computed(() => (state.onQuiz ? 'quiz' : state.saver ? 'deep' : state.idle ? 'afk' : state.onGame ? 'game' : 'here')),
     enter(zone) { if (zone) state.zone = zone; if (!state.active) { state.active = true; state.secs = 0 } persist(); ensureTimer() },
