@@ -26,6 +26,7 @@
           <label class="cf-lbl" for="cf-baht">โอนไปเท่าไหร่ (บาท)</label>
           <input id="cf-baht" v-model.trim="baht" class="cf-in" type="text" inputmode="decimal" placeholder="ยอดที่โอน" />
           <p class="cf-note">เติมเศษสตางค์ที่ไม่ซ้ำใคร (เช่น xx.67) จะช่วยให้หายอดเจอไวขึ้น ยอดเท่าไหร่ก็ได้ ไม่มีขั้นต่ำ</p>
+          <p class="cf-note">เช็คยอดแล้วจะมีของตอบแทนเล็กๆ น้อยๆ ส่งไปในจดหมายขอบคุณด้วยนะ 🎁</p>
         </template>
         <label class="cf-lbl" for="cf-msg">ข้อความถึงผู้พัฒนา / เสนอฟีเจอร์{{ step === 'pay' ? ' (ไม่บังคับ)' : '' }}</label>
         <textarea id="cf-msg" v-model="msg" class="cf-in" rows="3" :maxlength="LIMITS.feedback" placeholder="อยากได้โหมด... / ขอบคุณที่ทำเว็บ..."></textarea>

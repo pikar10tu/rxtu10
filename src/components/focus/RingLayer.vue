@@ -3,7 +3,7 @@
      ทุกเครื่องเล่นอนิเมชันเองจาก useRing.state (คนดูเห็นเหมือนกัน) · มือเหนือหัว/ตัวขาว/ล้ม → ringFx (FocusView วาดบนอวาตาร์)
      ผลแพ้ชนะ → แชตห้อง + กระดาน (คนปิดไฟต์คนเดียวเขียน) · ไม่มีเหรียญรางวัล (กันฟาร์ม) -->
 <template>
-  <div class="rg" :class="{ dim: fighting }">
+  <div class="rg" :class="{ dim: fighting, top: picking }">
     <!-- สกอร์ -->
     <template v-if="m && m.b">
       <div class="rg-sc r"><b>{{ m.r?.name || '—' }}</b><i v-for="n in WIN_ROUNDS" :key="n" :class="{ on: n <= shownScore.r }"></i></div>
@@ -248,6 +248,7 @@ onBeforeUnmount(() => { clearRingFx(); clearTimeout(waitDownT); clearTimeout(pic
 
 <style scoped>
 .rg { position: absolute; inset: 0; pointer-events: none; z-index: 900; }
+.rg.top { z-index: 2100; }   /* 27 พ.ย. user: ตอนเลือกมือโดนแชตบัง → ยกทั้งชั้นขึ้นเหนือแชต (2000) */
 .rg.dim::before { content: ""; position: absolute; inset: 0; background: rgba(20,14,30,.28); }
 .rg button, .rg-panel, .rg-bar { pointer-events: auto; }
 .rg-sc { position: absolute; top: 2.5cqw; display: flex; gap: .9cqw; align-items: center; background: rgba(42,34,56,.78); color: #fff; border-radius: 99px; padding: .6cqw 1.6cqw; font-size: max(.7rem, 2.4cqw); }

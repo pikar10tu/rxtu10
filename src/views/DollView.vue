@@ -124,6 +124,7 @@ import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import { useRosterSync } from '../composables/useRosterSync.js'
 import { sfx } from '../utils/sfx.js'
+import { BEK_BUFF_PARTS, BEK_FOCUS_BONUS } from '../utils/supporter.js'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -179,7 +180,11 @@ const sections = computed(() => {
   return [{ title: null, list: sortParts(list) }]
 })
 
-function pick(slot, id) { trying.value = tryOn(trying.value, slot, id) }
+// ☕ ชุดเบค: คนที่มีแล้วกดชิ้นที่มีบัฟ → บอกบัฟ (คนไม่มีไม่เห็น · 27 พ.ย.)
+function pick(slot, id) {
+  trying.value = tryOn(trying.value, slot, id)
+  if (id && BEK_BUFF_PARTS.includes(id) && has(id)) toast(`☕ ใส่ชิ้นนี้อยู่ใน Co-working space ได้เหรียญเพิ่ม +${BEK_FOCUS_BONUS}/วิ`)
+}
 function reset() { trying.value = { ...mine.value.eq } }
 function stripAll() { trying.value = { ...DEFAULT_EQ, s: trying.value.s, c: trying.value.c } }   // คงสีผิว/สีผมไว้
 function randomize() {
