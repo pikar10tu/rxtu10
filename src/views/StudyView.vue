@@ -90,12 +90,12 @@
           <span class="sv-feat-go">เริ่มเลย ›</span>
         </RouterLink>
         <div class="sv-modes">
-          <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
-          <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
+          <QuizModeCard emoji="📝" title="ทั่วไป" :badge="X2" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
+          <QuizModeCard emoji="♾️" title="Zen" :badge="X2" subtitle="ทำเรื่อยๆ ไม่จำกัด ฝึกจนพอใจ" to="/quiz?mode=zen" />
           <!-- 🔖 ข้อที่บันทึกไว้ (user 20 พ.ย. 2026: ใต้ Zen เหนือข้อที่ผิด) -->
-          <QuizModeCard emoji="🔖" title="ข้อที่บันทึกไว้" :subtitle="savedN ? `${savedN} ข้อ · ทำทวนข้อที่กดบันทึกไว้` : 'กด 🔖 ระหว่างทำข้อสอบเพื่อเก็บข้อไว้ทวน'" to="/quiz?mode=saved" />
-          <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
-          <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
+          <QuizModeCard emoji="🔖" title="ข้อที่บันทึกไว้" :badge="X2" :subtitle="savedN ? `${savedN} ข้อ · ทำทวนข้อที่กดบันทึกไว้` : 'กด 🔖 ระหว่างทำข้อสอบเพื่อเก็บข้อไว้ทวน'" to="/quiz?mode=saved" />
+          <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :badge="X2" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
+          <QuizModeCard emoji="⏱️" title="Time Attack" :badge="X2" subtitle="แข่งกับเวลา 4 / 15 นาที · มีอันดับในรุ่น" to="/study/time-attack" />
         </div>
 
         <!-- ทางเข้าจัดการคลังข้อสอบ — เฉพาะทีมวิชาการ -->
@@ -298,6 +298,7 @@ const authStore = useAuthStore()
 const { toast } = useToast()
 
 import { examFestMulti } from '../utils/examFest.js'
+const X2 = examFestMulti() > 1 ? 'เหรียญ ×2' : ''   // 📚 ป้ายหายเองหลัง 31 ธ.ค.
 const DECK = DRUGS
 const NEW_PER_SESSION = 5
 const MATURE_DAYS = 21

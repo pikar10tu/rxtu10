@@ -24,8 +24,8 @@
             <div class="cf-row"><span class="cf-k">ชื่อบัญชี</span><span>{{ PROMPTPAY_NAME }}</span></div>
           </div>
           <label class="cf-lbl" for="cf-baht">โอนไปเท่าไหร่ (บาท)</label>
-          <input id="cf-baht" v-model.trim="baht" class="cf-in" type="text" inputmode="decimal" placeholder="เช่น 50.67" />
-          <p class="cf-note">ใส่เศษสตางค์ที่ไม่ซ้ำใคร (เช่น 50.67) จะช่วยให้หายอดเจอไวขึ้น ยอดเท่าไหร่ก็ได้ ไม่มีขั้นต่ำ</p>
+          <input id="cf-baht" v-model.trim="baht" class="cf-in" type="text" inputmode="decimal" placeholder="ยอดที่โอน" />
+          <p class="cf-note">เติมเศษสตางค์ที่ไม่ซ้ำใคร (เช่น xx.67) จะช่วยให้หายอดเจอไวขึ้น ยอดเท่าไหร่ก็ได้ ไม่มีขั้นต่ำ</p>
         </template>
         <label class="cf-lbl" for="cf-msg">ข้อความถึงผู้พัฒนา / เสนอฟีเจอร์{{ step === 'pay' ? ' (ไม่บังคับ)' : '' }}</label>
         <textarea id="cf-msg" v-model="msg" class="cf-in" rows="3" :maxlength="LIMITS.feedback" placeholder="อยากได้โหมด... / ขอบคุณที่ทำเว็บ..."></textarea>

@@ -3,7 +3,7 @@
     class="qmc" :class="{ soon: comingSoon }" :aria-disabled="comingSoon ? 'true' : undefined">
     <span class="qmc-emoji"><Emoji :char="emoji" /></span>
     <span class="qmc-text">
-      <b>{{ title }}</b>
+      <b>{{ title }}<span v-if="badge" class="qmc-badge">{{ badge }}</span></b>
       <small>{{ subtitle }}</small>
     </span>
     <span v-if="comingSoon" class="qmc-soon">เร็วๆ นี้</span>
@@ -19,6 +19,7 @@ defineProps({
   subtitle:   { type: String, default: '' },
   to:         { type: String, default: null },
   comingSoon: { type: Boolean, default: false },
+  badge:      { type: String, default: '' },   // ป้ายเล็กท้ายชื่อ เช่น เทศกาลสอบ ×2
 })
 </script>
 
@@ -34,4 +35,5 @@ defineProps({
 .qmc.soon .qmc-text small { color: #64748b; }
 .qmc-go { font-size: 1.4rem; color: var(--primary-2); flex-shrink: 0; }
 .qmc-soon { font-size: .7rem; font-weight: 800; color: #fff; background: #94a3b8; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+.qmc-badge { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; font-size: .7rem; vertical-align: 1px; }
 </style>
