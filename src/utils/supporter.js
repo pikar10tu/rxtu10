@@ -6,6 +6,7 @@ import { dollOf } from './doll.js'
 export const BEK_BUFF_PARTS = ['t20', 'f64', 'x58']
 export const BEK_GIFT_PARTS = ['t20', 'f64', 'x58', 'w28']
 export const BEK_FOCUS_BONUS = 5
+export const COFFEE_COINS_PER_BAHT = 10000   // จดหมายขอบคุณแนบเหรียญ = ยอดโอน × 10,000 ทุกครั้ง (27 พ.ย. · ไม่ประกาศก่อนโอน กันดูเป็นการจูงใจ)
 
 /** โบนัสเหรียญโฟกัสต่อวินาทีจากชุดที่ใส่อยู่จริง (ต้องมีของ — dollOf กรองของที่ไม่มีออกแล้ว) */
 export function focusBonus(u) {

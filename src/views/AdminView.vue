@@ -577,7 +577,7 @@ function pleCatsDrifted(q) {
 import { distinctCategories } from '../utils/questionsFilter.js'
 import { useTopics } from '../composables/useTopics.js'
 import { towerResetsAfter } from '../data/towerMilestones.js'
-import { BEK_GIFT_PARTS } from '../utils/supporter.js'
+import { BEK_GIFT_PARTS, COFFEE_COINS_PER_BAHT } from '../utils/supporter.js'
 
 const authStore = useAuthStore()
 const members   = useMembersStore()
@@ -1143,16 +1143,17 @@ async function approveCoffee(f) {
   try {
     const u = await getDoc(doc(db, 'users', f.reporterUid))
     const times = (u.data()?.coffeeCount || 0) + 1   // เลี้ยงซ้ำได้ · ครั้งแรกเท่านั้นที่แนบชุด (ชิ้นที่ยังไม่มี)
+    const coins = Math.round((Number(f.amount) || 0) * COFFEE_COINS_PER_BAHT)   // 27 พ.ย. user: ทุกครั้ง (ครั้งแรก+ซ้ำ) 10,000/บาท · ไม่ประกาศก่อนโอน
     if (!(await confirm(`ยืนยันว่าเจอยอด ${f.amount} บาท ของ ${f.reporterName || 'ไม่ระบุ'} ในแอปธนาคารแล้ว?
 แจ้งเมื่อ ${fmtTs(f.ts)} · เลี้ยงครั้งที่ ${times}
-จะส่งจดหมายขอบคุณ${times === 1 ? ' (แนบชุดเบค)' : ''}`))) return
+จะส่งจดหมายขอบคุณ + ${coins.toLocaleString()} เหรียญ${times === 1 ? ' + ชุดเบค' : ''}`))) return
     const owned = u.data()?.doll?.owned || []
     const gift = BEK_GIFT_PARTS.filter(id => !owned.includes(id))
     const body = gift.length
-      ? `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณมากๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ ตั้งใจจะดูแลเว็บให้ดีที่สุด มีของที่ระลึกเล็กๆ มาฝาก เป็นชุดเท่ๆ ใส่แล้วนั่งอ่านได้เหรียญเพิ่มนิดหน่อย กดรับแล้วไปใส่ได้ที่ห้องแต่งตัวเลย`
-      : `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณอีกครั้งจริงๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ`
+      ? `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณมากๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ ตั้งใจจะดูแลเว็บให้ดีที่สุด มีของที่ระลึกเล็กๆ มาฝาก เป็นเหรียญกับชุดเท่ๆ ใส่แล้วนั่งอ่านได้เหรียญเพิ่มนิดหน่อย กดรับแล้วไปใส่ได้ที่ห้องแต่งตัวเลย`
+      : `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณอีกครั้งจริงๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ มีเหรียญเล็กๆ น้อยๆ แนบมาให้ กดรับได้เลย`
     await setDoc(doc(db, 'users', f.reporterUid, 'mail', `coffee-${f.id}`),
-      buildBroadcastMail({ title: '☕ ขอบคุณที่เลี้ยงกาแฟนะ', body, doll: gift, from: 'admin', kind: 'coffee' }, serverTimestamp()))
+      buildBroadcastMail({ title: '☕ ขอบคุณที่เลี้ยงกาแฟนะ', body, coins, doll: gift, from: 'admin', kind: 'coffee' }, serverTimestamp()))
     await updateDoc(doc(db, 'users', f.reporterUid), { coffeeCount: increment(1) })
     await deleteDoc(doc(db, 'feedback', f.id))
     feedback.value = feedback.value.filter(x => x.id !== f.id)
