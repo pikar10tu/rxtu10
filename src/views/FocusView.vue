@@ -646,9 +646,10 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .tod-night .fo-desk img { filter: brightness(.6) saturate(.8); }
 .fo-scene { container-type: inline-size; position: relative; width: 100%; aspect-ratio: 160 / 100; border-radius: 14px; overflow: hidden; cursor: pointer; background: #222; box-shadow: var(--shadow-md); }
 .fo-bg, .fo-ent img { image-rendering: pixelated; user-select: none; }
-.fo-coffee { position: absolute; left: 40%; top: 12%; width: 20%; height: 30%; z-index: 3; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 8px; }
+.fo-coffee { position: absolute; left: 44%; top: 16%; width: 12%; height: 18%; z-index: 3; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 8px; }
 .fo-coffee span { position: absolute; left: 50%; top: -2px; transform: translateX(-50%); display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: var(--pop); font-size: .9rem; animation: foCoffee 1.8s ease-in-out infinite; }
-.fo-coffee:hover, .fo-coffee:focus-visible { background: rgba(255,255,255,.14); outline: 2px solid rgba(255,255,255,.7); }
+.fo-coffee:focus { outline: none; }   /* 27 พ.ย. user: กรอบสี่เหลี่ยมใหญ่เกิน → ไม่ไฮไลต์ทั้งพื้นที่ ขยายถ้วยแทน */
+.fo-coffee:hover span, .fo-coffee:focus-visible span { box-shadow: var(--pop), 0 0 0 2px #fff, 0 0 0 4px #8a5a3b; }
 @keyframes foCoffee { 50% { transform: translate(-50%, -4px); } }
 .fo-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fo-ent { position: absolute; transform: translate(-50%, -100%); pointer-events: none; display: flex; flex-direction: column; align-items: center; }
