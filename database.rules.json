@@ -234,7 +234,31 @@
         ".read": "auth != null",
         "$uid": {
           ".write": "auth != null && auth.uid === $uid",
-          ".validate": "!newData.exists() || (newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('zone').isString() && newData.child('zone').val().matches(/^(lib|cafe|forest)$/) && newData.child('x').isNumber() && newData.child('y').isNumber() && (!newData.child('doll').exists() || (newData.child('doll').isString() && newData.child('doll').val().length <= 300)))"
+          ".validate": "!newData.exists() || (newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('zone').isString() && newData.child('zone').val().matches(/^(lib|cafe|forest|ring)$/) && newData.child('x').isNumber() && newData.child('y').isNumber() && (!newData.child('doll').exists() || (newData.child('doll').isString() && newData.child('doll').val().length <= 300)))"
+        }
+      },
+      "ring": {
+        ".read": "auth != null",
+        "m": {
+          ".write": "auth != null",
+          ".validate": "!newData.exists() || newData.child('id').isString()",
+          "r": { ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 24 && (newData.child('uid').val() === auth.uid || (data.exists() && newData.child('uid').val() === data.child('uid').val()))" },
+          "b": { ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 24 && (newData.child('uid').val() === auth.uid || (data.exists() && newData.child('uid').val() === data.child('uid').val()))" },
+          "h": {
+            "$side": {
+              "$i": {
+                ".write": "auth != null && !data.exists() && data.parent().parent().parent().child($side).child('uid').val() === auth.uid",
+                ".validate": "newData.isString() && newData.val().matches(/^(rock|paper|scissors)$/)"
+              }
+            }
+          }
+        },
+        "board": {
+          ".indexOn": ["at"],
+          "$id": {
+            ".write": "auth != null && !data.exists()",
+            ".validate": "newData.child('w').isString() && newData.child('w').val().length <= 24 && newData.child('l').isString() && newData.child('l').val().length <= 24 && newData.child('at').val() === now"
+          }
         }
       },
       "chat": {

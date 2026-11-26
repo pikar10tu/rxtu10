@@ -18,6 +18,7 @@ export const useMailbox = defineStore('mailbox', () => {
   const mails = ref([])
   const loading = ref(false)
   let loadedFor = null   // uid ที่โหลดไว้แล้ว (guard)
+  let loadedAt = 0       // เวลาโหลดล่าสุด — maxAge: เปิดกล่องแล้วข้อมูลเก่ากว่านี้ = โหลดใหม่ (27 พ.ย. จดหมายขอบคุณกาแฟส่งหลังเพื่อนเปิดเว็บ เลยไม่ขึ้น)
 
   const attention = computed(() => attentionCount(mails.value))
   const inbox = computed(() => mails.value.filter(m => !isSeasonMail(m)))
@@ -27,16 +28,17 @@ export const useMailbox = defineStore('mailbox', () => {
     return mails.value.find(m => isSeasonMail(m) && m.mode === mode && !m.claimed) || null
   }
 
-  async function load({ force = false } = {}) {
+  async function load({ force = false, maxAge = 0 } = {}) {
     const uid = auth.currentUser?.uid
     if (!uid) { mails.value = []; loadedFor = null; return }
-    if (!force && loadedFor === uid) return
+    if (!force && loadedFor === uid && !(maxAge && Date.now() - loadedAt > maxAge)) return
     loading.value = true
     try {
       const snap = await getDocs(query(collection(db, 'users', uid, 'mail'), orderBy('createdAt', 'desc')))
       usage.track(snap.size)
       mails.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       loadedFor = uid
+      loadedAt = Date.now()
     } catch (e) { console.error('[mailbox load]', e) }
     finally { loading.value = false }
   }

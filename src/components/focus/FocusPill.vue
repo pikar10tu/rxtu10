@@ -22,6 +22,7 @@ import { audioState as audio } from '../../utils/focusAudio.js'
 import { useFocusRoom } from '../../composables/useFocusRoom.js'
 import { useToast } from '../../composables/useToast.js'
 import { freeSeat, seatFoot } from '../../utils/focusLayout.js'
+import { SPECTATE } from '../../utils/ringMatch.js'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -39,7 +40,9 @@ watch(() => fm.status.value, (st) => room.patch({ st }))
 watch(() => [fm.state.active, room.joined.value, auth.userData?.uid || auth.userData?.nickname], ([active, joined, ready]) => {
   if (!active || joined || !ready || route.name === 'focus') return   // หน้าโฟกัสจัดการเอง
   const taken = new Set(room.people.value.filter(p => p.zone === fm.state.zone).map(p => p.seat))
-  const seat = freeSeat(taken); const [x, y] = seat >= 0 ? seatFoot(seat) : [80, 80]
+  const ring = fm.state.zone === 'ring'   // 🥊 สนามมวยไม่มีที่นั่ง → ยืนรอบเวที
+  const seat = ring ? -1 : freeSeat(taken)
+  const [x, y] = ring ? SPECTATE[Math.floor(Math.random() * SPECTATE.length)] : seat >= 0 ? seatFoot(seat) : [80, 80]
   room.join({ zone: fm.state.zone, seat, x, y, st: fm.status.value }, { auto: true })
 }, { immediate: true })
 // 📱 เครื่องอื่นเข้าห้องแทน → เครื่องนี้ออก (นับเครื่องเดียว)

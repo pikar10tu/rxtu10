@@ -120,7 +120,7 @@ import Emoji from '../components/shared/Emoji.vue'
 import MockScoreCard from '../components/me/MockScoreCard.vue'
 import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { RouterLink } from 'vue-router'
-import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useMailbox } from '../stores/mailbox.js'
 import { questNotClaimed } from '../utils/dailyQuest.js'
@@ -152,6 +152,8 @@ const homeDoll = computed(() => dollOf(authStore.userData).eq)
 const greet = (() => { const h = new Date().getHours(); return h < 11 ? 'สวัสดีตอนเช้า' : h < 16 ? 'สวัสดีตอนบ่าย' : h < 19 ? 'สวัสดีตอนเย็น' : 'ราตรีสวัสดิ์' })()
 
 const showMail = ref(false)
+// เปิดกล่องจดหมาย → ถ้าโหลดไว้นานเกิน 1 นาที โหลดใหม่ (จดหมายที่แอดมินส่งระหว่างเปิดเว็บค้างจะได้ขึ้น)
+watch(showMail, (o) => { if (o) mailbox.load({ maxAge: 60000 }) })
 const showQuest = ref(false)
 const showToday = ref(false)
 const { fillPct } = useDaily()

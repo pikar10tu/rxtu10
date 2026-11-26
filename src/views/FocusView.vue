@@ -28,22 +28,24 @@
         <span>{{ ZONES[ZI].label }}</span>
         <button type="button" aria-label="โซนถัดไป" @click="stepZone(1)">›</button>
       </div>
-      <div v-for="(c, i) in COUNTERS" :key="'c' + i" class="fo-ent fo-desk" :style="entStyle(c[0], c[1], c[1] + 8.4)">
+      <div v-for="(c, i) in zoneCounters(viewZone)" :key="'c' + i" class="fo-ent fo-desk" :style="entStyle(c[0], c[1], c[1] + 8.4)">
         <img :src="ART['desk_' + viewZone]" alt="" draggable="false">
       </div>
       <template v-for="p in others" :key="p.uid">
-        <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="{ walk: pos[p.uid].walking, away: p.away }" :style="entStyle(pos[p.uid].x, pos[p.uid].y, pos[p.uid].y)">
+        <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="[{ walk: pos[p.uid].walking, away: p.away }, ringFx.cls[p.uid] && 'rg-' + ringFx.cls[p.uid]]" :style="entStyle(pos[p.uid].x, pos[p.uid].y, pos[p.uid].y)">
           <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> <Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /> {{ p.away ? 'พักสายตา' : stText(p.st) }}</span></div>
           <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
           <span v-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
+          <span v-if="ringFx.hands[p.uid]" class="fo-rh" :class="ringFx.hands[p.uid].k"><Emoji :char="ringFx.hands[p.uid].c" /></span>
           <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ (p.house || 1) * FEST_X }}</span>
           <div class="fo-doll"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
         </div>
       </template>
-      <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="{ walk: me.walking }" :style="entStyle(me.x, me.y, me.y)">
+      <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="[{ walk: me.walking }, ringFx.cls[room.myUid()] && 'rg-' + ringFx.cls[room.myUid()]]" :style="entStyle(me.x, me.y, me.y)">
         <div class="fo-label"><span class="fo-nm">{{ myName }}<template v-if="narrow"> <Emoji :char="STATUS_ICON[fm.status.value]" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="STATUS_ICON[fm.status.value]" /> {{ stText(fm.status.value) }}</span></div>
         <div v-if="bubbles[room.myUid()]" class="fo-bubble">{{ bubbles[room.myUid()] }}</div>
         <span v-if="myHandUp" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
+        <span v-if="ringFx.hands[room.myUid()]" class="fo-rh" :class="ringFx.hands[room.myUid()].k"><Emoji :char="ringFx.hands[room.myUid()].c" /></span>
         <span v-for="c in coins" :key="c.id" class="fo-coin"><Emoji char="🪙" />+{{ c.v }}</span>
         <div class="fo-doll"><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
       </div>
@@ -58,6 +60,7 @@
         <button type="button" class="fo-btn primary big" @click="join"><Emoji char="🎯" /> เริ่มโฟกัส</button>
         <small>อ่านหนังสือเพื่อสร้างรายได้ตามระดับที่อยู่ของคุณ<br>ตอนนี้ +{{ rateNow }} เหรียญ/วิ<template v-if="FEST_X > 1"> (×2 ถึง 31 ธ.ค.)</template></small>
       </div>
+      <RingLayer v-if="viewZone === 'ring'" :me="fm.state.active && !peeking ? me : null" :my-name="myName" :scene-el="sceneEl" @goto="ringGoto" />
       <FocusSceneFx v-if="!saver" ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
       <div v-for="c in claps" :key="c.id" class="fo-ent fo-clap" :style="entStyle(c.x, c.y, 999)" aria-hidden="true">
         <span class="l"><Emoji char="✋" /></span><span class="r"><Emoji char="✋" /></span><b>แปะ!</b>
@@ -205,6 +208,9 @@ import DollFigure from '../components/doll/DollFigure.vue'
 import BottomSheet from '../components/shared/BottomSheet.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import FocusSceneFx from '../components/focus/FocusSceneFx.vue'
+import RingLayer from '../components/focus/RingLayer.vue'
+import { ringFx } from '../composables/useRing.js'
+import { SPECTATE } from '../utils/ringMatch.js'
 import { useCoffee } from '../composables/useCoffee.js'
 import { examFestMulti } from '../utils/examFest.js'
 import { focusBonus } from '../utils/supporter.js'
@@ -222,7 +228,13 @@ import { chime, TRACKS, NOISES, audioState as audio, playTrack, stopTrack, playN
 
 const ART = Object.fromEntries(Object.entries(import.meta.glob('../assets/focus/*.png', { eager: true, import: 'default' }))
   .map(([k, v]) => [k.split('/').pop().replace('.png', ''), v]))
-const ZONES = [{ key: 'lib', label: '📚 ห้องสมุด' }, { key: 'cafe', label: '☕ คาเฟ่' }, { key: 'forest', label: '🌳 สวน' }]
+const ZONES = [{ key: 'lib', label: '📚 ห้องสมุด' }, { key: 'cafe', label: '☕ คาเฟ่' }, { key: 'forest', label: '🌳 สวน' }, { key: 'ring', label: '🥊 สนามมวย' }]
+// 🥊 สนามมวย (27 พ.ย.): ไม่มีเคาน์เตอร์/ที่นั่ง · เข้าห้อง = ยืนรอบเวที (SPECTATE) · ชกผ่าน RingLayer
+const NO_DESK = new Set(['ring'])
+const zoneCounters = (z) => (NO_DESK.has(z) ? [] : COUNTERS)
+const standSpot = (z) => (z === 'ring' ? SPECTATE[Math.floor(Math.random() * SPECTATE.length)] : [80, 80])
+const seatOrStand = (z, seat) => (seat >= 0 && !NO_DESK.has(z) ? seatFoot(seat) : standSpot(z))
+const freeSeatIn = (z) => (NO_DESK.has(z) ? -1 : freeSeat(takenSeats()))
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -244,6 +256,8 @@ function setView(z) {
   if (!fm.state.active) fm.setZone(z)
 }
 function moveHere() { pickZone(viewZone.value) }
+// 🥊 ขึ้น/ลงเวที: เดินไปมุม (ไม่หลบสิ่งกีดขวาง ห้องนี้โล่ง) แล้วบอกตำแหน่ง
+function ringGoto([x, y]) { me.seat = -1; walkTo(me, x, y, () => room.patch({ seat: -1, x, y })) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 // ฉีกหน้าเมื่อวานแค่ครั้งแรกของวัน (จำในเครื่อง) — รอบต่อไปเห็นเลขวันนี้นิ่งๆ
 const CAL_KEY = 'rxtu.focus.calTorn'
@@ -283,7 +297,7 @@ const entStyle = (x, y, depth) => ({ left: (x / 160 * 100) + '%', top: y + '%', 
 
 // ── เดิน: BFS กริด 2px เลี่ยงเคาน์เตอร์ (ช่วงหน้าเคาน์เตอร์ y+4..y+10) ──
 const CELL = 2, GW = 80, GH = 50, Y0 = 52, Y1 = 98
-const inCounter = (x, y) => COUNTERS.find(([cx, cy]) => x >= cx - 28 && x <= cx + 28 && y >= cy + 4 && y <= cy + 10)
+const inCounter = (x, y) => zoneCounters(viewZone.value).find(([cx, cy]) => x >= cx - 28 && x <= cx + 28 && y >= cy + 4 && y <= cy + 10)
 const blocked = (x, y) => y < Y0 || y > Y1 || x < 6 || x > 154 || !!inCounter(x, y)
 function findPath(sx, sy, tx, ty) {
   const key = (i, j) => j * GW + i
@@ -353,8 +367,8 @@ function pickZone(z) {
   if (viewZone.value !== z) { viewedAt = Date.now(); viewZone.value = z }
   room.watchChat(z)
   if (!fm.state.active) return
-  const seat = freeSeat(takenSeats())
-  const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
+  const seat = freeSeatIn(z)
+  const [tx, ty] = seatOrStand(z, seat)
   me.seat = seat; me.x = DOOR[0]; me.y = DOOR[1]
   room.patch({ zone: z, seat, x: tx, y: ty })
   walkTo(me, tx, ty)
@@ -379,7 +393,7 @@ function onFloor(e) {
   const id = ++tapId; taps.value.push({ id, x, y }); setTimeout(() => { taps.value = taps.value.filter(t => t.id !== id) }, 600)
   const taken = takenSeats()
   let best = -1, bd = 12
-  SEATS.forEach(([sx, sy], i) => { if (taken.has(i)) return; const d = Math.hypot((sx - x) / 1.5, sy - y); if (d < bd) { bd = d; best = i } })
+  if (!NO_DESK.has(viewZone.value)) SEATS.forEach(([sx, sy], i) => { if (taken.has(i)) return; const d = Math.hypot((sx - x) / 1.5, sy - y); if (d < bd) { bd = d; best = i } })
   let tx, ty
   if (best >= 0) [tx, ty] = seatFoot(best)
   else {
@@ -512,8 +526,8 @@ async function join() {   // เข้าห้อง: เดินจากป�
   // 📱 นับเครื่องเดียว: มีอีกเครื่องนั่งอยู่ → ถามก่อน ยืนยันแล้วเครื่องนั้นออก
   if (await room.otherDevice() && !await confirm('ตอนนี้คุณนั่งอยู่ในห้องจากอีกเครื่อง 📱\nเข้าจากเครื่องนี้แทน?\nเครื่องก่อนหน้าจะออกจากห้อง')) return
   fm.enter()
-  const seat = freeSeat(takenSeats())
-  const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
+  const seat = freeSeatIn(fm.state.zone)
+  const [tx, ty] = seatOrStand(fm.state.zone, seat)
   me.seat = seat; me.x = DOOR[0]; me.y = DOOR[1]
   room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value })
   walkTo(me, tx, ty)
@@ -548,7 +562,7 @@ onMounted(() => {
     const mine = room.people.value.find(p => p.uid === room.myUid())
     if (mine) { me.x = mine.x; me.y = mine.y; me.seat = mine.seat ?? -1 }
     else {   // รีเฟรชแล้ว presence หาย (onDisconnect) → เข้าห้องใหม่ที่นั่งว่าง
-      const seat = freeSeat(takenSeats()); const [tx, ty] = seat >= 0 ? seatFoot(seat) : [80, 80]
+      const seat = freeSeatIn(fm.state.zone); const [tx, ty] = seatOrStand(fm.state.zone, seat)
       me.seat = seat; me.x = tx; me.y = ty
       room.join({ zone: fm.state.zone, seat, x: tx, y: ty, st: fm.status.value }, { auto: true })
     }
@@ -651,6 +665,22 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-coffee:focus { outline: none; }   /* 27 พ.ย. user: กรอบสี่เหลี่ยมใหญ่เกิน → ไม่ไฮไลต์ทั้งพื้นที่ ขยายถ้วยแทน */
 .fo-coffee:hover span, .fo-coffee:focus-visible span { box-shadow: var(--pop), 0 0 0 2px #fff, 0 0 0 4px #8a5a3b; }
 @keyframes foCoffee { 50% { transform: translate(-50%, -4px); } }
+.fo-rh { position: absolute; bottom: 100%; margin-bottom: 4px; font-size: 1.5rem; line-height: 1; z-index: 2; }
+.fo-rh.think { animation: fo-rh-think .5s ease-in-out infinite alternate; }
+.fo-rh.slam { animation: fo-rh-slam .28s cubic-bezier(.3,1.8,.5,1); }
+@keyframes fo-rh-think { to { transform: rotate(12deg) scale(.9); } }
+@keyframes fo-rh-slam { 0% { transform: scale(2.4) translateY(-30%); opacity: 0; } 100% { transform: scale(1); } }
+.fo-av.rg-white .fo-doll { filter: brightness(0) invert(1); }
+.fo-av.rg-hit .fo-doll { animation: fo-rg-hit .45s; }
+.fo-av.rg-ko .fo-doll { transform-origin: 50% 100%; animation: fo-rg-ko .7s cubic-bezier(.5,-.4,.7,1) forwards; }
+.fo-av.rg-win .fo-doll { animation: fo-rg-hop .5s ease-in-out 3; }
+@keyframes fo-rg-hit { 20% { transform: translateX(6px) rotate(6deg); filter: brightness(1.6); } 45% { transform: translateX(-4px); } 70% { transform: translateX(2px); } }
+@keyframes fo-rg-ko { 30% { transform: rotate(-12deg); } 100% { transform: rotate(84deg) translateY(10%); } }
+@keyframes fo-rg-hop { 50% { transform: translateY(-8px); } }
+.fo-scene.rg-shake { animation: fo-rg-shake .32s cubic-bezier(.36,.07,.19,.97); }
+.fo-scene.rg-shake-big { animation: fo-rg-shake-big .6s cubic-bezier(.36,.07,.19,.97); }
+@keyframes fo-rg-shake { 20% { transform: translate(-1.2%, .6%); } 40% { transform: translate(1.2%, -.8%); } 60% { transform: translate(-.8%, .5%); } 80% { transform: translate(.5%, -.3%); } }
+@keyframes fo-rg-shake-big { 10% { transform: translate(-2.4%, 1%) scale(1.04); } 25% { transform: translate(2.2%, -1.4%) scale(1.05); } 40% { transform: translate(-1.6%, 1%) scale(1.03); } 60% { transform: translate(1%, -.6%) scale(1.02); } 80% { transform: translate(-.4%, .3%); } }
 .fo-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fo-ent { position: absolute; transform: translate(-50%, -100%); pointer-events: none; display: flex; flex-direction: column; align-items: center; }
 .fo-desk { width: calc(54 / 160 * 100%); transform: translate(-50%, -30%); }
