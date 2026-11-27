@@ -42,6 +42,7 @@
     <ToastContainer />
     <ConfirmModal />
     <AchievementBalloon />
+    <UpdateBanner />
   </div>
 </template>
 
@@ -71,6 +72,8 @@ import GuestPendingScreen from './components/onboarding/GuestPendingScreen.vue'
 import LoginLanding       from './components/onboarding/LoginLanding.vue'
 import WelcomeBox         from './components/WelcomeBox.vue'
 import FocusPill          from './components/focus/FocusPill.vue'
+import UpdateBanner       from './components/layout/UpdateBanner.vue'
+import { startVersionWatch } from './composables/useAppVersion.js'
 import { onboardingGate } from './utils/onboarding.js'
 import { CONSENT_VERSION } from './firebase/config.js'
 import { activeEvent } from './utils/event.js'
@@ -95,6 +98,7 @@ watch(() => authStore.userData, (d) => runIntegrityCheck(d), { immediate: true }
 
 // flush ตัวนับ usage ครั้งเดียวตอนแอปถูกซ่อน/ปิด (มือถือ: visibilitychange เชื่อถือสุด)
 onMounted(() => {
+  startVersionWatch()
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') usage.flush()
   })

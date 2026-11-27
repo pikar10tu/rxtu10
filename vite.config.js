@@ -51,9 +51,16 @@ function dollEditorSave() {
 //   - GitHub Pages subpath (…github.io/rxtu10/)
 // (App uses hash routing, so relative asset paths resolve correctly.)
 // https://vite.dev/config/
+// 🔄 ตัวเช็คเวอร์ชัน (27 พ.ย. 2026): ฝังรหัส build ในแอป + เขียน version.json คู่กัน → แอปเทียบแล้วชวนรีเฟรช (useAppVersion)
+const BUILD_ID = String(Date.now())
+function versionFile() {
+  return { name: 'version-file', apply: 'build', generateBundle() { this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ v: BUILD_ID }) }) } }
+}
+
 export default defineConfig({
   base: './',
-  plugins: [vue(), dollEditorSave()],
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  plugins: [vue(), dollEditorSave(), versionFile()],
   build: {
     rollupOptions: {
       output: {
