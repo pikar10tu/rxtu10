@@ -20,6 +20,8 @@
     <div class="rg-world"><span v-for="f in fx" :key="f.id" :class="['rg-fx', f.k]" :style="f.style"><Emoji v-if="f.e" :char="f.e" />{{ f.t }}</span></div>
     <div v-if="flashOn" class="rg-flash"></div>
     <div v-if="banner" :key="banner.id" class="rg-banner" :class="banner.k">{{ banner.t }}</div>
+    <!-- 🏆 ผู้ชนะไฟต์ล่าสุด ค้างไว้ตอนเวทีว่าง (27 พ.ย. user ขอ) -->
+    <div v-else-if="lastWin" class="rg-last"><Emoji char="🏆" /> ล่าสุด: <b>{{ lastWin.w }}</b> ชนะ {{ lastWin.l }}</div>
 
     <!-- ปุ่มกระดานผล (27 พ.ย. ถอดปุ่มเชียร์ — user: พื้นที่ไม่พอ) -->
     <div class="rg-bar" @click.stop>
@@ -118,7 +120,7 @@ watch(() => !!m.value?.b, (hasB) => { if (hasB && waitMsg) { onDisconnect(waitMs
 const fx = ref([]); let fxId = 0
 function addFx(k, style, { e, t, ms = 900 } = {}) { const id = ++fxId; fx.value.push({ id, k, style, e, t }); setTimeout(() => { fx.value = fx.value.filter(f => f.id !== id) }, ms) }
 const banner = ref(null)
-function showBanner(t, k = '', ms = 1100) { const b = { id: ++fxId, t, k }; banner.value = b; setTimeout(() => { if (banner.value === b) banner.value = null }, ms) }
+function showBanner(t, k = '', ms = 1100) { const b = { id: ++fxId, t, k }; banner.value = b; setTimeout(() => { if (banner.value?.id === b.id) banner.value = null }, ms) }   // เทียบ id — banner.value เป็น proxy ไม่เท่ากับ b (เดิมป้ายไม่เคยหายเอง ค้างจนป้ายถัดไปมาทับ)
 const flashOn = ref(false)
 function flash() { flashOn.value = false; requestAnimationFrame(() => { flashOn.value = true; setTimeout(() => { flashOn.value = false }, 180) }) }
 function shake(big) { const el = props.sceneEl; if (!el) return; el.classList.remove('rg-shake', 'rg-shake-big'); void el.offsetWidth; el.classList.add(big ? 'rg-shake-big' : 'rg-shake') }
@@ -398,6 +400,7 @@ watch(() => [mySide.value, !!m.value?.b], ([side, hasB]) => {
   clearTimeout(waitDownT)
   if (side && !hasB) waitDownT = setTimeout(() => { if (mySide.value && !m.value?.b) stepDown() }, WAIT_MS + 1000)
 }, { immediate: true })
+const lastWin = computed(() => (!m.value?.b && !qte.on ? ring.board.value[0] || null : null))
 const ranking = computed(() => ring.wins.value)   // ยอดถาวร ไม่ใช่ 60 ไฟต์ล่าสุด
 onBeforeUnmount(() => { clearInterval(awayT); document.removeEventListener('visibilitychange', onHide); camReset(); if (qteRes) qteEnd({ s: -1, seed: 1 }); if (waitMsg && !m.value?.b) dropWaitMsg(); clearRingFx(); clearTimeout(waitDownT); clearTimeout(pickTimer); clearTimeout(waitTimer); ring.release(); room.release() })
 </script>
@@ -418,6 +421,7 @@ onBeforeUnmount(() => { clearInterval(awayT); document.removeEventListener('visi
 .rg-fx.boom { font-size: 9cqw; transform: translate(-50%, -50%); animation: rg-boom .4s ease-out forwards; z-index: 4; }
 .rg-fx.fist { font-size: 6cqw; transform: translate(-50%, -50%); z-index: 4; }
 @keyframes rg-boom { 0% { transform: translate(-50%, -50%) scale(.4); } 30% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+.rg-last { position: absolute; left: 50%; top: 2.5cqw; transform: translateX(-50%); background: rgba(42,34,56,.78); color: #fff; border-radius: 99px; padding: .6cqw 2cqw; font-size: max(.7rem, 2.4cqw); white-space: nowrap; max-width: 70cqw; overflow: hidden; text-overflow: ellipsis; }
 .rg-bs { display: inline-flex; align-items: center; gap: 6px; }
 .rg-pill.rp { padding: 2px 8px; }
 .rg { position: absolute; inset: 0; pointer-events: none; z-index: 900; }
