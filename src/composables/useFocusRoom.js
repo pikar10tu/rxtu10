@@ -10,7 +10,7 @@
 //     · แยกห้องรายวัน จอดึงเฉพาะวันนี้ 50 ข้อความล่าสุด · ของเก่ายังเก็บไว้ตรวจย้อนหลัง (ไม่แจ้งผู้ใช้ — user สั่ง 22 พ.ย.)
 //  เหรียญ/เวลาโฟกัสไม่ผ่าน RTDB (useFocusMode) — เหรียญเด้งของเพื่อนแต่ละเครื่องวาดเองจาก house
 // ════════════════════════════════════════════════════════════
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   getDatabase, ref as dbRef, onValue, update, remove, push, onDisconnect, get,
   serverTimestamp, query, limitToLast,
@@ -107,7 +107,11 @@ async function join(p, opts = {}) {   // p = { zone, seat, x, y, st }
   await update(meRef(), { ...base(), ...p, x: Math.round(p.x), y: Math.round(p.y), away: !!document.hidden, dev: DEV }).catch(() => { joined.value = false })
   clearInterval(beat)
   beat = setInterval(() => { if (joined.value && !document.hidden) update(meRef(), { at: serverTimestamp() }).catch(() => {}) }, 60000)
-  if (!visBound) { visBound = true; document.addEventListener('visibilitychange', () => patch({ away: document.hidden })) }
+  if (!visBound) {
+    visBound = true; document.addEventListener('visibilitychange', () => patch({ away: document.hidden }))
+    // 👗 เปลี่ยนชุดตอนอยู่ในห้อง → เพื่อนเห็นทันที (เขียนเฉพาะตอนรหัสชุดเปลี่ยนจริง · 27 พ.ย. user ขอ)
+    watch(() => encodeDoll(dollOf(useAuthStore().userData).eq) || '', (d, old) => { if (d !== old) patch({ doll: d }) })
+  }
 }
 function leave() {
   if (!joined.value) return
