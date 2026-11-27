@@ -42,3 +42,23 @@ test('usageDocId: นับวันตามเวลาแปซิฟิก (
   assert.equal(usageDocId(new Date('2026-11-27T08:00:00Z')), 'usage_2026-11-27')   // 15:00 ไทย = รอบใหม่
   assert.equal(usageDocId(new Date('2026-06-15T12:00:00Z'), 'UTC'), 'usage_2026-06-15')
 })
+
+test('ประมาณค่าใช้จ่าย: ใต้โควต้าฟรี = 0 · เกิน = คิดเฉพาะส่วนเกิน', async () => {
+  const { dayCost, monthEstimate, PRICE } = await import('./usageMeter.js')
+  assert.equal(dayCost({ reads: 50000, writes: 20000 }), 0)
+  assert.ok(Math.abs(dayCost({ reads: 150000, writes: 20000 }) - 0.0369) < 1e-9)
+  const m = monthEstimate([{ reads: 150000, writes: 0 }, { reads: 0, writes: 0 }])
+  assert.equal(m.days, 1)
+  assert.ok(Math.abs(m.firestore - 0.0369 * 30) < 1e-9)
+  assert.equal(m.total, m.firestore + PRICE.claudePro)
+})
+
+test('ปรับเทียบ: solveK หา k ที่ผลรวมตรงบิลจริง', async () => {
+  const { solveK, dayCost } = await import('./usageMeter.js')
+  const days = [{ reads: 60000, writes: 10000 }, { reads: 120000, writes: 25000 }]
+  const k = solveK(days, 0.1)
+  const sum = days.reduce((s, d) => s + dayCost(d, k), 0)
+  assert.ok(Math.abs(sum - 0.1) < 0.002, String(sum))
+  assert.equal(solveK(days, 0), null)
+  assert.equal(solveK([{ reads: 10, writes: 1 }], 5), null)
+})

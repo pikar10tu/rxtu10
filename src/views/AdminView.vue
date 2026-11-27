@@ -84,6 +84,38 @@
           </div>
           <div class="admin-hint">รอบวันเริ่มบ่ายสามเวลาไทย (ช่วงหน้าร้อนอเมริกาเป็นบ่ายสอง) · ข้อมูลก่อน 27 พ.ย. นับตามวันไทย</div>
         </div>
+
+        <!-- 💸 ค่าใช้จ่ายรายเดือนโดยประมาณ (28 พ.ย.) · Firestore จากตัวนับในแอป + Claude Pro · แปลงเป็นบาทด้วยอัตราสด -->
+        <div v-if="usage.today || usage.history.length" class="cost-box">
+          <div class="cost-head"><Emoji char="💸" /> ค่าใช้จ่ายต่อเดือน (ประมาณ)</div>
+          <div class="cost-row"><span>Firestore (ส่วนที่เกินโควต้าฟรี)</span><b>{{ thb(cost.firestore) }}</b></div>
+          <div class="cost-row"><span>Claude Pro <small>$20 + VAT 7%</small></span><b>{{ thb(cost.claude) }}</b></div>
+          <div class="cost-row total"><span>รวม</span><b>{{ thb(cost.total) }}</b></div>
+          <div class="cost-cal">
+            <span>ยอดจริง Firebase เดือนนี้ ฿</span>
+            <input v-model="calInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="เช่น 17.98">
+            <button class="btn-mini" :disabled="calBusy || !(+calInput > 0)" @click="calibrate">{{ calBusy ? '…' : 'ปรับเทียบ' }}</button>
+          </div>
+          <div class="admin-hint">
+            ปรับเทียบแล้ว: ยอดในแอป ×{{ cal.k }} ({{ cal.note }}) · ใส่ยอดจริงจาก Firebase Console (ตั้งแต่วันที่ 1 ถึงวันนี้) แล้วกดปรับเทียบได้ทุกเมื่อ
+          </div>
+          <div class="admin-hint">
+            เฉลี่ยจาก {{ cost.days }} วัน{{ usage.history.length ? 'ย้อนหลัง' : ' (กดดูย้อนหลังเพื่อเฉลี่ยแม่นขึ้น)' }} × 30 · ราคาโซนสิงคโปร์ อ่าน $0.0369 / เขียน $0.1107 ต่อแสนครั้ง
+            · 1 USD = {{ fx.rate.toFixed(2) }} บาท{{ fx.live ? ' (อัตราวันนี้)' : ' (อัตราสำรอง)' }}
+           
+          </div>
+        </div>
+        <div class="usage-watch">
+          <div class="cost-head"><Emoji char="👀" /> ค่าที่ควรเฝ้าดู (โควต้าฟรี)</div>
+          <ul>
+            <li><b>Firestore อ่าน</b> 50,000/วัน · <b>เขียน</b> 20,000/วัน · <b>ลบ</b> 20,000/วัน — ดูเกจด้านบน</li>
+            <li><b>Realtime DB ดาวน์โหลด</b> 10 GB/เดือน (ห้อง Co-work แชต สนามมวย) — เกินคิด $1/GB</li>
+            <li><b>Realtime DB เก็บข้อมูล</b> 1 GB — เกินคิด $5/GB/เดือน</li>
+            <li><b>Firestore เก็บข้อมูล</b> 1 GB — เกินคิด $0.18/GB/เดือน</li>
+            <li><b>Hosting</b> 10 GB/เดือน ส่งออก · 10 GB เก็บไฟล์</li>
+          </ul>
+          <div class="admin-hint">สามตัวหลังตัวนับในแอปนับไม่ได้ ดูยอดจริงที่ Firebase Console → Usage and billing</div>
+        </div>
       </section>
 
       <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
@@ -566,7 +598,7 @@ import AdminCoinWatch from '../components/admin/AdminCoinWatch.vue'
 // 🎲 เศรษฐีรอบโลก: ถอดการ์ดออกจากแผงแอดมิน 27 พ.ย. (user สั่งเคลีย) · ไฟล์ components/admin/AdminTycoon.vue ยังอยู่
 import { ROULETTE_DEFAULT, ROULETTE_WINNER, ROULETTE_MAX, ROULETTE_NAME_MAX } from '../data/pvpRoulette.js'
 import { WEEKLY_EFFECTS, WEEKLY_DAYS, activeWeekly } from '../data/pvpWeekly.js'
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { doc, updateDoc, setDoc, getDoc, collection, getDocs, query, where, orderBy, limit, addDoc, deleteDoc, serverTimestamp, writeBatch, deleteField, runTransaction, increment } from 'firebase/firestore'
 import { buildRosterFromUsers } from '../utils/roster.js'
@@ -595,7 +627,7 @@ import { TAG_LIST } from '../data/tags.js'
 import { getPetDef } from '../data/index.js'
 import { ACHIEVEMENTS } from '../data/achievements.js'
 import { MAX_RESIDENCE_LEVEL } from '../data/residence.js'
-import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT } from '../utils/usageMeter.js'
+import { usageStatus, DAILY_READ_LIMIT, DAILY_WRITE_LIMIT, monthEstimate, FX_FALLBACK, CAL_DEFAULT, solveK, usageDocId } from '../utils/usageMeter.js'
 import { computeStatus, reviewStatusKey, tallyReviewCounts } from '../utils/questionReview.js'
 import { getCategories } from '../utils/questionCategories.js'
 import { plePatch } from '../utils/pleMapping.js'
@@ -613,6 +645,31 @@ import { BEK_GIFT_PARTS, COFFEE_COINS_PER_BAHT } from '../utils/supporter.js'
 const authStore = useAuthStore()
 const members   = useMembersStore()
 const usage     = useUsageStore()
+// 💸 ค่าใช้จ่าย: เฉลี่ยจากประวัติ (ถ้าโหลดแล้ว) ไม่งั้นใช้วันนี้ · อัตราแลกเปลี่ยนสด (ไม่ส่งข้อมูลผู้ใช้ไปไหน) พังก็ใช้ค่าสำรอง
+const fx = reactive({ rate: FX_FALLBACK, live: false })
+fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json()).then(d => { const v = d?.rates?.THB; if (v > 20 && v < 60) { fx.rate = v; fx.live = true } }).catch(() => {})
+// 🎯 ตัวคูณปรับเทียบ: ค่าตั้งต้นในโค้ด · แอดมินใส่บิลจริงแล้วกดปรับเทียบ = เก็บในเครื่องนี้ (localStorage)
+const CAL_KEY = 'rx_cost_cal'
+const cal = ref((() => { try { const v = JSON.parse(localStorage.getItem(CAL_KEY)); if (v?.k > 0) return v } catch {} return CAL_DEFAULT })())
+const calInput = ref(''), calBusy = ref(false)
+async function calibrate() {
+  calBusy.value = true
+  try {
+    // วันที่ 1 ของเดือนนี้ (ตามรอบวันแปซิฟิก) ถึงวันนี้
+    const day = +usageDocId().slice(-2)
+    await usage.loadHistory(day)
+    const month = usageDocId().slice(6, 13)
+    const days = usage.history.filter(h => h.date.startsWith(month))
+    const k = solveK(days, +calInput.value / fx.rate)
+    if (!k) { toast?.('ยอดนี้คำนวณตัวคูณไม่ได้ (ยอดในแอปน้อยเกินไป)'); return }
+    const d = new Date()
+    cal.value = { k, note: `บิลจริง ฿${(+calInput.value).toLocaleString()} ณ ${d.getDate()}/${d.getMonth() + 1}` }
+    try { localStorage.setItem(CAL_KEY, JSON.stringify(cal.value)) } catch {}
+    calInput.value = ''
+  } finally { calBusy.value = false }
+}
+const cost = computed(() => monthEstimate(usage.history.length ? usage.history : [usage.today], cal.value.k))
+const thb = (usd) => '฿' + Math.round(usd * fx.rate).toLocaleString()
 // สวิตช์ pvpOpen / expeditionOpen / arcadeOpen ถูกเอาออกจากหน้านี้แล้ว (25 ก.ย. 2026 user สั่งเคลียร์แอดมิน)
 //   ค่ายังอยู่ใน config/app และยังคุมฟีเจอร์อยู่ — จะสลับต้องแก้ที่ Firestore console
 //   ⚠️ ห้ามลบ flag arcadeOpen ทิ้ง ตัวฝึก CrCl ฝั่งเรียนใช้โครงเดียวกัน
@@ -1470,6 +1527,14 @@ async function saveEcon(m) {
 }
 .usage-bar i { display: block; height: 100%; transition: width .3s; }
 .usage-histbtn { margin-top: 10px; }
+.cost-box, .usage-watch { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2, rgba(0,0,0,.02)); }
+.cost-head { font-weight: 700; font-size: .85rem; margin-bottom: 6px; }
+.cost-row { display: flex; justify-content: space-between; font-size: .8rem; padding: 2px 0; }
+.cost-row small { color: var(--muted); font-size: .7rem; }
+.cost-row.total { border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 6px; font-size: .9rem; }
+.cost-cal { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: .75rem; }
+.cost-cal input { width: 80px; font-family: inherit; font-size: .8rem; padding: 3px 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+.usage-watch ul { margin: 0; padding-left: 18px; font-size: .75rem; line-height: 1.6; }
 .usage-hist { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; }
 .usage-hist-head, .usage-hist-row { display: grid; grid-template-columns: 1fr 1fr 1fr; font-size: .72rem; font-weight: 700; padding: 3px 6px; border-radius: 6px; }
 .usage-hist-head { color: var(--muted, #888); }

@@ -436,7 +436,7 @@ onBeforeUnmount(() => { clearInterval(awayT); document.removeEventListener('visi
 .rg-fx.boom { font-size: 9cqw; transform: translate(-50%, -50%); animation: rg-boom .4s ease-out forwards; z-index: 4; }
 .rg-fx.fist { font-size: 6cqw; transform: translate(-50%, -50%); z-index: 4; }
 @keyframes rg-boom { 0% { transform: translate(-50%, -50%) scale(.4); } 30% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
-.rg-last { position: absolute; left: 50%; top: 2.5cqw; transform: translateX(-50%); background: rgba(42,34,56,.78); color: #fff; border-radius: 99px; padding: .6cqw 2cqw; font-size: max(.7rem, 2.4cqw); white-space: nowrap; max-width: 70cqw; overflow: hidden; text-overflow: ellipsis; }
+.rg-last { position: absolute; left: 50%; top: 40px;   /* 28 พ.ย. เดิมอยู่ใต้ป้ายชื่อห้อง (โดนบัง) → ลงมาใต้ป้าย */ transform: translateX(-50%); background: rgba(42,34,56,.78); color: #fff; border-radius: 99px; padding: .6cqw 2cqw; font-size: max(.7rem, 2.4cqw); white-space: nowrap; max-width: 70cqw; overflow: hidden; text-overflow: ellipsis; }
 .rg-bs { display: inline-flex; align-items: center; gap: 6px; }
 .rg-pill.rp { padding: 2px 8px; }
 .rg { position: absolute; inset: 0; pointer-events: none; z-index: 900; }

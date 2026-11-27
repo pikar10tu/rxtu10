@@ -271,6 +271,20 @@ export function chime(kind) {
     src.buffer = buf; src.connect(bp).connect(e).connect(master); src.start(t)
     return
   }
+  if (kind === 'whistle') {   // 😙 ผิวปากทักทาย (ยกมือไฮไฟว์ 28 พ.ย.) ฟวี้-ฟิ้ววว · ไซน์ไล่ความถี่ + สั่นนิดๆ
+    const tone = (at, len, pts, vol) => {
+      const o = ac.createOscillator(), e = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain()
+      o.type = 'sine'; o.frequency.setValueAtTime(pts[0], t + at)
+      pts.slice(1).forEach((f, i) => o.frequency.exponentialRampToValueAtTime(f, t + at + len * (i + 1) / (pts.length - 1)))
+      lfo.frequency.value = 7; lg.gain.value = 18; lfo.connect(lg).connect(o.frequency)
+      e.gain.setValueAtTime(0.0001, t + at); e.gain.exponentialRampToValueAtTime(vol, t + at + 0.03)
+      e.gain.setValueAtTime(vol, t + at + len - 0.06); e.gain.exponentialRampToValueAtTime(0.0001, t + at + len)
+      o.connect(e).connect(master); o.start(t + at); lfo.start(t + at); o.stop(t + at + len + 0.05); lfo.stop(t + at + len + 0.05)
+    }
+    tone(0, 0.2, [1100, 2000], 0.09)
+    tone(0.3, 0.55, [1300, 2200, 1250], 0.09)
+    return
+  }
   if (kind === 'meow') { playMeow(); return }   // เสียงแมวจริง (ไฟล์) สุ่ม 1 ใน 7
   if (kind === 'door') { note(784, 0, 0.9, 0.12); note(659, 0.14, 1.1, 0.1) }   // กริ๊ง
   else { note(520, 0, 0.18, 0.12); note(390, 0.03, 0.2, 0.06) }                 // ป๊อก

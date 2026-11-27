@@ -593,6 +593,18 @@ const AURA = { ...LUX_AURA, ...COSTUME_AURA,
   x47: { type: 'sparkle', color: '#EEF4FF' },
   f15: { type: 'shimmer', color: '#FFFFFF' }, f16: { type: 'shimmer', color: '#FFFFFF' }, f17: { type: 'shimmer', color: '#FFFFFF' }, f18: { type: 'shimmer', color: '#FFFFFF' },
 }
+// ✊ ของในมือทับมือ (27 พ.ย. user) — มือขวาอยู่ col 26–27 แถว 26–27 · [dx, dy, กำปั้น] บวกเพิ่มจาก off เดิม
+//   กำปั้น = วาดนิ้วสีผิวทับด้าม (เฉพาะของมีด้าม) · ไม่แตะลายเดิม แก้พิกัดที่ตารางนี้ที่เดียว
+const GRIP = {
+  i4: [-1, 0, 1], i5: [-1, 0, 1], i7: [0, 0, 1], i15: [0, 0, 1], i21: [-2, 2, 1], i24: [-3, 2, 1],
+  i14: [-2, 0], i16: [-2, 2], i17: [-2, 2], i18: [-2, 3], i20: [-2, 1], i22: [-2, 2], i23: [-2, 2],
+}
+for (const p of PARTS) {
+  const g = GRIP[p.id]; if (!g) continue
+  const [ox, oy] = p.off || [0, 0], dx = ox + g[0], dy = oy + g[1]
+  p.off = [dx, dy]
+  if (g[2]) p.o = [...p.o, P(26 - dx, 26 - dy, 'SS'), P(26 - dx, 27 - dy, 'ss')]
+}
 for (const p of PARTS) { const a = AURA[p.id] ?? AURA[p.variantOf]; if (a) p.aura = a; else delete p.aura }
 
 // 🎁 โบนัสครบเซ็ต (19 พ.ย. 2026 · user) — ใส่ทุกชิ้นในเซ็ตพร้อมกัน = ได้ออร่าเพิ่ม (ชุดสัตว์+ฮู้ดคู่)

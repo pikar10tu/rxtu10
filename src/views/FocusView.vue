@@ -8,7 +8,7 @@
     <header class="fo-head">
       <BackButton aria-label="ย้อนกลับ" @click="$router.back()" />
       <div class="fo-title"><b><Emoji char="🎯" /> Co-working space</b><small>ห้องอ่านหนังสือกับเพื่อน</small></div>
-      <button type="button" class="fo-fb" @click="fbOpen = true"><Emoji char="🐞" /> แจ้งบัค/ข้อเสนอแนะ</button>
+      <button type="button" class="fo-fb" @click="fbOpen = true"><Emoji char="🐞" /> แจ้งบัค<span class="fo-fb-x">/ข้อเสนอแนะ</span></button>
     </header>
 
 
@@ -69,21 +69,47 @@
 
       <!-- แชทแบบเกมออนไลน์ยุคก่อน: มุมซ้ายล่าง ข้อความใหม่อยู่ล่างสุด เก่าดันหายไป · แตะเพื่อเลื่อนอ่านย้อน 50 ข้อความ -->
       <!-- ข้อความทะลุคลิกได้ (pointer-events: none) → จิ้มพื้นมุมซ้ายล่างเดินได้ · เปิดอ่านย้อนด้วยปุ่ม 💬 -->
-      <div class="fo-chat" :class="{ open: chatOpen }" @click.stop>
+      <div v-if="!narrow || chatOpen" class="fo-chat" :class="{ open: chatOpen }" @click.stop>
         <div ref="chatBox" class="fo-chat-in">
           <div v-for="m in (chatOpen ? chat : chat.slice(narrow ? -3 : -5))" :key="m.id" class="fo-line">
             <time>{{ m.time }}</time> <template v-if="m.sys"><b>{{ m.text }}</b></template><template v-else><b>{{ m.who }}:</b> {{ m.text }}</template>
           </div>
         </div>
       </div>
-      <button type="button" class="fo-chat-btn" :class="{ on: chatOpen }" :aria-label="chatOpen ? 'ปิดประวัติแชท' : 'อ่านแชทย้อนหลัง'" @click.stop="chatOpen = !chatOpen"><Emoji char="💬" /></button>
-      <button v-if="fm.state.active && !peeking" type="button" class="fo-hf-btn" :class="{ on: myHandUp }" :aria-pressed="myHandUp" :aria-label="myHandUp ? 'เอามือลง' : 'ยกมือไฮไฟว์ · เพื่อนที่อยู่ใกล้กดด้วยก็ตบกัน'" @click.stop="toggleHand"><Emoji char="✋" /></button>
+      <button v-if="!narrow" type="button" class="fo-chat-btn" :class="{ on: chatOpen }" :aria-label="chatOpen ? 'ปิดประวัติแชท' : 'อ่านแชทย้อนหลัง'" @click.stop="chatOpen = !chatOpen"><Emoji char="💬" /></button>
+      <button v-if="fm.state.active && !peeking && !narrow" type="button" class="fo-hf-btn" :class="{ on: myHandUp }" :aria-pressed="myHandUp" :aria-label="myHandUp ? 'เอามือลง' : 'ยกมือไฮไฟว์ · เพื่อนที่อยู่ใกล้กดด้วยก็ตบกัน'" @click.stop="toggleHand"><Emoji char="✋" /></button>
     </div>
 
-    <form class="fo-say" @submit.prevent="send">
-      <input v-model="draft" maxlength="80" :disabled="!fm.state.active || peeking" :placeholder="!fm.state.active ? 'กดเริ่มโฟกัสก่อนถึงจะคุยได้' : peeking ? 'กำลังดูห้องอื่น · เข้าห้องนี้ก่อนถึงจะคุยได้' : 'พิมพ์คุยกับเพื่อนในห้อง…'" aria-label="ข้อความแชท" autocomplete="off">
+    <!-- 📱 จอแคบ (28 พ.ย. user) → แชทพับเป็นแถบบรรทัดเดียว (ข้อความล่าสุด + ป้ายยังไม่อ่าน) แตะ = บานเลื่อนขึ้นจากล่าง พิมพ์/อ่านย้อนในนั้น · ✋ ปลายแถบ -->
+    <div v-if="narrow" class="fo-cbar">
+      <button type="button" class="fo-cbar-msg" aria-label="เปิดแชท" @click="openDrawer">
+        <Emoji char="💬" />
+        <span class="fo-cbar-t"><template v-if="lastMsg"><template v-if="lastMsg.sys"><b>{{ lastMsg.text }}</b></template><template v-else><b>{{ lastMsg.who }}:</b> {{ lastMsg.text }}</template></template><template v-else>{{ fm.state.active && !peeking ? 'แตะเพื่อคุยกับเพื่อนในห้อง' : 'ยังไม่มีใครคุย' }}</template></span>
+        <i v-if="unread" class="fo-cbar-n">{{ unread > 9 ? '9+' : unread }}</i>
+      </button>
+      <button v-if="fm.state.active && !peeking" type="button" class="fo-btn fo-hf-n" :class="{ on: myHandUp }" :aria-pressed="myHandUp" :aria-label="myHandUp ? 'เอามือลง' : 'ยกมือไฮไฟว์ · เพื่อนที่อยู่ใกล้กดด้วยก็ตบกัน'" @click="toggleHand"><Emoji char="✋" /></button>
+    </div>
+    <form v-else class="fo-say" @submit.prevent="send">
+      <input v-model="draft" maxlength="80" :disabled="!fm.state.active || peeking" :placeholder="sayHint">
       <button type="submit" class="fo-btn">ส่ง</button>
     </form>
+    <Teleport to="body">
+      <Transition name="fo-dw">
+        <div v-if="narrow && drawer" class="fo-dw-bg" @click.self="drawer = false">
+          <div class="fo-dw" role="dialog" aria-label="แชทในห้อง">
+            <div class="fo-dw-head"><b><Emoji char="💬" /> แชท{{ ZONES[ZI].label ? ' · ' + ZONES[ZI].label : '' }}</b><button type="button" class="fo-dw-x" aria-label="พับแชท" @click="drawer = false">✕</button></div>
+            <div ref="drawerBox" class="fo-dw-list">
+              <p v-if="!chat.length" class="fo-muted">ยังไม่มีข้อความ ทักเพื่อนก่อนเลย</p>
+              <div v-for="m in chat" :key="m.id" class="fo-dw-line"><time>{{ m.time }}</time> <template v-if="m.sys"><b>{{ m.text }}</b></template><template v-else><b>{{ m.who }}:</b> {{ m.text }}</template></div>
+            </div>
+            <form class="fo-say" @submit.prevent="send">
+              <input ref="drawerIn" v-model="draft" maxlength="80" :disabled="!fm.state.active || peeking" :placeholder="sayHint">
+              <button type="submit" class="fo-btn primary">ส่ง</button>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- เวลา + เหรียญ + ปุ่ม (ขึ้นเมื่อเข้าห้องแล้ว) -->
     <template v-if="fm.state.active">
@@ -97,7 +123,7 @@
           </div>
           <div class="fo-cap" :class="{ full: fm.capFull.value }" role="progressbar" :aria-valuenow="Math.round(fm.capPct.value * 100)" aria-valuemin="0" aria-valuemax="100" aria-label="กระปุกเหรียญ"><i :style="{ width: fm.capPct.value * 100 + '%' }"></i></div>
           <div class="fo-bank">
-            <small class="fo-capt">{{ fm.capFull.value ? 'กระปุกเต็มแล้ว · กดรับก่อนถึงจะสะสมต่อ' : `สะสม +${house}/วิ · อีก ${capLeft} กระปุกเต็ม` }}</small>
+            <small class="fo-capt">{{ fm.capFull.value ? 'กระปุกเต็มแล้ว · กดรับก่อนถึงจะสะสมต่อ' : (narrow ? `+${house}/วิ · เต็มใน ${String(capLeft).replace(/ /g, '')}` : `สะสม +${house}/วิ · อีก ${capLeft} กระปุกเต็ม`) }}</small>
             <button type="button" class="fo-claim" :disabled="!fm.bankCoins.value || fm.state.claiming" @click="claimCoins"><Emoji char="🪙" /> รับ {{ fm.bankCoins.value.toLocaleString() }}</button>
           </div>
         </div>
@@ -166,7 +192,7 @@
       </div>
       <label class="mp-row mp-vol"><span aria-hidden="true"><Emoji char="🎵" /></span><input type="range" min="0" max="100" :value="audio.music" aria-label="ระดับเสียงเพลง" @input="setVolume('music', +$event.target.value)"><span class="mp-num">{{ audio.music }}</span></label>
       <div class="mp-row mp-amb" role="group" aria-label="เสียงพื้นหลัง">
-        <span class="mp-lbl">เสียงพื้นหลัง</span>
+        <span class="mp-lbl">BGM</span>
         <button type="button" class="mp-q" :aria-expanded="why" aria-label="เสียงพื้นหลังช่วยอะไร" @click="why = !why">?</button>
         <button v-for="n in AMB" :key="n.key" type="button" class="mp-chip" :aria-pressed="audio.noise === n.key || ambLoading(n.key)" :aria-busy="ambLoading(n.key)" @click="!n.key || ambLoading(n.key) ? stopNoise() : playNoise(n.key)"><template v-if="ambLoading(n.key)"><span class="mp-spin" aria-hidden="true"></span> {{ audio.loadPct }}%</template><template v-else>{{ ambError(n.key) ? '⚠️ ' : '' }}{{ n.short }}</template></button>
       </div>
@@ -456,6 +482,21 @@ function toggleHand() {
 function lowerHand() { handPending.value = false; clearTimeout(hfOff); room.patch({ hf: null }) }
 watch(myPres, (p) => { if (raisedAt(p)) handPending.value = false })
 const near = (a, b) => Math.abs(a.x - b.x) <= 30 && Math.abs(a.y - b.y) <= 14
+// 😙 ยกมือ = ผิวปากทักทาย (เพื่อนที่ไม่ได้มองจอก็ได้ยิน) · ถ้ามีคนยกมือรออยู่ใกล้ๆ แล้ว = ตบกันเลย ไม่ต้องผิวปาก (28 พ.ย. user)
+const hfHeard = new Set()
+let hfPrimed = false
+watch(() => room.people.value, (list) => {
+  const up = list.filter(p => p.zone === viewZone.value && handUp(p) && typeof p.x === 'number')
+  for (const p of up) {
+    const key = p.uid + ':' + raisedAt(p)
+    if (hfHeard.has(key)) continue
+    hfHeard.add(key)
+    if (!hfPrimed || !fm.state.active) continue   // มือที่ยกค้างอยู่ก่อนเราเปิดหน้า ไม่ต้องผิวปาก
+    const pair = up.some(q => q.uid !== p.uid && raisedAt(q) < raisedAt(p) && near(p, q))
+    if (!pair && !document.hidden && !saver.value) chime('whistle')   // เฉพาะคนที่เปิดหน้าห้องอยู่ · พับจอ/โหมดโฟกัส/ไปทำข้อสอบ = ไม่ได้ยิน
+  }
+  hfPrimed = true
+})
 const claps = ref([])
 const clapped = new Set()
 let clapId = 0
@@ -528,6 +569,16 @@ watch(() => room.chat.value, (list) => {
   nextTick(() => { if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight })
 })
 const draft = ref('')
+const sayHint = computed(() => (!fm.state.active ? 'กดเริ่มโฟกัสก่อนถึงจะคุยได้' : peeking.value ? 'กำลังดูห้องอื่น · เข้าห้องนี้ก่อนถึงจะคุยได้' : 'พิมพ์คุยกับเพื่อนในห้อง…'))
+// 📱 บานแชท (จอแคบ) · ยังไม่อ่าน = ข้อความหลังเปิดบานครั้งล่าสุด (ไม่นับของตัวเอง)
+const drawer = ref(false), drawerBox = ref(null), drawerIn = ref(null), readUpTo = ref(0)
+const lastMsg = computed(() => chat.value[chat.value.length - 1] || null)
+const unread = computed(() => (drawer.value ? 0 : room.chat.value.slice(readUpTo.value).filter(m => m.uid !== room.myUid()).length))
+const dwScroll = () => nextTick(() => { if (drawerBox.value) drawerBox.value.scrollTop = drawerBox.value.scrollHeight })
+function openDrawer() { drawer.value = true; dwScroll(); if (fm.state.active && !peeking.value) nextTick(() => drawerIn.value?.focus()) }
+watch([drawer, () => room.chat.value.length], () => { if (drawer.value) { readUpTo.value = room.chat.value.length; dwScroll() } })
+watch(() => room.chat.value.length, (n, o) => { if (!o) readUpTo.value = n })   // ประวัติชุดแรกตอนเข้าห้อง = อ่านแล้ว
+watch(narrow, (n) => { if (!n) drawer.value = false })
 let lastSend = 0
 function send() {
   if (!fm.state.active || peeking.value || !draft.value.trim()) return
@@ -767,6 +818,40 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-chat-btn { display: block; }
 .fo-chat:not(.open) { left: 42px; }
 .fo-say { display: flex; gap: 6px; }
+.fo-hf-n { padding: 0 10px; }
+.fo-cbar { display: flex; gap: 6px; }
+.fo-cbar-msg { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; font-family: inherit; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 6px 10px; cursor: pointer; }
+.fo-cbar-t { flex: 1; min-width: 0; font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.fo-cbar-t b { color: var(--text); }
+.fo-cbar-n { font-style: normal; font-size: .65rem; font-weight: 800; color: #fff; background: #ef4444; border-radius: 99px; padding: 1px 6px; }
+.fo-dw-bg { position: fixed; inset: 0; z-index: 3000; background: rgba(15,23,42,.25); display: flex; align-items: flex-end; }
+.fo-dw { width: 100%; max-height: 55vh; display: flex; flex-direction: column; gap: 8px; background: var(--surface); border-radius: 16px 16px 0 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 24px rgba(0,0,0,.18); }
+.fo-dw-head { display: flex; align-items: center; justify-content: space-between; font-size: .85rem; }
+.fo-dw-x { border: 0; background: none; font-size: 1rem; color: var(--muted); cursor: pointer; padding: 2px 6px; }
+.fo-dw-list { flex: 1; min-height: 80px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+.fo-dw-line { font-size: .78rem; line-height: 1.35; word-break: break-word; }
+.fo-dw-line time { color: var(--muted); font-size: .68rem; font-variant-numeric: tabular-nums; }
+.fo-dw-enter-active, .fo-dw-leave-active { transition: background .2s; }
+.fo-dw-enter-active .fo-dw, .fo-dw-leave-active .fo-dw { transition: transform .22s ease; }
+.fo-dw-enter-from, .fo-dw-leave-to { background: transparent; }
+.fo-dw-enter-from .fo-dw, .fo-dw-leave-to .fo-dw { transform: translateY(100%); }
+.fo-hf-n.on { background: var(--accent); }
+.fo-hf-n.on :deep(*) { animation: fo-wave 1s ease-in-out infinite; transform-origin: bottom center; }
+@media (max-width: 440px) {
+  .fo-fb-x { display: none; }
+  .fo-title b { font-size: .95rem; }
+  .fo-zsw span { font-size: .78rem; padding: 2px 10px !important; }
+  .fo-zsw button { width: 26px; height: 26px; font-size: .95rem; }
+  .fo-label { margin-bottom: -3px; }
+  .fo-nm, .fo-st { font-size: .6rem; padding: 0 3px; border-radius: 4px; }
+  .fo-coin { font-size: .66rem; margin-bottom: 14px; }
+  .fo-bubble { margin-bottom: 16px; font-size: .66rem; max-width: 110px; padding: 2px 6px; }
+  .fo-capt { font-size: .6rem; white-space: nowrap; letter-spacing: -.01em; }
+  .fo-bank .fo-claim { padding: 4px 8px; font-size: .7rem; }
+  .fo-bank { gap: 2px; }
+  .mp-amb { flex-wrap: nowrap; gap: 4px; }
+  .mp-chip { padding: 3px 7px; font-size: .68rem; white-space: nowrap; }
+}
 .fo-say input { flex: 1; min-width: 0; font-family: inherit; font-size: .9rem; border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; background: var(--surface); color: var(--text); }
 
 .fo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
