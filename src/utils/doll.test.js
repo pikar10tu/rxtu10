@@ -132,3 +132,10 @@ test('Diorx ใส่ 2 ใน 3 ก็ได้ออร่าเซ็ต · 1
   assert.equal(setsWorn({ ...base, r: 'a22', n: 'n18' }).filter(s => s.label === 'Diorx ครบเซ็ต').length, 1)
   assert.equal(setsWorn({ ...base, i: 'i28' }).filter(s => s.id.startsWith('diorx')).length, 0)
 })
+
+test('เทพจิ้งจอกสีปน → ออร่าสีหางสีเดียว', async () => {
+  const { setsWorn } = await import('./doll.js')
+  const ids = eq => setsWorn(eq).filter(s => s.id.startsWith('kitsune')).map(s => s.id)
+  assert.deepEqual(ids({ t: 'f62', w: 'w25', x: 'x54' }), ['kitsune_gold'])
+  assert.deepEqual(ids({ t: 'f62', x: 'x56' }), ['kitsune_sakura'])
+})

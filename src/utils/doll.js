@@ -120,6 +120,8 @@ export function aurasOf(eq) {
 
 /** เซ็ตติดไหม: ใส่ครบ หรือถึงขั้นต่ำ set.min (Diorx 2 ใน 3 · 27 พ.ย. user) */
 export const setActive = (s, worn) => s.parts.filter(id => worn.has(id)).length >= (s.min || s.parts.length)
+  // เซ็ตกลุ่มเดียวกัน (เทพจิ้งจอก 4 สี) ใส่สีปนได้ออร่าสีเดียว: สีหาง (lead) เป็นหลัก · 27 พ.ย. user
+  && !(s.lead && !worn.has(s.lead) && SETS.some(o => o.group === s.group && worn.has(o.lead)))
 
 /** เซ็ตที่ใส่ครบอยู่ (โชว์ป้ายในห้องแต่งตัว) */
 export function setsWorn(eq) {

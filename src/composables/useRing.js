@@ -23,14 +23,19 @@ export const STALE_MS = 15 * 60 * 1000  // ไฟต์ค้างนานผ�
 export const ringFx = reactive({ hands: {}, cls: {} })
 const match = ref(null)
 const board = ref([])
-let subs = 0, offM = null, offB = null
+const wins = ref([])   // 27 พ.ย. ยอดชนะถาวร focus/ring/wins/{uid} {name,n} — เดิมนับจาก 60 ไฟต์ล่าสุด ยอดเลยลดเอง
+let subs = 0, offM = null, offB = null, offW = null
 function attach() {
   offM = onValue(dbRef(rtdb(), M), (s) => { match.value = s.val() }, () => { match.value = null })
   offB = onValue(query(dbRef(rtdb(), 'focus/ring/board'), limitToLast(60)), (s) => {
     const out = []; s.forEach(c => { const v = c.val(); if (v) out.push({ id: c.key, ...v }) }); board.value = out.reverse()
   }, () => { board.value = [] })
+  offW = onValue(dbRef(rtdb(), 'focus/ring/wins'), (s) => {
+    const out = []; s.forEach(c => { const v = c.val(); if (v?.n) out.push({ uid: c.key, name: v.name, wins: v.n }) })
+    wins.value = out.sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name, 'th')).slice(0, 5)
+  }, () => { wins.value = [] })
 }
-function detach() { offM?.(); offB?.(); offM = offB = null }
+function detach() { offM?.(); offB?.(); offW?.(); offM = offB = offW = null }
 
 // ตัวเราอยู่บนเวทีไหม (FocusView ห้ามเดินระหว่างชก)
 // ล็อกตั้งแต่ขึ้นเวทีจนเวทีถูกล้าง (รวมช่วงฉลองหลังจบ) · เวทีหมดอายุ (รอคู่ชกเกิน 3 นาที/ค้าง) = ปลดล็อก
@@ -94,6 +99,11 @@ export function useRing() {
     for (const s of ['r', 'b']) if (mySide.value === s) onDisconnect(dbRef(rtdb(), `${M}/${s}`)).cancel().catch(() => {})
     runTransaction(dbRef(rtdb(), M), (cur) => (cur && cur.id === id ? null : undefined)).catch(() => {})
   }
+  /** คนชนะบวกยอดตัวเอง +1 (rules บังคับทีละ 1) */
+  function addWin(name) {
+    const me = uid(); if (!me) return
+    runTransaction(dbRef(rtdb(), `focus/ring/wins/${me}`), (cur) => ({ name: cleanText(name || 'เพื่อน', 24), n: (cur?.n || 0) + 1 })).catch(() => {})
+  }
   function release() { if (--subs === 0) detach() }
-  return { match, board, mySide, state, claim, throwHand, leaveRing, finish, record, clear, release, isStale }
+  return { match, board, wins, addWin, mySide, state, claim, throwHand, leaveRing, finish, record, clear, release, isStale }
 }

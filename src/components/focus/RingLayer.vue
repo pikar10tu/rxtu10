@@ -44,7 +44,7 @@
     <div class="rg-board">
       <template v-if="ranking.length">
         <b>อันดับชนะ</b>
-        <ol><li v-for="(r, i) in ranking" :key="r.name"><span>{{ ['🥇', '🥈', '🥉'][i] || i + 1 + '.' }} {{ r.name }}</span><span>{{ r.wins }} ครั้ง</span></li></ol>
+        <ol><li v-for="(r, i) in ranking" :key="r.uid"><span>{{ ['🥇', '🥈', '🥉'][i] || i + 1 + '.' }} {{ r.name }}</span><span>{{ r.wins }} ครั้ง</span></li></ol>
       </template>
       <b>ไฟต์ล่าสุด</b>
       <p v-if="!ring.board.value.length" class="rg-empty">ยังไม่มีใครขึ้นชก เป็นคนแรกเลย</p>
@@ -172,7 +172,7 @@ async function playEnd(winner, forfeit) {
   // ปิดไฟต์ครั้งเดียว: คนที่ได้ done = เขียนกระดาน + แชต
   const score = shownScore.value
   // 🏅 ชุดนักมวย: นับเฉพาะชนะจริง (คู่ชกหนีไม่นับ กันปั๊ม) · ทุกเครื่องเห็นผล แต่เขียนเฉพาะคนชนะของตัวเอง
-  if (!forfeit && cur[winner]?.uid && cur[winner].uid === useAuthStore().currentUser?.uid) bumpQuest('ringWin', cur.id)
+  if (!forfeit && cur[winner]?.uid && cur[winner].uid === useAuthStore().currentUser?.uid) { bumpQuest('ringWin', cur.id); ring.addWin(wName) }
   if (await ring.finish(cur.id)) {
     room.say('ring', resultText({ wName, lName, score, winner, forfeit }), { sys: 'ring' })
     ring.record({ w: wName, l: lName, s: forfeit ? '' : scoreText(score, winner), ...(forfeit ? { f: true } : {}) })
@@ -252,7 +252,7 @@ watch(() => [mySide.value, !!m.value?.b], ([side, hasB]) => {
   clearTimeout(waitDownT)
   if (side && !hasB) waitDownT = setTimeout(() => { if (mySide.value && !m.value?.b) stepDown() }, WAIT_MS + 1000)
 }, { immediate: true })
-const ranking = computed(() => ringRanking(ring.board.value))
+const ranking = computed(() => ring.wins.value)   // ยอดถาวร ไม่ใช่ 60 ไฟต์ล่าสุด
 const boardOpen = ref(false)
 onBeforeUnmount(() => { if (waitMsg && !m.value?.b) dropWaitMsg(); clearRingFx(); clearTimeout(waitDownT); clearTimeout(pickTimer); clearTimeout(waitTimer); ring.release(); room.release() })
 </script>

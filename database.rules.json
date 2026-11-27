@@ -253,6 +253,12 @@
             }
           }
         },
+        "wins": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('n').isNumber() && newData.child('n').val() === (data.exists() ? data.child('n').val() + 1 : 1)"
+          }
+        },
         "board": {
           ".indexOn": ["at"],
           "$id": {
