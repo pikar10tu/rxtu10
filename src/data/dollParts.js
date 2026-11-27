@@ -6,6 +6,7 @@
 import EDITS from './dollEdits.js'
 import ART_PARTS from './dollPartsArt.js'
 import { LIMITED_PARTS, LIMITED_SETS } from './dollLimited.js'
+import { COSTUME_PARTS, COSTUME_PRICE, COSTUME_SETS, COSTUME_AURA } from './dollCostume.js'   // 👑🛡️ คอสตูม 27 พ.ย.
 import { LUX_PARTS, LUX_PRICE, LUX_AURA, LUX_SETS } from './dollLuxury.js'   // 💎 Diorx 27 พ.ย.   // 🏅 ชุดภารกิจ 27 พ.ย.
 export const W = 40, H = 44, PAD = 4;
 // 🪽 ชิ้นแบบสติกเกอร์ (19 พ.ย. 2026): วาดแยกเป็นภาพของตัวเอง แล้วติดที่ "จุดยึด" บนตัว
@@ -380,6 +381,7 @@ export const PARTS = [
   I('w28', 'w', 'fantasy', 'ปีกสายรุ้ง', { limited: true, back: [P(8, 9, 'WW'), P(5, 10, 'WWWWW'), P(3, 11, 'WWWWWWWW'), P(2, 12, 'WWWWWWWWWW'), P(1, 13, 'RRWWWWWWWWW'), P(1, 14, 'OORRWWWWWWW'), P(1, 15, 'YYOORRWWWWg'), P(2, 16, 'GGYYOORWWg'), P(2, 17, 'BBGGYYOOg'), P(3, 18, 'VBBGGYYg'), P(4, 19, 'VVBBGG'), P(5, 20, 'VVBB'), P(6, 21, 'VV')], pal: { W: '#FFFFFF', g: '#D9DEE8', R: '#FF9AA2', O: '#FFC48C', Y: '#FFE88A', G: '#A8E6B8', B: '#9DD0F5', V: '#C9B0F0' } }),
   ...LIMITED_PARTS,
   ...LUX_PARTS,
+  ...COSTUME_PARTS,
 ];
 // 💎 27 พ.ย. user: แยกช่อง 'แว่น/หน้า' → แว่น (a) + เครื่องประดับหน้า (r) ให้ใส่ต่างหู/แมสก์พร้อมแว่นได้ · id เดิมไม่เปลี่ยน (รหัส dl ถอดตามช่องของชิ้นเอง)
 // คนที่ใส่ชิ้นพวกนี้ไว้ในช่อง a → migrateEq() ใน utils/doll.js ย้ายให้ตอนโหลด
@@ -490,7 +492,7 @@ for (const p of PARTS) if (OFF[p.id]) p.off = OFF[p.id]
 export const FREE = new Set(['h1', 'h2', 'h3', 'e1', 'e2', 'm1', 'm5', 't1', 't5', 'b2', 'b4', 'k1'])
 // 19 พ.ย. user: ของธรรมดาไม่ต้องแพง · ของแพง (ปีก/ชุดโชว์) มีออร่า
 const THEME_PRICE = { basic: 3000, uniform: 10000, sport: 10000, fashion: 15000, cute: 15000, fantasy: 60000 }
-const PRICE_OVERRIDE = { ...LUX_PRICE,
+const PRICE_OVERRIDE = { ...LUX_PRICE, ...COSTUME_PRICE,
   // ชุดสัตว์เต็มตัว แพงกว่าเสื้อทั่วไป (ฮู้ดราคาปกติของ cute)
   n1: 60000, x41: 150000,
   f19: 400000, f20: 400000, f21: 400000, f22: 400000, x39: 150000, x40: 150000,
@@ -520,7 +522,7 @@ for (const p of PARTS) p.price = FREE.has(p.id) ? 0 : (PRICE_OVERRIDE[p.id] ?? P
 // sparkle = ประกายพิกเซลกระพริบรอบตัว · glow = เรืองแสงนุ่มรอบขอบ
 // 🔗 ใส่คู่กันแล้วไม่ซ้อน (user 19 พ.ย.): ชุด = ออร่ารอบตัว (glow/ring) · หมวก/ปีก/ผ้าคลุม = อนุภาค (ดู utils/dollAura.js)
 // ⚠️ ห้ามใส่คอมเมนต์ // ท้ายบรรทัดที่มีหลาย id — เคยกิน id ที่ตามมาจนออร่าหายเงียบ (มีเทสต์คุม)
-const AURA = { ...LUX_AURA,
+const AURA = { ...LUX_AURA, ...COSTUME_AURA,
   // ── ปีก/ผ้าคลุม = อนุภาค ──
   w1: { type: 'petals', color: '#FFFFFF' },        // ปีกนางฟ้า: ขนนกปลิว
   w7: { type: 'sparkle', color: '#FFFFFF' },       // ปีกนางฟ้าจิ๋ว
@@ -612,6 +614,7 @@ export const SETS = [
   { id: 'panda', label: 'แพนด้าครบเซ็ต', parts: ['f13', 'x24'], aura: { type: 'petals', color: '#9ED98C' } },
   ...LIMITED_SETS,
   ...LUX_SETS,
+  ...COSTUME_SETS,
 ]
 
 // 🆕 ของใหม่ (ป้าย "ใหม่" + ตัวกรองในห้องแต่งตัว) — ใส่ id ตอนเพิ่มของเข้าร้านหลังเปิดใช้ แล้วเอาออกเมื่อเก่าแล้ว

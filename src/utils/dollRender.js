@@ -102,6 +102,8 @@ export function composeWide(eq, { bare = false } = {}) {
       if (p) { const pal = { ...glob, ...p.pal }; apply(g, p.back, pal, true); apply(g, p.ob, pal, false) }
       continue
     }
+    // ปีก/หลังที่มีสายคาดหน้า (fm สะท้อน / fo ไม่สะท้อน) วาดทับเสื้อผ้า ก่อนผ้าพันคอ · 27 พ.ย. อุปกรณ์เคลื่อนย้าย 4 มิติ
+    if (k === 'n' && !hidden.has('w')) { const q = PART[eq.w]; if (q?.fm || q?.fo) { const qp = { ...glob, ...q.pal }; apply(g, q.fm, qp, true, false, q.off); apply(g, q.fo, qp, false, false, q.off) } }
     if (k === 'i') handBefore = HAND.map(([x, y]) => g[y][x + XM])
     if (hidden.has(k)) continue
     const p = PART[eq[k]]
