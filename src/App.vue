@@ -54,6 +54,7 @@ import { useUsageStore } from './stores/usage.js'
 import { useAppConfig } from './composables/useAppConfig.js'
 import { runIntegrityCheck } from './composables/useGuard.js'
 import { initAchievements } from './composables/useAchievements.js'
+import { initDollQuests } from './composables/useDollQuests.js'
 import { useNavDots } from './composables/useNavDots.js'
 import ToastContainer   from './components/layout/ToastContainer.vue'
 import ConfirmModal     from './components/layout/ConfirmModal.vue'
@@ -82,6 +83,7 @@ const authStore = useAuthStore()
 const usage = useUsageStore()
 const { maintenance, configLoaded } = useAppConfig()
 initAchievements()
+initDollQuests()   // 🏅 ชุดภารกิจปลดล็อค → บอลลูน
 // จุดแดงนำทางบนแถบล่าง: รายได้เกินครึ่ง → Home · พืชสุก → Play
 const { homeDot, playDot } = useNavDots()
 

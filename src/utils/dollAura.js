@@ -21,6 +21,7 @@ export const AURA_TYPES = {
   wind: 'ลมพัด',
   foxfire: 'ไฟจิ้งจอก',
   rainbow: 'สาดสีรุ้ง',
+  glint: 'วิ้งที่ต่างหู',
 }
 export const BODY_AURAS = ['glow', 'ring', 'rainbow']
 
@@ -41,6 +42,8 @@ const LAYOUT = {
   apples: [[14, 70, 0], [80, 62, 1.0], [8, 42, 2.0], [86, 32, 2.9], [24, 86, 2.4]],
   // ไฟจิ้งจอก (23 พ.ย.) ลอยวนข้างตัวช้าๆ ระดับเอว-ไหล่ ไม่ทับหน้า
   foxfire: [[8, 36, 0], [88, 30, 1.1], [14, 62, 2.2], [84, 58, 0.6], [4, 48, 1.7], [92, 46, 2.8]],
+  // ✦ วิ้งที่ต่างหู (27 พ.ย. Diorx) — ตรงมุกทั้งสองข้าง (พิกัดตัว col 13/26 แถว 13 → % ของกรอบ)
+  glint: [[39, 35, 0], [61, 35, 1.3]],
   wind: [[2, 40, 0], [62, 30, 0.8], [8, 64, 1.6], [60, 56, 0.4], [30, 20, 1.2]],
   // ชนิดพ่วง
   // 🎨 สาดสีรุ้ง (ชุดเบค 27 พ.ย.) หยดสีกระเด็นออกจากตัวรอบทิศ · สีวนรุ้งตามลำดับ (ไม่ใช้ --au ของชิ้น)
@@ -66,7 +69,8 @@ export function auraLayers(auras = []) {
   const floors = uniq.filter(a => a.type === 'flame' || a.type === 'ring').map(a => a.color)
   // อนุภาค: ไม่เกิน 3 แหล่ง (แพงสุดก่อน) กันรกและแลคตอนใส่หลายชิ้น · ชนิดพ่วงตามแหล่งที่ได้โชว์เท่านั้น
   const PART_SRC_MAX = 3
-  const srcs = uniq.filter(a => LAYOUT[a.type] || EXTRA[a.type]).slice(0, PART_SRC_MAX)
+  // glint (วิ้งที่ต่างหู) จุดเล็ก 2 จุด ไม่นับเพดาน — ไม่งั้นครบเซ็ตแล้ววิ้งต่างหูหาย
+  const srcs = [...uniq.filter(a => a.type !== 'glint' && (LAYOUT[a.type] || EXTRA[a.type])).slice(0, PART_SRC_MAX), ...uniq.filter(a => a.type === 'glint')]
   const list = [...srcs, ...srcs.filter(a => EXTRA[a.type]).map(a => ({ type: EXTRA[a.type], color: a.color }))]
   const particles = []
   const seen = {}

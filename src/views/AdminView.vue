@@ -133,6 +133,7 @@
             <button v-if="f.category === 'coffee' && f.reporterUid" class="btn-mini btn-gold" :disabled="coffeeBusy === f.id" @click="approveCoffee(f)">
               {{ coffeeBusy === f.id ? 'กำลังส่ง…' : `☕ เจอยอด ${f.amount} แล้ว · ส่งจดหมายขอบคุณ` }}
             </button>
+            <button v-if="f.category === 'coffee'" class="btn-mini" :disabled="coffeeBusy === f.id" @click="editCoffeeAmount(f)">✏️ แก้ยอด</button>
             <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ f.category === 'coffee' ? 'แจ้งโอนเมื่อ ' : '' }}{{ fmtTs(f.ts) }}</div>
           </li>
         </ul>
@@ -1176,6 +1177,15 @@ const fbCatLabel = (c) => ({ idea: '💡 ไอเดีย', bug: '🐞 ปั�
 // ☕ อนุมัติเลี้ยงกาแฟ (27 พ.ย. 2026): แอดมินเทียบยอดเฉพาะตัว (เศษสตางค์) ในแอปธนาคารแล้วกด → จดหมายขอบคุณ + ชุดเบค (เฉพาะชิ้นที่ยังไม่มี)
 // doc id ตายตัว coffee-<feedbackId> กันกดซ้ำแล้วได้ 2 ฉบับ · ส่งแล้วลบรายการ feedback
 const coffeeBusy = ref(null)
+// ✏️ 27 พ.ย. user: เพื่อนพิมยอดผิด → แอดมินแก้เป็นยอดจริงก่อนกดส่ง (เหรียญในจดหมายคิดจากยอดนี้)
+async function editCoffeeAmount(f) {
+  const raw = window.prompt(`ยอดที่ถูกต้องของ ${f.reporterName || 'ไม่ระบุ'} (บาท)`, f.amount ?? '')
+  if (raw == null) return
+  const n = Math.round(Number(String(raw).replace(/[,\s]/g, '')))
+  if (!Number.isFinite(n) || n <= 0 || n > 100000) { toast('ยอดไม่ถูกต้อง', 'error'); return }
+  try { await updateDoc(doc(db, 'feedback', f.id), { amount: n }); f.amount = n; toast(`แก้ยอดเป็น ${n} บาทแล้ว`, 'success') }
+  catch (e) { console.error('[coffee amount]', e); toast('แก้ไม่สำเร็จ', 'error') }
+}
 async function approveCoffee(f) {
   if (coffeeBusy.value) return
   coffeeBusy.value = f.id

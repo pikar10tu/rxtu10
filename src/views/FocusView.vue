@@ -25,7 +25,7 @@
       <button v-if="viewZone === 'cafe'" type="button" class="fo-coffee" aria-label="เคาน์เตอร์คาเฟ่ เลี้ยงกาแฟผู้พัฒนา" @click.stop="openCoffee"><span><Emoji char="☕" /></span></button>
       <div class="fo-zsw" @click.stop>
         <button type="button" aria-label="โซนก่อนหน้า" @click="stepZone(-1)">‹</button>
-        <span>{{ ZONES[ZI].label }}</span>
+        <span>{{ ZONES[ZI].label }} <small>{{ headIn(viewZone) }}/{{ ROOM_CAP }}</small></span>
         <button type="button" aria-label="โซนถัดไป" @click="stepZone(1)">›</button>
       </div>
       <div v-for="(c, i) in zoneCounters(viewZone)" :key="'c' + i" class="fo-ent fo-desk" :style="entStyle(c[0], c[1], c[1] + 8.4)">
@@ -255,7 +255,14 @@ function setView(z) {
   room.watchChat(z)
   if (!fm.state.active) fm.setZone(z)
 }
-function moveHere() { pickZone(viewZone.value) }
+function moveHere() {
+  if (roomFull(viewZone.value)) { toast(`ห้องนี้เต็มแล้ว (${ROOM_CAP} คน) ลองห้องอื่นนะ`, 'error'); return }
+  pickZone(viewZone.value)
+}
+// 👥 27 พ.ย. user: ห้องละไม่เกิน 20 คน กันแลค · นับคนอื่นในห้อง (ไม่นับตัวเอง)
+const ROOM_CAP = 20
+const headIn = (z) => room.people.value.filter(p => p.zone === z).length
+const roomFull = (z) => room.people.value.filter(p => p.zone === z && p.uid !== room.myUid()).length >= ROOM_CAP
 // 🥊 ขึ้น/ลงเวที: เดินไปมุม (ไม่หลบสิ่งกีดขวาง ห้องนี้โล่ง) แล้วบอกตำแหน่ง
 function ringGoto([x, y]) { me.seat = -1; walkTo(me, x, y, () => room.patch({ seat: -1, x, y })) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
@@ -532,6 +539,12 @@ const listOpen = ref(false)
 const why = ref(false)
 async function join() {   // เข้าห้อง: เดินจากประตูล่างกลางไปที่นั่งว่าง แล้วเริ่มจับเวลา
   // 📱 นับเครื่องเดียว: มีอีกเครื่องนั่งอยู่ → ถามก่อน ยืนยันแล้วเครื่องนั้นออก
+  if (roomFull(fm.state.zone)) {   // เต็ม → ย้ายไปห้องที่ยังว่างให้เอง · เต็มหมด = เข้าไม่ได้
+    const alt = ZONES.find(z => !roomFull(z.key))
+    if (!alt) { toast('ทุกห้องเต็มหมดแล้ว รอสักครู่นะ', 'error'); return }
+    toast(`${ZONES.find(z => z.key === fm.state.zone)?.label} เต็มแล้ว พาไป ${alt.label} แทนนะ`)
+    fm.setZone(alt.key); viewedAt = Date.now(); viewZone.value = alt.key; room.watchChat(alt.key)
+  }
   if (await room.otherDevice() && !await confirm('ตอนนี้คุณนั่งอยู่ในห้องจากอีกเครื่อง 📱\nเข้าจากเครื่องนี้แทน?\nเครื่องก่อนหน้าจะออกจากห้อง')) return
   fm.enter()
   const seat = freeSeatIn(fm.state.zone)

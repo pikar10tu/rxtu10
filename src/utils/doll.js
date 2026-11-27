@@ -3,8 +3,20 @@
 // แบบเดียวกับ utils/cosmetics.js: ซื้อครั้งเดียวเก็บถาวร · ใส่ได้ช่องละ 1 · ลองใส่ก่อนซื้อ · ซื้อรวดเดียวทั้งชุดที่ลอง
 import { hiddenSlots } from './dollRender.js'
 import { PART, SKINS, HAIRC, FREE, DEFAULT_EQ, REQUIRED, SETS } from '../data/dollParts.js'
+import { questUnlocked } from './dollQuests.js'
 
-const SLOT_KEYS = ['s', 'c', 'h', 'e', 'm', 'f', 'j', 't', 'b', 'k', 'n', 'x', 'a', 'i', 'w']
+const SLOT_KEYS = ['s', 'c', 'h', 'e', 'm', 'f', 'j', 't', 'b', 'k', 'n', 'x', 'a', 'r', 'i', 'w']
+
+/** ชิ้นที่เคยอยู่ช่องอื่นแล้วย้ายช่อง (27 พ.ย. แมสก์/ต่างหู a → r) — ย้ายตาม slot ปัจจุบันของชิ้น · ช่องปลายทางมีของอยู่แล้วไม่ทับ */
+export function migrateEq(eq) {
+  if (!eq || typeof eq !== 'object') return eq
+  const out = { ...eq }
+  for (const [k, id] of Object.entries(eq)) {
+    const s = PART[id]?.slot
+    if (s && s !== k && k !== 's' && k !== 'c') { delete out[k]; if (!out[s]) out[s] = id }
+  }
+  return out
+}
 const isColor = (k, v) => (k === 's' ? SKINS : HAIRC).some(o => o.id === v)
 
 /** ชิ้นนี้ฟรีไหม (สีผิว/สีผมฟรีหมด) */
@@ -13,9 +25,11 @@ export const isFree = (id) => FREE.has(id)
 /** ของที่มี + ชุดที่ใส่ จาก user doc — กันค่าเพี้ยน/ชิ้นที่ถูกลบ/ใส่ของที่ไม่มี */
 export function dollOf(u) {
   const d = u?.doll || {}
-  const owned = Array.isArray(d.owned) ? d.owned.filter(id => PART[id] && !isFree(id)) : []
+  const bought = Array.isArray(d.owned) ? d.owned.filter(id => PART[id] && !isFree(id)) : []
+  // 🏅 ชุดภารกิจ: ทำเงื่อนไขครบ = มีของ (ไม่ต้องเขียน owned · 27 พ.ย.)
+  const owned = [...new Set([...bought, ...questUnlocked(u)])]
   const has = (id) => isFree(id) || owned.includes(id)
-  const raw = d.eq && typeof d.eq === 'object' ? d.eq : DEFAULT_EQ   // ยังไม่เคยแต่ง = ชุดเริ่มต้น (รวมรองเท้า)
+  const raw = d.eq && typeof d.eq === 'object' ? migrateEq(d.eq) : DEFAULT_EQ   // ยังไม่เคยแต่ง = ชุดเริ่มต้น (รวมรองเท้า)
   const eq = {}
   for (const k of SLOT_KEYS) {
     const v = raw[k]
@@ -97,7 +111,10 @@ export function aurasOf(eq) {
   const auras = list.sort((a, b) => b.price - a.price).map(p => p.aura)
   // 🎁 ครบเซ็ต → ออร่าเพิ่ม
   const worn = new Set(Object.entries(eq || {}).filter(([k, id]) => PART[id]?.slot === k).map(([, id]) => id))
-  for (const set of SETS) if (set.parts.every(id => worn.has(id))) auras.push(set.aura)
+  // 27 พ.ย. user: ครบเซ็ตทุกเซ็ต = เส้นแสงเรืองรอบตัว (glow) ยืนพื้น + ออร่าเฉพาะเซ็ต (หมอก/อนุภาค) · ขึ้นหน้าแถวให้ไม่โดนตัดเพดานอนุภาค 3 แหล่ง
+  const setAuras = []
+  for (const set of SETS) if (set.parts.every(id => worn.has(id))) setAuras.push({ type: 'glow', color: set.glow || set.aura.color }, set.aura)
+  auras.unshift(...setAuras)
   return auras
 }
 

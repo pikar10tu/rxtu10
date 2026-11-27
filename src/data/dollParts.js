@@ -5,6 +5,8 @@
 // 18 พ.ย.: แขนยาวขึ้น 1 แถว (มือแถว 26–27) user เลือกแบบ B · ชุด/กระโปรงทับมือได้เพราะ base วาดก่อนเสื้อผ้าเสมอ
 import EDITS from './dollEdits.js'
 import ART_PARTS from './dollPartsArt.js'
+import { LIMITED_PARTS, LIMITED_SETS } from './dollLimited.js'
+import { LUX_PARTS, LUX_PRICE, LUX_AURA, LUX_SETS } from './dollLuxury.js'   // 💎 Diorx 27 พ.ย.   // 🏅 ชุดภารกิจ 27 พ.ย.
 export const W = 40, H = 44, PAD = 4;
 // 🪽 ชิ้นแบบสติกเกอร์ (19 พ.ย. 2026): วาดแยกเป็นภาพของตัวเอง แล้วติดที่ "จุดยึด" บนตัว
 // กรอบรวมกว้างขึ้นข้างละ XM ให้ปีกกางพ้นตัวได้ (ตัวยังอยู่กริด 40x44 เดิม)
@@ -45,7 +47,7 @@ export const HAIRC = [
 export const SLOTS = [
   { k: 'h', label: 'ทรงผม' }, { k: 'e', label: 'ตา' }, { k: 'm', label: 'ปาก' },
   { k: 'f', label: 'หนวด/เครา' }, { k: 'j', label: 'แก้ม' }, { k: 't', label: 'เสื้อ/ชุด' }, { k: 'b', label: 'ท่อนล่าง' }, { k: 'k', label: 'รองเท้า' },
-  { k: 'n', label: 'ผ้าพันคอ/สร้อย' }, { k: 'x', label: 'หมวก' }, { k: 'a', label: 'แว่น/หน้า' },
+  { k: 'n', label: 'ผ้าพันคอ/สร้อย' }, { k: 'x', label: 'หมวก' }, { k: 'a', label: 'แว่น' }, { k: 'r', label: 'เครื่องประดับหน้า' },
   { k: 'i', label: 'ในมือ' }, { k: 'w', label: 'ปีก/หลัง' },
 ];
 export const THEMES = { basic: 'พื้นฐาน', fashion: 'แฟชั่น', uniform: 'ยูนิฟอร์ม', fantasy: 'แฟนซี', cute: 'น่ารัก', sport: 'กีฬา' };
@@ -376,7 +378,13 @@ export const PARTS = [
   I('f64', 't', 'fashion', 'ชุดเบคเต็มตัว', { limited: true, full: true, o: [P(15, 17, 'KKKSSSSKKK'), P(12, 18, 'KGGRKKKSSYYKKkKK'), P(12, 19, 'GGgRRKKkKYYYKkKV'), P(12, 20, 'GKRRrKYkKKYOKkVVV'), P(12, 21, 'KYKKBBKkKKKGKkVVb'), P(14, 22, 'KKBBBkKKGGBk'), P(14, 23, 'KKKBbkOKGGgk'), P(14, 24, 'KVVKKOOOKKRR'), P(14, 25, 'VVbKKOOrKRRr'), P(14, 26, 'VKKKKkKKKRKk'), P(14, 27, 'KKYKKKKBBKKk'), P(14, 28, 'KYYYKKKBBBKk'), P(15, 29, 'YYOK.VKBbk'), P(15, 30, 'KKGG..KRKk'), P(15, 31, 'KGGg..RRRk'), P(15, 32, 'kGkk..RRrk')], pal: { B: '#4DA8F0', G: '#4CD18A', K: '#2A2533', O: '#FF9F43', R: '#FF5A5F', V: '#9B6BD9', Y: '#FFD93D', b: '#2F7FCC', g: '#2FA86A', k: '#1A1622', r: '#D93A48' } }),
   I('x58', 'x', 'fashion', 'หมวกเบค', { limited: true, o: [P(16, 0, 'KRRKKYYK'), P(14, 1, 'KBBKKGGGKKKK'), P(14, 2, 'KKKKKKKKKOOK'), P(14, 3, 'VVKKYYKKKKKK'), P(14, 4, 'kkkkkkkkkkkk'), P(12, 5, 'kGGKKOOKKBBKRRRk')], pal: { B: '#4DA8F0', G: '#4CD18A', K: '#2A2533', O: '#FF9F43', R: '#FF5A5F', V: '#9B6BD9', Y: '#FFD93D', k: '#1A1622' } }),
   I('w28', 'w', 'fantasy', 'ปีกสายรุ้ง', { limited: true, back: [P(8, 9, 'WW'), P(5, 10, 'WWWWW'), P(3, 11, 'WWWWWWWW'), P(2, 12, 'WWWWWWWWWW'), P(1, 13, 'RRWWWWWWWWW'), P(1, 14, 'OORRWWWWWWW'), P(1, 15, 'YYOORRWWWWg'), P(2, 16, 'GGYYOORWWg'), P(2, 17, 'BBGGYYOOg'), P(3, 18, 'VBBGGYYg'), P(4, 19, 'VVBBGG'), P(5, 20, 'VVBB'), P(6, 21, 'VV')], pal: { W: '#FFFFFF', g: '#D9DEE8', R: '#FF9AA2', O: '#FFC48C', Y: '#FFE88A', G: '#A8E6B8', B: '#9DD0F5', V: '#C9B0F0' } }),
+  ...LIMITED_PARTS,
+  ...LUX_PARTS,
 ];
+// 💎 27 พ.ย. user: แยกช่อง 'แว่น/หน้า' → แว่น (a) + เครื่องประดับหน้า (r) ให้ใส่ต่างหู/แมสก์พร้อมแว่นได้ · id เดิมไม่เปลี่ยน (รหัส dl ถอดตามช่องของชิ้นเอง)
+// คนที่ใส่ชิ้นพวกนี้ไว้ในช่อง a → migrateEq() ใน utils/doll.js ย้ายให้ตอนโหลด
+export const FACE_ACC = new Set(['a3', 'a4', 'a5', 'a17', 'a18', 'a19', 'a22'])
+for (const p of PARTS) if (FACE_ACC.has(p.id)) p.slot = 'r'
 // ── ตัวแปรสี (19 พ.ย. 2026) — ใช้รูปทรงของชิ้นแม่ เปลี่ยนแค่สี · แก้ทรงชิ้นแม่ = ทุกสีเปลี่ยนตาม ──
 // [ชิ้นแม่, id ใหม่, ชื่อ, สีที่ทับ] — K ในหูฟัง = สีโครง (ทับสีหมึกเฉพาะชิ้นนี้)
 const VARIANTS = [
@@ -482,7 +490,7 @@ for (const p of PARTS) if (OFF[p.id]) p.off = OFF[p.id]
 export const FREE = new Set(['h1', 'h2', 'h3', 'e1', 'e2', 'm1', 'm5', 't1', 't5', 'b2', 'b4', 'k1'])
 // 19 พ.ย. user: ของธรรมดาไม่ต้องแพง · ของแพง (ปีก/ชุดโชว์) มีออร่า
 const THEME_PRICE = { basic: 3000, uniform: 10000, sport: 10000, fashion: 15000, cute: 15000, fantasy: 60000 }
-const PRICE_OVERRIDE = {
+const PRICE_OVERRIDE = { ...LUX_PRICE,
   // ชุดสัตว์เต็มตัว แพงกว่าเสื้อทั่วไป (ฮู้ดราคาปกติของ cute)
   n1: 60000, x41: 150000,
   f19: 400000, f20: 400000, f21: 400000, f22: 400000, x39: 150000, x40: 150000,
@@ -512,7 +520,7 @@ for (const p of PARTS) p.price = FREE.has(p.id) ? 0 : (PRICE_OVERRIDE[p.id] ?? P
 // sparkle = ประกายพิกเซลกระพริบรอบตัว · glow = เรืองแสงนุ่มรอบขอบ
 // 🔗 ใส่คู่กันแล้วไม่ซ้อน (user 19 พ.ย.): ชุด = ออร่ารอบตัว (glow/ring) · หมวก/ปีก/ผ้าคลุม = อนุภาค (ดู utils/dollAura.js)
 // ⚠️ ห้ามใส่คอมเมนต์ // ท้ายบรรทัดที่มีหลาย id — เคยกิน id ที่ตามมาจนออร่าหายเงียบ (มีเทสต์คุม)
-const AURA = {
+const AURA = { ...LUX_AURA,
   // ── ปีก/ผ้าคลุม = อนุภาค ──
   w1: { type: 'petals', color: '#FFFFFF' },        // ปีกนางฟ้า: ขนนกปลิว
   w7: { type: 'sparkle', color: '#FFFFFF' },       // ปีกนางฟ้าจิ๋ว
@@ -602,6 +610,8 @@ export const SETS = [
   { id: 'kitsune_sakura', label: 'เทพจิ้งจอกซากุระครบเซ็ต', parts: ['f62', 'w26'], aura: { type: 'glow', color: '#FF9CC4' } },
   { id: 'kitsune_violet', label: 'เทพจิ้งจอกม่วงครบเซ็ต', parts: ['f62', 'w27'], aura: { type: 'glow', color: '#B48CFF' } },
   { id: 'panda', label: 'แพนด้าครบเซ็ต', parts: ['f13', 'x24'], aura: { type: 'petals', color: '#9ED98C' } },
+  ...LIMITED_SETS,
+  ...LUX_SETS,
 ]
 
 // 🆕 ของใหม่ (ป้าย "ใหม่" + ตัวกรองในห้องแต่งตัว) — ใส่ id ตอนเพิ่มของเข้าร้านหลังเปิดใช้ แล้วเอาออกเมื่อเก่าแล้ว
@@ -613,7 +623,7 @@ export const NEW_PARTS = new Set(['w8', 'w9', 'w10', 'w11', 'w12', 'w13', 'w14',
 // ชุดเริ่มต้นของคนที่ยังไม่เคยแต่ง (ทุกชิ้นฟรี)
 // 🧑 ลักษณะตัวละคร vs 👕 แต่งตัว — ตู้เสื้อผ้าแยกเป็น 2 หมวด
 export const LOOK_SLOTS = ['s', 'c', 'h', 'e', 'm', 'f', 'j']
-export const WEAR_SLOTS = ['t', 'b', 'k', 'n', 'x', 'a', 'i', 'w']
+export const WEAR_SLOTS = ['t', 'b', 'k', 'n', 'x', 'a', 'r', 'i', 'w']
 // 19 พ.ย. ยุบช่องเสื้อคลุม (o) ทิ้ง: กาวน์/แจ็กเก็ต → เสื้อ t · ผ้าพันคอ → ช่องใหม่ n (ผ้าพันคอ/สร้อย)
 export const WEAR_TABS = WEAR_SLOTS
 
@@ -633,7 +643,7 @@ export const OUTFITS = [
   { name: 'แม่มด', eq: { j: 'j1', s: 's1', c: 'c5', h: 'h2', e: 'e7', m: 'm3', t: 'f4', k: 'k2', x: 'x4', i: 'i4' } },
   { name: 'เมด', eq: { j: 'j1', s: 's2', c: 'c4', h: 'h4', e: 'e2', m: 'm1', t: 'f4', k: 'k3', x: 'x6', i: 'i2' } },
   { name: 'กบน้อย', eq: { j: 'j1', s: 's2', c: 'c2', h: 'h1', e: 'e6', m: 'm4', t: 'f5', k: 'k5', x: 'x13', i: 'i7' } },
-  { name: 'ฮีโร่', eq: { j: 'j1', s: 's5', c: 'c8', h: 'h6', e: 'e1', m: 'm2', t: 'f6', k: 'k2', w: 'w6', a: 'a4' } },
+  { name: 'ฮีโร่', eq: { j: 'j1', s: 's5', c: 'c8', h: 'h6', e: 'e1', m: 'm2', t: 'f6', k: 'k2', w: 'w6', r: 'a4' } },
   { name: 'ยูกาตะ', eq: { j: 'j1', s: 's2', c: 'c1', h: 'h5', e: 'e3', m: 'm1', t: 'f7', k: 'k6', x: 'x11', i: 'i9' } },
   { name: 'นักบอล', eq: { j: 'j1', s: 's4', c: 'c2', h: 'h1', e: 'e1', m: 'm2', t: 'o4', b: 'b7', k: 'k7', x: 'x12' } },
   { name: 'มังกร', eq: { j: 'j1', s: 's3', c: 'c6', h: 'h8', e: 'e8', m: 'm6', t: 't12', b: 'b6', k: 'k2', w: 'w5', i: 'i5' } },

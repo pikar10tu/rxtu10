@@ -46,7 +46,16 @@ const state = reactive({
   pops: 0,                             // นับครั้งที่เหรียญเด้ง — หน้าห้อง watch ตัวนี้เพื่อวาดเลขลอย
   lastGain: 0,
 })
-const pending = { secs: 0 }
+const pending = { secs: 0, z: {} }
+// 🏅 ชุดภารกิจ (27 พ.ย.): วินาทีที่นั่งแยกรายห้อง → users.quest.z<ห้อง> (ห้องสมุด/คาเฟ่/สวน)
+const QUEST_ZONES = new Set(['lib', 'cafe', 'forest'])
+function takeZonePatch(u) {
+  const z = pending.z; pending.z = {}
+  const local = { ...(u.quest || {}) }, server = {}
+  for (const [k, n] of Object.entries(z)) { if (!n) continue; local['z' + k] = (local['z' + k] || 0) + n; server['quest.z' + k] = increment(n) }
+  return Object.keys(server).length ? { local: { quest: local }, server, back: z } : { local: {}, server: {}, back: null }
+}
+const giveBackZones = (z) => { if (z) for (const [k, n] of Object.entries(z)) pending.z[k] = (pending.z[k] || 0) + n }
 let timer = null, sinceFlush = 0, synced = false
 let houseLevel = () => 1
 // เหรียญต่อวินาที = เลเวลบ้าน + บัฟชุดเบค (+5) แล้วคูณเทศกาลสอบ
@@ -89,10 +98,11 @@ function flush() {
   pending.secs = 0; sinceFlush = 0
   const fd = { d: state.day.day, secs: state.day.secs, coins: state.day.coins }
   const fb = { secs: state.bank.secs, c: state.bank.c || 0 }
+  const zp = takeZonePatch(u)
   Promise.resolve(auth.patchUser(
-    { focusSecs: (u.focusSecs || 0) + ps, focusDay: fd, focusBank: fb },
-    { focusSecs: increment(ps), focusDay: fd, focusBank: fb },
-  )).then((ok) => { if (ok === false) pending.secs += ps })   // ไม่ผ่าน → คืนยอดไว้ส่งรอบหน้า
+    { focusSecs: (u.focusSecs || 0) + ps, focusDay: fd, focusBank: fb, ...zp.local },
+    { focusSecs: increment(ps), focusDay: fd, focusBank: fb, ...zp.server },
+  )).then((ok) => { if (ok === false) { pending.secs += ps; giveBackZones(zp.back) } })   // ไม่ผ่าน → คืนยอดไว้ส่งรอบหน้า
   persist()
 }
 function tick() {
@@ -103,6 +113,7 @@ function tick() {
   state.secs += 1
   state.day.secs += 1
   pending.secs += 1
+  if (QUEST_ZONES.has(state.zone)) pending.z[state.zone] = (pending.z[state.zone] || 0) + 1
   if (state.bank.secs < COIN_CAP_SECS) {
     state.bank.secs += 1
     state.lastGain = perSec()
@@ -126,12 +137,13 @@ async function claim() {
   const ps = pending.secs; pending.secs = 0; sinceFlush = 0
   const fb = { secs: 0, c: now }
   const fd = { d: state.day.day, secs: state.day.secs, coins: state.day.coins + coins }
+  const zp = takeZonePatch(u)
   const ok = await auth.patchUser(
-    { coins: (u.coins || 0) + coins, focusSecs: (u.focusSecs || 0) + ps, focusDay: fd, focusBank: fb, focusClaimAt: new Date(now) },
-    { coins: increment(coins), focusSecs: increment(ps), focusDay: fd, focusBank: fb, focusClaimAt: serverTimestamp() },
+    { coins: (u.coins || 0) + coins, focusSecs: (u.focusSecs || 0) + ps, focusDay: fd, focusBank: fb, focusClaimAt: new Date(now), ...zp.local },
+    { coins: increment(coins), focusSecs: increment(ps), focusDay: fd, focusBank: fb, focusClaimAt: serverTimestamp(), ...zp.server },
   )
   state.claiming = false
-  if (ok === false) { pending.secs += ps; return 0 }
+  if (ok === false) { pending.secs += ps; giveBackZones(zp.back); return 0 }
   state.bank = { secs: 0, c: now }
   state.day.coins = fd.coins
   persist()

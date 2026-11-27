@@ -20,6 +20,7 @@ import { app } from '../firebase/config.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useNewsPost } from './useNewsPost.js'
 import { logPlay } from '../utils/playLog.js'
+import { bumpQuest } from './useQuestBump.js'
 import { deal, tally, judgeGuess, allVoted, MIN_PLAYERS, MAX_PLAYERS } from '../utils/spyfallEngine.js'
 
 const ROOT = 'spyfall/rooms'
@@ -97,6 +98,13 @@ export function useSpyfall() {
         leaveLocal(); return
       }
       room.value = r
+      // 🏅 ชุดสายลับ: เกมจบ + เราอยู่ในเกมนั้น = +1 (จำเกมล่าสุดในเครื่อง กันรีเฟรชแล้วนับซ้ำ)
+      const st = r.state
+      if (st?.status === 'end' && st.roster?.[uid.value]) {
+        const key = `${id}:${st.round || 0}:${st.endsAt || 0}`
+        let last = ''; try { last = localStorage.getItem('rxtu.spyLast') || '' } catch { /* private mode */ }
+        if (last !== key) { try { localStorage.setItem('rxtu.spyLast', key) } catch { /* */ } bumpQuest('spyGames', key) }
+      }
     })
     secretRef = dbRef(rtdb(), `${SECRETS}/${id}/${uid.value}`)
     onValue(secretRef, s => { secret.value = s.val() }, () => { secret.value = null })

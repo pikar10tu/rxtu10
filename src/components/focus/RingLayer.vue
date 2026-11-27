@@ -65,6 +65,8 @@ import {
   deriveMatch, isDecider, roundNo, resultText, scoreText, randomHand, ringRanking,
 } from '../../utils/ringMatch.js'
 import { sfx } from '../../utils/sfx.js'
+import { bumpQuest } from '../../composables/useQuestBump.js'
+import { useAuthStore } from '../../stores/auth.js'
 
 const props = defineProps({
   me: { type: Object, default: null },        // { x, y } ตัวเรา (null = ยังไม่ได้นั่งห้องนี้)
@@ -169,6 +171,8 @@ async function playEnd(winner, forfeit) {
   showBanner(`🏆 ${wName} ชนะ!`, '', 2000)
   // ปิดไฟต์ครั้งเดียว: คนที่ได้ done = เขียนกระดาน + แชต
   const score = shownScore.value
+  // 🏅 ชุดนักมวย: นับเฉพาะชนะจริง (คู่ชกหนีไม่นับ กันปั๊ม) · ทุกเครื่องเห็นผล แต่เขียนเฉพาะคนชนะของตัวเอง
+  if (!forfeit && cur[winner]?.uid && cur[winner].uid === useAuthStore().currentUser?.uid) bumpQuest('ringWin', cur.id)
   if (await ring.finish(cur.id)) {
     room.say('ring', resultText({ wName, lName, score, winner, forfeit }), { sys: 'ring' })
     ring.record({ w: wName, l: lName, s: forfeit ? '' : scoreText(score, winner), ...(forfeit ? { f: true } : {}) })

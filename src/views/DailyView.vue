@@ -110,6 +110,7 @@
 </template>
 
 <script setup>
+import { nextDailyStreak } from '../utils/dollQuests.js'
 import { useLeaveGuard } from '../composables/useLeaveGuard.js'
 import BackButton from '../components/shared/BackButton.vue'
 import QuestionImages from '../components/shared/QuestionImages.vue'
@@ -356,14 +357,17 @@ async function finish() {
   const { server: gsServer, optimisticGs } = buildGsPatch({ gs: u?.study?.gs, tally: tallyGroups(answers.value), increment })
   const study = { ...optimisticStudy, gs: optimisticGs }
   const dq = bumpDailyQuest(u?.dailyQuest, 'quiz', new Date().toISOString().slice(0, 10), answers.value.length)
+  // 🏅 ชุดคนตื่นเช้า: สตรีคทำข้อสอบประจำวันติดกัน (นับรอบจริง ไม่นับฝึกซ้ำ)
+  const qd = nextDailyStreak(u?.quest, dayKey(), dayKey(Date.now() - 86400000))
   const ok = await auth.patchUser(
     {
       coins: (u?.coins || 0) + grant, quizDoneTotal: (u?.quizDoneTotal || 0) + answers.value.length,
-      dailyQuest: dq, study, ...(evp ? evp.local : {}),
+      dailyQuest: dq, study, quest: { ...(u?.quest || {}), ...qd }, ...(evp ? evp.local : {}),
     },
     {
       ...(grant ? { coins: increment(grant) } : {}), quizDoneTotal: increment(answers.value.length),
-      dailyQuest: dq, ...gsServer, ...qcServer, ...(evp ? evp.server : {}),
+      dailyQuest: dq, 'quest.dDay': qd.dDay, 'quest.dStreak': qd.dStreak, 'quest.dBest': qd.dBest,
+      ...gsServer, ...qcServer, ...(evp ? evp.server : {}),
     },
   )
   if (ok && grant) toast(`ได้ ${grant.toLocaleString()} 🪙${evPts ? ` + ${evPts}${ev.pt}` : ''}`, 'success')

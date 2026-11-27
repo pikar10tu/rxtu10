@@ -88,11 +88,12 @@ onBeforeUnmount(() => mq?.removeEventListener('change', onDpr))
 /* ทุกอนุภาค: สีหลัก + จุดไฮไลต์ขาว (--hi) + เงาเรืองนุ่มๆ = ดูมีแสงในตัว ยังเป็นพิกเซลคม */
 .dollw{--hi:#FFFFFF}
 /* ✦ ประกายสี่แฉก 5x5 แกนขาว แขนสี หมุนป๊อป */
-.pt-sparkle,.pt-shimmer{width:calc(var(--px)*5);height:calc(var(--px)*5);margin:calc(var(--px)*-2.5) 0 0 calc(var(--px)*-2.5);
+.pt-sparkle,.pt-shimmer,.pt-glint{width:calc(var(--px)*5);height:calc(var(--px)*5);margin:calc(var(--px)*-2.5) 0 0 calc(var(--px)*-2.5);
  background:linear-gradient(var(--hi),var(--hi)) center/var(--px) var(--px) no-repeat,linear-gradient(var(--au),var(--au)) center/var(--px) 100% no-repeat,linear-gradient(var(--au),var(--au)) center/100% var(--px) no-repeat,linear-gradient(var(--au),var(--au)) center/calc(var(--px)*3) calc(var(--px)*3) no-repeat;
  -webkit-mask:linear-gradient(#000,#000) center/var(--px) 100% no-repeat,linear-gradient(#000,#000) center/100% var(--px) no-repeat,linear-gradient(#000,#000) center/calc(var(--px)*3) var(--px) no-repeat,linear-gradient(#000,#000) center/var(--px) calc(var(--px)*3) no-repeat;
  filter:drop-shadow(0 0 calc(var(--px)*1.5) var(--au)) drop-shadow(0 0 calc(var(--px)*.5) var(--hi));animation:dollSpk 2.6s cubic-bezier(.3,1.6,.5,1) infinite}
 .pt-shimmer{animation:dollShim 3.6s ease-in-out infinite;filter:drop-shadow(0 0 var(--px) var(--au))}
+.pt-glint{transform-origin:center;scale:.7;animation:dollShim 2.6s ease-in-out infinite}   /* วิ้งเล็กที่ต่างหู */
 @keyframes dollSpk{0%,100%{opacity:0;transform:scale(.2) rotate(-45deg)}30%{opacity:1;transform:scale(1.15) rotate(0)}55%{transform:scale(.9)}75%{opacity:.6;transform:scale(1) rotate(10deg)}}
 @keyframes dollShim{0%,24%,100%{opacity:0;transform:scale(.2) rotate(-30deg)}8%{opacity:1;transform:scale(1.2) rotate(0)}16%{opacity:.8;transform:scale(.8)}}
 /* 💗 หัวใจ + จุดไฮไลต์ขาว · ลอยส่ายซ้ายขวา ป๊อปตอนเกิด */

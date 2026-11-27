@@ -26,6 +26,14 @@
         <button class="dv-mini" :disabled="!saved.some(Boolean)" @click="slotSheet = 'load'"><Emoji char="📂" /> โหลดชุด</button>
       </div>
     </div>
+    <!-- 🎁 แบบ B (27 พ.ย. user เอาทั้ง 2 แบบ): แตะชิ้นที่อยู่ในเซ็ต → บอกเซ็ต + ปุ่มใส่ครบ · ชิ้นลิมิเต็ดที่ยังไม่มี → บอกวิธีได้ -->
+    <div v-if="group === 'wear' && pickInfo" class="dv-pinfo">
+      <p v-if="pickInfo.src" class="dv-src">{{ pickInfo.src }}</p>
+      <div v-if="pickInfo.set" class="dv-sethint">
+        <span>ชิ้นนี้อยู่ใน <b>{{ setName(pickInfo.set) }}</b> ใส่ครบ {{ pickInfo.set.parts.length }} ชิ้นได้ออร่า<template v-if="pickInfo.miss.length"> · ยังไม่มี {{ pickInfo.miss.map(id => PART[id].label).join(', ') }}</template></span>
+        <button class="dv-mini" @click="wearSet(pickInfo.set)">✨ {{ pickInfo.miss.length ? 'ลองทั้งเซ็ต' : 'ใส่ครบเซ็ต' }}</button>
+      </div>
+    </div>
     <BottomSheet :open="!!slotSheet" :icon="slotSheet === 'save' ? '💾' : '📂'" :title="slotSheet === 'save' ? 'บันทึกชุดที่ลองอยู่' : 'โหลดชุดที่บันทึกไว้'" @update:open="v => { if (!v) slotSheet = null }">
       <div class="dv-sheet-sub">{{ slotSheet === 'save' ? 'เลือกช่องที่จะเก็บชุดนี้ · ของที่ยังไม่ได้ซื้อก็เก็บได้' : 'เลือกชุดมาลอง · ถูกใจแล้วกด "ใส่ชุดนี้" (ชิ้นที่ยังไม่มีจะขึ้นให้ซื้อ)' }}</div>
       <div class="dv-saverow">
@@ -34,7 +42,7 @@
           :disabled="slotSheet === 'load' && !sv"
           @click="slotSheet === 'save' ? saveSlot(i) : useSaved(i)"
         >
-          <DollFigure v-if="sv" :eq="{ ...DEFAULT_EQ, ...sv }" :scale="2" :aura="false" :label="`ชุดช่อง ${i + 1}`" />
+          <DollFigure v-if="sv" :eq="migrateEq({ ...DEFAULT_EQ, ...sv })" :scale="2" :aura="false" :label="`ชุดช่อง ${i + 1}`" />
           <span v-else class="dv-savecard-empty">ว่าง</span>
           <b>ช่อง {{ i + 1 }}</b>
           <small v-if="slotSheet === 'save' && sv">บันทึกทับ</small>
@@ -65,6 +73,23 @@
                 :style="{ background: tab === 's' ? o.S : o.H }" :aria-label="o.label" :title="o.label" @click="pick(tab, o.id)">
           <span class="dv-color-l">{{ o.label }}</span>
         </button>
+      </div>
+
+      <!-- 🎁 แบบ A: แท็บเซ็ต — ทุกเซ็ตที่มีออร่า · ครบแล้วกดใส่ทีเดียว · ยังไม่ครบ = ลองทั้งเซ็ต + บอกวิธีได้ -->
+      <div v-else-if="tab === 'set'" class="dv-sets">
+        <div v-for="s in setCards" :key="s.id" class="dv-setcard">
+          <div class="dv-setpic"><DollFigure :eq="withSet(s)" :scale="2" :label="setName(s)" /></div>
+          <div class="dv-setbody">
+            <b class="dv-setname">{{ setName(s) }}</b>
+            <div class="dv-pcs">
+              <span v-for="id in s.parts" :key="id" class="dv-pc" :class="{ lock: !has(id) }">{{ has(id) ? '✓' : '🔒' }} {{ PART[id].label }}</span>
+            </div>
+            <div v-if="questOf(s)" class="dv-quest">🏅 {{ questOf(s).label }}<template v-if="!questOf(s).done"> · {{ questOf(s).text }}<span class="dv-qbar"><i :style="{ width: questOf(s).pct + '%' }" /></span></template><b v-else class="dv-qok"> · ปลดล็อคแล้ว</b></div>
+            <button class="dv-mini" :class="{ ready: !s.miss.length }" @click="wearSet(s)">
+              {{ s.miss.length ? `ลองทั้งเซ็ต · ขาด ${s.miss.length} ชิ้น` : '✨ ใส่ครบเซ็ต' }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <template v-else>
@@ -117,8 +142,10 @@ import BottomSheet from '../components/shared/BottomSheet.vue'
 import DollFigure from '../components/doll/DollFigure.vue'
 import DollThumb from '../components/doll/DollThumb.vue'
 import CosmeticShop from '../components/shop/CosmeticShop.vue'
-import { PARTS, PART, SKINS, HAIRC, SLOTS, REQUIRED, LOOK_SLOTS, WEAR_TABS, DEFAULT_EQ, NEW_PARTS } from '../data/dollParts.js'
-import { dollOf, tryOn, cartFor, canBuyCart, afterBuyCart, afterEquip, sameEq, isFree, setsWorn } from '../utils/doll.js'
+import { PARTS, PART, SKINS, HAIRC, SLOTS, REQUIRED, LOOK_SLOTS, WEAR_TABS, DEFAULT_EQ, NEW_PARTS, SETS } from '../data/dollParts.js'
+import { QUESTS } from '../data/dollLimited.js'
+import { questProgress, progressText } from '../utils/dollQuests.js'
+import { dollOf, tryOn, cartFor, canBuyCart, afterBuyCart, afterEquip, sameEq, isFree, setsWorn, migrateEq } from '../utils/doll.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
@@ -135,10 +162,10 @@ const { toast } = useToast()
 const { confirm } = useConfirm()
 const { syncRosterRow } = useRosterSync()
 
-const TABS = [{ k: 's', label: 'สีผิว' }, { k: 'c', label: 'สีผม' }, ...SLOTS]
+const TABS = [{ k: 's', label: 'สีผิว' }, { k: 'c', label: 'สีผม' }, ...SLOTS, { k: 'set', label: '🎁 เซ็ต' }]
 const GROUPS = [
   { k: 'look', icon: '🧑', label: 'ตัวละคร', slots: LOOK_SLOTS, first: 'h' },
-  { k: 'wear', icon: '👕', label: 'แต่งตัว', slots: WEAR_TABS, first: 't' },
+  { k: 'wear', icon: '👕', label: 'แต่งตัว', slots: [...WEAR_TABS, 'set'], first: 't' },
   { k: 'card', icon: '🪪', label: 'การ์ดโปรไฟล์', slots: [], first: null },
 ]
 const FILTERS = [{ k: 'all', label: 'ทั้งหมด' }, { k: 'own', label: 'มีแล้ว' }, { k: 'not', label: 'ยังไม่มี' }, ...(NEW_PARTS.size ? [{ k: 'new', label: 'ใหม่' }] : [])]
@@ -181,8 +208,37 @@ const sections = computed(() => {
 })
 
 // ☕ ชุดเบค: คนที่มีแล้วกดชิ้นที่มีบัฟ → บอกบัฟ (คนไม่มีไม่เห็น · 27 พ.ย.)
+// 🎁 เซ็ต (27 พ.ย.) — แท็บเซ็ต (A) + แถบใต้ตัวละครเมื่อแตะชิ้นในเซ็ต (B)
+const BEK_PARTS = ['t20', 'f64', 'x58', 'w28']
+const setName = (s) => s.label.replace('ครบเซ็ต', '').trim()
+const qprog = computed(() => questProgress(auth.userData))
+const questOf = (s) => {
+  const q = s.parts.map(id => PART[id]?.quest).find(Boolean), p = q && qprog.value[q]
+  return p ? { label: p.label, done: p.done, text: progressText(p), pct: Math.round(p.have / p.need * 100) } : null
+}
+const withSet = (s) => s.parts.reduce((eq, id) => tryOn(eq, PART[id].slot, id), { ...trying.value })
+const setCards = computed(() => SETS
+  .filter(s => s.parts.every(id => PART[id] && !PART[id].hidden))
+  .map(s => ({ ...s, miss: s.parts.filter(id => !has(id)) }))
+  .sort((a, b) => a.miss.length - b.miss.length))
+const lastPick = ref(null)
+const pickInfo = computed(() => {
+  const id = lastPick.value, p = PART[id]
+  if (!p) return null
+  const src = has(id) ? null : BEK_PARTS.includes(id) ? '☕ ได้จากการเลี้ยงกาแฟผู้พัฒนา' : p.quest ? `🏅 ปลดล็อค: ${QUESTS[p.quest]?.label} (${progressText(qprog.value[p.quest])})` : null
+  const s = SETS.find(x => x.parts.includes(id))
+  const set = s && !sets.value.some(x => x.id === s.id) ? s : null
+  return src || set ? { src, set, miss: set ? set.parts.filter(x => !has(x)) : [] } : null
+})
+function wearSet(s) {
+  trying.value = withSet(s)
+  lastPick.value = null
+  if (s.parts.every(has)) doEquip()
+  else toast('ลองทั้งเซ็ตให้ดูแล้ว · ชิ้นที่ยังไม่มีต้องได้มาก่อนถึงจะใส่จริงได้')
+}
 function pick(slot, id) {
   trying.value = tryOn(trying.value, slot, id)
+  lastPick.value = id
   if (id && BEK_BUFF_PARTS.includes(id) && has(id)) toast(`☕ ใส่ชิ้นนี้อยู่ใน Co-working space ได้เหรียญเพิ่ม +${BEK_FOCUS_BONUS}/วิ`)
 }
 function reset() { trying.value = { ...mine.value.eq } }
@@ -210,7 +266,7 @@ const slotSheet = ref(null)   // 'save' | 'load' | null
 function useSaved(i) {
   const sv = saved.value[i]
   if (!sv) return
-  trying.value = { ...DEFAULT_EQ, ...sv }
+  trying.value = migrateEq({ ...DEFAULT_EQ, ...sv })
   slotSheet.value = null
   toast(`โหลดชุดช่อง ${i + 1} มาลองแล้ว`, 'success')
 }
@@ -318,4 +374,22 @@ async function doEquip() {
 .dv-btn { flex: 1; font: inherit; font-size: .9rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2)); border: 0; border-radius: 14px; padding: 13px 10px; cursor: pointer; box-shadow: var(--pop); }
 .dv-btn.ghost { flex: 0 0 auto; color: var(--primary-dark); background: var(--surface); border: var(--bw) solid var(--line); }
 .dv-btn:disabled { background: #cbd5e1; color: #fff; cursor: default; }
+/* 🎁 เซ็ต (27 พ.ย.) */
+.dv-pinfo { display: flex; flex-direction: column; gap: 6px; margin: 0 0 10px; }
+.dv-src { margin: 0; font-size: .78rem; font-weight: 700; background: #FFF3D6; color: #7A5A1A; border-radius: 10px; padding: 6px 10px; }
+.dv-sethint { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; font-size: .78rem; background: var(--surface); border: var(--bw) solid var(--accent); border-radius: 12px; padding: 8px 10px; }
+.dv-sethint span { flex: 1; min-width: 0; }
+.dv-sets { display: flex; flex-direction: column; gap: 8px; }
+.dv-setcard { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; align-items: start; background: var(--surface); border: var(--bw) solid var(--line); border-radius: 14px; padding: 8px; }
+.dv-setpic { display: flex; justify-content: center; }
+.dv-setbody { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-width: 0; }
+.dv-setname { font-size: .88rem; }
+.dv-pcs { display: flex; flex-wrap: wrap; gap: 4px; }
+.dv-pc { font-size: .72rem; border: var(--bw) solid var(--line); border-radius: 8px; padding: 1px 6px; }
+.dv-pc.lock { color: var(--muted); border-style: dashed; }
+.dv-quest { margin: 0; font-size: .72rem; color: var(--muted); width: 100%; }
+.dv-qbar { display: block; height: 5px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 3px; }
+.dv-qbar i { display: block; height: 100%; background: var(--mint); }
+.dv-qok { color: var(--mint); }
+.dv-mini.ready { background: var(--accent); border-color: var(--accent); color: #fff; }
 </style>
