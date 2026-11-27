@@ -3,7 +3,7 @@
      ทุกเครื่องเล่นอนิเมชันเองจาก useRing.state (คนดูเห็นเหมือนกัน) · มือเหนือหัว/ตัวขาว/ล้ม → ringFx (FocusView วาดบนอวาตาร์)
      ผลแพ้ชนะ → แชตห้อง + กระดาน (คนปิดไฟต์คนเดียวเขียน) · ไม่มีเหรียญรางวัล (กันฟาร์ม) -->
 <template>
-  <div class="rg" :class="{ dim: fighting, top: picking }">
+  <div class="rg" :class="{ dim: fighting, top: picking || qte.on }">
     <!-- สกอร์ -->
     <template v-if="m && m.b">
       <div class="rg-sc r"><b>{{ m.r?.name || '—' }}</b><i v-for="n in WIN_ROUNDS" :key="n" :class="{ on: n <= shownScore.r }"></i></div>
@@ -125,7 +125,8 @@ const flashOn = ref(false)
 function flash() { flashOn.value = false; requestAnimationFrame(() => { flashOn.value = true; setTimeout(() => { flashOn.value = false }, 180) }) }
 function shake(big) { const el = props.sceneEl; if (!el) return; el.classList.remove('rg-shake', 'rg-shake-big'); void el.offsetWidth; el.classList.add(big ? 'rg-shake-big' : 'rg-shake') }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
-const uidOf = (s) => m.value?.[s]?.uid
+const fUid = { r: null, b: null }   // uid คู่ชกตอนเริ่มปิดฉาก (เวทีอาจถูกล้างกลางทาง)
+const uidOf = (s) => m.value?.[s]?.uid || fUid[s]   // เวทีถูกล้างกลางปิดฉาก → ใช้ uid ที่จำไว้
 function setHand(s, c, k) { const u = uidOf(s); if (u) ringFx.hands[u] = c ? { c, k } : null }
 function setCls(s, c) { const u = uidOf(s); if (u) ringFx.cls[u] = c }
 function stars(x, y, n, big) {
@@ -168,7 +169,13 @@ async function playThrow(t) {
   const sc = { ...shownScore.value }; sc[t.res]++
   const final = sc[t.res] >= WIN_ROUNDS
   setHand('r', null); setHand('b', null)
-  if (final) { shownScore.value = sc; await finale(t.res); return }
+  if (final) {
+    // 27 พ.ย. จำไฟต์ไว้ก่อน — เครื่องอื่นอาจล้างเวทีระหว่างเล่นปิดฉาก (เดิม playEnd ไม่ทำงาน → ท่าล้มค้าง ยืนไม่ได้)
+    const snap = { ...m.value }; shownScore.value = sc
+    inFinale = true
+    try { await finale(t.res) } finally { inFinale = false }
+    await playEnd(t.res, false, snap); return
+  }
   await punch(t.res, t.res === 'r' ? 'b' : 'r', false)
   shownScore.value = sc
   await sleep(700)
@@ -176,9 +183,9 @@ async function playThrow(t) {
   else { showBanner(`ยกที่ ${roundNo(sc)}`, '', 800); await sleep(900) }
 }
 
-async function playEnd(winner, forfeit) {
-  const cur = m.value; if (!cur || ended) return
-  const wasMine = !!mySide.value   // จำไว้ก่อน — อีกเครื่องอาจล้างเวทีก่อนเราฉลองจบ แล้ว mySide กลายเป็น null (เดิมตัวค้างบนเวที)
+async function playEnd(winner, forfeit, snap) {
+  const cur = snap || m.value; if (!cur || ended) return
+  const myU = room.myUid(), wasMine = !!mySide.value || cur.r?.uid === myU || cur.b?.uid === myU   // จำไว้ก่อน — อีกเครื่องอาจล้างเวทีก่อนเราฉลองจบ แล้ว mySide กลายเป็น null (เดิมตัวค้างบนเวที)
   ended = true; picking.value = false
   const loser = winner === 'r' ? 'b' : 'r'
   if (forfeit) setCls(loser, null)   // ล้ม/กระเด็นเล่นไปแล้วใน finale
@@ -197,6 +204,7 @@ async function playEnd(winner, forfeit) {
     }) })
   }
   await sleep(2600)
+  fUid.r = fUid.b = null
   clearRingFx()   // 27 พ.ย. เดิมล้างตาม uid ใน match → ถ้าอีกเครื่องล้างเวทีไปก่อน ท่าล้มค้างตอนเดิน
   if (wasMine && !(landedOut && cur[loser]?.uid === room.myUid())) goDown()   // โดนซัดตกนอกเวทีแล้ว = ไม่ต้องเดินลงอีก
   ring.clear(cur.id)
@@ -248,7 +256,8 @@ async function pump() {
 watch(m, (cur, old) => {
   // ไฟต์ใหม่ → รีเซ็ต · เปิดหน้ามากลางไฟต์ = ข้ามยกที่ผ่านไปแล้ว
   if (cur?.id !== shownId) {
-    clearRingFx(); names.r = names.b = ''
+    if (!inFinale) { clearRingFx(); banner.value = null; fUid.r = fUid.b = null }   // กำลังเล่นปิดฉาก → ปล่อยให้จบเอง (playEnd ล้างให้)
+    names.r = names.b = ''
     shownId = cur?.id || null; ended = false; pickedIdx = -1; picking.value = false; clearTimeout(pickTimer); clearTimeout(waitTimer)
     const st = deriveMatch(cur?.h)
     const fresh = !old || !old.id   // เห็นตั้งแต่เริ่ม
@@ -292,10 +301,11 @@ async function waitKnock(id, ms) {
   while (Date.now() - t0 < ms) { const c = m.value; if (!c || c.id !== id) return null; if (c.k) return c.k; await sleep(100) }
   return null
 }
-let landedOut = false
+let landedOut = false, inFinale = false
 async function finale(w) {
   const l = w === 'r' ? 'b' : 'r', dir = l === 'b' ? 1 : -1, id = m.value?.id
   const [wx, wy] = CORNER[w], [lx] = CORNER[l], wu = uidOf(w)
+  fUid.r = m.value?.r?.uid || null; fUid.b = m.value?.b?.uid || null
   const mine = mySide.value === w
   landedOut = false
   camTo(2, (wx + lx) / 2, wy - 16)
@@ -326,7 +336,7 @@ async function finale(w) {
   await knockout(w, l, k)
 }
 async function knockout(w, l, k) {
-  const wu = uidOf(w), lu = uidOf(l), dir = l === 'b' ? 1 : -1
+  const wu = fUid[w], lu = fUid[l], dir = l === 'b' ? 1 : -1
   const [wx, wy] = CORNER[w], [lx, ly] = CORNER[l], p = powerOf(k), xHit = lx - dir * 13
   sfx('tap')
   for (let i = 1; i <= 7; i++) {   // 💨 พุ่งเข้าไปชก
