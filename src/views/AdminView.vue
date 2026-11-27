@@ -47,12 +47,12 @@
       <!-- ───── การใช้ Firestore (ประมาณการ) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
-          <span><Emoji char="📊" /> การใช้ Firestore วันนี้</span>
+          <span><Emoji char="📊" /> ฐานข้อมูลวันนี้ใช้ไปเท่าไร</span>
           <button class="btn-mini" @click="usage.loadToday()">↻ โหลด</button>
         </div>
         <div class="admin-hint">
-          ค่า<strong>ประมาณการ</strong>ในแอป (นับเฉพาะ getDocs ใหญ่ + การเขียนหลัก ไม่นับ listener echo)
-          — ตัวจริงดูที่ Cloud Monitoring เตือนทางอีเมล
+          ตัวเลขนี้<strong>นับคร่าวๆ จากในแอป</strong> ของจริงมักสูงกว่านี้ · เทียบกับโควต้าฟรีต่อวัน (รีเซ็ตทุกวันราวบ่ายสามเวลาไทย)
+          — ยอดจริงและค่าใช้จ่ายดูที่ Firebase Console
         </div>
 
         <div v-if="usageBanner" class="usage-banner" :class="usageLevel">
@@ -61,17 +61,29 @@
 
         <div v-if="usage.today" class="usage-gauges">
           <div class="usage-row">
-            <span class="usage-lbl">อ่าน (reads)</span>
+            <span class="usage-lbl">ดึงข้อมูล (อ่าน)</span>
             <span class="usage-num">{{ usage.today.reads.toLocaleString() }} / {{ READ_LIMIT.toLocaleString() }}</span>
           </div>
           <div class="usage-bar"><i :style="{ width: pct(usage.today.reads, READ_LIMIT), background: barColor(usage.today.reads, READ_LIMIT) }"></i></div>
           <div class="usage-row">
-            <span class="usage-lbl">เขียน (writes)</span>
+            <span class="usage-lbl">บันทึกข้อมูล (เขียน)</span>
             <span class="usage-num">{{ usage.today.writes.toLocaleString() }} / {{ WRITE_LIMIT.toLocaleString() }}</span>
           </div>
           <div class="usage-bar"><i :style="{ width: pct(usage.today.writes, WRITE_LIMIT), background: barColor(usage.today.writes, WRITE_LIMIT) }"></i></div>
         </div>
         <div v-else class="admin-empty">กดปุ่ม ↻ โหลด เพื่อดูค่า</div>
+
+        <!-- ย้อนหลัง 14 วัน (กดถึงโหลด = 14 reads) · วันละแถว แดง = เกินโควต้าวันนั้น -->
+        <button v-if="!usage.history.length" class="btn-mini usage-histbtn" @click="usage.loadHistory()">📅 ดูย้อนหลัง 14 วัน</button>
+        <div v-else class="usage-hist">
+          <div class="usage-hist-head"><span>วัน (รอบโควต้า)</span><span>อ่าน</span><span>เขียน</span></div>
+          <div v-for="h in usage.history" :key="h.date" class="usage-hist-row" :class="{ over: h.reads >= READ_LIMIT || h.writes >= WRITE_LIMIT }">
+            <span>{{ h.date.slice(8) }}/{{ h.date.slice(5, 7) }}</span>
+            <span :style="{ color: barColor(h.reads, READ_LIMIT) }">{{ h.reads.toLocaleString() }}</span>
+            <span :style="{ color: barColor(h.writes, WRITE_LIMIT) }">{{ h.writes.toLocaleString() }}</span>
+          </div>
+          <div class="admin-hint">รอบวันเริ่มบ่ายสามเวลาไทย (ช่วงหน้าร้อนอเมริกาเป็นบ่ายสอง) · ข้อมูลก่อน 27 พ.ย. นับตามวันไทย</div>
+        </div>
       </section>
 
       <!-- ───── คำขอ guest (รออนุมัติ) ───── -->
@@ -940,8 +952,10 @@ async function computeGlobalStats() {
 const usageLevel = computed(() => usageStatus(usage.today?.reads || 0, usage.today?.writes || 0))
 const usageBanner = computed(() => {
   if (!usage.today) return ''
-  if (usageLevel.value === 'danger') return '🔴 ใกล้ชนลิมิตฟรีมาก! พิจารณาลดการอ่าน หรือเปิด Blaze (ยังมี quota ฟรีเดิม)'
-  if (usageLevel.value === 'warn')   return '🟡 การใช้งานสูงกว่าปกติ — จับตาดูไว้ (ค่านี้ undercount จริง)'
+  const over = (usage.today.reads || 0) >= READ_LIMIT || (usage.today.writes || 0) >= WRITE_LIMIT
+  if (over) return '🔴 เกินโควต้าของวันนี้แล้ว — ส่วนที่เกินอาจถูกคิดเงิน ตรวจสอบค่าใช้จ่ายใน Firebase Console'
+  if (usageLevel.value === 'danger') return '🔴 ใกล้เต็มโควต้าของวันนี้ — ถ้าเกินอาจถูกคิดเงิน ตรวจสอบค่าใช้จ่ายใน Firebase Console'
+  if (usageLevel.value === 'warn')   return '🟡 วันนี้ใช้เยอะกว่าปกติ ลองจับตาดูไว้ (ของจริงมักสูงกว่าตัวเลขนี้)'
   return ''
 })
 const pct = (v, max) => `${Math.min(100, Math.round((v / max) * 100))}%`
@@ -1455,6 +1469,12 @@ async function saveEcon(m) {
   background: #fff; overflow: hidden; margin-bottom: 6px;
 }
 .usage-bar i { display: block; height: 100%; transition: width .3s; }
+.usage-histbtn { margin-top: 10px; }
+.usage-hist { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+.usage-hist-head, .usage-hist-row { display: grid; grid-template-columns: 1fr 1fr 1fr; font-size: .72rem; font-weight: 700; padding: 3px 6px; border-radius: 6px; }
+.usage-hist-head { color: var(--muted, #888); }
+.usage-hist-row span:not(:first-child), .usage-hist-head span:not(:first-child) { text-align: right; }
+.usage-hist-row.over { background: #fdecec; }
 .bstat { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .8rem; }
 .bstat th, .bstat td { text-align: left; padding: 5px 6px; border-bottom: 1px solid rgba(0,0,0,.08); }
 .bstat th { color: rgba(0,0,0,.45); font-weight: 700; }

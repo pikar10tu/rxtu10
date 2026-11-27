@@ -45,5 +45,19 @@ export const useUsageStore = defineStore('usage', () => {
         } catch { today.value = null }
     }
 
-    return { pending, today, track, flush, loadToday }
+    // ย้อนหลัง n วัน (Admin กดดู) — n reads · วันล่าสุดก่อน · วันที่ไม่มี doc = 0
+    const history = ref([])
+    async function loadHistory(n = 14) {
+        const now = Date.now()
+        const ids = [...new Set(Array.from({ length: n }, (_, i) => usageDocId(new Date(now - i * 86400000))))]
+        try {
+            history.value = await Promise.all(ids.map(async id => {
+                const snap = await getDoc(doc(db, 'stats', id))
+                const d = snap.exists() ? snap.data() : {}
+                return { date: id.slice(6), reads: d.reads || 0, writes: d.writes || 0 }
+            }))
+        } catch { history.value = [] }
+    }
+
+    return { pending, today, history, track, flush, loadToday, loadHistory }
 })

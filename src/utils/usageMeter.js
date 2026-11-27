@@ -23,10 +23,10 @@ export function addUsage(acc, reads = 0, writes = 0) {
     }
 }
 
-// id ของ doc usage รายวัน (อิงวันที่ท้องถิ่น) — `stats/usage_YYYY-MM-DD`
-export function usageDocId(date = new Date()) {
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, '0')
-    const d = String(date.getDate()).padStart(2, '0')
-    return `usage_${y}-${m}-${d}`
+// id ของ doc usage รายวัน — `stats/usage_YYYY-MM-DD`
+// 27 พ.ย. 2026: นับวันตามเวลาแปซิฟิก (America/Los_Angeles) ให้ตรงรอบรีเซ็ตโควต้า Firestore (เที่ยงคืนแปซิฟิก = บ่ายสาม/บ่ายสองไทย)
+//   เดิมใช้วันที่เครื่อง (ไทย) → 1 doc คร่อมสองรอบโควต้า · doc ก่อนหน้านี้ยังเป็นวันไทย
+export function usageDocId(date = new Date(), tz = 'America/Los_Angeles') {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date).map(x => [x.type, x.value]))
+    return `usage_${p.year}-${p.month}-${p.day}`
 }

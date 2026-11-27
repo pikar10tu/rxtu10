@@ -37,7 +37,8 @@ test('addUsage: ค่า default และ acc ว่าง', () => {
   assert.deepEqual(addUsage({ reads: 1, writes: 1 }), { reads: 1, writes: 1 })
 })
 
-test('usageDocId: usage_YYYY-MM-DD จากวันที่ท้องถิ่น', () => {
-  assert.equal(usageDocId(new Date(2026, 5, 15)), 'usage_2026-06-15') // มิ.ย. = index 5
-  assert.equal(usageDocId(new Date(2026, 11, 1)), 'usage_2026-12-01')
+test('usageDocId: นับวันตามเวลาแปซิฟิก (รอบรีเซ็ตโควต้า)', () => {
+  assert.equal(usageDocId(new Date('2026-11-27T07:59:00Z')), 'usage_2026-11-26')   // 14:59 ไทย = ยังวันก่อน
+  assert.equal(usageDocId(new Date('2026-11-27T08:00:00Z')), 'usage_2026-11-27')   // 15:00 ไทย = รอบใหม่
+  assert.equal(usageDocId(new Date('2026-06-15T12:00:00Z'), 'UTC'), 'usage_2026-06-15')
 })
