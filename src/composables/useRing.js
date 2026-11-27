@@ -20,7 +20,8 @@ export const WAIT_MS = 3 * 60 * 1000    // จองมุมแดงแล้�
 export const STALE_MS = 15 * 60 * 1000  // ไฟต์ค้างนานผิดปกติ = ถือว่าว่าง
 
 // เอฟเฟกต์บนตัวคู่ชก (FocusView วาดบนอวาตาร์เอง): hands[uid] = { c: อีโมจิเหนือหัว, k: 'think'|'slam'|'on' } · cls[uid] = 'white'|'hit'|'ko'|'win'
-export const ringFx = reactive({ hands: {}, cls: {} })
+// at[uid] = { x, y, rot, pw } วาดทับตำแหน่งจริงชั่วคราว (ง้างหมัด/พุ่งชก/กระเด็น · pw = ออร่าชาร์จ 0..1)
+export const ringFx = reactive({ hands: {}, cls: {}, at: {} })
 const match = ref(null)
 const board = ref([])
 const wins = ref([])   // 27 พ.ย. ยอดชนะถาวร focus/ring/wins/{uid} {name,n} — เดิมนับจาก 60 ไฟต์ล่าสุด ยอดเลยลดเอง
@@ -39,9 +40,11 @@ function detach() { offM?.(); offB?.(); offW?.(); offM = offB = offW = null }
 
 // ตัวเราอยู่บนเวทีไหม (FocusView ห้ามเดินระหว่างชก)
 // ล็อกตั้งแต่ขึ้นเวทีจนเวทีถูกล้าง (รวมช่วงฉลองหลังจบ) · เวทีหมดอายุ (รอคู่ชกเกิน 3 นาที/ค้าง) = ปลดล็อก
+// uid ที่ยืนบนเวทีได้ตอนนี้ (คู่ชก) — คนอื่นที่ค้างอยู่บนพื้นเวที FocusView วาดไว้ขอบเวทีแทน
+export const ringFighters = computed(() => { const m = match.value; return isStale(m) ? [] : [m.r?.uid, m.b?.uid].filter(Boolean) })
 export const ringMine = computed(() => { const m = match.value, u = uid(); return !!(u && m && !isStale(m) && (m.r?.uid === u || m.b?.uid === u)) })
 /** ล้างเอฟเฟกต์บนตัวทุกคน (จบไฟต์/ออกห้อง) — ไม่อิง uid จาก match เพราะ match อาจถูกล้างไปก่อนแล้ว */
-export function clearRingFx() { for (const k of Object.keys(ringFx.hands)) delete ringFx.hands[k]; for (const k of Object.keys(ringFx.cls)) delete ringFx.cls[k] }
+export function clearRingFx() { for (const k of Object.keys(ringFx.hands)) delete ringFx.hands[k]; for (const k of Object.keys(ringFx.cls)) delete ringFx.cls[k]; for (const k of Object.keys(ringFx.at)) delete ringFx.at[k] }
 const isStale = (m, now = Date.now()) => !m || !m.r || (typeof m.at === 'number' && (now - m.at > STALE_MS || (!m.b && now - m.at > WAIT_MS)))
 
 export function useRing() {
@@ -104,6 +107,19 @@ export function useRing() {
     const me = uid(); if (!me) return
     runTransaction(dbRef(rtdb(), `focus/ring/wins/${me}`), (cur) => ({ name: cleanText(name || 'เพื่อน', 24), n: (cur?.n || 0) + 1 })).catch(() => {})
   }
+  /** 🎬 คนชนะเขียนผลชาร์จหมัดปิดฉากครั้งเดียว — ทุกเครื่องอ่านไปเล่นกระเด็นด้วย seed เดียวกัน */
+  function setKnock(id, k) {
+    runTransaction(dbRef(rtdb(), M), (cur) => (cur && cur.id === id && !cur.k ? { ...cur, k } : undefined)).catch(() => {})
+  }
+  /** 💤 คู่ชกพักสายตา (ปัดจอ) นานเกิน → เครื่องไหนเห็นก่อนก็พาลงเวที (ตอนรอคู่ = ปล่อยเวที · กลางไฟต์ = นับเป็นคู่ชกออก) */
+  function kickAway(uid) {
+    runTransaction(dbRef(rtdb(), M), (cur) => {
+      if (!cur || cur.done) return undefined
+      if (cur.r?.uid === uid && !cur.b) return null
+      for (const s of ['r', 'b']) if (cur[s]?.uid === uid) { const n = { ...cur }; delete n[s]; return n }
+      return undefined
+    }).catch(() => {})
+  }
   function release() { if (--subs === 0) detach() }
-  return { match, board, wins, addWin, mySide, state, claim, throwHand, leaveRing, finish, record, clear, release, isStale }
+  return { match, board, wins, setKnock, kickAway, addWin, mySide, state, claim, throwHand, leaveRing, finish, record, clear, release, isStale }
 }

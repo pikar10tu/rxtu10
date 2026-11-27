@@ -32,22 +32,22 @@
         <img :src="ART['desk_' + viewZone]" alt="" draggable="false">
       </div>
       <template v-for="p in others" :key="p.uid">
-        <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="[{ walk: pos[p.uid].walking, away: p.away }, ringFx.cls[p.uid] && 'rg-' + ringFx.cls[p.uid]]" :style="entStyle(pos[p.uid].x, pos[p.uid].y, pos[p.uid].y)">
+        <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="[{ walk: pos[p.uid].walking, away: p.away }, ringFx.cls[p.uid] && 'rg-' + ringFx.cls[p.uid]]" :style="avStyle(p.uid, pos[p.uid])">
           <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> <Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /> {{ p.away ? 'พักสายตา' : stText(p.st) }}</span></div>
           <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
           <span v-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
           <span v-if="ringFx.hands[p.uid]" class="fo-rh" :class="ringFx.hands[p.uid].k"><Emoji :char="ringFx.hands[p.uid].c" /></span>
           <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ (p.house || 1) * FEST_X }}</span>
-          <div class="fo-doll"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
+          <div class="fo-doll" :style="dollTf(p.uid)"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
         </div>
       </template>
-      <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="[{ walk: me.walking }, ringFx.cls[room.myUid()] && 'rg-' + ringFx.cls[room.myUid()]]" :style="entStyle(me.x, me.y, me.y)">
+      <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="[{ walk: me.walking }, ringFx.cls[room.myUid()] && 'rg-' + ringFx.cls[room.myUid()]]" :style="avStyle(room.myUid(), me)">
         <div class="fo-label"><span class="fo-nm">{{ myName }}<template v-if="narrow"> <Emoji :char="STATUS_ICON[fm.status.value]" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="STATUS_ICON[fm.status.value]" /> {{ stText(fm.status.value) }}</span></div>
         <div v-if="bubbles[room.myUid()]" class="fo-bubble">{{ bubbles[room.myUid()] }}</div>
         <span v-if="myHandUp" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
         <span v-if="ringFx.hands[room.myUid()]" class="fo-rh" :class="ringFx.hands[room.myUid()].k"><Emoji :char="ringFx.hands[room.myUid()].c" /></span>
         <span v-for="c in coins" :key="c.id" class="fo-coin"><Emoji char="🪙" />+{{ c.v }}</span>
-        <div class="fo-doll"><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
+        <div class="fo-doll" :style="dollTf(room.myUid())"><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
       </div>
       <!-- ดูห้องอื่นอยู่ = แค่ดู · จะย้ายต้องกดปุ่มนี้ (หน้าตาเดียวกับปุ่มเริ่มโฟกัส · อยู่ห้องนี้แล้วหาย) -->
       <div v-if="peeking" class="fo-join" @click.stop>
@@ -60,7 +60,7 @@
         <button type="button" class="fo-btn primary big" @click="join"><Emoji char="🎯" /> เริ่มโฟกัส</button>
         <small>อ่านหนังสือเพื่อสร้างรายได้ตามระดับที่อยู่ของคุณ<br>ตอนนี้ +{{ rateNow }} เหรียญ/วิ<template v-if="FEST_X > 1"> (×2 ถึง 31 ธ.ค.)</template></small>
       </div>
-      <RingLayer v-if="viewZone === 'ring'" :me="fm.state.active && !peeking ? me : null" :my-name="myName" :scene-el="sceneEl" @goto="ringGoto" />
+      <RingLayer v-if="viewZone === 'ring'" :me="fm.state.active && !peeking ? me : null" :my-name="myName" :scene-el="sceneEl" :doll-of="ringDoll" :away-of="ringAway" @goto="ringGoto" @place="ringPlace" />
       <FocusSceneFx v-if="!saver" ref="sfx" :zone="viewZone" :me="fm.state.active && !peeking ? { x: me.x, y: me.y } : null" @tod="tod = $event" />
       <div v-for="c in claps" :key="c.id" class="fo-ent fo-clap" :style="entStyle(c.x, c.y, 999)" aria-hidden="true">
         <span class="l"><Emoji char="✋" /></span><span class="r"><Emoji char="✋" /></span><b>แปะ!</b>
@@ -209,7 +209,7 @@ import BottomSheet from '../components/shared/BottomSheet.vue'
 import QuizModeCard from '../components/study/QuizModeCard.vue'
 import FocusSceneFx from '../components/focus/FocusSceneFx.vue'
 import RingLayer from '../components/focus/RingLayer.vue'
-import { ringFx, ringMine } from '../composables/useRing.js'
+import { ringFx, ringMine, ringFighters } from '../composables/useRing.js'
 import { SPECTATE, RING } from '../utils/ringMatch.js'
 import { useCoffee } from '../composables/useCoffee.js'
 import { examFestMulti } from '../utils/examFest.js'
@@ -217,7 +217,7 @@ import { focusBonus } from '../utils/supporter.js'
 import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { useAuthStore } from '../stores/auth.js'
 import { dollOf } from '../utils/doll.js'
-import { decodeDoll } from '../utils/dollCode.js'
+import { decodeDoll, encodeDoll } from '../utils/dollCode.js'
 import { serverTimestamp } from 'firebase/database'
 import { useFocusRoom } from '../composables/useFocusRoom.js'
 import { SEATS, COUNTERS, DOOR, seatFoot, freeSeat } from '../utils/focusLayout.js'
@@ -264,6 +264,10 @@ const ROOM_CAP = 20
 const headIn = (z) => room.people.value.filter(p => p.zone === z).length
 const roomFull = (z) => room.people.value.filter(p => p.zone === z && p.uid !== room.myUid()).length >= ROOM_CAP
 // 🥊 ขึ้น/ลงเวที: เดินไปมุม (ไม่หลบสิ่งกีดขวาง ห้องนี้โล่ง) แล้วบอกตำแหน่ง
+const ringAway = (u) => !!others.value.find(p => p.uid === u)?.away
+const ringDoll = (u) => (u === room.myUid() ? encodeDoll(myEq.value) : others.value.find(p => p.uid === u)?.doll) || ''
+// โดนซัดตกนอกเวที → วางตัวตรงนั้นเลย (ไม่เดิน) แล้วส่งตำแหน่ง
+function ringPlace([x, y]) { cancelAnimationFrame(rafs.get(me)); rafs.delete(me); me.walking = false; me.seat = -1; me.x = x; me.y = y; room.patch({ seat: -1, x, y }) }
 function ringGoto([x, y]) { me.seat = -1; walkTo(me, x, y, () => room.patch({ seat: -1, x, y })) }
 const daysLeft = Math.max(0, Math.ceil((new Date(PLE_CC_DATE).getTime() - Date.now()) / 86400000))
 // ฉีกหน้าเมื่อวานแค่ครั้งแรกของวัน (จำในเครื่อง) — รอบต่อไปเห็นเลขวันนี้นิ่งๆ
@@ -300,7 +304,15 @@ const eqOf = (code) => (code ? (eqCache[code] ||= (decodeDoll(code) || DEFAULT_E
 const me = reactive({ x: DOOR[0], y: DOOR[1], seat: -1, walking: false })
 
 // ── วาง entity: ซ้าย/บนเป็น % ของฉาก · z เรียงตามตำแหน่งเท้า ──
-const entStyle = (x, y, depth) => ({ left: (x / 160 * 100) + '%', top: y + '%', zIndex: Math.round(depth * 10) })
+const entStyle = (x, y, depth) => ({ left: (x / 160 * 100) + '%', top: y + '%', zIndex: Math.round(depth * 10), '--ex': x, '--ey': y })
+// 🥊 ระหว่างปิดฉาก (ง้าง/พุ่ง/กระเด็น) วาดตามตำแหน่งที่ RingLayer สั่ง แทนตำแหน่งจริง
+const avStyle = (u, o) => {
+  const a = ringFx.at[u]; if (a) return entStyle(a.x, a.y, Math.max(a.y, 80))
+  // ค้างบนพื้นเวทีทั้งที่ไม่ได้ชกแล้ว (เช่นโดนพาลงตอนพักสายตา) → วาดไว้ใต้ขอบเวทีแทน
+  if (viewZone.value === 'ring' && inRing(o.x, o.y) && !o.walking && !ringFighters.value.includes(u)) { const y = Math.min(Y1, RING.y1 + 6); return entStyle(o.x, y, y) }
+  return entStyle(o.x, o.y, o.y)
+}
+const dollTf = (u) => { const a = ringFx.at[u]; return a ? { transform: `rotate(${a.rot || 0}rad)`, transformOrigin: '50% 100%', filter: a.pw > .02 ? `drop-shadow(0 0 ${2 + a.pw * 8}px rgba(255,${Math.round(200 - a.pw * 150)},60,.95))` : undefined } : undefined }
 
 // ── เดิน: BFS กริด 2px เลี่ยงเคาน์เตอร์ (ช่วงหน้าเคาน์เตอร์ y+4..y+10) ──
 const CELL = 2, GW = 80, GH = 50, Y0 = 52, Y1 = 98
@@ -364,7 +376,11 @@ watch(others, (list) => {
       const fresh = Date.now() - viewedAt > 2500
       pos[p.uid] = o = reactive({ x: fresh ? DOOR[0] : tx, y: fresh ? DOOR[1] : ty, walking: false, tx, ty })
       if (fresh) { walkTo(o, tx, ty); if (fm.state.active) chime('door') }   // 🔔 กริ๊ง: มีคนเพิ่งเข้าห้อง
-    } else if (o.tx !== tx || o.ty !== ty) { o.tx = tx; o.ty = ty; walkTo(o, tx, ty) }
+    } else if (o.tx !== tx || o.ty !== ty) {
+      o.tx = tx; o.ty = ty
+      if (ringFx.at[p.uid]) { cancelAnimationFrame(rafs.get(o)); rafs.delete(o); o.walking = false; o.x = tx; o.y = ty }   // 🥊 คนโดนซัดย้ายไปจุดตก = วาร์ป ไม่เดิน
+      else walkTo(o, tx, ty)
+    }
   }
   for (const uid of Object.keys(pos)) if (!seen.has(uid)) { cancelAnimationFrame(rafs.get(pos[uid])); delete pos[uid] }
 }, { immediate: true, deep: true })
@@ -698,6 +714,9 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 @keyframes fo-rg-hit { 20% { transform: translateX(6px) rotate(6deg); filter: brightness(1.6); } 45% { transform: translateX(-4px); } 70% { transform: translateX(2px); } }
 @keyframes fo-rg-ko { 30% { transform: rotate(-12deg); } 100% { transform: rotate(84deg) translateY(10%); } }
 @keyframes fo-rg-hop { 50% { transform: translateY(-8px); } }
+/* 🎬 กล้องซูมตอนปิดฉาก (RingLayer ตั้ง --cz/--ccx/--ccy) — ซูมรอบจุดเดียวกันทั้งพื้นหลังและตัวละคร */
+.fo-scene.rg-cam .fo-bg { transform-origin: calc(var(--ccx) * .625%) calc(var(--ccy) * 1%); transform: scale(var(--cz)); }
+.fo-scene.rg-cam .fo-ent { left: calc((var(--ccx) + (var(--ex) - var(--ccx)) * var(--cz)) * .625%) !important; top: calc((var(--ccy) + (var(--ey) - var(--ccy)) * var(--cz)) * 1%) !important; transform: translate(-50%, -100%) scale(var(--cz)); transform-origin: 50% 100%; }
 .fo-scene.rg-shake { animation: fo-rg-shake .32s cubic-bezier(.36,.07,.19,.97); }
 .fo-scene.rg-shake-big { animation: fo-rg-shake-big .6s cubic-bezier(.36,.07,.19,.97); }
 @keyframes fo-rg-shake { 20% { transform: translate(-1.2%, .6%); } 40% { transform: translate(1.2%, -.8%); } 60% { transform: translate(-.8%, .5%); } 80% { transform: translate(.5%, -.3%); } }
