@@ -113,13 +113,17 @@ export function aurasOf(eq) {
   const worn = new Set(Object.entries(eq || {}).filter(([k, id]) => PART[id]?.slot === k).map(([, id]) => id))
   // 27 พ.ย. user: ครบเซ็ตทุกเซ็ต = เส้นแสงเรืองรอบตัว (glow) ยืนพื้น + ออร่าเฉพาะเซ็ต (หมอก/อนุภาค) · ขึ้นหน้าแถวให้ไม่โดนตัดเพดานอนุภาค 3 แหล่ง
   const setAuras = []
-  for (const set of SETS) if (set.parts.every(id => worn.has(id))) setAuras.push({ type: 'glow', color: set.glow || set.aura.color }, set.aura)
+  for (const set of SETS) if (setActive(set, worn)) setAuras.push({ type: 'glow', color: set.glow || set.aura.color }, set.aura)
   auras.unshift(...setAuras)
   return auras
 }
 
+/** เซ็ตติดไหม: ใส่ครบ หรือถึงขั้นต่ำ set.min (Diorx 2 ใน 3 · 27 พ.ย. user) */
+export const setActive = (s, worn) => s.parts.filter(id => worn.has(id)).length >= (s.min || s.parts.length)
+
 /** เซ็ตที่ใส่ครบอยู่ (โชว์ป้ายในห้องแต่งตัว) */
 export function setsWorn(eq) {
   const worn = new Set(Object.entries(eq || {}).filter(([k, id]) => PART[id]?.slot === k).map(([, id]) => id))
-  return SETS.filter(s => s.parts.every(id => worn.has(id)))
+  const seen = new Set()   // เซ็ตที่แชร์ชิ้นกัน (Diorx 4 สีกระเป๋า) ใส่ต่างหู+ผ้า = ติดทุกสี → โชว์ป้ายเดียว
+  return SETS.filter(s => setActive(s, worn) && !seen.has(s.label) && seen.add(s.label))
 }

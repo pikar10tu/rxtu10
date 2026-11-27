@@ -112,7 +112,8 @@ test('โบนัสครบเซ็ต: ชุดสัตว์+ฮู้�
     const eq = { s: 's2', c: 'c1' }
     for (const id of set.parts) eq[PART[id].slot] = id
     assert.ok(aurasOf(eq).includes(set.aura), set.id)
-    assert.equal(setsWorn(eq)[0]?.id, set.id)
+    assert.equal(setsWorn(eq)[0]?.label, set.label)
+    if (set.min) continue   // เซ็ตขั้นต่ำ (Diorx) เทสแยกข้างล่าง
     const half = { ...eq }; delete half[PART[set.parts[1]].slot]
     assert.ok(!aurasOf(half).includes(set.aura), set.id + ' ครึ่งเซ็ต')
   }
@@ -122,4 +123,12 @@ test('ออร่าทุกชิ้นใช้แบบที่ตัว�
   const { AURA_TYPES } = await import('./dollAura.js')
   const { SETS } = await import('../data/dollParts.js')
   for (const a of [...PARTS.map(p => p.aura).filter(Boolean), ...SETS.map(s => s.aura)]) assert.ok(AURA_TYPES[a.type], a.type)
+})
+
+test('Diorx ใส่ 2 ใน 3 ก็ได้ออร่าเซ็ต · 1 ชิ้นไม่ได้', async () => {
+  const { setsWorn } = await import('./doll.js')
+  const base = { s: 's2', c: 'c1', h: 'h1', e: 'e1', m: 'm1', t: 't1', b: 'b2' }
+  assert.equal(setsWorn({ ...base, i: 'i28', r: 'a22' }).filter(s => s.id.startsWith('diorx')).length, 1)
+  assert.equal(setsWorn({ ...base, r: 'a22', n: 'n18' }).filter(s => s.label === 'Diorx ครบเซ็ต').length, 1)
+  assert.equal(setsWorn({ ...base, i: 'i28' }).filter(s => s.id.startsWith('diorx')).length, 0)
 })

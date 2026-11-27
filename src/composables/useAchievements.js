@@ -44,7 +44,8 @@ async function loadReviewedCount(uid) {
 const progressOf = (u) => ({
   ...computeProgress(u),
   cosmeticLegend: (u?.cosmetics?.owned || []).filter(id => getCosmetic(id)?.tier === 4).length,
-  dollSetsOwned: SETS.filter(set => set.parts.every(id => (u?.doll?.owned || []).includes(id))).length,
+  // เซ็ตหลายสีชื่อเดียวกัน (Diorx) นับเป็นเซ็ตเดียว
+  dollSetsOwned: new Set(SETS.filter(set => set.parts.every(id => (u?.doll?.owned || []).includes(id))).map(s => s.label)).size,
   reviewedCount,
   // มาจาก likes/board ที่กระดานข่าวโหลดอยู่แล้ว ⇒ read เพิ่ม 0 · ยังไม่เปิดกระดาน = 0 (ไม่ปลด ไม่ใช่ปลดผิด)
   likesReceived: useNewsLikes().board.value.recv?.[u?.uid || useAuthStore().currentUser?.uid] || 0,

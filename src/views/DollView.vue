@@ -80,13 +80,13 @@
         <div v-for="s in setCards" :key="s.id" class="dv-setcard">
           <div class="dv-setpic"><DollFigure :eq="withSet(s)" :scale="2" :label="setName(s)" /></div>
           <div class="dv-setbody">
-            <b class="dv-setname">{{ setName(s) }}</b>
+            <b class="dv-setname">{{ setName(s) }}</b><small v-if="s.min" class="dv-quest">ใส่ {{ s.min }} ใน {{ s.parts.length }} ชิ้นก็ได้ออร่าเซ็ต</small>
             <div class="dv-pcs">
-              <span v-for="id in s.parts" :key="id" class="dv-pc" :class="{ lock: !has(id) }">{{ has(id) ? '✓' : '🔒' }} {{ PART[id].label }}</span>
+              <span v-for="id in s.parts" :key="id" class="dv-pc" :class="{ lock: !has(id) }">{{ has(id) ? '✓' : '🔒' }} {{ pcLabel(s, id) }}</span>
             </div>
             <div v-if="questOf(s)" class="dv-quest">🏅 {{ questOf(s).label }}<template v-if="!questOf(s).done"> · {{ questOf(s).text }}<span class="dv-qbar"><i :style="{ width: questOf(s).pct + '%' }" /></span></template><b v-else class="dv-qok"> · ปลดล็อคแล้ว</b></div>
-            <button class="dv-mini" :class="{ ready: !s.miss.length }" @click="wearSet(s)">
-              {{ s.miss.length ? `ลองทั้งเซ็ต · ขาด ${s.miss.length} ชิ้น` : '✨ ใส่ครบเซ็ต' }}
+            <button class="dv-mini" :class="{ ready: s.ready }" @click="wearSet(s)">
+              {{ s.ready ? '✨ ใส่ครบเซ็ต' : `ลองทั้งเซ็ต · ขาด ${s.miss.length} ชิ้น` }}
             </button>
           </div>
         </div>
@@ -145,7 +145,7 @@ import CosmeticShop from '../components/shop/CosmeticShop.vue'
 import { PARTS, PART, SKINS, HAIRC, SLOTS, REQUIRED, LOOK_SLOTS, WEAR_TABS, DEFAULT_EQ, NEW_PARTS, SETS } from '../data/dollParts.js'
 import { QUESTS } from '../data/dollLimited.js'
 import { questProgress, progressText } from '../utils/dollQuests.js'
-import { dollOf, tryOn, cartFor, canBuyCart, afterBuyCart, afterEquip, sameEq, isFree, setsWorn, migrateEq } from '../utils/doll.js'
+import { dollOf, tryOn, cartFor, canBuyCart, afterBuyCart, afterEquip, sameEq, isFree, setsWorn, migrateEq, setActive } from '../utils/doll.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useToast } from '../composables/useToast.js'
 import { useConfirm } from '../composables/useConfirm.js'
@@ -219,21 +219,35 @@ const questOf = (s) => {
 const withSet = (s) => s.parts.reduce((eq, id) => tryOn(eq, PART[id].slot, id), { ...trying.value })
 const setCards = computed(() => SETS
   .filter(s => s.parts.every(id => PART[id] && !PART[id].hidden))
-  .map(s => ({ ...s, miss: s.parts.filter(id => !has(id)) }))
-  .sort((a, b) => a.miss.length - b.miss.length))
+  .map(s => { const miss = s.parts.filter(id => !has(id)); return { ...s, miss, ready: s.parts.length - miss.length >= (s.min || s.parts.length) } })
+  // เซ็ตชื่อเดียวกันหลายสี (Diorx กระเป๋า 4 สี) → ยุบเหลือการ์ดเดียว ใช้สีที่มีของมากสุดเป็นตัวแทน · ชิ้นที่ต่างกัน = "สีไหนก็ได้"
+  .reduce((acc, s) => {
+    const g = acc.find(x => x.label === s.label)
+    if (!g) { acc.push({ ...s, members: [s] }); return acc }
+    g.members.push(s)
+    const best = [...g.members].sort((a, b) => b.ready - a.ready || a.miss.length - b.miss.length)[0]
+    Object.assign(g, best, { members: g.members, anyIds: best.parts.filter(id => !g.members.every(m => m.parts.includes(id))) })
+    return acc
+  }, [])
+  .sort((a, b) => b.ready - a.ready || a.miss.length - b.miss.length))
+const pcLabel = (s, id) => (s.anyIds?.includes(id) && s.anyLabel ? s.anyLabel : PART[id].label)
 const lastPick = ref(null)
 const pickInfo = computed(() => {
   const id = lastPick.value, p = PART[id]
   if (!p) return null
   const src = has(id) ? null : BEK_PARTS.includes(id) ? '☕ ได้จากการเลี้ยงกาแฟผู้พัฒนา' : p.quest ? `🏅 ปลดล็อค: ${QUESTS[p.quest]?.label} (${progressText(qprog.value[p.quest])})` : null
   const s = SETS.find(x => x.parts.includes(id))
-  const set = s && !sets.value.some(x => x.id === s.id) ? s : null
+  const worn = new Set(Object.values(trying.value))
+  const set = s && !setActive(s, worn) ? s : null
   return src || set ? { src, set, miss: set ? set.parts.filter(x => !has(x)) : [] } : null
 })
 function wearSet(s) {
-  trying.value = withSet(s)
+  const mineParts = s.parts.filter(has)
+  const ready = mineParts.length >= (s.min || s.parts.length)
+  // ถึงขั้นต่ำ (Diorx 2 ใน 3) = ใส่เฉพาะชิ้นที่มีแล้วใส่จริงเลย · ยังไม่ถึง = ลองทั้งเซ็ตให้ดู
+  trying.value = ready ? mineParts.reduce((eq, id) => tryOn(eq, PART[id].slot, id), { ...trying.value }) : withSet(s)
   lastPick.value = null
-  if (s.parts.every(has)) doEquip()
+  if (ready) doEquip()
   else toast('ลองทั้งเซ็ตให้ดูแล้ว · ชิ้นที่ยังไม่มีต้องได้มาก่อนถึงจะใส่จริงได้')
 }
 function pick(slot, id) {

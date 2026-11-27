@@ -30,6 +30,7 @@ const CHAMPAGNE = { type: 'sparkle', color: '#FFE9A8' }   // สีเดีย�
 // ต่างหู = วิ้งที่ตัวต่างหูเอง (glint · ไม่นับเพดานอนุภาค) · ชิ้นอื่น = ประกายรอบตัว
 export const LUX_AURA = { ...Object.fromEntries(Object.keys(LUX_PRICE).map(id => [id, CHAMPAGNE])), a22: { type: 'glint', color: '#FFF3C4' } }
 export const LUX_SETS = ['i25', 'i26', 'i27', 'i28'].map((bag, k) => ({
-  id: 'diorx' + (k ? k + 1 : ''), label: 'Diorx ครบเซ็ต', parts: [bag, 'a22', 'n18'],
+  id: 'diorx' + (k ? k + 1 : ''), label: 'Diorx ครบเซ็ต', parts: [bag, 'a22', 'n18'], min: 2,   // 27 พ.ย. user: ใส่ 2 ใน 3 ก็ได้เอฟเฟคเซ็ต
+  anyLabel: 'กระเป๋า Diorx สีไหนก็ได้',   // แท็บเซ็ตยุบ 4 สีเป็นการ์ดเดียว
   glow: '#F3D9A4', aura: { type: 'shimmer', color: '#FFF6DC' },
 }))
