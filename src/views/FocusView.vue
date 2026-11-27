@@ -485,6 +485,10 @@ const near = (a, b) => Math.abs(a.x - b.x) <= 30 && Math.abs(a.y - b.y) <= 14
 // 😙 ยกมือ = ผิวปากทักทาย (เพื่อนที่ไม่ได้มองจอก็ได้ยิน) · ถ้ามีคนยกมือรออยู่ใกล้ๆ แล้ว = ตบกันเลย ไม่ต้องผิวปาก (28 พ.ย. user)
 const hfHeard = new Set()
 let hfPrimed = false
+// 28 พ.ย. ผิวปากซ้อน: serverTimestamp เด้ง 2 รอบ (ค่าประมาณในเครื่อง → ค่าจริงจากเซิร์ฟเวอร์) = key ใหม่ · คนละคนยกพร้อมกันก็ซ้อน
+//   → คนเดิมเว้น 1.5 วิ · ทั้งห้องไม่เกิน 1 ครั้งต่อ 1.5 วิ
+const hfLastBy = {}
+let hfLastAny = 0
 watch(() => room.people.value, (list) => {
   const up = list.filter(p => p.zone === viewZone.value && handUp(p) && typeof p.x === 'number')
   for (const p of up) {
@@ -493,7 +497,11 @@ watch(() => room.people.value, (list) => {
     hfHeard.add(key)
     if (!hfPrimed || !fm.state.active) continue   // มือที่ยกค้างอยู่ก่อนเราเปิดหน้า ไม่ต้องผิวปาก
     const pair = up.some(q => q.uid !== p.uid && raisedAt(q) < raisedAt(p) && near(p, q))
-    if (!pair && !document.hidden && !saver.value) chime('whistle')   // เฉพาะคนที่เปิดหน้าห้องอยู่ · พับจอ/โหมดโฟกัส/ไปทำข้อสอบ = ไม่ได้ยิน
+    const now = Date.now()
+    if (now - (hfLastBy[p.uid] || 0) < 1500) continue   // คูลดาวน์ 1.5 วิ (user: เอามือลง-ขึ้นทักเพื่อนได้) · ยังกันเด้งซ้ำจาก serverTimestamp
+    hfLastBy[p.uid] = now
+    if (now - hfLastAny < 1500) continue
+    if (!pair && !document.hidden && !saver.value) { hfLastAny = now; chime('whistle') }   // เฉพาะคนที่เปิดหน้าห้องอยู่ · พับจอ/โหมดโฟกัส/ไปทำข้อสอบ = ไม่ได้ยิน
   }
   hfPrimed = true
 })

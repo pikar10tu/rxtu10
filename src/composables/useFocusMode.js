@@ -10,7 +10,8 @@
 //    focusBank = { secs, c } (กระปุก · c = เวลารับครั้งล่าสุด ms ใช้รู้ว่าเครื่องอื่นกดรับไปแล้ว)
 //    focusDay = { d, secs, coins } (ยอดวันนี้ โชว์อย่างเดียว)
 // ════════════════════════════════════════════════════════════
-import { reactive, computed } from 'vue'
+import { reactive, computed, watch } from 'vue'
+import { chime } from '../utils/focusAudio.js'
 import { increment, serverTimestamp } from 'firebase/firestore'
 import { dayKey } from '../utils/dailyChallenge.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -158,6 +159,17 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (document.hidden) flush() })
   window.addEventListener('pagehide', flush)
 }
+
+// 🐈 เสียงแมวระหว่างทำข้อสอบ (เพื่อนขอ 28 พ.ย.) — นั่งห้องที่มีแมว (ห้องสมุด/สวน) แล้วไปทำข้อสอบ = แมวร้องเมี๊ยวเป็นพักๆ ทุก 1.5–4 นาที
+//   ตามการตั้งค่าเสียงเดิม (ปิดเสียง = เงียบ) · พับจอ = ไม่ร้อง
+const CAT_ZONES = new Set(['lib', 'forest'])
+let meowT = 0
+function meowLoop() {
+  clearTimeout(meowT)
+  if (!(state.active && state.onQuiz && CAT_ZONES.has(state.zone))) return
+  meowT = setTimeout(() => { if (!document.hidden) chime('meow'); meowLoop() }, (90 + Math.random() * 150) * 1000)
+}
+watch(() => [state.active, state.onQuiz, state.zone], meowLoop)
 
 export function useFocusMode(getHouseLevel) {
   if (getHouseLevel) houseLevel = getHouseLevel
