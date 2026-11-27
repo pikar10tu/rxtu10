@@ -604,11 +604,11 @@ export const SETS = [
   { id: 'cat', label: 'แมวส้มครบเซ็ต', parts: ['f10', 'x21'], aura: { type: 'hearts', color: '#F7B6C8' } },
   { id: 'bunny', label: 'กระต่ายครบเซ็ต', parts: ['f11', 'x22'], aura: { type: 'petals', color: '#F7B6C8' } },
   { id: 'dino', label: 'ไดโนครบเซ็ต', parts: ['f12', 'x23'], aura: { type: 'stardust', color: '#F6C453' } },
-  // ⛩️ มิโกะ + หางเทพจิ้งจอก (23 พ.ย. user) = เรืองคลุมตัวสีเดียวกับหาง
-  { id: 'kitsune', label: 'เทพจิ้งจอกฟ้าครบเซ็ต', parts: ['f62', 'w12'], aura: { type: 'glow', color: '#7EC8FF' } },
-  { id: 'kitsune_gold', label: 'เทพจิ้งจอกทองครบเซ็ต', parts: ['f62', 'w25'], aura: { type: 'glow', color: '#FFD15A' } },
-  { id: 'kitsune_sakura', label: 'เทพจิ้งจอกซากุระครบเซ็ต', parts: ['f62', 'w26'], aura: { type: 'glow', color: '#FF9CC4' } },
-  { id: 'kitsune_violet', label: 'เทพจิ้งจอกม่วงครบเซ็ต', parts: ['f62', 'w27'], aura: { type: 'glow', color: '#B48CFF' } },
+  // ⛩️ มิโกะ + หางเทพจิ้งจอก + หู (27 พ.ย. เพิ่มหู · ใส่ 2 ใน 3 ก็ได้) = เรืองคลุมตัวสีเดียวกับหาง
+  { id: 'kitsune', label: 'เทพจิ้งจอกฟ้าครบเซ็ต', parts: ['f62', 'w12', 'x54'], min: 2, aura: { type: 'glow', color: '#7EC8FF' } },
+  { id: 'kitsune_gold', label: 'เทพจิ้งจอกทองครบเซ็ต', parts: ['f62', 'w25', 'x55'], min: 2, aura: { type: 'glow', color: '#FFD15A' } },
+  { id: 'kitsune_sakura', label: 'เทพจิ้งจอกซากุระครบเซ็ต', parts: ['f62', 'w26', 'x56'], min: 2, aura: { type: 'glow', color: '#FF9CC4' } },
+  { id: 'kitsune_violet', label: 'เทพจิ้งจอกม่วงครบเซ็ต', parts: ['f62', 'w27', 'x57'], min: 2, aura: { type: 'glow', color: '#B48CFF' } },
   { id: 'panda', label: 'แพนด้าครบเซ็ต', parts: ['f13', 'x24'], aura: { type: 'petals', color: '#9ED98C' } },
   ...LIMITED_SETS,
   ...LUX_SETS,

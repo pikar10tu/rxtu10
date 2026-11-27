@@ -3,7 +3,7 @@
     <div v-if="current" class="ach-balloon" role="status" aria-live="polite" @click="dismiss">
       <span class="ach-balloon-icon"><Emoji :char="current.icon" /></span>
       <div class="ach-balloon-txt">
-        <div class="ach-balloon-head"><Emoji char="🎉" /> ปลดล็อกความสำเร็จ!</div>
+        <div class="ach-balloon-head"><Emoji char="🎉" /> {{ current?.head || 'ปลดล็อกความสำเร็จ!' }}</div>
         <div class="ach-balloon-title">{{ current.title }}</div>
       </div>
     </div>

@@ -23,7 +23,7 @@ export function initDollQuests() {
     if (!seen || fresh.length) { try { localStorage.setItem(key, JSON.stringify(done)) } catch { /* private mode */ } }
     for (const id of fresh) {
       const set = LIMITED_SETS.find(s => s.id === 'q_' + id)
-      useAchievementBalloon().celebrate({ title: `ปลดล็อค${set ? set.label.replace('ครบเซ็ต', '') : 'ชุดใหม่'}แล้ว! ไปใส่ที่ห้องแต่งตัวได้เลย`, icon: ICON[id] || '🎁' })
+      useAchievementBalloon().celebrate({ head: 'ปลดล็อกเครื่องแต่งกาย!', title: `ปลดล็อค${set ? set.label.replace('ครบเซ็ต', '') : 'ชุดใหม่'}แล้ว! ไปใส่ที่ห้องแต่งตัวได้เลย`, icon: ICON[id] || '🎁' })
     }
   }, { deep: true })
 }
