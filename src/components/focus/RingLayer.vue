@@ -69,7 +69,7 @@ import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
 import RingReplay from './RingReplay.vue'
-import { launch, step, STEP, arrowAt, powerOf, GAUGE_MS, ARROW_SPD, RED_ZONE } from '../../utils/ringKnock.js'
+import { launch, step, STEP, arrowAt, powerOf, seedOf, GAUGE_MS, ARROW_SPD, RED_ZONE } from '../../utils/ringKnock.js'
 import { useRing, ringFx, clearRingFx, WAIT_MS } from '../../composables/useRing.js'
 import { useFocusRoom } from '../../composables/useFocusRoom.js'
 import { onDisconnect } from 'firebase/database'
@@ -173,7 +173,7 @@ async function playThrow(t) {
     // 27 พ.ย. จำไฟต์ไว้ก่อน — เครื่องอื่นอาจล้างเวทีระหว่างเล่นปิดฉาก (เดิม playEnd ไม่ทำงาน → ท่าล้มค้าง ยืนไม่ได้)
     const snap = { ...m.value }; shownScore.value = sc
     inFinale = true
-    try { await finale(t.res) } finally { inFinale = false }
+    try { const k = await finale(t.res); if (k && !snap.k) snap.k = k } finally { inFinale = false }
     await playEnd(t.res, false, snap); return
   }
   await punch(t.res, t.res === 'r' ? 'b' : 'r', false)
@@ -203,7 +203,7 @@ async function playEnd(winner, forfeit, snap) {
       d: { w: props.dollOf?.(cur[winner]?.uid) || '', l: props.dollOf?.(cur[loser]?.uid) || '' },
     }) })
   }
-  await sleep(2600)
+  await sleep(2600 + 2500)   // 27 พ.ย. ค้างท่ากระเด็น/ลงพื้นให้ทุกคนดูอีก 2.5 วิ ก่อนล้างเวที (user: ล้างเร็วไป อยากเห็น)
   fUid.r = fUid.b = null
   clearRingFx()   // 27 พ.ย. เดิมล้างตาม uid ใน match → ถ้าอีกเครื่องล้างเวทีไปก่อน ท่าล้มค้างตอนเดิน
   if (wasMine && !(landedOut && cur[loser]?.uid === room.myUid())) goDown()   // โดนซัดตกนอกเวทีแล้ว = ไม่ต้องเดินลงอีก
@@ -265,6 +265,7 @@ watch(m, (cur, old) => {
     shownScore.value = fresh ? { r: 0, b: 0 } : { ...st.score }
   }
   if (!cur?.id) return
+  if (cur.k) knockSeen[cur.id] = cur.k
   for (const s of ['r', 'b']) if (cur[s]?.name) names[s] = cur[s].name
   // 🏅 นับชนะทันทีที่ผลออก (เดิมรอเล่นอนิเมชันจบ → เครื่องช้า/พับจอ เวทีถูกล้างก่อน ยอดชนะหาย) · เฉพาะชนะจริง ไม่นับคู่ชกหนี
   const w = deriveMatch(cur.h).winner, myU = useAuthStore().currentUser?.uid
@@ -294,16 +295,19 @@ const qte = reactive({ on: false, hold: false, s: 0, ph: 0, t0: 0, h0: 0, now: 0
 const qteLeft = computed(() => Math.max(0, (GAUGE_MS - (qte.now - qte.t0)) / 1000).toFixed(1))
 let qteRes = null
 function qteDown(e) { if (!qte.on || qte.hold) return; e?.target?.setPointerCapture?.(e.pointerId); qte.hold = true; qte.ph = 0; qte.h0 = performance.now(); sfx('tap') }
-function qteUp() { if (!qte.on || !qte.hold) return; qteEnd({ s: Math.round(qte.s * 1000) / 1000, hold: Math.round(performance.now() - qte.h0), spd: ARROW_SPD, zone: RED_ZONE, seed: 1 + Math.floor(Math.random() * 1e9) }) }
+function qteUp() { if (!qte.on || !qte.hold) return; qteEnd({ s: Math.round(qte.s * 1000) / 1000, hold: Math.round(performance.now() - qte.h0), spd: ARROW_SPD, zone: RED_ZONE, seed: seedOf(m.value?.id || fId) }) }
 function qteEnd(k) { qte.on = qte.hold = false; const r = qteRes; qteRes = null; r?.(k) }
+// 27 พ.ย. คนดูไม่เห็นกระเด็น: เดิมเวทีถูกล้าง/เปลี่ยนไฟต์ก่อน k มาถึง = ยอมแพ้ทันที → ล้มเฉยๆ
+// ตอนนี้จำ k ทุกครั้งที่เห็น (ต่อรหัสไฟต์) + รอต่อจนหมดเวลา · ไม่ได้จริงๆ = ซัดแรงกลางๆ ด้วย seed เดียวกัน (ยังเห็นกระเด็น)
+const knockSeen = {}
 async function waitKnock(id, ms) {
   const t0 = Date.now()
-  while (Date.now() - t0 < ms) { const c = m.value; if (!c || c.id !== id) return null; if (c.k) return c.k; await sleep(100) }
-  return null
+  while (Date.now() - t0 < ms) { const c = m.value; if (c?.id === id && c.k) knockSeen[id] = c.k; if (knockSeen[id]) return knockSeen[id]; await sleep(100) }
+  return { s: .6, seed: seedOf(id) }
 }
-let landedOut = false, inFinale = false
+let landedOut = false, inFinale = false, fId = null
 async function finale(w) {
-  const l = w === 'r' ? 'b' : 'r', dir = l === 'b' ? 1 : -1, id = m.value?.id
+  const l = w === 'r' ? 'b' : 'r', dir = l === 'b' ? 1 : -1, id = m.value?.id; fId = id
   const [wx, wy] = CORNER[w], [lx] = CORNER[l], wu = uidOf(w)
   fUid.r = m.value?.r?.uid || null; fUid.b = m.value?.b?.uid || null
   const mine = mySide.value === w
@@ -319,7 +323,7 @@ async function finale(w) {
     if (mine) {
       if (qte.hold) { qte.ph += dt * ARROW_SPD; qte.s = arrowAt(qte.ph); const t = Math.floor(qte.ph * 6); if (t !== tick) { tick = t; sfx('tap') } }
       target = qte.hold ? .4 + .6 * qte.s : .25; jit = qte.hold ? (Math.random() - .5) * .8 * (.5 + qte.s) : 0; pw = qte.hold ? qte.s : 0
-      if (qte.on && now - qte.t0 > GAUGE_MS) qteEnd({ s: -1, seed: 1 })   // ไม่กด/ไม่ปล่อยใน 5 วิ = ต่อยแล้วล้มเฉยๆ
+      if (qte.on && now - qte.t0 > GAUGE_MS) qteEnd({ s: -1, seed: seedOf(id) })   // ไม่กด/ไม่ปล่อยใน 5 วิ = ต่อยแล้วล้มเฉยๆ
     }
     pull += (target - pull) * Math.min(1, dt * 14)
     if (wu) ringFx.at[wu] = { x: wx - dir * pull * 6 + jit, y: wy, rot: -dir * pull * .25, pw }
@@ -334,6 +338,7 @@ async function finale(w) {
   } else k = await waitKnock(id, GAUGE_MS + 4000)
   run = false
   await knockout(w, l, k)
+  return k
 }
 async function knockout(w, l, k) {
   const wu = fUid[w], lu = fUid[l], dir = l === 'b' ? 1 : -1

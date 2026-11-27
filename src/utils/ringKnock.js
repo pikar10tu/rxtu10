@@ -15,6 +15,8 @@ const inRing = (x) => x > RING.x0 - 4 && x < RING.x1 + 4
 export function mulberry(a) {
   return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 }
 }
+/** 🎯 มุม/การเด้งกำหนดล่วงหน้าจากรหัสไฟต์ (27 พ.ย.) — ทุกเครื่องรู้ seed เดียวกันตั้งแต่ก่อนชาร์จ ไม่ต้องรอซิงก์ */
+export function seedOf(id) { let h = 2166136261; for (const c of String(id || '')) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) % 1e9 + 1 }
 /** ลูกศรขึ้นลง: เฟส (รอบ) → ตำแหน่ง 0..1 */
 export const arrowAt = (ph) => { const p = ((ph % 2) + 2) % 2; return p < 1 ? p : 2 - p }
 /** แรงจาก k: -1 = ล้มเฉยๆ · 0.08..0.85 = ปกติ · 0.95..1 = โซนแดง (บินชนขอบจอ) */
