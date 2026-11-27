@@ -19,7 +19,7 @@
 
     <template v-if="authStore.isLoggedIn">
       <!-- 🏠 หน้าแรกแบบ B (user เคาะ 20 พ.ย. 2026): ฉากบ้านเต็มกว้าง อวาตาร์ยืนในฉาก · คำทักทายบนแถบฟ้า · แตะอวาตาร์ = ห้องแต่งตัว -->
-      <ResidenceScene v-slot="{ headX, headY }" class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน">
+      <ResidenceScene v-slot="{ headX, headY }" class="home-scene" :scene="homeScene" :eq="homeDoll" doll-to="/doll" label="อวาตาร์ของฉัน" @click="onSceneTap">
         <!-- ป้ายทักทาย + วันสอบ (ย้ายจากหัวหน้ามาไว้บนฟ้า) · จิ้มรัวยังได้ความสำเร็จลับเหมือนเดิม -->
         <!-- บับเบิ้ลคำพูด: หางชี้ลงเหนือหัวอวาตาร์ เว้น 24px (ตามจุดยืนของแต่ละฉาก) -->
         <div class="greet-bubble home-greet" :style="{ left: Math.max(8, headX - 27) + 'px', bottom: `calc(100% - ${headY - 24}px)` }">
@@ -35,11 +35,18 @@
         <button type="button" class="place-tag home-place" :style="{ '--tier': homeTier.frameColor }" @click="homeOpen = true">
           <Emoji :char="homeTier.art" /> {{ homeTier.tierName }} <b>›</b>
         </button>
+        <!-- 🪙 รายได้ประจำวันบนฉาก (user 28 พ.ย. แบบ B): เส้นทองขอบล่าง = เต็มแค่ไหน · มุมขวาเหนือป้ายบ้าน (ฝั่งตรงข้ามอวาตาร์)
+             แตะตัวเลข = ป๊อปอัปที่มาของรายได้ (มีปุ่มเก็บในนั้นด้วย) · แตะ "เก็บ" = เก็บเลย -->
+        <div class="home-inc-edge" aria-hidden="true"><i :style="{ width: fillPct + '%' }"></i></div>
+        <div class="home-inc" :class="{ full: isFull }">
+          <button type="button" class="home-inc-amt" :aria-label="`รายได้สะสม ${accrued.toLocaleString()} เหรียญ ดูที่มา`" @click.stop="showIncome = true"><Emoji char="🪙" /> {{ accrued.toLocaleString() }}</button>
+          <button type="button" class="home-inc-go" :disabled="accrued < 1" @click.stop="claim">{{ accrued < 1 ? 'เพิ่งเก็บ' : isFull ? 'เต็ม! เก็บ' : 'เก็บ' }}</button>
+        </div>
       </ResidenceScene>
       <ResidenceSheet v-model:open="homeOpen" />
       <!-- จัดหน้าใหม่ (user เคาะ 11 พ.ย. 2026): ผลสอบจำลอง → วันนี้ของคุณ → ประจำวันสนุกๆ → บ้าน → ลิงก์ท้ายหน้า -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
-      <MockScoreCard only-unseen class="home" />
+      <!-- ผลสอบจำลอง CC2 รอบอาจารย์: ถอดจากหน้าแรก 28 พ.ย. (user: เพื่อนส่วนใหญ่เปิดดูแล้ว) · ยังดูได้ที่หน้าฉัน -->
       <!-- 🎯 กลางหน้า: นับถอยหลังวันสอบ + ปุ่มไปเรียน (user 20 พ.ย. 2026) · จิ้มตัวเลขรัวยังได้ความสำเร็จลับเหมือนเดิม -->
       <section v-if="nextExam" class="home-go">
         <div class="home-go-cd" :class="{ 'cd-jig': jig === 1, 'cd-panic': jig === 2 }" role="button" tabindex="0" data-sfx="none"
@@ -96,6 +103,9 @@
         </template>
         <MailboxCard />
       </BottomSheet>
+      <BottomSheet v-model:open="showIncome" icon="🪙" title="รายได้ประจำวัน">
+        <ContinueCard income-only class="home-today" />
+      </BottomSheet>
       <BottomSheet v-model:open="showToday" icon="☀️" title="วันนี้ของคุณ">
         <ContinueCard class="home-today" />
       </BottomSheet>
@@ -117,7 +127,7 @@ import ResidenceSheet from '../components/residence/ResidenceSheet.vue'
 import { getTier, sceneOf } from '../data/residence.js'
 import { dollOf } from '../utils/doll.js'
 import Emoji from '../components/shared/Emoji.vue'
-import MockScoreCard from '../components/me/MockScoreCard.vue'
+
 import FeedbackModal from '../components/shared/FeedbackModal.vue'
 import { RouterLink } from 'vue-router'
 import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
@@ -156,7 +166,14 @@ const showMail = ref(false)
 watch(showMail, (o) => { if (o) mailbox.load({ maxAge: 60000 }) })
 const showQuest = ref(false)
 const showToday = ref(false)
-const { fillPct } = useDaily()
+const { fillPct, accrued, isFull, claim } = useDaily()
+const showIncome = ref(false)
+// แตะพื้นที่ฉากบ้าน (ที่ไม่ใช่อวาตาร์/ปุ่ม) = เปิดแผงบ้านเหมือนกดป้ายชื่อบ้าน (user 28 พ.ย.)
+function onSceneTap(e) {   // เฉพาะซีกขวาของฉาก (ซีกซ้ายเป็นที่ยืนอวาตาร์ · user 28 พ.ย.)
+  if (e.target.closest('a, button, .greet-bubble')) return
+  const r = e.currentTarget.getBoundingClientRect()
+  if (e.clientX - r.left >= r.width / 2) homeOpen.value = true
+}
 const playedToday = computed(() => authStore.userData?.dc?.last === dayKey())
 // 🔥 แถบ 7 วัน + เป้าวันนี้ (user เลือก 1+2 · 20 พ.ย. 2026)
 const GOAL = 30
@@ -241,7 +258,18 @@ onMounted(async () => {
 .try-dress::before { content: ''; position: absolute; left: -5px; top: 50%; width: 8px; height: 8px; margin-top: -4px; background: #fff; border-left: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); transform: rotate(45deg); }
 @keyframes try-bob { 50% { transform: translateY(-3px); } }
 .home-greet { position: absolute; z-index: 2; max-width: calc(100% - 24px); }
-.home-place { position: absolute; right: 12px; bottom: 8px; z-index: 2; }
+.home-place { position: absolute; right: 12px; bottom: 10px; z-index: 2; }
+
+.home-inc-edge { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 2; background: rgba(255,255,255,.35); pointer-events: none; }
+.home-inc-edge i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold, #f6b93b), #f97316); box-shadow: 0 0 6px rgba(246,185,59,.8); transition: width .6s; }
+.home-inc { position: absolute; right: 12px; bottom: 46px; z-index: 2; display: flex; align-items: center; gap: 0; background: rgba(255,255,255,.96); border-radius: 99px; padding: 2px; box-shadow: 0 1px 5px rgba(40,30,70,.2); }
+.home-inc-amt { font: inherit; font-size: .78rem; font-weight: 800; color: var(--text, #1e293b); background: none; border: 0; padding: 3px 8px 3px 6px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.home-inc-amt :deep(img), .home-inc-amt :deep(.emoji) { width: 1.05em; height: 1.05em; vertical-align: -.15em; }
+.home-inc-go { font: inherit; font-size: .72rem; font-weight: 800; color: #fff; background: linear-gradient(90deg, #f6b93b, #f97316); border: 0; border-radius: 99px; padding: 4px 11px; cursor: pointer; }
+.home-inc-go:disabled { background: #d7d2e0; cursor: default; }
+.home-inc.full { animation: home-inc-glow 1.4s ease-in-out infinite; }
+@keyframes home-inc-glow { 50% { box-shadow: 0 0 0 4px rgba(246,185,59,.45), 0 1px 5px rgba(40,30,70,.2); } }
+@media (prefers-reduced-motion: reduce) { .home-inc.full { animation: none; } }
 /* ── จัดหน้าใหม่ 13 พ.ย. 2026 ── */
 .home-sec { font-size: .8rem; font-weight: 800; color: var(--muted); margin: 4px 2px 8px; }
 .home-fun { display: grid; gap: 8px; margin-bottom: 12px; align-items: stretch; }

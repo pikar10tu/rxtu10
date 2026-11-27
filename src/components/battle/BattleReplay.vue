@@ -43,7 +43,10 @@
       <div v-if="showFps" class="br-fps" :class="{ bad: fpsWorst > 33, warn: fpsWorst > fpsDropAt && fpsWorst <= 33 }">{{ fpsWorst }}ms</div>
 
       <!-- ป้ายชื่อ: ใคร · แต้ม · สนามอะไร (data.sides ไม่ส่งมา = "ศัตรู"/"ทีมคุณ" แบบเดิม) -->
-      <div class="br-side foe-label"><i class="dot foe"></i> <b>{{ sideTop.name }}</b><span v-if="sideTop.sub" class="br-side-sub">{{ sideTop.sub }}</span></div>
+      <!-- 🧑‍🏫 เทรนเนอร์ (user 28 พ.ย.): อวาตาร์ยืนท้ายแถวป้ายชื่อ เท้าแตะเส้นป้าย ตัวโผล่ขึ้นไปในช่องว่างด้านบน (ไม่ดันเลย์เอาต์)
+           ฝั่งเรา = เสมอ · ฝั่งตรงข้าม = เฉพาะคนจริง (data.sides.top.eq) บอท/หอคอย/ดันเจี้ยนไม่มี -->
+      <div class="br-siderow foe"><div class="br-side foe-label"><i class="dot foe"></i> <b>{{ sideTop.name }}</b><span v-if="sideTop.sub" class="br-side-sub">{{ sideTop.sub }}</span></div>
+        <span v-if="topEq" class="br-trainer foe" aria-hidden="true"><DollFigure :eq="topEq" :scale="2" :aura="false" :label="sideTop.name" /></span></div>
       <div class="br-team">
         <div v-for="(p, i) in data.botTeam" :key="'B'+i" :ref="el => setEl('B'+i, el)"
              class="br-unit foe" @click="inspect('B'+i)">
@@ -93,7 +96,8 @@
           <div class="br-stats"><span class="br-atk" :class="[atkMood('A'+i), { bump: atkBump['A'+i] }]"><i v-if="atkMood('A'+i)" class="br-atk-arr">{{ atkMood('A'+i) === 'up' ? '▲' : '▼' }}</i>{{ atkOf('A'+i) }}</span><span class="br-hpn me" :class="{ hit: hpHit['A'+i] }">{{ shownHp('A'+i) }}</span></div>
         </div>
       </div>
-      <div class="br-side me-label"><i class="dot me"></i> <b>{{ sideBot.name }}</b><span v-if="sideBot.sub" class="br-side-sub">{{ sideBot.sub }}</span></div>
+      <div class="br-siderow me"><div class="br-side me-label"><i class="dot me"></i> <b>{{ sideBot.name }}</b><span v-if="sideBot.sub" class="br-side-sub">{{ sideBot.sub }}</span></div>
+        <span v-if="botEq" class="br-trainer me" aria-hidden="true"><DollFigure :eq="botEq" :scale="2" :aura="false" label="อวาตาร์ของฉัน" /></span></div>
 
       <!-- สปอตไลต์สกิล — หรี่ฉากแล้วชูแบนเนอร์ให้อ่านก่อน ผลค่อยลงทีหลัง
            🚫 ห้ามใช้ backdrop-filter/blur ตรงนี้เด็ดขาด — เป็นตัวฆ่าเฟรมบน iOS Safari (ดูเคสกระตุก v3)
@@ -259,6 +263,9 @@ import { useEscapeKey } from '../../composables/useEscapeKey.js'
 import Emoji from '../shared/Emoji.vue'
 import { STATUSES } from '../../data/statuses.js'
 import ArenaFloor from './ArenaFloor.vue'
+import DollFigure from '../doll/DollFigure.vue'
+import { useAuthStore } from '../../stores/auth.js'
+import { dollOf } from '../../utils/doll.js'
 import { getArena } from '../../data/arenas.js'
 import { parseArenaRef } from '../../utils/arenas.js'
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
@@ -305,6 +312,9 @@ function sideOf(key, fallback) {
   return { name: s.name || fallback, sub: bits.join(' · ') }
 }
 const sideTop = computed(() => sideOf('top', 'ศัตรู'))
+const _auth = useAuthStore()
+const botEq = computed(() => (props.data?.sides?.bot?.eq === null ? null : props.data?.sides?.bot?.eq || (_auth.userData ? dollOf(_auth.userData).eq : null)))
+const topEq = computed(() => props.data?.sides?.top?.eq || null)
 const sideBot = computed(() => sideOf('bot', 'ทีมคุณ'))
 const ovRef = ref(null)
 const vsRef = ref(null)
@@ -1784,6 +1794,12 @@ onUnmounted(() => {
 @keyframes br-vsi-bar { to { transform: scaleX(1); } }
 @keyframes br-vsi-x { to { transform: translate(-50%, -50%) scale(1); } }
 @keyframes br-vsi-out { to { opacity: 0; } }
+.br-siderow { position: relative; display: flex; }
+.br-siderow.foe { justify-content: flex-end; }
+/* ยืนใกล้ป้ายชื่อตัวเอง (user 28 พ.ย.): ศัตรู = ขวาบน ยืนบนเส้นป้าย · เรา = ซ้ายล่าง ใต้ป้าย "ทีมคุณ" (ไม่ทับการ์ด) */
+.br-trainer { position: absolute; line-height: 0; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
+.br-trainer.foe { right: 0; bottom: 18px; transform: scale(.7); transform-origin: 100% 100%; }
+.br-trainer.me { left: 0; top: 14px; transform: scale(.75); transform-origin: 0 0; }
 .br-side .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
 .dot.foe { background: #f87171; }
 .dot.me { background: #34d399; }
@@ -1862,6 +1878,11 @@ onUnmounted(() => {
 @keyframes br-atk-bump { 0% { transform: scale(1) } 35% { transform: scale(1.4) } 100% { transform: scale(var(--br-atk-rest, 1)) } }
 .br-atk.up { --br-atk-rest: 1.12; } .br-atk.down { --br-atk-rest: 1.06; }
 @media (prefers-reduced-motion: reduce) { .br-atk.bump, .br-atk.bump::after { animation: none; } }
+/* 🖥️ จอใหญ่ (28 พ.ย. ยกเครื่อง UI): กล่องสนามกว้างแค่ 440px → แท็บเล็ต/คอมการ์ดเล็กโหรงเหรง · ขยายทั้งกล่องด้วย zoom
+   (zoom = เลย์เอาต์+ตำแหน่งวัดจริงขยายตาม เอฟเฟกต์/กระสุนยังตรงตัว) · คุมด้วยความสูงด้วย กันล้นจอแนวนอน */
+@media (min-width: 640px) and (min-height: 600px) { .br-box { zoom: 1.2; } }
+@media (min-width: 760px) and (min-height: 760px) { .br-box { zoom: 1.4; } }
+@media (min-width: 1000px) and (min-height: 860px) { .br-box { zoom: 1.6; } }
 @keyframes br-hpn-pop { 0% { transform: scale(1) } 30% { transform: scale(1.28) } 100% { transform: scale(1) } }
 @keyframes br-hpn-ring { 0% { opacity: .95; transform: scale(.9) } 100% { opacity: 0; transform: scale(1.35) } }
 

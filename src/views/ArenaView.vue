@@ -128,6 +128,7 @@
 </template>
 
 <script setup>
+import { decodeDoll } from '../utils/dollCode.js'
 import BackButton from '../components/shared/BackButton.vue'
 import Emoji from '../components/shared/Emoji.vue'
 import { RouterLink, useRouter } from 'vue-router'
@@ -298,7 +299,7 @@ async function onFind() {
     // สนามครึ่งบน = ของคู่ต่อสู้ (แถว roster · บอทไม่มีแถว = สนามฟรี) · ครึ่งล่าง = ของเรา
     const top = opp?.isBot ? null : (members.rosterRows?.[opp?.uid]?.ar ?? null)
     const sides = {
-      top: { name: opp?.isBot ? 'หุ่นซ้อม' : (opp?.nickname || '?'), rating: opp?.rating ?? null },
+      top: { name: opp?.isBot ? 'หุ่นซ้อม' : (opp?.nickname || '?'), rating: opp?.rating ?? null, eq: opp?.isBot ? null : (decodeDoll(members.rosterRows?.[opp?.uid]?.dl) || null) },   // 🧑‍🏫 เทรนเนอร์ฝั่งตรงข้าม (คนจริงเท่านั้น)
       bot: { name: 'คุณ', rating: myRating },
     }
     pending = { ...r, sides, arenas: { top, bot: myArenaRef } }

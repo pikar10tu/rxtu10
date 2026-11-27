@@ -21,13 +21,17 @@ export function createBattleFx() {
   function setReducedOverride(v) { ignoreReduced = !!v }
 
   // ── centers cache (ย้ายมาจาก BattleReplay) ──
-  function invalidateCenters() { centers = {}; boxRect = null }
+  function invalidateCenters() { centers = {}; boxRect = null; zk = 0 }
+  // 🖥️ กล่องสนามถูก CSS zoom บนจอใหญ่ (28 พ.ย.) → rect บนจอใหญ่กว่าพิกัดในกล่อง k เท่า · หารกลับก่อนวาง
+  let zk = 0
+  const Z = () => (zk ||= (boxEl && boxEl.offsetWidth ? boxEl.getBoundingClientRect().width / boxEl.offsetWidth : 1) || 1)
   function centerOf(uid) {
     const c = centers[uid]; if (c) return c
     const el = getEl(uid); if (!el || !boxEl) return null
     if (!boxRect) boxRect = boxEl.getBoundingClientRect()
     const r = el.getBoundingClientRect()
-    const v = { x: r.left - boxRect.left + r.width / 2, y: r.top - boxRect.top + r.height / 2 }
+    const k = Z()
+    const v = { x: (r.left - boxRect.left + r.width / 2) / k, y: (r.top - boxRect.top + r.height / 2) / k }
     centers[uid] = v; return v
   }
   function onResize() { invalidateCenters() }
@@ -492,7 +496,7 @@ export function createBattleFx() {
     if (!boxRect && boxEl) boxRect = boxEl.getBoundingClientRect()
     const plan = showtimePlan(petId, {
       owner, team: pts(ctx.team), foes: pts(ctx.foes), targets: pts(ctx.targets), stacks: ctx.stacks, partner: ctx.partner ? centerOf(ctx.partner) : null,
-      box: { w: boxRect?.width || 360, h: boxRect?.height || 560 },
+      box: { w: boxRect ? boxRect.width / Z() : 360, h: boxRect ? boxRect.height / Z() : 560 },
     })
     const poolName = petId.startsWith('weather') ? 'wx' : 'st'
     return Promise.all(plan.map(sp => {
@@ -552,7 +556,7 @@ export function createBattleFx() {
     const src = BASE + 'fx/' + img + '.webp'
     if (el.getAttribute('src') !== src) el.src = src
     const lv = Math.max(0.2, Math.min(1, level || 0))
-    const s = (card.getBoundingClientRect().height / 96) * (1.08 + 0.14 * lv)
+    const s = (card.getBoundingClientRect().height / Z() / 96) * (1.08 + 0.14 * lv)
     const base = `translate(${c.x.toFixed(1)}px, ${(c.y - 4).toFixed(1)}px) translateZ(0)`
     el.style.visibility = ''
     lift(el)
@@ -594,9 +598,9 @@ export function createBattleFx() {
       const t = mkEl('brfx-boo-t'); t.textContent = 'แบร่!'
       booEls = { g, t }
     }
-    const r = boxEl.getBoundingClientRect()
-    const cx = r.width / 2, cy = r.height / 2
-    const size = Math.min(r.width * 0.42, 190)
+    const r = boxEl.getBoundingClientRect(), k = Z()
+    const cx = r.width / k / 2, cy = r.height / k / 2
+    const size = Math.min(r.width / k * 0.42, 190)
     const { g, t } = booEls
     const at = (dy, rot, sc) => `translate(${(cx - size / 2).toFixed(1)}px, ${(cy - size / 2 + dy).toFixed(1)}px) rotate(${rot}deg) scale(${sc})`
     g.style.width = g.style.height = size + 'px'
@@ -624,7 +628,7 @@ export function createBattleFx() {
   function abductBeam(uid) {
     const c = centerOf(uid), el = getEl(uid)
     if (!layer || !c || !el) return 0
-    const w = el.getBoundingClientRect().width
+    const w = el.getBoundingClientRect().width / Z()
     const ms = 1100 / rate
     const ufo = mkImg('brfx-ufo'); imgSrc(ufo, '🛸')
     const beam = mkEl('brfx-beam')

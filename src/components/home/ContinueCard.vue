@@ -20,18 +20,22 @@
         <span class="td-inc-amt"><b>{{ accrued.toLocaleString() }}</b> / {{ ratePerDay.toLocaleString() }}</span>
         <button type="button" class="td-claim" :disabled="accrued < 1" @click="claim">{{ accrued >= 1 ? 'เก็บเหรียญ' : 'เพิ่งเก็บไป' }}</button>
       </div>
-      <details class="td-why">
+      <details class="td-why" :open="incomeOnly">
         <summary>รายได้มาจากไหน</summary>
-        <div class="td-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย</span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
-        <div class="td-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง</span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
-        <div v-if="towerBonus" class="td-row"><span><Emoji char="🏯" /> หอคอย</span><b>{{ towerBonus.toLocaleString() }}/วัน</b></div>
+        <div class="td-row"><span><Emoji char="🏠" /> ที่อยู่อาศัย <button type="button" class="td-q" :aria-expanded="why === 'home'" aria-label="บ้านให้รายได้ยังไง" @click="toggleWhy('home')">?</button></span><b>{{ baseIncome.toLocaleString() }}/วัน</b></div>
+        <p v-if="why === 'home'" class="td-qa">อัปบ้านแล้วไม่ได้แค่รายได้ประจำวันเพิ่มนะ เวลานั่งอ่านหนังสือใน Co-working space ก็ได้เหรียญต่อวินาทีมากขึ้นด้วย บ้านยิ่งหรู ยิ่งอ่านยิ่งรวย</p>
+        <div class="td-row"><span><Emoji char="🐾" /> สัตว์เลี้ยงในคลัง <button type="button" class="td-q" :aria-expanded="why === 'pet'" aria-label="สัตว์เลี้ยงให้รายได้ยังไง" @click="toggleWhy('pet')">?</button></span><b>{{ petIncome.toLocaleString() }}/วัน</b></div>
+        <p v-if="why === 'pet'" class="td-qa">แน่นอนสิ สัตว์เลี้ยงในคลังก็สร้างรายได้ให้เราด้วยนะ แถมพออัปเกรดแล้วจะให้รายได้สูงขึ้นด้วย<br><span>#ครีเอเตอร์มือใหม่ #อย่าปิดกั้นการมองเห็น</span></p>
+        <div v-if="towerBonus" class="td-row"><span><Emoji char="🏯" /> หอคอย <button type="button" class="td-q" :aria-expanded="why === 'tower'" aria-label="หอคอยให้รายได้ยังไง" @click="toggleWhy('tower')">?</button></span><b>{{ towerBonus.toLocaleString() }}/วัน</b></div>
         <RouterLink v-else to="/tower" class="td-row td-tip"><span><Emoji char="🏯" /> หอคอยถึงชั้น {{ TOWER_HINT_FLOOR }}</span><b>+{{ towerHintBonus.toLocaleString() }}/วัน ›</b></RouterLink>
+        <p v-if="why === 'tower'" class="td-qa">ยิ่งปีนสูงขึ้น รายได้ก็ยิ่งสูงขึ้นนะ มาไต่หอคอยกันเถอะ</p>
         <div v-if="bonusPct" class="td-row"><span><Emoji char="💖" /> โบนัสซัพพอร์ตเตอร์</span><b>+{{ bonusPct }}%</b></div>
         <div v-if="buffActive" class="td-row"><span><Emoji char="⚡" /> โบนัสเควสต์รายวัน</span><b>+50%</b></div>
       </details>
     </div>
 
-    <!-- ☀️ วันนี้ของคุณ -->
+    <!-- ☀️ วันนี้ของคุณ (ป๊อปอัปรายได้จากฉากบ้าน = income-only ซ่อนส่วนนี้) -->
+    <template v-if="!incomeOnly">
     <div class="td-h">
       <span><Emoji char="☀️" /> วันนี้ของคุณ</span>
       <span class="td-count" :class="{ all: doneN === goalN }">{{ doneN === goalN ? 'ครบแล้ว เก่งมาก!' : `ทำแล้ว ${doneN}/${goalN}` }}</span>
@@ -44,6 +48,7 @@
       </RouterLink>
     </div>
     <RouterLink to="/quiz" class="td-main"><Emoji char="📝" /> ทำข้อสอบต่อ</RouterLink>
+    </template>
   </section>
 </template>
 <script setup>
@@ -58,6 +63,9 @@ import { loadCc2Index } from '../../composables/useCc2Data.js'
 import { dayKey } from '../../utils/dailyChallenge.js'
 import { dueCount as qcardsDueCount } from '../../utils/srsQuestions.js'
 
+const props = defineProps({ incomeOnly: { type: Boolean, default: false } })
+const why = ref('')   // ❓ ที่มารายได้ (user 28 พ.ย. สำนวนปั่นๆ) · 'home' | 'pet' | 'tower'
+const toggleWhy = (k) => { why.value = why.value === k ? '' : k }
 const auth = useAuthStore()
 const coins = computed(() => auth.userData?.coins || 0)
 const {
@@ -139,6 +147,10 @@ const incState = computed(() => (isFull.value ? 'full' : fillPct.value >= 75 ? '
 .td-inc-amt { font-size: .76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .td-inc-amt b { color: var(--ink); font-size: .9rem; }
 .td-claim { border: none; border-radius: 10px; padding: 7px 14px; font: inherit; font-size: .8rem; font-weight: 800; color: #fff; background: var(--bar); cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+.td-q { font: inherit; font-size: .62rem; font-weight: 800; width: 16px; height: 16px; line-height: 14px; padding: 0; margin-left: 3px; border-radius: 50%; border: 1px solid currentColor; background: none; color: var(--muted); cursor: pointer; vertical-align: 1px; }
+.td-q[aria-expanded="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.td-qa { margin: 2px 0 4px; padding: 6px 9px; font-size: .72rem; line-height: 1.45; background: #fff; border-radius: 8px; color: var(--text); }
+.td-qa span { color: #3b82c4; font-weight: 600; }
 .td-claim:disabled { background: #d7d2e0; box-shadow: none; cursor: default; }
 .td-why summary { font-size: .72rem; color: var(--muted); cursor: pointer; }
 .td-row { display: flex; justify-content: space-between; font-size: .74rem; padding: 3px 0; color: var(--ink); text-decoration: none; }
