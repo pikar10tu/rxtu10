@@ -288,6 +288,11 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // 💌 ข้อความกำลังใจจากคนเลี้ยงกาแฟ (27 พ.ย. 2026) — แอดมินเก็บไว้อ่านถาวร
+    match /supporterNotes/{id} {
+      allow read, write: if isAdmin();
+    }
+
     // ── News feed — admin posts anything; logged-in users may post
     //    achievement / legendary / tower100 / record1 only (field+length guarded)
     //    ⚠️ ชนิดต้องตรงกับ NEWS_TYPES ใน composables/useNewsPost.js ──

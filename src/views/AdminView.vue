@@ -138,6 +138,24 @@
         </ul>
       </section>
 
+      <!-- ───── 💌 ข้อความกำลังใจ (เก็บถาวร) ───── -->
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <span><Emoji char="💌" /> ข้อความกำลังใจ ({{ supporterNotes.length }})</span>
+          <button class="btn-mini" :disabled="loadingNotes" @click="loadSupporterNotes">
+            {{ loadingNotes ? '...' : '↻ โหลด' }}
+          </button>
+        </div>
+        <div class="admin-hint">ข้อความจากคนเลี้ยงกาแฟ เก็บอัตโนมัติตอนกดส่งจดหมายขอบคุณหรือกดปิด · ไม่หายไปไหน</div>
+        <div v-if="!supporterNotes.length" class="admin-empty">ยังไม่มีข้อความ</div>
+        <ul v-else class="log-list">
+          <li v-for="n in supporterNotes" :key="n.id" class="rep-row">
+            <div class="rep-note">{{ n.message }}</div>
+            <div class="log-ts">{{ n.name }}<span v-if="n.amount"> · ☕ {{ n.amount }} บาท</span> · {{ fmtTs(n.ts) }}</div>
+          </li>
+        </ul>
+      </section>
+
       <!-- ───── รายงานการโกง (cheat logs) ───── -->
       <section class="admin-card">
         <div class="admin-card-head">
@@ -1099,7 +1117,7 @@ const cheatLogs = ref([])
 const loadingLogs = ref(false)
 
 onMounted(() => {
-  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews(); loadDrugReports(); loadFeedback(); usage.loadToday() }
+  if (authStore.isAdmin) { reload(); loadCheatLogs(); loadNews(); loadDrugReports(); loadFeedback(); loadSupporterNotes(); usage.loadToday() }
 })
 
 // ── Drug reports + dev feedback ──
@@ -1124,8 +1142,29 @@ async function loadFeedback() {
   } catch (e) { console.error('[admin feedback]', e) }
   finally { loadingFeedback.value = false }
 }
+// 💌 เก็บข้อความกำลังใจถาวร (supporterNotes) — doc id = feedback id กันซ้ำ
+const supporterNotes = ref([])
+const loadingNotes = ref(false)
+async function loadSupporterNotes() {
+  loadingNotes.value = true
+  try {
+    const snap = await getDocs(query(collection(db, 'supporterNotes'), orderBy('ts', 'desc')))
+    supporterNotes.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  } catch (e) { console.error('[admin supporterNotes]', e) }
+  finally { loadingNotes.value = false }
+}
+async function keepSupporterNote(f) {
+  if (!f || !['coffee', 'coffee-msg'].includes(f.category) || !f.message) return
+  await setDoc(doc(db, 'supporterNotes', f.id), {
+    message: f.message, name: f.reporterName || 'ไม่ระบุ', uid: f.reporterUid || null,
+    amount: f.amount || null, category: f.category, ts: f.ts || serverTimestamp(), keptAt: serverTimestamp(),
+  })
+  loadSupporterNotes()
+}
+
 async function resolveDoc(coll, id) {
   try {
+    if (coll === 'feedback') await keepSupporterNote(feedback.value.find(x => x.id === id))
     await deleteDoc(doc(db, coll, id))
     if (coll === 'drugReports') drugReports.value = drugReports.value.filter(x => x.id !== id)
     else if (coll === 'feedback') feedback.value = feedback.value.filter(x => x.id !== id)
@@ -1155,6 +1194,7 @@ async function approveCoffee(f) {
     await setDoc(doc(db, 'users', f.reporterUid, 'mail', `coffee-${f.id}`),
       buildBroadcastMail({ title: '☕ ขอบคุณที่เลี้ยงกาแฟนะ', body, coins, doll: gift, from: 'admin', kind: 'coffee' }, serverTimestamp()))
     await updateDoc(doc(db, 'users', f.reporterUid), { coffeeCount: increment(1) })
+    await keepSupporterNote(f)
     await deleteDoc(doc(db, 'feedback', f.id))
     feedback.value = feedback.value.filter(x => x.id !== f.id)
     toast('ส่งจดหมายขอบคุณแล้ว', 'success')
