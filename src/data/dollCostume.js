@@ -48,6 +48,8 @@ export const COSTUME_PRICE = { f75: 900000, x67: 700000, a23: 300000, n19: 40000
 export const COSTUME_SETS = [
   { id: 'empress', label: 'ฮองเฮาครบเซ็ต', parts: ['f75', 'x67', 'a23', 'n19'], min: 2, glow: '#F2C94C', aura: { type: 'sparkle', color: '#FFE08A' } },
   { id: 'titan_armor', label: 'ยักษ์เกราะหินครบเซ็ต', parts: ['f76', 'x68'], glow: '#FF8A5C', aura: { type: 'mist', color: '#F4EEE6' } },   // ร่างยักษ์ร้อนระอุ + ไอน้ำ
+  // 🟢 หน่วยสำรวจ (user 27 พ.ย.): ชุดปีกเสรี f41 + ผ้าพันคอแดง n14 (ของเดิม) + อุปกรณ์ฯ w29 · 2 ใน 3 · เรืองเขียว + ไอแก๊สรอบเท้า
+  { id: 'scout', label: 'หน่วยสำรวจครบเซ็ต', parts: ['f41', 'n14', 'w29'], min: 2, glow: '#3FA36B', aura: { type: 'mist', color: '#BFE6CC' } },
 ]
 // ชิ้นเดี่ยว: สีเดียวกันทั้งชุด → dollAura ตัดซ้ำ ไม่รก · ต่างหูวิ้งที่ตัวเอง
 const GOLD = { type: 'sparkle', color: '#FFE08A' }, STEAM = { type: 'mist', color: '#F4EEE6' }
