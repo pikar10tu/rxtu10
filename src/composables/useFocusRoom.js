@@ -132,11 +132,14 @@ function unwatchChat() { chatOff?.(); chatOff = null; chatZone = '' }
 function say(zone, text, extra = {}) {   // extra.sys = ข้อความระบบ เช่น 'hf' ไฮไฟว์
   const t = cleanText(text, 80)
   if (!t || !myUid()) return false
-  push(dbRef(rtdb(), `focus/chat/${dayKey()}/${zone}`), { uid: myUid(), name: base().name, text: t, at: serverTimestamp(), ...extra }).catch(() => {})
-  return true
+  const r = push(dbRef(rtdb(), `focus/chat/${dayKey()}/${zone}`), { uid: myUid(), name: base().name, text: t, at: serverTimestamp(), ...extra })
+  r.catch(() => {})
+  return r   // ThenableReference (truthy) · ใช้ลบข้อความตัวเองทีหลังได้ (unsay)
 }
+// ลบข้อความของตัวเอง (rules: เจ้าของลบได้) — ใช้กับ "ขึ้นสังเวียน รอคู่ชก" ที่ไม่มีใครมาชก
+function unsay(ref) { if (!ref) return; onDisconnect(ref).cancel().catch(() => {}); remove(ref).catch(() => {}) }
 
 export function useFocusRoom() {
   subPresence()
-  return { people: live, joined, myUid, join, otherDevice, kicked, patch, leave, watchChat, unwatchChat, chat, say, release: unsubPresence }
+  return { people: live, joined, myUid, join, otherDevice, kicked, patch, leave, watchChat, unwatchChat, chat, say, unsay, release: unsubPresence }
 }

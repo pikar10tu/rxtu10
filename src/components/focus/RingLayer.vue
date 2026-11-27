@@ -59,6 +59,7 @@ import Emoji from '../shared/Emoji.vue'
 import BottomSheet from '../shared/BottomSheet.vue'
 import { useRing, ringFx, clearRingFx, WAIT_MS } from '../../composables/useRing.js'
 import { useFocusRoom } from '../../composables/useFocusRoom.js'
+import { onDisconnect } from 'firebase/database'
 import {
   HANDS, HAND_EMOJI, HAND_LABEL, WIN_ROUNDS, PICK_MS, RING, CORNER, RING_BTN, SPECTATE,
   deriveMatch, isDecider, roundNo, resultText, scoreText, randomHand, ringRanking,
@@ -90,8 +91,14 @@ async function onClaim() {
   if (!side) return
   sfx('tap')
   emit('goto', CORNER[side])
-  room.say('ring', side === 'r' ? `🥊 ${props.myName} ขึ้นสังเวียน รอคู่ชก!` : `🥊 ${props.myName} รับคำท้า!`, { sys: 'ring' })
+  const msg = room.say('ring', side === 'r' ? `🥊 ${props.myName} ขึ้นสังเวียน รอคู่ชก!` : `🥊 ${props.myName} รับคำท้า!`, { sys: 'ring' })
+  // ข้อความ "รอคู่ชก" — ถ้าไม่มีใครมาชก (ลงเอง/หมดเวลา/หลุด) ลบทิ้ง ไม่ให้ค้างในแชตแบบเฟลๆ
+  if (side === 'r' && msg?.key) { waitMsg = msg; onDisconnect(msg).remove().catch(() => {}) }
 }
+let waitMsg = null
+const dropWaitMsg = () => { room.unsay(waitMsg); waitMsg = null }
+// มีคู่ชกมาแล้ว → เก็บข้อความไว้ (ยกเลิกลบตอนหลุด)
+watch(() => !!m.value?.b, (hasB) => { if (hasB && waitMsg) { onDisconnect(waitMsg).cancel().catch(() => {}); waitMsg = null } })
 
 // ── อนิเมชัน: เล่นทีละยกจากข้อมูล (คู่ชก+คนดูเหมือนกัน) ──
 const fx = ref([]); let fxId = 0
@@ -234,7 +241,7 @@ watch(m, (cur, old) => {
 }, { deep: true })
 
 const goDown = () => emit('goto', SPECTATE[Math.floor(Math.random() * SPECTATE.length)])
-async function stepDown() { await ring.leaveRing(); goDown() }
+async function stepDown() { if (!m.value?.b) dropWaitMsg(); await ring.leaveRing(); goDown() }
 // รอคู่ชกจนเวทีหมดอายุ → ลงเอง (เดิมค้างยืนมุมแดง)
 let waitDownT = 0
 watch(() => [mySide.value, !!m.value?.b], ([side, hasB]) => {
@@ -243,7 +250,7 @@ watch(() => [mySide.value, !!m.value?.b], ([side, hasB]) => {
 }, { immediate: true })
 const ranking = computed(() => ringRanking(ring.board.value))
 const boardOpen = ref(false)
-onBeforeUnmount(() => { clearRingFx(); clearTimeout(waitDownT); clearTimeout(pickTimer); clearTimeout(waitTimer); ring.release(); room.release() })
+onBeforeUnmount(() => { if (waitMsg && !m.value?.b) dropWaitMsg(); clearRingFx(); clearTimeout(waitDownT); clearTimeout(pickTimer); clearTimeout(waitTimer); ring.release(); room.release() })
 </script>
 
 <style scoped>

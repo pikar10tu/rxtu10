@@ -269,7 +269,7 @@
               "at"
             ],
             "$msg": {
-              ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (!newData.exists() && auth.token.email === 'prawich.aum@dome.tu.ac.th'))",
+              ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (!newData.exists() && (auth.token.email === 'prawich.aum@dome.tu.ac.th' || data.child('uid').val() === auth.uid)))",
               ".validate": "!newData.exists() || (newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 80 && newData.child('name').isString() && newData.child('name').val().length <= 24 && newData.child('at').val() === now)"
             }
           }
