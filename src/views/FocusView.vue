@@ -35,7 +35,8 @@
         <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="[{ walk: pos[p.uid].walking, away: p.away }, ringFx.cls[p.uid] && 'rg-' + ringFx.cls[p.uid]]" :style="avStyle(p.uid, pos[p.uid])">
           <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> <Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /> {{ p.away ? 'พักสายตา' : stText(p.st) }}</span></div>
           <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
-          <span v-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
+          <button v-if="handUp(p) && fm.state.active && !peeking" type="button" class="fo-hand fo-hand-go" :aria-label="`ไปไฮไฟว์กับ ${p.name}`" @click.stop="hfWith(p)"><Emoji char="✋" /><span>ไฮไฟว์!</span></button>
+          <span v-else-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
           <span v-if="ringFx.hands[p.uid]" class="fo-rh" :class="ringFx.hands[p.uid].k"><Emoji :char="ringFx.hands[p.uid].c" /></span>
           <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ (p.house || 1) * FEST_X }}</span>
           <div class="fo-doll" :style="dollTf(p.uid)"><span v-if="ringFx.daze[p.uid]" class="fo-daze" :style="dazeTf(p.uid)"><Emoji char="💫" /></span><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
@@ -481,6 +482,14 @@ function toggleHand() {
   room.patch({ hf: serverTimestamp() })
   clearTimeout(hfOff); hfOff = setTimeout(lowerHand, HF_MS)
 }
+// 28 พ.ย. user: เพื่อนยกมือ → กดที่มือบนตัวเพื่อนได้เลย = เดินไปยืนข้างๆ แล้วยกมือให้ (ไม่ต้องรู้จักปุ่ม ✋ ข้างล่าง)
+function hfWith(p) {
+  if (!fm.state.active || peeking.value || typeof p?.x !== 'number') return
+  const side = me.x <= p.x ? -14 : 14
+  const x = Math.min(152, Math.max(8, p.x + side)), y = p.y
+  me.seat = -1
+  walkTo(me, x, y, () => { room.patch({ seat: -1, x, y }); if (!myHandUp.value) toggleHand() })
+}
 function lowerHand() { handPending.value = false; clearTimeout(hfOff); room.patch({ hf: null }) }
 watch(myPres, (p) => { if (raisedAt(p)) handPending.value = false })
 const near = (a, b) => Math.abs(a.x - b.x) <= 30 && Math.abs(a.y - b.y) <= 14
@@ -812,6 +821,8 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-hf-btn { position: absolute; right: 6px; bottom: 6px; z-index: 2001; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(15,23,42,.45); font-size: 1.1rem; cursor: pointer; display: grid; place-items: center; }
 .fo-hf-btn.on { background: var(--accent); }
 .fo-hf-btn.on :deep(*), .fo-hand { animation: fo-wave 1s ease-in-out infinite; transform-origin: bottom center; }
+.fo-hand-go { pointer-events: auto; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: 0; padding: 2px 8px 2px 4px; border-radius: 999px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.2); font: inherit; font-size: .9rem; z-index: 5; }
+.fo-hand-go span { font-size: .7rem; font-weight: 800; color: #b45309; }
 .fo-hand { position: absolute; bottom: 100%; right: -6px; margin-bottom: 4px; font-size: 1.1rem; }
 @keyframes fo-wave { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
 .fo-clap { pointer-events: none; display: flex; flex-direction: row; align-items: center; transform: translate(-50%, -50%); }
