@@ -177,9 +177,9 @@ const src = computed(() => {
   return { ...r, stations: e.stations.map((s, i) => ({ ...s, ...r.stations[i] })) }
 })
 watch(() => exam.value?.id, () => { scope.value = 'all' })
-const clsPct = computed(() => classPct(src.value.stations))
-const myPct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores) : 0)
-const headPct = computed(() => my.value ? myPct.value : classPct(exam.value.stations))
+const clsPct = computed(() => classPct(src.value.stations, exam.value.pctMode))
+const myPct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores, exam.value.pctMode) : 0)
+const headPct = computed(() => my.value ? myPct.value : classPct(exam.value.stations, exam.value.pctMode))
 const pass = computed(() => myPct.value >= exam.value.passPct - 1e-9)
 const ringColor = computed(() => !my.value ? 'var(--primary)' : pass.value ? '#10b981' : '#ef4444')
 const rows = computed(() => src.value.stations.map((s, i) => {

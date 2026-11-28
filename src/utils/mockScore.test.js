@@ -23,3 +23,9 @@ test('weakestStation เลือกฐานที่ไม่ผ่านก�
   assert.equal(weakestStation(ST, [7, 11], 0.8), 0)
   assert.equal(weakestStation(ST, [10, 8], 0.8), 1)
 })
+
+test("overallPct mode 'sum' = รวม/เต็มรวม", () => {
+  const S = [{ max: 10 }, { max: 20 }]
+  assert.ok(Math.abs(overallPct(S, [5, 20], 'sum') - 25 / 30) < 1e-9)
+  assert.ok(Math.abs(classPct([{ max: 10, mean: 5 }, { max: 20, mean: 20 }], 'sum') - 25 / 30) < 1e-9)
+})

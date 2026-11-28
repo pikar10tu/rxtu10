@@ -4,14 +4,20 @@ export function stationPct(score, max) {
   return max > 0 && Number.isFinite(score) ? Math.max(0, Math.min(1, score / max)) : 0
 }
 
-export function overallPct(stations, scores) {
+// mode 'sum' = คะแนนรวม / คะแนนเต็มรวม (ตรงชีททีม · ฐานเต็ม 20 หนัก 2 เท่า) — ครั้งที่ 3 ขึ้นไป (exam.pctMode)
+export function overallPct(stations, scores, mode) {
   if (!stations?.length) return 0
+  if (mode === 'sum') {
+    const tot = stations.reduce((a, s) => a + (s.max || 0), 0)
+    const got = stations.reduce((a, s, i) => a + (Number.isFinite(scores?.[i]) ? Math.max(0, Math.min(s.max, scores[i])) : 0), 0)
+    return tot > 0 ? got / tot : 0
+  }
   const sum = stations.reduce((a, s, i) => a + stationPct(scores?.[i], s.max), 0)
   return sum / stations.length
 }
 
-export function classPct(stations) {
-  return overallPct(stations, stations.map(s => s.mean))
+export function classPct(stations, mode) {
+  return overallPct(stations, stations.map(s => s.mean), mode)
 }
 
 /** ฐานที่ควรฝึก = ต่ำกว่าค่าเฉลี่ยรุ่นมากที่สุด (เป็น %) · ต่ำกว่าเกณฑ์มาก่อน */

@@ -41,7 +41,7 @@ const exam = computed(() => exams.value.find(e => !e.pending && !e.summaryOnly) 
 const my = computed(() => (exam.value && mine.value[exam.value.id]) || null)
 const seen = computed(() => isSeen(exam.value.id, !!my.value))
 const hot = computed(() => !!my.value && !seen.value)
-const pct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores) : 0)
+const pct = computed(() => my.value ? overallPct(exam.value.stations, my.value.scores, exam.value.pctMode) : 0)
 const pass = computed(() => pct.value >= exam.value.passPct - 1e-9)
 const nPassSt = computed(() => exam.value.stations.filter((s, i) => stationPct(my.value?.scores?.[i], s.max) >= exam.value.passPct - 1e-9).length)
 
