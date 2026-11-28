@@ -1110,6 +1110,8 @@ async function sheetSendReport(k) {
 }
 
 // 📄 เซฟ PDF: เปิดหน้าต่างใหม่ที่มีแต่กระดาษเฉลย แล้วเรียกพิมพ์ (เลือก "บันทึกเป็น PDF") — ไม่ติดเลย์เอาต์แอป/แถบเมนู
+// ⚠️ ห้ามมีบรรทัดขึ้นต้นด้วย <style> ในไฟล์ .vue (แม้อยู่ใน string) — ตัวแยกไฟล์ Vue นับเป็นสไตล์ global จริง (29 พ.ย. หลุดทั้งเว็บ)
+const PRINT_CSS = "body{font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif;color:#1f2430;margin:24px;font-size:13px;line-height:1.6} h1{font-size:18px;margin:0 0 4px}.sum{color:#555;margin:0 0 16px}section{border-top:1px solid #ddd;padding:10px 0;break-inside:avoid} h3{font-size:14px;margin:0 0 4px}h3 span{font-size:12px;padding:1px 8px;border-radius:9px;margin-left:6px}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#b91c1c}.skip{background:#eee;color:#555} .q{white-space:pre-line;margin:0 0 6px}ul{list-style:none;padding:0;margin:0 0 6px}li{padding:2px 6px;border-radius:4px}li.right{background:#dcfce7}li.mine{background:#fee2e2} .exp{white-space:pre-line;background:#f6f7f9;padding:6px 8px;border-radius:6px;margin:0}img{max-width:60%;max-height:260px;display:block;margin:4px 0} @page{margin:14mm}"
 function printExamSheet() {
   const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
   const base = location.origin + (import.meta.env.BASE_URL || '/')
@@ -1128,12 +1130,7 @@ function printExamSheet() {
       <p class="q">${esc(q.question)}</p>${imgs}<ul>${ch}</ul>${q.explanation ? `<p class="exp">${esc(q.explanation)}</p>` : ''}</section>`
   }).join('')
   const html = `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>เฉลยจำลองสอบ ${d.toLocaleDateString('th-TH')}</title>
-<style>body{font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif;color:#1f2430;margin:24px;font-size:13px;line-height:1.6}
-h1{font-size:18px;margin:0 0 4px}.sum{color:#555;margin:0 0 16px}section{border-top:1px solid #ddd;padding:10px 0;break-inside:avoid}
-h3{font-size:14px;margin:0 0 4px}h3 span{font-size:12px;padding:1px 8px;border-radius:9px;margin-left:6px}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#b91c1c}.skip{background:#eee;color:#555}
-.q{white-space:pre-line;margin:0 0 6px}ul{list-style:none;padding:0;margin:0 0 6px}li{padding:2px 6px;border-radius:4px}li.right{background:#dcfce7}li.mine{background:#fee2e2}
-.exp{white-space:pre-line;background:#f6f7f9;padding:6px 8px;border-radius:6px;margin:0}img{max-width:60%;max-height:260px;display:block;margin:4px 0}
-@page{margin:14mm}</style></head><body>
+${'<' + 'style>' + PRINT_CSS + '</' + 'style>'}</head><body>
 <h1>ผลจำลองสอบ PLE-CC1</h1><p class="sum">${d.toLocaleString('th-TH')} · ได้ ${correct.value}/${quiz.value.length} (${pct.value}%) · ตอบ ${answered.value} ข้อ · ${examSecStats.value.map(g => `${g.k} ${g.c}/${g.t}`).join(' · ')}</p>
 ${items}<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`
   const w = window.open('', '_blank')
