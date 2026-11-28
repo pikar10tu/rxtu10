@@ -269,19 +269,59 @@
             <span class="qv-dom-val">{{ d.c }}/{{ d.t }}</span>
           </div>
         </div>
-        <!-- 📋 จำลองสอบ: เฉลยรายข้อ กดเข้าไปดูคำอธิบาย/บันทึก/แจ้งข้อผิดได้ -->
-        <div v-if="examReviewList.length" class="qv-card qv-xs-review">
-          <div class="qv-label">เฉลยรายข้อ · กดดูคำอธิบาย</div>
-          <button v-for="r in examReviewList" :key="r.k" class="qv-xs-rrow" :class="r.state" @click="openExamReview(r.k)">
-            <span class="qv-xs-rno">{{ r.k + 1 }}</span>
-            <span class="qv-xs-rq">{{ r.text }}</span>
-            <span class="qv-xs-rtag">{{ r.state === 'ok' ? 'ถูก' : r.state === 'bad' ? 'ผิด' : 'ไม่ได้ตอบ' }}<template v-if="r.star"> ★</template></span>
-          </button>
-        </div>
+        <!-- 📋 จำลองสอบ: กระดาษเฉลย (28 พ.ย. user: จัดเป็นสัดส่วน · แจ้งข้อผิด/บันทึกรายข้อ · เซฟ PDF) -->
+        <section v-if="examReviewList.length" class="qv-sheet">
+          <div class="qv-sheet-head">
+            <b>เฉลยรายข้อ</b>
+            <button class="qv-sheet-pdf" @click="printExamSheet"><Emoji char="📄" /> เซฟเป็น PDF</button>
+          </div>
+          <div class="qv-seg qv-sheet-filter">
+            <button v-for="f in SHEET_FILTERS" :key="f.k" :class="{ on: sheetFilter === f.k }" @click="sheetFilter = f.k">{{ f.label }} {{ sheetCount(f.k) }}</button>
+          </div>
+          <article v-for="r in sheetRows" :key="r.k" class="qv-sq" :class="r.state">
+            <header class="qv-sq-top">
+              <span class="qv-sq-no">ข้อ {{ r.k + 1 }}</span>
+              <span class="qv-sq-tag">{{ r.state === 'ok' ? 'ถูก' : r.state === 'bad' ? 'ผิด' : 'ไม่ได้ตอบ' }}</span>
+              <span v-if="r.star" class="qv-sq-star">★ มาร์คไว้</span>
+              <span v-if="r.q.domain" class="qv-sq-dom">{{ domainLabel(r.q.domain) }}</span>
+            </header>
+            <div class="qv-sq-q">{{ r.q.question }}</div>
+            <QuestionImages :question="r.q" />
+            <ol class="qv-sq-ch">
+              <li v-for="(c, j) in r.q.choices" :key="j" :class="{ right: j === r.q.answer, mine: j === r.ans && j !== r.q.answer }">
+                <span class="qv-sq-lt">{{ LETTERS[j] }}</span>
+                <span class="qv-sq-ct">{{ c }}</span>
+                <span v-if="j === r.q.answer" class="qv-sq-mk">เฉลย</span>
+                <span v-else-if="j === r.ans" class="qv-sq-mk">คุณตอบ</span>
+              </li>
+            </ol>
+            <div v-if="r.q.explanation" class="qv-sq-exp"><Emoji char="💡" /> {{ r.q.explanation }}</div>
+            <div class="qv-acts qv-sq-acts">
+              <button class="qv-report-btn qv-save-btn" :class="{ on: isSaved(savedMap, r.q.id) }" :aria-pressed="isSaved(savedMap, r.q.id)" :disabled="saving" @click="sheetSave(r.k)">
+                <Emoji char="🔖" /> {{ isSaved(savedMap, r.q.id) ? 'บันทึกแล้ว' : 'บันทึก' }}
+              </button>
+              <button class="qv-report-btn qv-talk-btn" @click="sheetComments(r.k)"><Emoji char="💬" /> ความเห็น</button>
+              <button v-if="reportedIds.has(r.q.id)" class="qv-report-btn done" disabled><Emoji char="🚩" /> แจ้งแล้ว ✓</button>
+              <button v-else class="qv-report-btn" :aria-expanded="sheetReportK === r.k" @click="sheetReport(r.k)"><Emoji char="🚩" /> แจ้งข้อ {{ r.k + 1 }} ผิด</button>
+            </div>
+            <div v-if="sheetReportK === r.k && !reportedIds.has(r.q.id)" class="qv-report-panel">
+              <div class="qv-report-chips">
+                <button v-for="x in REPORT_REASONS" :key="x" class="qv-report-chip" :class="{ on: reportReason === x }" :aria-pressed="reportReason === x" @click="reportReason = x">{{ x }}</button>
+              </div>
+              <textarea v-model="reportNote" :maxlength="LIMITS.report" class="qv-report-note" rows="2" :aria-label="`รายละเอียดเพิ่มเติมเกี่ยวกับข้อ ${r.k + 1}`" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)…"></textarea>
+              <div class="qv-report-actions">
+                <button class="qv-report-cancel" @click="sheetReportK = -1; resetReport()">ยกเลิก</button>
+                <button class="qv-report-send" :disabled="!reportReason || reportSending" @click="sheetSendReport(r.k)">{{ reportSending ? 'กำลังส่ง…' : 'ส่ง' }}</button>
+              </div>
+            </div>
+          </article>
+          <p v-if="!sheetRows.length" class="qv-empty">ไม่มีข้อในหมวดนี้</p>
+        </section>
         <div class="qv-dock qv-dock-row">
           <button v-if="(examAns.length ? answered - correct : sessionTotal - correct) > 0" class="qv-ghost" :disabled="starting" @click="startRedo">ทบทวนข้อผิด</button>
           <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
         </div>
+        <QuestionComments v-if="examReviewList.length && current" v-model:open="commentsOpen" :qid="current.id" />
       </div>
     </template>
 
@@ -333,6 +373,7 @@ import QuestionComments from '../components/quiz/QuestionComments.vue'
 import { useQComments, loadQComments, qCommentCount } from '../composables/useQComments.js'
 import HelpButton from '../components/help/HelpButton.vue'
 import ExamSim from '../components/quiz/ExamSim.vue'
+import { questionImages } from '../utils/questionImages.js'
 import { EXAM_SIM_LENS, SEC_PER_Q, SAP_GROUP, examQuotas, loadExamState, clearExamState, slimQuestion, gradeExam } from '../utils/examSim.js'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -1005,6 +1046,57 @@ const examReviewList = computed(() => (examAns.value.length && quiz.value.length
   ? quiz.value.map((q, k) => ({ k, text: q.question, star: !!examStars.value[k],
       state: examAns.value[k] === null ? 'skip' : examAns.value[k] === q.answer ? 'ok' : 'bad' }))
   : [])
+// ── 📋 กระดาษเฉลย: กรอง · บันทึก/ความเห็น/แจ้งผิดรายข้อ (ยืมฟังก์ชันเดิมโดยชี้ idx ไปข้อนั้นก่อน) ──
+const SHEET_FILTERS = [{ k: 'all', label: 'ทั้งหมด' }, { k: 'bad', label: 'ผิด' }, { k: 'skip', label: 'ไม่ได้ตอบ' }, { k: 'star', label: '★' }]
+const sheetFilter = ref('all')
+const sheetReportK = ref(-1)
+const sheetAll = computed(() => examReviewList.value.map(r => ({ ...r, q: quiz.value[r.k], ans: examAns.value[r.k] })))
+const sheetMatch = (r, f) => f === 'all' || (f === 'star' ? r.star : r.state === f)
+const sheetRows = computed(() => sheetAll.value.filter(r => sheetMatch(r, sheetFilter.value)))
+const sheetCount = (f) => sheetAll.value.filter(r => sheetMatch(r, f)).length
+function sheetSave(k) { idx.value = k; toggleSave() }
+function sheetComments(k) { idx.value = k; commentsOpen.value = true }
+function sheetReport(k) {
+  if (sheetReportK.value === k) { sheetReportK.value = -1; resetReport(); return }
+  resetReport(); sheetReportK.value = k
+}
+async function sheetSendReport(k) {
+  idx.value = k
+  await sendReport()
+  if (reportedIds.value.has(quiz.value[k]?.id)) sheetReportK.value = -1
+}
+
+// 📄 เซฟ PDF: เปิดหน้าต่างใหม่ที่มีแต่กระดาษเฉลย แล้วเรียกพิมพ์ (เลือก "บันทึกเป็น PDF") — ไม่ติดเลย์เอาต์แอป/แถบเมนู
+function printExamSheet() {
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+  const base = location.origin + (import.meta.env.BASE_URL || '/')
+  const imgSrc = (p) => new URL((import.meta.env.BASE_URL || './') + String(p).replace(/^\//, ''), location.href).href
+  const d = new Date()
+  const items = sheetAll.value.map(r => {
+    const q = r.q
+    const imgs = questionImages(q).map(p => `<img src="${esc(imgSrc(p))}" alt="">`).join('')
+    const ch = q.choices.map((c, j) => {
+      const cls = j === q.answer ? 'right' : j === r.ans ? 'mine' : ''
+      const mk = j === q.answer ? ' <b>(เฉลย)</b>' : j === r.ans ? ' <b>(คุณตอบ)</b>' : ''
+      return `<li class="${cls}">${LETTERS[j]}. ${esc(c)}${mk}</li>`
+    }).join('')
+    const st = r.state === 'ok' ? 'ถูก' : r.state === 'bad' ? 'ผิด' : 'ไม่ได้ตอบ'
+    return `<section><h3>ข้อ ${r.k + 1} <span class="${r.state}">${st}</span>${r.star ? ' ★' : ''}</h3>
+      <p class="q">${esc(q.question)}</p>${imgs}<ul>${ch}</ul>${q.explanation ? `<p class="exp">${esc(q.explanation)}</p>` : ''}</section>`
+  }).join('')
+  const html = `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>เฉลยจำลองสอบ ${d.toLocaleDateString('th-TH')}</title>
+<style>body{font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif;color:#1f2430;margin:24px;font-size:13px;line-height:1.6}
+h1{font-size:18px;margin:0 0 4px}.sum{color:#555;margin:0 0 16px}section{border-top:1px solid #ddd;padding:10px 0;break-inside:avoid}
+h3{font-size:14px;margin:0 0 4px}h3 span{font-size:12px;padding:1px 8px;border-radius:9px;margin-left:6px}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#b91c1c}.skip{background:#eee;color:#555}
+.q{white-space:pre-line;margin:0 0 6px}ul{list-style:none;padding:0;margin:0 0 6px}li{padding:2px 6px;border-radius:4px}li.right{background:#dcfce7}li.mine{background:#fee2e2}
+.exp{white-space:pre-line;background:#f6f7f9;padding:6px 8px;border-radius:6px;margin:0}img{max-width:60%;max-height:260px;display:block;margin:4px 0}
+@page{margin:14mm}</style></head><body>
+<h1>เฉลยจำลองสอบจริง · RxTU10</h1><p class="sum">${d.toLocaleString('th-TH')} · ได้ ${correct.value}/${quiz.value.length} (${pct.value}%) · ตอบ ${answered.value} ข้อ</p>
+${items}<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`
+  const w = window.open('', '_blank')
+  if (!w) { toast('เบราว์เซอร์บล็อกหน้าต่างใหม่ ลองอนุญาต pop-up แล้วกดอีกครั้ง', 'error'); return }
+  w.document.open(); w.document.write(html); w.document.close()
+}
 function openExamReview(k) {
   resetReport()
   variant.value = 'examReview'; idx.value = k
@@ -1247,6 +1339,28 @@ async function finish() {
 .qv-xs-rtag { flex: none; font-size: .72rem; font-weight: 700; color: var(--muted); }
 .qv-xs-rrow.ok .qv-xs-rtag { color: #166534; }
 .qv-xs-rrow.bad .qv-xs-rtag { color: #b91c1c; }
+.qv-sheet { display: grid; gap: 12px; margin-top: 16px; text-align: left; }
+.qv-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.qv-sheet-head b { font-size: 1rem; }
+.qv-sheet-pdf { font: inherit; font-size: .8rem; font-weight: 700; color: var(--primary); background: var(--surface); border: var(--bw) solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.qv-sq { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.qv-sq.ok { border-left-color: #22c55e; } .qv-sq.bad { border-left-color: #ef4444; }
+.qv-sq-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.qv-sq-no { font-weight: 800; font-size: .85rem; }
+.qv-sq-tag { font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 2px 9px; background: #f1f5f9; color: var(--muted); }
+.qv-sq.ok .qv-sq-tag { background: #dcfce7; color: #166534; } .qv-sq.bad .qv-sq-tag { background: #fee2e2; color: #b91c1c; }
+.qv-sq-star { font-size: .72rem; font-weight: 700; color: #b45309; }
+.qv-sq-dom { margin-left: auto; font-size: .7rem; color: var(--muted); }
+.qv-sq-q { white-space: pre-line; font-size: .9rem; line-height: 1.6; overflow-wrap: anywhere; }
+.qv-sq-ch { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.qv-sq-ch li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 8px; border-radius: 8px; font-size: .84rem; line-height: 1.5; overflow-wrap: anywhere; }
+.qv-sq-ch li.right { background: #dcfce7; color: #14532d; font-weight: 600; }
+.qv-sq-ch li.mine { background: #fee2e2; color: #7f1d1d; }
+.qv-sq-lt { flex: none; width: 1.2em; font-weight: 700; color: var(--muted); }
+.qv-sq-ct { flex: 1; min-width: 0; }
+.qv-sq-mk { flex: none; font-size: .7rem; font-weight: 800; }
+.qv-sq-exp { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: #f6f7f9; font-size: .82rem; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+.qv-sq-acts { margin-top: 10px; }
 .qv-hint { text-align: center; font-size: .7rem; color: rgba(0,0,0,.4); margin-top: 10px; }
 
 .qv-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
