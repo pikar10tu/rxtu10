@@ -10,33 +10,34 @@
 
     <!-- ── 📋 จำลองสอบจริง: หน้าตั้งค่า (28 พ.ย. 2026 แทนการ์ด Zen ในหน้าเรียน) ── -->
     <template v-else-if="mode === 'home' && examMode">
-      <div class="qv-card qv-xs-setup">
-        <div class="qv-xs-title"><Emoji char="📋" /> จำลองสอบจริง</div>
-        <p class="qv-xs-p">หน้าจอแบบแอป ExamPod ที่ใช้สอบ PLE-CC1 · ไม่เฉลยระหว่างทำ ข้ามข้อและมาร์ค ★ ย้อนกลับมาได้ · จับเวลาเท่าสอบจริง</p>
+      <div class="qv-xs-setup">
+        <div class="qv-xs-title">จำลองสอบ PLE-CC1</div>
+        <p class="qv-xs-p">หน้าจอแบบ ExamPod · เฉลยหลังส่ง</p>
         <div v-if="examResume" class="qv-xs-resume">
-          <b>มีการสอบค้างอยู่ {{ examResume.qs.length }} ข้อ</b>
-          <span>ตอบแล้ว {{ examResume.ans.filter(a => a !== null).length }} ข้อ · {{ examResumeLeft }}</span>
-          <div class="qv-dock-row">
-            <button class="qv-ghost" @click="discardExam">ล้างทิ้ง</button>
-            <button class="qv-start" style="margin-top:0" @click="resumeExam">ทำต่อ</button>
+          <div><b>มีชุดที่ทำค้างไว้</b> · {{ examResume.qs.length }} ข้อ · ตอบแล้ว {{ examResume.ans.filter(a => a !== null).length }}</div>
+          <div class="qv-xs-mute">{{ examResumeLeft }}</div>
+          <div class="qv-xs-btns">
+            <button class="qv-xs-btn" @click="discardExam">ล้างทิ้ง</button>
+            <button class="qv-xs-btn main" @click="resumeExam">ทำต่อ</button>
           </div>
         </div>
         <template v-else>
-          <div class="qv-label">จำนวนข้อ</div>
-          <div class="qv-seg">
-            <button v-for="n in EXAM_SIM_LENS" :key="n" :class="{ on: examLen === n }" @click="examLen = n">{{ n }}</button>
+          <div class="qv-xs-lens" role="radiogroup" aria-label="จำนวนข้อ">
+            <button v-for="n in EXAM_SIM_LENS" :key="n" role="radio" :aria-checked="examLen === n" :class="{ on: examLen === n }" @click="examLen = n">
+              <b>{{ n }}</b><small>{{ examTimeText(n) }}</small>
+            </button>
           </div>
-          <div class="qv-xs-meta">
-            <span><Emoji char="⏱️" /> {{ examTimeText(examLen) }}</span>
-            <span>ผู้ป่วย ~{{ Math.round(examLen * .5) }} · ผลิตภัณฑ์ ~{{ Math.round(examLen * .4) }} · สังคมและกฎหมาย {{ Math.round(examLen * .1) }}</span>
-          </div>
+          <dl class="qv-xs-spec">
+            <div><dt>Care</dt><dd>~{{ Math.round(examLen * .5) }}</dd></div>
+            <div><dt>Sci</dt><dd>~{{ Math.round(examLen * .4) }}</dd></div>
+            <div><dt>SAP</dt><dd>{{ Math.round(examLen * .1) }}</dd></div>
+          </dl>
           <ul class="qv-xs-notes">
-            <li>เวลาคิดจากสอบจริง 120 ข้อใน 3 ชั่วโมง = 1.5 นาทีต่อข้อ</li>
-            <li>สัดส่วนตามประกาศศูนย์สอบฯ ผู้ป่วย 50 : ผลิตภัณฑ์ 40 : สังคมและบริหาร (รวมกฎหมาย) 10 สุ่มขยับได้ข้อสองข้อ</li>
-            <li>สอบจริงอาจเป็นสถานการณ์ละ 4–6 ข้อต่อเนื่องกัน แต่ข้อสอบในเว็บเก็บแยกเป็นข้อเดี่ยวมาตั้งแต่ต้น จึงยังจัดเป็นชุดสถานการณ์ให้ไม่ได้</li>
-            <li>คำตอบเก็บไว้ในเครื่องนี้ · กด ✕ แล้วเลือก "พักไว้ทำต่อ" ได้ (เวลาหยุดรอ) · เผลอปิดแอปก็กลับมาทำต่อได้แต่เวลาเดินต่อ · ส่งแล้วล้าง</li>
+            <li>เวลา 1.5 นาทีต่อข้อ และสัดส่วน 50 : 40 : 10 ตามสอบจริง</li>
+            <li>สอบจริงจัดเป็นสถานการณ์ละ 4–6 ข้อ ชุดนี้เป็นข้อเดี่ยว</li>
+            <li>พักไว้ทำต่อได้ คำตอบบันทึกในเครื่องนี้</li>
           </ul>
-          <div class="qv-dock"><button class="qv-start" :disabled="starting" @click="startExam">{{ starting ? 'กำลังจัดชุดข้อสอบ…' : `เริ่มสอบ ${examLen} ข้อ` }}</button></div>
+          <button class="qv-xs-start" :disabled="starting" @click="startExam">{{ starting ? 'กำลังจัดชุด…' : 'เริ่มสอบ' }}</button>
         </template>
       </div>
     </template>
@@ -240,41 +241,27 @@
       <QuestionComments v-if="current" v-model:open="commentsOpen" :qid="current.id" />
     </template>
 
-    <!-- ── RESULT ── -->
-    <template v-else-if="mode === 'result'">
-      <div class="qv-result">
-        <div class="qv-result-title"><Emoji :char="resultEmoji" /> ทำข้อสอบจบแล้ว!</div>
-        <div class="qv-ring" role="img" :aria-label="`ถูก ${correct} จาก ${sessionTotal} ข้อ ${pct} เปอร์เซ็นต์`">
-          <svg viewBox="0 0 120 120" aria-hidden="true">
-            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(43,53,80,.08)" stroke-width="12" />
-            <circle class="qv-ring-arc" cx="60" cy="60" r="50" fill="none" stroke-width="12" stroke-linecap="round"
-                    stroke-dasharray="314.16" :stroke-dashoffset="314.16 * (1 - pct / 100)" />
-          </svg>
-          <div class="qv-ring-c"><b>{{ correct }}/{{ sessionTotal }}</b><small>{{ pct }}%</small></div>
-        </div>
-        <div v-if="prevPct !== null" class="qv-result-cmp" :class="{ up: pct > prevPct, down: pct < prevPct }">
-          {{ pct > prevPct ? `ดีกว่ารอบก่อน +${pct - prevPct}%` : pct < prevPct ? `ต่ำกว่ารอบก่อน ${pct - prevPct}%` : 'เท่ากับรอบก่อน' }}
-        </div>
-        <div class="qv-stats">
-          <div class="qv-stat coin"><b>{{ coinsEarned ? `+${coinsEarned.toLocaleString()}` : '0' }}</b><small>เหรียญ</small></div>
-          <div v-if="evNow" class="qv-stat coin"><b>{{ evEarned ? `+${evEarned}` : '0' }}</b><small>{{ evNow.pt }} {{ evNow.ptName }}</small></div>
-          <div class="qv-stat"><b><Emoji char="🔥" /> {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
-          <div class="qv-stat"><b>{{ examAns.length ? answered - correct : sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
-        </div>
-        <div v-if="roundDomains.length > 1" class="qv-card qv-rdom">
-          <div class="qv-label">รายหมวดรอบนี้</div>
-          <div v-for="d in roundDomains" :key="d.key" class="qv-dom-row">
-            <span class="qv-dom-name">{{ d.label }}</span>
-            <span class="qv-dom-bar"><span class="qv-dom-fill" :style="{ width: d.pct + '%' }"></span></span>
-            <span class="qv-dom-val">{{ d.c }}/{{ d.t }}</span>
+    <!-- ── 📋 ผลจำลองสอบ: หน้าแบบกระดาษรายงาน (28 พ.ย. user เลือกแทนหน้าสรุปเดิม) ── -->
+    <template v-else-if="mode === 'result' && examAns.length">
+      <div class="qv-rep">
+        <header class="qv-rep-head">
+          <div>
+            <div class="qv-rep-title">ผลจำลองสอบ PLE-CC1</div>
+            <div class="qv-rep-sub">{{ examDoneAt }}</div>
           </div>
+          <div class="qv-rep-score"><b>{{ correct }}/{{ quiz.length }}</b><span>{{ pct }}%</span></div>
+        </header>
+        <dl class="qv-xs-spec qv-rep-sec">
+          <div v-for="g in examSecStats" :key="g.k"><dt>{{ g.k }}</dt><dd>{{ g.c }}/{{ g.t }}</dd></div>
+        </dl>
+        <div class="qv-rep-meta">ตอบ {{ answered }} ข้อ · ไม่ได้ตอบ {{ quiz.length - answered }} ข้อ<template v-if="coinsEarned"> · ได้ {{ coinsEarned.toLocaleString() }} เหรียญ</template></div>
+        <div class="qv-xs-btns">
+          <button class="qv-xs-btn" @click="printExamSheet">เซฟเป็น PDF</button>
+          <button v-if="roundWrongIds.length" class="qv-xs-btn" :disabled="starting" @click="startRoundRedo">ทำข้อผิดชุดนี้ ({{ roundWrongIds.length }})</button>
+          <button class="qv-xs-btn main" @click="backToHome">ทำชุดใหม่</button>
         </div>
         <!-- 📋 จำลองสอบ: กระดาษเฉลย (28 พ.ย. user: จัดเป็นสัดส่วน · แจ้งข้อผิด/บันทึกรายข้อ · เซฟ PDF) -->
         <section v-if="examReviewList.length" class="qv-sheet">
-          <div class="qv-sheet-head">
-            <b>เฉลยรายข้อ</b>
-            <button class="qv-sheet-pdf" @click="printExamSheet"><Emoji char="📄" /> เซฟเป็น PDF</button>
-          </div>
           <div class="qv-seg qv-sheet-filter">
             <button v-for="f in SHEET_FILTERS" :key="f.k" :class="{ on: sheetFilter === f.k }" @click="sheetFilter = f.k">{{ f.label }} {{ sheetCount(f.k) }}</button>
           </div>
@@ -317,11 +304,43 @@
           </article>
           <p v-if="!sheetRows.length" class="qv-empty">ไม่มีข้อในหมวดนี้</p>
         </section>
+        <QuestionComments v-if="current" v-model:open="commentsOpen" :qid="current.id" />
+      </div>
+    </template>
+
+    <!-- ── RESULT ── -->
+    <template v-else-if="mode === 'result'">
+      <div class="qv-result">
+        <div class="qv-result-title"><Emoji :char="resultEmoji" /> ทำข้อสอบจบแล้ว!</div>
+        <div class="qv-ring" role="img" :aria-label="`ถูก ${correct} จาก ${sessionTotal} ข้อ ${pct} เปอร์เซ็นต์`">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(43,53,80,.08)" stroke-width="12" />
+            <circle class="qv-ring-arc" cx="60" cy="60" r="50" fill="none" stroke-width="12" stroke-linecap="round"
+                    stroke-dasharray="314.16" :stroke-dashoffset="314.16 * (1 - pct / 100)" />
+          </svg>
+          <div class="qv-ring-c"><b>{{ correct }}/{{ sessionTotal }}</b><small>{{ pct }}%</small></div>
+        </div>
+        <div v-if="prevPct !== null" class="qv-result-cmp" :class="{ up: pct > prevPct, down: pct < prevPct }">
+          {{ pct > prevPct ? `ดีกว่ารอบก่อน +${pct - prevPct}%` : pct < prevPct ? `ต่ำกว่ารอบก่อน ${pct - prevPct}%` : 'เท่ากับรอบก่อน' }}
+        </div>
+        <div class="qv-stats">
+          <div class="qv-stat coin"><b>{{ coinsEarned ? `+${coinsEarned.toLocaleString()}` : '0' }}</b><small>เหรียญ</small></div>
+          <div v-if="evNow" class="qv-stat coin"><b>{{ evEarned ? `+${evEarned}` : '0' }}</b><small>{{ evNow.pt }} {{ evNow.ptName }}</small></div>
+          <div class="qv-stat"><b><Emoji char="🔥" /> {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
+          <div class="qv-stat"><b>{{ sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
+        </div>
+        <div v-if="roundDomains.length > 1" class="qv-card qv-rdom">
+          <div class="qv-label">รายหมวดรอบนี้</div>
+          <div v-for="d in roundDomains" :key="d.key" class="qv-dom-row">
+            <span class="qv-dom-name">{{ d.label }}</span>
+            <span class="qv-dom-bar"><span class="qv-dom-fill" :style="{ width: d.pct + '%' }"></span></span>
+            <span class="qv-dom-val">{{ d.c }}/{{ d.t }}</span>
+          </div>
+        </div>
         <div class="qv-dock qv-dock-row">
-          <button v-if="(examAns.length ? answered - correct : sessionTotal - correct) > 0" class="qv-ghost" :disabled="starting" @click="startRedo">ทบทวนข้อผิด</button>
+          <button v-if="roundWrongIds.length" class="qv-ghost" :disabled="starting" @click="startRoundRedo">ทำข้อผิดชุดนี้ ({{ roundWrongIds.length }})</button>
           <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
         </div>
-        <QuestionComments v-if="examReviewList.length && current" v-model:open="commentsOpen" :qid="current.id" />
       </div>
     </template>
 
@@ -1036,6 +1055,7 @@ function onExamSubmit({ ans, star }) {
   const qs = examSession.value?.qs || quiz.value
   const g = gradeExam(qs, ans)
   examAns.value = ans; examStars.value = star
+  examDoneAt.value = new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })
   answers.value = g.answers; correct.value = g.correct; answered.value = g.answered
   examSession.value = null
   finish()
@@ -1091,11 +1111,36 @@ h3{font-size:14px;margin:0 0 4px}h3 span{font-size:12px;padding:1px 8px;border-r
 .q{white-space:pre-line;margin:0 0 6px}ul{list-style:none;padding:0;margin:0 0 6px}li{padding:2px 6px;border-radius:4px}li.right{background:#dcfce7}li.mine{background:#fee2e2}
 .exp{white-space:pre-line;background:#f6f7f9;padding:6px 8px;border-radius:6px;margin:0}img{max-width:60%;max-height:260px;display:block;margin:4px 0}
 @page{margin:14mm}</style></head><body>
-<h1>เฉลยจำลองสอบจริง · RxTU10</h1><p class="sum">${d.toLocaleString('th-TH')} · ได้ ${correct.value}/${quiz.value.length} (${pct.value}%) · ตอบ ${answered.value} ข้อ</p>
+<h1>ผลจำลองสอบ PLE-CC1</h1><p class="sum">${d.toLocaleString('th-TH')} · ได้ ${correct.value}/${quiz.value.length} (${pct.value}%) · ตอบ ${answered.value} ข้อ · ${examSecStats.value.map(g => `${g.k} ${g.c}/${g.t}`).join(' · ')}</p>
 ${items}<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`
   const w = window.open('', '_blank')
   if (!w) { toast('เบราว์เซอร์บล็อกหน้าต่างใหม่ ลองอนุญาต pop-up แล้วกดอีกครั้ง', 'error'); return }
   w.document.open(); w.document.write(html); w.document.close()
+}
+// ── ผลรอบนี้ ──
+const examDoneAt = ref('')
+// สรุปรายส่วน Care/Sci/SAP (SAP = สังคม sci_social + กฎหมาย)
+const examSecStats = computed(() => {
+  const sec = (q) => q.domain === 'law' || q.pleGroup === SAP_GROUP ? 'SAP' : q.domain === 'sci' ? 'Sci' : 'Care'
+  const o = { Care: { c: 0, t: 0 }, Sci: { c: 0, t: 0 }, SAP: { c: 0, t: 0 } }
+  quiz.value.forEach((q, k) => { const g = o[sec(q)]; g.t++; if (examAns.value[k] === q.answer) g.c++ })
+  return Object.entries(o).map(([k, v]) => ({ k, ...v }))
+})
+// 🔁 ข้อผิดของ "ชุดนี้" (28 พ.ย. user: ปุ่มหลังจบชุดต้องทวนข้อในชุด ไม่ใช่กองข้อผิดทั้งคลัง) · จำลองสอบนับข้อที่ไม่ได้ตอบด้วย
+const roundWrongIds = computed(() => {
+  if (examAns.value.length) return quiz.value.filter((q, k) => examAns.value[k] !== q.answer).map(q => q.id)
+  return [...new Set(answers.value.filter(a => !a.correct).map(a => a.id))]
+})
+function startRoundRedo() {
+  const ids = new Set(roundWrongIds.value)
+  const seen = new Set()
+  const qs = quiz.value.filter(q => ids.has(q.id) && !seen.has(q.id) && seen.add(q.id))
+  if (!qs.length) return
+  quiz.value = shuffle(qs).map(shuffleChoices)
+  examAns.value = []; examStars.value = []
+  variant.value = 'normal'; idx.value = 0; resetRound(); resetReport()
+  mode.value = 'quiz'
+  window.scrollTo?.(0, 0)
 }
 function openExamReview(k) {
   resetReport()
@@ -1339,6 +1384,41 @@ async function finish() {
 .qv-xs-rtag { flex: none; font-size: .72rem; font-weight: 700; color: var(--muted); }
 .qv-xs-rrow.ok .qv-xs-rtag { color: #166534; }
 .qv-xs-rrow.bad .qv-xs-rtag { color: #b91c1c; }
+/* 📋 จำลองสอบ: หน้าตั้งค่า + หน้ารายงานผล (โทนกระดาษ ขาว เรียบ) */
+.qv-xs-setup, .qv-rep { background: #fff; color: #1f2430; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+.qv-xs-title, .qv-rep-title { font-size: 1.1rem; font-weight: 700; letter-spacing: .01em; }
+.qv-xs-p, .qv-rep-sub, .qv-xs-mute { font-size: .8rem; color: #6b7280; margin: 2px 0 0; }
+.qv-xs-lens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 18px; }
+.qv-xs-lens button { font: inherit; display: grid; gap: 2px; padding: 12px 4px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; color: #1f2430; cursor: pointer; }
+.qv-xs-lens button b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.qv-xs-lens button small { font-size: .7rem; color: #6b7280; }
+.qv-xs-lens button.on { border-color: #3b4fd8; box-shadow: inset 0 0 0 1px #3b4fd8; }
+.qv-xs-lens button.on b { color: #3b4fd8; }
+.qv-xs-spec { display: grid; grid-template-columns: repeat(3, 1fr); margin: 14px 0 0; border: 1px solid #e5e7eb; border-radius: 10px; }
+.qv-xs-spec div { padding: 8px 4px; text-align: center; }
+.qv-xs-spec div + div { border-left: 1px solid #e5e7eb; }
+.qv-xs-spec dt { font-size: .7rem; font-weight: 700; color: #6b7280; letter-spacing: .06em; }
+.qv-xs-spec dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.qv-xs-notes { margin: 14px 0 0; padding-left: 18px; font-size: .76rem; color: #6b7280; line-height: 1.6; }
+.qv-xs-start { width: 100%; margin-top: 18px; font: inherit; font-weight: 700; font-size: .95rem; color: #fff; background: #3b4fd8; border: 0; border-radius: 10px; padding: 13px; cursor: pointer; }
+.qv-xs-start:disabled { opacity: .6; cursor: default; }
+.qv-xs-resume { margin-top: 16px; padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: .85rem; display: grid; gap: 4px; }
+.qv-xs-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.qv-xs-btn { flex: 1 1 auto; font: inherit; font-size: .84rem; font-weight: 600; color: #1f2430; background: #fff; border: 1px solid #d1d5db; border-radius: 9px; padding: 9px 14px; cursor: pointer; }
+.qv-xs-btn.main { background: #3b4fd8; border-color: #3b4fd8; color: #fff; }
+.qv-xs-btn:disabled { opacity: .6; cursor: default; }
+.qv-rep-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
+.qv-rep-score { text-align: right; line-height: 1.1; }
+.qv-rep-score b { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.qv-rep-score span { font-size: .8rem; color: #6b7280; }
+.qv-rep-meta { font-size: .78rem; color: #6b7280; margin-top: 10px; }
+.qv-rep .qv-sheet { margin-top: 16px; gap: 0; }
+.qv-rep .qv-sheet-filter { margin-bottom: 4px; background: #f3f4f6; border-radius: 9px; }
+.qv-rep .qv-sheet-filter button { color: #6b7280; }
+.qv-rep .qv-sheet-filter button.on { background: #fff; color: #1f2430; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.qv-rep .qv-sq { border: 0; border-top: 1px solid #e5e7eb; border-radius: 0; padding: 14px 0; }
+.qv-rep .qv-sq-exp { background: #f6f7f9; }
+.qv-rep .qv-sq-acts .qv-report-btn { font-size: .74rem; }
 .qv-sheet { display: grid; gap: 12px; margin-top: 16px; text-align: left; }
 .qv-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .qv-sheet-head b { font-size: 1rem; }
