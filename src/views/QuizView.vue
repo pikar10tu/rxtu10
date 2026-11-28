@@ -8,6 +8,39 @@
 
     <div v-if="!authStore.isLoggedIn" class="qv-empty">เข้าสู่ระบบเพื่อทำข้อสอบ</div>
 
+    <!-- ── 📋 จำลองสอบจริง: หน้าตั้งค่า (28 พ.ย. 2026 แทนการ์ด Zen ในหน้าเรียน) ── -->
+    <template v-else-if="mode === 'home' && examMode">
+      <div class="qv-card qv-xs-setup">
+        <div class="qv-xs-title"><Emoji char="📋" /> จำลองสอบจริง</div>
+        <p class="qv-xs-p">หน้าจอแบบแอป ExamPod ที่ใช้สอบ PLE-CC1 · ไม่เฉลยระหว่างทำ ข้ามข้อและมาร์ค ★ ย้อนกลับมาได้ · จับเวลาเท่าสอบจริง</p>
+        <div v-if="examResume" class="qv-xs-resume">
+          <b>มีการสอบค้างอยู่ {{ examResume.qs.length }} ข้อ</b>
+          <span>ตอบแล้ว {{ examResume.ans.filter(a => a !== null).length }} ข้อ · {{ examResumeLeft }}</span>
+          <div class="qv-dock-row">
+            <button class="qv-ghost" @click="discardExam">ล้างทิ้ง</button>
+            <button class="qv-start" style="margin-top:0" @click="resumeExam">ทำต่อ</button>
+          </div>
+        </div>
+        <template v-else>
+          <div class="qv-label">จำนวนข้อ</div>
+          <div class="qv-seg">
+            <button v-for="n in EXAM_SIM_LENS" :key="n" :class="{ on: examLen === n }" @click="examLen = n">{{ n }}</button>
+          </div>
+          <div class="qv-xs-meta">
+            <span><Emoji char="⏱️" /> {{ examTimeText(examLen) }}</span>
+            <span>ผู้ป่วย ~{{ Math.round(examLen * .5) }} · ผลิตภัณฑ์ ~{{ Math.round(examLen * .4) }} · สังคมและกฎหมาย {{ Math.round(examLen * .1) }}</span>
+          </div>
+          <ul class="qv-xs-notes">
+            <li>เวลาคิดจากสอบจริง 120 ข้อใน 3 ชั่วโมง = 1.5 นาทีต่อข้อ</li>
+            <li>สัดส่วนตามประกาศศูนย์สอบฯ ผู้ป่วย 50 : ผลิตภัณฑ์ 40 : สังคมและบริหาร (รวมกฎหมาย) 10 สุ่มขยับได้ข้อสองข้อ</li>
+            <li>สอบจริงอาจเป็นสถานการณ์ละ 4–6 ข้อต่อเนื่องกัน แต่ข้อสอบในเว็บเก็บแยกเป็นข้อเดี่ยวมาตั้งแต่ต้น จึงยังจัดเป็นชุดสถานการณ์ให้ไม่ได้</li>
+            <li>คำตอบเก็บไว้ในเครื่องนี้ เผลอปิดแอปกลับมาทำต่อได้ (เวลาเดินต่อ) · กดออกหรือส่งแล้วจะล้าง</li>
+          </ul>
+          <div class="qv-dock"><button class="qv-start" :disabled="starting" @click="startExam">{{ starting ? 'กำลังจัดชุดข้อสอบ…' : `เริ่มสอบ ${examLen} ข้อ` }}</button></div>
+        </template>
+      </div>
+    </template>
+
     <!-- ── HOME ── -->
     <template v-else-if="mode === 'home'">
       <div v-if="loading" class="qv-empty">กำลังโหลดข้อสอบ…</div>
@@ -118,6 +151,7 @@
     </template>
 
     <!-- ── QUIZ ── -->
+    <ExamSim v-else-if="mode === 'quiz' && variant === 'exam' && examSession" :session="examSession" :uid="authStore.currentUser?.uid || ''" @submit="onExamSubmit" @exit="onExamExit" />
     <template v-else-if="mode === 'quiz'">
       <div class="qv-bar-row">
         <button class="qv-quit" aria-label="ออกจากการทำข้อสอบ" @click="quit">✕</button>
@@ -201,7 +235,7 @@
       <p v-else class="qv-idle">เลือกคำตอบเพื่อดูเฉลย</p>
 
       <div v-if="picked !== null" class="qv-dock">
-        <button class="qv-start" @click="next">{{ idx + 1 < quiz.length || variant === 'zen' ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
+        <button class="qv-start" @click="next">{{ variant === 'examReview' ? '← กลับหน้าผลสอบ' : idx + 1 < quiz.length || variant === 'zen' ? 'ข้อถัดไป →' : 'ดูผลคะแนน' }}</button>
       </div>
       <QuestionComments v-if="current" v-model:open="commentsOpen" :qid="current.id" />
     </template>
@@ -234,6 +268,15 @@
             <span class="qv-dom-bar"><span class="qv-dom-fill" :style="{ width: d.pct + '%' }"></span></span>
             <span class="qv-dom-val">{{ d.c }}/{{ d.t }}</span>
           </div>
+        </div>
+        <!-- 📋 จำลองสอบ: เฉลยรายข้อ กดเข้าไปดูคำอธิบาย/บันทึก/แจ้งข้อผิดได้ -->
+        <div v-if="examReviewList.length" class="qv-card qv-xs-review">
+          <div class="qv-label">เฉลยรายข้อ · กดดูคำอธิบาย</div>
+          <button v-for="r in examReviewList" :key="r.k" class="qv-xs-rrow" :class="r.state" @click="openExamReview(r.k)">
+            <span class="qv-xs-rno">{{ r.k + 1 }}</span>
+            <span class="qv-xs-rq">{{ r.text }}</span>
+            <span class="qv-xs-rtag">{{ r.state === 'ok' ? 'ถูก' : r.state === 'bad' ? 'ผิด' : 'ไม่ได้ตอบ' }}<template v-if="r.star"> ★</template></span>
+          </button>
         </div>
         <div class="qv-dock qv-dock-row">
           <button v-if="sessionTotal - correct > 0" class="qv-ghost" :disabled="starting" @click="startRedo">ทบทวนข้อผิด</button>
@@ -289,6 +332,8 @@ import BottomSheet from '../components/shared/BottomSheet.vue'
 import QuestionComments from '../components/quiz/QuestionComments.vue'
 import { useQComments, loadQComments, qCommentCount } from '../composables/useQComments.js'
 import HelpButton from '../components/help/HelpButton.vue'
+import ExamSim from '../components/quiz/ExamSim.vue'
+import { EXAM_SIM_LENS, SEC_PER_Q, SAP_GROUP, examQuotas, loadExamState, clearExamState, slimQuestion, gradeExam } from '../utils/examSim.js'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLeaveGuard } from '../composables/useLeaveGuard.js'
@@ -529,7 +574,7 @@ const evNow = activeEvent()
 const answers = ref([])
 
 const ZEN_BATCH = 15
-const variant = ref('normal')   // 'normal' | 'zen' | 'redo' | 'saved'
+const variant = ref('normal')   // 'normal' | 'zen' | 'redo' | 'saved' | 'exam' | 'examReview' (ดูเฉลยหลังส่ง)
 const sessionTotal = computed(() => variant.value === 'zen' ? answered.value : quiz.value.length)
 
 // ── ประวัติของฉัน (Phase 1 — private, ไม่มี leaderboard) ──
@@ -863,6 +908,7 @@ function choiceClass(i) {
 }
 async function next() {
   resetReport()
+  if (variant.value === 'examReview') { mode.value = 'result'; return }
   if (variant.value === 'zen') {
     if (idx.value + 1 >= quiz.value.length - 2) await loadMoreZen()   // ใกล้หมด → เติม
     if (idx.value + 1 < quiz.value.length) { idx.value++; picked.value = null }
@@ -873,17 +919,96 @@ async function next() {
   else finish()
 }
 function quit() {
+  if (variant.value === 'examReview') { mode.value = 'result'; return }
   if (answered.value > 0) finish()
   else mode.value = 'home'
 }
-function backToHome() { variant.value = 'normal'; mode.value = 'home' }
+function backToHome() { variant.value = 'normal'; mode.value = 'home'; examAns.value = []; if (examMode.value) examResume.value = loadExamState(lsStore, authStore.currentUser?.uid) }
 
 // กันมือโดน toolbar/ปุ่มกลับกลางชุด — ออกแล้วบันทึกผลเท่าที่ทำให้
 useLeaveGuard(
-  () => mode.value === 'quiz' && answered.value > 0,
+  () => mode.value === 'quiz' && answered.value > 0 && variant.value !== 'examReview',
   'ออกจากข้อสอบตอนนี้?\nระบบจะบันทึกผลเท่าที่ทำไว้ให้',
   { onLeave: () => finish() },
 )
+
+// ══ 📋 จำลองสอบจริง (28 พ.ย. 2026) ══
+const examMode = computed(() => route.query.mode === 'exam')
+const examLen = ref(20)
+const examSession = ref(null)
+const examAns = ref([])     // คำตอบตอนส่ง (null = ไม่ตอบ) — ใช้หน้าเฉลยรายข้อ
+const examStars = ref([])
+const examResume = ref(null)
+const lsStore = typeof window !== 'undefined' ? window.localStorage : null
+const examTimeText = (n) => { const m = Math.round(n * SEC_PER_Q / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม.${m % 60 ? ` ${m % 60} นาที` : ''}` : `${m} นาที` }
+const examResumeLeft = computed(() => {
+  const s = examResume.value; if (!s) return ''
+  const left = Math.max(0, Math.round((s.deadline - Date.now()) / 60000))
+  return left > 0 ? `เหลือเวลาประมาณ ${left} นาที` : 'หมดเวลาแล้ว กดทำต่อเพื่อส่ง'
+})
+watch(examMode, (on) => { if (on) examResume.value = loadExamState(lsStore, authStore.currentUser?.uid) }, { immediate: true })
+watch(() => authStore.currentUser?.uid, () => { if (examMode.value) examResume.value = loadExamState(lsStore, authStore.currentUser?.uid) })
+
+// ดึงตามสัดส่วน: ผู้ป่วย (domain care) · ผลิตภัณฑ์ (domain sci ยกเว้นสังคม) · สังคม (กลุ่ม sci_social) · กฎหมาย (domain law)
+// ส่วนไหนในคลังมีไม่พอ → เติมจากส่วนอื่นให้ครบ n
+async function startExam() {
+  if (starting.value) return
+  starting.value = true
+  try {
+    const n = examLen.value
+    const quota = examQuotas(n)
+    const [care, sciRaw, sap, law] = await Promise.all([
+      feedQuestions(quota.care + 4, { domain: 'care' }),
+      feedQuestions(quota.sci + Math.ceil(quota.sci * 0.3) + 4, { domain: 'sci' }),
+      quota.sap ? feedQuestions(quota.sap + 2, { group: SAP_GROUP }) : [],
+      feedQuestions(quota.law + 2, { domain: 'law' }),
+    ])
+    const sci = sciRaw.filter(q => q.pleGroup !== SAP_GROUP)
+    const usable = (q) => q.isPublished && Array.isArray(q.choices) && q.choices.length >= 2 && typeof q.answer === 'number'
+    const seen = new Set()
+    const take = (arr, k) => {
+      const out = []
+      for (const q of shuffle(arr)) { if (out.length >= k) break; if (!usable(q) || seen.has(q.id)) continue; seen.add(q.id); out.push(q) }
+      return out
+    }
+    let chosen = [...take(care, quota.care), ...take(sci, quota.sci), ...take(sap, quota.sap), ...take(law, quota.law)]
+    if (chosen.length < n) chosen = [...chosen, ...take([...care, ...sci, ...sap, ...law], n - chosen.length)]
+    if (chosen.length < n) chosen = [...chosen, ...take(await feedQuestions(n * 2, {}), n - chosen.length)]
+    if (chosen.length < 5) { toast('ข้อสอบในคลังยังไม่พอจัดชุด ลองใหม่อีกครั้ง', 'error'); return }
+    const qs = shuffle(chosen).map(shuffleChoices).map(slimQuestion)
+    examSession.value = { qs, ans: Array(qs.length).fill(null), star: Array(qs.length).fill(false), i: 0, deadline: Date.now() + qs.length * SEC_PER_Q * 1000 }
+    quiz.value = qs; idx.value = 0; resetRound(); examAns.value = []
+    variant.value = 'exam'; mode.value = 'quiz'
+  } catch (e) {
+    console.error('[exam sim]', e); toast('จัดชุดข้อสอบไม่สำเร็จ ลองใหม่อีกครั้ง', 'error')
+  } finally { starting.value = false }
+}
+function resumeExam() {
+  const s = examResume.value; if (!s) return
+  examSession.value = s; quiz.value = s.qs; idx.value = 0; resetRound(); examAns.value = []
+  variant.value = 'exam'; mode.value = 'quiz'; examResume.value = null
+}
+function discardExam() { clearExamState(lsStore, authStore.currentUser?.uid); examResume.value = null }
+function onExamSubmit({ ans, star }) {
+  const qs = examSession.value?.qs || quiz.value
+  const g = gradeExam(qs, ans)
+  examAns.value = ans; examStars.value = star
+  answers.value = g.answers; correct.value = g.correct; answered.value = g.answered
+  examSession.value = null
+  finish()
+}
+function onExamExit() { examSession.value = null; variant.value = 'normal'; mode.value = 'home'; examResume.value = null; quiz.value = [] }
+const examReviewList = computed(() => (examAns.value.length && quiz.value.length === examAns.value.length)
+  ? quiz.value.map((q, k) => ({ k, text: q.question, star: !!examStars.value[k],
+      state: examAns.value[k] === null ? 'skip' : examAns.value[k] === q.answer ? 'ok' : 'bad' }))
+  : [])
+function openExamReview(k) {
+  resetReport()
+  variant.value = 'examReview'; idx.value = k
+  picked.value = examAns.value[k] === null ? -1 : examAns.value[k]
+  mode.value = 'quiz'
+  window.scrollTo?.(0, 0)
+}
 
 async function finish() {
   mode.value = 'result'
@@ -1103,6 +1228,22 @@ async function finish() {
 .qv-start { width: 100%; margin-top: 20px; border: var(--bw) solid var(--line); border-radius: 14px; padding: 15px; font-family: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: var(--primary); box-shadow: var(--pop); cursor: pointer; transition: transform .12s, box-shadow .12s; }
 .qv-start:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
 .qv-start:disabled { background: #cbd5e1; cursor: default; box-shadow: none; }
+.qv-xs-title { font-weight: 800; font-size: 1.05rem; margin-top: 12px; }
+.qv-xs-p { font-size: .82rem; color: var(--muted); margin: 6px 0 4px; line-height: 1.55; }
+.qv-xs-meta { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; font-size: .8rem; font-weight: 700; }
+.qv-xs-meta span + span { font-weight: 600; color: var(--muted); font-size: .74rem; }
+.qv-xs-notes { margin: 12px 0 0; padding-left: 18px; font-size: .74rem; color: var(--muted); line-height: 1.55; display: grid; gap: 4px; }
+.qv-xs-resume { display: grid; gap: 6px; margin-top: 12px; padding: 12px; border-radius: 14px; background: var(--primary-light); font-size: .82rem; }
+.qv-xs-resume .qv-dock-row { margin-top: 6px; }
+.qv-xs-review { padding-bottom: 10px; }
+.qv-xs-rrow { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font: inherit; background: none; border: 0; border-top: 1px solid var(--line); padding: 9px 2px; cursor: pointer; color: var(--ink); }
+.qv-xs-rno { flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-size: .74rem; font-weight: 800; background: var(--line); }
+.qv-xs-rrow.ok .qv-xs-rno { background: #dcfce7; color: #166534; }
+.qv-xs-rrow.bad .qv-xs-rno { background: #fee2e2; color: #b91c1c; }
+.qv-xs-rq { flex: 1; min-width: 0; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qv-xs-rtag { flex: none; font-size: .72rem; font-weight: 700; color: var(--muted); }
+.qv-xs-rrow.ok .qv-xs-rtag { color: #166534; }
+.qv-xs-rrow.bad .qv-xs-rtag { color: #b91c1c; }
 .qv-hint { text-align: center; font-size: .7rem; color: rgba(0,0,0,.4); margin-top: 10px; }
 
 .qv-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
