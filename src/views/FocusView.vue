@@ -35,6 +35,7 @@
         <div v-if="pos[p.uid]" class="fo-ent fo-av" :class="[{ walk: pos[p.uid].walking, away: p.away }, ringFx.cls[p.uid] && 'rg-' + ringFx.cls[p.uid]]" :style="avStyle(p.uid, pos[p.uid])">
           <div class="fo-label"><span class="fo-nm">{{ p.name }}<template v-if="narrow"> <Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /></template></span><span v-if="!narrow" class="fo-st"><Emoji :char="p.away ? '💤' : STATUS_ICON[p.st] || '💤'" /> {{ p.away ? 'พักสายตา' : stText(p.st) }}</span></div>
           <div v-if="bubbles[p.uid]" class="fo-bubble">{{ bubbles[p.uid] }}</div>
+          <div v-else-if="typingOf(p)" class="fo-bubble fo-typing" aria-label="กำลังพิมพ์"><i /><i /><i /></div>
           <button v-if="handUp(p) && fm.state.active && !peeking" type="button" class="fo-hand fo-hand-go" :aria-label="`ไปไฮไฟว์กับ ${p.name}`" @click.stop="hfWith(p)"><Emoji char="✋" /><span>ไฮไฟว์!</span></button>
           <span v-else-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
           <span v-if="ringFx.hands[p.uid]" class="fo-rh" :class="ringFx.hands[p.uid].k"><Emoji :char="ringFx.hands[p.uid].c" /></span>
@@ -85,7 +86,7 @@
     <div v-if="narrow" class="fo-cbar">
       <button type="button" class="fo-cbar-msg" aria-label="เปิดแชท" @click="openDrawer">
         <Emoji char="💬" />
-        <span class="fo-cbar-t"><template v-if="lastMsg"><template v-if="lastMsg.sys"><b>{{ lastMsg.text }}</b></template><template v-else><b>{{ lastMsg.who }}:</b> {{ lastMsg.text }}</template></template><template v-else>{{ fm.state.active && !peeking ? 'แตะเพื่อคุยกับเพื่อนในห้อง' : 'ยังไม่มีใครคุย' }}</template></span>
+        <span class="fo-cbar-t"><template v-if="typingText"><i>{{ typingText }}</i></template><template v-else-if="lastMsg"><template v-if="lastMsg.sys"><b>{{ lastMsg.text }}</b></template><template v-else><b>{{ lastMsg.who }}:</b> {{ lastMsg.text }}</template></template><template v-else>{{ fm.state.active && !peeking ? 'แตะเพื่อคุยกับเพื่อนในห้อง' : 'ยังไม่มีใครคุย' }}</template></span>
         <i v-if="unread" class="fo-cbar-n">{{ unread > 9 ? '9+' : unread }}</i>
       </button>
       <button v-if="fm.state.active && !peeking" type="button" class="fo-btn fo-hf-n" :class="{ on: myHandUp }" :aria-pressed="myHandUp" :aria-label="myHandUp ? 'เอามือลง' : 'ยกมือไฮไฟว์ · เพื่อนที่อยู่ใกล้กดด้วยก็ตบกัน'" @click="toggleHand"><Emoji char="✋" /></button>
@@ -94,6 +95,7 @@
       <input v-model="draft" maxlength="80" :disabled="!fm.state.active || peeking" :placeholder="sayHint">
       <button type="submit" class="fo-btn">ส่ง</button>
     </form>
+    <div v-if="!narrow && typingText" class="fo-typing-line">{{ typingText }}</div>
     <Teleport to="body">
       <Transition name="fo-dw">
         <div v-if="narrow && drawer" class="fo-dw-bg" @click.self="drawer = false">
@@ -103,6 +105,7 @@
               <p v-if="!chat.length" class="fo-muted">ยังไม่มีข้อความ ทักเพื่อนก่อนเลย</p>
               <div v-for="m in chat" :key="m.id" class="fo-dw-line"><time>{{ m.time }}</time> <template v-if="m.sys"><b>{{ m.text }}</b></template><template v-else><b>{{ m.who }}:</b> {{ m.text }}</template></div>
             </div>
+            <div v-if="typingText" class="fo-typing-line">{{ typingText }}</div>
             <form class="fo-say" @submit.prevent="send">
               <input ref="drawerIn" v-model="draft" maxlength="80" :disabled="!fm.state.active || peeking" :placeholder="sayHint">
               <button type="submit" class="fo-btn primary">ส่ง</button>
@@ -602,8 +605,24 @@ let lastSend = 0
 function send() {
   if (!fm.state.active || peeking.value || !draft.value.trim()) return
   if (Date.now() - lastSend < 3000) return
-  if (room.say(fm.state.zone, draft.value)) { lastSend = Date.now(); draft.value = '' }
+  if (room.say(fm.state.zone, draft.value)) { lastSend = Date.now(); draft.value = ''; stopTyping() }
 }
+// ── ✍️ กำลังพิมพ์ (29 พ.ย.) — presence.ty = เวลาเซิร์ฟเวอร์ตอนพิมพ์ล่าสุด · ส่งไม่ถี่กว่า 3 วิ · หยุดพิมพ์ 5 วิ/ส่ง/ลบหมด = ล้าง
+const TYPING_MS = 6000
+let tyLast = 0, tyOff = 0
+function stopTyping() { clearTimeout(tyOff); if (tyLast) { tyLast = 0; room.patch({ ty: null }) } }
+watch(draft, (v) => {
+  if (!fm.state.active || peeking.value) return
+  if (!v.trim()) { stopTyping(); return }
+  if (Date.now() - tyLast > 3000) { tyLast = Date.now(); room.patch({ ty: serverTimestamp() }) }
+  clearTimeout(tyOff); tyOff = setTimeout(stopTyping, 5000)
+})
+const typingOf = (p) => p?.uid !== room.myUid() && typeof p?.ty === 'number' && nowTick.value - p.ty < TYPING_MS
+const typingText = computed(() => {
+  const names = room.people.value.filter(p => p.zone === viewZone.value && typingOf(p)).map(p => p.name)
+  if (!names.length) return ''
+  return names.length === 1 ? `${names[0]} กำลังพิมพ์…` : names.length === 2 ? `${names[0]} และ ${names[1]} กำลังพิมพ์…` : `${names[0]} และอีก ${names.length - 1} คนกำลังพิมพ์…`
+})
 
 // ── 🌙 โหมดโฟกัส (จอดำประหยัดแบต) ──
 // หน้าห้องถูกซ่อนด้วย content-visibility (ไม่วาดอะไรเลย) · ขอ wake lock กันจอดับ (เครื่องไหนไม่ให้ก็ไม่เป็นไร)
@@ -807,6 +826,11 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-nm { background: rgba(255,255,255,.92); color: #1e293b; }
 .me .fo-nm { background: var(--primary); color: #fff; }
 .fo-st { background: rgba(30,41,59,.72); color: #fff; }
+.fo-typing { display: flex; gap: 3px; padding: 5px 8px; }
+.fo-typing i { width: 5px; height: 5px; border-radius: 50%; background: #94a3b8; animation: fo-dot 1s ease-in-out infinite; }
+.fo-typing i:nth-child(2) { animation-delay: .15s; } .fo-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes fo-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-3px); opacity: 1; } }
+.fo-typing-line { font-size: .72rem; color: var(--muted, #64748b); padding: 2px 4px; font-style: italic; }
 .fo-bubble { position: absolute; bottom: 100%; margin-bottom: 26px; width: max-content; max-width: 150px; background: #fff; color: #1e293b; border: 1px solid var(--border); border-radius: 10px; padding: 3px 8px; font-size: .75rem; text-align: center; box-shadow: var(--shadow-md); z-index: 2; }
 .fo-bubble::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -5px; border: 5px solid transparent; border-top-color: #fff; }
 .fo-coin :deep(img), .fo-coin :deep(.emoji) { width: 1.05em; height: 1.05em; vertical-align: -.15em; margin-right: 1px; }
