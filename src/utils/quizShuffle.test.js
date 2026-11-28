@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { shuffle, shuffleChoices, isPinnedChoice } from './quizShuffle.js'
+import { shuffle, shuffleChoices, isPinnedChoice, refersToOtherChoices } from './quizShuffle.js'
 
 test('shuffle ไม่แตะ array เดิม และคงสมาชิกครบ', () => {
   const src = [1, 2, 3, 4, 5]
@@ -37,4 +37,18 @@ test('isPinnedChoice จับคำแบบรวมทุกตัวเล�
     assert.ok(isPinnedChoice(c), c)
   for (const c of ['Clindamycin และ Erythromycin', 'A,C', 'วิตามิน A, D, E, K', 'ยาไม่มีข้อบ่งใช้', 'ถูกทุกข้อในผู้ใหญ่'.slice(0, 3)])
     assert.ok(!isPinnedChoice(c), c)
+})
+
+test('ข้อที่ตัวเลือกอ้างตัวอักษรตัวเลือกอื่น ไม่สลับทั้งข้อ', () => {
+  const qs = [
+    { choices: ['Codeine', 'ยาแก้ไอผสม Codeine', 'Lomotil', 'ข้อ ก และ ข ถูก', 'ข้อ ข และ ค ถูก'], answer: 4 },
+    { choices: ['MCC', 'Aerosil', 'SSG', 'ก และ ข ถูก', 'ก ข และ ค ถูก'], answer: 3 },
+    { choices: ['Furosemide', 'Spironolactone', 'Hydralazine', 'ISDN', 'C และ D'], answer: 4 },
+  ]
+  for (const q of qs) for (let i = 0; i < 30; i++) {
+    const s = shuffleChoices(q)
+    assert.deepEqual(s.choices, q.choices); assert.equal(s.answer, q.answer)
+  }
+  for (const c of ['วิตามิน A, D, E, K', 'A,C', 'Clindamycin และ Erythromycin', 'ขลู่'])
+    assert.ok(!refersToOtherChoices(c), c)
 })
