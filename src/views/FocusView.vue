@@ -38,7 +38,7 @@
           <span v-if="handUp(p)" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
           <span v-if="ringFx.hands[p.uid]" class="fo-rh" :class="ringFx.hands[p.uid].k"><Emoji :char="ringFx.hands[p.uid].c" /></span>
           <span v-for="c in (fcoins[p.uid] || [])" :key="c" class="fo-coin"><Emoji char="🪙" />+{{ (p.house || 1) * FEST_X }}</span>
-          <div class="fo-doll" :style="dollTf(p.uid)"><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
+          <div class="fo-doll" :style="dollTf(p.uid)"><span v-if="ringFx.daze[p.uid]" class="fo-daze" :style="dazeTf(p.uid)"><Emoji char="💫" /></span><DollFigure :eq="eqOf(p.doll)" :scale="dollScale" :label="p.name" /></div>
         </div>
       </template>
       <div v-if="fm.state.active && !peeking" class="fo-ent fo-av me" :class="[{ walk: me.walking }, ringFx.cls[room.myUid()] && 'rg-' + ringFx.cls[room.myUid()]]" :style="avStyle(room.myUid(), me)">
@@ -47,7 +47,7 @@
         <span v-if="myHandUp" class="fo-hand" aria-label="ยกมือรอไฮไฟว์"><Emoji char="✋" /></span>
         <span v-if="ringFx.hands[room.myUid()]" class="fo-rh" :class="ringFx.hands[room.myUid()].k"><Emoji :char="ringFx.hands[room.myUid()].c" /></span>
         <span v-for="c in coins" :key="c.id" class="fo-coin"><Emoji char="🪙" />+{{ c.v }}</span>
-        <div class="fo-doll" :style="dollTf(room.myUid())"><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
+        <div class="fo-doll" :style="dollTf(room.myUid())"><span v-if="ringFx.daze[room.myUid()]" class="fo-daze" :style="dazeTf(room.myUid())"><Emoji char="💫" /></span><DollFigure :eq="myEq" :scale="dollScale" label="อวาตาร์ของฉัน" /></div>
       </div>
       <!-- ดูห้องอื่นอยู่ = แค่ดู · จะย้ายต้องกดปุ่มนี้ (หน้าตาเดียวกับปุ่มเริ่มโฟกัส · อยู่ห้องนี้แล้วหาย) -->
       <div v-if="peeking" class="fo-join" @click.stop>
@@ -338,6 +338,8 @@ const avStyle = (u, o) => {
   if (viewZone.value === 'ring' && inRing(o.x, o.y) && !o.walking && !ringFighters.value.includes(u)) { const y = Math.min(Y1, RING.y1 + 6); return entStyle(o.x, y, y) }
   return entStyle(o.x, o.y, o.y)
 }
+// 💫 อยู่ใน .fo-doll ที่หมุนตามตัว → หมุนกลับให้อีโมจิตั้งตรง
+const dazeTf = (u) => ({ '--dr': `${-(ringFx.at[u]?.rot || 0)}rad` })
 const dollTf = (u) => { const a = ringFx.at[u]; return a ? { transform: `rotate(${a.rot || 0}rad)`, transformOrigin: '50% 100%', filter: a.pw > .02 ? `drop-shadow(0 0 ${2 + a.pw * 8}px rgba(255,${Math.round(200 - a.pw * 150)},60,.95))` : undefined } : undefined }
 
 // ── เดิน: BFS กริด 2px เลี่ยงเคาน์เตอร์ (ช่วงหน้าเคาน์เตอร์ y+4..y+10) ──
@@ -766,6 +768,9 @@ onBeforeUnmount(() => { stopSaver(); clearInterval(hfTick); clearTimeout(hfOff);
 .fo-rh.slam { animation: fo-rh-slam .28s cubic-bezier(.3,1.8,.5,1); }
 @keyframes fo-rh-think { to { transform: rotate(12deg) scale(.9); } }
 @keyframes fo-rh-slam { 0% { transform: scale(2.4) translateY(-30%); opacity: 0; } 100% { transform: scale(1); } }
+.fo-doll { position: relative; }
+.fo-daze { position: absolute; left: 50%; top: 0; z-index: 2; font-size: 1.3rem; line-height: 1; pointer-events: none; transform: translate(-50%, -70%) rotate(var(--dr, 0rad)); animation: fo-daze-spin 1.8s ease-out forwards; }
+@keyframes fo-daze-spin { 0% { opacity: 0; } 15%, 80% { opacity: 1; } 100% { opacity: 0; } }
 .fo-av.rg-white .fo-doll { filter: brightness(0) invert(1); }
 .fo-av.rg-hit .fo-doll { animation: fo-rg-hit .45s; }
 .fo-av.rg-ko .fo-doll { transform-origin: 50% 100%; animation: fo-rg-ko .7s cubic-bezier(.5,-.4,.7,1) forwards; }

@@ -21,7 +21,7 @@ export const STALE_MS = 15 * 60 * 1000  // ไฟต์ค้างนานผ�
 
 // เอฟเฟกต์บนตัวคู่ชก (FocusView วาดบนอวาตาร์เอง): hands[uid] = { c: อีโมจิเหนือหัว, k: 'think'|'slam'|'on' } · cls[uid] = 'white'|'hit'|'ko'|'win'
 // at[uid] = { x, y, rot, pw } วาดทับตำแหน่งจริงชั่วคราว (ง้างหมัด/พุ่งชก/กระเด็น · pw = ออร่าชาร์จ 0..1)
-export const ringFx = reactive({ hands: {}, cls: {}, at: {} })
+export const ringFx = reactive({ hands: {}, cls: {}, at: {}, daze: {} })   // daze[uid] = 💫 ติดหัวคนโดนน็อก (วาดใน .fo-doll หมุนตามตัว)
 const match = ref(null)
 const board = ref([])
 const wins = ref([])   // 27 พ.ย. ยอดชนะถาวร focus/ring/wins/{uid} {name,n} — เดิมนับจาก 60 ไฟต์ล่าสุด ยอดเลยลดเอง

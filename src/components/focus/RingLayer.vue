@@ -378,7 +378,9 @@ async function knockout(w, l, k) {
     }
     requestAnimationFrame(tick)
   })
-  shake(false); addFx('cheer', pos(b.x, b.y - 30), { e: '💫', ms: 1800 })
+  shake(false)
+  // 💫 ติดหัวจริง: เดิมวางพิกัดฉาก (b.y-30) แต่ตุ๊กตาขนาดเป็น px และนอนตะแคงหลังตก → ลอยกลางอากาศ (user 28 พ.ย.)
+  if (lu) { ringFx.daze[lu] = 1; setTimeout(() => { delete ringFx.daze[lu] }, 1800) }
   landedOut = b.y > 90
   if (landedOut && lu === room.myUid()) emit('place', [Math.round(b.x * 10) / 10, Math.round(b.y * 10) / 10])
 }
