@@ -175,7 +175,7 @@
             <div class="rep-top"><span class="fb-cat">{{ fbCatLabel(f.category) }}<b v-if="f.amount"> · {{ f.amount }} บาท</b></span><button class="rep-done" @click="resolveDoc('feedback', f.id)">✓ ปิด</button></div>
             <div v-if="f.message" class="rep-note">{{ f.message }}</div>
             <button v-if="f.category === 'coffee' && f.reporterUid" class="btn-mini btn-gold" :disabled="coffeeBusy === f.id" @click="approveCoffee(f)">
-              {{ coffeeBusy === f.id ? 'กำลังส่ง…' : `☕ เจอยอด ${f.amount} แล้ว · ส่งจดหมายขอบคุณ` }}
+              {{ coffeeBusy === f.id ? 'กำลังส่ง…' : `☕ เจอยอด ${f.amount} แล้ว · เขียนจดหมายขอบคุณ` }}
             </button>
             <button v-if="f.category === 'coffee'" class="btn-mini" :disabled="coffeeBusy === f.id" @click="editCoffeeAmount(f)">✏️ แก้ยอด</button>
             <div class="log-ts">{{ f.reporterName || 'ไม่ระบุ' }} · {{ f.category === 'coffee' ? 'แจ้งโอนเมื่อ ' : '' }}{{ fmtTs(f.ts) }}</div>
@@ -589,7 +589,29 @@
 
     </template>
 
-  </div>
+  
+    <BottomSheet :open="!!coffeeDraft" icon="☕" title="ตอบกลับคนเลี้ยงกาแฟ" @update:open="v => { if (!v) coffeeDraft = null }">
+      <div v-if="coffeeDraft" class="cf-draft">
+        <div class="admin-hint">{{ coffeeDraft.f.reporterName || 'ไม่ระบุ' }} · {{ coffeeDraft.f.amount }} บาท · แจ้งเมื่อ {{ fmtTs(coffeeDraft.f.ts) }} · เลี้ยงครั้งที่ {{ coffeeDraft.times }}</div>
+        <div v-if="coffeeDraft.f.message" class="rep-note">💬 {{ coffeeDraft.f.message }}</div>
+        <label class="cf-lbl">หัวข้อ</label>
+        <input v-model="coffeeDraft.title" class="admin-search" maxlength="60" />
+        <label class="cf-lbl">ข้อความตอบกลับ</label>
+        <textarea v-model="coffeeDraft.body" class="admin-search" rows="6" :maxlength="LIMITS.feedback"></textarea>
+        <div class="cf-row">
+          <button class="btn-mini" @click="coffeeDraft.body = coffeeDefaultBody(coffeeDraft.f.amount, coffeeDraft.withOutfit)">↺ ใช้ข้อความตั้งต้น</button>
+          <button class="btn-mini" @click="coffeeDraft.body = ''">ล้าง</button>
+        </div>
+        <label class="cf-lbl">ของที่แนบ</label>
+        <div class="cf-row">🪙 <input v-model.number="coffeeDraft.coins" type="number" min="0" step="1000" class="admin-search cf-coins" /> เหรียญ</div>
+        <label class="cf-row"><input v-model="coffeeDraft.withOutfit" type="checkbox" :disabled="!coffeeDraft.gift.length" />
+          ชุดเบค {{ coffeeDraft.gift.length ? `(${coffeeDraft.gift.length} ชิ้นที่ยังไม่มี)` : '(มีครบแล้ว)' }}</label>
+        <button class="btn-mini btn-gold cf-send" :disabled="!!coffeeBusy" @click="sendCoffeeDraft">
+          {{ coffeeBusy ? 'กำลังส่ง…' : 'ส่งจดหมายขอบคุณ' }}
+        </button>
+      </div>
+    </BottomSheet>
+</div>
 </template>
 
 <script setup>
@@ -615,6 +637,7 @@ import { useToast } from '../composables/useToast.js'
 import { useNewsPost } from '../composables/useNewsPost.js'
 import { useConfirm } from '../composables/useConfirm.js'
 import Emoji from '../components/shared/Emoji.vue'
+import BottomSheet from '../components/shared/BottomSheet.vue'
 import MaintenanceScreen from '../components/layout/MaintenanceScreen.vue'
 import { cleanText, LIMITS, stripTrailingEmoji } from '../utils/text.js'
 import { buildBroadcastMail } from '../utils/mailbox.js'
@@ -1257,27 +1280,47 @@ async function editCoffeeAmount(f) {
   try { await updateDoc(doc(db, 'feedback', f.id), { amount: n }); f.amount = n; toast(`แก้ยอดเป็น ${n} บาทแล้ว`, 'success') }
   catch (e) { console.error('[coffee amount]', e); toast('แก้ไม่สำเร็จ', 'error') }
 }
+// 28 พ.ย. user: ตอนยืนยันขอเลือกของ+พิมพ์ข้อความตอบกลับเอง → กดปุ่มแล้วเปิดแผ่นแก้ไขก่อนส่ง (ไม่ส่งทันทีแบบเดิม)
+const coffeeDraft = ref(null)   // { f, times, gift[], body, coins, withOutfit }
+function coffeeDefaultBody(amount, withGift) {
+  return withGift
+    ? `ได้รับค่ากาแฟ ${amount} บาทแล้วนะ ขอบคุณมากๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ ตั้งใจจะดูแลเว็บให้ดีที่สุด มีของที่ระลึกเล็กๆ มาฝาก เป็นเหรียญกับชุดเท่ๆ ใส่แล้วนั่งอ่านได้เหรียญเพิ่มนิดหน่อย กดรับแล้วไปใส่ได้ที่ห้องแต่งตัวเลย`
+    : `ได้รับค่ากาแฟ ${amount} บาทแล้วนะ ขอบคุณอีกครั้งจริงๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ มีเหรียญเล็กๆ น้อยๆ แนบมาให้ กดรับได้เลย`
+}
 async function approveCoffee(f) {
   if (coffeeBusy.value) return
   coffeeBusy.value = f.id
   try {
     const u = await getDoc(doc(db, 'users', f.reporterUid))
-    const times = (u.data()?.coffeeCount || 0) + 1   // เลี้ยงซ้ำได้ · ครั้งแรกเท่านั้นที่แนบชุด (ชิ้นที่ยังไม่มี)
-    const coins = Math.round((Number(f.amount) || 0) * COFFEE_COINS_PER_BAHT)   // 27 พ.ย. user: ทุกครั้ง (ครั้งแรก+ซ้ำ) 10,000/บาท · ไม่ประกาศก่อนโอน
-    if (!(await confirm(`ยืนยันว่าเจอยอด ${f.amount} บาท ของ ${f.reporterName || 'ไม่ระบุ'} ในแอปธนาคารแล้ว?
-แจ้งเมื่อ ${fmtTs(f.ts)} · เลี้ยงครั้งที่ ${times}
-จะส่งจดหมายขอบคุณ + ${coins.toLocaleString()} เหรียญ${times === 1 ? ' + ชุดเบค' : ''}`))) return
+    const times = (u.data()?.coffeeCount || 0) + 1
     const owned = u.data()?.doll?.owned || []
     const gift = BEK_GIFT_PARTS.filter(id => !owned.includes(id))
-    const body = gift.length
-      ? `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณมากๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ ตั้งใจจะดูแลเว็บให้ดีที่สุด มีของที่ระลึกเล็กๆ มาฝาก เป็นเหรียญกับชุดเท่ๆ ใส่แล้วนั่งอ่านได้เหรียญเพิ่มนิดหน่อย กดรับแล้วไปใส่ได้ที่ห้องแต่งตัวเลย`
-      : `ได้รับค่ากาแฟ ${f.amount} บาทแล้วนะ ขอบคุณอีกครั้งจริงๆ ที่ช่วยให้เว็บรุ่นเราได้ไปต่อ มีเหรียญเล็กๆ น้อยๆ แนบมาให้ กดรับได้เลย`
+    coffeeDraft.value = {
+      f, times, gift,
+      withOutfit: gift.length > 0,
+      coins: Math.round((Number(f.amount) || 0) * COFFEE_COINS_PER_BAHT),
+      title: '☕ ขอบคุณที่เลี้ยงกาแฟนะ',
+      body: coffeeDefaultBody(f.amount, gift.length > 0),
+    }
+  } catch (e) { console.error('[coffee load]', e); toast('โหลดข้อมูลไม่สำเร็จ', 'error') }
+  finally { coffeeBusy.value = null }
+}
+async function sendCoffeeDraft() {
+  const d = coffeeDraft.value
+  if (!d || coffeeBusy.value) return
+  const body = cleanText(d.body, LIMITS.feedback)
+  const coins = Math.max(0, Math.round(Number(d.coins) || 0))
+  if (!body) { toast('พิมพ์ข้อความก่อนนะ', 'error'); return }
+  const f = d.f
+  coffeeBusy.value = f.id
+  try {
     await setDoc(doc(db, 'users', f.reporterUid, 'mail', `coffee-${f.id}`),
-      buildBroadcastMail({ title: '☕ ขอบคุณที่เลี้ยงกาแฟนะ', body, coins, doll: gift, from: 'admin', kind: 'coffee' }, serverTimestamp()))
+      buildBroadcastMail({ title: cleanText(d.title, 60) || '☕ ขอบคุณที่เลี้ยงกาแฟนะ', body, coins, doll: d.withOutfit ? d.gift : [], from: 'admin', kind: 'coffee' }, serverTimestamp()))
     await updateDoc(doc(db, 'users', f.reporterUid), { coffeeCount: increment(1) })
     await keepSupporterNote(f)
     await deleteDoc(doc(db, 'feedback', f.id))
     feedback.value = feedback.value.filter(x => x.id !== f.id)
+    coffeeDraft.value = null
     toast('ส่งจดหมายขอบคุณแล้ว', 'success')
   } catch (e) { console.error('[coffee approve]', e); toast('ส่งไม่สำเร็จ', 'error') }
   finally { coffeeBusy.value = null }
@@ -1642,4 +1685,9 @@ async function saveEcon(m) {
 .news-del { border: none; background: none; cursor: pointer; font-size: .9rem; flex-shrink: 0; }
 .maint-preview { position: fixed; inset: 0; z-index: 230; }
 .maint-preview-x { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 231; border: 2px solid #2b3550; background: #fff; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
+.cf-draft { display: flex; flex-direction: column; gap: 8px; }
+.cf-lbl { font-size: .78rem; font-weight: 700; margin-top: 4px; }
+.cf-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .85rem; }
+.cf-coins { width: 140px; }
+.cf-send { margin-top: 8px; padding: 10px; font-size: .9rem; }
 </style>
