@@ -169,7 +169,7 @@
       <div class="fo-modes">
         <QuizModeCard emoji="🌅" title="ข้อสอบประจำวัน" subtitle="5 ข้อวันละรอบ · ลุ้นท็อป 10" to="/daily" />
         <QuizModeCard emoji="📝" title="ทั่วไป" subtitle="เลือกหมวด + จำนวนข้อ" to="/quiz" />
-        <QuizModeCard emoji="♾️" title="Zen" subtitle="ทำเรื่อยๆ ไม่จำกัด" to="/quiz?mode=zen" />
+        <QuizModeCard emoji="📋" title="จำลอง ExamPod (Monk)" subtitle="หน้าจอแบบวันสอบ · จับเวลาเท่าจริง" to="/quiz?mode=exam" />
         <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" subtitle="ทวนข้อที่พลาด" to="/quiz?mode=redo" />
         <QuizModeCard emoji="🔖" title="ข้อที่บันทึกไว้" subtitle="ทวนข้อที่กดเก็บไว้" to="/quiz?mode=saved" />
         <QuizModeCard emoji="⏱️" title="Time Attack" subtitle="แข่งกับเวลา มีอันดับในรุ่น" to="/study/time-attack" />
