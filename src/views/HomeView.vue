@@ -46,7 +46,8 @@
       <ResidenceSheet v-model:open="homeOpen" />
       <!-- จัดหน้าใหม่ (user เคาะ 11 พ.ย. 2026): ผลสอบจำลอง → วันนี้ของคุณ → ประจำวันสนุกๆ → บ้าน → ลิงก์ท้ายหน้า -->
       <!-- ผลสอบจำลอง — โชว์จนกว่าจะเคยเปิดหน้าผล (user 8 พ.ย. 2026) -->
-      <!-- ผลสอบจำลอง CC2 รอบอาจารย์: ถอดจากหน้าแรก 28 พ.ย. (user: เพื่อนส่วนใหญ่เปิดดูแล้ว) · ยังดูได้ที่หน้าฉัน -->
+      <!-- ผลสอบจำลอง CC2 ครั้งที่ 3: โชว์จนกว่าจะเปิดหน้าผล · หายเองตั้งแต่ 29 พ.ย. 2026 (user 28 พ.ย.) -->
+      <MockScoreCard v-if="mockCardOn" only-unseen class="home" />
       <!-- 🎯 กลางหน้า: นับถอยหลังวันสอบ + ปุ่มไปเรียน (user 20 พ.ย. 2026) · จิ้มตัวเลขรัวยังได้ความสำเร็จลับเหมือนเดิม -->
       <section v-if="nextExam" class="home-go">
         <div class="home-go-cd" :class="{ 'cd-jig': jig === 1, 'cd-panic': jig === 2 }" role="button" tabindex="0" data-sfx="none"
@@ -117,6 +118,8 @@
 </template>
 
 <script setup>
+import MockScoreCard from '../components/me/MockScoreCard.vue'
+const mockCardOn = Date.now() < new Date(2026, 10, 29).getTime() // เที่ยงคืน 29 พ.ย. เวลาเครื่อง
 import { useDaily } from '../composables/useDaily.js'
 import { useCoffee } from '../composables/useCoffee.js'
 const { openCoffee } = useCoffee()
