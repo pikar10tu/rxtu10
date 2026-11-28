@@ -13,14 +13,28 @@
       <div class="qv-xs-setup">
         <div class="qv-xs-tt">
           <div class="qv-xs-title">จำลองสอบ PLE-CC1</div>
-          <button class="qv-xs-info" :aria-expanded="examInfo" aria-label="เกี่ยวกับโหมดนี้" @click="examInfo = !examInfo">?</button>
+          <button class="qv-xs-info" aria-label="เกี่ยวกับโหมดนี้" @click="examInfo = true">?</button>
         </div>
-        <p class="qv-xs-p">หน้าจอแบบ ExamPod · เฉลยหลังส่ง</p>
-        <div v-if="examInfo" class="qv-xs-about">
-          <p>จำลองหน้าจอและจังหวะการสอบของระบบ ExamPod ให้ใกล้ของจริงที่สุดเท่าที่เว็บทำได้ ทั้งแถบเลขข้อ การมาร์ค ★ เวลา และการส่งคำตอบ</p>
-          <p>ยังไม่มีปากกาขีดเขียนบนโจทย์ และหน้าค่าปกติ (ⓘ) แบบของจริง</p>
-          <p>อยากได้ฟีลที่สุด แนะนำทำบน iPad และถอดเคสออกด้วย วันสอบจริงก็ต้องถอดเคสอยู่แล้ว 😆</p>
-        </div>
+        <p class="qv-xs-p">หน้าจอแบบ ExamPod (มั้ง) · เฉลยหลังส่ง</p>
+        <BottomSheet :open="examInfo" icon="📋" title="จำลอง ExamPod" @update:open="examInfo = $event">
+          <div class="qv-xs-about">
+            <p class="qv-xs-lead">จำลองหน้าจอและจังหวะการสอบให้ใกล้วันจริงที่สุดเท่าที่เว็บทำได้</p>
+            <div class="qv-xs-ab-h">มีให้ลอง</div>
+            <ul>
+              <li>แถบเลขข้อ และตารางดูทุกข้อ</li>
+              <li>มาร์ค ★ ข้ามข้อ แล้วย้อนกลับมาตอบ</li>
+              <li>จับเวลาเท่าสอบจริง 1.5 นาทีต่อข้อ</li>
+              <li>ยืนยันก่อนส่ง เฉลยดูหลังส่ง</li>
+            </ul>
+            <div class="qv-xs-ab-h">ยังไม่มี</div>
+            <ul>
+              <li>ปากกาขีดเขียนบนโจทย์</li>
+              <li>หน้าค่าปกติ (ⓘ)</li>
+              <li>โจทย์แบบสถานการณ์ต่อเนื่อง</li>
+            </ul>
+            <div class="qv-xs-ab-tip">อยากได้ฟีลที่สุด ทำบน iPad แล้วถอดเคสด้วย วันจริงก็ต้องถอดอยู่แล้ว 😆</div>
+          </div>
+        </BottomSheet>
         <div v-if="examResume" class="qv-xs-resume">
           <div><b>มีชุดที่ทำค้างไว้</b> · {{ examResume.qs.length }} ข้อ · ตอบแล้ว {{ examResume.ans.filter(a => a !== null).length }}</div>
           <div class="qv-xs-mute">{{ examResumeLeft }}</div>
@@ -1401,9 +1415,11 @@ async function finish() {
 .qv-head-joke { font-size: .8em; color: var(--muted); }
 .qv-xs-tt { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .qv-xs-info { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #d1d5db; background: #fff; color: #6b7280; font: inherit; font-weight: 700; font-size: .8rem; cursor: pointer; }
-.qv-xs-about { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: #f6f7f9; font-size: .8rem; line-height: 1.6; color: #374151; }
-.qv-xs-about p { margin: 0; }
-.qv-xs-about p + p { margin-top: 6px; }
+.qv-xs-about { padding: 4px 4px 12px; color: #374151; font-size: .86rem; line-height: 1.65; }
+.qv-xs-lead { margin: 0 0 14px; font-weight: 600; color: #1f2430; }
+.qv-xs-ab-h { font-size: .72rem; font-weight: 800; letter-spacing: .06em; color: #6b7280; margin: 12px 0 4px; }
+.qv-xs-about ul { margin: 0; padding-left: 20px; display: grid; gap: 2px; }
+.qv-xs-ab-tip { margin-top: 16px; padding: 10px 12px; border-radius: 10px; background: #f6f7f9; font-size: .82rem; }
 .qv-xs-lens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 18px; }
 .qv-xs-lens button { font: inherit; display: grid; gap: 2px; padding: 12px 4px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; color: #1f2430; cursor: pointer; }
 .qv-xs-lens button b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
