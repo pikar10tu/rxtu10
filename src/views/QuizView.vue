@@ -2,7 +2,7 @@
   <div class="tab-content">
     <div class="qv-head">
       <BackButton aria-label="ย้อนกลับ" @click="$router.back()" />
-      <span class="qv-head-title"><Emoji char="📝" /> ทำข้อสอบ</span>
+      <span class="qv-head-title" :class="{ 'qv-head-xs': examMode }"><template v-if="examMode"><Emoji char="📋" /> จำลอง ExamPod <small class="qv-head-joke">(มั้ง)</small></template><template v-else><Emoji char="📝" /> ทำข้อสอบ</template></span>
       <HelpButton topic="quiz" style="margin-left:auto" />
     </div>
 
@@ -11,8 +11,16 @@
     <!-- ── 📋 จำลองสอบจริง: หน้าตั้งค่า (28 พ.ย. 2026 แทนการ์ด Zen ในหน้าเรียน) ── -->
     <template v-else-if="mode === 'home' && examMode">
       <div class="qv-xs-setup">
-        <div class="qv-xs-title">จำลองสอบ PLE-CC1</div>
+        <div class="qv-xs-tt">
+          <div class="qv-xs-title">จำลองสอบ PLE-CC1</div>
+          <button class="qv-xs-info" :aria-expanded="examInfo" aria-label="เกี่ยวกับโหมดนี้" @click="examInfo = !examInfo">?</button>
+        </div>
         <p class="qv-xs-p">หน้าจอแบบ ExamPod · เฉลยหลังส่ง</p>
+        <div v-if="examInfo" class="qv-xs-about">
+          <p>จำลองหน้าจอและจังหวะการสอบของระบบ ExamPod ให้ใกล้ของจริงที่สุดเท่าที่เว็บทำได้ ทั้งแถบเลขข้อ การมาร์ค ★ เวลา และการส่งคำตอบ</p>
+          <p>ยังไม่มีปากกาขีดเขียนบนโจทย์ และหน้าค่าปกติ (ⓘ) แบบของจริง</p>
+          <p>อยากได้ฟีลที่สุด แนะนำทำบน iPad และถอดเคสออกด้วย วันสอบจริงก็ต้องถอดเคสอยู่แล้ว 😆</p>
+        </div>
         <div v-if="examResume" class="qv-xs-resume">
           <div><b>มีชุดที่ทำค้างไว้</b> · {{ examResume.qs.length }} ข้อ · ตอบแล้ว {{ examResume.ans.filter(a => a !== null).length }}</div>
           <div class="qv-xs-mute">{{ examResumeLeft }}</div>
@@ -995,12 +1003,13 @@ useLeaveGuard(
 // ══ 📋 จำลองสอบจริง (28 พ.ย. 2026) ══
 const examMode = computed(() => route.query.mode === 'exam')
 const examLen = ref(20)
+const examInfo = ref(false)
 const examSession = ref(null)
 const examAns = ref([])     // คำตอบตอนส่ง (null = ไม่ตอบ) — ใช้หน้าเฉลยรายข้อ
 const examStars = ref([])
 const examResume = ref(null)
 const lsStore = typeof window !== 'undefined' ? window.localStorage : null
-const examTimeText = (n) => { const m = Math.round(n * SEC_PER_Q / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม.${m % 60 ? ` ${m % 60} นาที` : ''}` : `${m} นาที` }
+const examTimeText = (n) => { const m = Math.round(n * SEC_PER_Q / 60); return m >= 120 && m % 60 === 0 ? `${m / 60} ชม.` : `${m} นาที` }
 const examResumeLeft = computed(() => {
   const s = examResume.value; if (!s) return ''
   const ms = s.paused ? (s.remainMs || 0) : s.deadline - Date.now()
@@ -1388,6 +1397,13 @@ async function finish() {
 .qv-xs-setup, .qv-rep { background: #fff; color: #1f2430; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
 .qv-xs-title, .qv-rep-title { font-size: 1.1rem; font-weight: 700; letter-spacing: .01em; }
 .qv-xs-p, .qv-rep-sub, .qv-xs-mute { font-size: .8rem; color: #6b7280; margin: 2px 0 0; }
+.qv-head-xs { white-space: nowrap; font-size: clamp(1.05rem, 5.4vw, 1.4rem); }
+.qv-head-joke { font-size: .8em; color: var(--muted); }
+.qv-xs-tt { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.qv-xs-info { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #d1d5db; background: #fff; color: #6b7280; font: inherit; font-weight: 700; font-size: .8rem; cursor: pointer; }
+.qv-xs-about { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: #f6f7f9; font-size: .8rem; line-height: 1.6; color: #374151; }
+.qv-xs-about p { margin: 0; }
+.qv-xs-about p + p { margin-top: 6px; }
 .qv-xs-lens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 18px; }
 .qv-xs-lens button { font: inherit; display: grid; gap: 2px; padding: 12px 4px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; color: #1f2430; cursor: pointer; }
 .qv-xs-lens button b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }

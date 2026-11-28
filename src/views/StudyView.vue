@@ -92,7 +92,7 @@
         <div class="sv-modes">
           <QuizModeCard emoji="📝" title="ทั่วไป" :badge="X2" subtitle="เลือกหมวด + จำนวนข้อ (5/10/15/20) ได้เหรียญ" to="/quiz" />
           <!-- 28 พ.ย. 2026 user: การ์ด Zen → จำลองสอบจริง (Zen ยังเลือกได้ในหน้าทำข้อสอบ) -->
-          <QuizModeCard emoji="📋" title="จำลองสอบจริง" :badge="X2" subtitle="หน้าจอแบบ ExamPod · จับเวลาเท่าสอบจริง · 20–120 ข้อ" to="/quiz?mode=exam" />
+          <QuizModeCard emoji="📋" title="จำลองระบบ ExamPod (Monk)" :badge="X2" subtitle="ฝึกบนหน้าจอแบบวันสอบ · จับเวลาเท่าจริง" to="/quiz?mode=exam" />
           <!-- 🔖 ข้อที่บันทึกไว้ (user 20 พ.ย. 2026: ใต้ Zen เหนือข้อที่ผิด) -->
           <QuizModeCard emoji="🔖" title="ข้อที่บันทึกไว้" :badge="X2" :subtitle="savedN ? `${savedN} ข้อ · ทำทวนข้อที่กดบันทึกไว้` : 'กด 🔖 ระหว่างทำข้อสอบเพื่อเก็บข้อไว้ทวน'" to="/quiz?mode=saved" />
           <QuizModeCard emoji="🔁" title="ข้อที่เคยผิด" :badge="X2" :subtitle="redoSubtitle" to="/quiz?mode=redo" />
@@ -379,7 +379,7 @@ const TOOLS = [
 const SEARCH_ITEMS = [
   { key: 'm-quiz', emoji: '📝', title: 'ข้อสอบทั่วไป', sub: 'ข้อสอบ', to: '/quiz', words: 'quiz ข้อสอบ ทั่วไป' },
   { key: 'm-zen', emoji: '♾️', title: 'Zen', sub: 'ข้อสอบ', to: '/quiz?mode=zen', words: 'zen เซน' },
-  { key: 'm-exam', emoji: '📋', title: 'จำลองสอบจริง', sub: 'ข้อสอบ', to: '/quiz?mode=exam', words: 'จำลอง สอบจริง exampod mock exam' },
+  { key: 'm-exam', emoji: '📋', title: 'จำลองระบบ ExamPod (Monk)', sub: 'ข้อสอบ', to: '/quiz?mode=exam', words: 'จำลอง สอบจริง exampod mock exam' },
   { key: 'm-redo', emoji: '🔁', title: 'ข้อที่เคยผิด', sub: 'ข้อสอบ', to: '/quiz?mode=redo', words: 'ผิด redo ทบทวน' },
   { key: 'm-ta', emoji: '⏱️', title: 'Time Attack', sub: 'ข้อสอบ', to: '/study/time-attack', words: 'time attack จับเวลา' },
   { key: 'm-flash', emoji: '🧠', title: 'แฟลชการ์ด', sub: 'ทบทวนกลุ่มยา', door: 'flash', words: 'flash แฟลช การ์ด กลุ่มยา' },
