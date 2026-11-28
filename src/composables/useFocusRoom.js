@@ -7,7 +7,7 @@
 //     · ปัดจอ (hidden) → away:true (ขึ้น 💤 จาง) · กลับมา → away:false
 //     · ชีพจรเงียบเกิน 30 นาที = ไม่แสดง (กันตกค้างกรณี onDisconnect ไม่ทำงาน)
 //  focus/chat/{YYYY-MM-DD}/{zone}/{push}  { uid, name, text, at }
-//     · แยกห้องรายวัน จอดึงเฉพาะวันนี้ 50 ข้อความล่าสุด · ของเก่ายังเก็บไว้ตรวจย้อนหลัง (ไม่แจ้งผู้ใช้ — user สั่ง 22 พ.ย.)
+//     · เก็บแยกรายวัน · จอรวมเมื่อวาน+วันนี้ 50 ข้อความล่าสุด (แชทไม่หายตอนเที่ยงคืน 29 พ.ย.) · ของเก่ายังเก็บไว้ตรวจย้อนหลัง (ไม่แจ้งผู้ใช้ — user สั่ง 22 พ.ย.)
 //  เหรียญ/เวลาโฟกัสไม่ผ่าน RTDB (useFocusMode) — เหรียญเด้งของเพื่อนแต่ละเครื่องวาดเองจาก house
 // ════════════════════════════════════════════════════════════
 import { ref, computed, watch } from 'vue'
@@ -120,19 +120,38 @@ function leave() {
   unsubPresence()
 }
 
-// ── แชทของโซน (วันนี้) ──
+// ── แชทของโซน ──
+// 29 พ.ย. user: แชทไม่หายตอนเที่ยงคืน → ฟังห้องเมื่อวาน+วันนี้ รวมกันโชว์ 50 ข้อความล่าสุด (ที่เก็บยังแยกรายวันเหมือนเดิม)
+//   + เช็คทุกนาทีว่าข้ามวันหรือยัง ข้ามแล้วเลื่อนไปฟังคู่วันใหม่ (เดิมเปิดค้างข้ามคืน = เห็นแชทเก่า ส่งไปห้องใหม่ที่มองไม่เห็น)
+const CHAT_N = 50
 const chat = ref([])
-let chatOff = null, chatZone = ''
-function watchChat(zone) {
-  if (zone === chatZone && chatOff) return
-  chatOff?.(); chat.value = []; chatZone = zone
-  chatOff = onValue(query(dbRef(rtdb(), `focus/chat/${dayKey()}/${zone}`), limitToLast(50)), (s) => {
-    const out = []
-    s.forEach((c) => { const v = c.val(); if (v) out.push({ id: c.key, ...v }) })
-    chat.value = out
-  }, () => { chat.value = [] })
+let chatOffs = [], chatZone = '', chatDay = '', chatRoll = 0
+const prevDayKey = (k) => dayKey(Date.parse(k + 'T12:00:00Z') - 86400000)
+function subChat(zone) {
+  chatOffs.forEach(f => f()); chatOffs = []
+  chatDay = dayKey()
+  const parts = { a: [], b: [] }
+  const merge = () => {
+    chat.value = [...parts.a, ...parts.b]
+      .sort((x, y) => (typeof x.at === 'number' ? x.at : Infinity) - (typeof y.at === 'number' ? y.at : Infinity))   // เพิ่งส่ง (ยังไม่ประทับเวลา) = ท้ายสุด
+      .slice(-CHAT_N)
+  }
+  ;[['a', prevDayKey(chatDay)], ['b', chatDay]].forEach(([k, d]) => {
+    chatOffs.push(onValue(query(dbRef(rtdb(), `focus/chat/${d}/${zone}`), limitToLast(CHAT_N)), (s) => {
+      const out = []
+      s.forEach((c) => { const v = c.val(); if (v) out.push({ id: d + '/' + c.key, ...v }) })
+      parts[k] = out; merge()
+    }, () => { parts[k] = []; merge() }))
+  })
 }
-function unwatchChat() { chatOff?.(); chatOff = null; chatZone = '' }
+function watchChat(zone) {
+  if (zone === chatZone && chatOffs.length) return
+  chat.value = []; chatZone = zone
+  subChat(zone)
+  clearInterval(chatRoll)
+  chatRoll = setInterval(() => { if (chatZone && dayKey() !== chatDay) subChat(chatZone) }, 60000)
+}
+function unwatchChat() { chatOffs.forEach(f => f()); chatOffs = []; chatZone = ''; clearInterval(chatRoll) }
 function say(zone, text, extra = {}) {   // extra.sys = ข้อความระบบ เช่น 'hf' ไฮไฟว์
   const t = cleanText(text, 80)
   if (!t || !myUid()) return false
