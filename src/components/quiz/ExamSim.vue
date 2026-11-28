@@ -79,9 +79,9 @@
           <template v-else-if="panel === 'exit'">
             <div class="xs-phead">ออกจากการสอบ<button aria-label="ปิด" @click="panel = null">×</button></div>
             <div class="xs-pbody">
-              <div>คำตอบที่ทำไว้จะถูกล้าง และไม่บันทึกผล</div>
-              <div class="xs-mute">ถ้าอยากเก็บผล กด "ส่งคำตอบ" แทน</div>
-              <div class="xs-row"><button class="xs-ghost" @click="panel = null">ทำต่อ</button><button class="xs-danger" @click="exit">ออกและล้างคำตอบ</button></div>
+              <div><b>พักไว้ทำต่อ</b> เก็บคำตอบไว้ในเครื่องนี้และหยุดเวลา กลับมากด "ทำต่อ" ได้จากหน้าจำลองสอบ</div>
+              <div><b>ทิ้งชุดนี้</b> ล้างคำตอบ ไม่บันทึกผล</div>
+              <div class="xs-row"><button class="xs-ghost" @click="panel = null">ยกเลิก</button><button class="xs-danger" @click="exit">ทิ้งชุดนี้</button><button class="xs-submit" @click="pause">พักไว้ทำต่อ</button></div>
             </div>
           </template>
         </div>
@@ -100,7 +100,7 @@ const props = defineProps({
   session: { type: Object, required: true },
   uid: { type: String, default: '' },
 })
-const emit = defineEmits(['submit', 'exit'])
+const emit = defineEmits(['submit', 'exit', 'pause'])
 
 const LETTERS = ['ก', 'ข', 'ค', 'ง', 'จ', 'ฉ']
 const qs = props.session.qs
@@ -111,7 +111,7 @@ const scroller = ref(null)
 const storage = typeof window !== 'undefined' ? window.localStorage : null
 
 const persist = () => saveExamState(storage, props.uid, { qs, ans: st.ans, star: st.star, i: st.i, deadline: props.session.deadline, n: qs.length })
-watch(() => [st.i, st.ans.slice(), st.star.slice()], persist, { deep: true })
+watch(() => [st.i, st.ans.slice(), st.star.slice()], () => { if (!done) persist() }, { deep: true })
 
 function go(k) {
   if (k < 0 || k >= qs.length) return
@@ -147,6 +147,12 @@ function submit() {
   done = true
   clearExamState(storage, props.uid)
   emit('submit', { ans: [...st.ans], star: [...st.star] })
+}
+// ⏸️ พัก: เก็บเวลาที่เหลือ (ไม่ใช่ deadline) → กลับมาเวลาเริ่มนับต่อจากเดิม · ไม่ต้องดึงข้อใหม่ = ไม่เสีย read
+function pause() {
+  done = true
+  saveExamState(storage, props.uid, { qs, ans: st.ans, star: st.star, i: st.i, deadline: props.session.deadline, n: qs.length, paused: true, remainMs: Math.max(0, props.session.deadline - Date.now()) })
+  emit('pause')
 }
 function exit() {
   done = true

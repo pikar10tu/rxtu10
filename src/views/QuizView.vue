@@ -34,7 +34,7 @@
             <li>เวลาคิดจากสอบจริง 120 ข้อใน 3 ชั่วโมง = 1.5 นาทีต่อข้อ</li>
             <li>สัดส่วนตามประกาศศูนย์สอบฯ ผู้ป่วย 50 : ผลิตภัณฑ์ 40 : สังคมและบริหาร (รวมกฎหมาย) 10 สุ่มขยับได้ข้อสองข้อ</li>
             <li>สอบจริงอาจเป็นสถานการณ์ละ 4–6 ข้อต่อเนื่องกัน แต่ข้อสอบในเว็บเก็บแยกเป็นข้อเดี่ยวมาตั้งแต่ต้น จึงยังจัดเป็นชุดสถานการณ์ให้ไม่ได้</li>
-            <li>คำตอบเก็บไว้ในเครื่องนี้ เผลอปิดแอปกลับมาทำต่อได้ (เวลาเดินต่อ) · กดออกหรือส่งแล้วจะล้าง</li>
+            <li>คำตอบเก็บไว้ในเครื่องนี้ · กด ✕ แล้วเลือก "พักไว้ทำต่อ" ได้ (เวลาหยุดรอ) · เผลอปิดแอปก็กลับมาทำต่อได้แต่เวลาเดินต่อ · ส่งแล้วล้าง</li>
           </ul>
           <div class="qv-dock"><button class="qv-start" :disabled="starting" @click="startExam">{{ starting ? 'กำลังจัดชุดข้อสอบ…' : `เริ่มสอบ ${examLen} ข้อ` }}</button></div>
         </template>
@@ -151,7 +151,7 @@
     </template>
 
     <!-- ── QUIZ ── -->
-    <ExamSim v-else-if="mode === 'quiz' && variant === 'exam' && examSession" :session="examSession" :uid="authStore.currentUser?.uid || ''" @submit="onExamSubmit" @exit="onExamExit" />
+    <ExamSim v-else-if="mode === 'quiz' && variant === 'exam' && examSession" :session="examSession" :uid="authStore.currentUser?.uid || ''" @submit="onExamSubmit" @exit="onExamExit" @pause="onExamPause" />
     <template v-else-if="mode === 'quiz'">
       <div class="qv-bar-row">
         <button class="qv-quit" aria-label="ออกจากการทำข้อสอบ" @click="quit">✕</button>
@@ -943,8 +943,9 @@ const lsStore = typeof window !== 'undefined' ? window.localStorage : null
 const examTimeText = (n) => { const m = Math.round(n * SEC_PER_Q / 60); return m >= 60 ? `${Math.floor(m / 60)} ชม.${m % 60 ? ` ${m % 60} นาที` : ''}` : `${m} นาที` }
 const examResumeLeft = computed(() => {
   const s = examResume.value; if (!s) return ''
-  const left = Math.max(0, Math.round((s.deadline - Date.now()) / 60000))
-  return left > 0 ? `เหลือเวลาประมาณ ${left} นาที` : 'หมดเวลาแล้ว กดทำต่อเพื่อส่ง'
+  const ms = s.paused ? (s.remainMs || 0) : s.deadline - Date.now()
+  const left = Math.max(0, Math.round(ms / 60000))
+  return left > 0 ? `${s.paused ? 'พักไว้ · ' : ''}เหลือเวลาประมาณ ${left} นาที` : 'หมดเวลาแล้ว กดทำต่อเพื่อส่ง'
 })
 watch(examMode, (on) => { if (on) examResume.value = loadExamState(lsStore, authStore.currentUser?.uid) }, { immediate: true })
 watch(() => authStore.currentUser?.uid, () => { if (examMode.value) examResume.value = loadExamState(lsStore, authStore.currentUser?.uid) })
@@ -984,7 +985,8 @@ async function startExam() {
   } finally { starting.value = false }
 }
 function resumeExam() {
-  const s = examResume.value; if (!s) return
+  let s = examResume.value; if (!s) return
+  if (s.paused) s = { ...s, paused: false, remainMs: undefined, deadline: Date.now() + (s.remainMs || 0) }   // พักไว้ → นับเวลาต่อจากที่เหลือ
   examSession.value = s; quiz.value = s.qs; idx.value = 0; resetRound(); examAns.value = []
   variant.value = 'exam'; mode.value = 'quiz'; examResume.value = null
 }
@@ -997,6 +999,7 @@ function onExamSubmit({ ans, star }) {
   examSession.value = null
   finish()
 }
+function onExamPause() { examSession.value = null; variant.value = 'normal'; mode.value = 'home'; quiz.value = []; examResume.value = loadExamState(lsStore, authStore.currentUser?.uid); toast('พักการสอบไว้แล้ว กลับมากดทำต่อได้', 'success') }
 function onExamExit() { examSession.value = null; variant.value = 'normal'; mode.value = 'home'; examResume.value = null; quiz.value = [] }
 const examReviewList = computed(() => (examAns.value.length && quiz.value.length === examAns.value.length)
   ? quiz.value.map((q, k) => ({ k, text: q.question, star: !!examStars.value[k],
