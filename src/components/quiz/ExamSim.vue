@@ -24,7 +24,7 @@
         </div>
         <div class="xs-r">
           <span class="xs-time" :class="{ low: left <= 300 }" :aria-label="`เหลือเวลา ${timeText}`">{{ timeText }}</span>
-          <button class="xs-submit" @click="panel = 'submit'">ส่ง</button>
+          <button class="xs-submit" @click="panel = 'submit'">ส่ง<span class="xs-wide">คำตอบ</span></button>
         </div>
       </header>
 
@@ -70,8 +70,8 @@
             <div class="xs-phead">ส่งคำตอบ<button aria-label="ปิด" @click="panel = null">×</button></div>
             <div class="xs-pbody">
               <div>ตอบแล้ว {{ doneN }} จาก {{ qs.length }} ข้อ</div>
-              <div v-if="missList.length" class="xs-warn">ยังไม่ได้ตอบ {{ missList.length }} ข้อ: {{ missList.join(', ') }}</div>
-              <div v-if="starList.length">มาร์คไว้ {{ starList.length }} ข้อ: {{ starList.join(', ') }}</div>
+              <div v-if="missList.length" class="xs-warn">ยังไม่ได้ตอบ {{ missList.length }} ข้อ: {{ listText(missList) }}</div>
+              <div v-if="starList.length">มาร์คไว้ {{ starList.length }} ข้อ: {{ listText(starList) }}</div>
               <div class="xs-mute">ส่งแล้วแก้คำตอบไม่ได้ ข้อที่ไม่ได้ตอบนับเป็นผิด</div>
               <div class="xs-row"><button class="xs-ghost" @click="panel = null">กลับไปทำต่อ</button><button class="xs-submit" @click="submit">ส่งคำตอบ</button></div>
             </div>
@@ -126,6 +126,8 @@ function answer(j) {
 }
 function toggleStar() { st.star[st.i] = !st.star[st.i] }
 
+// รายการยาว (ชุด 120) โชว์ 30 ตัวแรก ที่เหลือดูในตารางทุกข้อ
+const listText = (a) => a.length > 30 ? `${a.slice(0, 30).join(', ')} … (ดูทั้งหมดในตารางทุกข้อ)` : a.join(', ')
 const doneN = computed(() => st.ans.filter(a => a !== null).length)
 const starN = computed(() => st.star.filter(Boolean).length)
 const missList = computed(() => st.ans.map((a, k) => (a === null ? k + 1 : null)).filter(Boolean))
@@ -231,6 +233,13 @@ defineExpose({ submit })
 .xs-warn { color: #dc2626; }
 .xs-mute { color: #6b7280; font-size: .88rem; }
 .xs-row { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.xs-wide { display: none; }
+@media (min-width: 700px) {
+  .xs { font-size: 17px; }
+  .xs-wide { display: inline; }
+  .xs-choice { padding: 14px 8px; }
+  .xs-card { padding: 22px 28px 24px; }
+}
 @media (max-width: 560px) {
   .xs-bar { grid-template-columns: auto 1fr auto; gap: 6px; }
   .xs-pager { justify-self: center; }
@@ -241,6 +250,11 @@ defineExpose({ submit })
   .xs-submit { padding: 7px 10px; }
   .xs-card { padding: 14px 14px 16px; }
   .xs-main { padding-top: 12px; }
+}
+@media (max-width: 420px) {
+  .xs-main { padding-left: 8px; padding-right: 8px; }
+  .xs-card { border-radius: 8px; padding: 12px 12px 14px; }
+  .xs-foot { padding: 0 4px; }
 }
 </style>
 <style>

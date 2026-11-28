@@ -259,7 +259,7 @@
           <div class="qv-stat coin"><b>{{ coinsEarned ? `+${coinsEarned.toLocaleString()}` : '0' }}</b><small>เหรียญ</small></div>
           <div v-if="evNow" class="qv-stat coin"><b>{{ evEarned ? `+${evEarned}` : '0' }}</b><small>{{ evNow.pt }} {{ evNow.ptName }}</small></div>
           <div class="qv-stat"><b><Emoji char="🔥" /> {{ bestStreak }}</b><small>ถูกติดกันสูงสุด</small></div>
-          <div class="qv-stat"><b>{{ sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
+          <div class="qv-stat"><b>{{ examAns.length ? answered - correct : sessionTotal - correct }}</b><small>เข้าคิวทบทวน</small></div>
         </div>
         <div v-if="roundDomains.length > 1" class="qv-card qv-rdom">
           <div class="qv-label">รายหมวดรอบนี้</div>
@@ -279,7 +279,7 @@
           </button>
         </div>
         <div class="qv-dock qv-dock-row">
-          <button v-if="sessionTotal - correct > 0" class="qv-ghost" :disabled="starting" @click="startRedo">ทบทวนข้อผิด</button>
+          <button v-if="(examAns.length ? answered - correct : sessionTotal - correct) > 0" class="qv-ghost" :disabled="starting" @click="startRedo">ทบทวนข้อผิด</button>
           <button class="qv-start" @click="backToHome">ทำชุดใหม่</button>
         </div>
       </div>
